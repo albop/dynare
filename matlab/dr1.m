@@ -10,11 +10,12 @@ global BlanchardKahn
 
 BlanchardKahn = 1;
 
-if options_.silent
-  % warning off all
-end  
-
 options_ = set_default_option(options_,'loglinear',0);
+options_ = set_default_option(options_,'silent',0);
+
+if options_.silent
+  warning off all
+end  
 
 xlen = xkmax_ + xkmin_ + 1;
 klen = ykmin_ + ykmax_ + 1;
@@ -306,8 +307,8 @@ A(1:endo_nbr,nstatic+1:nstatic+npred)=...
     A(1:endo_nbr,nstatic+1:nstatic+npred)+B1*gx2(:,1:npred);
 B(1:endo_nbr,end-length(k1)+1:end) = B1;
 offset = endo_nbr;
-k0 = find(kstate(:,2) == ykmin_+1);
-for i=1:ykmax_-1
+k0 = find(kstate(:,2) == ykmin_+2);
+for i=2:ykmax_-1
   k1 = find(kstate(:,2) == ykmin_+i+1);
   A(offset+[1:length(k1)],1:npred) = -gx(k1,1:npred); 
   [k2,junk,k3] = find(kstate(k1,3));
@@ -322,7 +323,7 @@ for i=1:ykmax_-1
     [junk,junk,k4]=intersect(kstate(k1,1),kstate(k0,1));
 %  end
   i1 = offset-n0+n1;
-  B(offset+1:offset+n1,i1:offset) = -E(k4,:);
+  B(offset+1:offset+n1,offset-n0+k4) = -E;
   k0 = k1;
   offset = offset + length(k1);
 end
