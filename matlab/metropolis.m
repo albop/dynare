@@ -43,301 +43,301 @@ d     = chol(vv);
 options_.lik_algo = 1;
 
 if nruns
-	if ~options_.load_mh_file
+  if ~options_.load_mh_file
     % Delete old mh files...
-      	if nblck > 1
-			disp('MH: Multiple chains mode.')
-      	else
-			disp('MH: One Chain mode.')
-      	end
-      	files = eval(['dir(''' fname_ '_mh*.mat'');']);
-      	if length(files)
-			delete([fname_ '_mh*.mat']);
-			disp('MH: Old _mh files succesfully erased!')
-      	end	
-      	nops = 0; 		% Number Of Past Simulations.
-      	lfile = -1;		% Index for the last mh file.
-      	if nblck > 1
-			disp('MH: Searching for initial values...')
-			ix2 = zeros(1,npar,nblck);
-			ilogpo2 = zeros(1,nblck);
-			for j=1:nblck
-	  			validate	= 0;
-	  			init_iter	= 0;
-	  			trial		= 1;
-	  			while validate == 0 & trial <= 10 
-					candidate = options_.mh_init_scale*randn(1,npar)*d + transpose(xparam1);
-					if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
-						ix2(1,:,j) = candidate;
-						ilogpo2(1,j) = -DsgeLikelihood(ix2(1,:,j)',gend,data);
-				    	j = j+1;
-				      	validate = 1;
-				    end
-				    init_iter = init_iter + 1;
-				    if init_iter > 100 & validate == 0
-				    	disp(['MH: I couldn''t get a valid initial value in 100 trials.'])
-				      	disp(['MH: You should Reduce mh_init_scale...'])
-				      	disp(sprintf('MH: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
-				      	options_.mh_init_scale = input('MH: Enter a new value...  ');
-				      	trial = trial+1;
-				    end
-				end
-				if trial > 10 & ~validate
-					error(['MH: I''m unable to find a starting value for block ' int2str(j)]);
-				end
-			end
-			disp('MH: Initial values found!')
-			disp(' ')
-		else
-			candidate = transpose(xparam1);
-			if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
-	  			ix2 = candidate;
-	  			ilogpo2 = -DsgeLikelihood(ix2',gend,data);
-	  			disp('MH: Initialization at the posterior mode.')
-	  			disp(' ')
-			else
-	  			disp('MH: Initialization failed...')
-	  			error('MH: The posterior mode lies outside the prior bounds.')
-			end
-    	end
-	else
-		disp('MH: I''m loading past metropolis-hastings simulations...')
-    	files = eval(['dir(''' fname_ '_mh*.mat'');']);
-    	if ~length(files)
-			error('MH: FAILURE :: there is no MH file to load here!')    
-    	end
-    	bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
-		past_number_of_blocks = length(bfiles);
-		if length(bfiles)>0 & past_number_of_blocks ~= nblck
-			disp('MH: The specified number of blocks doesn''t match with the previous number of blocks!')
-			disp(['MH: You declared ' int2str(nblck) ' blocks, but the previous number of blocks was ' int2str(past_number_of_blocks) '.'])
-			disp(['MH: I will run the Metropolis-Hastings with ' int2str(past_number_of_blocks) ' blocks.' ])
-			nblck = past_number_of_blocks;
-			options_.mh_nblck = nblck;
-    	end
-		lfile = length(files)/nblck-1;
-    	if nblck == 1
-			instr = [fname_ '_mh' int2str(lfile)];
-			eval(['load ' instr]);
-			clear post2;
-			nops = size(logpo2,1);  
-			ix2 = x2(nops,:); 	
-			ilogpo2 = logpo2(nops);
-			clear x2  logpo2;     
-			for file = 0:lfile-1
-	  			instr = [fname_ '_mh' int2str(file)];
-	  			eval(['load ' instr]);
-	  			clear post2 x2;
-	  			nops = nops + size(logpo2,1);
-			end
-		else 
-			for b = 1:nblck
-	  			instr = [fname_ '_mh' int2str(lfile) '_blck' int2str(b)];
-	  			eval(['load ' instr]);
-	  			clear post2;
-	  			nops = length(logpo2);
-	  			ix2(1,:,b) = x2(nops,:); 	
-	  			ilogpo2(b) = logpo2(nops);
-	  			clear x2  logpo2;     
-			end
-			for file = 0:lfile-1
-	  			instr = [fname_ '_mh' int2str(file) '_blck1'];
-	  			eval(['load ' instr]);
-	  			clear post2 x2;
-	  			nops = nops + length(logpo2);
-	  			clear logpo2;
-			end
-		end
-    	% nops is the Number Of Past Simulations. 
-    	disp(['MH: ... It''s done. I''ve loaded ' int2str(nops) 'simulations.'])
-    	disp(' ')
-	end    
-	isux = 0; 
-	if nblck == 1
-		hh   = waitbar(0,'Please wait... Metropolis-Hastings...');
-    	set(hh,'Name','Metropolis-Hastings')
-    	if nruns <= MAX_nruns
-			x2 = zeros(nruns,npar);	
-			x2(1,:) = ix2(1,:);
-			logpo2 = zeros(nruns,1);	
-			logpo2(1) = ilogpo2;	
-    	else
-			x2 = zeros(MAX_nruns,npar);
-			x2(1,:) = ix2(1,:);
-			logpo2 = zeros(MAX_nruns,1);
-			logpo2(1) = ilogpo2;
-    	end
-    	irun = ~options_.load_mh_file;	%%%% irun=0 <-- previous files are loaded
-    	rruns = nruns-irun;
-    	j=1;
-    	while j<=rruns
-			irun = irun + 1;
-			if irun <= MAX_nruns
-	  			par = randn(1,npar)*d;
-	  			par = par.*bayestopt_.jscale' + ix2;  
-	  			if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
-	    			logpost = -DsgeLikelihood(transpose(par),gend,data);
-	  			else
-	    			logpost = -inf;
-	  			end    
-	  			if logpost > -inf & log(rand) < logpost - ilogpo2
-	    			x2(irun,:) = par; 
-	    			ix2 = par;
-	    			logpo2(irun) = logpost; 
-	    			ilogpo2 = logpost;
-	    			isux = isux + 1;
-	  			else    
-	    			x2(irun,:) = ix2;
-	    			logpo2(irun) = ilogpo2;
-	  			end	
-	  			prtfrc = j/nruns;
-	  			waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
-			else
-	  			post2 = exp(logpo2);
-	  			save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
-	  			clear x2 logpo2 post2;
-	  			x2 = zeros(MAX_nruns,npar);
-	  			logpo2 = zeros(MAX_nruns,1);
-	  			lfile = lfile + 1;
-	  			irun = 0;
-	  			j = j - 1;
-			end
-			j = j + 1;
-		end
-    	if nruns <= MAX_nruns
-			post2 = exp(logpo2);
-			save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
-			clear post2 x2 logpo2;
-		elseif irun <= MAX_nruns    
-			x2 = x2(1:irun,:);
-			logpo2 = logpo2(1:irun,1); 
-			post2 = exp(logpo2);
-			save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
-			clear post2 x2 logpo2;
-		end
-    	close(hh)
-    	disp(sprintf('Acceptation rate : %f',isux/nruns))
-	else
-		disp('Acceptation rates :')
-    	for b=1:nblck
-			hh   = waitbar(0,'Please wait... Metropolis-Hastings...');
-			set(hh,'Name',['Metropolis-Hastings, Block ',int2str(b)]);
-			if nruns <= MAX_nruns
-	  			x2 = zeros(nruns,npar);	
-	  			x2(1,:) = ix2(1,:,b);
-	  			logpo2 = zeros(nruns,1);	
-	  			logpo2(1) = ilogpo2(1,b);	
-			else
-	  			x2 = zeros(MAX_nruns,npar);
-	  			x2(1,:) = ix2(1,:,b);
-	  			logpo2 = zeros(MAX_nruns,1);
-	  			logpo2(1) = ilogpo2(1,b);
-			end	
-			irun  = ~options_.load_mh_file;	% Previous files are loaded <-- irun=0
-			rruns = nruns-irun;
-			isav = 0;
-			isux = 0;
-			j = 1;
-			while j <= rruns
-	  			irun = irun + 1;
-	  			if irun <= MAX_nruns
-	    			par = randn(1,npar)*d;
-	    			par = par.*transpose(bayestopt_.jscale) + ix2(1,:,b);  
-	    			if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
-	      				logpost = -DsgeLikelihood(transpose(par),gend,data);
-	    			else
-	      				logpost = -inf;
-	    			end    
-	    			if logpost > -inf & log(rand) < logpost - ilogpo2(1,b)
-	      				x2(irun,:) = par; 
-	      				ix2(1,:,b) = par;
-	      				logpo2(irun) = logpost; 
-	      				ilogpo2(1,b) = logpost;
-	      				isux = isux + 1;
-	    			else    
-	      				x2(irun,:) = ix2(1,:,b);
-	      				logpo2(irun) = ilogpo2(1,b);
-	    			end	
-	    			prtfrc = j/nruns;
-	    			waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
-	  			else
-	    			post2 = exp(logpo2);
-	    			save([fname_ '_mh' int2str(lfile+1+isav) '_blck' int2str(b)],'x2','logpo2','post2');
-	    			clear post2;
-	    			x2 = zeros(MAX_nruns,npar);
-	    			logpo2 = zeros(MAX_nruns,1);
-	    			isav = isav + 1;
-	    			irun = 0;
-	    			j=j-1;
-	  			end
-	  			j = j+1; 
-			end
-			if nruns <= MAX_nruns
-	  			post2 = exp(logpo2);
-	  			save([fname_ '_mh' int2str(lfile+isav+1) '_blck' int2str(b)],'x2','logpo2','post2');
-	  			clear post2 x2 logpo2;
-			elseif irun <= MAX_nruns    
-	  			x2 = x2(1:irun,:);
-	  			logpo2 = logpo2(1:irun,1); 
-	  			post2 = exp(logpo2);
-	  			save([fname_ '_mh' int2str(lfile+isav+1) '_blck' int2str(b)],'x2','logpo2','post2');
-	  			clear post2 x2 logpo2;
-			end
-			disp(sprintf('Block %d: %f',b,isux/nruns))
-			close(hh)
-		end
+    if nblck > 1
+      disp('MH: Multiple chains mode.')
+    else
+      disp('MH: One Chain mode.')
+    end
+    files = eval(['dir(''' fname_ '_mh*.mat'');']);
+    if length(files)
+      delete([fname_ '_mh*.mat']);
+      disp('MH: Old _mh files succesfully erased!')
+    end	
+    nops = 0; 		% Number Of Past Simulations.
+    lfile = -1;		% Index for the last mh file.
+    if nblck > 1
+      disp('MH: Searching for initial values...')
+      ix2 = zeros(1,npar,nblck);
+      ilogpo2 = zeros(1,nblck);
+      for j=1:nblck
+	validate	= 0;
+	init_iter	= 0;
+	trial		= 1;
+	while validate == 0 & trial <= 10 
+	  candidate = options_.mh_init_scale*randn(1,npar)*d + transpose(xparam1);
+	  if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
+	    ix2(1,:,j) = candidate;
+	    ilogpo2(1,j) = -DsgeLikelihood(ix2(1,:,j)',gend,data);
+	    j = j+1;
+	    validate = 1;
+	  end
+	  init_iter = init_iter + 1;
+	  if init_iter > 100 & validate == 0
+	    disp(['MH: I couldn''t get a valid initial value in 100 trials.'])
+	    disp(['MH: You should Reduce mh_init_scale...'])
+	    disp(sprintf('MH: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
+	    options_.mh_init_scale = input('MH: Enter a new value...  ');
+	    trial = trial+1;
+	  end
 	end
+	if trial > 10 & ~validate
+	  error(['MH: I''m unable to find a starting value for block ' int2str(j)]);
+	end
+      end
+      disp('MH: Initial values found!')
+      disp(' ')
+    else
+      candidate = transpose(xparam1);
+      if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
+	ix2 = candidate;
+	ilogpo2 = -DsgeLikelihood(ix2',gend,data);
+	disp('MH: Initialization at the posterior mode.')
+	disp(' ')
+      else
+	disp('MH: Initialization failed...')
+	error('MH: The posterior mode lies outside the prior bounds.')
+      end
+    end
+  else
+    disp('MH: I''m loading past metropolis-hastings simulations...')
+    files = eval(['dir(''' fname_ '_mh*.mat'');']);
+    if ~length(files)
+      error('MH: FAILURE :: there is no MH file to load here!')    
+    end
+    bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
+    past_number_of_blocks = length(bfiles);
+    if length(bfiles)>0 & past_number_of_blocks ~= nblck
+      disp('MH: The specified number of blocks doesn''t match with the previous number of blocks!')
+      disp(['MH: You declared ' int2str(nblck) ' blocks, but the previous number of blocks was ' int2str(past_number_of_blocks) '.'])
+      disp(['MH: I will run the Metropolis-Hastings with ' int2str(past_number_of_blocks) ' blocks.' ])
+      nblck = past_number_of_blocks;
+      options_.mh_nblck = nblck;
+    end
+    lfile = length(files)/nblck-1;
+    if nblck == 1
+      instr = [fname_ '_mh' int2str(lfile)];
+      eval(['load ' instr]);
+      clear post2;
+      nops = size(logpo2,1);  
+      ix2 = x2(nops,:); 	
+      ilogpo2 = logpo2(nops);
+      clear x2  logpo2;     
+      for file = 0:lfile-1
+	instr = [fname_ '_mh' int2str(file)];
+	eval(['load ' instr]);
+	clear post2 x2;
+	nops = nops + size(logpo2,1);
+      end
+    else 
+      for b = 1:nblck
+	instr = [fname_ '_mh' int2str(lfile) '_blck' int2str(b)];
+	eval(['load ' instr]);
+	clear post2;
+	nops = length(logpo2);
+	ix2(1,:,b) = x2(nops,:); 	
+	ilogpo2(b) = logpo2(nops);
+	clear x2  logpo2;     
+      end
+      for file = 0:lfile-1
+	instr = [fname_ '_mh' int2str(file) '_blck1'];
+	eval(['load ' instr]);
+	clear post2 x2;
+	nops = nops + length(logpo2);
+	clear logpo2;
+      end
+    end
+    % nops is the Number Of Past Simulations. 
+    disp(['MH: ... It''s done. I''ve loaded ' int2str(nops) 'simulations.'])
     disp(' ')
-    disp(['MH: Total number of iterations 		: ' int2str(nops+nruns) '.'])
+  end    
+  isux = 0; 
+  if nblck == 1
+    hh   = waitbar(0,'Please wait... Metropolis-Hastings...');
+    set(hh,'Name','Metropolis-Hastings')
+    if nruns <= MAX_nruns
+      x2 = zeros(nruns,npar);	
+      x2(1,:) = ix2(1,:);
+      logpo2 = zeros(nruns,1);	
+      logpo2(1) = ilogpo2;	
+    else
+      x2 = zeros(MAX_nruns,npar);
+      x2(1,:) = ix2(1,:);
+      logpo2 = zeros(MAX_nruns,1);
+      logpo2(1) = ilogpo2;
+    end
+    irun = ~options_.load_mh_file;	%%%% irun=0 <-- previous files are loaded
+    rruns = nruns-irun;
+    j=1;
+    while j<=rruns
+      irun = irun + 1;
+      if irun <= MAX_nruns
+	par = randn(1,npar)*d;
+	par = par.*bayestopt_.jscale' + ix2;  
+	if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
+	  logpost = -DsgeLikelihood(transpose(par),gend,data);
+	else
+	  logpost = -inf;
+	end    
+	if logpost > -inf & log(rand) < logpost - ilogpo2
+	  x2(irun,:) = par; 
+	  ix2 = par;
+	  logpo2(irun) = logpost; 
+	  ilogpo2 = logpost;
+	  isux = isux + 1;
+	else    
+	  x2(irun,:) = ix2;
+	  logpo2(irun) = ilogpo2;
+	end	
+	prtfrc = j/nruns;
+	waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
+      else
+	post2 = exp(logpo2);
+	save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
+	clear x2 logpo2 post2;
+	x2 = zeros(MAX_nruns,npar);
+	logpo2 = zeros(MAX_nruns,1);
+	lfile = lfile + 1;
+	irun = 0;
+	j = j - 1;
+      end
+      j = j + 1;
+    end
+    if nruns <= MAX_nruns
+      post2 = exp(logpo2);
+      save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
+      clear post2 x2 logpo2;
+    elseif irun <= MAX_nruns    
+      x2 = x2(1:irun,:);
+      logpo2 = logpo2(1:irun,1); 
+      post2 = exp(logpo2);
+      save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
+      clear post2 x2 logpo2;
+    end
+    close(hh)
+    disp(sprintf('Acceptation rate : %f',isux/nruns))
+  else
+    disp('Acceptation rates :')
+    for b=1:nblck
+      hh   = waitbar(0,'Please wait... Metropolis-Hastings...');
+      set(hh,'Name',['Metropolis-Hastings, Block ',int2str(b)]);
+      if nruns <= MAX_nruns
+	x2 = zeros(nruns,npar);	
+	x2(1,:) = ix2(1,:,b);
+	logpo2 = zeros(nruns,1);	
+	logpo2(1) = ilogpo2(1,b);	
+      else
+	x2 = zeros(MAX_nruns,npar);
+	x2(1,:) = ix2(1,:,b);
+	logpo2 = zeros(MAX_nruns,1);
+	logpo2(1) = ilogpo2(1,b);
+      end	
+      irun  = ~options_.load_mh_file;	% Previous files are loaded <-- irun=0
+      rruns = nruns-irun;
+      isav = 0;
+      isux = 0;
+      j = 1;
+      while j <= rruns
+	irun = irun + 1;
+	if irun <= MAX_nruns
+	  par = randn(1,npar)*d;
+	  par = par.*transpose(bayestopt_.jscale) + ix2(1,:,b);  
+	  if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
+	    logpost = -DsgeLikelihood(transpose(par),gend,data);
+	  else
+	    logpost = -inf;
+	  end    
+	  if logpost > -inf & log(rand) < logpost - ilogpo2(1,b)
+	    x2(irun,:) = par; 
+	    ix2(1,:,b) = par;
+	    logpo2(irun) = logpost; 
+	    ilogpo2(1,b) = logpost;
+	    isux = isux + 1;
+	  else    
+	    x2(irun,:) = ix2(1,:,b);
+	    logpo2(irun) = ilogpo2(1,b);
+	  end	
+	  prtfrc = j/nruns;
+	  waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
+	else
+	  post2 = exp(logpo2);
+	  save([fname_ '_mh' int2str(lfile+1+isav) '_blck' int2str(b)],'x2','logpo2','post2');
+	  clear post2;
+	  x2 = zeros(MAX_nruns,npar);
+	  logpo2 = zeros(MAX_nruns,1);
+	  isav = isav + 1;
+	  irun = 0;
+	  j=j-1;
+	end
+	j = j+1; 
+      end
+      if nruns <= MAX_nruns
+	post2 = exp(logpo2);
+	save([fname_ '_mh' int2str(lfile+isav+1) '_blck' int2str(b)],'x2','logpo2','post2');
+	clear post2 x2 logpo2;
+      elseif irun <= MAX_nruns    
+	x2 = x2(1:irun,:);
+	logpo2 = logpo2(1:irun,1); 
+	post2 = exp(logpo2);
+	save([fname_ '_mh' int2str(lfile+isav+1) '_blck' int2str(b)],'x2','logpo2','post2');
+	clear post2 x2 logpo2;
+      end
+      disp(sprintf('Block %d: %f',b,isux/nruns))
+      close(hh)
+    end
+  end
+  disp(' ')
+  disp(['MH: Total number of iterations 		: ' int2str(nops+nruns) '.'])
 end
 if nblck == 1
-	files = eval(['dir(''' fname_ '_mh*.mat'');']);
-  	nfile = length(files)-1;
-  	number_of_simulations_per_file = zeros(nfile+1,1);
-  	instr = [fname_ '_mh' int2str(0)];
-  	eval(['load ' instr]);
-  	clear x2 post2;
-  	number_of_simulations_per_file(1) = length(logpo2);
-  	if nfile >= 1
-    	for file = 1:nfile
-      		instr = [fname_ '_mh' int2str(file)];
-      		eval(['load ' instr]);
-      		clear post2 x2;
-      		number_of_simulations_per_file(file+1) = length(logpo2);
-    	end
-  	end
-  	clear logpo2;
-  	if ~nruns
-    	tmp  = cumsum(number_of_simulations_per_file);
-    	nops = tmp(nfile+1); clear tmp;
-  	end
+  files = eval(['dir(''' fname_ '_mh*.mat'');']);
+  nfile = length(files)-1;
+  number_of_simulations_per_file = zeros(nfile+1,1);
+  instr = [fname_ '_mh' int2str(0)];
+  eval(['load ' instr]);
+  clear x2 post2;
+  number_of_simulations_per_file(1) = length(logpo2);
+  if nfile >= 1
+    for file = 1:nfile
+      instr = [fname_ '_mh' int2str(file)];
+      eval(['load ' instr]);
+      clear post2 x2;
+      number_of_simulations_per_file(file+1) = length(logpo2);
+    end
+  end
+  clear logpo2;
+  if ~nruns
+    tmp  = cumsum(number_of_simulations_per_file);
+    nops = tmp(nfile+1); clear tmp;
+  end
 else
-	files = eval(['dir(''' fname_ '_mh*_blck1.mat'');']);	
-  	nfile = length(files)-1;
-  	number_of_simulations_per_file = zeros(nfile+1,1);
-  	instr = [fname_ '_mh' int2str(0) '_blck' int2str(1)];
-  	eval(['load ' instr]);
-  	clear x2 post2;
-  	number_of_simulations_per_file(1) = length(logpo2);
-  	if nfile >= 1
-    	for file = 1:nfile
-      		instr = [fname_ '_mh' int2str(file) '_blck1'];
-      		eval(['load ' instr]);
-      		clear post2 x2;
-      		number_of_simulations_per_file(file+1) = length(logpo2);
-    	end
-	end
-	clear logpo2;
-	if ~nruns
-		tmp  = cumsum(number_of_simulations_per_file);
-    	nops = tmp(nfile+1); clear tmp;
-    	bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
-    	past_number_of_blocks = length(bfiles);
-    	if past_number_of_blocks ~= nblck
-    		nblck = past_number_of_blocks;
-    		options_.mh_nblck = nblck;
-    	end
-  	end
+  files = eval(['dir(''' fname_ '_mh*_blck1.mat'');']);	
+  nfile = length(files)-1;
+  number_of_simulations_per_file = zeros(nfile+1,1);
+  instr = [fname_ '_mh' int2str(0) '_blck' int2str(1)];
+  eval(['load ' instr]);
+  clear x2 post2;
+  number_of_simulations_per_file(1) = length(logpo2);
+  if nfile >= 1
+    for file = 1:nfile
+      instr = [fname_ '_mh' int2str(file) '_blck1'];
+      eval(['load ' instr]);
+      clear post2 x2;
+      number_of_simulations_per_file(file+1) = length(logpo2);
+    end
+  end
+  clear logpo2;
+  if ~nruns
+    tmp  = cumsum(number_of_simulations_per_file);
+    nops = tmp(nfile+1); clear tmp;
+    bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
+    past_number_of_blocks = length(bfiles);
+    if past_number_of_blocks ~= nblck
+      nblck = past_number_of_blocks;
+      options_.mh_nblck = nblck;
+    end
+  end
 end
 cumulated_number_of_simulations_per_file = cumsum(number_of_simulations_per_file);
 disp(['MH: Number of mh files				: ' int2str(nfile+1) ' per block.'])
@@ -359,301 +359,301 @@ nsim = nops+nruns;
 %%
 %
 if ~options_.nodiagnostic & nblck > 1
-	%%
-	%%	Univariate diagnostic : Brooks and Gelman (1998).
-  	%%
-  	origin      = 1000;
-  	step_size   = ceil((nsim-origin)/100); 	% So that the computational time does not 
-  	ALPHA       = 0.2;						% increase too much with the number of simulations. 
-  	time = 1:nsim;
-  	xx = origin:step_size:nsim;
-  	number_of_lines = length(xx);
-  	tmp = zeros(nsim*nblck,3);
-  	UDIAG = zeros(number_of_lines,6,npar);
-  	if nsim < origin
-    	error('MH: The number of simulations is to small to compute the MCMC convergence diagnostics.')
-  	end
-  	if TeX
-    	fidTeX = fopen([fname_ '_UnivariateDiagnostics.TeX'],'w');
-    	fprintf(fidTeX,'%% TeX eps-loader file generated by metropolis.m (Dynare).\n');
-    	fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-    	fprintf(fidTeX,' \n');
-  	end
-  	disp('MH: Univariate convergence diagnostic, Brooks and Gelman (1998):')
-  	for j=1:npar
-    	fprintf('    Parameter %d...  ',j);
-    	for b = 1:nblck
-      		startline = 0;
-      		for n = 0:nfile
-				instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
-				eval(['load ' instr]);
-				clear logpo2 post2;
-				tmp((b-1)*nsim+startline+1:(b-1)*nsim+cumulated_number_of_simulations_per_file(n+1),1) = x2(:,j);
-				clear x2;
-				startline = startline+number_of_simulations_per_file(n+1);
-      		end	
-    	end
-    	tmp(:,2) = kron(transpose(1:nblck),ones(nsim,1));
-    	tmp(:,3) = kron(ones(nblck,1),transpose(time)); 
-    	tmp = sortrows(tmp,1);
-    	ligne   = 0;
-    	for iter  = origin:step_size:nsim
-      		ligne = ligne+1;
-      		linea = ceil(0.5*iter);
-      		n     = iter-linea+1;
-      		cinf  = round(n*ALPHA/2);
-      		csup  = round(n*(1-ALPHA/2));
-      		CINF  = round(nblck*n*ALPHA/2);
-      		CSUP  = round(nblck*n*(1-ALPHA/2));
-      		temp  = tmp(find((tmp(:,3)>=linea) & (tmp(:,3)<=iter)),1:2);
-      		UDIAG(ligne,1,j) = temp(CSUP,1)-temp(CINF,1);
-      		moyenne = mean(temp(:,1));%% Pooled mean.
-      		UDIAG(ligne,3,j) = sum((temp(:,1)-moyenne).^2)/(nblck*n-1);
-      		UDIAG(ligne,5,j) = sum(abs(temp(:,1)-moyenne).^3)/(nblck*n-1);
-      		for i=1:nblck
-				pmet = temp(find(temp(:,2)==i));
-				UDIAG(ligne,2,j) = UDIAG(ligne,2,j) + pmet(csup,1)-pmet(cinf,1);
-				moyenne = mean(pmet,1); %% Within mean. 
-				UDIAG(ligne,4,j) = UDIAG(ligne,4,j) + sum((pmet(:,1)-moyenne).^2)/(n-1);
-				UDIAG(ligne,6,j) = UDIAG(ligne,6,j) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
-      		end
-    	end
-    	fprintf('Done! \n');
-  	end
-  	UDIAG(:,[2 4 6],:) = UDIAG(:,[2 4 6],:)/nblck;
-  	disp(' ')
-  	clear pmet temp moyenne CSUP CINF csup cinf n linea iter tmp;    
-  	pages = floor(npar/3);
-  	k = 0;  
-  	for i = 1:pages
-    	h = figure('Name','MCMC univariate diagnostic (Brooks and Gelman,1998)');
-    	boxplot = 1;
-    	if TeX
-      		NAMES = [];
-      		TEXNAMES = [];
-    	end
-    	for j = 1:3 % Loop over parameters
-     		k = k+1;
-      		[nam,namtex] = get_the_name(k,TeX);
-      		for crit = 1:3% Loop over criteria
-				if crit == 1
-	  				plt1 = UDIAG(:,1,k);
-	  				plt2 = UDIAG(:,2,k);
-	  				namnam  = [nam , ' (Interval)']; 
-				elseif crit == 2
-	  				plt1 = UDIAG(:,3,k);
-	  				plt2 = UDIAG(:,4,k);
-	  				namnam  = [nam , ' (m2)'];
-				elseif crit == 3    
-	  				plt1 = UDIAG(:,5,k);
-	  				plt2 = UDIAG(:,6,k);
-	  				namnam  = [nam , ' (m3)'];
-				end
-				if TeX
-	  				NAMES = strvcat(NAMES,deblank(namnam));
-	  				TEXNAMES = strvcat(TEXNAMES,deblank(namtex));
-				end
-				subplot(3,3,boxplot);
-				plot(xx,plt1,'-b');     % Pooled
-				hold on;
-				plot(xx,plt2,'-r');     % Within (mean)
-				hold off;
-				xlim([xx(1) xx(number_of_lines)])
-				title(namnam,'Interpreter','none')
-				boxplot = boxplot + 1;
-      		end
-    	end
-    	eval(['print -depsc2 ' fname_ '_udiag' int2str(i)]);
-    	eval(['print -dpdf ' fname_ '_udiag' int2str(i)]);
-    	saveas(h,[fname_ '_udiag' int2str(i) '.fig']);
-    	if options_.nograph, close(h), end
-    	if TeX
-      		fprintf(fidTeX,'\\begin{figure}[H]\n');
-      		for jj = 1:size(NAMES,1)
-				fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-      		end    
-      		fprintf(fidTeX,'\\centering \n');
-      		fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_udiag%s}\n',fname_,int2str(i));
-      		fprintf(fidTeX,'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n');
-      		fprintf(fidTeX,'The first, second and third columns are respectively the criteria based on\n');
-      		fprintf(fidTeX,'the eighty percent interval, the second and third moments.}');
-      		fprintf(fidTeX,'\\label{Fig:UnivariateDiagnostics:%s}\n',int2str(i));
-      		fprintf(fidTeX,'\\end{figure}\n');
-      		fprintf(fidTeX,'\n');
-    	end
+  %%
+  %%	Univariate diagnostic : Brooks and Gelman (1998).
+  %%
+  origin      = 1000;
+  step_size   = ceil((nsim-origin)/100); 	% So that the computational time does not 
+  ALPHA       = 0.2;						% increase too much with the number of simulations. 
+  time = 1:nsim;
+  xx = origin:step_size:nsim;
+  number_of_lines = length(xx);
+  tmp = zeros(nsim*nblck,3);
+  UDIAG = zeros(number_of_lines,6,npar);
+  if nsim < origin
+    error('MH: The number of simulations is to small to compute the MCMC convergence diagnostics.')
+  end
+  if TeX
+    fidTeX = fopen([fname_ '_UnivariateDiagnostics.TeX'],'w');
+    fprintf(fidTeX,'%% TeX eps-loader file generated by metropolis.m (Dynare).\n');
+    fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
+    fprintf(fidTeX,' \n');
+  end
+  disp('MH: Univariate convergence diagnostic, Brooks and Gelman (1998):')
+  for j=1:npar
+    fprintf('    Parameter %d...  ',j);
+    for b = 1:nblck
+      startline = 0;
+      for n = 0:nfile
+	instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
+	eval(['load ' instr]);
+	clear logpo2 post2;
+	tmp((b-1)*nsim+startline+1:(b-1)*nsim+cumulated_number_of_simulations_per_file(n+1),1) = x2(:,j);
+	clear x2;
+	startline = startline+number_of_simulations_per_file(n+1);
+      end	
+    end
+    tmp(:,2) = kron(transpose(1:nblck),ones(nsim,1));
+    tmp(:,3) = kron(ones(nblck,1),transpose(time)); 
+    tmp = sortrows(tmp,1);
+    ligne   = 0;
+    for iter  = origin:step_size:nsim
+      ligne = ligne+1;
+      linea = ceil(0.5*iter);
+      n     = iter-linea+1;
+      cinf  = round(n*ALPHA/2);
+      csup  = round(n*(1-ALPHA/2));
+      CINF  = round(nblck*n*ALPHA/2);
+      CSUP  = round(nblck*n*(1-ALPHA/2));
+      temp  = tmp(find((tmp(:,3)>=linea) & (tmp(:,3)<=iter)),1:2);
+      UDIAG(ligne,1,j) = temp(CSUP,1)-temp(CINF,1);
+      moyenne = mean(temp(:,1));%% Pooled mean.
+      UDIAG(ligne,3,j) = sum((temp(:,1)-moyenne).^2)/(nblck*n-1);
+      UDIAG(ligne,5,j) = sum(abs(temp(:,1)-moyenne).^3)/(nblck*n-1);
+      for i=1:nblck
+	pmet = temp(find(temp(:,2)==i));
+	UDIAG(ligne,2,j) = UDIAG(ligne,2,j) + pmet(csup,1)-pmet(cinf,1);
+	moyenne = mean(pmet,1); %% Within mean. 
+	UDIAG(ligne,4,j) = UDIAG(ligne,4,j) + sum((pmet(:,1)-moyenne).^2)/(n-1);
+	UDIAG(ligne,6,j) = UDIAG(ligne,6,j) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
+      end
+    end
+    fprintf('Done! \n');
+  end
+  UDIAG(:,[2 4 6],:) = UDIAG(:,[2 4 6],:)/nblck;
+  disp(' ')
+  clear pmet temp moyenne CSUP CINF csup cinf n linea iter tmp;    
+  pages = floor(npar/3);
+  k = 0;  
+  for i = 1:pages
+    h = figure('Name','MCMC univariate diagnostic (Brooks and Gelman,1998)');
+    boxplot = 1;
+    if TeX
+      NAMES = [];
+      TEXNAMES = [];
+    end
+    for j = 1:3 % Loop over parameters
+      k = k+1;
+      [nam,namtex] = get_the_name(k,TeX);
+      for crit = 1:3% Loop over criteria
+	if crit == 1
+	  plt1 = UDIAG(:,1,k);
+	  plt2 = UDIAG(:,2,k);
+	  namnam  = [nam , ' (Interval)']; 
+	elseif crit == 2
+	  plt1 = UDIAG(:,3,k);
+	  plt2 = UDIAG(:,4,k);
+	  namnam  = [nam , ' (m2)'];
+	elseif crit == 3    
+	  plt1 = UDIAG(:,5,k);
+	  plt2 = UDIAG(:,6,k);
+	  namnam  = [nam , ' (m3)'];
 	end
-  	reste = npar-k;
-  	if reste
-    	if reste == 1
-      		nr = 3;
-      		nc = 1;
-    	elseif reste == 2;
-      		nr = 2;
-      		nc = 3;
-    	end
-    	if TeX
-      		NAMES = [];
-      		TEXNAMES = [];
-    	end
-    	h = figure('Name','MCMC univariate diagnostic (Brooks and Gelman, 1998)');
-    	boxplot = 1;
-    	for j = 1:reste
-      		k = k+1;
-      		[nam,namtex] = get_the_name(k,TeX);
-      		for crit = 1:3
-				if crit == 1
-	  				plt1 = UDIAG(:,1,k);
-	  				plt2 = UDIAG(:,2,k);
-	  				namnam  = [nam , ' (Interval)']; 
-				elseif crit == 2
-	  				plt1 = UDIAG(:,3,k);
-	  				plt2 = UDIAG(:,4,k);
-	  				namnam  = [nam , ' (m2)'];
-				elseif crit == 3    
-	  				plt1 = UDIAG(:,5,k);
-	  				plt2 = UDIAG(:,6,k);
-	  				namnam  = [nam , ' (m3)'];
-				end
-				if TeX
-	  				NAMES = strvcat(NAMES,deblank(namnam));
-	  				TEXNAMES = strvcat(TEXNAMES,deblank(namtex));
-				end
-				subplot(nr,nc,boxplot);
-				plot(xx,plt1,'-b');					% Pooled
-				hold on;
-				plot(xx,plt2,'-r');					% Within (mean)
-				hold off;
-				xlim([xx(1) xx(number_of_lines)]);
-				title(namnam,'Interpreter','none');
-				boxplot = boxplot + 1;
-      		end
-    	end
-    	eval(['print -depsc2 ' fname_ '_udiag' int2str(pages+1)]);
-    	eval(['print -dpdf ' fname_ '_udiag' int2str(pages+1)]);
-    	saveas(h,[fname_ '_udiag' int2str(pages+1) '.fig']);
-    	if options_.nograph, close(h), end
-    	if TeX
-      		fprintf(fidTeX,'\\begin{figure}[H]\n');
-      		for jj = 1:size(NAMES,1);
-				fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-      		end    
-      		fprintf(fidTeX,'\\centering \n');
-      		fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_udiag%s}\n',fname_,int2str(pages+1));
-      		if reste == 2
-				fprintf(fidTeX,'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n');
-				fprintf(fidTeX,'The first, second and third columns are respectively the criteria based on\n');
-				fprintf(fidTeX,'the eighty percent interval, the second and third moments.}');
-      		elseif reste == 1
-				fprintf(fidTeX,'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n');
-				fprintf(fidTeX,'The first, second and third rows are respectively the criteria based on\n');
-				fprintf(fidTeX,'the eighty percent interval, the second and third moments.}');
-      		end
-      		fprintf(fidTeX,'\\label{Fig:UnivariateDiagnostics:%s}\n',int2str(pages+1));
-      		fprintf(fidTeX,'\\end{figure}\n');
-      		fprintf(fidTeX,'\n');
-      		fprintf(fidTeX,'% End Of TeX file.');
-      		fclose(fidTeX);
-    	end
-	end % if reste > 0
-  	clear UDIAG;
-	%%
-  	%% Multivariate diagnostic.
-  	%%
-  	if TeX
-    	fidTeX = fopen([fname_ '_MultivariateDiagnostics.TeX'],'w');
-    	fprintf(fidTeX,'%% TeX eps-loader file generated by metropolis.m (Dynare).\n');
-    	fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-    	fprintf(fidTeX,' \n');
-    	NAMES = [];
-  	end
-  	tmp = zeros(nsim*nblck,3);
-  	MDIAG = zeros(number_of_lines,6);
-  	for b = 1:nblck
-    	startline = 0;
-    	for n = 0:nfile
-      		instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
-      		eval(['load ' instr]);
-      		clear x2 post2;
-      		tmp((b-1)*nsim+startline+1:(b-1)*nsim+cumulated_number_of_simulations_per_file(n+1),1) = logpo2;
-      		startline = startline+number_of_simulations_per_file(n+1);
-    	end	
-  	end
-  	clear logpo2;
-  	tmp(:,2) = kron(transpose(1:nblck),ones(nsim,1));
-  	tmp(:,3) = kron(ones(nblck,1),transpose(time)); 
-  	tmp = sortrows(tmp,1);
-  	ligne   = 0;
-  	for iter  = origin:step_size:nsim
-    	ligne = ligne+1;
-    	linea = ceil(0.5*iter);
-    	n     = iter-linea+1;
-    	cinf  = round(n*ALPHA/2);
-    	csup  = round(n*(1-ALPHA/2));
-    	CINF  = round(nblck*n*ALPHA/2);
-    	CSUP  = round(nblck*n*(1-ALPHA/2));
-    	temp  = tmp(find((tmp(:,3)>=linea) & (tmp(:,3)<=iter)),1:2);
-    	MDIAG(ligne,1) = temp(CSUP,1)-temp(CINF,1);
-    	moyenne = mean(temp(:,1));%% Pooled mean.
-    	MDIAG(ligne,3) = sum((temp(:,1)-moyenne).^2)/(nblck*n-1);
-    	MDIAG(ligne,5) = sum(abs(temp(:,1)-moyenne).^3)/(nblck*n-1);
-    	for i=1:nblck
-      		pmet = temp(find(temp(:,2)==i));
-      		MDIAG(ligne,2) = MDIAG(ligne,2) + pmet(csup,1)-pmet(cinf,1);
-      		moyenne = mean(pmet,1); %% Within mean. 
-      		MDIAG(ligne,4) = MDIAG(ligne,4) + sum((pmet(:,1)-moyenne).^2)/(n-1);
-      		MDIAG(ligne,6) = MDIAG(ligne,6) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
-    	end
-  	end
-  	MDIAG(:,[2 4 6],:) = MDIAG(:,[2 4 6],:)/nblck;	
- 	h = figure('Name','Multivatiate diagnostic');
-  	boxplot = 1;
-  	for crit = 1:3
-    	if crit == 1
-    		plt1 = MDIAG(:,1);
-    		plt2 = MDIAG(:,2);
-    		namnam  = 'Interval'; 
-    	elseif crit == 2
-    		plt1 = MDIAG(:,3);
-    		plt2 = MDIAG(:,4);
-    		namnam  = 'm2';
-    	elseif crit == 3    
-    		plt1 = MDIAG(:,5);
-    		plt2 = MDIAG(:,6);
-    		namnam  = 'm3';
-    	end
-    	if TeX
-    		NAMES = strvcat(NAMES,namnam);
-    	end
-    	subplot(3,1,boxplot);
-    	plot(xx,plt1,'-b');  % Pooled
-    	hold on
-    	plot(xx,plt2,'-r');  % Within (mean)
-    	hold off
-    	xlim([xx(1) xx(number_of_lines)])
-    	title(namnam,'Interpreter','none');
-    	boxplot = boxplot + 1;
-  	end
-  	eval(['print -depsc2 ' fname_ '_mdiag']);
-  	eval(['print -dpdf ' fname_ '_mdiag']);
-  	saveas(h,[fname_ '_mdiag.fig']);
-  	if options_.nograph, close(h), end
-  	if TeX
-    	fprintf(fidTeX,'\\begin{figure}[H]\n');
-    	for jj = 1:3
-      		fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),' ');
-    	end    
-    	fprintf(fidTeX,'\\centering \n');
-    	fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_mdiag}\n',fname_);
-    	fprintf(fidTeX,'\\caption{Multivariate convergence diagnostics for the Metropolis-Hastings.\n');
-    	fprintf(fidTeX,'The first, second and third rows are respectively the criteria based on\n');
-    	fprintf(fidTeX,'the eighty percent interval, the second and third moments. The different \n');
-    	fprintf(fidTeX,'parameters are aggregated using the posterior kernel.}');
-    	fprintf(fidTeX,'\\label{Fig:MultivariateDiagnostics}\n');
-    	fprintf(fidTeX,'\\end{figure}\n');
-    	fprintf(fidTeX,'\n');
-    	fprintf(fidTeX,'% End Of TeX file.');
-    	fclose(fidTeX);
-  	end
+	if TeX
+	  NAMES = strvcat(NAMES,deblank(namnam));
+	  TEXNAMES = strvcat(TEXNAMES,deblank(namtex));
+	end
+	subplot(3,3,boxplot);
+	plot(xx,plt1,'-b');     % Pooled
+	hold on;
+	plot(xx,plt2,'-r');     % Within (mean)
+	hold off;
+	xlim([xx(1) xx(number_of_lines)])
+	title(namnam,'Interpreter','none')
+	boxplot = boxplot + 1;
+      end
+    end
+    eval(['print -depsc2 ' fname_ '_udiag' int2str(i)]);
+    eval(['print -dpdf ' fname_ '_udiag' int2str(i)]);
+    saveas(h,[fname_ '_udiag' int2str(i) '.fig']);
+    if options_.nograph, close(h), end
+    if TeX
+      fprintf(fidTeX,'\\begin{figure}[H]\n');
+      for jj = 1:size(NAMES,1)
+	fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+      end    
+      fprintf(fidTeX,'\\centering \n');
+      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_udiag%s}\n',fname_,int2str(i));
+      fprintf(fidTeX,'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n');
+      fprintf(fidTeX,'The first, second and third columns are respectively the criteria based on\n');
+      fprintf(fidTeX,'the eighty percent interval, the second and third moments.}');
+      fprintf(fidTeX,'\\label{Fig:UnivariateDiagnostics:%s}\n',int2str(i));
+      fprintf(fidTeX,'\\end{figure}\n');
+      fprintf(fidTeX,'\n');
+    end
+  end
+  reste = npar-k;
+  if reste
+    if reste == 1
+      nr = 3;
+      nc = 1;
+    elseif reste == 2;
+      nr = 2;
+      nc = 3;
+    end
+    if TeX
+      NAMES = [];
+      TEXNAMES = [];
+    end
+    h = figure('Name','MCMC univariate diagnostic (Brooks and Gelman, 1998)');
+    boxplot = 1;
+    for j = 1:reste
+      k = k+1;
+      [nam,namtex] = get_the_name(k,TeX);
+      for crit = 1:3
+	if crit == 1
+	  plt1 = UDIAG(:,1,k);
+	  plt2 = UDIAG(:,2,k);
+	  namnam  = [nam , ' (Interval)']; 
+	elseif crit == 2
+	  plt1 = UDIAG(:,3,k);
+	  plt2 = UDIAG(:,4,k);
+	  namnam  = [nam , ' (m2)'];
+	elseif crit == 3    
+	  plt1 = UDIAG(:,5,k);
+	  plt2 = UDIAG(:,6,k);
+	  namnam  = [nam , ' (m3)'];
+	end
+	if TeX
+	  NAMES = strvcat(NAMES,deblank(namnam));
+	  TEXNAMES = strvcat(TEXNAMES,deblank(namtex));
+	end
+	subplot(nr,nc,boxplot);
+	plot(xx,plt1,'-b');					% Pooled
+	hold on;
+	plot(xx,plt2,'-r');					% Within (mean)
+	hold off;
+	xlim([xx(1) xx(number_of_lines)]);
+	title(namnam,'Interpreter','none');
+	boxplot = boxplot + 1;
+      end
+    end
+    eval(['print -depsc2 ' fname_ '_udiag' int2str(pages+1)]);
+    eval(['print -dpdf ' fname_ '_udiag' int2str(pages+1)]);
+    saveas(h,[fname_ '_udiag' int2str(pages+1) '.fig']);
+    if options_.nograph, close(h), end
+    if TeX
+      fprintf(fidTeX,'\\begin{figure}[H]\n');
+      for jj = 1:size(NAMES,1);
+	fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+      end    
+      fprintf(fidTeX,'\\centering \n');
+      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_udiag%s}\n',fname_,int2str(pages+1));
+      if reste == 2
+	fprintf(fidTeX,'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n');
+	fprintf(fidTeX,'The first, second and third columns are respectively the criteria based on\n');
+	fprintf(fidTeX,'the eighty percent interval, the second and third moments.}');
+      elseif reste == 1
+	fprintf(fidTeX,'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n');
+	fprintf(fidTeX,'The first, second and third rows are respectively the criteria based on\n');
+	fprintf(fidTeX,'the eighty percent interval, the second and third moments.}');
+      end
+      fprintf(fidTeX,'\\label{Fig:UnivariateDiagnostics:%s}\n',int2str(pages+1));
+      fprintf(fidTeX,'\\end{figure}\n');
+      fprintf(fidTeX,'\n');
+      fprintf(fidTeX,'% End Of TeX file.');
+      fclose(fidTeX);
+    end
+  end % if reste > 0
+  clear UDIAG;
+  %%
+  %% Multivariate diagnostic.
+  %%
+  if TeX
+    fidTeX = fopen([fname_ '_MultivariateDiagnostics.TeX'],'w');
+    fprintf(fidTeX,'%% TeX eps-loader file generated by metropolis.m (Dynare).\n');
+    fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
+    fprintf(fidTeX,' \n');
+    NAMES = [];
+  end
+  tmp = zeros(nsim*nblck,3);
+  MDIAG = zeros(number_of_lines,6);
+  for b = 1:nblck
+    startline = 0;
+    for n = 0:nfile
+      instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
+      eval(['load ' instr]);
+      clear x2 post2;
+      tmp((b-1)*nsim+startline+1:(b-1)*nsim+cumulated_number_of_simulations_per_file(n+1),1) = logpo2;
+      startline = startline+number_of_simulations_per_file(n+1);
+    end	
+  end
+  clear logpo2;
+  tmp(:,2) = kron(transpose(1:nblck),ones(nsim,1));
+  tmp(:,3) = kron(ones(nblck,1),transpose(time)); 
+  tmp = sortrows(tmp,1);
+  ligne   = 0;
+  for iter  = origin:step_size:nsim
+    ligne = ligne+1;
+    linea = ceil(0.5*iter);
+    n     = iter-linea+1;
+    cinf  = round(n*ALPHA/2);
+    csup  = round(n*(1-ALPHA/2));
+    CINF  = round(nblck*n*ALPHA/2);
+    CSUP  = round(nblck*n*(1-ALPHA/2));
+    temp  = tmp(find((tmp(:,3)>=linea) & (tmp(:,3)<=iter)),1:2);
+    MDIAG(ligne,1) = temp(CSUP,1)-temp(CINF,1);
+    moyenne = mean(temp(:,1));%% Pooled mean.
+    MDIAG(ligne,3) = sum((temp(:,1)-moyenne).^2)/(nblck*n-1);
+    MDIAG(ligne,5) = sum(abs(temp(:,1)-moyenne).^3)/(nblck*n-1);
+    for i=1:nblck
+      pmet = temp(find(temp(:,2)==i));
+      MDIAG(ligne,2) = MDIAG(ligne,2) + pmet(csup,1)-pmet(cinf,1);
+      moyenne = mean(pmet,1); %% Within mean. 
+      MDIAG(ligne,4) = MDIAG(ligne,4) + sum((pmet(:,1)-moyenne).^2)/(n-1);
+      MDIAG(ligne,6) = MDIAG(ligne,6) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
+    end
+  end
+  MDIAG(:,[2 4 6],:) = MDIAG(:,[2 4 6],:)/nblck;	
+  h = figure('Name','Multivatiate diagnostic');
+  boxplot = 1;
+  for crit = 1:3
+    if crit == 1
+      plt1 = MDIAG(:,1);
+      plt2 = MDIAG(:,2);
+      namnam  = 'Interval'; 
+    elseif crit == 2
+      plt1 = MDIAG(:,3);
+      plt2 = MDIAG(:,4);
+      namnam  = 'm2';
+    elseif crit == 3    
+      plt1 = MDIAG(:,5);
+      plt2 = MDIAG(:,6);
+      namnam  = 'm3';
+    end
+    if TeX
+      NAMES = strvcat(NAMES,namnam);
+    end
+    subplot(3,1,boxplot);
+    plot(xx,plt1,'-b');  % Pooled
+    hold on
+    plot(xx,plt2,'-r');  % Within (mean)
+    hold off
+    xlim([xx(1) xx(number_of_lines)])
+    title(namnam,'Interpreter','none');
+    boxplot = boxplot + 1;
+  end
+  eval(['print -depsc2 ' fname_ '_mdiag']);
+  eval(['print -dpdf ' fname_ '_mdiag']);
+  saveas(h,[fname_ '_mdiag.fig']);
+  if options_.nograph, close(h), end
+  if TeX
+    fprintf(fidTeX,'\\begin{figure}[H]\n');
+    for jj = 1:3
+      fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),' ');
+    end    
+    fprintf(fidTeX,'\\centering \n');
+    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_mdiag}\n',fname_);
+    fprintf(fidTeX,'\\caption{Multivariate convergence diagnostics for the Metropolis-Hastings.\n');
+    fprintf(fidTeX,'The first, second and third rows are respectively the criteria based on\n');
+    fprintf(fidTeX,'the eighty percent interval, the second and third moments. The different \n');
+    fprintf(fidTeX,'parameters are aggregated using the posterior kernel.}');
+    fprintf(fidTeX,'\\label{Fig:MultivariateDiagnostics}\n');
+    fprintf(fidTeX,'\\end{figure}\n');
+    fprintf(fidTeX,'\n');
+    fprintf(fidTeX,'% End Of TeX file.');
+    fclose(fidTeX);
+  end
 end % End of if ~options_.nodiagnostic 
 %%
 %% Now i discard some simulations...
@@ -663,10 +663,10 @@ irun = floor(options_.mh_drop*trun)+1;
 ffil = 0;       % The first MH file we have to read...
 ifil = irun;    % and the first line we have to read in this file.
 for ffil = 0:nfile
-	if irun <= cumulated_number_of_simulations_per_file(ffil+1)
-    	break
-    end
-    ifil = ifil-number_of_simulations_per_file(ffil+1);
+  if irun <= cumulated_number_of_simulations_per_file(ffil+1)
+    break
+  end
+  ifil = ifil-number_of_simulations_per_file(ffil+1);
 end
 trun = trun-irun+1;
 fprintf('MH: I''ll use mh-files %d to %d.\n',ffil,nfile);
@@ -683,80 +683,60 @@ disp(' ');
 %%
 %
 fprintf('MH: I''m computing the posterior mean... ');
-if nblck > 1
-	MU = zeros(1,npar);
-    lpost_mode = -Inf;
-    for  b = 1:nblck
-		instr = [fname_ '_mh' int2str(ffil) '_blck' int2str(b)];
-		eval(['load ' instr]); clear post2;
-		MU(1,:) = MU(1,:) + sum(x2(ifil:end,:),1);
-		lpost_mode = max(lpost_mode,max(logpo2(ifil:end,1)));
-	end
-    for n = ffil+1:nfile
-    	for b = 1:nblck
-	  		instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
-	  		eval(['load ' instr]);
-	  		clear post2;
-	  		MU(1,:) = MU(1,:) + sum(x2,1);
-	  		lpost_mode = max(lpost_mode,max(logpo2));
-		end
-    end
-    clear x2 logpo2;
-else
-	MU = zeros(1,npar);
-    lpost_mode = -Inf;
+MU = zeros(1,npar);
+lpost_mode = -Inf;
+for  b = 1:nblck
+  if nblck > 1
+    instr = [fname_ '_mh' int2str(ffil) '_blck' int2str(b)];
+  else
     instr = [fname_ '_mh' int2str(ffil)];
+  end
+  eval(['load ' instr]); clear post2;
+  MU(1,:) = MU(1,:) + sum(x2(ifil:end,:),1);
+  lpost_mode = max(lpost_mode,max(logpo2(ifil:end,1)));
+end
+for n = ffil+1:nfile
+  for b = 1:nblck
+    if nblck > 1
+      instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
+    else
+      instr = [fname_ '_mh' int2str(n)]
+    end
     eval(['load ' instr]);
     clear post2;
-    MU(1,:) = MU(1,:) + sum(x2(ifil:end,:),1);
-    lpost_mode = max(lpost_mode,max(logpo2(ifil:end)));
-    for n = ffil+1:nfile
-		instr = [fname_ '_mh' int2str(n)];
-		eval(['load ' instr]);
-		clear post2;
-		MU(1,:) = MU(1,:) + sum(x2,1);
-		lpost_mode = max(lpost_mode,max(logpo2));
-	end
-    clear x2 logpo2;
-end %	<=== Mean of the parameters (ok!)
+    MU(1,:) = MU(1,:) + sum(x2,1);
+    lpost_mode = max(lpost_mode,max(logpo2));
+  end
+end
+clear x2 logpo2;
 MU = MU/(trun*nblck);
-%	lpost_mode is the value of the log posterior kernel at the mode.	
 fprintf(' Done!\n');
 fprintf('MH: I''m computing the posterior covariance matrix... ');
 SIGMA = zeros(npar,npar);
-if nblck > 1
-	for b = 1:nblck
-		instr = [fname_ '_mh' int2str(ffil) '_blck' int2str(b)];
-		eval(['load ' instr]);
-		clear post2 logpo2;
-		SIGMA = SIGMA + transpose(x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU)*...
-			(x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU);
-    end				
-    for n = ffil+1:nfile
-		for b = 1:nblck
-	  		instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
-	  		eval(['load ' instr]);
-	  		clear post2 logpo2;
-	  		SIGMA = SIGMA + transpose(x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU)*...
-		  		(x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU);
-		end				
-	end
-    clear x2;
-else
-	instr = [fname_ '_mh' int2str(ffil)];
+for b = 1:nblck
+  if nblck > 1
+    instr = [fname_ '_mh' int2str(ffil) '_blck' int2str(b)];
+  else
+    instr = [fname_ '_mh' int2str(ffil)];
+  end  
+  eval(['load ' instr]);
+  clear post2 logpo2;
+  SIGMA = SIGMA + transpose(x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU)*...
+	  (x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU);
+end				
+for n = ffil+1:nfile
+  for b = 1:nblck
+    if nblck > 1
+      instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
+    else
+      instr = [fname_ '_mh' int2str(n)];
+    end
     eval(['load ' instr]);
     clear post2 logpo2;
-    SIGMA = SIGMA + transpose(x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU)*...
-		(x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU);
-    for n = ffil+1:nfile
-		instr = [fname_ '_mh' int2str(n)];
-		eval(['load ' instr]);
-		clear post2 logpo2;
-		SIGMA = SIGMA + transpose(x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU)*...
-		   (x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU);
-    end
-    clear x2;
+    SIGMA = SIGMA + transpose(x2-ones(size(x2,1),1)*MU)*(x2-ones(size(x2,1),1)*MU);
+  end				
 end
+clear x2;
 SIGMA =  SIGMA/(trun*nblck);%<=== Variance of the parameters (ok!)
 fprintf(' Done!\n');
 disp(' ');
@@ -768,100 +748,76 @@ linee = 0;
 check_coverage  = 1;
 increase        = 1;
 while check_coverage
-	for p = 0.1:0.1:0.9;
-		critval = qchisq(p,npar);
-		tmp = 0;
-		if nblck == 1
-	  		instr = [fname_ '_mh' int2str(ffil)];
-	  		eval(['load ' instr]);
-	  		clear post2;
-	  		EndOfFile = number_of_simulations_per_file(ffil+1);
-	  		for i = ifil:EndOfFile
-	    		deviation  = (x2(i,:)-MU)*invSIGMA*transpose(x2(i,:)-MU);
-	    		if deviation <= critval
-	      			lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
-	      			tmp = tmp + exp(lftheta - logpo2(i)+lpost_mode);
-	    		end
-	  		end
-	  		for k = ffil+1:nfile
-	    		instr = [fname_ '_mh' int2str(k)];
-	    		eval(['load ' instr]);
-	    		clear post2;
-	    		EndOfFile = number_of_simulations_per_file(k+1);
-	    		for i = 1:EndOfFile
-	      			deviation  = (x2(i,:)-MU)*invSIGMA*transpose(x2(i,:)-MU);
-	      			if deviation <= critval
-						lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
-						tmp = tmp + exp(lftheta - logpo2(i)+lpost_mode);
-	      			end
-	    		end
-	  		end
-	  		clear x2 logpo2;
-		else	
-	  		inst = [fname_ '_mh' int2str(ffil)];
-	  		EndOfFile = number_of_simulations_per_file(ffil+1);
-	  		for b=1:nblck
-	    		instr = [inst '_blck' int2str(b)];
-	    		eval(['load ' instr]);
-	    		clear post2;
-	    		for i = ifil:EndOfFile
-	      			for j=1:nblck
-						deviation  = (x2(i,:)-MU)*invSIGMA*transpose(x2(i,:)-MU);
-						if deviation <= critval
-		  					lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
-		  					tmp = tmp + exp(lftheta - logpo2(i)+lpost_mode);
-						end
-	      			end
-	    		end
-	  		end	
-	  		for k = ffil+1:nfile
-	    		inst = [fname_ '_mh' int2str(k)];
-	    		EndOfFile = number_of_simulations_per_file(k+1);
-	    		for b=1:nblck
-	      			instr = [inst '_blck' int2str(b)];
-	      			eval(['load ' instr]);
-	      			clear post2;
-	      			for i = ifil:EndOfFile
-						for j=1:nblck
-		  					deviation  = (x2(i,:)-MU)*invSIGMA*transpose(x2(i,:)-MU);
-		  					if deviation <= critval
-		    					lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
-		    					tmp = tmp + exp(lftheta - logpo2(i)+lpost_mode);
-		  					end
-						end
-	      			end
-	    		end	
-	  		end
-	  		clear x2 logpo2;
-		end
-		linee = linee + 1;  	
-		marginal(linee,:) = [p,lpost_mode-log(tmp/(trun*nblck))];
+  for p = 0.1:0.1:0.9;
+    critval = qchisq(p,npar);
+    tmp = 0;
+    inst = [fname_ '_mh' int2str(ffil)];
+    EndOfFile = number_of_simulations_per_file(ffil+1);
+    for b=1:nblck
+      if nblck > 1
+	instr = [inst '_blck' int2str(b)];
+      else
+	instr = inst;
+      end	
+      eval(['load ' instr]);
+      clear post2;
+      for i = ifil:EndOfFile
+	deviation  = (x2(i,:)-MU)*invSIGMA*transpose(x2(i,:)-MU);
+	if deviation <= critval
+	  lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
+	  tmp = tmp + exp(lftheta - logpo2(i)+lpost_mode);
 	end
-    if abs((marginal(9,2)-marginal(1,2))/marginal(9,2)) > 0.01 | isinf(marginal(1,2))
-		if increase == 1
-	  		disp('MH: The support of the weighting density function is not large enough...')
-	  		disp('MH: I increase the variance of this distribution.')
-	  		increase = 1.2*increase;
-	  		invSIGMA = inv(SIGMA*increase);
-	  		detSIGMA = det(SIGMA*increase);
-	  		linee    = 0;   
-		else
-	  		disp('MH: Let me try again.')
-	  		increase = 1.2*increase;
-	  		invSIGMA = inv(SIGMA*increase);
-	  		detSIGMA = det(SIGMA*increase);
-	  		linee    = 0;
-	  		if increase > 20
-	    		check_coverage = 0;
-	    		clear invSIGMA detSIGMA increase;
-	    		disp('MH: There''s probably a problem with the modified harmonic mean estimator.')    
-	  		end    
-		end    
+      end
+    end	
+    for k = ffil+1:nfile
+      inst = [fname_ '_mh' int2str(k)];
+      EndOfFile = number_of_simulations_per_file(k+1);
+      for b=1:nblck
+	if nblck > 1
+	  instr = [inst '_blck' int2str(b)];
+	else
+	  instr = inst;
+	end  
+	eval(['load ' instr]);
+	clear post2;
+	for i = 1:EndOfFile
+	  deviation  = (x2(i,:)-MU)*invSIGMA*transpose(x2(i,:)-MU);
+	  if deviation <= critval
+	    lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
+	    tmp = tmp + exp(lftheta - logpo2(i)+lpost_mode);
+	  end
+	end
+      end	
+      clear x2 logpo2;
+    end
+    linee = linee + 1;  	
+    marginal(linee,:) = [p,lpost_mode-log(tmp/(trun*nblck))];
+  end
+  if abs((marginal(9,2)-marginal(1,2))/marginal(9,2)) > 0.01 | isinf(marginal(1,2))
+    if increase == 1
+      disp('MH: The support of the weighting density function is not large enough...')
+      disp('MH: I increase the variance of this distribution.')
+      increase = 1.2*increase;
+      invSIGMA = inv(SIGMA*increase);
+      detSIGMA = det(SIGMA*increase);
+      linee    = 0;   
     else
-		check_coverage = 0;
-		clear invSIGMA detSIGMA increase;
-		disp('MH: Modified harmonic mean estimator, done!')
+      disp('MH: Let me try again.')
+      increase = 1.2*increase;
+      invSIGMA = inv(SIGMA*increase);
+      detSIGMA = det(SIGMA*increase);
+      linee    = 0;
+      if increase > 20
+	check_coverage = 0;
+	clear invSIGMA detSIGMA increase;
+	disp('MH: There''s probably a problem with the modified harmonic mean estimator.')    
+      end    
     end    
+  else
+    check_coverage = 0;
+    clear invSIGMA detSIGMA increase;
+    disp('MH: Modified harmonic mean estimator, done!')
+  end    
 end
 %
 %%
@@ -880,66 +836,66 @@ n1	= round((1-options_.mh_conf_sig)*n);
 k	= zeros(n1,1);
 tmp = zeros(n,1);
 if nblck == 1
-	for i = 1:npar
-		EndOfFile = number_of_simulations_per_file(ffil+1)-ifil+1;
-		instr = [fname_ '_mh' int2str(ffil)];
-		eval(['load ' instr]);
-		clear post2 logpo2;
-		tmp(1:EndOfFile) = x2(ifil:end,i);
-		OldEndOfFile = EndOfFile;
-		for f = ffil+1:nfile
-	  		NewEndOfFile = number_of_simulations_per_file(f+1);
-	  		instr = [fname_ '_mh' int2str(f)];
-	  		eval(['load ' instr]);
-	  		clear post2 logpo2;
-	  		tmp(OldEndOfFile+1:OldEndOfFile+NewEndOfFile) = x2(:,i);
-	  		OldEndOfFile = OldEndOfFile + NewEndOfFile;
-		end
-		clear x2;
-		tmp = sort(tmp);
-		j2 = n-n1;
-		for j1 = 1:n1
-	  		k(j1) = tmp(j2)-tmp(j1);
-	  		j2 = j2 + 1;
-		end
-		[kmin,k1] = min(k);
-		min_interval(i,:) = [tmp(k1) tmp(k1)+kmin];
-	end
-    clear tmp;
+  for i = 1:npar
+    EndOfFile = number_of_simulations_per_file(ffil+1)-ifil+1;
+    instr = [fname_ '_mh' int2str(ffil)];
+    eval(['load ' instr]);
+    clear post2 logpo2;
+    tmp(1:EndOfFile) = x2(ifil:end,i);
+    OldEndOfFile = EndOfFile;
+    for f = ffil+1:nfile
+      NewEndOfFile = number_of_simulations_per_file(f+1);
+      instr = [fname_ '_mh' int2str(f)];
+      eval(['load ' instr]);
+      clear post2 logpo2;
+      tmp(OldEndOfFile+1:OldEndOfFile+NewEndOfFile) = x2(:,i);
+      OldEndOfFile = OldEndOfFile + NewEndOfFile;
+    end
+    clear x2;
+    tmp = sort(tmp);
+    j2 = n-n1;
+    for j1 = 1:n1
+      k(j1) = tmp(j2)-tmp(j1);
+      j2 = j2 + 1;
+    end
+    [kmin,k1] = min(k);
+    min_interval(i,:) = [tmp(k1) tmp(k1)+kmin];
+  end
+  clear tmp;
 else
-	for i = 1:npar
-		EndOfFile = number_of_simulations_per_file(ffil+1)-ifil+1;
-		NewStartLine = 0;
-		inst = [fname_ '_mh' int2str(ffil)];
-		for b = 1:nblck
-	  		instr = [inst '_blck' int2str(b)];
-	  		eval(['load ' instr]);
-	  		clear post2 logpo2;
-	  		tmp(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(ifil:end,i);
-	  		NewStartLine = NewStartLine + EndOfFile;
-		end
-		for f = ffil+1:nfile
-	  		EndOfFile = number_of_simulations_per_file(f+1);
-	  		inst = [fname_ '_mh' int2str(f)];
-	  		for B = 1:nblck
-	    		instr = [inst '_blck' int2str(b)];
-	    		eval(['load ' instr]);
-	    		clear post2 logpo2;
-	    		tmp(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(:,i);
-	    		NewStartLine = NewStartLine + EndOfFile;
-	  		end
-		end
-		clear x2;
-		tmp = sort(tmp);
-		j2 = n-n1;
-		for j1 = 1:n1
-	 		k(j1) = tmp(j2)-tmp(j1);
-	  		j2 = j2 + 1;
-		end
-		[kmin,k1] = min(k);
-		min_interval(i,:) = [tmp(k1) tmp(k1)+kmin];
-	end
-    clear tmp;
+  for i = 1:npar
+    EndOfFile = number_of_simulations_per_file(ffil+1)-ifil+1;
+    NewStartLine = 0;
+    inst = [fname_ '_mh' int2str(ffil)];
+    for b = 1:nblck
+      instr = [inst '_blck' int2str(b)];
+      eval(['load ' instr]);
+      clear post2 logpo2;
+      tmp(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(ifil:end,i);
+      NewStartLine = NewStartLine + EndOfFile;
+    end
+    for f = ffil+1:nfile
+      EndOfFile = number_of_simulations_per_file(f+1);
+      inst = [fname_ '_mh' int2str(f)];
+      for B = 1:nblck
+	instr = [inst '_blck' int2str(b)];
+	eval(['load ' instr]);
+	clear post2 logpo2;
+	tmp(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(:,i);
+	NewStartLine = NewStartLine + EndOfFile;
+      end
+    end
+    clear x2;
+    tmp = sort(tmp);
+    j2 = n-n1;
+    for j1 = 1:n1
+      k(j1) = tmp(j2)-tmp(j1);
+      j2 = j2 + 1;
+    end
+    [kmin,k1] = min(k);
+    min_interval(i,:) = [tmp(k1) tmp(k1)+kmin];
+  end
+  clear tmp;
 end
 fprintf(' Done!\n');
 %
