@@ -69,8 +69,8 @@ k1 = iy_(find([1:klen] ~= ykmin_+1),:);
 b = jacobia_(:,iy_(ykmin_+1,order_var));
 a = b\jacobia_(:,nonzeros(k1')); 
 if any(isinf(a(:)))
-  dir_test_(1) = 5;
-  dir_test_(2) = bayestopt_.penalty;
+  dr1_test_(1) = 5;
+  dr1_test_(2) = bayestopt_.penalty;
 end
 if exo_nbr
   fu = b\jacobia_(:,nz+1:end);

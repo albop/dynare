@@ -1,25 +1,24 @@
 function initial_estimation_checks(xparam1,gend,data)
-  global dr1_test bayestopt_ estim_params_ exo_nbr
+global dr1_test_ bayestopt_ estim_params_ exo_nbr
   
-  nv = size(data,1);
+nv = size(data,1);
   
-  if nv > exo_nbr + estim_params_.nvn
-    error(['Estimation can''t take place because there are less shocks than' ...
-	  'observed variables'])
-  end
+if nv > exo_nbr + estim_params_.nvn
+  error(['Estimation can''t take place because there are less shocks than' ...
+	 'observed variables'])
+end
   
-  r = rank(data);
-  if r < nv
-    error(['Estimation can''t take place because the data are perfectly' ...
- 	   ' correlated']);
-  end
+r = rank(data);
+if r < nv
+  error(['Estimation can''t take place because the data are perfectly' ...
+	 ' correlated']);
+end
 
-  fval = DsgeLikelihood(xparam1,gend,data);
-  
-if exist(dr1_test)
-  disp(dr1_test)
+fval = DsgeLikelihood(xparam1,gend,data);
 
-  switch(dr1_test(1))
+if exist('dr1_test_') & dr1_test_(1)>0
+  % disp(dr1_test_)
+  switch(dr1_test_(1))
    case 1
     error('The steady state can''t be found');
    case 2
@@ -34,4 +33,3 @@ if exist(dr1_test)
    otherwise
   end
 end
-

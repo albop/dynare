@@ -2,7 +2,7 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
 % stephane.adjemian@cepremap.cnrs.fr [09-07-2004]
 %
 % Adapted from mj_optmumlik.m
-  global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test
+global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test
   global dr1_test_ trend_coeff_
 
   fval = [];
@@ -12,7 +12,7 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
 
   xparam1_test = xparam1;
   cost_flag   = 1;
-  nobs 		= size(options_.varobs,1);
+  nobs 	= size(options_.varobs,1);
 
   if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
@@ -173,3 +173,5 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
   % ------------------------------------------------------------------------------
   lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
   fval    = (likelihood-lnprior);
+  
+  

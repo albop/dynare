@@ -6,10 +6,10 @@ options_.varlist = varlist;
 
 options_.lgyidx2varobs = zeros(size(lgy_,1),1);
 for i = 1:size(lgy_,1)
-	tmp = strmatch(deblank(lgy_(i,:)),options_.varobs,'exact');
-	if ~isempty(tmp)
-		options_.lgyidx2varobs(i,1) = tmp;
-	end			
+  tmp = strmatch(deblank(lgy_(i,:)),options_.varobs,'exact');
+  if ~isempty(tmp)
+    options_.lgyidx2varobs(i,1) = tmp;
+  end			
 end
 
 options_ = set_default_option(options_,'first_obs',1);
@@ -171,11 +171,15 @@ k = find(isnan(bayestopt_.jscale));
 bayestopt_.jscale(k) = options_.mh_jscale;
 
 % read and demean data 
+
 if exist(options_.datafile)
   instr = options_.datafile;
 else
   instr = ['load ' options_.datafile];
 end
+
+instr
+
 eval(instr);
 
 rawdata = [];
@@ -213,7 +217,6 @@ end
 if length(options_.mode_file) > 0
   eval(['load ' options_.mode_file ';']');
 end
-
 
 initial_estimation_checks(xparam1,gend,data);
 
