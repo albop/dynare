@@ -98,4 +98,4 @@ end;
 options_.unit_root_vars = {'P_obs'; 'Y_obs'};
 
 //stoch_simul(order=1,nomoments,irf=0);
-estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=5000,mh_nblocks=10,mh_drop=0.45,lik_init=2);
+estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=2000,mh_nblocks=2,mh_drop=0.45);
