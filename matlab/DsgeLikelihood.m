@@ -50,10 +50,13 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
     [CholQ,testQ] = chol(Q);
     if testQ 	%% The variance-covariance matrix of the structural innovations is not definite positive.
 		%% We have to compute the eigenvalues of this matrix in order to build the penalty.
-		a = diag(eig(Q));
-		fval = bayestopt_.penalty*min(1e3,exp(sum(-a(a<=0))));
-		cost_flag = 0;
-		return
+		a = eig(Q);
+		k = a<0;
+		if k > 0
+		  fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
+		  cost_flag = 0;
+		  return
+		end
     end
     offset = offset+estim_params_.ncx;
   end
@@ -66,25 +69,12 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
     end
     [CholH,testH] = chol(H);
     if testH
-      a = diag(eig(H));
-      if nobs == estim_params_.nvn
-	fval = bayestopt_.penalty*min(1e3,exp(sum(-a(a<=0))));
+      a = eig(H);
+      k = a<0;
+      if k > 0
+	fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
 	cost_flag = 0;
 	return
-      else
-	if sum(abs(a)<crit) == nobs-estim_params_.nvn
-	  if any(a<0)
-	    fval = bayestopt_.penalty*min(1e3,exp(sum(-a(a<0))));
-	    cost_flag = 0;
-	    return					
-	  else
-	    % All is fine, there's nothing to do here...
-	  end 					
-	else
-	  fval = bayestopt_.penalty*min(1e3,exp(sum(-a(a<=0))));
-	  cost_flag = 0;
-	  return			
-	end 
       end
     end
     offset = offset+estim_params_.ncn;
