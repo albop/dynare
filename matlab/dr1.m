@@ -417,19 +417,23 @@ Gu(end-length(kk)+1:end,:) = dr.ghu(kstate(kk,1),:);
 Guu = zeros(size(hx1,1),exo_nbr^2);
 Guu(end-length(kk)+1:end,:) = dr.ghuu(kstate(kk,1),:);
 E = eye(endo_nbr);
+iy_ordered = iy_(:,order_var)';
+iy_ordered = iy_ordered(:);
+k1 = find(iy_ordered);
+iy_ordered(k1) = [1:length(k1)]';
+iy_ordered =reshape(iy_ordered,endo_nbr,ykmin_+ykmax_+1)';
 for i=1:ykmax_
   for j=i:ykmax_
-    k2 = iy_(ykmin_+j+1,order_var);
-    k2a = find(k2);
-    k2 = k2(k2a);
-    RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+hessian(:,kh(k2,k2))* ...
+    k2 = iy_(ykmin_+i+1,order_var);
+    [junk,k2a,k2] = find(k2);
+    k2b = nonzeros(iy_ordered(ykmin_+j+1,:));
+    RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+hessian(:,kh(k2b,k2b))* ...
 	  kron(gu(k2a,:),gu(k2a,:));
   end
 
   % LHS
   k2 = iy_(ykmin_+i+1,order_var);
-  k2a = find(k2);
-  k2 = k2(k2a);
+  [junk,k2a,k2] = find(k2);
   LHS = LHS + jacobia_(:,k2)*(E(k2a,:)+[O1(k2a,:) ghx(k2a,:)*H O2(k2a,:)]);
   
   if i == ykmax_ 
