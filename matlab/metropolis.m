@@ -751,26 +751,13 @@ while check_coverage
   for p = 0.1:0.1:0.9;
     critval = qchisq(p,npar);
     tmp = 0;
-    inst = [fname_ '_mh' int2str(ffil)];
-    EndOfFile = number_of_simulations_per_file(ffil+1);
-    for b=1:nblck
-      if nblck > 1
-	instr = [inst '_blck' int2str(b)];
-      else
-	instr = inst;
-      end	
-      eval(['load ' instr]);
-      clear post2;
-      for i = ifil:EndOfFile
-	deviation  = (x2(i,:)-MU)*invSIGMA*transpose(x2(i,:)-MU);
-	if deviation <= critval
-	  lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
-	  tmp = tmp + exp(lftheta - logpo2(i)+lpost_mode);
-	end
-      end
-    end	
-    for k = ffil+1:nfile
+    for k = ffil:nfile
       inst = [fname_ '_mh' int2str(k)];
+      if k == ffil
+	i1 = ifil;
+      else
+	i1 = 1;
+      end
       EndOfFile = number_of_simulations_per_file(k+1);
       for b=1:nblck
 	if nblck > 1
@@ -778,18 +765,17 @@ while check_coverage
 	else
 	  instr = inst;
 	end  
-	eval(['load ' instr]);
-	clear post2;
-	for i = 1:EndOfFile
-	  deviation  = (x2(i,:)-MU)*invSIGMA*transpose(x2(i,:)-MU);
+	load(instr,'x2','logpo2');
+	for i = i1:EndOfFile
+	  deviation  = (x2(i,:)-MU)*invSIGMA*(x2(i,:)-MU)';
 	  if deviation <= critval
 	    lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
 	    tmp = tmp + exp(lftheta - logpo2(i)+lpost_mode);
 	  end
 	end
       end	
-      clear x2 logpo2;
     end
+    clear x2 logpo2;
     linee = linee + 1;  	
     marginal(linee,:) = [p,lpost_mode-log(tmp/(trun*nblck))];
   end
