@@ -6,6 +6,8 @@ global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
 global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ 
 global fname_ means_ stderrs_ lgy_ maxit_
 global dynatol_ options_
+global BlanchardKahn_
+
 
 if linear == 1
   iorder =1;
@@ -68,6 +70,3 @@ tempex = [];
 % 08/24/2001 MJ uses Schmitt-Grohe and Uribe (2001) constant correction
 %               in dr.ghs2 
 % 05/26/2003 MJ added temporary values for ex_
-
-
-

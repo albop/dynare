@@ -6,6 +6,13 @@ global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
 global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ ys_ stdexo_
 global fname_ means_ Sigma_e_ lgy_
 global eigval options_ M_
+global BlanchardKahn
+
+BlanchardKahn = 1;
+
+if options_.silent
+  % warning off all
+end  
 
 options_ = set_default_option(options_,'loglinear',0);
 
@@ -49,7 +56,6 @@ order_var = dr.order_var;
 nd = size(kstate,1);
 
 sdyn = endo_nbr - nstatic;
-
 
 tempex = ex_;
 
@@ -136,9 +142,11 @@ if check
 end
 
 if nba ~= nyf;
-  disp('WARNING: Blanchard-Kahn conditions are not satisfied. Run CHECK to learn more!');
-  disp('Press any key to continue');
-  pause
+  if ~options_.silent
+    disp('Blanchard-Kahn conditions are not satisfied. Run CHECK to learn more!');
+  end  
+  BlanchardKahn = 0;
+  return
 end
 
 np = nd - nyf;
@@ -147,7 +155,13 @@ n3 = nyf;
 n4 = n3 + 1;
 % derivatives with respect to dynamic state variables
 % forward variables
-gx = -w(1:n3,n2:nd)'\w(n4:nd,n2:nd)';
+if rank(w(1:n3,n2:nd)) == n3
+  gx = -w(1:n3,n2:nd)'\w(n4:nd,n2:nd)';
+else
+  BlanchardKahn = 0;
+  return
+end  
+
 % predetermined variables
 hx = w(1:n3,1:np)'*gx+w(n4:nd,1:np)';
 hx = (tt(1:np,1:np)*hx)\(ss(1:np,1:np)*hx);

@@ -1,15 +1,16 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function stoch_simul(var_list)
-global iter_ ys_ dr_ y_ dr_ exo_nbr lgy_ lgx_ Sigma_e_ ykmin_ ykmax_ ...
-   endo_nbr exo_nbr exe_ ex_ xkmin_ xkmax_ iter_ options_ lgx_orig_ord_ ...
-   fname_ lgx_TeX_ lgy_TeX_
+global iter_ ys_ dr_ y_ dr_ exo_nbr lgy_ lgx_ Sigma_e_ ykmin_ ykmax_ 
+global endo_nbr exo_nbr exe_ ex_ xkmin_ xkmax_ iter_ options_ lgx_orig_ord_
+global fname_ lgx_TeX_ lgy_TeX_
+global BlanchardKahn_
 
 options_ = set_default_option(options_,'TeX',0);  
 options_ = set_default_option(options_,'order',2);
 options_ = set_default_option(options_,'linear',0);
 if options_.linear
-	options_.order = 1;
+  options_.order = 1;
 end
 options_ = set_default_option(options_,'ar',5);
 options_ = set_default_option(options_,'irf',40);
@@ -18,9 +19,9 @@ options_ = set_default_option(options_,'dr_algo',0);
 options_ = set_default_option(options_,'simul_algo',0);
 options_ = set_default_option(options_,'drop',100);
 if options_.order == 1
-	options_.replic = 1;
+  options_.replic = 1;
 else
-	options_ = set_default_option(options_,'replic',50);
+  options_ = set_default_option(options_,'replic',50);
 end
 options_ = set_default_option(options_,'nomoments',0);
 options_ = set_default_option(options_,'nocorr',0);
@@ -29,83 +30,90 @@ options_ = set_default_option(options_,'hp_filter',0);
 options_ = set_default_option(options_,'hp_ngrid',512);
 options_ = set_default_option(options_,'simul',0);
 options_ = set_default_option(options_,'periods',0);
-  
+options_ = set_default_option(options_,'silent',0);
+
 TeX = options_.TeX;
-  
+
 if options_.simul & ~isempty(iter_) & options_.periods == 0
-    options_.periods = iter_;
+  options_.periods = iter_;
 end
 iter_ = max(options_.periods,1);
-
 if exo_nbr > 0
-    ex_= ones(iter_ + xkmin_ + xkmax_,1) * exe_';
+  ex_= ones(iter_ + xkmin_ + xkmax_,1) * exe_';
 end
 
 dr_=resol(ys_,options_.dr_algo,options_.linear,options_.order);
 
-disp(' ')
-disp('MODEL SUMMARY')
-disp(' ')
-disp(['  Number of variables:         ' int2str(endo_nbr)])
-disp(['  Number of stochastic shocks: ' int2str(exo_nbr)])
-disp(['  Number of state variables:   ' ...
+if ~BlanchardKahn_
+  return
+end  
+
+if ~options_.silent
+  disp(' ')
+  disp('MODEL SUMMARY')
+  disp(' ')
+  disp(['  Number of variables:         ' int2str(endo_nbr)])
+  disp(['  Number of stochastic shocks: ' int2str(exo_nbr)])
+  disp(['  Number of state variables:   ' ...
 	int2str(length(find(dr_.kstate(:,2) <= ykmin_+1)))])
-disp(['  Number of jumpers:           ' ...
+  disp(['  Number of jumpers:           ' ...
 	int2str(length(find(dr_.kstate(:,2) == ykmin_+2)))])
-disp(['  Number of static variables:  ' int2str(dr_.nstatic)])
-my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
-labels = deblank(lgx_);
-headers = strvcat('Variables',labels);
-lh = size(labels,2)+2;
-table(my_title,headers,labels,Sigma_e_,lh,10,6);
-disp(' ')
-disp_dr(dr_,options_.order,var_list);
+  disp(['  Number of static variables:  ' int2str(dr_.nstatic)])
+  my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
+  labels = deblank(lgx_);
+  headers = strvcat('Variables',labels);
+  lh = size(labels,2)+2;
+  table(my_title,headers,labels,Sigma_e_,lh,10,6);
+  disp(' ')
+  disp_dr(dr_,options_.order,var_list);
+end
 
 if options_.simul == 0 & options_.nomoments == 0
-    disp_th_moments(dr_,var_list);
+  disp_th_moments(dr_,var_list); 
 elseif options_.simul == 1
-	if options_.periods == 0
-    	error('STOCH_SIMUL error: number of periods for the simulation isn''t specified')
-    end
-    if options_.periods < options_.drop
-      disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
-	    ' than the number of observations to be DROPed'])
-      return
-    end
-    y_ = simult(repmat(dr_.ys,1,ykmin_),dr_);
-    dyn2vec;
-    if options_.nomoments == 0
-      disp_moments(y_,var_list);
-    end
+  if options_.periods == 0
+    error('STOCH_SIMUL error: number of periods for the simulation isn''t specified')
+  end
+  if options_.periods < options_.drop
+    disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
+	  ' than the number of observations to be DROPed'])
+    return
+  end
+  y_ = simult(repmat(dr_.ys,1,ykmin_),dr_);
+  dyn2vec;
+  if options_.nomoments == 0
+    disp_moments(y_,var_list);
+  end
 end
 
-n = size(var_list,1);
-if n == 0
-	n = endo_nbr;
-    ivar = [1:n]';
-    var_list = lgy_;
-	if TeX
-		var_listTeX = lgy_TeX_;
-	end
-else
-	ivar=zeros(n,1);
-	if TeX
-		var_listTeX = [];
-	end
-	for i=1:n
-   		i_tmp = strmatch(var_list(i,:),lgy_,'exact');
-		if isempty(i_tmp)
-			error (['One of the specified variables does not exist']) ;
-		else
-			ivar(i) = i_tmp;
-			if TeX
-				var_listTeX = strvcat(var_listTeX,deblank(lgy_TeX_(i_tmp,:)));
-			end
-		end
-    end
-end
+
 
 if options_.irf 
+  n = size(var_list,1);
+  if n == 0
+    n = endo_nbr;
+    ivar = [1:n]';
+    var_list = lgy_;
+    if TeX
+      var_listTeX = lgy_TeX_;
+    end
+  else
+    ivar=zeros(n,1);
+    if TeX
+      var_listTeX = [];
+    end
+    for i=1:n
+      i_tmp = strmatch(var_list(i,:),lgy_,'exact');
+      if isempty(i_tmp)
+	error (['One of the specified variables does not exist']) ;
+      else
+	ivar(i) = i_tmp;
+	if TeX
+	  var_listTeX = strvcat(var_listTeX,deblank(lgy_TeX_(i_tmp,:)));
+	end
+      end
+    end
+  end
   if TeX
     fidTeX = fopen([fname_ '_IRF.TeX'],'w');
     fprintf(fidTeX,'%% TeX eps-loader file generated by stoch_simul.m (Dynare).\n');
@@ -180,10 +188,10 @@ if options_.irf
 	for fig = 1:nbplt-1
 	  if options_.relative_irf == 1
 	    hh = figure('Name',['Relative response to orthogonalized shock' ...
-			      ' to ' tit(i,:) ' figure ' int2str(fig)]);
+				' to ' tit(i,:) ' figure ' int2str(fig)]);
 	  else
 	    hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ...
-		    ' figure ' int2str(fig)]);
+				' figure ' int2str(fig)]);
 	  end
 	  for plt = 1:nstar
 	    subplot(nr,nc,plt);
