@@ -57,7 +57,7 @@ it_ = ykmin_ + 1;
 z = repmat(dr.ys,1,klen);
 z = z(iyr0) ;
 %jacobia_=real(diffext('ff1_',[z; exe_])) ;
-jacobia_=real(jacob_a('ff1_',[z; exe_])) ;
+jacobia_=real(jacob_a('ff1_',[z(:); exe_])) ;
 
 ex_ = tempex ;
 tempex = [];
@@ -75,8 +75,10 @@ end
 
 if ykmax_ == 0;  % backward model
   dr.ghx = -a;
-  dr.ghu = -fu;
-  dr.eigval = eig(-a);
+  if exo_nbr
+    dr.ghu = -fu;
+  end
+  dr.eigval = eig(transition_matrix(dr));
   dr.rank = 0;
   return;
 end
