@@ -1203,6 +1203,12 @@ void print_model1(struct queue *p, int flag_steady)
   str_output("retp(z);\n");
   str_output("endp;\n");
 #elif defined MATLAB || defined SCILAB
+  if (flag_steady == 1)
+    {
+      str_output("if ~isreal(z)\n");
+      str_output("  z = real(z)+imag(z).^2;\n");
+      str_output("end\n");
+    }
   fclose(f_out);
   f_out = f_temp;
 #endif
