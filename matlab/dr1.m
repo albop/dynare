@@ -81,7 +81,13 @@ if exo_nbr
 end
 
 if ykmax_ == 0;  % backward model
-  dr.ghx = -a;
+  dr.ghx = zeros(size(a));
+  m = 0;
+  for i=ykmin_:-1:1
+    k = nonzeros(iy_(i,order_var));
+    dr.ghx(:,m+[1:length(k)]) = -a(:,k);
+    m = m+length(k);
+  end
   if exo_nbr
     dr.ghu = -fu;
   end
@@ -259,6 +265,7 @@ clear tempex
 n1 = 0;
 n2 = np;
 zx = zeros(np,np);
+zu=zeros(np,exo_nbr);
 for i=2:ykmin_+1
   k1 = sum(kstate(:,2) == i);
   zx(n1+1:n1+k1,n2-k1+1:n2)=eye(k1);
@@ -268,15 +275,19 @@ end
 kk = flipud(cumsum(flipud(iy_(ykmin_+1:end,order_var)),1));
 k0 = [1:endo_nbr];
 gx1 = dr.ghx;
+hu = dr.ghu(nstatic+[1:npred],:);
 zx = [zx; gx1];
+zu = [zu; dr.ghu];
 for i=1:ykmax_
   k1 = find(kk(i+1,k0) > 0);
+  zu = [zu; gx1(k1,1:npred)*hu];
   gx1 = gx1(k1,:)*hx;
   zx = [zx; gx1];
   kk = kk(:,k0);
   k0 = k1;
 end
 zx=[zx; zeros(exo_nbr,np)];
+zu=[zu; eye(exo_nbr)];
 [n1,n2] = size(zx);
 if n1*n1*n2*n2 > 1e7
   rhs = zeros(endo_nbr,n2*n2);
@@ -296,36 +307,42 @@ rhs = -rhs;
 n = endo_nbr+sum(kstate(:,2) > ykmin_+1 & kstate(:,2) < ykmin_+ykmax_+1);
 A = zeros(n,n);
 B = zeros(n,n);
-kp = find(kstate(:,2) == ykmin_+ykmax_+1);
-gx2 = gx(kp,:);
-% variables with the highest lead
-k1 = kstate(find(kstate(:,2) == ykmin_+ykmax_+1),3)+endo_nbr;
-% Jacobian with respect to the variables with the highest lead
-B1 = jacobia_(:,k1);
+[junk,k1,k2] = find(iy_(ykmin_+ykmax_+1,order_var));
+gx2 = dr.ghx(k1,:);
 A(1:endo_nbr,1:endo_nbr) = jacobia_(:,iy_(ykmin_+1,order_var));
 A(1:endo_nbr,nstatic+1:nstatic+npred)=...
-    A(1:endo_nbr,nstatic+1:nstatic+npred)+B1*gx2(:,1:npred);
-B(1:endo_nbr,end-length(k1)+1:end) = B1;
+    A(1:endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx2(:,1:npred);
+% variables with the highest lead
+k1 = find(kstate(:,2) == ykmin_+ykmax_+1);
+if ykmax_ > 1
+  k2 = find(kstate(:,2) == ykmin_+ykmax_);
+  [junk,junk,k3] = intersect(kstate(k1,1),kstate(k2,1));
+else
+  k2 = [1:endo_nbr];
+  k3 = kstate(k1,1);
+end
+% Jacobian with respect to the variables with the highest lead
+B(1:endo_nbr,end-length(k2)+k3) = jacobia_(:,kstate(k1,3)+endo_nbr);
 offset = endo_nbr;
-k0 = find(kstate(:,2) == ykmin_+2);
-for i=2:ykmax_-1
+k0 = [1:endo_nbr];
+for i=1:ykmax_-1
   k1 = find(kstate(:,2) == ykmin_+i+1);
-  A(offset+[1:length(k1)],1:npred) = -gx(k1,1:npred); 
   [k2,junk,k3] = find(kstate(k1,3));
-  A(1:endo_nbr,offset+k2) = jacobia_(:,k3);
+  A(1:endo_nbr,offset+k2) = jacobia_(:,k3+endo_nbr);
   n1 = length(k1);
-  A(offset+1:offset+n1,offset+1:offset+n1) = eye(n1);
+  A(offset+[1:n1],nstatic+[1:npred]) = -gx(k1,1:npred); 
+  A(offset+[1:n1],offset+[1:n1]) = eye(n1);
   n0 = length(k0);
   E = eye(n0);
-%  if i == 1
-%    [junk,junk,k4]=intersect(kstate(k1,1),[1:endo_nbr]);
-%  else
+  if i == 1
+    [junk,junk,k4]=intersect(kstate(k1,1),[1:endo_nbr]);
+  else
     [junk,junk,k4]=intersect(kstate(k1,1),kstate(k0,1));
-%  end
+  end
   i1 = offset-n0+n1;
-  B(offset+1:offset+n1,offset-n0+k4) = -E;
+  B(offset+[1:n1],offset-n0+k0) = -E(k4,:);
   k0 = k1;
-  offset = offset + length(k1);
+  offset = offset + n1;
 end
 C = kron(hx,hx);
 %C = hx;
@@ -337,7 +354,6 @@ dr.ghxx = sylvester3a(x0,A,B,C,D);
 %ghxu
 %rhs
 hu = dr.ghu(nstatic+1:nstatic+npred,:);
-zu=[zeros(np,exo_nbr);dr.ghu;gx(:,1:npred)*hu;eye(exo_nbr)];
 %kk = reshape([1:np*np],np,np);
 %kk = kk(1:npred,1:npred);
 %rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));
@@ -355,7 +371,8 @@ else
 end
 nyf1 = sum(kstate(:,2) == ykmin_+2);
 hu1 = [hu;zeros(np-npred,exo_nbr)];
-rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hx,hu1);
+B1 = [B(1:endo_nbr,:);zeros(size(A,1)-endo_nbr,size(B,2))];
+rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B1*dr.ghxx*kron(hx,hu1);
 
 %lhs
 dr.ghxu = A\rhs;
@@ -441,7 +458,7 @@ iy_ordered(k1) = [1:length(k1)]';
 iy_ordered =reshape(iy_ordered,endo_nbr,ykmin_+ykmax_+1)';
 for i=1:ykmax_
   for j=i:ykmax_
-    k2 = iy_(ykmin_+i+1,order_var);
+    k2 = iy_(ykmin_+j+1,order_var);
     [junk,k2a,k2] = find(k2);
     k2b = nonzeros(iy_ordered(ykmin_+j+1,:));
     RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+hessian(:,kh(k2b,k2b))* ...
