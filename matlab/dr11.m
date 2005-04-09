@@ -87,6 +87,7 @@ elseif ykmax_ == 0 & ykmin_ > 1 % backward model with lags on more than
   e(:,k) = -a(:,kstate(k,4)) ;
   dr.ghx = e;
   dr.ghu = -fu;
+  return;
 end
 
 % buildind D and E
