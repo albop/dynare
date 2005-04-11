@@ -340,7 +340,7 @@ for i=1:ykmax_-1
     [junk,junk,k4]=intersect(kstate(k1,1),kstate(k0,1));
   end
   i1 = offset-n0+n1;
-  B(offset+[1:n1],offset-n0+k0) = -E(k4,:);
+  B(offset+[1:n1],offset-n0+[1:n0]) = -E(k4,:);
   k0 = k1;
   offset = offset + n1;
 end
@@ -407,37 +407,6 @@ dr.ghuu = dr.ghuu(1:endo_nbr,:);
 % dr.ghs2
 % derivatives of F with respect to forward variables
 % reordering predetermined variables in diminishing lag order
-o_pred_dimin = [];
-k0 = find(kstate(:,2) <= ykmin_+1);
-for i=1:ykmin_
-  o_pred_dimin = [o_pred_dimin; find(kstate(k0,2) == i+1)];
-end
-%reordering transition matrix
-hx1 = hx(o_pred_dimin,o_pred_dimin);
-%reordering second order transition matrix
-nstate = size(hx,1);
-k1 = reshape([1:nstate^2],nstate,nstate);
-k1 = k1(o_pred_dimin,o_pred_dimin);
-ghxx = dr.ghxx(:,k1(:));
-hxx = dr.ghxx(nstatic+[1:npred],k1(:));
-% computing selection index for hessian: k1
-kh = reshape([1:nk^2],nk,nk);
-ghx = dr.ghx(:,o_pred_dimin);
-guu = dr.ghuu(end-nyf1+1:end,:);
-gu = dr.ghu(end-nyf1+1:end,:);
-[n1,n2] = size(gu);
-kp = sum(kstate(:,2) <= ykmin_+1);
-E1 = zeros(kp,npred);
-E1(end-npred+1:end,:) = eye(npred);
-H = E1;
-%offset = size(Hs,1)-npred;
-kk = find(kstate(:,2) == ykmin_+1);
-for i=1:ykmin_-1
-  kk1 = find(kstate(:,2) == ykmin_-i+1);
-  [junk,kk2] = intersect(kstate(kk,1),kstate(kk1,1));
-  E = eye(length(kk));
-%  Hs(offset-length(kk1)+1:offset,offset+[1:length(kk)]) = E(kk2,:);
-end
 O1 = zeros(endo_nbr,nstatic);
 O2 = zeros(endo_nbr,endo_nbr-nstatic-npred);
 LHS = jacobia_(:,iy_(ykmin_+1,order_var));
@@ -445,44 +414,48 @@ RHS = zeros(endo_nbr,exo_nbr^2);
 kk = find(kstate(:,2) == ykmin_+2);
 gu = dr.ghu; 
 guu = dr.ghuu; 
-kk = find(kstate(:,2) == ykmin_+1);
-Gu = zeros(size(hx1,1),exo_nbr);
-Gu(end-length(kk)+1:end,:) = dr.ghu(kstate(kk,1),:);
-Guu = zeros(size(hx1,1),exo_nbr^2);
-Guu(end-length(kk)+1:end,:) = dr.ghuu(kstate(kk,1),:);
+Gu = [dr.ghu(nstatic+[1:npred],:); zeros(np-npred,exo_nbr)];
+Guu = [dr.ghuu(nstatic+[1:npred],:); zeros(np-npred,exo_nbr*exo_nbr)];
 E = eye(endo_nbr);
-iy_ordered = iy_(:,order_var)';
+iy_ordered = flipud(cumsum(flipud(iy_(ykmin_+1:end,order_var)),1));
+if ykmin_ > 0
+  iy_ordered = [cumsum(iy_(1:ykmin_,order_var),1); iy_ordered];
+end
+iy_ordered = iy_ordered';
 iy_ordered = iy_ordered(:);
 k1 = find(iy_ordered);
 iy_ordered(k1) = [1:length(k1)]';
 iy_ordered =reshape(iy_ordered,endo_nbr,ykmin_+ykmax_+1)';
+kh = reshape([1:nk^2],nk,nk);
+kp = sum(kstate(:,2) <= ykmin_+1);
+E1 = [eye(npred); zeros(kp-npred,npred)];
+H = E1;
+hxx = dr.ghxx(nstatic+[1:npred],:);
 for i=1:ykmax_
   for j=i:ykmax_
-    k2 = iy_(ykmin_+j+1,order_var);
-    [junk,k2a,k2] = find(k2);
-    k2b = nonzeros(iy_ordered(ykmin_+j+1,:));
-    RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+hessian(:,kh(k2b,k2b))* ...
-	  kron(gu(k2a,:),gu(k2a,:));
+    [junk,k2a,k2] = find(iy_(ykmin_+j+1,order_var));
+    [junk,k3a,k3] = find(iy_ordered(ykmin_+j+1,:));
+    RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+hessian(:,kh(k3,k3))* ...
+	  kron(gu(k3a,:),gu(k3a,:));
   end
 
   % LHS
-  k2 = iy_(ykmin_+i+1,order_var);
-  [junk,k2a,k2] = find(k2);
-  LHS = LHS + jacobia_(:,k2)*(E(k2a,:)+[O1(k2a,:) ghx(k2a,:)*H O2(k2a,:)]);
+  [junk,k2a,k2] = find(iy_(ykmin_+i+1,order_var));
+  LHS = LHS + jacobia_(:,k2)*(E(k2a,:)+[O1(k2a,:) dr.ghx(k2a,:)*H O2(k2a,:)]);
   
   if i == ykmax_ 
     break
   end
   
   kk = find(kstate(:,2) == ykmin_+i+1);
-  gu = ghx*Gu;
+  gu = dr.ghx*Gu;
   GuGu = kron(Gu,Gu);
-  guu = ghx*Guu+ghxx*GuGu;
-  Gu = hx1*Gu;
-  Guu = hx1*Guu;
+  guu = dr.ghx*Guu+dr.ghxx*GuGu;
+  Gu = hx*Gu;
+  Guu = hx*Guu;
   Guu(end-npred+1:end,:) = Guu(end-npred+1:end,:) + hxx*GuGu;
 
-  H = E1 + hx1*H;
+  H = E1 + hx*H;
 end
 RHS = RHS*Sigma_e_(:);
 dr.fuu = RHS;
