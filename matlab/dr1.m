@@ -1,21 +1,19 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function dr=dr1(iorder,dr,check)
+function [dr,info]=dr1(iorder,dr,check)
 
-global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
-global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ ys_ stdexo_
-global fname_ means_ Sigma_e_ lgy_
-global eigval options_ M_
-global BlanchardKahn
+% info = 1: the model doesn't define current variables uniquely
+% info = 2: problem in mjdgges.dll info(2) contains error code
+% info = 3: BK order condition not satisfied info(2) contains "distance"
+% info = 4: BK rank condition not satisfied
 
-BlanchardKahn = 1;
+  global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
+  global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ ys_ stdexo_
+  global fname_ means_ Sigma_e_ lgy_
+  global eigval options_ M_
 
 options_ = set_default_option(options_,'loglinear',0);
-options_ = set_default_option(options_,'silent',0);
-
-if options_.silent
-  warning off all
-end  
+options_ = set_default_option(options_,'noprint',0);
 
 xlen = xkmax_ + xkmin_ + 1;
 klen = ykmin_ + ykmax_ + 1;
@@ -24,25 +22,8 @@ iyv = iyv(:);
 iyr0 = find(iyv) ;
 it_ = ykmin_ + 1 ;
 
-
 if exo_nbr == 0
   exe_ = [] ;
-end
-
-if ~ all(iy_(ykmin_+1,:) > 0)
-  error ('Error in model specification: some variables don"t appear as current') ;
-end
-
-if ~check
-  if xlen > 1
-    error (['SS: stochastic exogenous variables must appear only at the' ...
-	    ' current period. Use additional endogenous variables']) ;
-  end
-end
-
-if (exo_det_nbr > 0) & (ykmin_ > 1 | ykmax_ > 1)
-  error(['Exogenous deterministic variables are currently only allowed in' ...
-	 ' models with leads and lags on only one period'])
 end
 
 dr=set_state_space(dr);
@@ -74,7 +55,8 @@ k1 = iy_(find([1:klen] ~= ykmin_+1),:);
 b = jacobia_(:,iy_(ykmin_+1,order_var));
 a = b\jacobia_(:,nonzeros(k1')); 
 if any(isinf(a(:)))
-  error('DR1: the model doesn''t determine current variables uniquely')
+  info = 1;
+  return
 end
 if exo_nbr
   fu = b\jacobia_(:,nz+1:end);
@@ -133,9 +115,11 @@ if ~exist('mjdgges')
   nba = nnz(abs(eigval) > options_.qz_criterium);
 else
   use_qzdiv = 0;
-  [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,options_.qz_criterium);
-  if info & info ~= nd+2;
-%    error(['ERROR' info ' in MJDGGES.DLL']);
+  [ss,tt,w,sdim,eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+  if info1
+    info(1) = 2;
+    info(2) = info1;
+    return
   end
   nba = nd-sdim;
 end
@@ -149,10 +133,14 @@ if check
 end
 
 if nba ~= nyf;
-  if ~options_.silent
-    disp('Blanchard-Kahn conditions are not satisfied. Run CHECK to learn more!');
-  end  
-  BlanchardKahn = 0;
+  temp = sort(abs(dr.eigval));
+  if nba > nyf;
+    temp = temp(nd-nba+1:nd-nyf))-1-options_.qz_criterium;
+  elseif nba < nyf;
+    temp = temp(nd-nyf+1:nd-nba))-1-1e-options_.qz_criterium
+  end
+  info(1) = 3;
+  info(2) = temp'*temp;
   return
 end
 
@@ -162,11 +150,13 @@ n3 = nyf;
 n4 = n3 + 1;
 % derivatives with respect to dynamic state variables
 % forward variables
-if rank(w(1:n3,n2:nd)) == n3
-  gx = -w(1:n3,n2:nd)'\w(n4:nd,n2:nd)';
+w1 =w(1:n3,n2:nd);
+if condest(w1) > 1e9;
+  info(1) = 4;
+  info(2) = condest(w1);
+  return;
 else
-  BlanchardKahn = 0;
-  return
+  gx = -w1'\w(n4:nd,n2:nd)';
 end  
 
 % predetermined variables
