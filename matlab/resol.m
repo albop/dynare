@@ -1,6 +1,6 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function dr=resol(ys,algo,linear,iorder)
+function [dr,info]=resol(ys,algo,linear,iorder)
 
 global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
 global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ 
@@ -33,6 +33,11 @@ if xlen > 1
 	  ' current period. Use additional endogenous variables']) ;
 end
 
+if (exo_det_nbr > 0) & (ykmin_ > 1 | ykmax_ > 1)
+  error(['Exogenous deterministic variables are currently only allowed in' ...
+	 ' models with leads and lags on only one period'])
+end
+
 % check if ys is steady state
 tempex = ex_;
 tempexdet = ex_det_;
@@ -55,7 +60,7 @@ else
 end
 
 dr.fbias = zeros(endo_nbr,1);
-dr = dr1(iorder,dr,0);
+[dr,info] = dr1(iorder,dr,0);
 
 if algo == 1 & iorder > 1
   dr.ys = dynare_solve('dr2',ys,dr);
