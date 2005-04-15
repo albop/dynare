@@ -80,7 +80,7 @@ end
 
 lh = size(deblank(lgy_(ivar,:)),2)+2;
 if options_.nomoments == 0
-  if ~options_.silent
+  if ~options_.noprint
     title='THEORETICAL MOMENTS';
     if options_.hp_filter > 1
       title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
@@ -316,7 +316,7 @@ if options_.nomoments == 0
   end
 end
 
-if options_.nocorr == 0 & ~options_.silent
+if options_.nocorr == 0 & ~options_.noprint
     disp(' ')
     title='MATRIX OF CORRELATIONS';
     if options_.hp_filter > 1
@@ -332,7 +332,7 @@ if options_.ar > 0
   for i=1:options_.ar
     oo_.autocorr{i} = Gamma_y{i+1};
   end
-  if ~options_.silent
+  if ~options_.noprint
     disp(' ')
     title='COEFFICIENTS OF AUTOCORRELATION';
     if options_.hp_filter > 1
