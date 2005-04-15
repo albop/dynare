@@ -5,15 +5,21 @@ function [dr,info]=dr1(iorder,dr,check)
 % info = 1: the model doesn't define current variables uniquely
 % info = 2: problem in mjdgges.dll info(2) contains error code
 % info = 3: BK order condition not satisfied info(2) contains "distance"
-% info = 4: BK rank condition not satisfied
+%           absence of stable trajectory
+% info = 4: BK order condition not satisfied info(2) contains "distance"
+%           indeterminacy
+% info = 5: BK rank condition not satisfied
 
   global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
   global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ ys_ stdexo_
   global fname_ means_ Sigma_e_ lgy_
   global eigval options_ M_
 
-options_ = set_default_option(options_,'loglinear',0);
-options_ = set_default_option(options_,'noprint',0);
+
+  info = 0;
+  
+  options_ = set_default_option(options_,'loglinear',0);
+  options_ = set_default_option(options_,'noprint',0);
 
 xlen = xkmax_ + xkmin_ + 1;
 klen = ykmin_ + ykmax_ + 1;
@@ -132,14 +138,15 @@ if check
   return
 end
 
-if nba ~= nyf;
+if nba ~= nyf
   temp = sort(abs(dr.eigval));
-  if nba > nyf;
-    temp = temp(nd-nba+1:nd-nyf))-1-options_.qz_criterium;
+  if nba > nyf
+    temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
+    info(1) = 3
   elseif nba < nyf;
-    temp = temp(nd-nyf+1:nd-nba))-1-1e-options_.qz_criterium
+    temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium
+    info(1) = 4;
   end
-  info(1) = 3;
   info(2) = temp'*temp;
   return
 end
@@ -152,7 +159,7 @@ n4 = n3 + 1;
 % forward variables
 w1 =w(1:n3,n2:nd);
 if condest(w1) > 1e9;
-  info(1) = 4;
+  info(1) = 5;
   info(2) = condest(w1);
   return;
 else
