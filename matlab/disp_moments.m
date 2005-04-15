@@ -32,7 +32,7 @@ oo_.var = y'*y/size(y,1);
 
 labels = deblank(lgy_(ivar,:));
 
-if options_.nomoments == 0 & ~options_.silent
+if options_.nomoments == 0 & ~options_.noprint
   z = [ m' s' s2' (mean(y.^3)./s2.^1.5)' (mean(y.^4)./(s2.*s2)-3)' ];
   title='MOMENTS OF SIMULATED VARIABLES';
   if options_.hp_filter > 1
@@ -44,7 +44,7 @@ if options_.nomoments == 0 & ~options_.silent
   table(title,headers,labels,z,size(labels,2)+2,16,6);
 end
 
-if options_.nocorr == 0 & ~options_.silent
+if options_.nocorr == 0 & ~options_.noprint
   corr = (y'*y/size(y,1))./(s'*s);
   title = 'CORRELATION OF SIMULATED VARIABLES';
   if options_.hp_filter > 1
@@ -64,7 +64,7 @@ if ar > 0
     oo_.autocorr{i} = y(ar+1:end,:)'*y(ar+1-i:end-i,:)./((size(y,1)-ar)*s'*s);
     autocorr = [ autocorr diag(oo_.autocorr{i}) ];
   end
-  if ~options_.silent
+  if ~options_.noprint
     title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
     if options_.hp_filter > 1
       title = [title ' (HP filter, lambda = ' ...
