@@ -31,6 +31,7 @@ function Gamma_y=th_autocovariances(dr,ivar)
   A = zeros(nx,nx);
   k0 = kstate(find(kstate(:,2) <= ykmin_+1),:);
   i0 = find(k0(:,2) == ykmin_+1);
+  i00 = i0;
   n0 = length(i0);
   A(i0,:) = ghx(ikx,:);
   AS = ghx(:,i0);
@@ -42,7 +43,7 @@ function Gamma_y=th_autocovariances(dr,ivar)
     j1 = zeros(n1,1);
     j2 = j1;
     for k1 = 1:n1
-      j1(k1) = find(k0(1:n0,1)==k0(i1(k1),1));
+      j1(k1) = find(k0(i00,1)==k0(i1(k1),1));
       j2(k1) = find(k0(i0,1)==k0(i1(k1),1));
     end
     A(i1,i0(j2))=eye(n1);
