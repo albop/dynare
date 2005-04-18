@@ -150,10 +150,10 @@ end
 %number of multipliers corresponding to forward looking variables
 i_cum2 = any(aa(:,nonzeros(siy(klen,:))-endo_nbr),2);
 ilambda{klen} = find(i_cum2);
-jlambda{klen} = ilambda{klen}
+jlambda{klen} = ilambda{klen};
 klambda{klen} = [1:length(ilambda{klen})]';
 for i = klen-1:-1:ykmin_+2
-  i1 = any(aa(:,nonzeros(siy(i,:))))';
+  i1 = any(aa(:,nonzeros(siy(i,:))-endo_nbr),2);
   ilambda{i} = find(i1);
   i_cum2 = i_cum2 | i1;
   jlambda{i} = find(i_cum2);
@@ -217,11 +217,11 @@ order_var1 = order_var(nstatic+inst_nbr+1:end);
 for i = 1:ykmin_
   kk1 = find(iy_(i,order_var1));
   kk2 = nonzeros(iy_(i,order_var1));
-  d(sdyn1+kk1,offsetc+klambda{i}) = aa(ilambda{i},kk2)';
+  d(sdyn1+kk1,offsetc+klambda{i}) = bet^(ykmin_+1-i)*aa(ilambda{i},kk2)';
   if i == ykmin_
-    e(sdyn1+kk1,offsetc+klambda{i}) = -a1(klambda{i},:)';
+    e(sdyn1+[1:sdyn1],offsetc+klambda{i}) = -a1(klambda{i},:)';
   end
-  offsetc = offsetc+klambda{i};
+  offsetc = offsetc+nlambda(i);
 end 
 offsetc = nsfwrd+nslambdap;
 e(sdyn1+[1:sdyn1],offsetc+[1:inst_nbr]) = -RR;
@@ -232,7 +232,9 @@ d(sdyn1+[1:sdyn1],offsetc+klambda{ykmin_+1}) = a1(ilambda{ykmin_+1},:)';
 for i = ykmin_+2:klen
   kk1 = find(iy_(i,order_var1));
   kk2 = nonzeros(iy_(i,order_var));
-  e(sdyn1+kk1,offsetc+klambda{i}) = -aa(ilambda{i},kk2-endo_nbr)';
+  e(sdyn1+kk1,offsetc+klambda{i}) = -bet^(ykmin_+1-i)*aa(ilambda{i},kk2- ...
+						  endo_nbr)';
+  offsetc = offsetc+nlambda(1);
 end
 
 %first order condition from Lagrangian with respect to u
@@ -249,12 +251,17 @@ e(2*sdyn1+[1:inst_nbr],nsfwrd+nslambdap-nlambda(ykmin_)+klambda{ykmin_}) = ...
 if ~isempty(kad)
   for j = 1:size(kad,1)
     if kstate(kad(j),2) < ykmin_+2
-      offsetc = nslambdap+inst_nbr;
+      offsetc1 = nslambdap+inst_nbr;
     else
-      offsetc = 0;
+      offsetc1 = 0;
     end
-    d(2*sdyn1+inst_nbr+j,offsetc+kad(j)) = 1 ;
-    e(2*sdyn1+inst_nbr+j,kae(j)) = 1 ;
+    if kstate(kae(j),2) < ykmin_+2
+      offsetc2 = nslambdap+inst_nbr;
+    else
+      offsetc2 = 0;
+    end
+    d(2*sdyn1+inst_nbr+j,offsetc1+kad(j)) = 1 ;
+    e(2*sdyn1+inst_nbr+j,offsetc2+kae(j)) = 1 ;
   end
 end
 offsetr = 2*sdyn1+inst_nbr+size(kad,1)+1;
@@ -308,7 +315,7 @@ else
   nba = nd1-sdim;
 end
 
-nyf = nfwrd+nboth+sdyn1+inst_nbr;
+nyf = nsfwrd+nslambdap+inst_nbr;
 
 if nba ~= nyf;
   disp('WARNING: Blanchard-Kahn conditions are not satisfied. Run CHECK to learn more!');
@@ -359,17 +366,19 @@ kstate(:,1) = kstate(:,1)-inst_nbr;
 kstate = [kstate(1:nsfwrd,:);zeros(nslambdap+inst_nbr,4);kstate(nsfwrd+1:end,:);zeros(nslambdaf,4)];
 offsetr = nsfwrd;
 for i=1:ykmin_
-  kstate(offsetr+[1:nlambda(i)],1:2) = [im(jlambda{i}) (klen-i+1)* ...
+  kstate(offsetr+[1:nlambda(i)],1:2) = [im(jlambda{i}) (klen-i+2)* ...
 		    ones(nlambda(i),1)];
   offsetr = offsetr+nlambda(i);
 end
 kstate(offsetr+[1:inst_nbr],1:2) = ...
     [endo_nbr+nlambda(ykmin_+1)-inst_nbr+[1:inst_nbr] (ykmin_+2)*ones(inst_nbr,1)];
 offsetr = nsfwrd + nslambdap + inst_nbr +nspred;
+m = ykmin_+1;
 for i=ykmin_+2:klen
-  kstate(offsetr+[1:nlambda(i)],1:2) = [im(jlambda{i}) (klen-i+2)* ...
+  kstate(offsetr+[1:nlambda(i)],1:2) = [im(jlambda{i}) m* ...
 		    ones(nlambda(i),1)];
   offsetr = offsetr+nlambda(i);
+  m = m - 1;
 end
 disp(kstate);
 %lead variables actually present in the model
@@ -382,11 +391,11 @@ if exo_nbr
 end
 
 nrgx = size(gx,1);
-nrhx = size(gx,1);
-k1 = find((kstate(:,2) == ykmin_+1))';
-k2 = setdiff(find((kstate(:,2) == ykmin_+2))',k1-nrgx);
-dr.ghx = [hx(k1-nrgx,:); gx(k2,:)]; 
-dr.ghu = ghu([k1 k2],:); 
+k1 = find((kstate(:,2) == ykmin_+1));
+k2 = find((kstate(:,2) == ykmin_+2));
+[junk,k3] = setdiff(kstate(k2,1),kstate(k1,1));
+dr.ghx = [hx(k1-nrgx,:); gx(k2(k3),:)]; 
+dr.ghu = ghu([k1; k2(k3)],:); 
 
 % static variables
 if nstatic > 0
@@ -412,4 +421,4 @@ dr.order_var = [order_var(inst_nbr+[1:nstatic+npred+nboth]);...
 	     endo_nbr+[1:nlambda(ykmin_+1)]';...
 	     order_var(nstatic+npred+nboth+[1:nfwrd]);...
 	     order_var(1:inst_nbr)];
-endo_nbr = endo_nbr+nslambdap;
+endo_nbr = endo_nbr+nlambda(ykmin_+1);
