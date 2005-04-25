@@ -97,7 +97,7 @@ unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
  
 <DYNARE1>; {BEGIN INITIAL; return yytext[0];}
 <DYNARE2,DYNARE3,DYNARE4>; {return yytext[0];}
-<DYNARE2,DYNARE3,DYNARE4>[\(\)] {return yytext[0];}
+<DYNARE1,DYNARE2,DYNARE3,DYNARE4>[\(\)] {return yytext[0];}
 
  /* var, periods and values in shock statements */
 <DYNARE2>var {return VAR;}
@@ -130,9 +130,12 @@ unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
 <DYNARE1>order {return ORDER;}
 <DYNARE1>replic {return REPLIC;}
 <DYNARE1>shock_size {return SHOCK_SIZE;}
+<DYNARE1>moments {return MOMENTS;}
 <DYNARE1>nomoments {return NOMOMENTS;}
+<DYNARE1>corr {return CORR;}
 <DYNARE1>nocorr {return NOCORR;}
 <DYNARE1>ar {return AR;}
+<DYNARE1>functions {return FUNCTIONS;}
 <DYNARE1>nofunctions {return NOFUNCTIONS;}
 <DYNARE1>irf {return IRF;}
 <DYNARE1>hp_filter {return HP_FILTER;}
@@ -158,6 +161,9 @@ unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
 <DYNARE1>lik_algo  {return LIK_ALGO;}  
 <DYNARE1>lik_init  {return LIK_INIT;}  
 <DYNARE1>nograph   {return NOGRAPH;}  	  
+<DYNARE1>graph   {return GRAPH;}  	  
+<DYNARE1>noprint   {return NOPRINT;}  	  
+<DYNARE1>print   {return PRINT;}  	  
 <DYNARE1>conf_sig  {return CONF_SIG;}  
 <DYNARE1>mh_replic {return MH_REPLIC;} 
 <DYNARE1>mh_drop   {return MH_DROP;}   
@@ -171,6 +177,7 @@ unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
 <DYNARE1>mh_nblocks {return MH_NBLOCKS;}
 <DYNARE1>load_mh_file {return LOAD_MH_FILE;}
 <DYNARE1>loglinear {return LOGLINEAR;}
+<DYNARE1>diagnostic {return DIAGNOSTIC;}
 <DYNARE1>nodiagnostic {return NODIAGNOSTIC;}
 <DYNARE1>xtick {return XTICK;}
 <DYNARE1>xticklabel {return XTICKLABEL;}
@@ -215,14 +222,16 @@ unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
   yylval.string=strdup(yytext);
   return INUMBER;}
  
-<DYNARE2>: {return yytext[0];}
+<DYNARE1,DYNARE2>: {return yytext[0];}
 <DYNARE2>= {return EQUAL;}
+<DYNARE1,DYNARE3>= {return yytext[0];}
 <DYNARE2>, {return yytext[0];}
 <DYNARE2,DYNARE4>\$ {return DOLLAR;}
-<DYNARE3>= {return yytext[0];}
+<DYNARE1>\$ {return yytext[0];}
 <DYNARE3>] {BEGIN DYNARE1; return yytext[0];}
 <DYNARE3>\[ {return yytext[0];}
-<DYNARE2,DYNARE3,DYNARE4>. {yylval.string=strdup(yytext); return OPERATORS;}
+<DYNARE1>, {return yytext[0];}
+<DYNARE1,DYNARE2,DYNARE3,DYNARE4>. {yylval.string=strdup(yytext); return OPERATORS;}
 <*>. {return yytext[0];}
 
 %%
