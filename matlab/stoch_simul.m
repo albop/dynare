@@ -47,7 +47,7 @@ function stoch_simul(var_list)
   [dr_, info] = resol(ys_,0);
 
   if info(1)
-    print_info;
+    print_info(info);
   end  
 
   if ~options_.noprint
