@@ -23,7 +23,7 @@ end
 % check if ys is steady state
 tempex = ex_;
 tempexdet = ex_det_;
-ex_ = exe_';
+ex_ = repmat(exe_',xkmin_+xkmax_+1,1);
 if exo_det_nbr > 0 
   ex_det_ = ones(ykmin_+1,1)*exe_det_';
 end
