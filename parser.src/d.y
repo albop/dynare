@@ -388,6 +388,7 @@
  o_filtered_vars : FILTERED_VARS {p_option("filtered_vars","1");};
  o_relative_irf : RELATIVE_IRF {p_option("relative_irf","1");};
  o_kalman_algo : KALMAN_ALGO '=' INUMBER {p_option("kalman_algo",$3);};
+ o_kalman_tol : KALMAN_TOL '=' value {p_option("kalman_algo",$3);};
  o_diffuse_d : DIFFUSE_D '=' INUMBER {p_option("diffuse_d",$3);};
  o_nk : NK '=' INUMBER {p_option("nk",$3);};
 
@@ -712,6 +713,8 @@
                    | o_filtered_vars
                    | o_kalman_algo
                    | o_kalman_tol
+                   | o_diffuse_d
+                   | o_nk
                    ;
 
  varobs : VAROBS {nbr_tmpvar = 0;} varlist4 ';' {print_varobs();}
