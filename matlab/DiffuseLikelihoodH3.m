@@ -80,6 +80,7 @@ function LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,Y,trend,start)
 %   F_{\ast,t}  = Z_t*P_{\ast,t}*Z_t' + H_t
 global bayestopt_ options_
   
+id = options_.diffuse_d;
 mf = bayestopt_.mf;
 pp     = size(Y,1);
 mm     = size(T,1);
@@ -109,10 +110,10 @@ while rank(Pinf,crit) & t < smpl %% Matrix Finf is assumed to be zero
       Pinf	= Pinf - Kinf*transpose(Kinf)/Finf;
       lik(t) 	= lik(t) + log(Finf);
       % start new termination criterion for DKF
-      if ~isempty(id_),  
-	newRank = (icc<id_);  
+      if ~isempty(id),  
+	newRank = (icc<id);  
 	if newRank & any(diag(Pinf(mf,mf))>crit)==0; 
-	  id_ = icc;
+	  id = icc;
 	  newRank=0;
 	  disp('WARNING: Change in ID in univariate DKF')
 	  disp('You may have to reset the optimisation')
@@ -123,7 +124,7 @@ while rank(Pinf,crit) & t < smpl %% Matrix Finf is assumed to be zero
 	  P0=	T*Pinf*transpose(T);
 	  newRank = any(diag(P0(mf,mf))>crit);
 	  if newRank==0, 
-	    id_ = icc;
+	    id = icc;
 	  end
 	end                    
       end,
