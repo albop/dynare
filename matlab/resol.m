@@ -1,8 +1,13 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function [dr,info]=resol(ys,check_flag)
+% info: same as dr1 
+% plus: 
+% 11 .... same as dr1 for dr_algo = 2
+% 20: can't find steady state info(2) contains sum of sqare residuals
 
-global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
+  
+  global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
 global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ 
 global fname_ means_ stderrs_ lgy_ maxit_
 global dynatol_ options_
