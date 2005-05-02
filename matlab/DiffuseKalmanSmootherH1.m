@@ -1,4 +1,4 @@
-function [alphahat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+function [alphahat,epsilonhatetahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % modified by M. Ratto:
 % new output argument aK (1-step to k-step predictions)
 % new options_.nk: the max step ahed prediction in aK (default is 4)
@@ -134,3 +134,4 @@ else
     alphahat(:,1)	= a(:,1) + P(:,:,1)*r0;
     etahat(:,1)	= QRt*r(:,1);
 end
+epsilonhat = Y-alphahat(mf,:)-trend;
