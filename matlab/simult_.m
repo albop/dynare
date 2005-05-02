@@ -23,15 +23,15 @@ global endo_nbr ykmin_ xkmin_ it_ options_ iy_
     [junk, k5] = sort(dr.order_var(o1:o2));
     [junk, k6] = sort(dr.order_var(o3:end));
   end
-  
+
   if iorder == 1
     for i = ykmin_+1: iter+ykmin_
       tempx1 = y_(dr.order_var,k1);
       tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,ykmin_);
       tempx = tempx2(k2);
       if options_.simul_algo == 0
-	y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* ...
-	    ex_(i+xkmin_-ykmin_,:)';
+	y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+...
+	    dr.ghu*ex_(i+xkmin_-ykmin_,:)';
       elseif options_.simul_algo == 1
 	it_ = i;
 	m = dr.ys(dr.order_var);
