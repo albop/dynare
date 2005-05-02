@@ -110,10 +110,10 @@ while newRank & t < smpl
       Pinf	= Pinf - Kinf*transpose(Kinf)/Finf;
       lik(t) 	= lik(t) + log(Finf);
       % start new termination criterion for DKF
-      if ~isempty(id_),  
-	newRank = (icc<id_);  
+      if ~isempty(id),  
+	newRank = (icc<id);  
 	if newRank & any(diag(Pinf(mf,mf))>crit)==0; 
-	  id_ = icc;
+	  id = icc;
 	  newRank=0;
 	  disp('WARNING: Change in ID in univariate DKF')
 	  disp('You may have to reset the optimisation')
@@ -124,7 +124,7 @@ while newRank & t < smpl
 	  P0=	T*Pinf*transpose(T);
 	  newRank = any(diag(P0(mf,mf))>crit);
 	  if newRank==0, 
-	    id_ = icc;
+	    id = icc;
 	  end
 	end                    
       end,
