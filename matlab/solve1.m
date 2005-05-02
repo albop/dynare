@@ -9,7 +9,7 @@ function [x,check] = solve1(func,x,j1,j2,varargin)
   fjac = zeros(nn,nn) ;
   g = zeros(nn,1) ;
 
-  tolf = eps^(2/3) ;
+  tolf = 100*eps^(2/3) ;
   tolmin = 3.7e-11 ;
   tolx = 3.7e-11 ;
 
