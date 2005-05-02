@@ -20,6 +20,7 @@ function olr(var_list,olr_inst,obj_var,W)
   options_ = set_default_option(options_,'olr_beta',1);
   options_ = set_default_option(options_,'periods',1);
   options_ = set_default_option(options_,'TeX',0);
+  options_ = set_default_option(options_,'noprint',0);
   
   if options_.simul & ~isempty(iter_) & options_.periods == 0
     options_.periods = iter_;
