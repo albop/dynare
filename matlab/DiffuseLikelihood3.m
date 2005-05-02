@@ -127,9 +127,6 @@ while newRank & t < smpl
 	  end
 	end                    
       end,
-      if newRank==0, 
-	fmax = max(fmax,max(abs(Pinf(:))));
-      end
       % end new termination and checks for DKF and fmax
     elseif Fstar > crit 
       %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
