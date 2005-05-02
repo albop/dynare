@@ -53,6 +53,9 @@ options_ = set_default_option(options_,'moments_varendo',0);
 options_ = set_default_option(options_,'filtered_vars',0);
 options_ = set_default_option(options_,'kalman_algo',1);
 options_ = set_default_option(options_,'kalman_tol',10^(-12));
+options_ = set_default_option(options_,'diffuse_d',0);
+options_ = set_default_option(options_,'nk',1);
+
 
 optim_options = optimset('display','iter','LargeScale','off',...
 			 'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
@@ -105,6 +108,8 @@ ncx = estim_params_.ncx;
 ncn = estim_params_.ncn;
 np  = estim_params_.np ;
 nx = nvx+nvn+ncx+ncn+np;
+
+check_model;
 
 %static solver
 if exist([fname_ '_steadystate'])
