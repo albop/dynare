@@ -1,7 +1,8 @@
 % the beginning and the end of this function may be adapted by the userx
-function [z,vx]=osr_obj(x,params,weights);
+function [loss,vx]=osr_obj(x,params,weights);
   global ys_ Sigma_e_ endo_nbr exo_nbr optimal_Q_ it_ ykmin_
   
+  vx = [];
   % set parameters of the policiy rule
   np = size(params,1);
   for i=1:np
@@ -10,7 +11,27 @@ function [z,vx]=osr_obj(x,params,weights);
   
   % don't change below until the part where the loss function is computed
   it_ = ykmin_+1;
-  dr_ = resol(ys_,1,0,1);
+  [dr_,info] = resol(ys_,0);
+  
+  switch info
+   case 1
+    loss = 1e8;
+    return
+   case 2
+    loss = 1e8*min(1e3,info(2));
+    return
+   case 3
+    loss = 1e8*min(1e3,info(2));
+    return
+   case 4
+    loss = 1e8*min(1e3,info(2));
+    return
+   case 5
+    loss = 1e8;
+    return
+   otherwise
+  end
+  
   nstatic = dr_.nstatic;
   npred = dr_.npred;
   ghx = dr_.ghx;
@@ -41,7 +62,7 @@ function [z,vx]=osr_obj(x,params,weights);
   
   % computes the loss function
   weights = weights(order,order);
-  z = weights(:)'*vx(:);
+  loss = weights(:)'*vx(:);
   
 
 
