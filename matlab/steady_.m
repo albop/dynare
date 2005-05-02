@@ -18,7 +18,7 @@ function steady_()
   end
 
   if exist([fname_ '_steadystate'])
-    [ys_,check] = feval([fname_ '_steadystate'],[fname_ '_fff'],x);
+    [ys_,check] = feval([fname_ '_steadystate'],x);
   else
     [ys_,check] = dynare_solve([fname_ '_fff'],x);
   end
