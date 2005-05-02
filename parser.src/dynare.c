@@ -2434,6 +2434,15 @@ void p_option(char *name, char *value)
   str_output(buffer);
 }
 
+void p_option_e(char *name, struct queue* expression)
+{
+  char buffer[2000];
+  sprintf(buffer,"options_.%s=",name);
+  str_output(buffer);
+  p_expression(expression);
+  str_output(";\n");
+}
+
 void p_s_option(char *name, char *value)
 {
   char buffer[2000];
@@ -2889,7 +2898,6 @@ void p_estimation(void)
 {
   char buffer[2000];
   int i;
-  check.olr = 1;
 #ifdef SCILAB
   str_output("global ");
   for(i=0;i < var_nbr; i++)
@@ -2946,7 +2954,7 @@ void print_unit_root_vars(void)
 {
   int i;
   char buffer[2000];
-  str_output("options_.varobs = {");
+  str_output("options_.unit_root_vars = {");
   for(i=0; i < nbr_tmpvar; i +=2)
     {
       if (i != 0)
