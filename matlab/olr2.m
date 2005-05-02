@@ -69,6 +69,7 @@ stat_var = order_var(1:nstatic);
 stat_var = setdiff(stat_var,inst_i);
 % static variables in objective function
 [stat_obj_var] = intersect(obj_var,stat_var);
+stat_var = setdiff(stat_var,stat_obj_var);
 n_stat_obj_var = length(stat_obj_var);
 pred_var = find(any(iy_(1:ykmin_,:),1))';
 pred_var = [stat_obj_var; pred_var];
@@ -79,7 +80,8 @@ nstatic1 = nstatic+inst_nbr;
 endo_nbr_1 = endo_nbr-inst_nbr;
 sdyn = endo_nbr - nstatic1;
 
-order_var = [ inst_i; setdiff(stat_var,inst_i); order_var(nstatic1+1:end)];
+order_var = [ inst_i; setdiff(stat_var,inst_i); stat_obj_var;...
+	      order_var(nstatic1+n_stat_obj_var+1:end)];
 
 % building QQ, RR and UU
 iq = [];
@@ -347,31 +349,42 @@ end
 
 % reordering multipliers, predetermined - both - forward
 im = zeros(sdyn1,1);
-j = endo_nbr-inst_nbr+1;
-for i=setdiff(jlambda{ykmin_+1},jlambda{ykmin_})';
+j = nstatic+npred+nboth+1;
+% $$$ for i=setdiff(jlambda{ykmin_+1},jlambda{ykmin_})';
+% $$$   im(i) = j;
+% $$$   j = j + 1;
+% $$$ end
+% $$$ for i=intersect(jlambda{ykmin_+1},jlambda{ykmin_})';
+% $$$   im(i) = j;
+% $$$   j = j + 1;
+% $$$ end
+for i=jlambda{ykmin_+1}'
   im(i) = j;
-  j = j + 1;
+  j = j+1;
 end
-for i=intersect(jlambda{ykmin_+1},jlambda{ykmin_})';
-  im(i) = j;
-  j = j + 1;
-end
+j = j+nfwrd;
+inst_id = j+[0:inst_nbr-1];
 for i=setdiff(jlambda{ykmin_},jlambda{ykmin_+1})';
-  im(i) = j;
+  im(i) = j+inst_nbr;
   j = j + 1;
 end
 
 % adding instruments and multipliers to kstate
 kstate(:,1) = kstate(:,1)-inst_nbr;
-kstate = [kstate(1:nsfwrd,:);zeros(nslambdap+inst_nbr,4);kstate(nsfwrd+1:end,:);zeros(nslambdaf,4)];
+for i=nstatic+npred+nboth+[1:nfwrd]
+  k = find(kstate(:,1) == i);
+  kstate(k,1) = (i+nlambda(ykmin_+1))*ones(length(k),1);
+end
+kstate = [kstate(1:nsfwrd,:);zeros(nslambdap+inst_nbr,4);...
+	  kstate(nsfwrd+1:end,:);zeros(nslambdaf,4)];
 offsetr = nsfwrd;
 for i=1:ykmin_
-  kstate(offsetr+[1:nlambda(i)],1:2) = [im(jlambda{i}) (klen-i+2)* ...
+  kstate(offsetr+[1:nlambda(i)],1:2) = [im(jlambda{i}) (2*ykmin_-i+2)* ...
 		    ones(nlambda(i),1)];
   offsetr = offsetr+nlambda(i);
 end
 kstate(offsetr+[1:inst_nbr],1:2) = ...
-    [endo_nbr+nlambda(ykmin_+1)-inst_nbr+[1:inst_nbr] (ykmin_+2)*ones(inst_nbr,1)];
+    [inst_id (ykmin_+2)*ones(inst_nbr,1)];
 offsetr = nsfwrd + nslambdap + inst_nbr +nspred;
 m = ykmin_+1;
 for i=ykmin_+2:klen
@@ -392,33 +405,38 @@ end
 
 nrgx = size(gx,1);
 k1 = find((kstate(:,2) == ykmin_+1));
-k2 = find((kstate(:,2) == ykmin_+2));
+k2 = find((kstate(:,2) == ykmin_+2 & kstate(:,1) <= inst_id(end)));
 [junk,k3] = setdiff(kstate(k2,1),kstate(k1,1));
 dr.ghx = [hx(k1-nrgx,:); gx(k2(k3),:)]; 
 dr.ghu = ghu([k1; k2(k3)],:); 
+dr.order_var = [order_var(inst_nbr+[1:nstatic+npred+nboth]);...
+		endo_nbr+[1:nlambda(ykmin_+1)]';...
+		order_var(inst_nbr+nstatic+npred+nboth+[1:nfwrd]);...
+		order_var(1:inst_nbr)];
+
 
 % static variables
 if nstatic > 0
+  dr.ghx = [zeros(nstatic,size(dr.ghx,2)); dr.ghx];
+  dr.ghu = [zeros(nstatic,exo_nbr); dr.ghu];
   j3 = nonzeros(kstate(:,3));
   j4  = find(kstate(:,3));
-  temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
-  temp = temp + b(1:nstatic,:)*gx(nsfwrd+[1:inst_nbr],:);
+  dr.ghx(1:nstatic,:) = -a(1:nstatic,j3)*gx(j4,:)*hx;
+  dr.ghx(1:nstatic,:) = dr.ghx(1:nstatic,:)...
+      +b(1:nstatic,:)*gx(nsfwrd+[1:inst_nbr],:);
   j5 = find(kstate(n4:nd1,4));
-  temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
-  dr.ghx = [temp; dr.ghx];
-  temp = -a(1:nstatic,j3)*gx(j4,:)*ghu(nsfwrd+nslambdap+inst_nbr+[1:nspred+nslambdaf],:);
-  temp = temp + b(1:nstatic,:)*ghu(nsfwrd+[1:inst_nbr],:);
-  temp = temp + fu(1:nstatic,:);
-  dr.ghu = [temp; dr.ghu];
-  temp = [];
+  dr.ghx(1:nstatic,j5) = dr.ghx(1:nstatic,j5)...
+      -a(1:nstatic,nonzeros(kstate(:,4)));
+  dr.ghu(1:nstatic,:) = -a(1:nstatic,j3)*gx(j4,:)...
+      *ghu(nsfwrd+nslambdap+inst_nbr+[1:nspred+nslambdaf],:);
+  dr.ghu(1:nstatic,:) = dr.ghu(1:nstatic,:)...
+      +b(1:nstatic,:)*ghu(nsfwrd+[1:inst_nbr],:);
+  dr.ghu(1:nstatic,:) = dr.ghu(1:nstatic,:) + fu(1:nstatic,:);
 end
 
 dr.ys = [dr.ys; zeros(length(jlambda{ykmin_+1}),1)];
 dr.nstatic = nstatic;
 dr.npred = npred+nboth+length(jlambda{ykmin_+1});
 dr.kstate = kstate;
-dr.order_var = [order_var(inst_nbr+[1:nstatic+npred+nboth]);...
-	     endo_nbr+[1:nlambda(ykmin_+1)]';...
-	     order_var(nstatic+npred+nboth+[1:nfwrd]);...
-	     order_var(1:inst_nbr)];
 endo_nbr = endo_nbr+nlambda(ykmin_+1);
+      
