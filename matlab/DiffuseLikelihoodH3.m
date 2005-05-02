@@ -127,9 +127,6 @@ while rank(Pinf,crit) & t < smpl %% Matrix Finf is assumed to be zero
 	  end
 	end                    
       end,
-      if newRank==0, 
-	fmax=max(fmax,max(abs(Pinf(:))));
-      end
       % end new termination and checks for DKF and fmax
     elseif Finf > crit 
       %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
@@ -161,7 +158,6 @@ while rank(Pinf,crit) & t < smpl %% Matrix Finf is assumed to be zero
   if oldRank ~= newRank
     disp('DiffuseLiklihoodH3 :: T does influence the rank of Pinf!')	
   end		 		
-  end
 end
 if t == smpl                                                           
   error(['There isn''t enough information to estimate the initial' ... 
