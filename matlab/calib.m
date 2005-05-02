@@ -1,5 +1,5 @@
-function Sigma_e_ = calib(var_indices,targets,var_weights,nar,cova,Sigma_e_)
-  global ys_ endo_nbr exo_nbr lgy_ lgx_ ykmin_ vx
+function [Sigma_e_,info] = calib(var_indices,targets,var_weights,nar,cova,Sigma_e_)
+  global ys_ endo_nbr exo_nbr lgy_ lgx_ ykmin_ vx options_
   
   ncstr = 0;
   ni = size(var_indices,1);
@@ -18,9 +18,15 @@ function Sigma_e_ = calib(var_indices,targets,var_weights,nar,cova,Sigma_e_)
     end
   end
   
-  % computes approximate solution at order 1
-  dr = resol(ys_,0,0,1);
+  check_model;
   
+  % computes approximate solution at order 1
+  [dr_, info] = resol(ys_,0);
+
+  if info(1)
+    print_info(info);
+  end  
+
   ghx = dr.ghx;
   ghu = dr.ghu;
   npred = dr.npred;
@@ -102,74 +108,76 @@ vx1 = [];
   [Sigma_e_,f]=fmincon(@calib_obj,diag(Sigma_e_).^2,-eye(exo_nbr),zeros(exo_nbr,1),[],[],[],[],[],options,A,ghu1,ghx(iiy,:),ghu(iiy,:),targets,var_weights,var_indices,nar);
   Sigma_e_ = diag(Sigma_e_);
   
-  objective = calib_obj2(diag(Sigma_e_),A,ghu1,ghx(iiy,:),ghu(iiy,:),targets,var_weights,var_indices,nar);
-  disp('CALIBRATION')
-  disp('')
-  if ~isempty(var_indices{1})
-    disp(sprintf('%16s %14s %14s %14s %14s','Std. Dev','Target','Obtained','Diff'));
-    str = '   ';
-    for i=1:size(var_indices{1},1)
-      [i1,i2] = ind2sub([ny ny],var_indices{1}(i));
-      str = sprintf('%16s: %14.2f %14.2f %14.2f',lgy_(order(iiy(i1)),:),targets{1}(i),objective{1}(i),objective{1}(i)-targets{1}(i));
-      disp(str);
-    end
-  end
-  if ~isempty(var_indices{2})
-    disp(sprintf('%32s %14s %14s','Correlations','Target','Obtained','Diff'));
-    str = '   ';
-    for i=1:size(var_indices{2},1)
-      [i1,i2]=ind2sub([ny ny],var_indices{2}(i));
-      str = sprintf('%16s,%16s: %14.2f %14.2f %14.2f',lgy_(order(iiy(i1)),:), ...
-		    lgy_(order(iiy(i2)),:),targets{2}(i),objective{2}(i),objective{2}(i)-targets{2}(i));
-      disp(str);
-    end
-  end
-  if ~isempty(var_indices{3})
-    disp(sprintf('%32s %16s %16s','Constrained shocks (co)variances','Target','Obtained'));
-    str = '   ';
-    for i=1:size(var_indices{3},1)
-      [i1,i2]=ind2sub([exo_nbr exo_nbr],var_indices{3}(i));
-      if i1 == i2
-	str = sprintf('%32s: %16.4f %16.4f',lgx_(order(i1),:), ...
-		      targets{3}(i),objective{3}(i));
-      else
-	str = sprintf('%16s,%16s: %16.4f %16.4f',lgx_(order(i1),:), ...
-		      lgx_(order(i2), :),targets{3}(i),objective{3}(i));
+  objective = calib_obj2(diag(Sigma_e_),A,ghu1,ghx(iiy,:),ghu(iiy,:), ...
+			 targets,var_weights,var_indices,nar);
+  if ~options_.noprint
+    disp('CALIBRATION')
+    disp('')
+    if ~isempty(var_indices{1})
+      disp(sprintf('%16s %14s %14s %14s %14s','Std. Dev','Target','Obtained','Diff'));
+      str = '   ';
+      for i=1:size(var_indices{1},1)
+	[i1,i2] = ind2sub([ny ny],var_indices{1}(i));
+	str = sprintf('%16s: %14.2f %14.2f %14.2f',lgy_(order(iiy(i1)),:),targets{1}(i),objective{1}(i),objective{1}(i)-targets{1}(i));
+	disp(str);
       end
-      disp(str);
     end
-  end
-  flag = 1;
-  for j=4:nar+3
-    if ~isempty(var_indices{j})
-      if flag
-	disp(sprintf('%16s %16s %16s','Autocorrelations','Target','Obtained'));
-	str = '   ';
-	flag = 0;
+    if ~isempty(var_indices{2})
+      disp(sprintf('%32s %14s %14s','Correlations','Target','Obtained','Diff'));
+      str = '   ';
+      for i=1:size(var_indices{2},1)
+	[i1,i2]=ind2sub([ny ny],var_indices{2}(i));
+	str = sprintf('%16s,%16s: %14.2f %14.2f %14.2f',lgy_(order(iiy(i1)),:), ...
+		      lgy_(order(iiy(i2)),:),targets{2}(i),objective{2}(i),objective{2}(i)-targets{2}(i));
+	disp(str);
       end
-      for i=1:size(var_indices{j},1)
-	[i1,i2] = ind2sub([ny ny],var_indices{j}(i));
-	str = sprintf('%16s(%d): %16.4f %16.4f',lgy_(order(iiy(i1)),:), ...
-		      j-3,targets{j}(i),objective{j}(i));
+    end
+    if ~isempty(var_indices{3})
+      disp(sprintf('%32s %16s %16s','Constrained shocks (co)variances','Target','Obtained'));
+      str = '   ';
+      for i=1:size(var_indices{3},1)
+	[i1,i2]=ind2sub([exo_nbr exo_nbr],var_indices{3}(i));
+	if i1 == i2
+	  str = sprintf('%32s: %16.4f %16.4f',lgx_(order(i1),:), ...
+			targets{3}(i),objective{3}(i));
+	else
+	  str = sprintf('%16s,%16s: %16.4f %16.4f',lgx_(order(i1),:), ...
+			lgx_(order(i2), :),targets{3}(i),objective{3}(i));
+	end
+	disp(str);
+      end
+    end
+    flag = 1;
+    for j=4:nar+3
+      if ~isempty(var_indices{j})
+	if flag
+	  disp(sprintf('%16s %16s %16s','Autocorrelations','Target','Obtained'));
+	  str = '   ';
+	  flag = 0;
+	end
+	for i=1:size(var_indices{j},1)
+	  [i1,i2] = ind2sub([ny ny],var_indices{j}(i));
+	  str = sprintf('%16s(%d): %16.4f %16.4f',lgy_(order(iiy(i1)),:), ...
+			j-3,targets{j}(i),objective{j}(i));
 	  disp(str);
+	end
       end
+    end    
+    
+    disp('');
+    disp('Calibrated variances')
+    str = '   ';
+    for i=1:exo_nbr
+      str = [str sprintf('%16s',lgx_(i,:))];
     end
-  end    
-  
-  disp('');
-  disp('Calibrated variances')
-  str = '   ';
-  for i=1:exo_nbr
-    str = [str sprintf('%16s',lgx_(i,:))];
-  end
-  disp(str);
-  disp('');
-  str = '      ';
-  for i=1:exo_nbr
-    str = [str sprintf('%16f',Sigma_e_(i,i))];
-  end
-  disp(str);
-  
+    disp(str);
+    disp('');
+    str = '      ';
+    for i=1:exo_nbr
+      str = [str sprintf('%16f',Sigma_e_(i,i))];
+    end
+    disp(str);
+  end % end if options_.noprint
 
   
   % 10/9/02 MJ
