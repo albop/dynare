@@ -78,8 +78,9 @@ function LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,Y,trend,start)%//Z,T,R,Q,Pinf
 %   v_t = y_t - Z_t*a_t
 %   L_{\ast,t} = T_t - K_{\ast,t}*Z_t
 %   F_{\ast,t}  = Z_t*P_{\ast,t}*Z_t' + H_t
-global bayestopt_ options_ id_
+global bayestopt_ options_
 
+id = options_.diffuse_d;
 mf = bayestopt_.mf;
 pp     = size(Y,1);
 mm     = size(T,1);
