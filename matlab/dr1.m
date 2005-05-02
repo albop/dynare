@@ -1,6 +1,6 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function [dr,info]=dr1(iorder,dr,check)
+function [dr,info]=dr1(dr,check)
 
 % info = 1: the model doesn't define current variables uniquely
 % info = 2: problem in mjdgges.dll info(2) contains error code
@@ -116,12 +116,12 @@ if ~exist('mjdgges')
   tt1=diag(tt);
   warning_state = warning;
   warning off;
-  eigval = ss1./tt1 ;
+  dr.eigval = ss1./tt1 ;
   warning warning_state;
-  nba = nnz(abs(eigval) > options_.qz_criterium);
+  nba = nnz(abs(dr.eigval) > options_.qz_criterium);
 else
   use_qzdiv = 0;
-  [ss,tt,w,sdim,eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+  [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
   if info1
     info(1) = 2;
     info(2) = info1;
@@ -229,7 +229,7 @@ if exo_det_nbr > 1
   end
 end
 
-if iorder == 1
+if options_.order == 1
   return
 end
 
