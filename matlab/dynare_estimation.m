@@ -53,7 +53,7 @@ options_ = set_default_option(options_,'moments_varendo',0);
 options_ = set_default_option(options_,'filtered_vars',0);
 options_ = set_default_option(options_,'kalman_algo',1);
 options_ = set_default_option(options_,'kalman_tol',10^(-12));
-options_ = set_default_option(options_,'diffuse_d',0);
+options_ = set_default_option(options_,'diffuse_d',[]);
 options_ = set_default_option(options_,'nk',1);
 
 
