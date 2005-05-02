@@ -190,6 +190,8 @@ unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
 <DYNARE1>relative_irf {return RELATIVE_IRF;}
 <DYNARE1>kalman_algo {return KALMAN_ALGO;}
 <DYNARE1>kalman_tol {return KALMAN_TOL;}
+<DYNARE1>diffuse_d {return DIFFUSE_D;}
+<DYNARE1>nk {return NK;}
 
  /* estimated_params priors */
  <DYNARE2>gamma_pdf {return GAMMA_PDF;}
