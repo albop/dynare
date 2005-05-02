@@ -28,21 +28,23 @@
 %token VARF VARP DEL SUM PROD TO MSHOCKS LONGNAMES PARAMETERS DYN2VEC RPLOT
 %token DO TO ENDO PROD BY DOLLAR STEADY STDERR DSAMPLE
 %token STOCH_SIMUL DR_ALGO SIMUL_ALGO SOLVE_ALGO 
-%token DROP LINEAR ORDER REPLIC AR NOCORR
-%token NOMOMENTS NOFUNCTIONS SIGMA_E HP_FILTER HP_NGRID SIMUL_SEED
+%token DROP LINEAR ORDER REPLIC AR
+%token SIGMA_E HP_FILTER HP_NGRID SIMUL_SEED
 %token RESOL SIMUL IRF DISP_DR DISP_MOMENTS D_CORR SHOCK_SIZE OPTIM_WEIGHTS
 %token OSR_PARAMS OSR CALIB_VAR CALIB AUTOCORR COVAR DYNATYPE DYNASAVE
 %token OLR OLR_INST OLR_BETA CHECK
 %token ESTIMATED_PARAMS GAMMA_PDF BETA_PDF NORMAL_PDF INV_GAMMA_PDF UNIFORM_PDF
 %token INV_GAMMA1_PDF INV_GAMMA2_PDF
-%token CORR PREFILTER PRESAMPLE LIK_ALGO LIK_INIT NOGRAPH CONF_SIG 
+%token PREFILTER PRESAMPLE LIK_ALGO LIK_INIT CONF_SIG 
 %token ESTIMATION DATAFILE NOBS FIRST_OBS VAROBS QZ_CRITERIUM MH_REPLIC MH_DROP
 %token MH_JSCALE OPTIM MH_INIT_SCALE MODE_FILE MODE_COMPUTE MODE_CHECK
 %token PRIOR_TRUNC MH_MODE MH_NBLOCKS LOAD_MH_FILE LOGLINEAR
-%token NODIAGNOSTIC UNIT_ROOT_VARS XTICK XTICKLABEL BAYESIAN_IRF RELATIVE_IRF
+%token UNIT_ROOT_VARS XTICK XTICKLABEL BAYESIAN_IRF RELATIVE_IRF
 %token TEX FORECAST SMOOTHER MOMENTS_VARENDO FILTERED_VARS 
 %token OBSERVATION_TRENDS ESTIMATED_PARAMS_INIT ESTIMATED_PARAMS_BOUNDS
-%token KALMAN_ALGO KALMAN_TOL
+%token KALMAN_ALGO KALMAN_TOL DIFFUSE_D NK
+%token CORR MOMENTS FUNCTIONS DIAGNOSTIC PRINT GRAPH
+%token NOCORR NOMOMENTS NOFUNCTIONS NODIAGNOSTIC NOPRINT NOGRAPH
 %token <string> INUMBER DNUMBER NAME OPERATORS POUND EOL INDEX 
 %token <p_tok> VAR_ID
 
@@ -332,15 +334,20 @@
  o_replic: REPLIC '=' INUMBER {p_option("replic",$3);};
  o_drop: DROP '=' INUMBER {p_option("drop",$3);};
  o_ar: AR '=' INUMBER {p_option("ar",$3);};
+ o_corr: CORR {p_option("nocorr","0");};
  o_nocorr: NOCORR {p_option("nocorr","1");};
+ o_function: FUNCTIONS {p_option("nofunctions","0");};
  o_nofunction: NOFUNCTIONS {p_option("nofunctions","1");};
+ o_moments: MOMENTS {p_option("nomoments","0");};
  o_nomoments: NOMOMENTS {p_option("nomoments","1");};
  o_irf: IRF '=' INUMBER {p_option("irf",$3);};
  o_hp_filter: HP_FILTER '=' INUMBER {p_option("hp_filter",$3);};
  o_hp_ngrid: HP_NGRID '=' INUMBER {p_option("hp_ngrid",$3);};
  o_periods: PERIODS '=' INUMBER {p_option("periods",$3);p_option("simul","1");};
  o_simul: SIMUL {p_option("simul","1");};
- o_simul_seed: SIMUL_SEED '=' INUMBER { p_option("simul_seed",$3)};
+ o_simul_seed: SIMUL_SEED '=' INUMBER { p_option("simul_seed",$3)}
+             | SIMUL_SEED '=' '(' expression ')' { p_option_e("simul_seed",$4)}
+             ;
  o_qz_criterium: QZ_CRITERIUM '=' INUMBER { p_option("qz_criterium",$3)}
                | QZ_CRITERIUM '=' DNUMBER { p_option("qz_criterium",$3)}
                ;
@@ -351,11 +358,14 @@
  o_presample: PRESAMPLE '=' INUMBER {p_option("presample",$3);};
  o_lik_algo: LIK_ALGO '=' INUMBER {p_option("lik_algo",$3);}; 
  o_lik_init: LIK_INIT '=' INUMBER {p_option("lik_init",$3);}; 
+ o_graph: GRAPH {p_option("nograph","0");}; 
  o_nograph: NOGRAPH {p_option("nograph","1");}; 
+ o_print: PRINT {p_option("print","0");}; 
+ o_noprint: NOPRINT {p_option("noprint","1");}; 
  o_conf_sig: CONF_SIG '=' DNUMBER {p_option("conf_sig",$3);}; 
  o_mh_replic: MH_REPLIC '=' INUMBER {p_option("mh_replic",$3);}; 
  o_mh_drop: MH_DROP '=' DNUMBER {p_option("mh_drop",$3);}; 
- o_mh_jscale: MH_JSCALE '=' DNUMBER {p_option("mh_jscale",$3);}; 
+ o_mh_jscale: MH_JSCALE '=' value {p_option("mh_jscale",$3);}; 
  o_optim: OPTIM {p_optim_options("","",1);} '=' '(' optim_options ')'
 {p_optim_options("","",3);};
  o_mh_init_scale :MH_INIT_SCALE '=' DNUMBER {p_option("mh_init_scale",$3);};
@@ -368,6 +378,7 @@
  o_mh_nblcks : MH_NBLOCKS '=' INUMBER {p_option("mh_nblck",$3);};
  o_load_mh_file : LOAD_MH_FILE {p_option("load_mh_file","1");};
  o_loglinear : LOGLINEAR {p_option("loglinear","1");};
+ o_diagnostic : DIAGNOSTIC {p_option("diagnostic","0");};
  o_nodiagnostic : NODIAGNOSTIC {p_option("nodiagnostic","1");};
  o_bayesian_irf : BAYESIAN_IRF {p_option("bayesian_irf","1");};
  o_tex : TEX {p_option("TeX","1");};
@@ -376,8 +387,9 @@
  o_moments_varendo : MOMENTS_VARENDO {p_option("moments_varendo","1");};
  o_filtered_vars : FILTERED_VARS {p_option("filtered_vars","1");};
  o_relative_irf : RELATIVE_IRF {p_option("relative_irf","1");};
-o_kalman_algo : KALMAN_ALGO '=' INUMBER {p_option("kalman_algo",$3);};
- o_kalman_tol : KALMAN_TOL '=' INUMBER {p_option("kalman_tol",$3);};
+ o_kalman_algo : KALMAN_ALGO '=' INUMBER {p_option("kalman_algo",$3);};
+ o_diffuse_d : DIFFUSE_D '=' INUMBER {p_option("diffuse_d",$3);};
+ o_nk : NK '=' INUMBER {p_option("nk",$3);};
 
  optim_option1: '\'' NAME '\'' ',' '\'' NAME '\'' {p_optim_options($2,$6,2);}
               | '\'' NAME '\'' ',' value {p_optim_options($2,$5,2);}
@@ -395,6 +407,9 @@ o_kalman_algo : KALMAN_ALGO '=' INUMBER {p_option("kalman_algo",$3);};
          | o_replic
          | o_drop
          | o_ar
+         | o_corr
+         | o_function
+         | o_moments
          | o_nocorr
          | o_nofunction
          | o_nomoments
@@ -406,6 +421,8 @@ o_kalman_algo : KALMAN_ALGO '=' INUMBER {p_option("kalman_algo",$3);};
          | o_simul
          | o_simul_seed
          | o_qz_criterium
+         | o_print
+         | o_noprint
          ;
 
  options_list1: options_list1 ',' o_list1
@@ -618,6 +635,7 @@ o_kalman_algo : KALMAN_ALGO '=' INUMBER {p_option("kalman_algo",$3);};
                      ;
 
  estimated_init_elem : STDERR VAR_ID ',' value ';' {p_estimated_init_elem1($2,$4);}
+                     | CORR VAR_ID ',' VAR_ID ',' value ';' {p_estimated_init_elem2($2,$4,$6);}
                      | VAR_ID ',' value ';' {p_estimated_init_elem3($1,$3);}
                      ;
 
@@ -668,6 +686,7 @@ o_kalman_algo : KALMAN_ALGO '=' INUMBER {p_option("kalman_algo",$3);};
                    | o_presample
                    | o_lik_algo 
                    | o_lik_init 
+                   | o_graph
                    | o_nograph
                    | o_conf_sig 
                    | o_mh_replic
@@ -683,6 +702,7 @@ o_kalman_algo : KALMAN_ALGO '=' INUMBER {p_option("kalman_algo",$3);};
                    | o_mh_nblcks 
                    | o_load_mh_file 
                    | o_loglinear
+                   | o_diagnostic
                    | o_nodiagnostic
                    | o_bayesian_irf
                    | o_tex
