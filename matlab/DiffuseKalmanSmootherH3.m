@@ -20,7 +20,6 @@ function [alphahat,etahat,a1, aK] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf1,Pstar1
 global options_
 
 nk = options_.nk;
-id = options_.diffuse_d;
 spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
 v       	= zeros(pp,smpl);
@@ -85,22 +84,22 @@ while newRank & t < smpl
       % new terminiation criteria by M. Ratto
       P0=Pinf(:,:,t);
       %             newRank = any(diag(P0(mf,mf))>crit);
-      %             if newRank==0, id = i; end,
-      if ~isempty(id),  
-	newRank = (icc<id);  
+      %             if newRank==0, options_.diffuse_d = i; end,
+      if ~isempty(options_.diffuse_d),  
+	newRank = (icc<options_.diffuse_d);  
 	if newRank & any(diag(P0(mf,mf))>crit)==0; 
-	  disp('WARNING!! Change in ID in univariate DKF')
-	  id = icc;
+	  disp('WARNING!! Change in OPTIONS_.DIFFUSE_D in univariate DKF')
+	  options_.diffuse_d = icc;
 	  newRank=0;
 	end
       else
 	newRank = any(diag(P0(mf,mf))>crit);                 
 	if newRank==0, 
-	  id = icc;
+	  options_.diffuse_d = icc;
 	end                    
       end,
       if newRank==0, 
-	id=i;
+	options_.diffuse_d=i;
       end                    
       % end new terminiation criteria by M. Ratto
     else 
@@ -207,7 +206,7 @@ if d
   r1 = zeros(mm,d);
   for t = d:-1:2
     for i=pp:-1:1
-      if Finf(i,t) > crit & ~(t==d & i>id),  % use of id to be sure of DKF termination
+      if Finf(i,t) > crit & ~(t==d & i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
 					     %r1(:,t) = transpose(Z)*v(:,t)/Finf(i,t) + ... BUG HERE in transpose(Z)
 					     r1(:,t) = transpose(Z(i,:))*v(i,t)/Finf(i,t) + ...
 						       transpose(L0(:,:,i,t))*r0(:,t) + transpose(Linf(:,:,i,t))*r1(:,t);
