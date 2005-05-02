@@ -10,23 +10,20 @@ function result = check
     ex_ = ones(xkmax_+xkmin_+1,1)*exe_';
   end
   
-  % check if ys is steady state
-  it_ = ykmin_+1;
-  fh = str2func([fname_ '_fff']);
-  if max(abs(feval(fh,ys_))) > dynatol_
-    if exist([fname_ '_steadystate'])
-      [dr.ys, check] = feval([fname_ '_steadystate'],[fname_ '_fff'],ys_);
-    else
-      [dr.ys,check] = dynare_solve([fname_ '_fff'],ys_);
-    end
-    if check
-      error('CHECK: convergence problem in DYNARE_SOLVE')
-    end
+  options_ = set_default_option(options_,'dr_algo',0);
+  options_ = set_default_option(options_,'order',2);
+  
+  if isfield(options_,'order');
+    temp_order = options_.order;
   else
-    dr.ys = ys_;
+    temp_order = [];
   end
+  
+  options_.iorder = 1;
 
-  dr = dr1(1,dr,1);
+  dr = resol(ys_,1);
+  
+  options_.order = temp_order;
   ex_ = tempex;
     
   eigenvalues_ = dr.eigval;
