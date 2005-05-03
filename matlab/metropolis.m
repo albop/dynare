@@ -30,7 +30,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   MAX_ninno = ceil(MaxNumberOfBytes/(exo_nbr*gend)/8);
   MAX_nerro = ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8);
   MAX_nfilt = ceil(MaxNumberOfBytes/((size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic)*gend)/8);
-  if options_.irf
+  if options_.bayesian_irf
     MAX_nirfs = ceil(MaxNumberOfBytes/(options_.irf*length(ys_)*exo_nbr)/8);
   end
   MAX_nthm1 = ceil(MaxNumberOfBytes/(length(ys_)*8));
@@ -3366,7 +3366,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %%	structure oo_ (posterior medians, posterior standard deviations and posterior HPD   
   %%	intervals are also computed and saved).
   %%
-  if options_.irf
+  if options_.bayesian_irf
     if B <= MAX_nirfs
       stock_irf = zeros(options_.irf,size(lgy_,1),exo_nbr,B);
     elseif nvn & B > MAX_nirfs
