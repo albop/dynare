@@ -99,6 +99,12 @@ Currently the development team of Dynare is composed of S. Adjemian, A. Benzouga
 </para>
 
 <section><title>Changes</title>
+<para>May 3, 2005</para>
+<itemizedlist>
+<listitem><para>added option <command>noprint</command> in <xref linkend="stoch_simul"/></para></listitem>
+<listitem><para>modified option <command>irf</command> in <xref linkend="stoch_simul"/></para></listitem>
+<listitem><para>modified option <command>simul_seed</command> in <xref linkend="stoch_simul"/></para></listitem>
+</itemizedlist>
 <para>March 6, 2005</para>
 <itemizedlist>
 <listitem><para>corrected typos in equations for 1st and 2nd order approximation formulas in <xref linkend="stoch_simul"/>.</para></listitem>
@@ -1170,7 +1176,7 @@ number of points dropped at the beginning of simulation before computing the sum
 number of points in the grid for the discreet Inverse Fast Fourier Transform used in the HP filter computation. It may be necessary to increase it for highly autocorrelated processes (default = 512) 
 </para></listitem>
 <listitem><para> <command>irf</command> = <replaceable>INTEGER</replaceable>:
- number of periods on which to compute the IRFs (default = 40)
+ number of periods on which to compute the IRFs (default = 40). Setting IRF=0, suppresses the plotting of IRF's. 
 </para></listitem>
 <listitem><para><command>relative_irf</command> requests the computation of normalized IRFs in percentage of the standard error of each shock</para></listitem>
 <listitem><para> <command>linear</command>:
@@ -1184,10 +1190,11 @@ doesn't print the correlation matrix (printing them is the default)
 </para></listitem>
 <listitem><para> <command>nomoments</command>: 
 doesn't print moments of the endogenous variables (printing them is the default)</para></listitem>
-<listitem><para> <command>periods</command> = <replaceable>INTEGER</replaceable>: specifies the number of periods to use in simulations. At order=1, no simulation is necessary to compute theoretical moments and IRFs. A number of periods larger than one triggers automatically option <command>simul</command> (default = 0).
-</para></listitem>
+<listitem><para> <command>noprint</command>: cancel any printing. Usefull for loops.</para></listitem>
 <listitem><para> <command>order</command> = 1 | 2 :
 order of Taylor approximation (default = 2)
+</para></listitem>
+<listitem><para> <command>periods</command> = <replaceable>INTEGER</replaceable>: specifies the number of periods to use in simulations. At order=1, no simulation is necessary to compute theoretical moments and IRFs. A number of periods larger than one triggers automatically option <command>simul</command> (default = 0).
 </para></listitem>
 <listitem><para> <command>qz_criterium</command> = <replaceable>INTEGER</replaceable> | <replaceable>DOUBLE</replaceable>:
 value used to split stable from unstable eigenvalues in reordering the Generalized Schur decomposition used for solving 1st order problems (default 1.000001)
@@ -1197,8 +1204,8 @@ value used to split stable from unstable eigenvalues in reordering the Generaliz
 <listitem><para> <command>simul</command>: 
 computes a stochastic simulation of the model for the number of periods specified in the <command>periods</command> statement. Uses <xref linkend='initval'/> values, possibly recomputed by <xref linkend='steady'/>, as initial values for the simulation. The simulated endogenous variables are made available to the user in a vector for each variable and in the global matrix <varname>y_</varname>. The variables are ordered alphabeticaly in the <varname>y_</varname> matrix (default: no simulation)
 </para></listitem>
-<listitem><para> <command>simul_seed</command> = <replaceable>INTEGER</replaceable>|<replaceable>DOUBLE</replaceable>:
- specifies a seed for the random generator so as to obtain the same random sample at each run of the program. Otherwise a different sample is used for each run (default: seed not specified).
+<listitem><para> <command>simul_seed</command> = <replaceable>INTEGER</replaceable>|<replaceable>DOUBLE</replaceable>|<replaceable>(EXPRESSION)</replaceable>:
+ specifies a seed for the random generator so as to obtain the same random sample at each run of the program. Otherwise a different sample is used for each run (default: seed not specified). Note that if you use an EXPRESSION rather than an INTEGER or a DOUBLE, the EXPRESSION must be in parenthesis.
 </para></listitem>
 <listitem><para> all <command>steady</command> options (see <xref linkend='steady'/>)</para></listitem>
 </itemizedlist>
