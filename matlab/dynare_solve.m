@@ -3,7 +3,7 @@
 function [x,check] = dynare_solve(func,x,varargin)
   global gstep_ options_
   
-  options_ = set_default_option(options_,'solve_algo',0);
+  options_ = set_default_option(options_,'solve_algo',2);
   check = 0;
   func = str2func(func);
   if options_.solve_algo == 0
@@ -29,7 +29,8 @@ function [x,check] = dynare_solve(func,x,varargin)
     [x,check]=solve1(func,x,1:nn,1:nn,varargin{:});
   elseif options_.solve_algo == 2
     nn = size(x,1) ;
-    tolf = eps^(2/3) ;
+    %    tolf = eps^(2/3) ;
+    tolf = 1e-9;
 
     fjac = zeros(nn,nn) ;
 
