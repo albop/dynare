@@ -7,16 +7,10 @@ global ex_ valf_ it_ exe_ xkmin_ xkmax_ ys_
 global fname_ means_ Sigma_e_ lgy_ options_
 
 order = options_.order;
-replic = options_.replic;
 seed = options_.simul_seed;
 iter_ = options_.periods;
 
 it_ = ykmin_ + 1 ;
-
-if replic > 1
-  fname = [fname_,'_simul'];
-  fh = fopen(fname,'w+');
-end
 
 % eliminate shocks with 0 variance
 i_exo_var = setdiff([1:exo_nbr],find(diag(Sigma_e_) == 0));
@@ -24,24 +18,16 @@ nxs = length(i_exo_var);
 ex_ = zeros(xkmin_+xkmax_+iter_,exo_nbr);
 chol_S = chol(Sigma_e_(i_exo_var,i_exo_var));
 
-for i=1:replic
-  if isempty(seed)
-    randn('state',sum(100*clock));
-  else
-    randn('state',seed+i-1);
-  end
-  if ~isempty(Sigma_e_)
-    ex_(:,i_exo_var) = randn(xkmin_+xkmax_+iter_,nxs)*chol_S;
-  end
-  y_ = simult_(ys,dr,ex_,order);
-  if replic > 1
-    fwrite(fh,y_(:,ykmin_+1:end),'float64');
-  end
+if isempty(seed)
+  randn('state',sum(100*clock));
+else
+  randn('state',seed);
 end
+if ~isempty(Sigma_e_)
+  ex_(:,i_exo_var) = randn(xkmin_+xkmax_+iter_,nxs)*chol_S;
+end
+y_ = simult_(ys,dr,ex_,order);
 
-if replic > 1
-  fclose(fh);
-end
 
 
 % 02/20/01 MJ replaced ys by dr.ys
