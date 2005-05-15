@@ -12,6 +12,7 @@ function result = check
   
   options_ = set_default_option(options_,'dr_algo',0);
   options_ = set_default_option(options_,'order',2);
+  options_ = set_default_option(options_,'noprint',0);
   
   if isfield(options_,'order');
     temp_order = options_.order;
@@ -21,30 +22,37 @@ function result = check
   
   options_.iorder = 1;
 
-  dr = resol(ys_,1);
+  [dr, info] = resol(ys_,1);
   
+  if info(1)
+    print_info(info);
+  end  
+
   options_.order = temp_order;
   ex_ = tempex;
-    
+  
   eigenvalues_ = dr.eigval;
   nyf = nnz(dr.kstate(:,2)>ykmin_+1);
   [m_lambda,i]=sort(abs(eigenvalues_));
-  disp(' ')
-  disp('EIGENVALUES:')
-  disp(sprintf('%16s %16s %16s\n','Modulus','Real','Imaginary'))
-  z=[m_lambda real(eigenvalues_(i)) imag(eigenvalues_(i))]';
-  disp(sprintf('%16.4g %16.4g %16.4g\n',z))
-  options_ = set_default_option(options_,'qz_criterium',1.000001);
-  disp(sprintf('\nThere are %d eigenvalue(s) larger than 1 in modulus ', ...
-	       nnz(abs(eigenvalues_) > options_.qz_criterium)));
-  disp(sprintf('for %d forward-looking variable(s)',nyf));
-  disp(' ')
-  if dr.rank == nyf
-    disp('The rank condition is verified.')
-  else
-    disp('The rank conditions ISN''T verified!')
+  
+  if options_.noprint == 0
+    disp(' ')
+    disp('EIGENVALUES:')
+    disp(sprintf('%16s %16s %16s\n','Modulus','Real','Imaginary'))
+    z=[m_lambda real(eigenvalues_(i)) imag(eigenvalues_(i))]';
+    disp(sprintf('%16.4g %16.4g %16.4g\n',z))
+    options_ = set_default_option(options_,'qz_criterium',1.000001);
+    disp(sprintf('\nThere are %d eigenvalue(s) larger than 1 in modulus ', ...
+		 nnz(abs(eigenvalues_) > options_.qz_criterium)));
+    disp(sprintf('for %d forward-looking variable(s)',nyf));
+    disp(' ')
+    if dr.rank == nyf
+      disp('The rank condition is verified.')
+    else
+      disp('The rank conditions ISN''T verified!')
+    end
+    disp(' ')
   end
-  disp(' ')
   
   % keep lambda_ for backward compatibility
   lambda_ = eigenvalues_;
