@@ -1,4 +1,4 @@
-function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,T,R] = DsgeSmoother(xparam1,gend,Y)
+function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff] = DsgeSmoother(xparam1,gend,Y)
 % stephane.adjemian@cepremap.cnrs.fr [09-07-2004]
 %
 % Adapted from mj_optmumlik.m
