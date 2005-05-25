@@ -26,10 +26,10 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   MaxNumberOfBytes = 1000000;%% This value should be adjusted
   MAX_nruns = ceil(MaxNumberOfBytes/(npar+2)/8);
   MAX_nforc = ceil(MaxNumberOfBytes/((options_.forecast+ykmin_)*length(ys_))/8);
-  MAX_nsmoo = ceil(MaxNumberOfBytes/((size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic)*gend)/8);
+  MAX_nsmoo = ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8);
   MAX_ninno = ceil(MaxNumberOfBytes/(exo_nbr*gend)/8);
   MAX_nerro = ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8);
-  MAX_nfilt = ceil(MaxNumberOfBytes/((size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic)*gend)/8);
+  MAX_nfilt = ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8);
   if options_.bayesian_irf
     MAX_nirfs = ceil(MaxNumberOfBytes/(options_.irf*length(ys_)*exo_nbr)/8);
   end
@@ -1392,7 +1392,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   end
   FLN(:,3) = FLN(:,3)/nruns;% I'm scaling the CDF
   nvar     = length(ys_);
-  B        = round(0.25*nruns);
+  B        = 100;%round(0.25*nruns);
   deciles = [round(0.1*B) ...
 	     round(0.2*B)...
 	     round(0.3*B)...
@@ -1455,15 +1455,17 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     if options_.forecast 
       if B <= MAX_nforc
 	stock_forcst = zeros(options_.forecast+ykmin_,nvar,B);
+	stock_forcst1 = zeros(options_.forecast+ykmin_,nvar,B*B);
       else
 	stock_forcst = zeros(options_.forecast+ykmin_,nvar,MAX_nforc);
+	stock_forcst1 = zeros(options_.forecast+ykmin_,nvar,B*MAX_nforc);
       end
     end	
     if options_.smoother
       if B <= MAX_nsmoo
-	stock_smooth = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,B);
+	stock_smooth = zeros(endo_nbr,gend,B);
       else
-	stock_smooth = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,MAX_nsmoo);
+	stock_smooth = zeros(endo_nbr,gend,MAX_nsmoo);
       end
       if B <= MAX_ninno	
 	stock_innov  = zeros(exo_nbr,gend,B);
@@ -1478,9 +1480,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     end
     if options_.filtered_vars
       if B <= MAX_nfilt
-	stock_filter = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend+1,B);
+	stock_filter = zeros(endo_nbr,gend+1,B);
       else
-	stock_filter = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend+1,MAX_nfilt);
+	stock_filter = zeros(endo_nbr,gend+1,MAX_nfilt);
       end
     end
     for j=1:nvobs
@@ -1512,6 +1514,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	for b = 1:B;
 	  if options_.forecast
 	    irun_forc = irun_forc+1;
+	    irun_forc1 = irun_forc1+B;
 	  end
 	  if options_.smoother
 	    irun_smoo = irun_smoo+1;
@@ -1557,7 +1560,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      sfil_smoo = sfil_smoo + 1;
 	      irun_smoo = 0;
 	      stock_smooth = ...
-		  zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,MAX_nsmoo);
+		  zeros(endo_nbr,gend,MAX_nsmoo);
 	    end	
 	    if irun_inno < MAX_ninno
 	      stock_innov(:,:,irun_inno) = innov;
@@ -1580,7 +1583,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      sfil_filt = sfil_filt + 1;
 	      irun_filt = 0;
 	      stock_filter = ...
-		  zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend+1,MAX_nfilt);
+		  zeros(endo_nbr,gend+1,MAX_nfilt);
 	    end	
 	  end    			
 	  if options_.forecast
@@ -1607,12 +1610,14 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(ys(bayestopt_.mfys)',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
+	    stock_forcst1(:,:,irun_forc1) = forcst2(yf,horizon,dr,B);
 	    if irun_forc == MAX_nforc
-	      instr = [fname_ '_forecast' int2str(sfil_forc) ' stock_forcst;'];
-	      eval(['save ' instr]);
+	      save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
 	      sfil_forc = sfil_forc + 1;
 	      irun_forc = 0;
+	      irun_forc1 = 1:B;
 	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
+	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc*B);
 	    end
 	  end		
 	  waitbar(b/B,h);    
@@ -1641,10 +1646,10 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.forecast	
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
-	    instr = [fname_ '_forecast' int2str(sfil_forc) ' stock_forcst;'];
-	    eval(['save ' instr]);
+	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
+	    save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
 	  end
-	  clear stock_forcst;
+	  clear stock_forcst stock_forcst1
 	end
 	if options_.filtered_vars	
 	  if irun_filt
@@ -1708,7 +1713,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      sfil_smoo = sfil_smoo + 1;
 	      irun_smoo = 0;
 	      stock_smooth = ...
-		  zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,MAX_nsmoo);
+		  zeros(endo_nbr,gend,MAX_nsmoo);
 	    end	
 	    if irun_inno < MAX_ninno
 	      stock_innov(:,:,irun_inno) = innov;
@@ -1731,7 +1736,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      sfil_filt = sfil_filt + 1;                                       
 	      irun_filt = 0;                                                   
 	      stock_filter = ...                                               
-		  zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend+1,MAX_nfilt);     
+		  zeros(endo_nbr,gend+1,MAX_nfilt);     
 	    end	                                                                 
 	  end
 	  if options_.forecast
@@ -1753,12 +1758,14 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(ys(bayestopt_.mfys)',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
+	    stock_forcst1(:,:,irun_forc1) = forcst2(yf,horizon,dr,B);
 	    if irun_forc == MAX_nforc
-	      instr = [fname_ '_forecast' int2str(sfil_forc) ' stock_forcst;'];
-	      eval(['save ' instr]);
+	      save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
 	      sfil_forc = sfil_forc + 1;
 	      irun_forc = 0;
+	      irun_forc1 = 1:B;
 	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
+	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc*B);
 	    end
 	  end	
 	  waitbar(b/B,h);    
@@ -1787,10 +1794,10 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.forecast	
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
-	    instr = [fname_ '_forecast' int2str(sfil_forc) ' stock_forcst;'];
-	    eval(['save ' instr]);
+	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
+	    save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
 	  end
-	  clear stock_forcst;
+	  clear stock_forcst stock_forcst1
 	end
 	if options_.filtered_vars
 	  if irun_filt
@@ -1855,14 +1862,36 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    %end
 	    if irun_smoo < MAX_nsmoo
 	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      if options_.prefilter == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
+	      elseif options_.loglinear == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+		     trend_coeff*[1:gend];
+	      else
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(ys(bayestopt_.mfys),1,gend)+...
+		     trend_coeff*[1:gend];
+	      end
 	    else
 	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      if options_.prefilter == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
+	      elseif options_.loglinear == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+		     trend_coeff*[1:gend];
+	      else
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(ys(bayestopt_.mfys),1,gend)+...
+		     trend_coeff*[1:gend];
+	      end
 	      instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	      eval(['save ' instr]);
 	      sfil_smoo = sfil_smoo + 1;
 	      irun_smoo = 0;
 	      stock_smooth = ...
-		  zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,MAX_nsmoo);
+		zeros(endo_nbr,gend,MAX_nsmoo);
 	    end	
 	    if irun_inno < MAX_ninno
 	      stock_innov(:,:,irun_inno) = innov;
@@ -1885,9 +1914,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      sfil_filt = sfil_filt + 1;
 	      irun_filt = 0;
 	      stock_filter = ...
-		  zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend+1,MAX_nfilt);
-	    end	
-	  end    			
+		 zeros(endo_nbr,gend+1,MAX_nfilt);
+	    end
+	  end
 	  if options_.forecast	    
 	    dr = resol(ys_,0);
 	    for j = 1:nvar 
@@ -1902,14 +1931,16 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(ys(bayestopt_.mfys)',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
+	    stock_forcst1(:,:,irun_forc1) = forcst2(yf,horizon,dr,B);
 	    if irun_forc == MAX_nforc
-	      instr = [fname_ '_forecast' int2str(sfil_forc) ' stock_forcst;'];
-	      eval(['save ' instr]);
+	      save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
 	      sfil_forc = sfil_forc + 1;
 	      irun_forc = 0;
+	      irun_forc1 = 1:B;
 	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
+	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc*B);
 	    end
-	  end		
+	  end
 	  waitbar(b/B,h);    
 	end
 	if options_.smoother
@@ -1930,10 +1961,10 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.forecast	
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
-	    instr = [fname_ '_forecast' int2str(sfil_forc) ' stock_forcst;'];
-	    eval(['save ' instr]);
+	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
+	    save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
 	  end
-	  clear stock_forcst;
+	  clear stock_forcst stock_forcst1
 	end
 	if options_.filtered_vars	
 	  if irun_filt
@@ -1980,14 +2011,36 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if options_.smoother
 	    if irun_smoo < MAX_nsmoo
 	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      if options_.prefilter == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
+	      elseif options_.loglinear == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+		     trend_coeff*[1:gend];
+	      else
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(ys(bayestopt_.mfys),1,gend)+...
+		     trend_coeff*[1:gend];
+	      end
 	    else
 	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      if options_.prefilter == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
+	      elseif options_.loglinear == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+		     trend_coeff*[1:gend];
+	      else
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(ys(bayestopt_.mfys),1,gend)+...
+		     trend_coeff*[1:gend];
+	      end
 	      instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	      eval(['save ' instr]);
 	      sfil_smoo = sfil_smoo + 1;
 	      irun_smoo = 0;
 	      stock_smooth = ...
-		  zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,MAX_nsmoo);
+		  zeros(endo_nbr,gend,MAX_nsmoo);
 	    end	
 	    if irun_inno < MAX_ninno
 	      stock_innov(:,:,irun_inno) = innov;
@@ -2010,7 +2063,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      sfil_filt = sfil_filt + 1;
 	      irun_filt = 0;
 	      stock_filter = ...
-		  zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend+1,MAX_nfilt);
+		  zeros(endo_nbr,gend+1,MAX_nfilt);
 	    end	
 	  end    			
 	  if options_.forecast	    
@@ -2018,21 +2071,23 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    for j = 1:nvar 
 	      yyyy(dr.order_var(j),1:ykmin_) = atT(j,size(atT,2)-ykmin_+1:size(atT,2));
 	    end
-	      yf = transpose(simult_(yyyy,dr,ex_,options_.order));
-	      if options_.prefilter == 1
-		yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
-	      elseif options_.loglinear == 1
-		yf(:,IdObs) = yf(:,IdObs)+repmat(log(ys(bayestopt_.mfys)'),horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
-	      else
-		yf(:,IdObs) = yf(:,IdObs)+repmat(ys(bayestopt_.mfys)',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
-	      end
-	      stock_forcst(:,:,irun_forc) = yf;
+	    yf = transpose(simult_(yyyy,dr,ex_,options_.order));
+	    if options_.prefilter == 1
+	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
+	    elseif options_.loglinear == 1
+	      yf(:,IdObs) = yf(:,IdObs)+repmat(log(ys(bayestopt_.mfys)'),horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
+	    else
+	      yf(:,IdObs) = yf(:,IdObs)+repmat(ys(bayestopt_.mfys)',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
+	    end
+	    stock_forcst(:,:,irun_forc) = yf;
+	    stock_forcst1(:,:,irun_forc1) = forcst2(yf,horizon,dr,B);
 	    if irun_forc == MAX_nforc
-	      instr = [fname_ '_forecast' int2str(sfil_forc) ' stock_forcst;'];
-	      eval(['save ' instr]);
+	      save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
 	      sfil_forc = sfil_forc + 1;
 	      irun_forc = 0;
+	      irun_forc1 = 1:B;
 	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
+	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc*B);
 	    end
 	  end	
 	  waitbar(b/B,h);    
@@ -2055,10 +2110,10 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.forecast	
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
-	    instr = [fname_ '_forecast' int2str(sfil_forc) ' stock_forcst;'];
-	    eval(['save ' instr]);
+	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
+	    save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
 	  end
-	  clear stock_forcst;
+	  clear stock_forcst stock_forcst1
 	end
 	if options_.filtered_vars	
 	  if irun_filt
@@ -2109,40 +2164,52 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %%                                    %%
   if options_.forecast
     tmp = zeros(B,1);
+    tmp_big = zeros(B*B,1);
     fprintf('MH: Out of sample forecasts...\n');
     MeanForecast = zeros(options_.forecast,nvar);
     MedianForecast = zeros(options_.forecast,nvar);
     StdForecast = zeros(options_.forecast,nvar);
     HPD   = zeros(options_.forecast,nvar,2);
+    StdForecast_total = zeros(options_.forecast,nvar);
+    HPD_total   = zeros(options_.forecast,nvar,2);
     for step = 1:options_.forecast % ... Suffering is one very long moment.
       truestep = step+ykmin_;
       for i = 1:nvar;
 	StartLine = 0;
 	for file = 1:sfil_forc;
-	  instr = [fname_ '_forecast' int2str(file)];
-	  eval(['load ' instr]);
+	  load([fname_ '_forecast' int2str(file)]);
 	  MeanForecast(step,i) = MeanForecast(step,i)+sum(stock_forcst(truestep,SelecVariables(i),:),3);
 	  DeProfundis = size(stock_forcst,3); 
 	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_forcst(truestep,SelecVariables(i),:)); 
+	  tmp_big(StartLine+1:StartLine+DeProfundis) = squeeze(stock_forcst1(truestep,SelecVariables(i),:)); 
 	  StartLine = StartLine+DeProfundis;
 	end
 	tmp = sort(tmp);
+	tmp_big = sort(tmp_big)
 	MedianForecast(step,i) = tmp(round(B*0.5));
 	StdForecast(step,i) = std(tmp);
+	StdForecast_total(step,i) = std(tmp_big);
 	t = floor(options_.mh_conf_sig*B);
 	a = 1; 
 	b = t;
 	tmp2 = [1;t;tmp(t)-tmp(1)];
+	tmp2_big = [1;t;tmp_big(t)-tmp_big(1)];
 	while b <= B
 	  tmp1 = [a;b;tmp(b)-tmp(a)];
+	  tmp1_big = [a;b;tmp_big(b)-tmp_big(a)];
 	  a = a + 1;
 	  b = b + 1;
 	  if tmp1(3,1) < tmp2(3,1)
 	    tmp2 = tmp1;     
 	  end    
+	  if tmp1_big(3,1) < tmp2_big(3,1)
+	    tmp2_big = tmp1_big;     
+	  end    
 	end
 	HPD(step,i,1) = tmp(tmp2(1,1));
 	HPD(step,i,2) = tmp(tmp2(2,1));
+	HPD_total(step,i,1) = tmp_big(tmp2_big(1,1));
+	HPD_total(step,i,2) = tmp_big(tmp2_big(2,1));
       end
       disp(['    Period = ' int2str(step)]);
     end
@@ -2156,199 +2223,47 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       NAMES = [];
       TEXNAMES = [];
     end    
-    if nbplt == 1
-      hfig = figure('Name','Out of sample forecasts');
-      for i = 1:nvar
-	subplot(nr,nc,i)
-	if any(i==IdObs)
-	  idx = find(i==IdObs);
-	  plot(1:options_.forecast+10,[data(idx,size(data,2)-10+1:end)';MeanForecast(:,i)],'-b','linewidth',2)
-	  hold on            
-	  plot(11:10+options_.forecast,HPD(:,i,1),'--k','linewidth',1.5)
-	  plot(11:10+options_.forecast,HPD(:,i,2),'--k','linewidth',1.5)
-	  plot([11 11],ylim,'-g')
-	  set(gca,'XTick',[11 20 30 40 50 60 70 80 90 100]);
-	  set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});
-	  xlim([1 options_.forecast+10]);
-	  box on
-	  hold off
-	  title(deblank(varlist(i,:)),'Interpreter','none')
-	  eval(['oo_.Forecast.Mean.' deblank(varlist(i,:)) ' = MeanForecast(:,i)'';']);
-	  eval(['oo_.Forecast.Median.' deblank(varlist(i,:)) ' = MedianForecast(:,i)'';']);
-	  eval(['oo_.Forecast.Std.' deblank(varlist(i,:)) ' = StdForecast(:,i)'';']);
-	  eval(['oo_.Forecast.HPDinf.' deblank(varlist(i,:)) ' = squeeze(HPD(:,i,1))'';']);
-	  eval(['oo_.Forecast.HPDsup.' deblank(varlist(i,:)) ' = squeeze(HPD(:,i,2))'';']);
-	  if TeX
-	    NAMES = strvcat(NAMES,deblank(varlist(i,:)));
-	    TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(i,:)) ' $']);
-	  end
-	else    
-	  plot(1:options_.forecast,HPD(:,i,1),'--k','linewidth',1.5)
-	  hold on
-	  plot(1:options_.forecast,HPD(:,i,2),'--k','linewidth',1.5)
-	  plot(1:options_.forecast,MeanForecast(:,i),'-b','linewidth',2)
-	  set(gca,'XTick',[1 10 20 30 40 50 60 70 80 90]);
-	  set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});    			
-	  xlim([1 options_.forecast]);
-	  box on
-	  hold off
-	  title(deblank(varlist(i,:)),'Interpreter','none')
-	  eval(['oo_.Forecast.Mean.' deblank(varlist(i,:)) ' = MeanForecast(:,i)'';']);
-	  eval(['oo_.Forecast.Median.' deblank(varlist(i,:)) ' = MedianForecast(:,i)'';']);
-	  eval(['oo_.Forecast.Std.' deblank(varlist(i,:)) ' = StdForecast(:,i)'';']);
-	  eval(['oo_.Forecast.HPDinf.' deblank(varlist(i,:)) ' = squeeze(HPD(:,i,1))'';']);
-	  eval(['oo_.Forecast.HPDsup.' deblank(varlist(i,:)) ' = squeeze(HPD(:,i,2))'';']);
-	  if TeX
-	    NAMES = strvcat(NAMES,deblank(varlist(i,:)));
-	    TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(i,:)) ' $']);
-	  end
-	end   
-      end
-      eval(['print -depsc2 ' fname_ '_Forecasts' int2str(1)]);
-      eval(['print -dpdf ' fname_ '_Forecasts' int2str(1)]);
-      saveas(hfig,[fname_ '_Forecasts' int2str(1) '.fig']);
-      if options_.nograph, close(hfig), end
-      if TeX
-	fprintf(fidTeX,'\\begin{figure}[H]\n');
-	for jj = 1:nvar
-	  fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-	end    
-	fprintf(fidTeX,'\\centering \n');
-	fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Forecasts%s}\n',fname_,int2str(1));
-	fprintf(fidTeX,'\\caption{DSGE posterior mean forecats with HPD intervals.}');
-	fprintf(fidTeX,'\\label{Fig:Forecasts:%s}\n',int2str(1));
-	fprintf(fidTeX,'\\end{figure}\n');
-	fprintf(fidTeX,' \n');
-	fprintf(fidTeX,' \n');
-	fprintf(fidTeX,'% End Of TeX File. \n');
-	fclose(fidTeX); 
-      end
-    else
-      for plt = 1:nbplt-1
-	if TeX
-	  NAMES = [];
-	  TEXNAMES = [];
-	end
-	hfig = figure('Name','Out of sample forecasts');
-	for i = 1:nstar
-	  k = (plt-1)*nstar+i;
-	  subplot(nr,nc,i)
-	  if any(k==IdObs)
-	    idx = find(k==IdObs);
-	    plot(1:options_.forecast+10,[data(idx,size(data,2)-10+1:end)';MeanForecast(:,k)],'-b','linewidth',2)
-	    hold on            
-	    plot(11:10+options_.forecast,HPD(:,k,1),'--k','linewidth',1.5)
-	    plot(11:10+options_.forecast,HPD(:,k,2),'--k','linewidth',1.5)
-	    plot([11 11],ylim,'-g')
-	    set(gca,'XTick',[11 20 30 40 50 60 70 80 90 100]);
-	    set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});
-	    xlim([1 options_.forecast+10]);
-	    box on
-	    title(deblank(varlist(k,:)),'Interpreter','none')
-	    hold off
-	    eval(['oo_.Forecast.Mean.' deblank(varlist(k,:)) ' = MeanForecast(:,k)'';']);
-	    eval(['oo_.Forecast.Median.' deblank(varlist(k,:)) ' = MedianForecast(:,k)'';']);
-	    eval(['oo_.Forecast.Std.' deblank(varlist(k,:)) ' = StdForecast(:,k)'';']);
-	    eval(['oo_.Forecast.HPDinf.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,1))'';']);
-	    eval(['oo_.Forecast.HPDsup.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,2))'';']);
-	    if TeX
-	      NAMES = strvcat(NAMES,deblank(varlist(k,:)));
-	      TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(k,:)) ' $']);
-	    end
-	  else    
-	    plot(1:options_.forecast,HPD(:,k,1),'--k','linewidth',1.5)
-	    hold on
-	    plot(1:options_.forecast,HPD(:,k,2),'--k','linewidth',1.5)
-	    plot(1:options_.forecast,MeanForecast(:,k),'-b','linewidth',2)
-	    set(gca,'XTick',[1 10 20 30 40 50 60 70 80 90]);
-	    set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});    			
-	    xlim([1 options_.forecast]);
-	    box on
-	    title(deblank(varlist(k,:)),'Interpreter','none')
-	    hold off
-	    eval(['oo_.Forecast.Mean.' deblank(varlist(k,:)) ' = MeanForecast(:,k)'';']);
-	    eval(['oo_.Forecast.Median.' deblank(varlist(k,:)) ' = MedianForecast(:,k)'';']);
-	    eval(['oo_.Forecast.Std.' deblank(varlist(k,:)) ' = StdForecast(:,k)'';']);
-	    eval(['oo_.Forecast.HPDinf.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,1))'';']);
-	    eval(['oo_.Forecast.HPDsup.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,2))'';']);
-	    if TeX
-	      NAMES = strvcat(NAMES,deblank(varlist(k,:)));
-	      TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(k,:)) ' $']);
-	    end
-	  end   
-	end
-	eval(['print -depsc2 ' fname_ '_Forecasts' int2str(plt)]);
-	eval(['print -dpdf ' fname_ '_Forecasts' int2str(plt)]);
-	saveas(hfig,[fname_ '_Forecasts' int2str(plt) '.fig']);
-	if options_.nograph, close(hfig), end
-	if TeX
-	  fprintf(fidTeX,'\\begin{figure}[H]\n');
-	  for jj = 1:nstar
-	    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-	  end    
-	  fprintf(fidTeX,'\\centering \n');
-	  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Forecasts%s}\n',fname_,int2str(plt));
-	  fprintf(fidTeX,'\\caption{DSGE posterior mean forecats with HPD intervals.}');
-	  fprintf(fidTeX,'\\label{Fig:Forecasts:%s}\n',int2str(plt));
-	  fprintf(fidTeX,'\\end{figure}\n');
-	  fprintf(fidTeX,' \n');
-	end
-      end
-      hfig = figure('Name','Out of sample forecasts');
+    for plt = 1:nbplt
       if TeX
 	NAMES = [];
 	TEXNAMES = [];
       end
-      for i=1:nfor-(nbplt-1)*nstar
-	k = (nbplt-1)*nstar+i;
-	subplot(lr,lc,i);
+      hfig = figure('Name','Out of sample forecasts');
+      for i = 1:nstar
+	k = (plt-1)*nstar+i;
+	subplot(nr,nc,i)
+	hold on            
 	if any(k==IdObs)
 	  idx = find(k==IdObs);
-	  plot(1:options_.forecast+10,[data(idx,size(data,2)-10+1:end)';MeanForecast(:,k)],'-b','linewidth',2)
-	  hold on            
-	  plot(11:10+options_.forecast,HPD(:,k,1),'--k','linewidth',1.5)
-	  plot(11:10+options_.forecast,HPD(:,k,2),'--k','linewidth',1.5)
-	  plot([11 11],'-g')
-	  set(gca,'XTick',[11 20 30 40 50 60 70 80 90 100]);
-	  set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});
-	  xlim([1 options_.forecast+10]);
-	  box on
-	  title(deblank(varlist(k,:)),'Interpreter','none')
-	  hold off
-	  eval(['oo_.Forecast.Mean.' deblank(varlist(k,:)) ' = MeanForecast(:,k)'';']);
-	  eval(['oo_.Forecast.Median.' deblank(varlist(k,:)) ' = MedianForecast(:,k)'';']);
-	  eval(['oo_.Forecast.Std.' deblank(varlist(k,:)) ' = StdForecast(:,k)'';']);
-	  eval(['oo_.Forecast.HPDinf.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,1))'';']);
-	  eval(['oo_.Forecast.HPDsup.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,2))'';']);
-	  if TeX
-	    NAMES = strvcat(NAMES,deblank(varlist(k,:)));
-	    TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(k,:)) ' $']);
-	  end	
+	  plot(1:options_.forecast+10,[data(idx,size(data,2)-10+1:end)'; ...
+		    MeanForecast(:,k)],'-b','linewidth',2)
 	else
-	  plot(1:options_.forecast,HPD(:,k,1),'--k','linewidth',1.5)                               
-	  hold on                                                                                  
-	  plot(1:options_.forecast,HPD(:,k,2),'--k','linewidth',1.5)                               
-	  plot(1:options_.forecast,MeanForecast(:,k),'-b','linewidth',2)                           
-	  set(gca,'XTick',[1 10 20 30 40 50 60 70 80 90]);                                         
-	  set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});    			 
-	  xlim([1 options_.forecast]);                                                             
-	  box on                                                                                   
-	  title(deblank(varlist(k,:)),'Interpreter','none')                                        
-	  hold off                                                                                 
-	  eval(['oo_.Forecast.Mean.' deblank(varlist(k,:)) ' = MeanForecast(:,k)'';']);
-	  eval(['oo_.Forecast.Median.' deblank(varlist(k,:)) ' = MedianForecast(:,k)'';']);
-	  eval(['oo_.Forecast.Std.' deblank(varlist(k,:)) ' = StdForecast(:,k)'';']);
-	  eval(['oo_.Forecast.HPDinf.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,1))'';']);
-	  eval(['oo_.Forecast.HPDsup.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,2))'';']);    			
-	  if TeX                                                                               
-	    NAMES = strvcat(NAMES,deblank(varlist(k,:)));                                    
-	    TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(k,:)) ' $']);              
-	  end                                                                                  
+	  plot(1:options_.forecast,MeanForecast(:,k),'-b','linewidth',2)
+	end	  
+	plot(11:10+options_.forecast,HPD(:,k,1),'--k','linewidth',1.5)
+	plot(11:10+options_.forecast,HPD(:,k,2),'--k','linewidth',1.5)
+	plot(11:10+options_.forecast,HPD_total(:,k,1),'--k','linewidth',1.5)
+	plot(11:10+options_.forecast,HPD_total(:,k,2),'--k','linewidth',1.5)
+	plot([11 11],ylim,'-g')
+	set(gca,'XTick',[11 20 30 40 50 60 70 80 90 100]);
+	set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});
+	xlim([1 options_.forecast+10]);
+	box on
+	title(deblank(varlist(k,:)),'Interpreter','none')
+	hold off
+	eval(['oo_.Forecast.Mean.' deblank(varlist(k,:)) ' = MeanForecast(:,k)'';']);
+	eval(['oo_.Forecast.Median.' deblank(varlist(k,:)) ' = MedianForecast(:,k)'';']);
+	eval(['oo_.Forecast.Std.' deblank(varlist(k,:)) ' = StdForecast(:,k)'';']);
+	eval(['oo_.Forecast.HPDinf.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,1))'';']);
+	eval(['oo_.Forecast.HPDsup.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,2))'';']);
+	if TeX
+	  NAMES = strvcat(NAMES,deblank(varlist(k,:)));
+	  TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(k,:)) ' $']);
 	end
-      end	 
-      eval(['print -depsc2 ' fname_ '_Forecasts' int2str(nbplt)]);
-      eval(['print -dpdf ' fname_ '_Forecasts' int2str(nbplt)]);
-      saveas(hfig,[fname_ '_Forecasts' int2str(nbplt) '.fig']);
+      end
+      eval(['print -depsc2 ' fname_ '_Forecasts' int2str(plt)]);
+      eval(['print -dpdf ' fname_ '_Forecasts' int2str(plt)]);
+      saveas(hfig,[fname_ '_Forecasts' int2str(plt) '.fig']);
       if options_.nograph, close(hfig), end
       if TeX
 	fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -2356,14 +2271,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
 	end    
 	fprintf(fidTeX,'\\centering \n');
-	fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Forecasts%s}\n',fname_,int2str(nplt));
+	fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Forecasts%s}\n',fname_,int2str(plt));
 	fprintf(fidTeX,'\\caption{DSGE posterior mean forecats with HPD intervals.}');
-	fprintf(fidTeX,'\\label{Fig:Forecasts:%s}\n',int2str(nplt));
+	fprintf(fidTeX,'\\label{Fig:Forecasts:%s}\n',int2str(plt));
 	fprintf(fidTeX,'\\end{figure}\n');
 	fprintf(fidTeX,' \n');
-	fprintf(fidTeX,' \n');
-	fprintf(fidTeX,'% End Of TeX File. \n');
-	fclose(fidTeX);
       end
     end
     fprintf('MH: Out of sample forecasts, done!\n')
@@ -2374,12 +2286,12 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %%
   if options_.smoother
     fprintf('MH: Smooth variables...\n')
-    MeanSmooth = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend);
-    MedianSmooth = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend);
-    StdSmooth = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend);
-    DistribSmooth = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,9);
-    HPDSmooth = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,2);
-    for i = 1:size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic;
+    MeanSmooth = zeros(endo_nbr,gend);
+    MedianSmooth = zeros(endo_nbr,gend);
+    StdSmooth = zeros(endo_nbr,gend);
+    DistribSmooth = zeros(endo_nbr,gend,9);
+    HPDSmooth = zeros(endo_nbr,gend,2);
+    for i = 1:endo_nbr;
       for t = 1:gend
 	StartLine = 0;
 	for file = 1:sfil_smoo-1;
@@ -2475,26 +2387,26 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     disp(' ')
     if nvn
       fprintf('MH: Smooth measurement error...\n')
-      MeanError = zeros(gend,nvobs);
-      MedianError = zeros(gend,nvobs);
-      StdError = zeros(gend,nvobs);
-      DistribError = zeros(gend,nvobs,9);
-      HPDError = zeros(gend,nvobs,2);
+      MeanError = zeros(nvobs,gend);
+      MedianError = zeros(nvobs,gend);
+      StdError = zeros(nvobs,gend);
+      DistribError = zeros(nvobs,gend,9);
+      HPDError = zeros(nvobs,gend,2);
       for i = 1:nvobs;
 	for t = 1:gend
 	  StartLine = 0;
 	  for file = 1:sfil_erro;
 	    instr = [fname_ '_error' int2str(file)];
 	    eval(['load ' instr]);
-	    MeanError(t,i) = MeanError(t,i)+sum(stock_error(t,i,:),3);
+	    MeanError(i,t) = MeanError(i,t)+sum(stock_error(t,i,:),3);
 	    DeProfundis = size(stock_error,3); 
 	    tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_error(t,i,:)); 
 	    StartLine = StartLine+DeProfundis;
 	  end
 	  tmp = sort(tmp);
-	  MedianError(t,i) = tmp(round(B*0.5));
-	  StdError(t,i) = std(tmp);
-	  DistribError(t,i,:) = reshape(tmp(deciles),1,1,9);
+	  MedianError(i,t) = tmp(round(B*0.5));
+	  StdError(i,t) = std(tmp);
+	  DistribError(i,t,:) = reshape(tmp(deciles),1,1,9);
 	  tt = floor(options_.mh_conf_sig*B);
 	  a = 1; 
 	  b = tt;
@@ -2507,20 +2419,20 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      tmp2 = tmp1;     
 	    end    
 	  end
-	  HPDError(t,i,1) = tmp(tmp2(1,1));
-	  HPDError(t,i,2) = tmp(tmp2(2,1));
+	  HPDError(i,t,1) = tmp(tmp2(1,1));
+	  HPDError(i,t,2) = tmp(tmp2(2,1));
 	end
-	disp(['    Variable: ' deblank(options_.varobs(i))]);
+	disp(['    Variable: ' deblank(options_.varobs(i,:))]);
       end
       clear stock_error;
       MeanError = MeanError/B;
       for i=1:nvobs
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.Mean.' deblank(options_.varobs(i)) ' = MeanError(:,i)'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.Median.' deblank(options_.varobs(i)) ' = MedianError(:,i)'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.Std.' deblank(options_.varobs(i)) ' = StdError(:,i)'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.Distribution.' deblank(options_.varobs(i)) ' = squeeze(DistribError(:,i,:))'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.HPDinf.' deblank(options_.varobs(i)) ' = squeeze(HPDError(:,i,1))'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.HPDsup.' deblank(options_.varobs(i)) ' = squeeze(HPDError(:,i,2))'';']);
+	eval(['oo_.PosteriorSmoothedMeasurementErrors.Mean.' deblank(options_.varobs(i)) ' = MeanError(i,:)'';']);
+	eval(['oo_.PosteriorSmoothedMeasurementErrors.Median.' deblank(options_.varobs(i)) ' = MedianError(i,:)'';']);
+	eval(['oo_.PosteriorSmoothedMeasurementErrors.Std.' deblank(options_.varobs(i)) ' = StdError(i,:)'';']);
+	eval(['oo_.PosteriorSmoothedMeasurementErrors.Distribution.' deblank(options_.varobs(i)) ' = squeeze(DistribError(i,:,:))'';']);
+	eval(['oo_.PosteriorSmoothedMeasurementErrors.HPDinf.' deblank(options_.varobs(i)) ' = squeeze(HPDError(i,:,1))'';']);
+	eval(['oo_.PosteriorSmoothedMeasurementErrors.HPDsup.' deblank(options_.varobs(i)) ' = squeeze(HPDError(i,:,2))'';']);
       end
       fprintf('MH: Smooth measurement error, done!\n')
       disp(' ')
@@ -2528,792 +2440,34 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     %%
     %% Now I plot the smooth -structural- shocks
     %%
-    [nbplt,nr,nc,lr,lc,nstar] = pltorg(exo_nbr);
-    if TeX
-      fidTeX = fopen([fname_ '_SmoothedShocks.TeX'],'w');
-      fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
-      fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-      fprintf(fidTeX,' \n');
-    end    
-    if nbplt == 1
-      hh = figure('Name','Smoothed shocks');    
-      NAMES = [];
-      if TeX; TEXNAMES = []; end;
-      for i=1:exo_nbr
-	set(0,'CurrentFigure',hh)
-	subplot(nr,nc,i);
-	plot([1 gend],[0 0],'-r','linewidth',0.5);
-	hold on
-	for j = 1:9
-	  plot(1:gend,DistribInnov(i,:,j),'-g','linewidth',0.5)
-	end
-	plot(1:gend,MeanInnov(i,:),'-k','linewidth',1)
-	xlim([1 gend]);
-	hold off
-	ih = figure('Visible','off');
-	set(0,'CurrentFigure',ih)
-	plot([1 gend],[0 0],'-r','linewidth',0.5);
-	hold on
-	for j = 1:9
-	  plot(1:gend,DistribInnov(i,:,j),'-g','linewidth',0.5)
-	end
-	plot(1:gend,MeanInnov(i,:),'-k','linewidth',1)
-	xlim([1 gend]);
-	hold off
-	name    = lgx_(i,:);
-	NAMES   = strvcat(NAMES,name);
-	if ~isempty(options_.XTick)
-	  set(gca,'XTick',options_.XTick)
-	  set(gca,'XTickLabel',options_.XTickLabel)
-	end
-	eval(['print -depsc2 ' fname_ '_SmoothedShock_' name]);
-	eval(['print -dpdf ' fname_ '_SmoothedShock_' name]);
-	saveas(ih,[fname_ '_SmoothedShock_' name '.fig']);
-	if TeX
-	  texname = lgx_TeX_(i,1);
-	  TEXNAMES   = strvcat(TEXNAMES,['$ ' deblank(texname) ' $']);
-	end
-	set(0,'CurrentFigure',hh)
-	title(name,'Interpreter','none')
-	if ~isempty(options_.XTick)
-	  set(gca,'XTick',options_.XTick)
-	  set(gca,'XTickLabel',options_.XTickLabel)
-	end
-      end
-      eval(['print -depsc2 ' fname_ '_SmoothedShocks' int2str(1)]);
-      eval(['print -dpdf ' fname_ '_SmoothedShocks' int2str(1)]);
-      saveas(hh,[fname_ '_SmoothedShocks' int2str(1) '.fig']);
-      if options_.nograph, close(hh), end
-      if TeX
-	fprintf(fidTeX,'\\begin{figure}[H]\n');
-	for jj = 1:exo_nbr
-	  fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-	end    
-	fprintf(fidTeX,'\\centering \n');
-	fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',fname_,int2str(1));
-	fprintf(fidTeX,'\\caption{Smoothed shocks.}');
-	fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(1));
-	fprintf(fidTeX,'\\end{figure}\n');
-	fprintf(fidTeX,' \n');
-	fprintf(fidTeX,'%% End of TeX file.\n');
-	fclose(fidTeX);
-      end    
-    else
-      for plt = 1:nbplt-1
-	hh = figure('Name','Smoothed shocks');
-	NAMES = [];
-	if TeX; TEXNAMES = []; end;
-	for i=1:nstar
-	  k = (plt-1)*nstar+i;
-	  set(0,'CurrentFigure',hh)
-	  subplot(nr,nc,i);
-	  plot([1 gend],[0 0],'-r','linewidth',0.5)
-	  hold on
-	  for j = 1:9
-	    plot(1:gend,DistribInnov(k,:,j),'-g','linewidth',0.5)
-	  end
-	  plot(1:gend,MeanInnov(k,:),'-k','linewidth',1)
-	  xlim([1 gend])
-	  hold off
-	  name = lgx_(k,:);
-	  NAMES = strvcat(NAMES,name);
-	  ih = figure('Visible','off');
-	  set(0,'CurrentFigure',ih)
-	  plot([1 gend],[0 0],'-r','linewidth',0.5);
-	  hold on
-	  for j = 1:9
-	    plot(1:gend,DistribInnov(k,:,j),'-g','linewidth',0.5)
-	  end
-	  plot(1:gend,MeanInnov(k,:),'-k','linewidth',1)
-	  xlim([1 gend]);
-	  hold off
-	  if ~isempty(options_.XTick)
-	    set(gca,'XTick',options_.XTick)
-	    set(gca,'XTickLabel',options_.XTickLabel)
-	  end
-	  eval(['print -depsc2 ' fname_ '_SmoothedShock_' name]);
-	  eval(['print -dpdf ' fname_ '_SmoothedShock_' name]);
-	  saveas(ih,[fname_ '_SmoothedShock_' name '.fig']);
-	  if TeX
-	    texname = lgx_TeX_(k,:);
-	    TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(texname) ' $']);
-	  end    
-	  set(0,'CurrentFigure',hh)
-	  title(name,'Interpreter','none')
-	  if ~isempty(options_.XTick)
-	    set(gca,'XTick',options_.XTick)
-	    set(gca,'XTickLabel',options_.XTickLabel)
-	  end
-	end
-	eval(['print -depsc2 ' fname_ '_SmoothedShocks' int2str(plt)]);
-	eval(['print -dpdf ' fname_ '_SmoothedShocks' int2str(plt)]);
-	saveas(hh,[fname_ '_SmoothedShocks' int2str(plt) '.fig']);
-	if options_.nograph, close(hh), end
-	if TeX
-	  fprintf(fileone,'\\begin{figure}[H]\n');
-	  for jj = 1:nstar
-	    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-	  end    
-	  fprintf(fidTeX,'\\centering \n');
-	  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',fname_,int2str(plt));
-	  fprintf(fidTeX,'\\caption{Smoothed shocks.}');
-	  fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(plt));
-	  fprintf(fidTeX,'\\end{figure}\n');
-	  fprintf(fidTeX,' \n');
-	end    
-      end
-      hh = figure('Name','Smoothed shocks');
-      NAMES = [];
-      if TeX; TEXNAMES = []; end;
-      for i=1:exo_nbr-(nbplt-1)*nstar
-	k = (nbplt-1)*nstar+i;
-	set(0,'CurrentFigure',hh)
-	if lr ~= 0
-	  subplot(lr,lc,i);
-	else
-	  subplot(nr,nc,i);
-	end    
-	plot([1 gend],[0 0],'-r','linewidth',0.5)
-	hold on
-	for j = 1:9
-	  plot(1:gend,DistribInnov(k,:,j),'-g','linewidth',0.5)
-	end
-	plot(1:gend,MeanInnov(k,:),'-k','linewidth',1)
-	xlim([1 gend]);
-	hold off
-	name = lgx_(k,:);
-	NAMES = strvcat(NAMES,name);
-	ih = figure('Visible','off');
-	set(0,'CurrentFigure',ih)
-	plot([1 gend],[0 0],'-r','linewidth',0.5);
-	hold on
-	for j = 1:9
-	  plot(1:gend,DistribInnov(k,:,j),'-g','linewidth',0.5)
-	end
-	plot(1:gend,MeanInnov(k,:),'-k','linewidth',1)
-	xlim([1 gend]);
-	hold off
-	if ~isempty(options_.XTick)
-	  set(gca,'XTick',options_.XTick)
-	  set(gca,'XTickLabel',options_.XTickLabel)
-	end
-	eval(['print -depsc2 ' fname_ '_SmoothedShock_' name]);
-	eval(['print -dpdf ' fname_ '_SmoothedShock_' name]);
-	saveas(ih,[fname_ '_SmoothedShock_' name '.fig']);
-	if TeX
-	  texname  = lgx_TeX_(k,:);
-	  TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(texname) ' $']);
-	end
-	set(0,'CurrentFigure',hh)
-	title(name,'Interpreter','none');
-	if ~isempty(options_.XTick)
-	  set(gca,'XTick',options_.XTick)
-	  set(gca,'XTickLabel',options_.XTickLabel)
-	end
-      end
-      eval(['print -depsc2 ' fname_ '_SmoothedShocks' int2str(nbplt)]);
-      eval(['print -dpdf ' fname_ '_SmoothedShocks' int2str(nbplt)]);
-      saveas(hh,[fname_ '_SmoothedShocks' int2str(nbplt) '.fig']);
-      if options_.nograph, close(hh), end
-      if TeX
-	fprintf(fileone,'\\begin{figure}[H]\n');
-	for jj = 1:nstar
-	  fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-	end    
-	fprintf(fidTeX,'\\centering \n');
-	fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',fname_,int2str(nbplt));
-	fprintf(fidTeX,'\\caption{Smoothed shocks.}');
-	fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(nbplt));
-	fprintf(fidTeX,'\\end{figure}\n');
-	fprintf(fidTeX,' \n');
-	fprintf(fidTeX,' \n');
-	fprintf(fidTeX,'%% End of TeX file.\n');
-	fclose(fidTeX);
-      end
-    end % nbplt == 1 (smooth -structural- shocks)	
-	%%
-	%%	Smoothed variables (observed and unobserved)
-	%%
-	%%	Here non zero steady state levels and linear trends are removed... Would be nice
-	%%  to add them... Later.
-	[nbplt,nr,nc,lr,lc,nstar] = pltorg(size(lgy_,1));
-	if TeX
-	  fidTeX = fopen([fname_ '_SmoothedVariables.TeX'],'w');
-	  fprintf(fidTeX,'%% TeX eps-loader file generated by metropolis.m (Dynare).\n');
-	  fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-	  fprintf(fidTeX,' \n');
-	end    
-	if nbplt == 1
-	  hh = figure('Name','Smoothed variables');    
-	  NAMES = [];
-	  if TeX; TEXNAMES = []; end;
-	  for i=1:size(lgy_,1)
-	    set(0,'CurrentFigure',hh)
-	    subplot(nr,nc,i);
-	    plot([1 gend],[0 0],'-r','linewidth',0.5);
-	    hold on
-	    for j = 1:9
-	      plot(1:gend,DistribSmooth(i,:,j),'-g','linewidth',0.5)
-	    end
-	    plot(1:gend,MeanSmooth(i,:),'-k','linewidth',1)
-	    xlim([1 gend]);
-	    hold off
-	    ih = figure('Visible','off');
-	    set(0,'CurrentFigure',ih)
-	    plot([1 gend],[0 0],'-r','linewidth',0.5);
-	    hold on
-	    for j = 1:9
-	      plot(1:gend,DistribSmooth(i,:,j),'-g','linewidth',0.5)
-	    end
-	    plot(1:gend,MeanSmooth(i,:),'-k','linewidth',1)
-	    xlim([1 gend]);
-	    hold off
-	    name = deblank(lgy_(dr_.order_var(i),:));
-	    NAMES   = strvcat(NAMES,name);
-	    if ~isempty(options_.XTick)
-	      set(gca,'XTick',options_.XTick)
-	      set(gca,'XTickLabel',options_.XTickLabel)
-	    end
-	    eval(['print -depsc2 ' fname_ '_SmoothedVariable_' name]);
-	    eval(['print -dpdf ' fname_ '_SmoothedVariable_' name]);
-	    saveas(ih,[fname_ '_SmoothedVariable_' name '.fig']);
-	    if TeX
-	      texname = deblank(lgy_TeX_(dr_.order_var(i),1));
-	      TEXNAMES   = strvcat(TEXNAMES,['$' texname '$']);
-	    end
-	    set(0,'CurrentFigure',hh)
-	    title(name,'Interpreter','none')
-	    if ~isempty(options_.XTick)
-	      set(gca,'XTick',options_.XTick)
-	      set(gca,'XTickLabel',options_.XTickLabel)
-	    end
-	  end
-	  eval(['print -depsc2 ' fname_ '_SmoothedVariables' int2str(1)]);
-	  eval(['print -dpdf ' fname_ '_SmoothedVariables' int2str(1)]);
-	  saveas(hh,[fname_ '_SmoothedVariables' int2str(1) '.fig']);
-	  if options_.nograph, close(hh), end
-	  if TeX
-	    fprintf(fidTeX,'\\begin{figure}[H]\n');
-	    for jj = 1:exo_nbr
-	      fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-	    end    
-	    fprintf(fidTeX,'\\centering \n');
-	    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedVariables%s}\n',fname_,int2str(1));
-	    fprintf(fidTeX,'\\caption{Smoothed variables.}');
-	    fprintf(fidTeX,'\\label{Fig:SmoothedVariables:%s}\n',int2str(1));
-	    fprintf(fidTeX,'\\end{figure}\n');
-	    fprintf(fidTeX,' \n');
-	    fprintf(fidTeX,'%% End of TeX file.\n');
-	    fclose(fidTeX);
-	  end    
-	else
-	  for plt = 1:nbplt-1
-	    hh = figure('Name','Smoothed variables');
-	    NAMES = [];
-	    TEXNAMES = [];
-	    for i=1:nstar
-	      k = (plt-1)*nstar+i;
-	      set(0,'CurrentFigure',hh)
-	      subplot(nr,nc,i);
-	      plot([1 gend],[0 0],'-r','linewidth',0.5)
-	      hold on
-	      for j = 1:9
-		plot(1:gend,DistribSmooth(k,:,j),'-g','linewidth',0.5)
-	      end
-	      plot(1:gend,MeanSmooth(k,:),'-k','linewidth',1)
-	      xlim([1 gend]);
-	      hold off
-	      name = deblank(lgy_(dr_.order_var(k),:));
-	      NAMES = strvcat(NAMES,name);
-	      ih = figure('Visible','off');
-	      set(0,'CurrentFigure',ih)
-	      plot([1 gend],[0 0],'-r','linewidth',0.5);
-	      hold on
-	      for j = 1:9
-		plot(1:gend,DistribSmooth(k,:,j),'-g','linewidth',0.5)
-	      end
-	      plot(1:gend,MeanSmooth(k,:),'-k','linewidth',1)
-	      xlim([1 gend]);
-	      hold off
-	      if ~isempty(options_.XTick)
-		set(gca,'XTick',options_.XTick)
-		set(gca,'XTickLabel',options_.XTickLabel)
-	      end
-	      eval(['print -depsc2 ' fname_ '_SmoothedVariable_' name]);
-	      eval(['print -dpdf ' fname_ '_SmoothedVariable_' name]);
-	      saveas(ih,[fname_ '_SmoothedVariable_' name '.fig']);
-	      if TeX
-		texname = deblank(lgy_TeX_(dr_.order_var(k),:));
-		TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
-	      end    
-	      set(0,'CurrentFigure',hh)
-	      title(name,'Interpreter','none')
-	      if ~isempty(options_.XTick)
-		set(gca,'XTick',options_.XTick)
-		set(gca,'XTickLabel',options_.XTickLabel)
-	      end
-	    end
-	    eval(['print -depsc2 ' fname_ '_SmoothedVariables' int2str(plt)]);
-	    eval(['print -dpdf ' fname_ '_SmoothedVariables' int2str(plt)]);
-	    saveas(hh,[fname_ '_SmoothedVariables' int2str(plt) '.fig']);
-	    if options_.nograph, close(hh), end
-	    if TeX
-	      fprintf(fidTeX,'\\begin{figure}[H]\n');
-	      for jj = 1:nstar
-		fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-	      end    
-	      fprintf(fidTeX,'\\centering \n');
-	      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedVariables%s}\n',fname_,int2str(plt));
-	      fprintf(fidTeX,'\\caption{Smoothed variables.}');
-	      fprintf(fidTeX,'\\label{Fig:SmoothedVariables:%s}\n',int2str(plt));
-	      fprintf(fidTeX,'\\end{figure}\n');
-	      fprintf(fidTeX,' \n');
-	    end    
-	  end
-	  hh = figure('Name','Smoothed variables');
-	  NAMES = [];
-	  TEXNAMES = [];
-	  for i=1:nvar-(nbplt-1)*nstar
-	    k = (nbplt-1)*nstar+i;
-	    set(0,'CurrentFigure',hh)
-	    if lr ~= 0
-	      subplot(lr,lc,i);
-	    else
-	      subplot(nr,nc,i);
-	    end    
-	    plot([1 gend],[0 0],'-r','linewidth',0.5)
-	    hold on
-	    for j = 1:9
-	      plot(1:gend,DistribSmooth(k,:,j),'-g','linewidth',0.5)
-	    end
-	    plot(1:gend,MeanSmooth(k,:),'-k','linewidth',1)
-	    xlim([1 gend]);
-	    hold off
-	    name     = deblank(lgy_(dr_.order_var(k),:));
-	    NAMES    = strvcat(NAMES,name);
-	    ih = figure('Visible','off');
-	    set(0,'CurrentFigure',ih)
-	    plot([1 gend],[0 0],'-r','linewidth',0.5);
-	    hold on
-	    for j = 1:9
-	      plot(1:gend,DistribSmooth(k,:,j),'-g','linewidth',0.5)
-	    end
-	    plot(1:gend,MeanSmooth(k,:),'-k','linewidth',1)
-	    xlim([1 gend]);
-	    hold off
-	    if ~isempty(options_.XTick)
-	      set(gca,'XTick',options_.XTick)
-	      set(gca,'XTickLabel',options_.XTickLabel)
-	    end
-	    eval(['print -depsc2 ' fname_ '_SmoothedVariable_' name]);
-	    eval(['print -dpdf ' fname_ '_SmoothedVariable_' name]);
-	    saveas(ih,[fname_ '_SmoothedVariable_' name '.fig']);
-	    if TeX
-	      texname  = deblank(lgy_TeX_(dr_.order_var(k),:));
-	      TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
-	    end
-	    set(0,'CurrentFigure',hh)
-	    title(name,'Interpreter','none');
-	    if ~isempty(options_.XTick)
-	      set(gca,'XTick',options_.XTick)
-	      set(gca,'XTickLabel',options_.XTickLabel)
-	    end
-	  end
-	  eval(['print -depsc2 ' fname_ '_SmoothedVariables' int2str(nbplt)]);
-	  eval(['print -dpdf ' fname_ '_SmoothedVariables' int2str(nbplt)]);
-	  saveas(hh,[fname_ '_SmoothedVariables' int2str(nbplt) '.fig']);
-	  if options_.nograph, close(hh), end
-	  if TeX
-	    fprintf(fidTeX,'\\begin{figure}[H]\n');
-	    for jj = 1:size(NAMES,1);
-	      fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-	    end    
-	    fprintf(fidTeX,'\\centering \n');
-	    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedVariables%s}\n',fname_,int2str(nbplt));
-	    fprintf(fidTeX,'\\caption{Smoothed variables.}');
-	    fprintf(fidTeX,'\\label{Fig:SmoothedVariables:%s}\n',int2str(nbplt));
-	    fprintf(fidTeX,'\\end{figure}\n');
-	    fprintf(fidTeX,'\n');
-	    fprintf(fidTeX,'%% End of TeX file.\n');
-	    fclose(fidTeX);
-	  end
-	end % nbplt == 1 (smooth variables)	
-	    %%
-	    %% Smoothed observation error
-	    %%
-	    if nvn
-	      number_of_plots_to_draw = 0;
-	      index = [];
-	      for i=1:nvobs
-		if max(abs(MeanError(10:end))) > 0.000000001
-		  number_of_plots_to_draw = number_of_plots_to_draw + 1;
-		  index = cat(1,index,i);
-		end
-	      end
-	      [nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
-	      if TeX
-		fidTeX = fopen([fname_ '_SmoothedObservationErrors.TeX'],'w');
-		fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
-		fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-		fprintf(fidTeX,' \n');
-	      end
-	      if nbplt == 1
-		hh = figure('Name','Smoothed observation errors');    
-		NAMES = [];
-		if TeX; TEXNAMES = []; end;
-		for i=1:number_of_plots_to_draw
-		  set(0,'CurrentFigure',hh)
-		  subplot(nr,nc,i);
-		  plot([1 gend],[0 0],'-r','linewidth',0.5);
-		  hold on
-		  for j = 1:9
-		    plot(1:gend,DistribError(:,index(i),j),'-g','linewidth',0.5)
-		  end
-		  plot(1:gend,MeanError(:,index(i)),'-k','linewidth',1)
-		  xlim([1 gend]);
-		  hold off
-		  ih = figure('Visible','off');
-		  set(0,'CurrentFigure',ih)
-		  plot([1 gend],[0 0],'-r','linewidth',0.5);
-		  hold on
-		  for j = 1:9
-		    plot(1:gend,DistribError(:,index(i),j),'-g','linewidth',0.5)
-		  end
-		  plot(1:gend,MeanError(:,index(i)),'-k','linewidth',1)
-		  xlim([1 gend]);
-		  hold off
-		  name    = deblank(options_.varobs(index(i),:));
-		  NAMES   = strvcat(NAMES,name);
-		  if ~isempty(options_.XTick)
-		    set(gca,'XTick',options_.XTick)
-		    set(gca,'XTickLabel',options_.XTickLabel)
-		  end
-		  eval(['print -depsc2 ' fname_ '_SmoothedObservationError_' name]);
-		  eval(['print -dpdf ' fname_ '_SmoothedObservationError_' name]);
-		  saveas(ih,[fname_ '_SmoothedObservationError_' name '.fig']);
-		  if TeX
-		    texname = deblank(options_.varobs_TeX(index(i),:));
-		    TEXNAMES   = strvcat(TEXNAMES,['$' texname '$']);
-		  end
-		  set(0,'CurrentFigure',hh)
-		  title(name,'Interpreter','none')
-		  if ~isempty(options_.XTick)
-		    set(gca,'XTick',options_.XTick)
-		    set(gca,'XTickLabel',options_.XTickLabel)
-		  end
-		end
-		eval(['print -depsc2 ' fname_ '_SmoothedObservationErrors' int2str(1)]);
-		eval(['print -dpdf ' fname_ '_SmoothedObservationErrors' int2str(1)]);
-		saveas(hh,[fname_ '_SmoothedObservationErrors' int2str(1) '.fig']);
-		if options_.nograph, close(hh), end
-		if TeX
-		  fprintf(fidTeX,'\\begin{figure}[H]\n');
-		  for jj = 1:exo_nbr
-		    fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-		  end    
-		  fprintf(fidTeX,'\\centering \n');
-		  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',fname_,int2str(1));
-		  fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
-		  fprintf(fidTeX,'\\label{Fig:SmoothedObservationErrors:%s}\n',int2str(1));
-		  fprintf(fidTeX,'\\end{figure}\n');
-		  fprintf(fidTeX,' \n');
-		  fprintf(fidTeX,'%% End of TeX file.\n');
-		  fclose(fidTeX);
-		end    
-	      else
-		for plt = 1:nbplt-1
-		  hh = figure('Name','Smoothed observation errors');
-		  NAMES = [];
-		  if TeX; TEXNAMES = []; end;
-		  for i=1:nstar
-		    k = (plt-1)*nstar+i;
-		    set(0,'CurrentFigure',hh)
-		    subplot(nr,nc,i);
-		    plot([1 gend],[0 0],'-r','linewidth',0.5)
-		    hold on
-		    for j = 1:9
-		      plot(1:gend,DistribError(:,index(k),j),'-g','linewidth',0.5)
-		    end
-		    plot(1:gend,MeanError(:,index(k)),'-k','linewidth',1)
-		    xlim([1 gend]);
-		    hold off
-		    name = deblank(options_.varobs(index(k),:));
-		    NAMES = strvcat(NAMES,name);
-		    ih = figure('Visible','off');
-		    set(0,'CurrentFigure',ih)
-		    plot([1 gend],[0 0],'-r','linewidth',0.5);
-		    hold on
-		    for j = 1:9
-		      plot(1:gend,DistribError(:,index(k),j),'-g','linewidth',0.5)
-		    end
-		    plot(1:gend,MeanError(:,index(k)),'-k','linewidth',1)
-		    xlim([1 gend]);
-		    hold off
-		    if ~isempty(options_.XTick)
-		      set(gca,'XTick',options_.XTick)
-		      set(gca,'XTickLabel',options_.XTickLabel)
-		    end
-		    eval(['print -depsc2 ' fname_ '_SmoothedObservationError_' name]);
-		    eval(['print -dpdf ' fname_ '_SmoothedObservationError_' name]);
-		    saveas(ih,[fname_ '_SmoothedObservationError_' name '.fig']);
-		    if TeX
-		      texname = deblank(options_.varobs_TeX(index(k),:));
-		      TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
-		    end    
-		    set(0,'CurrentFigure',hh)
-		    title(name,'Interpreter','none')
-		    if ~isempty(options_.XTick)
-		      set(gca,'XTick',options_.XTick)
-		      set(gca,'XTickLabel',options_.XTickLabel)
-		    end
-		  end
-		  eval(['print -depsc2 ' fname_ '_SmoothedObservationErrors' int2str(plt)]);
-		  eval(['print -dpdf ' fname_ '_SmoothedObservationErrors' int2str(plt)]);
-		  saveas(hh,[fname_ '_SmoothedObservationErrors' int2str(plt) '.fig']);
-		  if options_.nograph, close(hh), end
-		  if TeX
-		    fprintf(fidTeX,'\\begin{figure}[H]\n');
-		    for jj = 1:nstar
-		      fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-		    end    
-		    fprintf(fidTeX,'\\centering \n');
-		    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',fname_,int2str(plt));
-		    fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
-		    fprintf(fidTeX,'\\label{Fig:SmoothedObservationErrors:%s}\n',int2str(plt));
-		    fprintf(fidTeX,'\\end{figure}\n');
-		    fprintf(fidTeX,' \n');
-		  end    
-		end
-		hh = figure('Name','Smoothed observation errors');
-		NAMES = [];
-		if TeX; TEXNAMES = []; end;
-		for i=1:exo_nbr-(nbplt-1)*nstar
-		  k = (nbplt-1)*nstar+i;
-		  set(0,'CurrentFigure',hh)
-		  if lr ~= 0
-		    subplot(lr,lc,i);
-		  else
-		    subplot(nr,nc,i);
-		  end    
-		  plot([1 gend],[0 0],'-r','linewidth',0.5)
-		  hold on
-		  for j = 1:9
-		    plot(1:gend,DistribError(:,index(k),j),'-g','linewidth',0.5)
-		  end
-		  plot(1:gend,MeanError(:,index(k)),'-k','linewidth',1)
-		  xlim([1 gend]);
-		  hold off
-		  name = deblank(options_.varobs(index(k),:));
-		  NAMES = strvcat(NAMES,name);
-		  ih = figure('Visible','off');
-		  set(0,'CurrentFigure',ih)
-		  plot([1 gend],[0 0],'-r','linewidth',0.5);
-		  hold on
-		  for j = 1:9
-		    plot(1:gend,DistribError(:,index(k),j),'-g','linewidth',0.5)
-		  end
-		  plot(1:gend,MeanError(:,index(k)),'-k','linewidth',1)
-		  xlim([1 gend]);
-		  hold off
-		  if ~isempty(options_.XTick)
-		    set(gca,'XTick',options_.XTick)
-		    set(gca,'XTickLabel',options_.XTickLabel)
-		  end
-		  eval(['print -depsc2 ' fname_ '_SmoothedObservationError_' name]);
-		  eval(['print -dpdf ' fname_ '_SmoothedObservationError_' name]);
-		  saveas(ih,[fname_ '_SmoothedObservationError_' name '.fig']);
-		  if TeX
-		    texname  = deblank(options_.varobs_TeX(index(k),:));
-		    TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
-		  end
-		  set(0,'CurrentFigure',hh)
-		  title(name,'Interpreter','none');
-		  if ~isempty(options_.XTick)
-		    set(gca,'XTick',options_.XTick)
-		    set(gca,'XTickLabel',options_.XTickLabel)
-		  end
-		end
-		eval(['print -depsc2 ' fname_ '_SmoothedObservationErrors' int2str(nbplt)]);
-		eval(['print -dpdf ' fname_ '_SmoothedObservationErrors' int2str(nbplt)]);
-		saveas(hh,[fname_ '_SmoothedObservationErrors' int2str(nbplt) '.fig']);
-		if options_.nograph, close(hh), end
-		if TeX
-		  fprintf(fidTeX,'\\begin{figure}[H]\n');
-		  for jj = 1:size(NAMES,1);
-		    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-		  end    
-		  fprintf(fidTeX,'\\centering \n');
-		  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',fname_,int2str(nbplt));
-		  fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
-		  fprintf(fidTeX,'\\label{Fig:SmoothedObservationErrors:%s}\n',int2str(nbplt));
-		  fprintf(fidTeX,'\\end{figure}\n');
-		  fprintf(fidTeX,'\n');
-		  fprintf(fidTeX,'%% End of TeX file.\n');
-		  fclose(fidTeX);
-		end
-	      end % nbplt == 1 (smooth observation errors)
-	    end		
-	    %%
-	    %%	Historical and smoothed variabes
-	    %%
-	    [atT,innov,obs_err,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(post_mean,gend,data);
-	    yf = zeros(gend,nvobs,B);
-	    if options_.prefilter == 1
-	      yf = atT(bayestopt_.mf,:)+repmat(bayestopt_.mean_varobs',1,gend)+trend_coeff*[0:gend-1];
-	    elseif options_.loglinear == 1
-	      yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+...
-		   trend_coeff*[0:gend-1];
-	    else
-	      yf = atT(bayestopt_.mf,:)+repmat(ys(bayestopt_.mfys),1,gend)+...
-		   trend_coeff*[0:gend-1];
-	    end
-	    [nbplt,nr,nc,lr,lc,nstar] = pltorg(nvobs);
-	    if TeX
-	      fidTeX = fopen([fname_ '_HistoricalAndSmoothedVariables.TeX'],'w');
-	      fprintf(fidTeX,'%% TeX eps-loader file generated by metropolis.m (Dynare).\n');
-	      fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-	      fprintf(fidTeX,' \n');
-	    end    
-	    if nbplt == 1
-	      hh = figure('Name','Historical and smoothed variables');
-	      NAMES = [];
-	      if TeX ; TEXNAMES = []; end;
-	      for i=1:nvobs
-		subplot(nr,nc,i);
-		plot(1:gend,yf(i,1:end),'-r','linewidth',1) %yf(i,2:end)
-		hold on
-		plot(1:gend,rawdata(:,i),'-k','linewidth',1)
-		xlim([1 gend]);
-		hold off
-		name    = options_.varobs(i,:);
-		NAMES   = strvcat(NAMES,name);
-		if ~isempty(options_.XTick)
-		  set(gca,'XTick',options_.XTick)
-		  set(gca,'XTickLabel',options_.XTickLabel)
-		end
-		if TeX
-		  texname = options_.varobs_TeX(i,1);
-		  TEXNAMES   = strvcat(TEXNAMES,['$ ' deblank(texname) ' $']);
-		end
-		title(name,'Interpreter','none')
-	      end
-	      eval(['print -depsc2 ' fname_ '_HistoricalAndSmoothedVariables' int2str(1)]);
-	      eval(['print -dpdf ' fname_ '_HistoricalAndSmoothedVariables' int2str(1)]);
-	      saveas(hh,[fname_ '_HistoricalAndSmoothedVariables' int2str(1) '.fig']);
-	      if options_.nograph, close(hh), end
-	      if TeX
-		fprintf(fidTeX,'\\begin{figure}[H]\n');
-		for jj = 1:n_varobs
-		  fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-		end    	
-		fprintf(fidTeX,'\\centering \n');
-		fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',fname_,int2str(1));
-		fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
-		fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(1));
-		fprintf(fidTeX,'\\end{figure}\n');
-		fprintf(fidTeX,'\n');
-		fprintf(fidTeX,'%% End of TeX file.\n');
-		fclose(fidTeX);
-	      end    
-	    else
-	      for plt = 1:nbplt-1
-		hh = figure('Name','Historical and smoothed variables');
-		set(0,'CurrentFigure',hh)
-		NAMES = [];
-		if TeX; TEXNAMES = []; end;
-		for i=1:nstar
-		  k = (plt-1)*nstar+i;
-		  subplot(nr,nc,i);
-		  plot(1:gend,yf(k,2:end),'-r','linewidth',1)
-		  hold on
-		  plot(1:gend,rawdata(:,k),'-k','linewidth',1)
-		  xlim([1 gend]);
-		  hold off
-		  name = options_.varobs(k,:);
-		  NAMES = strvcat(NAMES,name);
-		  if ~isempty(options_.XTick)
-		    set(gca,'XTick',options_.XTick)
-		    set(gca,'XTickLabel',options_.XTickLabel)
-		  end
-		  if TeX
-		    texname = options_.varobs_TeX(k,:);
-		    TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(texname) ' $']);
-		  end    
-		  title(name,'Interpreter','none')
-		end
-		eval(['print -depsc2 ' fname_ '_HistoricalAndSmoothedVariables' int2str(plt)]);
-		eval(['print -dpdf ' fname_ '_HistoricalAndSmoothedVariables' int2str(plt)]);
-		saveas(hh,[fname_ '_HistoricalAndSmoothedVariables' int2str(plt) '.fig']);
-		if options_.nograph, close(hh), end
-		if TeX
-		  fprintf(fidTeX,'\\begin{figure}[H]\n');
-		  for jj = 1:nstar
-		    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-		  end    	
-		  fprintf(fidTeX,'\\centering \n');
-		  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',fname_,int2str(plt));
-		  fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
-		  fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(plt));
-		  fprintf(fidTeX,'\\end{figure}\n');
-		  fprintf(fidTeX,'\n');
-		end    
-	      end
-	      hh = figure('Name','Historical and smoothed variables');
-	      set(0,'CurrentFigure',hh)
-	      NAMES = [];
-	      if TeX; TEXNAMES = []; end;
-	      for i=1:nobs-(nbplt-1)*nstar
-		k = (nbplt-1)*nstar+i;
-		if lr ~= 0
-		  subplot(lr,lc,i);
-		else
-		  subplot(nr,nc,i);
-		end    
-		plot(1:gend,yf(k,2:end),'-r','linewidth',1)
-		hold on
-		plot(1:gend,rawdata(:,k),'-k','linewidth',1)
-		xlim([1 gend]);
-		hold off
-		name = options_.varobs(k,:);
-		NAMES    = strvcat(NAMES,name);
-		if ~isempty(options_.XTick)
-		  set(gca,'XTick',options_.XTick)
-		  set(gca,'XTickLabel',options_.XTickLabel)
-		end
-		if TeX
-		  texname  = options_.varobs_TeX(k,:);
-		  TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(texname) ' $']);
-		end
-		title(name,'Interpreter','none');
-	      end
-	      eval(['print -depsc2 ' fname_ '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
-	      eval(['print -dpdf ' fname_ '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
-	      saveas(hh,[fname_ '_HistoricalAndSmoothedVariables' int2str(nbplt) '.fig']);
-	      if options_.nograph, close(hh), end
-	      if TeX
-		fprintf(fidTeX,'\\begin{figure}[H]\n');
-		for jj = 1:size(NAMES,1)
-		  fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-		end    	
-		fprintf(fidTeX,'\\centering \n');
-		fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',fname_,int2str(nbplt));
-		fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
-		fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(nbplt));
-		fprintf(fidTeX,'\\end{figure}\n');
-		fprintf(fidTeX,'\n');
-		fprintf(fidTeX,'%% End of TeX file.\n');
-		fclose(fidTeX);
-	      end    
-	    end
+    MakeSmoothVariablesPlots('SmoothedShocks',DistribInnov,MeanInnov,gend)
+    %%
+    %% Smoothed variables (observed and unobserved)
+    %%
+    MakeSmoothVariablesPlots('SmoothedVariables',DistribSmooth,MeanSmooth,gend)
+    %%
+    %% Smoothed observation error
+    %%
+    if nvn
+      MakeSmoothVariablesPlots('SmoothedObservationErrors',DistribError,MeanError,gend)
+    end  
+    %%
+    %% Historical and smoothed variabes
+    %%
+    MakeSmoothVariablesPlots('Historical&SmoothedObservableVariables',...
+			     MeanSmooth,rawdata',gend)
+    %%
+    %%
+    %%
   end % options_.smoother
   if options_.filtered_vars
     fprintf('MH: Filtered variables...\n')
-    MeanFilter = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend);
-    MedianFilter = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend);
-    StdFilter = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend);
-    DistribFilter = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,9);
-    HPDFilter = zeros(size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic,gend,2);
-    for i = 1:size(dr_.ghx,2)+dr_.nfwrd+dr_.nstatic;
+    MeanFilter = zeros(endo_nbr,gend);
+    MedianFilter = zeros(endo_nbr,gend);
+    StdFilter = zeros(endo_nbr,gend);
+    DistribFilter = zeros(endo_nbr,gend,9);
+    HPDFilter = zeros(endo_nbr,gend,2);
+    for i = 1:endo_nbr;
       for t = 1:gend
 	StartLine = 0;
 	for file = 1:sfil_filt;

@@ -91,9 +91,10 @@ lik    = zeros(smpl+1,1);
 lik(smpl+1) = smpl*pp*log(2*pi); %% the constant of minus two times the log-likelihood 
 notsteady 	= 1;
 crit      	= options_.kalman_tol;
-newRank	  	= rank(Pinf,crit);
+crit1      	= 1.e-6;
+newRank	  	= rank(Pinf,crit1);
 icc = 0;
-while rank(Pinf,crit) & t < smpl %% Matrix Finf is assumed to be zero
+while newRank & t < smpl %% Matrix Finf is assumed to be zero
   t = t+1;
   for i=1:pp
     v(i) 	= Y(i,t)-a(mf(i))-trend(i,t);
@@ -111,17 +112,21 @@ while rank(Pinf,crit) & t < smpl %% Matrix Finf is assumed to be zero
       % start new termination criterion for DKF
       if ~isempty(options_.diffuse_d),  
 	newRank = (icc<options_.diffuse_d);  
-	if newRank & any(diag(Pinf(mf,mf))>crit)==0; 
+	%if newRank & any(diag(Pinf(mf,mf))>crit)==0; %  M. Ratto this line is BUGGY
+	if newRank & (any(diag(Pinf(mf,mf))>crit)==0 & rank(Pinf,crit1)==0); 
 	  options_.diffuse_d = icc;
 	  newRank=0;
 	  disp('WARNING: Change in OPTIONS_.DIFFUSE_D in univariate DKF')
+	  disp(['new OPTIONS_.DIFFUSE_D = ',int2str(icc)])
 	  disp('You may have to reset the optimisation')
 	end
       else
-	newRank = any(diag(Pinf(mf,mf))>crit);                 
+	%newRank = any(diag(Pinf(mf,mf))>crit);     % M. Ratto this line is BUGGY 
+	newRank = (any(diag(Pinf(mf,mf))>crit) | rank(Pinf,crit1));                 
 	if newRank==0, 
 	  P0=	T*Pinf*transpose(T);
-	  newRank = any(diag(P0(mf,mf))>crit);
+	  %newRank = any(diag(P0(mf,mf))>crit);   % M. Ratto this line is BUGGY
+	  newRank = (any(diag(Pinf(mf,mf))>crit) | rank(P0,crit1));   
 	  if newRank==0, 
 	    options_.diffuse_d = icc;
 	  end
@@ -145,7 +150,7 @@ while rank(Pinf,crit) & t < smpl %% Matrix Finf is assumed to be zero
     end
   end
   if newRank
-    oldRank = rank(Pinf,crit);
+    oldRank = rank(Pinf,crit1);
   else
     oldRank = 0;
   end
@@ -153,7 +158,7 @@ while rank(Pinf,crit) & t < smpl %% Matrix Finf is assumed to be zero
   Pstar 	= T*Pstar*transpose(T)+QQ;
   Pinf	= T*Pinf*transpose(T);
   if newRank
-    newRank = rank(Pinf,crit);
+    newRank = rank(Pinf,crit1);
   end
   if oldRank ~= newRank
     disp('DiffuseLiklihoodH3 :: T does influence the rank of Pinf!')	
@@ -195,3 +200,4 @@ while t < smpl
   a = T*a;
 end
 LIK = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);
+

@@ -1,5 +1,5 @@
 function LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,Y,trend,start)%//Z,T,R,Q,Pinf,Pstar,Y)
-% changes by M. Ratto
+% changes by M. Ratto [April 2005]
 % introduced new global variable id_ for termination of DKF
 % introduced a persistent fmax, in order to keep track the max order of
 % magnitude of the 'zero' values in Pinf at DKF termination
@@ -7,6 +7,9 @@ function LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,Y,trend,start)%//Z,T,R,Q,Pinf
 % new termination for DKF
 % likelihood terms for Fstar must be cumulated in DKF also when Pinf is non
 % zero. this bug is fixed.
+%
+% [4/5/2005] correctyed bug in the modified verson of Ratto for rank of Pinf 
+% introduced a specific crit1 for the DKF termination
 %
 % stepane.adjemian@cepremap.cnrs.fr [07-19-2004]
 % 
@@ -91,7 +94,8 @@ lik	   = zeros(smpl+1,1);
 lik(smpl+1) = smpl*pp*log(2*pi);		%% the constant of minus two times the log-likelihood
 notsteady 	= 1;
 crit      	= options_.kalman_tol;
-newRank	 	= rank(Pinf,crit);
+crit1      	= 1.e-6;
+newRank	 	= rank(Pinf,crit1);
 icc=0;
 while newRank & t < smpl
   t = t+1;
@@ -111,17 +115,21 @@ while newRank & t < smpl
       % start new termination criterion for DKF
       if ~isempty(options_.diffuse_d),  
 	newRank = (icc<options_.diffuse_d);  
-	if newRank & any(diag(Pinf(mf,mf))>crit)==0; 
+	%if newRank & any(diag(Pinf(mf,mf))>crit)==0; %  M. Ratto this line is BUGGY
+	if newRank & (any(diag(Pinf(mf,mf))>crit)==0 & rank(Pinf,crit1)==0); 
 	  options_.diffuse_d = icc;
 	  newRank=0;
 	  disp('WARNING: Change in OPTIONS_.DIFFUSE_D in univariate DKF')
+	  disp(['new OPTIONS_.DIFFUSE_D = ',int2str(icc)])
 	  disp('You may have to reset the optimisation')
 	end
       else
-	newRank = any(diag(Pinf(mf,mf))>crit);                 
+	%newRank = any(diag(Pinf(mf,mf))>crit);     % M. Ratto this line is BUGGY 
+	newRank = (any(diag(Pinf(mf,mf))>crit) | rank(Pinf,crit1));                 
 	if newRank==0, 
 	  P0=	T*Pinf*transpose(T);
-	  newRank = any(diag(P0(mf,mf))>crit);
+	  %newRank = any(diag(P0(mf,mf))>crit);   % M. Ratto this line is BUGGY
+	  newRank = (any(diag(Pinf(mf,mf))>crit) | rank(P0,crit1));   
 	  if newRank==0, 
 	    options_.diffuse_d = icc;
 	  end
@@ -150,7 +158,7 @@ while newRank & t < smpl
 %         oldRank = rank(Pinf,crit);
 %     end
     if newRank,
-        oldRank = rank(Pinf,crit);
+        oldRank = rank(Pinf,crit1);
     else
         oldRank = 0;
     end
@@ -163,7 +171,7 @@ while newRank & t < smpl
 %     	newRank = rank(Pinf,crit);
 %     end
     if newRank,
-        newRank = rank(Pinf,crit);
+        newRank = rank(Pinf,crit1);  % new crit1 is used 
     end
 	if oldRank ~= newRank
 		disp('DiffuseLiklihood3 :: T does influence the rank of Pinf!')	
@@ -211,3 +219,4 @@ while t < smpl
 end
 
 LIK = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);
+

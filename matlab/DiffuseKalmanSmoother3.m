@@ -40,6 +40,7 @@ Pinf    	= zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
 Pstar1 		= Pstar;
 Pinf1  		= Pinf;
 crit   	 	= options_.kalman_tol;
+crit1       = 1.e-6;
 steady  	= smpl;
 rr      	= size(Q,1);
 QQ      	= R*Q*transpose(R);
@@ -55,7 +56,7 @@ end
 
 t = 0;
 icc=0;
-newRank	  = rank(Pinf(:,:,1),crit);
+newRank	  = rank(Pinf(:,:,1),crit1);
 while newRank & t < smpl
   t = t+1;
   a1(:,t) = a(:,t);
@@ -87,13 +88,15 @@ while newRank & t < smpl
       %             if newRank==0, id = i; end,
       if ~isempty(options_.diffuse_d),  
 	newRank = (icc<options_.diffuse_d);  
-	if newRank & any(diag(P0(mf,mf))>crit)==0; 
+	%if newRank & any(diag(P0(mf,mf))>crit)==0; 
+	if newRank & (any(diag(P0(mf,mf))>crit)==0 & rank(P0,crit1)==0); 
 	  disp('WARNING!! Change in OPTIONS_.DIFFUSE_D in univariate DKF')
 	  options_.diffuse_d = icc;
 	  newRank=0;
 	end
       else
-	newRank = any(diag(P0(mf,mf))>crit);                 
+	%newRank = any(diag(P0(mf,mf))>crit);                 
+	newRank = (any(diag(P0(mf,mf))>crit) | rank(P0,crit1));                 
 	if newRank==0, 
 	  options_.diffuse_d = icc;
 	end                    
@@ -121,7 +124,7 @@ while newRank & t < smpl
   P0=Pinf(:,:,t+1);
   if newRank,
     %newRank = any(diag(P0(mf,mf))>crit);
-    newRank	  = rank(P0,crit);
+    newRank	  = rank(P0,crit1);
   end
 end
 
@@ -247,3 +250,4 @@ else
   alphahat(:,1)	= a1(:,1) + P1(:,:,1)*r0;
   etahat(:,1)	= QRt*r(:,1);
 end
+
