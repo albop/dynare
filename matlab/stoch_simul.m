@@ -1,10 +1,9 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function stoch_simul(var_list)
+function info=stoch_simul(var_list)
   global iter_ ys_ dr_ y_ dr_ exo_nbr lgy_ lgx_ Sigma_e_ ykmin_ ykmax_ 
   global endo_nbr exo_nbr exe_ ex_ xkmin_ xkmax_ iter_ options_ lgx_orig_ord_
   global fname_ lgx_TeX_ lgy_TeX_
-  global BlanchardKahn_
 
   options_ = set_default_option(options_,'TeX',0);  
   options_ = set_default_option(options_,'order',2);
@@ -48,6 +47,7 @@ function stoch_simul(var_list)
 
   if info(1)
     print_info(info);
+    return
   end  
 
   if ~options_.noprint
