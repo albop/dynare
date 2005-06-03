@@ -1748,7 +1748,7 @@ void p_stoch_simul()
 	}
       str_output(buffer);
     }
-  str_output("stoch_simul(var_list_);\n");
+  str_output("info=stoch_simul(var_list_);\n");
 #endif
 }
 
