@@ -52,6 +52,15 @@
       AllTeXNames = options_.varobs_TeX;
     end
     Distrib = Distrib(bayestopt_.mf,:);
+  elseif strcmpi(Type,'FilteredVariables')
+    generic = 'FilteredVariables';
+    figname = 'Filtered variables';
+    AllNames = lgy_(dr_.order_var,:);
+    if TeX
+      AllTeXNames = lgy_TeX_(dr_.order_var,:);
+    end
+    [nbplt,nr,nc,lr,lc,nstar] = pltorg(size(lgy_,1));
+    numb = size(lgy_,1);
   end    
   
   if TeX
