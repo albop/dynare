@@ -1473,9 +1473,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	stock_innov  = zeros(exo_nbr,gend,MAX_ninno);
       end
       if nvn & B <= MAX_nerro
-	stock_error = zeros(gend,nvobs,B);
+	%stock_error = zeros(gend,nvobs,B);
+    stock_error = zeros(nvobs,gend,B);
       else nvn & B > MAX_nerro
-	stock_error = zeros(gend,nvobs,MAX_nerro);
+	%stock_error = zeros(gend,nvobs,MAX_nerro);
+    stock_error = zeros(nvobs,gend,MAX_nerro);
       end
     end
     if options_.filtered_vars
@@ -1497,6 +1499,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.forecast
 	  sfil_forc = 1;
 	  irun_forc = 0;  			
+	  irun_forc1 = 1:B;  			
 	end
 	if options_.smoother
 	  sfil_smoo = 1;
@@ -1542,9 +1545,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  % FOURTH, smoothed and filtered variables are saved if needed
 	  if options_.smoother
 	    if irun_erro < MAX_nerro
-	      stock_error(:,:,irun_erro) = transpose(obs_err);
+	      stock_error(:,:,irun_erro) = obs_err;
 	    else
-	      stock_error(:,:,irun_erro) = transpose(obs_err);
+	      stock_error(:,:,irun_erro) = obs_err;
 	      instr = [fname_ '_error' int2str(sfil_erro) ' stock_error;'];
 	      eval(['save ' instr]);
 	      sfil_erro = sfil_erro + 1;
@@ -1610,14 +1613,14 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(ys(bayestopt_.mfys)',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
-	    stock_forcst1(:,:,irun_forc1) = forcst2(yf,horizon,dr,B);
+	    stock_forcst1(:,:,irun_forc1) = forcst2(yyyy,horizon,dr,B);
 	    if irun_forc == MAX_nforc
-	      save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
+	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      sfil_forc = sfil_forc + 1;
 	      irun_forc = 0;
 	      irun_forc1 = 1:B;
 	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
-	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc*B);
+	      stock_forcst1 = zeros(horizon+ykmin_,nvar,MAX_nforc*B);
 	    end
 	  end		
 	  waitbar(b/B,h);    
@@ -1647,7 +1650,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
 	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
-	    save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
+	    save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	  end
 	  clear stock_forcst stock_forcst1
 	end
@@ -1663,6 +1666,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.forecast
 	  sfil_forc = 1;
 	  irun_forc = 0;  			
+	  irun_forc1 = 1:B;  			
 	end
 	if options_.smoother
 	  sfil_smoo = 1;
@@ -1682,6 +1686,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	for b = 1:B;
 	  if options_.forecast
 	    irun_forc = irun_forc+1;
+	    irun_forc1 = irun_forc1+B;
 	  end
 	  if options_.smoother
 	    irun_smoo = irun_smoo+1;
@@ -1695,9 +1700,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  [atT,innov,obs_err,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(transpose(deep),gend,data);
 	  if options_.smoother
 	    if irun_erro < MAX_nerro
-	      stock_error(:,:,irun_erro) = transpose(obs_err);
+	      stock_error(:,:,irun_erro) = obs_err;
 	    else
-	      stock_error(:,:,irun_erro) = transpose(obs_err);
+	      stock_error(:,:,irun_erro) = obs_err;
 	      instr = [fname_ '_error' int2str(sfil_erro) ' stock_error;'];
 	      eval(['save ' instr]);
 	      sfil_erro = sfil_erro + 1;
@@ -1758,9 +1763,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(ys(bayestopt_.mfys)',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
-	    stock_forcst1(:,:,irun_forc1) = forcst2(yf,horizon,dr,B);
+	    stock_forcst1(:,:,irun_forc1) = forcst2(yyyy,horizon,dr,B);
 	    if irun_forc == MAX_nforc
-	      save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
+	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      sfil_forc = sfil_forc + 1;
 	      irun_forc = 0;
 	      irun_forc1 = 1:B;
@@ -1795,7 +1800,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
 	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
-	    save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
+	    save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	  end
 	  clear stock_forcst stock_forcst1
 	end
@@ -1813,6 +1818,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.forecast
 	  sfil_forc = 1;
 	  irun_forc = 0;  			
+	  irun_forc1 = 1:B;  			
 	end
 	if options_.smoother
 	  sfil_smoo = 1;
@@ -1829,6 +1835,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	for b = 1:B;
 	  if options_.forecast
 	    irun_forc = irun_forc+1;
+	    irun_forc1 = irun_forc1+B;
 	  end
 	  if options_.smoother
 	    irun_smoo = irun_smoo+1;
@@ -1931,9 +1938,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(ys(bayestopt_.mfys)',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
-	    stock_forcst1(:,:,irun_forc1) = forcst2(yf,horizon,dr,B);
+	    stock_forcst1(:,:,irun_forc1) = forcst2(yyyy,horizon,dr,B);
 	    if irun_forc == MAX_nforc
-	      save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
+	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      sfil_forc = sfil_forc + 1;
 	      irun_forc = 0;
 	      irun_forc1 = 1:B;
@@ -1962,7 +1969,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
 	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
-	    save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
+	    save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	  end
 	  clear stock_forcst stock_forcst1
 	end
@@ -1978,6 +1985,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.forecast
 	  sfil_forc = 1;
 	  irun_forc = 0;  			
+	  irun_forc1 = 1:B;  			
 	end
 	if options_.smoother
 	  sfil_smoo = 1;
@@ -1997,6 +2005,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	for b = 1:B;
 	  if options_.forecast
 	    irun_forc = irun_forc+1;
+	    irun_forc1 = irun_forc1+B;
 	  end
 	  if options_.smoother
 	    irun_smoo = irun_smoo+1;
@@ -2080,9 +2089,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(ys(bayestopt_.mfys)',horizon+1,1)+(gend+[0:horizon]')*trend_coeff';
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
-	    stock_forcst1(:,:,irun_forc1) = forcst2(yf,horizon,dr,B);
+	    stock_forcst1(:,:,irun_forc1) = forcst2(yyyy,horizon,dr,B);
 	    if irun_forc == MAX_nforc
-	      save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
+	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      sfil_forc = sfil_forc + 1;
 	      irun_forc = 0;
 	      irun_forc1 = 1:B;
@@ -2111,7 +2120,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
 	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
-	    save([fname_ '_forecast' int2str(sfil_forc)],stock_forcst,stock_forcst1);
+	    save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	  end
 	  clear stock_forcst stock_forcst1
 	end
@@ -2181,11 +2190,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  MeanForecast(step,i) = MeanForecast(step,i)+sum(stock_forcst(truestep,SelecVariables(i),:),3);
 	  DeProfundis = size(stock_forcst,3); 
 	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_forcst(truestep,SelecVariables(i),:)); 
-	  tmp_big(StartLine+1:StartLine+DeProfundis) = squeeze(stock_forcst1(truestep,SelecVariables(i),:)); 
+	  tmp_big(StartLine+1:StartLine+DeProfundis*B) = squeeze(stock_forcst1(truestep,SelecVariables(i),StartLine+1:DeProfundis*B)); 
 	  StartLine = StartLine+DeProfundis;
 	end
 	tmp = sort(tmp);
-	tmp_big = sort(tmp_big)
+	tmp_big = sort(tmp_big);
 	MedianForecast(step,i) = tmp(round(B*0.5));
 	StdForecast(step,i) = std(tmp);
 	StdForecast_total(step,i) = std(tmp_big);
@@ -2193,23 +2202,30 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	a = 1; 
 	b = t;
 	tmp2 = [1;t;tmp(t)-tmp(1)];
-	tmp2_big = [1;t;tmp_big(t)-tmp_big(1)];
 	while b <= B
 	  tmp1 = [a;b;tmp(b)-tmp(a)];
+	  a = a + 1;
+	  b = b + 1;
+	  if tmp1(3) < tmp2(3)
+	    tmp2 = tmp1;     
+	  end    
+	end
+	HPD(step,i,1) = tmp(tmp2(1));
+	HPD(step,i,2) = tmp(tmp2(2));
+	t = floor(options_.mh_conf_sig*B*B);
+	a = 1; 
+	b = t;
+	tmp2_big = [1;t;tmp_big(t)-tmp_big(1)];
+	while b <= B*B
 	  tmp1_big = [a;b;tmp_big(b)-tmp_big(a)];
 	  a = a + 1;
 	  b = b + 1;
-	  if tmp1(3,1) < tmp2(3,1)
-	    tmp2 = tmp1;     
-	  end    
-	  if tmp1_big(3,1) < tmp2_big(3,1)
+	  if tmp1_big(3) < tmp2_big(3)
 	    tmp2_big = tmp1_big;     
 	  end    
 	end
-	HPD(step,i,1) = tmp(tmp2(1,1));
-	HPD(step,i,2) = tmp(tmp2(2,1));
-	HPD_total(step,i,1) = tmp_big(tmp2_big(1,1));
-	HPD_total(step,i,2) = tmp_big(tmp2_big(2,1));
+	HPD_total(step,i,1) = tmp_big(tmp2_big(1));
+	HPD_total(step,i,2) = tmp_big(tmp2_big(2));
       end
       disp(['    Period = ' int2str(step)]);
     end
@@ -2285,158 +2301,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %% Smooth variables and Filtered variables (all endogenous variables are considered here)        
   %%
   if options_.smoother
-    fprintf('MH: Smooth variables...\n')
-    MeanSmooth = zeros(endo_nbr,gend);
-    MedianSmooth = zeros(endo_nbr,gend);
-    StdSmooth = zeros(endo_nbr,gend);
-    DistribSmooth = zeros(endo_nbr,gend,9);
-    HPDSmooth = zeros(endo_nbr,gend,2);
-    for i = 1:endo_nbr;
-      for t = 1:gend
-	StartLine = 0;
-	for file = 1:sfil_smoo-1;
-	  instr = [fname_ '_smooth' int2str(file)];
-	  eval(['load ' instr]);
-	  MeanSmooth(i,t) = MeanSmooth(i,t)+sum(stock_smooth(i,t,:),3);
-	  DeProfundis = size(stock_smooth,3); 
-	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_smooth(i,t,:)); 
-	  StartLine = StartLine+DeProfundis;
-	end
-	tmp = sort(tmp);
-	MedianSmooth(i,t) = tmp(round(B*0.5));
-	StdSmooth(i,t) = std(tmp);
-	DistribSmooth(i,t,:) = reshape(tmp(deciles),1,1,9);
-	tt = floor(options_.mh_conf_sig*B);
-	a = 1; 
-	b = tt;
-	tmp2 = [1;tt;tmp(tt)-tmp(1)];
-	while b <= B
-	  tmp1 = [a;b;tmp(b)-tmp(a)];
-	  a = a + 1;
-	  b = b + 1;
-	  if tmp1(3,1) < tmp2(3,1)
-	    tmp2 = tmp1;     
-	  end    
-	end
-	HPDSmooth(i,t,1) = tmp(tmp2(1,1));
-	HPDSmooth(i,t,2) = tmp(tmp2(2,1));
-      end
-      disp(['    Variable: ' deblank(lgy_(dr_.order_var(i),:))]);	
-    end
-    clear stock_smooth;
-    MeanSmooth = MeanSmooth/B;
-    for i=1:size(lgy_,1)
-      eval(['oo_.PosteriorSmoothedVariables.Mean.' deblank(lgy_(dr_.order_var(i),:)) ' = MeanSmooth(i,:)'';']);
-      eval(['oo_.PosteriorSmoothedVariables.Median.' deblank(lgy_(dr_.order_var(i),:)) ' = MedianSmooth(i,:)'';']);
-      eval(['oo_.PosteriorSmoothedVariables.Std.' deblank(lgy_(dr_.order_var(i),:)) ' = StdSmooth(i,:)'';']);
-      eval(['oo_.PosteriorSmoothedVariables.Distribution.' deblank(lgy_(dr_.order_var(i),:)) ' = squeeze(DistribSmooth(i,:,:))'';']);
-      eval(['oo_.PosteriorSmoothedVariables.HPDinf.' deblank(lgy_(dr_.order_var(i),:)) ' = squeeze(HPDSmooth(i,:,1))'';']);
-      eval(['oo_.PosteriorSmoothedVariables.HPDsup.' deblank(lgy_(dr_.order_var(i),:)) ' = squeeze(HPDSmooth(i,:,2))'';']);
-    end
-    fprintf('MH: Smooth variables, done!\n')
-    disp(' ')
-    fprintf('MH: Smooth structural shocks...\n')
-    MeanInnov = zeros(exo_nbr,gend);
-    MedianInnov = zeros(exo_nbr,gend);
-    StdInnov = zeros(exo_nbr,gend);
-    DistribInnov = zeros(exo_nbr,gend,9);
-    HPDInnov = zeros(exo_nbr,gend,2);
-    for i = 1:exo_nbr;
-      for t = 1:gend
-	StartLine = 0;
-	for file = 1:sfil_inno;
-	  instr = [fname_ '_innovation' int2str(file)];
-	  eval(['load ' instr]);
-	  MeanInnov(i,t) = MeanInnov(i,t)+sum(stock_innov(i,t,:),3);
-	  DeProfundis = size(stock_innov,3); 
-	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_innov(i,t,:)); 
-	  StartLine = StartLine+DeProfundis;
-	end
-	tmp = sort(tmp);
-	MedianInnov(i,t) = tmp(round(B*0.5));
-	StdInnov(i,t) = std(tmp);
-	DistribInnov(i,t,:) = reshape(tmp(deciles),1,1,9);
-	tt = floor(options_.mh_conf_sig*B);
-	a = 1; 
-	b = tt;
-	tmp2 = [1;tt;tmp(tt)-tmp(1)];
-	while b <= B
-	  tmp1 = [a;b;tmp(b)-tmp(a)];
-	  a = a + 1;
-	  b = b + 1;
-	  if tmp1(3,1) < tmp2(3,1)
-	    tmp2 = tmp1;     
-	  end    
-	end
-	HPDInnov(i,t,1) = tmp(tmp2(1,1));
-	HPDInnov(i,t,2) = tmp(tmp2(2,1));
-      end
-      disp(['    Variable: ' deblank(lgx_(i,:))]);
-    end
-    clear stock_innov;
-    MeanInnov = MeanInnov/B;
-    for i=1:exo_nbr
-      eval(['oo_.PosteriorSmoothedShocks.Mean.' deblank(lgx_(i,:)) ' = MeanInnov(i,:)'';']);
-      eval(['oo_.PosteriorSmoothedShocks.Median.' deblank(lgx_(i,:)) ' = MedianInnov(i,:)'';']);
-      eval(['oo_.PosteriorSmoothedShocks.Std.' deblank(lgx_(i,:)) ' = StdInnov(i,:)'';']);
-      eval(['oo_.PosteriorSmoothedShocks.Distribution.' deblank(lgx_(i,:)) ' = squeeze(DistribInnov(i,:,:))'';']);
-      eval(['oo_.PosteriorSmoothedShocks.HPDinf.' deblank(lgx_(i,:)) ' = squeeze(HPDInnov(i,:,1))'';']);
-      eval(['oo_.PosteriorSmoothedShocks.HPDsup.' deblank(lgx_(i,:)) ' = squeeze(HPDInnov(i,:,2))'';']);
-    end
-    fprintf('MH: Smooth structural shocks, done!\n')
-    disp(' ')
+    [MeanSmooth,MedianSmooth,StdSmooth,DistribSmooth,HPDSmooth] = GetPosteriorStatistics(gend,B,'SmoothedVariables');    
+    [MeanInnov,MedianInnov,StdInnov,DistribInnov,HPDInnov] = GetPosteriorStatistics(gend,B,'SmoothedShocks');
     if nvn
-      fprintf('MH: Smooth measurement error...\n')
-      MeanError = zeros(nvobs,gend);
-      MedianError = zeros(nvobs,gend);
-      StdError = zeros(nvobs,gend);
-      DistribError = zeros(nvobs,gend,9);
-      HPDError = zeros(nvobs,gend,2);
-      for i = 1:nvobs;
-	for t = 1:gend
-	  StartLine = 0;
-	  for file = 1:sfil_erro;
-	    instr = [fname_ '_error' int2str(file)];
-	    eval(['load ' instr]);
-	    MeanError(i,t) = MeanError(i,t)+sum(stock_error(t,i,:),3);
-	    DeProfundis = size(stock_error,3); 
-	    tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_error(t,i,:)); 
-	    StartLine = StartLine+DeProfundis;
-	  end
-	  tmp = sort(tmp);
-	  MedianError(i,t) = tmp(round(B*0.5));
-	  StdError(i,t) = std(tmp);
-	  DistribError(i,t,:) = reshape(tmp(deciles),1,1,9);
-	  tt = floor(options_.mh_conf_sig*B);
-	  a = 1; 
-	  b = tt;
-	  tmp2 = [1;tt;tmp(tt)-tmp(1)];
-	  while b <= B
-	    tmp1 = [a;b;tmp(b)-tmp(a)];
-	    a = a + 1;
-	    b = b + 1;
-	    if tmp1(3,1) < tmp2(3,1)
-	      tmp2 = tmp1;     
-	    end    
-	  end
-	  HPDError(i,t,1) = tmp(tmp2(1,1));
-	  HPDError(i,t,2) = tmp(tmp2(2,1));
-	end
-	disp(['    Variable: ' deblank(options_.varobs(i,:))]);
-      end
-      clear stock_error;
-      MeanError = MeanError/B;
-      for i=1:nvobs
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.Mean.' deblank(options_.varobs(i)) ' = MeanError(i,:)'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.Median.' deblank(options_.varobs(i)) ' = MedianError(i,:)'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.Std.' deblank(options_.varobs(i)) ' = StdError(i,:)'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.Distribution.' deblank(options_.varobs(i)) ' = squeeze(DistribError(i,:,:))'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.HPDinf.' deblank(options_.varobs(i)) ' = squeeze(HPDError(i,:,1))'';']);
-	eval(['oo_.PosteriorSmoothedMeasurementErrors.HPDsup.' deblank(options_.varobs(i)) ' = squeeze(HPDError(i,:,2))'';']);
-      end
-      fprintf('MH: Smooth measurement error, done!\n')
-      disp(' ')
-    end	
+      [MeanError,MedianError,StdError,DistribError,HPDError] = GetPosteriorStatistics(gend,B,'SmoothedObservationErrors');
+    end
     %%
     %% Now I plot the smooth -structural- shocks
     %%
@@ -2460,57 +2329,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     %%
     %%
   end % options_.smoother
-  if options_.filtered_vars
-    fprintf('MH: Filtered variables...\n')
-    MeanFilter = zeros(endo_nbr,gend);
-    MedianFilter = zeros(endo_nbr,gend);
-    StdFilter = zeros(endo_nbr,gend);
-    DistribFilter = zeros(endo_nbr,gend,9);
-    HPDFilter = zeros(endo_nbr,gend,2);
-    for i = 1:endo_nbr;
-      for t = 1:gend
-	StartLine = 0;
-	for file = 1:sfil_filt;
-	  instr = [fname_ '_filter' int2str(file)];
-	  eval(['load ' instr]);
-	  MeanFilter(i,t) = MeanFilter(i,t)+sum(stock_filter(i,t,:),3);
-	  DeProfundis = size(stock_filter,3); 
-	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_filter(i,t,:)); 
-	  StartLine = StartLine+DeProfundis;
-	end
-	tmp = sort(tmp);
-	MedianFilter(i,t) = tmp(round(B*0.5));
-	StdFilter(i,t) = std(tmp);
-	DistribFilter(i,t,:) = reshape(tmp(deciles),1,1,9);
-	tt = floor(options_.mh_conf_sig*B);
-	a = 1; 
-	b = tt;
-	tmp2 = [1;tt;tmp(tt)-tmp(1)];
-	while b <= B
-	  tmp1 = [a;b;tmp(b)-tmp(a)];
-	  a = a + 1;
-	  b = b + 1;
-	  if tmp1(3,1) < tmp2(3,1)
-	    tmp2 = tmp1;     
-	  end    
-	end
-	HPDFilter(i,t,1) = tmp(tmp2(1,1));
-	HPDFilter(i,t,2) = tmp(tmp2(2,1));
-      end
-      disp(['    Variable: ' deblank(lgy_(dr_.order_var(i),:))]);	
-    end
-    clear stock_filter;
-    MeanFilter = MeanFilter/B;
-    for i=1:size(lgy_,1)
-      eval(['oo_.PosteriorFilteredVariables.Mean.' deblank(lgy_(dr_.order_var(i),:)) ' = MeanFilter(i,:)'';']);
-      eval(['oo_.PosteriorFilteredVariables.Median.' deblank(lgy_(dr_.order_var(i),:)) ' = MedianFilter(i,:)'';']);
-      eval(['oo_.PosteriorFilteredVariables.Std.' deblank(lgy_(dr_.order_var(i),:)) ' = StdFilter(i,:)'';']);
-      eval(['oo_.PosteriorFilteredVariables.Distribution.' deblank(lgy_(dr_.order_var(i),:)) ' = squeeze(DistribFilter(i,:,:))'';']);
-      eval(['oo_.PosteriorFilteredVariables.HPDinf.' deblank(lgy_(dr_.order_var(i),:)) ' = squeeze(HPDFilter(i,:,1))'';']);
-      eval(['oo_.PosteriorFilteredVariables.HPDsup.' deblank(lgy_(dr_.order_var(i),:)) ' = squeeze(HPDFilter(i,:,2))'';']);
-    end
-    fprintf('MH: Filtered variables, done!\n')
-    disp(' ')
+  if options_.filtered_vars % Filtered variables.
+    [MeanFilter,MedianFilter,StdFilter,DistribFilter,HPDFilter] = GetPosteriorStatistics(gend,B,'FilteredVariables');
+    MakeSmoothVariablesPlots('FilteredVariables',DistribFilter,MeanFilter,gend)
   end	       
   %%
   %% 	Posterior IRFs. Instead of displaying the IRFs associated to the posterior mean
