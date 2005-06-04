@@ -1,8 +1,8 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function d = bksup1(ny,jcf)
+function d = bksup1(ny,jcf,iyf,c)
 
-global iter_ iyf c 
+global iter_
 
 ir = [(iter_-2)*ny+1:ny+(iter_-2)*ny] ;
 irf = iyf+(iter_-1)*ny ;
