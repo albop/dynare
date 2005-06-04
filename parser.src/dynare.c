@@ -78,7 +78,7 @@ char fname[200];
 int main(int argc, char **argv)
 {
   extern FILE *yyin,*yyout;
-  char fn_in[200],fn_out[200],*cp;
+  char fn_in[200],fn_out[200],*cp,buffer[2000];
   struct s_runtime_options runtime_options;
   struct s_runtime_options* p_ro;
   p_ro = &runtime_options;
@@ -173,6 +173,8 @@ int main(int argc, char **argv)
   dynare_init(fname,runtime_options);
   yyparse();
 #if defined MATLAB
+  sprintf(buffer,"save('%s_results','oo_','dr_');\n",fname);
+  str_output(buffer);
   str_output("diary off\n");
 #elif defined SCILAB
   str_output("mclose(fh_log);\n");
