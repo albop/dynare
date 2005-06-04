@@ -4,7 +4,7 @@ function simk
 
 global dynatol_ maxit_ slowc_ scalv_
 global iy_ ykmin_ ykmax_ iyr0 ct_ jacobia_ d1_
-global gstep_ ys_ y_ c it_ iter_
+global gstep_ ys_ y_ it_ iter_
 global ncc timing_ broyden_ fname_
 
 func_name = [fname_ '_ff'];
