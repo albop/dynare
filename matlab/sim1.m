@@ -4,7 +4,7 @@ function sim1
 
 global iyp iyf dynatol_ slowc_ maxit_ scalv_ it_
 global iy_ ykmin_ ykmax_ xkmin_ xkmax_ ct_ jacobia_ d1_
-global iter_ y_ c start_simul fname_
+global iter_ y_ start_simul fname_
 
 ny = size(y_,1) ;
 nyp = nnz(iy_(1,:)) ;
@@ -61,11 +61,11 @@ for iter = 1:maxit_
 		s(:,isf) = s(:,isf)+c(ic,1:nyf) ;
 		ic = ic + ny ;
 		c(ic,nrc) = s\c(:,nrc) ;
-		c = bksup1(ny,nrc) ;
+		c = bksup1(ny,nrc,iyf,c) ;
 		c = reshape(c,ny,iter_+1) ;
 		y_(:,it_init:iter_+2) = y_(:,it_init:iter_+2)+slowc_*c ;
 	else
-		c = bksup1(ny,nrc) ;
+		c = bksup1(ny,nrc,iyf,c) ;
 		c = reshape(c,ny,iter_) ;
 		y_(:,it_init:iter_+1) = y_(:,it_init:iter_+1)+slowc_*c ;
 	end
