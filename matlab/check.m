@@ -10,8 +10,6 @@ function result = check
     ex_ = ones(xkmax_+xkmin_+1,1)*exe_';
   end
   
-  options_ = set_default_option(options_,'dr_algo',0);
-  options_ = set_default_option(options_,'order',2);
   options_ = set_default_option(options_,'noprint',0);
   
   if isfield(options_,'order');
