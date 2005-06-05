@@ -1341,6 +1341,9 @@ void dynare_init(char* fname,struct s_runtime_options runtime_options)
   str_output("global dynatol_ slowc_ maxit_ valf_ ys0_ recurs0_ ex0_ timing_ ct_ gstep_ Sigma_e_ fname_ lgx_orig_ord_ iter_ options_ dr_ oo_ trend_coeff_ eigenvalues_\n");
   str_output("global M_\n");
   str_output("M_.ex_det_length = 0;\n");
+  str_output("M_.dname = '");
+  str_output(fname);
+  str_output("';\n");
   str_output("dsmpl_=0;\ndynatol_=0.00001;\nmaxit_=10;\nslowc_=1;\ntiming_=0;\nct_=0;\ngstep_=1e-2;\n");
   str_output("endval_=0;rplottype_=0;\nvalf_=0;\n");
   str_output("y_=[];\nex_=[];\nex_det_=[];\n");
