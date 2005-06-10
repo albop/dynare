@@ -5,20 +5,15 @@ function result = check
   global fname_ ys_ eigenvalues_ lambda_ dynatol_ it_ ykmin_ valf_ ex_ ...
       exe_ xkmin_ xkmax_ options_
   
+  temp_options = options_;
   tempex = ex_;
   if ~valf_
     ex_ = ones(xkmax_+xkmin_+1,1)*exe_';
   end
   
   options_ = set_default_option(options_,'noprint',0);
-  
-  if isfield(options_,'order');
-    temp_order = options_.order;
-  else
-    temp_order = [];
-  end
-  
-  options_.iorder = 1;
+  options_ = set_default_option(options_,'order',1);  
+  options_ = set_default_option(options_,'dr_algo',0);  
 
   [dr, info] = resol(ys_,1);
   
@@ -26,7 +21,6 @@ function result = check
     print_info(info);
   end  
 
-  options_.order = temp_order;
   ex_ = tempex;
   
   eigenvalues_ = dr.eigval;
@@ -55,6 +49,8 @@ function result = check
   % keep lambda_ for backward compatibility
   lambda_ = eigenvalues_;
 
+  options_ = temp_options;
+  
   % 2/9/99 MJ: line 15, added test for absence of exogenous variable.
   % 8/27/2000 MJ: change JACOB call. Added ...,1 to cumsum()
   % 6/24/01 MJ: added count of abs(eigenvalues) > 1
