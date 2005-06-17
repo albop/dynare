@@ -71,6 +71,7 @@ void p_check(void);
 void run_checks(void);
 void set_options(int, char**,struct s_runtime_options*);
 void make_empty(char *);
+void p_model_comparison(int);
 
 FILE *f_out;
 char fname[200];
@@ -3043,6 +3044,37 @@ void set_options(int argc, char** argv,struct s_runtime_options* runtime_options
     }
 }
 
+void p_model_comparison(int flag_model_prior)
+{
+  int i;
+  char buffer[2000];
+  str_output("ModelNames_ = {");
+  for(i=0; i < nbr_tmpvar; i +=2)
+    {
+      if (i != 0)
+	{
+	  str_output("; ");
+	}
+      sprintf(buffer,"'%s'",tmpvar_list[i]);
+      str_output(buffer);
+    }
+  str_output("};\n");
+  str_output("ModelPriors_ = [");
+  if (flag_model_prior)
+    {
+      for(i=1; i < nbr_tmpvar; i +=2)
+	{
+	  if (i != 0)
+	    {
+	      str_output("; ");
+	  }
+	  sprintf(buffer,"%s",tmpvar_list[i]);
+	  str_output(buffer);
+	}
+    }
+  str_output("];\n");
+  str_output("model_comparison(ModelNames_,ModelPriors_);\n");
+}
 
 /*
 02/22/01 MJ added test for nbr of equations != nbr endogenous variables

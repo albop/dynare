@@ -45,16 +45,18 @@
 %token KALMAN_ALGO KALMAN_TOL DIFFUSE_D NK
 %token CORR MOMENTS FUNCTIONS DIAGNOSTIC PRINT GRAPH
 %token NOCORR NOMOMENTS NOFUNCTIONS NODIAGNOSTIC NOPRINT NOGRAPH
+%token MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION LAPLACE
+%token MODIFIEDHARMONICMEAN
 %token <string> INUMBER DNUMBER NAME OPERATORS POUND EOL INDEX 
 %token <p_tok> VAR_ID
 
 %type <p_queue> equation_list equation other_inst p_expr expression elem_exp 
 %type <p_queue> del_exp sum_exp prod_exp period_list value_list
-%type <p_queue> value_list1 value_list2 expr1 do_loop 
+%type <p_queue> value_list1 value_list2 expr1 do_loop
 %type <p_queue> var_exp var_id_exp indexed_var_exp 
 %type <p_queue> triangular_matrix triangular_row
 %type <p_loop> loop_init
-%type <string> value prior
+%type <string> value prior filename filename_elem
 %expect 5
 %%
 
@@ -105,6 +107,7 @@
       | varobs
       | observation_trends
       | unit_root_vars
+      | model_comparison
       ;
  
  longnames : LONGNAMES ';'
@@ -315,7 +318,16 @@
       ; 
 
  steady : STEADY ';' {p_steady(model);}
-      | STEADY '(' options_list1 ')' ';' {p_steady_linear(model);check.linear=1;}
+      | STEADY '(' steady_options ')' ';' {p_steady_linear(model);check.linear=1;}
+      ;
+
+ steady_options: steady_options ',' steady_option
+      | steady_option
+      ;
+
+ steady_option: o_solve_algo
+      | o_print
+      | o_noprint
       ;
 
  stoch_simul : STOCH_SIMUL ';' {p_stoch_simul(dr_algo,simul_algo,drop,linear,order,replic,ar,nocorr,nofunctions,nomoments,irf);}
@@ -391,6 +403,9 @@
  o_kalman_tol : KALMAN_TOL '=' value {p_option("kalman_algo",$3);};
  o_diffuse_d : DIFFUSE_D '=' INUMBER {p_option("diffuse_d",$3);};
  o_nk : NK '=' INUMBER {p_option("nk",$3);};
+ o_model_comparison_approximation: MODEL_COMPARISON_APPROXIMATION '=' LAPLACE {p_s_option("model_comparison_approximation","Laplace");}
+   | MODEL_COMPARISON_APPROXIMATION '=' MODIFIEDHARMONICMEAN {p_s_option("model_comparison_approximation","ModifiedHarmonicMean");}
+   ;
 
  optim_option1: '\'' NAME '\'' ',' '\'' NAME '\'' {p_optim_options($2,$6,2);}
               | '\'' NAME '\'' ',' value {p_optim_options($2,$5,2);}
@@ -452,9 +467,19 @@
          ; 
 
  check : CHECK ';' {p_check();}
-       | CHECK '(' options_list1 ')' ';' {p_check();} 
+       | CHECK '(' check_options ')' ';' {p_check();} 
          ;
 
+ check_options: check_options ',' check_option
+       | check_option
+       ;
+
+ check_option: o_print
+       | o_noprint
+       | o_qz_criterium
+       | o_solve_algo
+       ;
+        
  irf : IRF ';' {p_irf(varexo,shock_size,iter,drop,replic,order);}
      | IRF '(' option_list_irf ')' ';' {p_irf(varexo,shock_size,iter,drop,replic,order);}
      | IRF varlist4 ';' {p_irf(varexo,shock_size,iter,drop,replic,order);}
@@ -733,6 +758,43 @@
 
  unit_root_vars : UNIT_ROOT_VARS {nbr_tmpvar = 0;} varlist4 ';' {print_unit_root_vars();}
                 ;
+
+ model_comparison : MODEL_COMPARISON {nbr_tmpvar=0;} model_comparison_args
+ ;
+
+ model_comparison_args : filename_list1 ';' {p_model_comparison(0);}
+              | filename_list2 ';' {p_model_comparison(1);}
+              | '(' model_comparison_options ')' filename_list1 ';' {p_model_comparison(0);}
+              | '(' model_comparison_options ')' filename_list2 ';' {p_model_comparison(1);}
+              ;
+
+ model_comparison_options: model_comparison_options ',' model_comparison_option
+              | model_comparison_option
+              ;
+
+ model_comparison_option : o_model_comparison_approximation
+              | o_print
+              | o_noprint
+              ;
+
+ filename_list1 : filename {add_tmpvar($1,"");}
+        | filename_list1 ',' filename {add_tmpvar($3,"");}
+        ;
+
+ filename_list2 : filename '(' value ')' {add_tmpvar($1,$3);}
+        | filename_list2 ',' filename '(' value ')' {add_tmpvar($3,$5);}
+        ;
+
+ filename : filename_elem {$$=$1;}
+        | filename filename_elem {$$ = my_strcat($1,$2);}
+        ;
+
+ filename_elem : NAME
+        | '\\' {$$ = "\\";}
+        | '/' {$$ = "/";}
+        | ':' {$$ = ":";}
+        | '.' {$$ = ".";}
+        ;
 
 %%
 int yyerror (char *s)

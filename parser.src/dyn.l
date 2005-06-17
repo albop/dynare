@@ -71,6 +71,7 @@ estimated_params_init {BEGIN DYNARE2; return ESTIMATED_PARAMS_INIT;}
 estimated_params_bounds {BEGIN DYNARE2; return ESTIMATED_PARAMS_BOUNDS;}
 estimated_params {BEGIN DYNARE2; return ESTIMATED_PARAMS;}
 unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
+model_comparison {BEGIN DYNARE1; return MODEL_COMPARISON;}
 
  /* \r is always ignored */
 <*>\r ;
@@ -192,6 +193,9 @@ unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
 <DYNARE1>kalman_tol {return KALMAN_TOL;}
 <DYNARE1>diffuse_d {return DIFFUSE_D;}
 <DYNARE1>nk {return NK;}
+<DYNARE1>model_comparison_approximation {return MODEL_COMPARISON;}
+<DYNARE1>laplace {return LAPLACE;}
+<DYNARE1>modifiedharmonicmean {return MODIFIEDHARMONICMEAN;}
 
  /* estimated_params priors */
  <DYNARE2>gamma_pdf {return GAMMA_PDF;}
@@ -233,6 +237,7 @@ unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
 <DYNARE3>] {BEGIN DYNARE1; return yytext[0];}
 <DYNARE3>\[ {return yytext[0];}
 <DYNARE1>, {return yytext[0];}
+<DYNARE1>' {return yytext[0];}
 <DYNARE1,DYNARE2,DYNARE3,DYNARE4>. {yylval.string=strdup(yytext); return OPERATORS;}
 <*>. {return yytext[0];}
 
