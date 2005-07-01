@@ -29,19 +29,14 @@ function yf=forcst2(y0,horizon,dr,n)
   
   B1 = dr.ghu(:,i_exo_var)*chol_S';
 
-  ys0 = repmat(dr.ys(dr.order_var),1,n);
-  ys1 = repmat(dr.ys(dr.order_var),1,ykmin_);
-  ys1 = ys1(k2);
-  ys1 = repmat(ys1,1,n);
-  
   yf = zeros(horizon+ykmin_,endo_nbr,n);
   yf(1:ykmin_,:,:) = repmat(y0',[1,1,n]);
   
   j = ykmin_*endo_nbr;
   for i=2:horizon+1
     tempx1 = reshape(yf(k1,:,:),[j,n]);
-    tempx = tempx1(k2,:)-ys1;
-    yf(i,:,:) = ys0+dr.ghx*tempx+B1*squeeze(e(:,:,i-1));
+    tempx = tempx1(k2,:);
+    yf(i,:,:) = dr.ghx*tempx+B1*squeeze(e(:,:,i-1));
     k1 = k1+1;
   end
   
