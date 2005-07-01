@@ -17,7 +17,7 @@ function olr(var_list,olr_inst,obj_var,W)
   options_ = set_default_option(options_,'hp_filter',0);
   options_ = set_default_option(options_,'hp_ngrid',512);
   options_ = set_default_option(options_,'simul',0);
-  options_ = set_default_option(options_,'olr_beta',1);
+  options_ = set_default_option(options_,'OLR_BETA',1);
   options_ = set_default_option(options_,'periods',1);
   options_ = set_default_option(options_,'TeX',0);
   options_ = set_default_option(options_,'noprint',0);
@@ -30,7 +30,7 @@ function olr(var_list,olr_inst,obj_var,W)
   
   make_ex_;
   
-  dr_=olr1(ys_,options_.dr_algo,olr_inst,options_.olr_beta,obj_var,W);
+  dr_=olr1(ys_,options_.dr_algo,olr_inst,options_.OLR_BETA,obj_var,W);
 
   disp(' ')
   disp('OPTIMAL LINEAR REGULATOR')
