@@ -1,18 +1,40 @@
-function PosteriorOddsTable = CompareModels(ModelNames,ModelPriors,type)
+function PosteriorOddsTable = model_comparison(ModelNames,ModelPriors)
 % 05-30-2005
 %
-% type is a string  = LaplaceApproximation
+% type is a string  = Laplace
 %                   = ModifiedHarmonicMean
 % ModelPriors is a m*1 column vector
 % ModelNames is m*1 cell array
 
-global oo_
+global oo_ options_
+
+type = options_.model_comparison_approximation;
+if strcmp(type,'Laplace')
+  type = 'LaplaceApproximation';
+end
 
 NumberOfModels = size(ModelNames,1);
 MarginalLogDensity = zeros(NumberOfModels,1);
 
 % Get the estimates of the (logged) marginal densities
-for i = 1:NumberOfModels
+
+init_loop = 1;
+if isempty(type)
+    oo_ = load(['ModelNames{1} '_results.mat' ],'oo_');
+    try
+        eval(['MarginalLogDensity(1) = oo_.MarginalDensity.ModifiedHarmonicMean']); 
+    catch
+      try
+        eval(['MarginalLogDensity(1) =' ...
+	      ' oo_.MarginalDensity.LaplaceApproximation']);
+      catch
+	disp(['CompareModels :: I cant''t find any marginal density approximation associated to model ' ModelNames{1}])
+	return
+      end
+    end
+
+end
+for i = init_loop:NumberOfModels
     oo_ = load(['ModelNames(i) '_results.mat' ],'oo_');
     try
         eval(['MarginalLogDensity(i) = oo_.MarginalDensity.' type ';']) 

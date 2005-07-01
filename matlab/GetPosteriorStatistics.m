@@ -18,7 +18,7 @@
     PrintOnScreen = 'Smooth variables';
     NumberOfX = size(lgy_,1);
     SaveName = 'SmoothedVariables';
-    XNames = lgy_(dr_.order_var);
+    XNames = lgy_(dr_.order_var,:);
     NonGenericName = '_smooth';
     varname = 'smooth';
   elseif strcmpi(infotype,'SmoothedShocks')
@@ -39,7 +39,7 @@
     PrintOnScreen = 'Filtered variables...';
     NumberOfX = size(lgy_,1);
     SaveName = 'FilteredVariables';
-    XNames = lgy_(dr_.order_var);
+    XNames = lgy_(dr_.order_var,:);
     NonGenericName = '_filter';
     varname = 'filter';
   end
