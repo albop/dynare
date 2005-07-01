@@ -183,8 +183,6 @@ else
   instr = ['load ' options_.datafile];
 end
 
-instr
-
 eval(instr);
 
 rawdata = [];
