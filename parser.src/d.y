@@ -405,6 +405,7 @@
  o_nk : NK '=' INUMBER {p_option("nk",$3);};
  o_model_comparison_approximation: MODEL_COMPARISON_APPROXIMATION '=' LAPLACE {p_s_option("model_comparison_approximation","Laplace");}
    | MODEL_COMPARISON_APPROXIMATION '=' MODIFIEDHARMONICMEAN {p_s_option("model_comparison_approximation","ModifiedHarmonicMean");}
+ o_olr_beta : OLR_BETA '=' value {p_option("olr_beta",$3);}
    ;
 
  optim_option1: '\'' NAME '\'' ',' '\'' NAME '\'' {p_optim_options($2,$6,2);}
@@ -540,24 +541,24 @@
                  ;
 
  osr : OSR ';' {p_osr();}
-     | OSR '(' options_list4 ')' ';' {p_osr();}
+     | OSR '(' olr_options ')' ';' {p_osr();}
      | OSR varlist4 ';' {p_osr();}
-     | OSR '(' options_list4 ')' varlist4 ';' {p_osr();}
+     | OSR '(' olr_options ')' varlist4 ';' {p_osr();}
      ;
  
  olr : OLR ';' {p_olr();}
-     | OLR '(' options_list4 ')' ';' {p_olr();}
+     | OLR '(' olr_options ')' ';' {p_olr();}
      | OLR varlist4 ';' {p_olr();}
-     | OLR '(' options_list4 ')' varlist4 ';' {p_olr();}
+     | OLR '(' olr_options ')' varlist4 ';' {p_olr();}
      ;
  
- options_list4 : OLR_BETA '=' INUMBER {p_option("OLR_BETA",$3);}
-             | OLR_BETA '=' DNUMBER {p_option("OLR_BETA",$3);}
-             | options_list1
-	     | options_list4 ',' options_list1
-	     | options_list4 ',' OLR_BETA '=' INUMBER {p_option("OLR_BETA",$5);}
-             | options_list4 ',' OLR_BETA '=' DNUMBER {p_option("OLR_BETA",$5);}
-             ;
+ olr_option : o_olr_beta
+     | options_list1
+     ;
+ 
+ olr_options : olr_option
+     | olr_options ',' olr_option
+     ;
 
  olr_inst : OLR_INST {p_olr_inst_init();} olr_inst_list ';'
           ;

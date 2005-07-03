@@ -2542,7 +2542,11 @@ void p_olr()
 	}
       str_output(buffer);
     }
-  str_output("olr(var_list_,olr_inst_,obj_var_,optim_weights_);\n");
+  str_output("options_.olr = 1;\n");
+  str_output("options_.olr_w = optim_weights_;\n");
+  str_output("options_.olr_inst = olr_inst_;\n");
+  str_output("info = stoch_simul(var_list_);\n");
+  //  str_output("olr(var_list_,olr_inst_,obj_var_,optim_weights_);\n");
 #endif
 }
 
