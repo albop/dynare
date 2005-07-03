@@ -1,6 +1,6 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function [dr,info]=dr1(dr,check)
+function [dr,info]=dr1(dr,task)
 
 % info = 1: the model doesn't define current variables uniquely
 % info = 2: problem in mjdgges.dll info(2) contains error code
@@ -11,7 +11,7 @@ function [dr,info]=dr1(dr,check)
 % info = 5: BK rank condition not satisfied
 
   global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
-  global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ ys_ stdexo_
+  global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ stdexo_
   global fname_ means_ Sigma_e_ lgy_
   global eigval options_ M_
 
@@ -20,6 +20,9 @@ function [dr,info]=dr1(dr,check)
   
   options_ = set_default_option(options_,'loglinear',0);
   options_ = set_default_option(options_,'noprint',0);
+  options_ = set_default_option(options_,'olr',0);
+  options_ = set_default_option(options_,'olr_beta',1);
+
 
 xlen = xkmax_ + xkmin_ + 1;
 klen = ykmin_ + ykmax_ + 1;
@@ -32,6 +35,75 @@ if exo_nbr == 0
   exe_ = [] ;
 end
 
+tempex = ex_;
+
+it_ = ykmin_ + 1;
+z = repmat(dr.ys,1,klen);
+z = z(iyr0) ;
+jacobia_=real(jacob_a('ff1_',[z(:); exe_])) ;
+
+ex_ = tempex ;
+tempex = [];
+
+% expanding system for Optimal Linear Regulator
+if options_.olr
+  bet = options_.olr_beta;
+  for i=1:endo_nbr
+    temp = ['mult_' int2str(i)];
+    lgy_ = strvcat(lgy_,temp);
+  end
+  
+  jacobia1 = [];
+  n_inst = size(options_.olr_inst,1);
+  nj = endo_nbr-n_inst;
+  jacobia_ = jacobia_(1:nj,:);
+  newykmin = max(ykmin_,ykmax_);
+  newykmax = newykmin;
+  offset_min = newykmin - ykmin_;
+  offset_max = newykmax - ykmax_;
+  newiy = zeros(2*newykmin,nj+endo_nbr);
+  for i=1:2*newykmin+1
+    if i > offset_min & i <= 2*newykmin+1-offset_max
+      [junk,k1,k2] = find(iy_(i-offset_min,:));
+      if i == newykmin+1
+	jacobia1 = [jacobia1 [jacobia_(:,k2); 2*options_.olr_w]];
+      else
+	jacobia1 = [jacobia1 [jacobia_(:,k2); zeros(endo_nbr, ...
+                                                  length(k1))]];
+      end
+      newiy(i,k1) = ones(1,length(k1));
+    end
+    i1  = 2*newykmin+2-i;
+    if i1 <= 2*newykmin+1-offset_max & i1 > offset_min 
+      [junk,k1,k2] = find(iy_(i1-offset_min,:));
+      k3 = find(any(jacobia_(:,k2),2));
+      x = zeros(endo_nbr,length(k3));
+      x(k1,:) = bet^(-i1+newykmin)*jacobia_(k3,k2)';
+      jacobia1  = [jacobia1 [zeros(nj,length(k3)); x]];
+      newiy(i,k3+endo_nbr) = ones(1,length(k3));
+    end      
+  end
+  jacobia1 = [jacobia1 [jacobia_(:,end-exo_nbr+1:end); zeros(endo_nbr, ...
+						  exo_nbr)]];
+  iy_
+  newiy
+  ykmin_ = newykmin;
+  ykmax_ = newykmax;
+  newiy = newiy';
+  newiy = find(newiy(:));
+  iy_ = zeros((nj+endo_nbr)*(ykmin_+ykmax_+1),1);
+  iy_(newiy) = [1:length(newiy)]';
+  iy_ =reshape(iy_,nj+endo_nbr,ykmin_+ykmax_+1)';
+  jacobia_ = jacobia1;
+  % assumes non distorted steady state
+  dr.ys =[dr.ys; zeros(nj,1)];
+  endo_nbr = endo_nbr+nj;
+  
+  clear jacobia1
+end
+% end of code section for Optimal Linear Regulator
+
+klen = ykmin_ + ykmax_ + 1;
 dr=set_state_space(dr);
 kstate = dr.kstate;
 kad = dr.kad;
@@ -45,21 +117,10 @@ nd = size(kstate,1);
 
 sdyn = endo_nbr - nstatic;
 
-tempex = ex_;
-
-it_ = ykmin_ + 1;
-z = repmat(dr.ys,1,klen);
-z = z(iyr0) ;
-%jacobia_=real(diffext('ff1_',[z; exe_])) ;
-jacobia_=real(jacob_a('ff1_',[z(:); exe_])) ;
-
-ex_ = tempex ;
-tempex = [];
-
-nz = size(z,1);
 k1 = iy_(find([1:klen] ~= ykmin_+1),:);
 b = jacobia_(:,iy_(ykmin_+1,order_var));
 a = b\jacobia_(:,nonzeros(k1')); 
+nz = nnz(iy_);
 if any(isinf(a(:)))
   info = 1;
   return
@@ -132,7 +193,7 @@ end
 
 nyf = sum(kstate(:,2) > ykmin_+1);
 
-if check
+if task == 1
   dr.rank = rank(w(1:nyf,nd-nyf+1:end));
   dr.eigval = eig(e,d);
   return
