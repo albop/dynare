@@ -17,7 +17,7 @@ function result = check
 
   [dr, info] = resol(ys_,1);
   
-  if info(1)
+  if info(1) ~= 0 & info(1) ~= 3 & info(1) ~= 4
     print_info(info);
   end  
 
@@ -38,12 +38,14 @@ function result = check
 		 nnz(abs(eigenvalues_) > options_.qz_criterium)));
     disp(sprintf('for %d forward-looking variable(s)',nyf));
     disp(' ')
-    if dr.rank == nyf
-      disp('The rank condition is verified.')
-    else
-      disp('The rank conditions ISN''T verified!')
+    if info(1) == 0
+      if dr.rank == nyf
+	disp('The rank condition is verified.')
+      else
+	disp('The rank conditions ISN''T verified!')
+      end
+      disp(' ')
     end
-    disp(' ')
   end
   
   % keep lambda_ for backward compatibility
