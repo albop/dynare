@@ -400,7 +400,7 @@
  o_filtered_vars : FILTERED_VARS {p_option("filtered_vars","1");};
  o_relative_irf : RELATIVE_IRF {p_option("relative_irf","1");};
  o_kalman_algo : KALMAN_ALGO '=' INUMBER {p_option("kalman_algo",$3);};
- o_kalman_tol : KALMAN_TOL '=' value {p_option("kalman_algo",$3);};
+ o_kalman_tol : KALMAN_TOL '=' value {p_option("kalman_tol",$3);};
  o_diffuse_d : DIFFUSE_D '=' INUMBER {p_option("diffuse_d",$3);};
  o_nk : NK '=' INUMBER {p_option("nk",$3);};
  o_model_comparison_approximation: MODEL_COMPARISON_APPROXIMATION '=' LAPLACE {p_s_option("model_comparison_approximation","Laplace");}
