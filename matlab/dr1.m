@@ -22,6 +22,7 @@ function [dr,info]=dr1(dr,task)
   options_ = set_default_option(options_,'noprint',0);
   options_ = set_default_option(options_,'olr',0);
   options_ = set_default_option(options_,'olr_beta',1);
+  options_ = set_default_option(options_,'qz_criterium',1.000001);
 
 
 xlen = xkmax_ + xkmin_ + 1;
@@ -142,6 +143,13 @@ if ykmax_ == 0;  % backward model
   end
   dr.eigval = eig(transition_matrix(dr));
   dr.rank = 0;
+  if any(abs(dr.eigval) > options_.qz_criterium)
+    temp = sort(abs(dr.eigval));
+    nba = nnz(abs(dr.eigval) > options_.qz_criterium);
+    temp = temp(nd-nba+1:nd)-1-options_.qz_criterium;
+    info(1) = 3;
+    info(2) = temp'*temp;
+  end
   return;
 end
 
@@ -167,7 +175,6 @@ if ~isempty(kad)
   end
 end
 
-options_ = set_default_option(options_,'qz_criterium',1.000001);
 if ~exist('mjdgges')
   % using Chris Sim's routines
   use_qzdiv = 1;
