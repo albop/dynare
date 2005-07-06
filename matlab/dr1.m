@@ -39,7 +39,11 @@ end
 tempex = ex_;
 
 it_ = ykmin_ + 1;
-z = repmat(dr.ys,1,klen);
+if options_.olr
+  z = repmat(zeros(endo_nbr,1),1,klen);
+else
+  z = repmat(dr.ys,1,klen);
+end
 z = z(iyr0) ;
 jacobia_=real(jacob_a('ff1_',[z(:); exe_])) ;
 
@@ -86,8 +90,6 @@ if options_.olr
   end
   jacobia1 = [jacobia1 [jacobia_(:,end-exo_nbr+1:end); zeros(endo_nbr, ...
 						  exo_nbr)]];
-  iy_
-  newiy
   ykmin_ = newykmin;
   ykmax_ = newykmax;
   newiy = newiy';
@@ -96,11 +98,22 @@ if options_.olr
   iy_(newiy) = [1:length(newiy)]';
   iy_ =reshape(iy_,nj+endo_nbr,ykmin_+ykmax_+1)';
   jacobia_ = jacobia1;
-  % assumes non distorted steady state
-  dr.ys =[dr.ys; zeros(nj,1)];
+  clear jacobia1
+  % computes steady state
+  resid = feval([fname_ '_fff'],zeros(endo_nbr,1));
+  if resid'*resid < 1e-12
+    dr.ys =[dr.ys; zeros(nj,1)];
+  else
+    AA = zeros(endo_nbr+nj,endo_nbr+nj);
+    for i=1:ykmin_+ykmax_+1
+      [junk,k1,k2] = find(iy_(i,:));
+      AA(:,k1) = AA(:,k1)+jacobia_(:,k2);
+    end
+    dr.ys = -AA\[resid; zeros(nj,1)];
+  end
   endo_nbr = endo_nbr+nj;
   
-  clear jacobia1
+
 end
 % end of code section for Optimal Linear Regulator
 
