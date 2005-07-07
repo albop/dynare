@@ -42,9 +42,9 @@ if options_.olr == 0
       info(2) = resid'*resid; % penalty...
       return
     end
-  else
-    dr.ys = ys;
   end
+else
+  dr.ys = ys;
 end
 
 dr.fbias = zeros(endo_nbr,1);
