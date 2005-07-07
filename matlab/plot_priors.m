@@ -34,9 +34,9 @@ if nbplt == 1
         title(nam,'Interpreter','none')
         drawnow
     end
-    eval(['print -depsc2 ' fname_ '_Priors' int2str(1)]);
-    eval(['print -dpdf ' fname_ '_Priors' int2str(1)]);
-	saveas(h1,[fname_ '_Priors' int2str(1) '.fig']);
+    print('-depsc2',[fname_ '_Priors' int2str(1)]);
+    print('-dpdf',[fname_ '_Priors' int2str(1)]);
+    saveas(h1,[fname_ '_Priors' int2str(1) '.fig']);
     if options_.nograph, close(h1), end
     if TeX
     	fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -75,9 +75,9 @@ else
             title(nam,'Interpreter','none')
             drawnow
         end  % index=1:nstar
-        eval(['print -depsc2 ' fname_ '_Priors' int2str(plt)]);
-        eval(['print -dpdf ' fname_ '_Priors' int2str(plt)]);
-		saveas(hplt,[fname_ '_Priors' int2str(plt) '.fig']);
+        print('-depsc2',[fname_ '_Priors' int2str(plt)]);
+        print('-dpdf',[fname_ '_Priors' int2str(plt)]);
+	saveas(hplt,[fname_ '_Priors' int2str(plt) '.fig']);
     	if options_.nograph, close(hplt), end
 		if TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -116,9 +116,9 @@ else
         title(nam,'Interpreter','none')
         drawnow
     end  % index=1:npar-(nbplt-1)*nstar
-    eval(['print -depsc2 ' fname_ '_Priors' int2str(nbplt)]);
-    eval(['print -dpdf ' fname_ '_Priors' int2str(nbplt)]);
- 	saveas(hplt,[fname_ '_Priors' int2str(nbplt) '.fig']);
+    print('-depsc2',[ fname_ '_Priors' int2str(nbplt)]);
+    print('-dpdf',[ fname_ '_Priors' int2str(nbplt)]);
+    saveas(hplt,[fname_ '_Priors' int2str(nbplt) '.fig']);
     if options_.nograph, close(hplt), end
 	if TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
