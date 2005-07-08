@@ -3,7 +3,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff] = DsgeSmoothe
 %
 % Adapted from mj_optmumlik.m
 global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test
-global dr1_test_ trend_coeff_
+global trend_coeff_
 
 alphahat 	= [];
 epsilonhat	= [];

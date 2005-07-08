@@ -1,9 +1,9 @@
-function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
+function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
 % stephane.adjemian@cepremap.cnrs.fr [09-07-2004]
 %
 % Adapted from mj_optmumlik.m
 global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test
-  global dr1_test_ trend_coeff_
+  global trend_coeff_
 
   fval = [];
   cost_flag = [];
@@ -86,17 +86,13 @@ global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test
   %------------------------------------------------------------------------------
   % 2. call model setup & reduction program
   %------------------------------------------------------------------------------
-  [T,R,SteadyState] = dynare_resolve;
-  if dr1_test_(1) == 1
-    fval = bayestopt_.penalty*min(1e3,exp(dr1_test_(2)));
+  [T,R,SteadyState,info] = dynare_resolve;
+  if info(1) == 1 | info(1) == 2 | info(1) == 5
+    fval = bayestopt_.penalty;
     cost_flag = 0;
     return
-  elseif dr1_test_(1) == 2
-    fval = bayestopt_.penalty*min(1e3,exp(dr1_test_(2)));
-    cost_flag = 0;
-    return
-  elseif dr1_test_(1) == 3
-    fval = bayestopt_.penalty*min(1e3,exp(dr1_test_(2)));
+  elseif info(1) == 3 | info(1) == 4 | info(1) == 20
+    fval = bayestopt_.penalty*min(1e3,exp(info(2)));
     cost_flag = 0;
     return
   end

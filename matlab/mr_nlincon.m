@@ -7,7 +7,7 @@ function [c, ceq] = mr_nlincon(xparam1,gend,rawdata,algo);
 
 
 global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam_test ...
-    dr1_test_ trend_coeff_ 
+    trend_coeff_ 
 
 
 c=0;
@@ -107,20 +107,17 @@ Sigma_e_ = Q;
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
 
-[A,B,ys] = dynare_resolve;
-
-if dr1_test_(1) == 1
-    c = abs(dr1_test_(2));
-    cost_flag = 0;
-    return;
-elseif dr1_test_(1) == 2;
-    c = abs(dr1_test_(2));
-    cost_flag = 0;
-    return;
-elseif dr1_test_(1) == 3;
-    c = abs(dr1_test_(2));
-    cost_flag = 0;
-    return;    
+[A,B,ys,info] = dynare_resolve;
+if info(1) == 1 | info(1) == 2 | info(1) == 5
+  fval = bayestopt_.penalty;
+  cost_flag = 0;
+  return
+elseif info(1) == 3 | info(1) == 4 | info(1) == 20
+  fval = bayestopt_.penalty*min(1e3,exp(info(2)));
+  cost_flag = 0;
+  return
 end
+
+
 
 % 11/18/03 MJ changed input parameters for priordens()

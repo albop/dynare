@@ -1,9 +1,9 @@
-function [A,B,ys] = dynare_resolve()
-  global dr1_test_ ys_ dr_
+function [A,B,ys,info] = dynare_resolve()
+  global ys_ dr_
   
-  dr_ = resol1(ys_,0,1,1);
+  [dr_,info] = resol(ys_,0);
   
-  if dr1_test_(1) > 0
+  if info(1) > 0
     A = [];
     B = [];
     ys = [];
