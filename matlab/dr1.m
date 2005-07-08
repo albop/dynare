@@ -13,7 +13,7 @@ function [dr,info]=dr1(dr,task)
   global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
   global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ stdexo_
   global fname_ means_ Sigma_e_ lgy_
-  global eigval options_ M_
+  global eigval options_ M_ olr_state_
 
 
   info = 0;
@@ -23,7 +23,6 @@ function [dr,info]=dr1(dr,task)
   options_ = set_default_option(options_,'olr',0);
   options_ = set_default_option(options_,'olr_beta',1);
   options_ = set_default_option(options_,'qz_criterium',1.000001);
-
 
 xlen = xkmax_ + xkmin_ + 1;
 klen = ykmin_ + ykmax_ + 1;
@@ -53,67 +52,71 @@ tempex = [];
 % expanding system for Optimal Linear Regulator
 if options_.olr
   bet = options_.olr_beta;
-  for i=1:endo_nbr
-    temp = ['mult_' int2str(i)];
-    lgy_ = strvcat(lgy_,temp);
-  end
-  
   jacobia1 = [];
   n_inst = size(options_.olr_inst,1);
-  nj = endo_nbr-n_inst;
+
+  if ~isfield(olr_state_,'done')
+    olr_state_.done = 1;
+    olr_state_.old_ykmin_ = ykmin_;
+    olr_state_.old_ykmax_ = ykmax_;
+    olr_state_.old_endo_nbr = endo_nbr;
+    olr_state_.old_iy_ = iy_;
+    
+    for i=1:endo_nbr
+      temp = ['mult_' int2str(i)];
+      lgy_ = strvcat(lgy_,temp);
+    end
+    endo_nbr = 2*endo_nbr-n_inst;
+    ykmin_ = max(ykmin_,ykmax_);
+    ykmax_ = ykmin_;
+  end    
+  nj = olr_state_.old_endo_nbr-n_inst;
+  offset_min = ykmin_ - olr_state_.old_ykmin_;
+  offset_max = ykmax_ - olr_state_.old_ykmax_;
+  newiy = zeros(2*ykmin_+1,nj+olr_state_.old_endo_nbr);
   jacobia_ = jacobia_(1:nj,:);
-  newykmin = max(ykmin_,ykmax_);
-  newykmax = newykmin;
-  offset_min = newykmin - ykmin_;
-  offset_max = newykmax - ykmax_;
-  newiy = zeros(2*newykmin,nj+endo_nbr);
-  for i=1:2*newykmin+1
-    if i > offset_min & i <= 2*newykmin+1-offset_max
-      [junk,k1,k2] = find(iy_(i-offset_min,:));
-      if i == newykmin+1
+  for i=1:2*ykmin_+1
+    if i > offset_min & i <= 2*ykmin_+1-offset_max
+      [junk,k1,k2] = find(olr_state_.old_iy_(i-offset_min,:));
+      if i == ykmin_+1
 	jacobia1 = [jacobia1 [jacobia_(:,k2); 2*options_.olr_w]];
       else
-	jacobia1 = [jacobia1 [jacobia_(:,k2); zeros(endo_nbr, ...
-                                                  length(k1))]];
+	jacobia1 = [jacobia1 [jacobia_(:,k2); ...
+		    zeros(olr_state_.old_endo_nbr,length(k1))]];
       end
       newiy(i,k1) = ones(1,length(k1));
     end
-    i1  = 2*newykmin+2-i;
-    if i1 <= 2*newykmin+1-offset_max & i1 > offset_min 
-      [junk,k1,k2] = find(iy_(i1-offset_min,:));
+    i1  = 2*ykmin_+2-i;
+    if i1 <= 2*ykmin_+1-offset_max & i1 > offset_min 
+      [junk,k1,k2] = find(olr_state_.old_iy_(i1-offset_min,:));
       k3 = find(any(jacobia_(:,k2),2));
-      x = zeros(endo_nbr,length(k3));
-      x(k1,:) = bet^(-i1+newykmin)*jacobia_(k3,k2)';
+      x = zeros(olr_state_.old_endo_nbr,length(k3));
+      x(k1,:) = bet^(-i1+ykmin_+1)*jacobia_(k3,k2)';
       jacobia1  = [jacobia1 [zeros(nj,length(k3)); x]];
-      newiy(i,k3+endo_nbr) = ones(1,length(k3));
+      newiy(i,k3+olr_state_.old_endo_nbr) = ones(1,length(k3));
     end      
   end
-  jacobia1 = [jacobia1 [jacobia_(:,end-exo_nbr+1:end); zeros(endo_nbr, ...
-						  exo_nbr)]];
-  ykmin_ = newykmin;
-  ykmax_ = newykmax;
+  jacobia1 = [jacobia1 [jacobia_(:,end-exo_nbr+1:end); ...
+		    zeros(olr_state_.old_endo_nbr, exo_nbr)]];
   newiy = newiy';
   newiy = find(newiy(:));
-  iy_ = zeros((nj+endo_nbr)*(ykmin_+ykmax_+1),1);
+  iy_ = zeros(endo_nbr*(ykmin_+ykmax_+1),1);
   iy_(newiy) = [1:length(newiy)]';
-  iy_ =reshape(iy_,nj+endo_nbr,ykmin_+ykmax_+1)';
+  iy_ =reshape(iy_,endo_nbr,ykmin_+ykmax_+1)';
   jacobia_ = jacobia1;
   clear jacobia1
   % computes steady state
-  resid = feval([fname_ '_fff'],zeros(endo_nbr,1));
+  resid = feval([fname_ '_fff'],zeros(olr_state_.old_endo_nbr,1));
   if resid'*resid < 1e-12
     dr.ys =[dr.ys; zeros(nj,1)];
   else
-    AA = zeros(endo_nbr+nj,endo_nbr+nj);
+    AA = zeros(endo_nbr,endo_nbr);
     for i=1:ykmin_+ykmax_+1
       [junk,k1,k2] = find(iy_(i,:));
       AA(:,k1) = AA(:,k1)+jacobia_(:,k2);
     end
     dr.ys = -AA\[resid; zeros(nj,1)];
   end
-  endo_nbr = endo_nbr+nj;
-  
-
 end
 % end of code section for Optimal Linear Regulator
 
