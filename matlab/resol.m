@@ -29,21 +29,19 @@ if exo_det_nbr > 0
   ex_det_ = ones(ykmin_+1,1)*exe_det_';
 end
 fh = str2func([fname_ '_fff']);
-if options_.olr == 0
-  if max(abs(feval(fh,ys))) > dynatol_
-    if exist([fname_ '_steadystate'])
-      [dr.ys,check1] = feval([fname_ '_steadystate'],ys);
-    else
-      [dr.ys,check1] = dynare_solve([fname_ '_fff'],ys);
-    end
-    if check1
-      info(1) = 20;
-      resid = feval(fh,ys);
-      info(2) = resid'*resid; % penalty...
-      return
-    end
+if max(abs(feval(fh,ys))) > dynatol_ & options_.olr == 0
+  if exist([fname_ '_steadystate'])
+    [dr.ys,check1] = feval([fname_ '_steadystate'],ys);
+  else
+    [dr.ys,check1] = dynare_solve([fname_ '_fff'],ys);
   end
-else
+  if check1
+    info(1) = 20;
+    resid = feval(fh,ys);
+    info(2) = resid'*resid; % penalty...
+    return
+  end
+else 
   dr.ys = ys;
 end
 
