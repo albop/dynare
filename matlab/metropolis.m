@@ -358,11 +358,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %%%
   %%
   %
-  if ~options_.nodiagnostic & nblck > 1
+  origin = 1000;
+  if ~options_.nodiagnostic & nblck > 1 & nsim > origin
     %%
     %%	Univariate diagnostic : Brooks and Gelman (1998).
     %%
-    origin      = 1000;
     step_size   = ceil((nsim-origin)/100); 	% So that the computational time does not 
     ALPHA       = 0.2;						% increase too much with the number of simulations. 
     time = 1:nsim;
