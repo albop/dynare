@@ -1,7 +1,7 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function [x,check] = dynare_solve(func,x,varargin)
-  global gstep_ options_
+  global gstep_ options_ debug_
   
   options_ = set_default_option(options_,'solve_algo',2);
   check = 0;
@@ -39,10 +39,15 @@ function [x,check] = dynare_solve(func,x,varargin)
     i = find(~isfinite(fvec));
     
     if ~isempty(i)
-      disp(['STEADY:  numerical initial values incompatible with the following' ...
-	    ' equations'])
-      disp(i')
-      error('exiting ...')
+      if debug_
+	disp(['STEADY:  numerical initial values incompatible with the following' ...
+	      ' equations'])
+	disp(i')
+	error('exiting ...')
+      else
+	check = 1;
+	return
+      end
     end
     
     f = 0.5*fvec'*fvec ;
@@ -63,7 +68,11 @@ function [x,check] = dynare_solve(func,x,varargin)
     for i=length(r)-1:-1:1
       [x,check]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),varargin{:});
       if check
-	error(sprintf('Solve block = %d check = %d\n',i,check));
+	if debug_
+	  error(sprintf('Solve block = %d check = %d\n',i,check));
+	else
+	  return
+	end
       end
     end
     [x,check]=solve1(func,x,1:nn,1:nn,varargin{:});
