@@ -364,7 +364,12 @@
                | QZ_CRITERIUM '=' DNUMBER { p_option("qz_criterium",$3)}
                ;
  o_datafile: DATAFILE '=' NAME {p_s_option("datafile",$3);};   
- o_nobs: NOBS '=' INUMBER {p_option("nobs",$3);};	      
+ o_nobs: NOBS '=' INUMBER {p_option("nobs",$3);}
+       | NOBS '=' '(' expression ')' {p_option_e("nobs",$4);}
+       ;
+/*
+       | NOBS '=' '[' INUMBER ':' INUMBER ']' {p_interval_option("nobs",$4,$6);};
+*/
  o_first_obs: FIRST_OBS '=' INUMBER {p_option("first_obs",$3);};
  o_prefilter: PREFILTER '=' INUMBER {p_option("prefilter",$3);};
  o_presample: PRESAMPLE '=' INUMBER {p_option("presample",$3);};
