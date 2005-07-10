@@ -2340,6 +2340,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	eval(['oo_.Forecast.Std.' deblank(varlist(k,:)) ' = StdForecast(:,k)'';']);
 	eval(['oo_.Forecast.HPDinf.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,1))'';']);
 	eval(['oo_.Forecast.HPDsup.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,2))'';']);
+	eval(['oo_.Forecast.HPDTotalinf.' deblank(varlist(k,:)) ' = squeeze(HPD_total(:,k,1))'';']);
+	eval(['oo_.Forecast.HPDTotalsup.' deblank(varlist(k,:)) ' = squeeze(HPD_total(:,k,2))'';']);
 	if TeX
 	  NAMES = strvcat(NAMES,deblank(varlist(k,:)));
 	  TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(k,:)) ' $']);
