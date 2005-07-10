@@ -2393,7 +2393,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       %% Historical and smoothed variabes
       %%
       MakeSmoothVariablesPlots('Historical&SmoothedObservableVariables',...
-			       MeanSmooth,rawdata',gend)
+			       MeanSmooth,rawdata(options_.first_obs+(0:gend-1),:),gend)
     end  
     %%
     %%
