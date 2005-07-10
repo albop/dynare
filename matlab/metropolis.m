@@ -2387,12 +2387,12 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     %%
     if nvn
       MakeSmoothVariablesPlots('SmoothedObservationErrors',DistribError,MeanError,gend)
+      %%
+      %% Historical and smoothed variabes
+      %%
+      MakeSmoothVariablesPlots('Historical&SmoothedObservableVariables',...
+			       MeanSmooth,rawdata',gend)
     end  
-    %%
-    %% Historical and smoothed variabes
-    %%
-    MakeSmoothVariablesPlots('Historical&SmoothedObservableVariables',...
-			     MeanSmooth,rawdata',gend)
     %%
     %%
     %%
