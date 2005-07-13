@@ -87,7 +87,7 @@ end
 pnames=['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
 [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_);
 if any(bayestopt_.pshape > 0)
-%  plot_priors
+  plot_priors
 else
   options_.mh_replic = 0;
 end
@@ -212,12 +212,6 @@ bayestopt_.jscale(k) = options_.mh_jscale;
 if options_.loglinear == 1
   rawdata = log(rawdata);
 end
-if options_.prefilter == 1
-  bayestopt_.mean_varobs = mean(rawdata,1);
-  data1 = rawdata'-repmat(bayestopt_.mean_varobs',1,size(rawdata,1));
-else
-  data1 = rawdata';
-end
 
 if ~isreal(rawdata)
   error(['There are complex values in the data. Probably  a wrong' ...
@@ -229,8 +223,15 @@ if length(options_.mode_file) > 0
 end
 
 iter1 = 1;
-for gend = options_.nobs(1):options_.nobs(end)-10
-  data = data1(:,options_.first_obs+(0:gend-1));
+for iter1 = 1:length(options_.nobs)
+  gend = options_.nobs(iter1);
+  if options_.prefilter == 1
+    bayestopt_.mean_varobs = mean(rawdata(options_.first_obs+(0:gend-1),:),1);
+    data = rawdata(options_.first_obs+(0:gend-1),:)'-...
+	   repmat(bayestopt_.mean_varobs',1,gend);
+  else
+    data = rawdata(options_.first_obs+(0:gend-1),:)';
+  end
   initial_estimation_checks(xparam1,gend,data);
 
   if options_.mode_compute > 0
@@ -1129,7 +1130,6 @@ for gend = options_.nobs(1):options_.nobs(end)-10
 end        % end for gend=options_.nobs(1):options_.nobs(end)
 
 if options_.nobs(1) < options_.nobs(end) & options_.forecast > 1
-  load fs2000_results
   if isempty(varlist)
     varlist = lgy_;
     nvar	= size(lgy_,1);
