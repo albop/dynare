@@ -1139,7 +1139,11 @@ if options_.nobs(1) < options_.nobs(end) & options_.forecast > 1
     SelecVariables = [];
     for i=1:nvar
       if ~isempty(strmatch(varlist(i,:),lgy_,'exact'))
-	SelecVariables = [SelecVariables;strmatch(varlist(i,:),lgy_,'exact')];
+	SelecVariables = [SelecVariables;strmatch(varlist(i,:),lgy_, ...
+						  'exact')];
+      else
+	error(['Estimation: ' varlist(i,:) ' isn'''t an endogenous' ...
+	       'variable'])
       end	
     end
     IdObs    = zeros(n_varobs,1);
