@@ -2,6 +2,8 @@
 %
 function print_info(info)
   global options_
+
+  options_ = set_default_option(options_,'noprint',0);
   
   if ~options_.noprint
     if info(1) > 10 & info(1) < 20
