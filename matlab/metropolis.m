@@ -1391,7 +1391,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     nruns = FLN(1,3);    
   end
   FLN(:,3) = FLN(:,3)/nruns;% I'm scaling the CDF
-  nvar     = length(ys_);
+  nvar     = endo_nbr;
   B        = 100;%round(0.25*nruns);
   deciles = [round(0.1*B) ...
 	     round(0.2*B)...
@@ -1494,20 +1494,20 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       % [3.1.1] More than one _mh file 
       if nfile-ffil+1>1			
 	if options_.forecast
-	  sfil_forc = 1;
+	  sfil_forc = 0;
 	  irun_forc = 0;  			
 	  irun_forc1 = 1:B;  			
 	end
 	if options_.smoother
-	  sfil_smoo = 1;
-	  sfil_inno = 1;
-	  sfil_erro = 1;
+	  sfil_smoo = 0;
+	  sfil_inno = 0;
+	  sfil_erro = 0;
 	  irun_smoo = 0;
 	  irun_inno = 0;
 	  irun_erro = 0;
 	end
 	if options_.filtered_vars
-	  sfil_filt = 1;
+	  sfil_filt = 0;
 	  irun_filt = 0;  			
 	end
 	% [3.1.1.1] Loop in the metropolis
@@ -1545,19 +1545,19 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_error(:,:,irun_erro) = obs_err;
 	    else
 	      stock_error(:,:,irun_erro) = obs_err;
+	      sfil_erro = sfil_erro + 1;
 	      instr = [fname_ '_error' int2str(sfil_erro) ' stock_error;'];
 	      eval(['save ' instr]);
-	      sfil_erro = sfil_erro + 1;
 	      irun_erro = 0;
 	      stock_error  = zeros(gend,nvobs,MAX_nerro);
 	    end
 	    if irun_smoo < MAX_nsmoo
-	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
 	    else
-	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
+	      sfil_smoo = sfil_smoo + 1;
 	      instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	      eval(['save ' instr]);
-	      sfil_smoo = sfil_smoo + 1;
 	      irun_smoo = 0;
 	      stock_smooth = ...
 		  zeros(endo_nbr,gend,MAX_nsmoo);
@@ -1566,9 +1566,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_innov(:,:,irun_inno) = innov;
 	    else
 	      stock_innov(:,:,irun_inno) = innov;
+	      sfil_inno = sfil_inno + 1;
 	      instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
 	      eval(['save ' instr]);
-	      sfil_inno = sfil_inno + 1;
 	      irun_inno = 0;
 	      stock_innov  = zeros(exo_nbr,gend,MAX_ninno);
 	    end	
@@ -1578,9 +1578,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_filter(:,:,irun_filt) = filtered_state_vector;
 	    else
 	      stock_filter(:,:,irun_filt) = filtered_state_vector;
+	      sfil_filt = sfil_filt + 1;
 	      instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];
 	      eval(['save ' instr]);
-	      sfil_filt = sfil_filt + 1;
 	      irun_filt = 0;
 	      stock_filter = ...
 		  zeros(endo_nbr,gend+1,MAX_nfilt);
@@ -1593,7 +1593,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    % The state of the economy at the end of the sample 
 	    % depends on the structural parameters.
 	    
-	    yyyy(:,1:ykmin_) = atT(:,size(atT,2)-ykmin_+1:size(atT,2));
+	    yyyy(:,1:ykmin_) = atT(1:endo_nbr,size(atT,2)-ykmin_+1:size(atT,2));
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
@@ -1622,8 +1622,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
-	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      sfil_forc = sfil_forc + 1;
+	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      irun_forc = 0;
 	      irun_forc1 = 1:B;
 	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
@@ -1635,19 +1635,21 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.smoother
 	  if irun_smoo
 	    stock_smooth = stock_smooth(:,:,1:irun_smoo);
+	    sfil_smoo = sfil_smoo + 1;
 	    instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	    eval(['save ' instr]);
-	    sfil_smoo = sfil_smoo + 1;
 	  end
 	  clear stock_smooth;
 	  if irun_inno
 	    stock_innov = stock_innov(:,:,1:irun_inno);
+	    sfil_inno = sfil_inno + 1;
 	    instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
 	    eval(['save ' instr]);
 	  end
 	  clear stock_innov;
 	  if irun_erro
 	    stock_error = stock_error(:,:,1:irun_erro);
+	    sfil_erro = sfil_erro + 1;
 	    instr = [fname_ '_error' int2str(sfil_erro) ' stock_error;'];
 	    eval(['save ' instr]);
 	  end
@@ -1657,6 +1659,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
 	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
+	    sfil_forc = sfil_forc + 1;
 	    save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	  end
 	  clear stock_forcst stock_forcst1
@@ -1664,6 +1667,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.filtered_vars	
 	  if irun_filt
 	    stock_filter = stock_filter(:,:,1:irun_filt);
+	    sfil_filt = sfil_filt + 1;
 	    instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];
 	    eval(['save ' instr]);
 	  end
@@ -1671,20 +1675,20 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	end
       else % [3.1.2] Just one _mh file
 	if options_.forecast
-	  sfil_forc = 1;
+	  sfil_forc = 0;
 	  irun_forc = 0;  			
 	  irun_forc1 = 1:B;  			
 	end
 	if options_.smoother
-	  sfil_smoo = 1;
-	  sfil_inno = 1;
-	  sfil_erro = 1;
+	  sfil_smoo = 0;
+	  sfil_inno = 0;
+	  sfil_erro = 0;
 	  irun_smoo = 0;
 	  irun_inno = 0;
 	  irun_erro = 0;
 	end
 	if options_.filtered_vars
-	  sfil_filt = 1;
+	  sfil_filt = 0;
 	  irun_filt = 0;  			
 	end
 	eval(['load ' instr1 int2str(ffil) instr2]);
@@ -1710,19 +1714,19 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_error(:,:,irun_erro) = obs_err;
 	    else
 	      stock_error(:,:,irun_erro) = obs_err;
+	      sfil_erro = sfil_erro + 1;
 	      instr = [fname_ '_error' int2str(sfil_erro) ' stock_error;'];
 	      eval(['save ' instr]);
-	      sfil_erro = sfil_erro + 1;
 	      irun_erro = 0;
 	      stock_error  = zeros(gend,nvobs,MAX_nerro);
 	    end
 	    if irun_smoo < MAX_nsmoo
-	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
 	    else
-	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
+	      sfil_smoo = sfil_smoo + 1;
 	      instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	      eval(['save ' instr]);
-	      sfil_smoo = sfil_smoo + 1;
 	      irun_smoo = 0;
 	      stock_smooth = ...
 		  zeros(endo_nbr,gend,MAX_nsmoo);
@@ -1731,9 +1735,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_innov(:,:,irun_inno) = innov;
 	    else
 	      stock_innov(:,:,irun_inno) = innov;
+	      sfil_inno = sfil_inno + 1;
 	      instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
 	      eval(['save ' instr]);
-	      sfil_inno = sfil_inno + 1;
 	      irun_inno = 0;
 	      stock_innov  = zeros(exo_nbr,gend,MAX_ninno);
 	    end
@@ -1743,9 +1747,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_filter(:,:,irun_filt) = filtered_state_vector;             
 	    else                                                                 
 	      stock_filter(:,:,irun_filt) = filtered_state_vector;             
+	      sfil_filt = sfil_filt + 1;                                       
 	      instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];  
 	      eval(['save ' instr]);                                           
-	      sfil_filt = sfil_filt + 1;                                       
 	      irun_filt = 0;                                                   
 	      stock_filter = ...                                               
 		  zeros(endo_nbr,gend+1,MAX_nfilt);     
@@ -1753,7 +1757,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end
 	  if options_.forecast
 	    dr = resol(ys_,0);
-	    yyyy(:,1:ykmin_) = atT(:,size(atT,2)-ykmin_+1:size(atT,2));
+	    yyyy(:,1:ykmin_) = atT(1:endo_nbr,size(atT,2)-ykmin_+1:size(atT,2));
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
@@ -1782,8 +1786,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
-	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      sfil_forc = sfil_forc + 1;
+	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      irun_forc = 0;
 	      irun_forc1 = 1:B;
 	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
@@ -1795,19 +1799,21 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.smoother
 	  if irun_smoo
 	    stock_smooth = stock_smooth(:,:,1:irun_smoo);
+	    sfil_smoo = sfil_smoo + 1;
 	    instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	    eval(['save ' instr]);
-	    sfil_smoo = sfil_smoo + 1;
 	  end
 	  clear stock_smooth;
 	  if irun_inno
 	    stock_innov = stock_innov(:,:,1:irun_inno);
+	    sfil_inno = sfil_inno + 1;
 	    instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
 	    eval(['save ' instr]);
 	  end
 	  clear stock_innov;
 	  if irun_erro
 	    stock_error = stock_error(:,:,1:irun_erro);
+	    sfil_erro = sfil_erro + 1;
 	    instr = [fname_ '_error' int2str(sfil_erro) ' stock_error;'];
 	    eval(['save ' instr]);
 	  end
@@ -1817,6 +1823,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
 	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
+	    sfil_forc = sfil_forc + 1;
 	    save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	  end
 	  clear stock_forcst stock_forcst1
@@ -1824,6 +1831,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.filtered_vars
 	  if irun_filt
 	    stock_filter = stock_filter(:,:,1:irun_filt);
+	    sfil_filt = sfil_filt + 1;
 	    instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];
 	    eval(['save ' instr]);
 	  end
@@ -1833,20 +1841,20 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     else % [3.2]	Second we consider the case without measurement error
       if nfile-ffil+1>1
 	if options_.forecast
-	  sfil_forc = 1;
+	  sfil_forc = 0;
 	  irun_forc = 0;  			
 	  irun_forc1 = 1:B;  			
 	end
 	if options_.smoother
-	  sfil_smoo = 1;
-	  sfil_inno = 1;
-	  sfil_erro = 1;
+	  sfil_smoo = 0;
+	  sfil_inno = 0;
+	  sfil_erro = 0;
 	  irun_smoo = 0;
 	  irun_inno = 0;
 	  irun_erro = 0;
 	end
 	if options_.filtered_vars
-	  sfil_filt = 1;
+	  sfil_filt = 0;
 	  irun_filt = 0;  			
 	end
 	for b = 1:B;
@@ -1885,7 +1893,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    %	stock_error  = zeros(gend,nvobs,MAX_nerro);
 	    %end
 	    if irun_smoo < MAX_nsmoo
-	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
 	      if options_.prefilter == 1
 		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
 	      elseif options_.loglinear == 1
@@ -1898,7 +1906,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 		     trend_coeff*[1:gend];
 	      end
 	    else
-	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
 	      if options_.prefilter == 1
 		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
 	      elseif options_.loglinear == 1
@@ -1910,9 +1918,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 		    repmat(ys(bayestopt_.mfys),1,gend)+...
 		     trend_coeff*[1:gend];
 	      end
+	      sfil_smoo = sfil_smoo + 1;
 	      instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	      eval(['save ' instr]);
-	      sfil_smoo = sfil_smoo + 1;
 	      irun_smoo = 0;
 	      stock_smooth = ...
 		zeros(endo_nbr,gend,MAX_nsmoo);
@@ -1921,9 +1929,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_innov(:,:,irun_inno) = innov;
 	    else
 	      stock_innov(:,:,irun_inno) = innov;
+	      sfil_inno = sfil_inno + 1;
 	      instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
 	      eval(['save ' instr]);
-	      sfil_inno = sfil_inno + 1;
 	      irun_inno = 0;
 	      stock_innov  = zeros(exo_nbr,gend,MAX_ninno);
 	    end	
@@ -1933,9 +1941,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_filter(:,:,irun_filt) = filtered_state_vector;
 	    else
 	      stock_filter(:,:,irun_filt) = filtered_state_vector;
+	      sfil_filt = sfil_filt + 1;
 	      instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];
 	      eval(['save ' instr]);
-	      sfil_filt = sfil_filt + 1;
 	      irun_filt = 0;
 	      stock_filter = ...
 		 zeros(endo_nbr,gend+1,MAX_nfilt);
@@ -1974,8 +1982,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
-	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      sfil_forc = sfil_forc + 1;
+	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      irun_forc = 0;
 	      irun_forc1 = 1:B;
 	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
@@ -1987,13 +1995,14 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.smoother
 	  if irun_smoo
 	    stock_smooth = stock_smooth(:,:,1:irun_smoo);
+	    sfil_smoo = sfil_smoo + 1;
 	    instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	    eval(['save ' instr]);
-	    sfil_smoo = sfil_smoo + 1;
 	  end
 	  clear stock_smooth;
 	  if irun_inno
 	    stock_innov = stock_innov(:,:,1:irun_inno);
+	    sfil_inno = sfil_inno + 1;
 	    instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
 	    eval(['save ' instr]);
 	  end
@@ -2003,6 +2012,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
 	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
+	    sfil_forc = sfil_forc + 1;
 	    save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	  end
 	  clear stock_forcst stock_forcst1
@@ -2010,6 +2020,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.filtered_vars	
 	  if irun_filt
 	    stock_filter = stock_filter(:,:,1:irun_filt);
+	    sfil_filt = sfil_filt + 1;
 	    instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];
 	    eval(['save ' instr]);
 	  end
@@ -2017,20 +2028,20 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	end
       else % just one _mh file
 	if options_.forecast
-	  sfil_forc = 1;
+	  sfil_forc = 0;
 	  irun_forc = 0;  			
 	  irun_forc1 = 1:B;  			
 	end
 	if options_.smoother
-	  sfil_smoo = 1;
-	  sfil_inno = 1;
+	  sfil_smoo = 0;
+	  sfil_inno = 0;
 	  %sfil_erro = 1;
 	  irun_smoo = 0;
 	  irun_inno = 0;
 	  %irun_erro = 0;
 	end
 	if options_.filtered_vars
-	  sfil_filt = 1;
+	  sfil_filt = 0;
 	  irun_filt = 0;  			
 	end	  		
 	eval(['load ' instr1 int2str(ffil) instr2]);
@@ -2053,7 +2064,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  [atT,innov,obs_err,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(deep',gend,data);
 	  if options_.smoother
 	    if irun_smoo < MAX_nsmoo
-	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
 	      if options_.prefilter == 1
 		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
 	      elseif options_.loglinear == 1
@@ -2066,7 +2077,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 		     trend_coeff*[1:gend];
 	      end
 	    else
-	      stock_smooth(:,:,irun_smoo) = atT(:,1:gend);
+	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
 	      if options_.prefilter == 1
 		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
 	      elseif options_.loglinear == 1
@@ -2078,9 +2089,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 		    repmat(ys(bayestopt_.mfys),1,gend)+...
 		     trend_coeff*[1:gend];
 	      end
+	      sfil_smoo = sfil_smoo + 1;
 	      instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	      eval(['save ' instr]);
-	      sfil_smoo = sfil_smoo + 1;
 	      irun_smoo = 0;
 	      stock_smooth = ...
 		  zeros(endo_nbr,gend,MAX_nsmoo);
@@ -2089,9 +2100,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_innov(:,:,irun_inno) = innov;
 	    else
 	      stock_innov(:,:,irun_inno) = innov;
+	      sfil_inno = sfil_inno + 1;
 	      instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
 	      eval(['save ' instr]);
-	      sfil_inno = sfil_inno + 1;
 	      irun_inno = 0;
 	      stock_innov  = zeros(exo_nbr,gend,MAX_ninno);
 	    end	
@@ -2101,9 +2112,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      stock_filter(:,:,irun_filt) = filtered_state_vector;
 	    else
 	      stock_filter(:,:,irun_filt) = filtered_state_vector;
+	      sfil_filt = sfil_filt + 1;
 	      instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];
 	      eval(['save ' instr]);
-	      sfil_filt = sfil_filt + 1;
 	      irun_filt = 0;
 	      stock_filter = ...
 		  zeros(endo_nbr,gend+1,MAX_nfilt);
@@ -2111,7 +2122,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end    			
 	  if options_.forecast	    
 	    dr = resol(ys_,0);
-	    yyyy(:,1:ykmin_) = atT(:,size(atT,2)-ykmin_+1:size(atT,2));
+	    yyyy(:,1:ykmin_) = atT(1:endo_nbr,size(atT,2)-ykmin_+1:size(atT,2));
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
@@ -2140,8 +2151,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
-	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      sfil_forc = sfil_forc + 1;
+	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	      irun_forc = 0;
 	      irun_forc1 = 1:B;
 	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
@@ -2153,13 +2164,14 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.smoother
 	  if irun_smoo
 	    stock_smooth = stock_smooth(:,:,1:irun_smoo);
+	    sfil_smoo = sfil_smoo + 1;
 	    instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	    eval(['save ' instr]);
-	    sfil_smoo = sfil_smoo + 1;
 	  end
 	  clear stock_smooth;
 	  if irun_inno
 	    stock_innov = stock_innov(:,:,1:irun_inno);
+	    sfil_inno = sfil_inno + 1;
 	    instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
 	    eval(['save ' instr]);
 	  end
@@ -2169,6 +2181,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if irun_forc
 	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
 	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc1(end));  
+	    sfil_forc = sfil_forc + 1;
 	    save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
 	  end
 	  clear stock_forcst stock_forcst1
@@ -2176,6 +2189,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	if options_.filtered_vars	
 	  if irun_filt
 	    stock_filter = stock_filter(:,:,1:irun_filt);
+	    sfil_filt = sfil_filt + 1;
 	    instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];
 	    eval(['save ' instr]);
 	  end
@@ -2419,7 +2433,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     end
     h = waitbar(0,'Bayesian IRFs...');
     if nfile-ffil+1>1
-      sfil_irf = 1;
+      sfil_irf = 0;
       irun_irf = 0;
       for b = 1:B;
 	irun_irf = irun_irf+1;
@@ -2481,9 +2495,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_irf(:,:,:,irun_irf) = tmp;
 	else
 	  stock_irf(:,:,:,irun_irf) = tmp;
+	  sfil_irf = sfil_irf + 1;
 	  instr = [fname_ '_irf' int2str(sfil_irf) ' stock_irf;'];
 	  eval(['save ' instr]);
-	  sfil_irf = sfil_irf + 1;
 	  irun_irf = 0;
 	  stock_irf = zeros(options_.irf,size(lgy_,1),exo_nbr,MAX_nirfs);
 	end	
@@ -2492,12 +2506,13 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       clear tmp;
       if irun_irf
 	stock_irf = stock_irf(:,:,:,1:irun_irf);
+	sfil_irf = sfil_irf + 1;
 	instr = [fname_ '_irf' int2str(sfil_irf) ' stock_irf;'];
 	eval(['save ' instr]);
       end
       clear stock_irf;
     else		
-      sfil_irf = 1;
+      sfil_irf = 0;
       irun_irf = 0;
       eval(['load ' instr1 int2str(ffil) instr2]);
       NumberOfSimulations = length(logpo2);
@@ -2550,9 +2565,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_irf(:,:,:,irun_irf) = tmp;
 	else
 	  stock_irf(:,:,:,irun_irf) = tmp;
+	  sfil_irf = sfil_irf + 1;
 	  instr = [fname_ '_irf' int2str(sfil_irf) ' stock_irf;'];
 	  eval(['save ' instr]);
-	  sfil_irf = sfil_irf + 1;
 	  irun_irf = 0;
 	  stock_irf = zeros(options_.irf,size(lgy_,1),exo_nbr,MAX_nirfs);
 	end	
@@ -2560,6 +2575,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       end
       if irun_irf
 	stock_irf = stock_irf(:,:,:,1:irun_irf);
+	sfil_irf = sfil_irf + 1;
 	instr = [fname_ '_irf' int2str(sfil_irf) ' stock_irf;'];
 	eval(['save ' instr]);
       end
@@ -2841,13 +2857,13 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     end
     h = waitbar(0,'Posterior theoretical moments...');
     if nfile-ffil+1>1
-      sfil_thm1 = 1;
+      sfil_thm1 = 0;
       irun_thm1 = 0;
-      sfil_thm2 = 1;
+      sfil_thm2 = 0;
       irun_thm2 = 0;
-      sfil_thm3 = 1;
+      sfil_thm3 = 0;
       irun_thm3 = 0;
-      sfil_thm4 = 1;
+      sfil_thm4 = 0;
       irun_thm4 = 0;
       for b = 1:B;
 	irun_thm1 = irun_thm1+1;
@@ -2918,9 +2934,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_thm1(:,irun_thm1) = m_mean;
 	else
 	  stock_thm1(:,irun_thm1) = m_mean;
+	  sfil_thm1 = sfil_thm1 + 1;
 	  instr = [fname_ '_thm1' int2str(sfil_thm1) ' stock_thm1;'];
 	  eval(['save ' instr]);
-	  sfil_thm1 = sfil_thm1 + 1;
 	  irun_thm1 = 0;
 	  stock_thm1 = zeros(nvar,MAX_nthm1);
 	end
@@ -2928,9 +2944,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_thm2(:,:,irun_thm2) = variance;
 	else
 	  stock_thm2(:,:,irun_thm2) = variance;
+	  sfil_thm2 = sfil_thm2 + 1;
 	  instr = [fname_ '_thm2' int2str(sfil_thm2) ' stock_thm2;'];
 	  eval(['save ' instr]);
-	  sfil_thm2 = sfil_thm2 + 1;
 	  irun_thm2 = 0;
 	  stock_thm2 = zeros(nvar,nvar,MAX_nthm2);
 	end
@@ -2938,9 +2954,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_thm3(:,:,irun_thm3) = Gamma_y{nar+2};
 	else
 	  stock_thm3(:,:,irun_thm3) = Gamma_y{nar+2};
+	  sfil_thm3 = sfil_thm3 + 1;
 	  instr = [fname_ '_thm3' int2str(sfil_thm3) ' stock_thm3;'];
 	  eval(['save ' instr]);
-	  sfil_thm3 = sfil_thm3 + 1;
 	  irun_thm3 = 0;
 	  stock_thm3 = zeros(nvar,exo_nbr,MAX_nthm3);
 	end
@@ -2952,9 +2968,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  for lag = 1:nar
 	    stock_thm4(:,lag,irun_thm4) = diag(Gamma_y{1+lag});
 	  end	
+	  sfil_thm4 = sfil_thm4 + 1;
 	  instr = [fname_ '_thm4' int2str(sfil_thm4) ' stock_thm4;'];
 	  eval(['save ' instr]);
-	  sfil_thm4 = sfil_thm4 + 1;
 	  irun_thm4 = 0;
 	  stock_thm4 = zeros(nvar,nar,MAX_nthm4);
 	end
@@ -2963,36 +2979,40 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       clear m_mean variance Gamma_y;
       if irun_thm1
 	stock_thm1 = stock_thm1(:,1:irun_thm1);
+	sfil_thm1 = sfil_thm1 + 1;
 	instr = [fname_ '_thm1' int2str(sfil_thm1) ' stock_thm1;'];
 	eval(['save ' instr]);
       end
       clear stock_thm1;
       if irun_thm2
 	stock_thm2 = stock_thm2(:,:,1:irun_thm2);
+	sfil_thm2 = sfil_thm2 + 1;
 	instr = [fname_ '_thm2' int2str(sfil_thm2) ' stock_thm2;'];
 	eval(['save ' instr]);
       end
       clear stock_thm2;
       if irun_thm3
 	stock_thm3 = stock_thm3(:,:,1:irun_thm3);
+	sfil_thm3 = sfil_thm3 + 1;
 	instr = [fname_ '_thm3' int2str(sfil_thm3) ' stock_thm3;'];
 	eval(['save ' instr]);
       end
       clear stock_thm3;
       if irun_thm4
 	stock_thm4 = stock_thm4(:,:,1:irun_thm4);
+	sfil_thm4 = sfil_thm4 + 1;
 	instr = [fname_ '_thm4' int2str(sfil_thm4) ' stock_thm4;'];
 	eval(['save ' instr]);
       end
       clear stock_thm4;
     else		
-      sfil_thm1 = 1;
+      sfil_thm1 = 0;
       irun_thm1 = 0;
-      sfil_thm2 = 1;
+      sfil_thm2 = 0;
       irun_thm2 = 0;
-      sfil_thm3 = 1;
+      sfil_thm3 = 0;
       irun_thm3 = 0;
-      sfil_thm4 = 1;
+      sfil_thm4 = 0;
       irun_thm4 = 0;
       eval(['load ' instr1 int2str(ffil) instr2]);
       NumberOfSimulations = length(logpo2);
@@ -3056,9 +3076,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_thm1(:,irun_thm1) = m_mean;
 	else
 	  stock_thm1(:,irun_thm1) = m_mean;
+	  sfil_thm1 = sfil_thm1 + 1;
 	  instr = [fname_ '_thm1' int2str(sfil_thm1) ' stock_thm1;'];
 	  eval(['save ' instr]);
-	  sfil_thm1 = sfil_thm1 + 1;
 	  irun_thm1 = 0;
 	  stock_thm1 = zeros(nvar,MAX_nthm1);
 	end
@@ -3066,9 +3086,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_thm2(:,:,irun_thm2) = variance;
 	else
 	  stock_thm2(:,:,irun_thm2) = variance;
+	  sfil_thm2 = sfil_thm2 + 1;
 	  instr = [fname_ '_thm2' int2str(sfil_thm2) ' stock_thm2;'];
 	  eval(['save ' instr]);
-	  sfil_thm2 = sfil_thm2 + 1;
 	  irun_thm2 = 0;
 	  stock_thm2 = zeros(nvar,nvar,MAX_nthm2);
 	end
@@ -3076,9 +3096,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_thm3(:,:,irun_thm3) = Gamma_y{nar+2};
 	else
 	  stock_thm3(:,:,irun_thm3) = Gamma_y{nar+2};
+	  sfil_thm3 = sfil_thm3 + 1;
 	  instr = [fname_ '_thm3' int2str(sfil_thm3) ' stock_thm3;'];
 	  eval(['save ' instr]);
-	  sfil_thm3 = sfil_thm3 + 1;
 	  irun_thm3 = 0;
 	  stock_thm3 = zeros(nvar,exo_nbr,MAX_nthm3);
 	end
@@ -3090,9 +3110,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  for lag = 1:nar
 	    stock_thm4(:,lag,irun_thm4) = diag(Gamma_y{1+lag});
 	  end	
+	  sfil_thm4 = sfil_thm4 + 1;
 	  instr = [fname_ '_thm4' int2str(sfil_thm4) ' stock_thm4;'];
 	  eval(['save ' instr]);
-	  sfil_thm4 = sfil_thm4 + 1;
 	  irun_thm4 = 0;
 	  stock_thm4 = zeros(nvar,nar,MAX_nthm4);
 	end
@@ -3101,24 +3121,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       clear m_mean variance Gamma_y;
       if irun_thm1
 	stock_thm1 = stock_thm1(:,1:irun_thm1);
+	sfil_thm1 = sfil_thm1 + 1;
 	instr = [fname_ '_thm1' int2str(sfil_thm1) ' stock_thm1;'];
 	eval(['save ' instr]);
       end
       clear stock_thm1;
       if irun_thm2
 	stock_thm2 = stock_thm2(:,:,1:irun_thm2);
+	sfil_thm2 = sfil_thm2 + 1;
 	instr = [fname_ '_thm2' int2str(sfil_thm2) ' stock_thm2;'];
 	eval(['save ' instr]);
       end
       clear stock_thm2;
       if irun_thm3
 	stock_thm3 = stock_thm3(:,:,1:irun_thm3);
+	sfil_thm3 = sfil_thm3 + 1;
 	instr = [fname_ '_thm3' int2str(sfil_thm3) ' stock_thm3;'];
 	eval(['save ' instr]);
       end
       clear stock_thm3;
       if irun_thm4
 	stock_thm4 = stock_thm4(:,:,1:irun_thm4);
+	sfil_thm4 = sfil_thm4 + 1;
 	instr = [fname_ '_thm4' int2str(sfil_thm4) ' stock_thm4;'];
 	eval(['save ' instr]);
       end
