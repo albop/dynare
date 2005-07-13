@@ -16,10 +16,10 @@ function yf=forcst2a(y0,dr,e)
   
   j = ykmin_*endo_nbr;
   for i=2:horizon+1
-    tempx = yf(k1,:);
-    yf(i,:) = tempx(k2)*dr.ghx';
+    tempx = yf(k1,:)';
+    yf(i,:) = tempx(k2)'*dr.ghx';
     k1 = k1+1;
   end
   
-   yf(:,dr.order_var,:) = yf;
+   yf(:,dr.order_var) = yf;
    
