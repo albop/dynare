@@ -2449,29 +2449,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	clear post2 logpo2;
 	deep  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
-	offset = nvx+nvn+ncx+ncn;
-	for i=1:estim_params_.np
-	  assignin('base',deblank(estim_params_.param_names(i,:)),deep(i+offset));
-	end
+	set_parameters(deep);
 	dr = resol(ys_,0);
-	if nvx
-	  ip = 1;
-	  for i=1:nvx
-	    k = estim_params_.var_exo(i,1);
-	    Sigma_e_(k,k) = deep(ip)*deep(ip);
-	    ip = ip+1;
-	  end
-	end
-	if ncx
-	  ip = nvx+nvn+1;
-	  for i=1:ncx
-	    k1 = estim_params_.corrx(i,1);
-	    k2 = estim_params_.corrx(i,2);
-	    Sigma_e_(k1,k2) = deep(ip)*sqrt(Sigma_e_(k1,k1)*Sigma_e_(k2,k2));
-	    Sigma_e_(k2,k1) = Sigma_e_(k1,k2);
-	    ip = ip+1;
-	  end
-	end
 	SS(lgx_orig_ord_,lgx_orig_ord_)=Sigma_e_+1e-14* ...
 	    eye(exo_nbr);
 	SS = transpose(chol(SS));
@@ -2521,29 +2500,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	irun_irf = irun_irf+1;
 	tmp = zeros(options_.irf,size(lgy_,1),exo_nbr);
 	deep  = x2(floor(rand*NumberOfSimulations)+1,:);
-	offset = nvx+nvn+ncx+ncn;
-	for i=1:estim_params_.np
-	  assignin('base',deblank(estim_params_.param_names(i,:)),deep(i+offset));
-	end
+	set_parameters(deep);
 	dr = resol(ys_,0);
-	if nvx
-	  ip = 1;
-	  for i=1:nvx
-	    k = estim_params_.var_exo(i,1);
-	    Sigma_e_(k,k) = deep(ip)*deep(ip);
-	    ip = ip+1;
-	  end
-	end
-	if ncx
-	  ip = nvx+nvn+1;
-	  for i=1:ncx
-	    k1 = estim_params_.corrx(i,1);
-	    k2 = estim_params_.corrx(i,2);
-	    Sigma_e_(k1,k2) = deep(ip)*sqrt(Sigma_e_(k1,k1)*Sigma_e_(k2,k2));
-	    Sigma_e_(k2,k1) = Sigma_e_(k1,k2);
-	    ip = ip+1;
-	  end
-	end
 	SS(lgx_orig_ord_,lgx_orig_ord_)=Sigma_e_+1e-14*eye(exo_nbr);
 	SS = transpose(chol(SS));
 	tit(lgx_orig_ord_,:) = lgx_;
@@ -2881,49 +2839,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	clear post2 logpo2;
 	deep  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
-	offset = nvx+nvn+ncx+ncn;
-	for i=1:estim_params_.np
-	  assignin('base',deblank(estim_params_.param_names(i,:)),deep(i+offset));
-	end
+	set_parameters(deep);
 	dr = resol(ys_,0);
-	if nvx
-	  ip = 1;
-	  for i=1:nvx
-	    k = estim_params_.var_exo(i,1);
-	    Sigma_e_(k,k) = deep(ip)*deep(ip);
-	    ip = ip+1;
-	  end
-	end
-	if ncx
-	  ip = nvx+nvn+1;
-	  for i=1:ncx
-	    k1 = estim_params_.corrx(i,1);
-	    k2 = estim_params_.corrx(i,2);
-	    Sigma_e_(k1,k2) = deep(ip)*sqrt(Sigma_e_(k1,k1)*Sigma_e_(k2,k2));
-	    Sigma_e_(k2,k1) = Sigma_e_(k1,k2);
-	    ip = ip+1;
-	  end
-	end
-	if nvn
-	  Sigma_m = zeros(size(options_.varobs,1));
-	  ip = nvx+1;
-	  for i=1:nvn
-	    k = estim_params_.var_endo(i,1);
-	    Sigma_m(k,k) = deep(ip)*deep(ip);
-	    ip = ip + 1;
-	  end
-	end
-	if ncn
-	  ip = nvx+nvn+ncx+1;
-	  for i=1:ncn
-	    k1 = estim_params_.corrn(i,1);
-	    k2 = estim_params_.corrn(i,2);
-	    Sigma_m(k1,k2) = deep(ip)*sqrt(Sigma_m(k1,k1)*Sigma_m(k2,k2));
-	    Sigma_m(k2,k1) = Sigma_m(k1,k2);
-	    ip = ip+1;
-	  end
-	end
-	Gamma_y = th_autocovariances(dr,ivar);
+	Gamma_y = th_autocovariances(dr,setdiff(ivar,bayestopt_.i_var_stable));
 	if options_.order == 2
 	  m_mean = dr.ys(ivar) + Gamma_y{options_.ar+3};
 	else
@@ -3017,55 +2935,17 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       eval(['load ' instr1 int2str(ffil) instr2]);
       NumberOfSimulations = length(logpo2);
       clear post2 logpo2;
+      ivar1 = find(ismember(ivar,bayestopt_.i_var_stable));
+      ivar1 = ivar(ivar1);
       for b = 1:B;
 	irun_thm1 = irun_thm1+1;
 	irun_thm2 = irun_thm2+1;
 	irun_thm3 = irun_thm3+1;
 	irun_thm4 = irun_thm4+1;
 	deep  = x2(floor(rand*NumberOfSimulations)+1,:);
-	offset = nvx+nvn+ncx+ncn;
-	for i=1:estim_params_.np
-	  assignin('base',deblank(estim_params_.param_names(i,:)),deep(i+offset));
-	end
+	set_parameters(deep);
 	dr = resol(ys_,0);
-	if nvx
-	  ip = 1;
-	  for i=1:nvx
-	    k = estim_params_.var_exo(i,1);
-	    Sigma_e_(k,k) = deep(ip)*deep(ip);
-	    ip = ip+1;
-	  end
-	end
-	if ncx
-	  ip = nvx+nvn+1;
-	  for i=1:ncx
-	    k1 = estim_params_.corrx(i,1);
-	    k2 = estim_params_.corrx(i,2);
-	    Sigma_e_(k1,k2) = deep(ip)*sqrt(Sigma_e_(k1,k1)*Sigma_e_(k2,k2));
-	    Sigma_e_(k2,k1) = Sigma_e_(k1,k2);
-	    ip = ip+1;
-	  end
-	end
-	if nvn
-	  Sigma_m = zeros(size(options_.varobs,1));
-	  ip = nvx+1;
-	  for i=1:nvn
-	    k = estim_params_.var_endo(i,1);
-	    Sigma_m(k,k) = deep(ip)*deep(ip);
-	    ip = ip + 1;
-	  end
-	end
-	if ncn
-	  ip = nvx+nvn+ncx+1;
-	  for i=1:ncn
-	    k1 = estim_params_.corrn(i,1);
-	    k2 = estim_params_.corrn(i,2);
-	    Sigma_m(k1,k2) = deep(ip)*sqrt(Sigma_m(k1,k1)*Sigma_m(k2,k2));
-	    Sigma_m(k2,k1) = Sigma_m(k1,k2);
-	    ip = ip+1;
-	  end
-	end
-	Gamma_y = th_autocovariances(dr,ivar);
+	Gamma_y = th_autocovariances(dr,ivar1);
 	if options_.order == 2
 	  m_mean = dr.ys(ivar) + Gamma_y{options_.ar+3};
 	else

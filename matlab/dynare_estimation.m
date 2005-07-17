@@ -162,6 +162,10 @@ if ~isempty(options_.unit_root_vars)
     end
     i_ur(i) = i1;
   end
+  i_stable = ones(endo_nbr,1);
+  i_stable(i_ur) = zeros(n_ur,1);
+  i_stable = find(i_stable);
+  bayestopt_.i_var_stable = i_stable;
   if ykmin_ > 1
     l1 = flipud([cumsum(iy_(1:ykmin_-1,dr.order_var),1);ones(1, ...
 						  endo_nbr)]);
@@ -172,11 +176,7 @@ if ~isempty(options_.unit_root_vars)
     l3(i_ur,:) = l1(:,i_ur)';
     l3 = l3(:);
     i_ur1 = find(l3(l2));
-    i_stable = ones(endo_nbr,1);
-    i_stable(i_ur) = zeros(n_ur,1);
-    i_stable = find(i_stable);
     bayestopt_.Pinf(i_ur1,i_ur1) = diag(ones(1,length(i_ur1)));
-    bayestopt_.i_var_stable = i_stable;
     l3 = zeros(endo_nbr,ykmin_);
     l3(i_stable,:) = l1(:,i_stable)';
     l3 = l3(:);

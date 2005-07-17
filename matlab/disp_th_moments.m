@@ -30,8 +30,8 @@ else
   end
 end
 
+[Gamma_y,ivar] = th_autocovariances(dr,ivar);
 m = dr.ys(ivar);
-Gamma_y = th_autocovariances(dr,ivar);
 
 i1 = find(abs(diag(Gamma_y{1})) > 1e-12);
 s2 = diag(Gamma_y{1});

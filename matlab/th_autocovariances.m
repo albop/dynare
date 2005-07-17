@@ -5,7 +5,7 @@
 % for a subset of variables ivar (indices in lgy_)
 % Theoretical HP filtering is available as an option
 
-function Gamma_y=th_autocovariances(dr,ivar)
+function [Gamma_y,i_ivar]=th_autocovariances(dr,ivar)
   global lgy_ endo_nbr exo_nbr Sigma_e_ ykmin_ lgx_orig_ord_ options_
 
   if sscanf(version('-release'),'%d') < 13
@@ -46,11 +46,36 @@ function Gamma_y=th_autocovariances(dr,ivar)
       j1(k1) = find(k0(i00,1)==k0(i1(k1),1));
       j2(k1) = find(k0(i0,1)==k0(i1(k1),1));
     end
-    A(i1,i0(j2))=eye(n1);
+%    A(i1,i0(j2))=eye(n1);
     AS(:,j1) = AS(:,j1)+ghx(:,i1);
     i0 = i1;
   end
   b = ghu1*Sigma_e_*ghu1';
+
+
+  [A,B] = kalman_transition_matrix(dr);
+  % index of predetermined variables in A
+  i_pred = [nstatic+(1:npred) endo_nbr+1:length(A)];
+  A = A(i_pred,i_pred);
+
+  [v,d] = eig(A);
+  abs_root = abs(diag(d));
+  i_ur = find(abs_root > 2-options_.qz_criterium & ...
+	      abs_root < options_.qz_criterium);
+
+  % non-stationary variables have non-zero entries in eigenvectors
+  % associated with unit roots
+  ns_var = find(any(abs(v(1:npred,i_ur))>1e-7,2));
+
+  %right eigenvectors
+  v1 = inv(v);
+
+  % remove zero frequency from A
+  A = A-real(v(:,i_ur)*d(i_ur,i_ur)*v1(i_ur,:));
+  
+  % return only variance of stationary variables
+  i_ivar = find(~ismember(ivar,dr.order_var(ns_var+nstatic)));
+  ivar = ivar(i_ivar);
   
   % order of variables with preset variances in ghx and ghu
   iky = iv(ivar);
@@ -88,7 +113,7 @@ function Gamma_y=th_autocovariances(dr,ivar)
     
     % variance decomposition
     if exo_nbr > 1
-      Gamma_y{nar+2} = zeros(nvar,exo_nbr);
+      Gamma_y{nar+2} = zeros(length(ivar),exo_nbr);
       SS(lgx_orig_ord_,lgx_orig_ord_)=Sigma_e_+1e-14*eye(exo_nbr);
       cs = chol(SS)';
       b1(:,lgx_orig_ord_) = ghu1;
