@@ -21,6 +21,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   nvobs 	= size(options_.varobs,1);
   horizon = options_.forecast;
 
+  % options_.load_mh_file = -1;
+  
 
   %% Determine the value of MAX_nruns, MAX_nforc, MAX_nsmoo and MAX_ninno values
   MaxNumberOfBytes = 1000000;%% This value should be adjusted
@@ -43,7 +45,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   options_.lik_algo = 1;
 
   if nruns
-    if ~options_.load_mh_file
+    if options_.load_mh_file == 0
       % Delete old mh files...
       if nblck > 1
 	disp('MH: Multiple chains mode.')
@@ -100,7 +102,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  error('MH: The posterior mode lies outside the prior bounds.')
 	end
       end
-    else
+      save([fname_ '_MhInitialization'],'ix2','ilogpo2');
+    elseif options_.load_mh_file == 1
       disp('MH: I''m loading past metropolis-hastings simulations...')
       files = eval(['dir(''' fname_ '_mh*.mat'');']);
       if ~length(files)
@@ -151,6 +154,24 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       % nops is the Number Of Past Simulations. 
       disp(['MH: ... It''s done. I''ve loaded ' int2str(nops) 'simulations.'])
       disp(' ')
+    elseif options_.load_mh_file == -1
+      instr = [fname_ '_MhInitialization'];
+      eval(['load ' instr]);
+      nblck = length(ilogpo2);
+      options_.mh_nblck = nblck;
+      % Count the total number of saved mh files
+      AllMhFiles = eval(['dir(''' fname_ '_mh*_blck*.mat'');']);
+      TotalNumberOfMhFiles = length(AllMhFiles);
+      % Count the number of saved mh files per block
+      NumberOfMhFilesPerBlock = zeros(nblck,1); 
+      for i = 1:nblck
+	BlckMhFiles = eval(['dir(''' fname_ '_mh*_blck' int2str(i) '.mat'');']);
+	NumberOfMhFilesPerBlock(i) = length(BlckMhFiles);
+      end
+
+      NumberOfMhFilesPerBlock
+    
+      return
     end    
     isux = 0; 
     if nblck == 1
