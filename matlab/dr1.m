@@ -235,18 +235,6 @@ if nba ~= nyf
   return
 end
 
-%correcting T for 1 < eigenvalues < qz_criterium
-if any(dr.eigval(1:sdim) > 1)
-  k = find(dr.eigval(1:sdim) > 1);
-  for i=1:length(k)
-    if ss(k(i)+1,k(i)) == 0
-      tt(k(i),k(i)) = ss(k(i),k(i));
-    else
-      error(['Correction for inaccurate complex unit roots not implemented' ...
-	     ' yet'])
-    end
-  end
-end
 np = nd - nyf;
 n2 = np + 1;
 n3 = nyf;
