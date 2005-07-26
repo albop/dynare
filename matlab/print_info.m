@@ -30,6 +30,8 @@ function print_info(info)
       error(['Impossible to find the steady state. Either the model' ...
 	     ' doesn''t have a unique steady state of the guess values' ...
 	     ' are too far from the solution']) 
+     case 30
+      error('Variance can''t be computed')
      otherwise
       error('This case shouldn''t happen. Contact the authors of Dynare')
     end
