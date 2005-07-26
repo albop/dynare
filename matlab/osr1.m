@@ -18,6 +18,10 @@ function dr_=osr1(params,weights)
     t0(i)=evalin('base',[params(i,:) ';']);
   end
   
+  [f,info] = osr_obj(t0,params,weights);
+  if info > 0
+    disp('OSR: bad initial value for the parameters');
+  end
   [p,f]=fminsearch(@osr_obj,t0,[],params,weights);
 
   disp('')
