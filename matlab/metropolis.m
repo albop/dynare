@@ -2862,7 +2862,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	deep  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
 	set_parameters(deep);
 	dr = resol(ys_,0);
-	Gamma_y = th_autocovariances(dr,setdiff(ivar,bayestopt_.i_var_stable));
+	Gamma_y = th_autocovariances(dr,ivar);
 	if options_.order == 2
 	  m_mean = dr.ys(ivar) + Gamma_y{options_.ar+3};
 	else
