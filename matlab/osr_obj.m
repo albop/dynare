@@ -36,7 +36,11 @@ function [loss,vx]=osr_obj(x,params,weights);
   end
   
   [A,B] = kalman_transition_matrix(dr_);
-  vx = lyapunov_symm(A,B*Sigma_e_*B');
+  [vx, info] = lyapunov_symm(A,B*Sigma_e_*B');
+  if info > 0
+    loss = 1e8;
+    return
+  end
   weights = weights(dr_.order_var,dr_.order_var);
   vx = vx(1:endo_nbr,1:endo_nbr);
   loss = weights(:)'*vx(:);
