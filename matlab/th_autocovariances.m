@@ -15,6 +15,9 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
   end
   nar = options_.ar;
   Gamma_y = cell(nar+1,1);
+  if isempty(ivar)
+    ivar = [1:endo_nbr]';
+  end
   nvar = size(ivar,1);
   
   ghx = dr.ghx;

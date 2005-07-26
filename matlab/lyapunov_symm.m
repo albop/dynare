@@ -1,5 +1,6 @@
 % solves x-a*x*a'=b for b (and then x) symmetrical
-function x=lyapunov_symm(a,b)
+function [x,info]=lyapunov_symm(a,b)
+  info = 0;
   n = size(b,1);
   if n == 1
     x=b/(1-a*a);
@@ -16,8 +17,15 @@ function x=lyapunov_symm(a,b)
 	c = t(1:i,:)*(x(:,i+1:end)*t(i,i+1:end)')+...
 	    t(i,i)*t(1:i,i+1:end)*x(i+1:end,i);
       end
-      x(1:i,i)=(eye(i)-t(1:i,1:i)*t(i,i))\(b(1:i,i)+c);
-      x(i,1:i-1)=x(1:i-1,i)';
+      q = eye(i)-t(1:i,1:i)*t(i,i);
+      if condest(q) > 1e9
+	info = 30;
+	x = [];
+	return;
+      else
+	x(1:i,i) = q\(b(1:i,i)+c);
+      end
+      x(i,1:i-1) = x(1:i-1,i)';
     else
       if i == n
 	c = zeros(n,1);
@@ -30,9 +38,15 @@ function x=lyapunov_symm(a,b)
 	     t(i-1,i-1)*t(1:i,i+1:end)*x(i+1:end,i-1)+...
 	     t(i-1,i)*t(1:i,i+1:end)*x(i+1:end,i);
       end
-      z = [eye(i)-t(1:i,1:i)*t(i,i) -t(1:i,1:i)*t(i,i-1);...
-	   -t(1:i,1:i)*t(i-1,i) eye(i)-t(1:i,1:i)*t(i-1,i-1)]...
-	  \[b(1:i,i)+c;b(1:i,i-1)+c1];
+      q = [eye(i)-t(1:i,1:i)*t(i,i) -t(1:i,1:i)*t(i,i-1);...
+	   -t(1:i,1:i)*t(i-1,i) eye(i)-t(1:i,1:i)*t(i-1,i-1)];
+      if condest(q) > 1e9
+	info = 30;
+	x = [];
+	return;
+      else
+	z =  q\[b(1:i,i)+c;b(1:i,i-1)+c1];
+      end
       x(1:i,i) = z(1:i);
       x(1:i,i-1) = z(i+1:end);
       x(i,1:i-1)=x(1:i-1,i)';
