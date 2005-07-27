@@ -226,9 +226,9 @@ if nba ~= nyf
   temp = sort(abs(dr.eigval));
   if nba > nyf
     temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
-    info(1) = 3;
+    info(1) = 3
   elseif nba < nyf;
-    temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
+    temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium
     info(1) = 4;
   end
   info(2) = temp'*temp;
@@ -425,12 +425,12 @@ for i=1:ykmax_-1
   k0 = k1;
   offset = offset + n1;
 end
-C = kron(hx,hx);
-%C = hx;
+%C = kron(hx,hx);
+C = hx;
 D = [rhs; zeros(n-endo_nbr,size(rhs,2))];
-x0 = sylvester3(A,B,C,D);
-dr.ghxx = sylvester3a(x0,A,B,C,D);
-%dr.ghxx = gensylv(2,A,B,C,D);
+%x0 = sylvester3(A,B,C,D);
+%dr.ghxx = sylvester3a(x0,A,B,C,D);
+dr.ghxx = gensylv(2,A,B,C,D);
 
 %ghxu
 %rhs
