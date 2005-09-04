@@ -9,13 +9,11 @@ function yf=forcst2a(y0,dr,e)
   k2 = dr.kstate(find(dr.kstate(:,2) <= ykmin_+1),[1 2]);
   k2 = k2(:,1)+(ykmin_+1-k2(:,2))*endo_nbr;
 
-  it_ = ykmin_ + 1 ;
-
   yf = zeros(horizon+ykmin_,endo_nbr);
   yf(1:ykmin_,:) = y0';
   
   j = ykmin_*endo_nbr;
-  for i=2:horizon+1
+  for i=ykmin_+(1:horizon)
     tempx = yf(k1,:)';
     yf(i,:) = tempx(k2)'*dr.ghx';
     k1 = k1+1;

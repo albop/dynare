@@ -1618,28 +1618,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-					       horizon+1,1);
+					       horizon+ykmin_,1);
 	    end
-	    yf(:,IdObs) = yf(:,IdObs)+(gend+[0:horizon]')*trend_coeff';
+	    yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
 	    if options_.loglinear == 1
-	      yf = yf+repmat(log(ys'),horizon+1,1);
+	      yf = yf+repmat(log(ys'),horizon+ykmin_,1);
 	      yf = exp(yf);
 	    else
-	      yf = yf+repmat(ys',horizon+1,1);
+	      yf = yf+repmat(ys',horizon+ykmin_,1);
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
 	    yf1 = forcst2(yyyy,horizon,dr,B);
 	    if options_.prefilter == 1
 	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-		  repmat(bayestopt_.mean_varobs',[horizon+1,1,B]);
+		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,B]);
 	    end
-	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[0:horizon]')* ...
+	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
 		trend_coeff',[1,1,B]);
 	    if options_.loglinear == 1
-	      yf1 = yf1 + repmat(log(ys'),[horizon+1,1,B]);
+	      yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,B]);
 	      yf1 = exp(yf1);
 	    else
-	      yf1 = yf1 + repmat(ys',[horizon+1,1,B]);
+	      yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,B]);
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
@@ -1782,28 +1782,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-					       horizon+1,1);
+					       horizon+ykmin_,1);
 	    end
-	    yf(:,IdObs) = yf(:,IdObs)+(gend+[0:horizon]')*trend_coeff';
+	    yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
 	    if options_.loglinear == 1
-	      yf = yf+repmat(log(ys'),horizon+1,1);
+	      yf = yf+repmat(log(ys'),horizon+ykmin_,1);
 	      yf = exp(yf);
 	    else
-	      yf = yf+repmat(ys',horizon+1,1);
+	      yf = yf+repmat(ys',horizon+ykmin_,1);
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
 	    yf1 = forcst2(yyyy,horizon,dr,B);
 	    if options_.prefilter == 1
 	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-		  repmat(bayestopt_.mean_varobs',[horizon+1,1,B]);
+		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,B]);
 	    end
-	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[0:horizon]')* ...
+	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
 		trend_coeff',[1,1,B]);
 	    if options_.loglinear == 1
-	      yf1 = yf1 + repmat(log(ys'),[horizon+1,1,B]);
+	      yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,B]);
 	      yf1 = exp(yf1);
 	    else
-	      yf1 = yf1 + repmat(ys',[horizon+1,1,B]);
+	      yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,B]);
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
@@ -1978,28 +1978,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-					       horizon+1,1);
+					       horizon+ykmin_,1);
 	    end
-	    yf(:,IdObs) = yf(:,IdObs)+(gend+[0:horizon]')*trend_coeff';
+	    yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
 	    if options_.loglinear == 1
-	      yf = yf+repmat(log(ys'),horizon+1,1);
+	      yf = yf+repmat(log(ys'),horizon+ykmin_,1);
 	      yf = exp(yf);
 	    else
-	      yf = yf+repmat(ys',horizon+1,1);
+	      yf = yf+repmat(ys',horizon+ykmin_,1);
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
 	    yf1 = forcst2(yyyy,horizon,dr,B);
 	    if options_.prefilter == 1
 	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-		  repmat(bayestopt_.mean_varobs',[horizon+1,1,B]);
+		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,B]);
 	    end
-	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[0:horizon]')* ...
+	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
 		trend_coeff',[1,1,B]);
 	    if options_.loglinear == 1
-	      yf1 = yf1 + repmat(log(ys'),[horizon+1,1,B]);
+	      yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,B]);
 	      yf1 = exp(yf1);
 	    else
-	      yf1 = yf1 + repmat(ys',[horizon+1,1,B]);
+	      yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,B]);
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
@@ -2147,28 +2147,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-					       horizon+1,1);
+					       horizon+ykmin_,1);
 	    end
-	    yf(:,IdObs) = yf(:,IdObs)+(gend+[0:horizon]')*trend_coeff';
+	    yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
 	    if options_.loglinear == 1
-	      yf = yf+repmat(log(ys'),horizon+1,1);
+	      yf = yf+repmat(log(ys'),horizon+ykmin_,1);
 	      yf = exp(yf);
 	    else
-	      yf = yf+repmat(ys',horizon+1,1);
+	      yf = yf+repmat(ys',horizon+ykmin_,1);
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
 	    yf1 = forcst2(yyyy,horizon,dr,B);
 	    if options_.prefilter == 1
 	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-		  repmat(bayestopt_.mean_varobs',[horizon+1,1,B]);
+		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,B]);
 	    end
-	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[0:horizon]')* ...
+	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
 		trend_coeff',[1,1,B]);
 	    if options_.loglinear == 1
-	      yf1 = yf1 + repmat(log(ys'),[horizon+1,1,B]);
+	      yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,B]);
 	      yf1 = exp(yf1);
 	    else
-	      yf1 = yf1 + repmat(ys',[horizon+1,1,B]);
+	      yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,B]);
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
