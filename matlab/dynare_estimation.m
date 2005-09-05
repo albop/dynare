@@ -165,7 +165,6 @@ if ~isempty(options_.unit_root_vars)
   i_stable = ones(endo_nbr,1);
   i_stable(i_ur) = zeros(n_ur,1);
   i_stable = find(i_stable);
-  bayestopt_.i_var_stable = i_stable;
   if ykmin_ > 1
     l1 = flipud([cumsum(iy_(1:ykmin_-1,dr.order_var),1);ones(1, ...
 						  endo_nbr)]);
@@ -190,7 +189,10 @@ if ~isempty(options_.unit_root_vars)
     bayestopt_.i_T_var_stable = find(l1);
   end
   options_.lik_init = 3;
+else
+  i_stable = [1:endo_nbr]';
 end % if ~isempty(options_.unit_root_vars)
+bayestopt_.i_var_stable = i_stable;
 
 if isempty(options_.datafile)
   error('ESTIMATION: datafile option is missing')
