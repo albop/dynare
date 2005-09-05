@@ -2083,6 +2083,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end	    
 	  deep  = x2(floor(rand*NumberOfSimulations)+1,:); 
 	  [atT,innov,obs_err,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(deep',gend,data);
+           % removing lagged variables when ykmin_ > 1
+           filtered_state_vector = filtered_state_vector(1:endo_nbr,:);
 	  if options_.smoother
 	    if irun_smoo < MAX_nsmoo
 	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
