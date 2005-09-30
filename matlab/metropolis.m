@@ -2276,7 +2276,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  MeanForecast(step,i) = MeanForecast(step,i)+sum(stock_forcst(truestep,SelecVariables(i),:),3);
 	  DeProfundis = size(stock_forcst,3); 
 	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_forcst(truestep,SelecVariables(i),:)); 
-	  tmp_big(StartLine+1:StartLine+DeProfundis*B) = squeeze(stock_forcst1(truestep,SelecVariables(i),StartLine+1:DeProfundis*B)); 
+	  tmp_big(StartLine+1:StartLine+DeProfundis*B) = squeeze(stock_forcst1(truestep,SelecVariables(i),StartLine+(1:DeProfundis*B))); 
 	  StartLine = StartLine+DeProfundis;
 	end
 	tmp = sort(tmp);
@@ -2476,11 +2476,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	dr = resol(ys_,0);
 	SS(lgx_orig_ord_,lgx_orig_ord_)=Sigma_e_+1e-14* ...
 	    eye(exo_nbr);
-	SS = transpose(chol(SS));
+	cs = transpose(chol(SS));
 	tit(lgx_orig_ord_,:) = lgx_;
 	for i = 1:exo_nbr
 	  if SS(i,i) > 1e-13
-	    y=irf(dr,SS(lgx_orig_ord_,i), options_.irf, options_.drop, ...
+	    y=irf(dr,cs(lgx_orig_ord_,i), options_.irf, options_.drop, ...
 		  options_.replic, options_.order);
 	    if options_.relative_irf
 	      y = 100*y/cs(i,i); 
