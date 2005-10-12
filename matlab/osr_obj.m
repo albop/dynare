@@ -1,5 +1,5 @@
-% the beginning and the end of this function may be adapted by the user
-function [loss,info]=osr_obj(x,params,weights);
+% the beginning and the end of this function may be adapted by the userx
+function [loss,vx]=osr_obj(x,params,weights);
   global ys_ Sigma_e_ endo_nbr exo_nbr optimal_Q_ it_ ykmin_ options_
   
   vx = [];

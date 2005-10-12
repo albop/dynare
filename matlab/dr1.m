@@ -388,7 +388,11 @@ rhs = -rhs;
 n = endo_nbr+sum(kstate(:,2) > ykmin_+1 & kstate(:,2) < ykmin_+ykmax_+1);
 A = zeros(n,n);
 B = zeros(n,n);
+[junk,k1,k2] = find(iy_(ykmin_+ykmax_+1,order_var));
+gx2 = dr.ghx(k1,:);
 A(1:endo_nbr,1:endo_nbr) = jacobia_(:,iy_(ykmin_+1,order_var));
+A(1:endo_nbr,nstatic+1:nstatic+npred)=...
+    A(1:endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx2(:,1:npred);
 % variables with the highest lead
 k1 = find(kstate(:,2) == ykmin_+ykmax_+1);
 if ykmax_ > 1
@@ -402,14 +406,12 @@ end
 B(1:endo_nbr,end-length(k2)+k3) = jacobia_(:,kstate(k1,3)+endo_nbr);
 offset = endo_nbr;
 k0 = [1:endo_nbr];
-gx1 = dr.ghx;
 for i=1:ykmax_-1
   k1 = find(kstate(:,2) == ykmin_+i+1);
   [k2,junk,k3] = find(kstate(k1,3));
   A(1:endo_nbr,offset+k2) = jacobia_(:,k3+endo_nbr);
   n1 = length(k1);
-  A(offset+[1:n1],nstatic+[1:npred]) = -gx1(kstate(k1,1),1:npred);
-  gx1 = gx1*hx;
+  A(offset+[1:n1],nstatic+[1:npred]) = -gx(k1,1:npred); 
   A(offset+[1:n1],offset+[1:n1]) = eye(n1);
   n0 = length(k0);
   E = eye(n0);
@@ -423,18 +425,12 @@ for i=1:ykmax_-1
   k0 = k1;
   offset = offset + n1;
 end
-[junk,k1,k2] = find(iy_(ykmin_+ykmax_+1,order_var));
-A(1:endo_nbr,nstatic+1:nstatic+npred)=...
-    A(1:endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx1(k1,1:npred);
+%C = kron(hx,hx);
 C = hx;
 D = [rhs; zeros(n-endo_nbr,size(rhs,2))];
-if exist('gensylv')
-  dr.ghxx = gensylv(2,A,B,C,D);
-else
-  C = kron(hx,hx); 
-  x0 = sylvester3(A,B,C,D);
-  dr.ghxx = sylvester3a(x0,A,B,C,D);
-end
+%x0 = sylvester3(A,B,C,D);
+%dr.ghxx = sylvester3a(x0,A,B,C,D);
+dr.ghxx = gensylv(2,A,B,C,D);
 
 %ghxu
 %rhs
@@ -456,7 +452,8 @@ else
 end
 nyf1 = sum(kstate(:,2) == ykmin_+2);
 hu1 = [hu;zeros(np-npred,exo_nbr)];
-rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hx,hu1);
+B1 = [B(1:endo_nbr,:);zeros(size(A,1)-endo_nbr,size(B,2))];
+rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B1*dr.ghxx*kron(hx,hu1);
 
 %lhs
 dr.ghxu = A\rhs;
