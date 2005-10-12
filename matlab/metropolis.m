@@ -105,7 +105,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       save([fname_ '_MhInitialization'],'ix2','ilogpo2');
     elseif options_.load_mh_file == 1
       disp('MH: I''m loading past metropolis-hastings simulations...')
-      files = eval(['dir(''' fname_ '_mh*.mat'');']);
+      files = eval(['dir(''' fname_ '_mh*_blck*.mat'');']);
       if ~length(files)
 	error('MH: FAILURE :: there is no MH file to load here!')    
       end
@@ -154,7 +154,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       % nops is the Number Of Past Simulations. 
       disp(['MH: ... It''s done. I''ve loaded ' int2str(nops) 'simulations.'])
       disp(' ')
-    elseif options_.load_mh_file == -1
+    elseif options_.load_mh_file == -1%%% Not ready...
       instr = [fname_ '_MhInitialization'];
       eval(['load ' instr]);
       nblck = length(ilogpo2);
@@ -168,9 +168,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	BlckMhFiles = eval(['dir(''' fname_ '_mh*_blck' int2str(i) '.mat'');']);
 	NumberOfMhFilesPerBlock(i) = length(BlckMhFiles);
       end
-
       NumberOfMhFilesPerBlock
-    
       return
     end    
     isux = 0; 
