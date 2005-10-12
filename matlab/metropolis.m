@@ -4,7 +4,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 
   global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam_test
   global lgy_ lgx_ fname_ ys_ xkmin_ xkmax_ ykmin_ ykmax_ endo_nbr mean_varobs
-  global oo_ lgx_orig_ord_ lgy_TeX_ lgx_TeX_
+  global oo_ lgx_orig_ord_ lgy_TeX_ lgx_TeX_ dsge_prior_weight
 
 
   TeX   	= options_.TeX;
@@ -56,7 +56,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       if length(files)
 	delete([fname_ '_mh*.mat']);
 	disp('MH: Old _mh files succesfully erased!')
-      end	
+      end
       nops = 0; 		% Number Of Past Simulations.
       lfile = -1;		% Index for the last mh file.
       if nblck > 1
@@ -71,7 +71,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    candidate = options_.mh_init_scale*randn(1,npar)*d + transpose(xparam1);
 	    if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
 	      ix2(1,:,j) = candidate;
-	      ilogpo2(1,j) = -DsgeLikelihood(ix2(1,:,j)',gend,data);
+	      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+		ilogpo2(1,j) = -DsgeLikelihood(ix2(1,:,j)',gend,data);
+	      else
+		ilogpo2(1,j) = -DsgeVarLikelihood(ix2(1,:,j)',gend);
+	      end
 	      j = j+1;
 	      validate = 1;
 	    end
@@ -94,7 +98,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	candidate = transpose(xparam1);
 	if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
 	  ix2 = candidate;
-	  ilogpo2 = -DsgeLikelihood(ix2',gend,data);
+	  if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	    ilogpo2 = -DsgeLikelihood(ix2',gend,data);
+	  else
+	    ilogpo2 = -DsgeVarLikelihood(ix2',gend);
+	  end  
 	  disp('MH: Initialization at the posterior mode.')
 	  disp(' ')
 	else
@@ -105,7 +113,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       save([fname_ '_MhInitialization'],'ix2','ilogpo2');
     elseif options_.load_mh_file == 1
       disp('MH: I''m loading past metropolis-hastings simulations...')
-      files = eval(['dir(''' fname_ '_mh*_blck*.mat'');']);
+      files = eval(['dir(''' fname_ '_mh*.mat'');']);
       if ~length(files)
 	error('MH: FAILURE :: there is no MH file to load here!')    
       end
@@ -154,7 +162,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       % nops is the Number Of Past Simulations. 
       disp(['MH: ... It''s done. I''ve loaded ' int2str(nops) 'simulations.'])
       disp(' ')
-    elseif options_.load_mh_file == -1%%% Not ready...
+    elseif options_.load_mh_file == -1
       instr = [fname_ '_MhInitialization'];
       eval(['load ' instr]);
       nblck = length(ilogpo2);
@@ -168,8 +176,6 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	BlckMhFiles = eval(['dir(''' fname_ '_mh*_blck' int2str(i) '.mat'');']);
 	NumberOfMhFilesPerBlock(i) = length(BlckMhFiles);
       end
-      NumberOfMhFilesPerBlock
-      return
     end    
     isux = 0; 
     if nblck == 1
@@ -195,7 +201,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  par = randn(1,npar)*d;
 	  par = par.*bayestopt_.jscale' + ix2;  
 	  if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
-	    logpost = -DsgeLikelihood(transpose(par),gend,data);
+	    if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	      logpost = -DsgeLikelihood(transpose(par),gend,data);
+	    else
+	      logpost = -DsgeVarLikelihood(transpose(par),gend);
+	    end
 	  else
 	    logpost = -inf;
 	  end    
@@ -262,8 +272,12 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if irun <= MAX_nruns
 	    par = randn(1,npar)*d;
 	    par = par.*transpose(bayestopt_.jscale) + ix2(1,:,b);  
-	    if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
-	      logpost = -DsgeLikelihood(transpose(par),gend,data);
+	    if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par)< mh_bounds(:,2))
+	      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+		logpost = -DsgeLikelihood(transpose(par),gend,data);
+	      else
+		logpost = -DsgeVarLikelihood(transpose(par),gend);
+	      end
 	    else
 	      logpost = -inf;
 	    end    
@@ -1616,28 +1630,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-					       horizon+ykmin_,1);
+					       horizon+1,1);
 	    end
-	    yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
+	    yf(:,IdObs) = yf(:,IdObs)+(gend+[0:horizon]')*trend_coeff';
 	    if options_.loglinear == 1
-	      yf = yf+repmat(log(ys'),horizon+ykmin_,1);
+	      yf = yf+repmat(log(ys'),horizon+1,1);
 	      yf = exp(yf);
 	    else
-	      yf = yf+repmat(ys',horizon+ykmin_,1);
+	      yf = yf+repmat(ys',horizon+1,1);
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
 	    yf1 = forcst2(yyyy,horizon,dr,B);
 	    if options_.prefilter == 1
 	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,B]);
+		  repmat(bayestopt_.mean_varobs',[horizon+1,1,B]);
 	    end
-	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
+	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[0:horizon]')* ...
 		trend_coeff',[1,1,B]);
 	    if options_.loglinear == 1
-	      yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,B]);
+	      yf1 = yf1 + repmat(log(ys'),[horizon+1,1,B]);
 	      yf1 = exp(yf1);
 	    else
-	      yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,B]);
+	      yf1 = yf1 + repmat(ys',[horizon+1,1,B]);
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
@@ -1780,28 +1794,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-					       horizon+ykmin_,1);
+					       horizon+1,1);
 	    end
-	    yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
+	    yf(:,IdObs) = yf(:,IdObs)+(gend+[0:horizon]')*trend_coeff';
 	    if options_.loglinear == 1
-	      yf = yf+repmat(log(ys'),horizon+ykmin_,1);
+	      yf = yf+repmat(log(ys'),horizon+1,1);
 	      yf = exp(yf);
 	    else
-	      yf = yf+repmat(ys',horizon+ykmin_,1);
+	      yf = yf+repmat(ys',horizon+1,1);
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
 	    yf1 = forcst2(yyyy,horizon,dr,B);
 	    if options_.prefilter == 1
 	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,B]);
+		  repmat(bayestopt_.mean_varobs',[horizon+1,1,B]);
 	    end
-	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
+	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[0:horizon]')* ...
 		trend_coeff',[1,1,B]);
 	    if options_.loglinear == 1
-	      yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,B]);
+	      yf1 = yf1 + repmat(log(ys'),[horizon+1,1,B]);
 	      yf1 = exp(yf1);
 	    else
-	      yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,B]);
+	      yf1 = yf1 + repmat(ys',[horizon+1,1,B]);
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
@@ -1976,28 +1990,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-					       horizon+ykmin_,1);
+					       horizon+1,1);
 	    end
-	    yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
+	    yf(:,IdObs) = yf(:,IdObs)+(gend+[0:horizon]')*trend_coeff';
 	    if options_.loglinear == 1
-	      yf = yf+repmat(log(ys'),horizon+ykmin_,1);
+	      yf = yf+repmat(log(ys'),horizon+1,1);
 	      yf = exp(yf);
 	    else
-	      yf = yf+repmat(ys',horizon+ykmin_,1);
+	      yf = yf+repmat(ys',horizon+1,1);
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
 	    yf1 = forcst2(yyyy,horizon,dr,B);
 	    if options_.prefilter == 1
 	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,B]);
+		  repmat(bayestopt_.mean_varobs',[horizon+1,1,B]);
 	    end
-	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
+	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[0:horizon]')* ...
 		trend_coeff',[1,1,B]);
 	    if options_.loglinear == 1
-	      yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,B]);
+	      yf1 = yf1 + repmat(log(ys'),[horizon+1,1,B]);
 	      yf1 = exp(yf1);
 	    else
-	      yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,B]);
+	      yf1 = yf1 + repmat(ys',[horizon+1,1,B]);
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
@@ -2081,8 +2095,6 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end	    
 	  deep  = x2(floor(rand*NumberOfSimulations)+1,:); 
 	  [atT,innov,obs_err,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(deep',gend,data);
-           % removing lagged variables when ykmin_ > 1
-           filtered_state_vector = filtered_state_vector(1:endo_nbr,:);
 	  if options_.smoother
 	    if irun_smoo < MAX_nsmoo
 	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
@@ -2147,28 +2159,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    yf = forcst2a(yyyy,dr,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-					       horizon+ykmin_,1);
+					       horizon+1,1);
 	    end
-	    yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
+	    yf(:,IdObs) = yf(:,IdObs)+(gend+[0:horizon]')*trend_coeff';
 	    if options_.loglinear == 1
-	      yf = yf+repmat(log(ys'),horizon+ykmin_,1);
+	      yf = yf+repmat(log(ys'),horizon+1,1);
 	      yf = exp(yf);
 	    else
-	      yf = yf+repmat(ys',horizon+ykmin_,1);
+	      yf = yf+repmat(ys',horizon+1,1);
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
 	    yf1 = forcst2(yyyy,horizon,dr,B);
 	    if options_.prefilter == 1
 	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,B]);
+		  repmat(bayestopt_.mean_varobs',[horizon+1,1,B]);
 	    end
-	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
+	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[0:horizon]')* ...
 		trend_coeff',[1,1,B]);
 	    if options_.loglinear == 1
-	      yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,B]);
+	      yf1 = yf1 + repmat(log(ys'),[horizon+1,1,B]);
 	      yf1 = exp(yf1);
 	    else
-	      yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,B]);
+	      yf1 = yf1 + repmat(ys',[horizon+1,1,B]);
 	    end
 	    stock_forcst1(:,:,irun_forc1) = yf1;
 	    if irun_forc == MAX_nforc
@@ -2274,7 +2286,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  MeanForecast(step,i) = MeanForecast(step,i)+sum(stock_forcst(truestep,SelecVariables(i),:),3);
 	  DeProfundis = size(stock_forcst,3); 
 	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_forcst(truestep,SelecVariables(i),:)); 
-	  tmp_big(StartLine+1:StartLine+DeProfundis*B) = squeeze(stock_forcst1(truestep,SelecVariables(i),StartLine+(1:DeProfundis*B))); 
+	  tmp_big(StartLine+1:StartLine+DeProfundis*B) = squeeze(stock_forcst1(truestep,SelecVariables(i),StartLine+1:DeProfundis*B)); 
 	  StartLine = StartLine+DeProfundis;
 	end
 	tmp = sort(tmp);
@@ -2474,11 +2486,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	dr = resol(ys_,0);
 	SS(lgx_orig_ord_,lgx_orig_ord_)=Sigma_e_+1e-14* ...
 	    eye(exo_nbr);
-	cs = transpose(chol(SS));
+	SS = transpose(chol(SS));
 	tit(lgx_orig_ord_,:) = lgx_;
 	for i = 1:exo_nbr
 	  if SS(i,i) > 1e-13
-	    y=irf(dr,cs(lgx_orig_ord_,i), options_.irf, options_.drop, ...
+	    y=irf(dr,SS(lgx_orig_ord_,i), options_.irf, options_.drop, ...
 		  options_.replic, options_.order);
 	    if options_.relative_irf
 	      y = 100*y/cs(i,i); 
@@ -2862,7 +2874,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	deep  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
 	set_parameters(deep);
 	dr = resol(ys_,0);
-	Gamma_y = th_autocovariances(dr,ivar);
+	Gamma_y = th_autocovariances(dr,setdiff(ivar,bayestopt_.i_var_stable));
 	if options_.order == 2
 	  m_mean = dr.ys(ivar) + Gamma_y{options_.ar+3};
 	else

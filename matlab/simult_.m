@@ -1,7 +1,7 @@
 % Copyright (C) 2001 Michel Juillard
 %
 
-function y_=simult_(y0,dr,ex_,iorder)
+function y_ = simult_(y0,dr,ex_,iorder)
 global endo_nbr ykmin_ xkmin_ it_ options_ iy_
   iter = size(ex_,1)-xkmin_;
   nx = size(dr.ghu,2);
@@ -38,7 +38,6 @@ global endo_nbr ykmin_ xkmin_ it_ options_ iy_
 	[y_(:,i), check] = dynare_solve('ff_simul1',y_(:,i-1),tempx1(k3), ...
 					m(o3:end),tempx(k4),o1,o2,o3,k6);
       end
-	
       k1 = k1+1;
     end
   elseif iorder == 2

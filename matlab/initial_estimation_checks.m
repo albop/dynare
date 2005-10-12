@@ -1,5 +1,5 @@
 function initial_estimation_checks(xparam1,gend,data)
-global bayestopt_ estim_params_ exo_nbr
+global bayestopt_ estim_params_ exo_nbr dsge_prior_weight
   
 nv = size(data,1);
   
@@ -14,8 +14,12 @@ if r < nv
 	 ' correlated']);
 end
 
-[fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data);
-
+if ~isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) | ~isempty(dsge_prior_weight)
+  % Just to fill info [stephane.adjemian@ens.fr]
+  [fval,cost_flag,ys,trend_coeff,info] = DsgeVarLikelihood(xparam1,gend);
+else
+  [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data);
+end
 if info(1) > 0
   disp('Error in computing likelihood for initial parameter values')
   print_info(info)
