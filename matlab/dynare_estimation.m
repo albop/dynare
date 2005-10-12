@@ -1,6 +1,7 @@
 function dynare_estimation(varlist)
 global options_ bayestopt_ estim_params_ lgy_ lgx_ Sigma_e_ exo_nbr endo_nbr
 global lgy_ lgx_ fname_ oo_  trend_coeff_  iy_ ykmin_ lgx_TeX_ lgy_TeX_
+global dsge_prior_weight
 
 options_.varlist = varlist;
 
@@ -9,7 +10,7 @@ for i = 1:size(lgy_,1)
   tmp = strmatch(deblank(lgy_(i,:)),options_.varobs,'exact');
   if ~isempty(tmp)
     options_.lgyidx2varobs(i,1) = tmp;
-  end			
+  end           
 end
 
 options_ = set_default_option(options_,'first_obs',1);
@@ -52,10 +53,11 @@ options_ = set_default_option(options_,'kalman_algo',1);
 options_ = set_default_option(options_,'kalman_tol',10^(-12));
 options_ = set_default_option(options_,'diffuse_d',[]);
 options_ = set_default_option(options_,'nk',1);
+options_ = set_default_option(options_,'varlag',3);
 
 
 optim_options = optimset('display','iter','LargeScale','off',...
-			 'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
+             'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
 
 if isfield(options_,'optim_opt')
   eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
@@ -79,7 +81,7 @@ k1 = [];
 for i=1:n_varobs
   rawdata = [rawdata eval(deblank(options_.varobs(i,:)))];
   k = [k strmatch(deblank(options_.varobs(i,:)),lgy_(dr.order_var,:), ...
-		  'exact')];
+          'exact')];
   k1 = [k1 strmatch(deblank(options_.varobs(i,:)),lgy_, 'exact')];
 end
 
@@ -98,10 +100,10 @@ bayestopt_.mfys = k1;
 % set options for recursive forecast if necessary
 options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
 if options_.nobs(1) == options_.nobs(end) % no recursive estimation
-  options_ = set_default_option(options_,'mh_nblck',2);	
+  options_ = set_default_option(options_,'mh_nblck',2); 
   options_ = set_default_option(options_,'nodiagnostic',0);
 else
-  options_ = set_default_option(options_,'mh_nblck',1);	
+  options_ = set_default_option(options_,'mh_nblck',1); 
   options_ = set_default_option(options_,'nodiagnostic',1);
 end
 
@@ -167,7 +169,7 @@ if ~isempty(options_.unit_root_vars)
   i_stable = find(i_stable);
   if ykmin_ > 1
     l1 = flipud([cumsum(iy_(1:ykmin_-1,dr.order_var),1);ones(1, ...
-						  endo_nbr)]);
+                          endo_nbr)]);
     n1 = nnz(l1);
     bayestopt_.Pinf = zeros(n1,n1);
     l2 = find(l1');
@@ -217,12 +219,17 @@ end
 
 if ~isreal(rawdata)
   error(['There are complex values in the data. Probably  a wrong' ...
-	 ' transformation'])
+     ' transformation'])
 end
 
 if length(options_.mode_file) > 0
   eval(['load ' options_.mode_file ';']');
 end
+
+if ~isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) | ~isempty(dsge_prior_weight)
+    evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
+       'VarSampleMoments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);'])
+end  
 
 iter1 = 1;
 for iter1 = 1:length(options_.nobs)
@@ -230,7 +237,7 @@ for iter1 = 1:length(options_.nobs)
   if options_.prefilter == 1
     bayestopt_.mean_varobs = mean(rawdata(options_.first_obs+(0:gend-1),:),1);
     data = rawdata(options_.first_obs+(0:gend-1),:)'-...
-	   repmat(bayestopt_.mean_varobs',1,gend);
+       repmat(bayestopt_.mean_varobs',1,gend);
   else
     data = rawdata(options_.first_obs+(0:gend-1),:)';
   end
@@ -240,22 +247,22 @@ for iter1 = 1:length(options_.nobs)
     fh=str2func('DsgeLikelihood');
     if options_.mode_compute == 1  
       [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-	  fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
+      fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
     elseif options_.mode_compute == 2
-      %	asamin('set','maximum_cost_repeat',0);
+      % asamin('set','maximum_cost_repeat',0);
       [fval,xparam1,grad,hessian_asamin,exitflag] = ...
-	  asamin('minimize','DsgeLikelihood',xparam1,lb,ub,- ...
-		 ones(size(xparam1)),gend,data);   
+      asamin('minimize','DsgeLikelihood',xparam1,lb,ub,- ...
+         ones(size(xparam1)),gend,data);   
     elseif options_.mode_compute == 3
       [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend, ...
-					data);
+                    data);
     elseif options_.mode_compute == 4
       H0 = 1e-4*eye(nx);
       crit = 1e-7;
       nit = 1000;
       verbose = 2;
       [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-	  csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,gend,data);
+      csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,gend,data);
       disp(sprintf('Objective function at mode: %f',fval))
       disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
     elseif options_.mode_compute == 5
@@ -285,20 +292,20 @@ for iter1 = 1:length(options_.nobs)
       tstath(i) = abs(xparam1(i))/stdh(i);
     end
     tit1 = sprintf('%10s %7s %8s %7s %6s %4s %6s\n',' ','prior mean', ...
-		   'mode','s.d.','t-stat','prior','pstdev');
+           'mode','s.d.','t-stat','prior','pstdev');
     if np
       ip = nvx+nvn+ncx+ncn+1;
       disp('parameters')
       disp(tit1)
       for i=1:np
-	disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
-		     deblank(estim_params_.param_names(i,:)), ...
-		     bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip), ...
-		     pnames(bayestopt_.pshape(ip)+1,:), ...
-		     bayestopt_.pstdev(ip)));
-	eval(['oo_.posterior_mode.parameters.' deblank(estim_params_.param_names(i,:)) ' = xparam1(ip);']);
-	eval(['oo_.posterior_std.parameters.' deblank(estim_params_.param_names(i,:)) ' = stdh(ip);']); 
-	ip = ip+1;
+    disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
+             deblank(estim_params_.param_names(i,:)), ...
+             bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip), ...
+             pnames(bayestopt_.pshape(ip)+1,:), ...
+             bayestopt_.pstdev(ip)));
+    eval(['oo_.posterior_mode.parameters.' deblank(estim_params_.param_names(i,:)) ' = xparam1(ip);']);
+    eval(['oo_.posterior_std.parameters.' deblank(estim_params_.param_names(i,:)) ' = stdh(ip);']); 
+    ip = ip+1;
       end
     end
     if nvx
@@ -306,15 +313,15 @@ for iter1 = 1:length(options_.nobs)
       disp('standard deviation of shocks')
       disp(tit1)
       for i=1:nvx
-	k = estim_params_.var_exo(i,1);
-      	disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
-		     deblank(lgx_(k,:)),bayestopt_.pmean(ip),xparam1(ip), ...
-		     stdh(ip),tstath(ip),pnames(bayestopt_.pshape(ip)+1,:), ...
-		     bayestopt_.pstdev(ip))); 
-      	Sigma_e_(k,k) = xparam1(ip)*xparam1(ip);
-	eval(['oo_.posterior_mode.shocks_std.' deblank(lgx_(k,:)) ' = xparam1(ip);']);
-	eval(['oo_.posterior_std.shocks_std.' deblank(lgx_(k,:)) ' = stdh(ip);']); 
-	ip = ip+1;
+    k = estim_params_.var_exo(i,1);
+        disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
+             deblank(lgx_(k,:)),bayestopt_.pmean(ip),xparam1(ip), ...
+             stdh(ip),tstath(ip),pnames(bayestopt_.pshape(ip)+1,:), ...
+             bayestopt_.pstdev(ip))); 
+        Sigma_e_(k,k) = xparam1(ip)*xparam1(ip);
+    eval(['oo_.posterior_mode.shocks_std.' deblank(lgx_(k,:)) ' = xparam1(ip);']);
+    eval(['oo_.posterior_std.shocks_std.' deblank(lgx_(k,:)) ' = stdh(ip);']); 
+    ip = ip+1;
       end
     end
     if nvn
@@ -322,15 +329,15 @@ for iter1 = 1:length(options_.nobs)
       disp(tit1)
       ip = nvx+1;
       for i=1:nvn
-    	disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
-		     deblank(options_.varobs(estim_params_.var_endo(i,1),: ...
-					     )),bayestopt_.pmean(ip), ...
-		     xparam1(ip),stdh(ip),tstath(ip), ...
-		     pnames(bayestopt_.pshape(ip)+1,:), ...
-		     bayestopt_.pstdev(ip)));
-	eval(['oo_.posterior_mode.measurement_errors_std.' deblank(options_.varobs(estim_params_.var_endo(i,1),:)) ' = xparam1(ip);']);
-	eval(['oo_.posterior_std.measurement_errors_std.' deblank(options_.varobs(estim_params_.var_endo(i,1),:)) ' = stdh(ip);']); 
-      	ip = ip+1;
+        disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
+             deblank(options_.varobs(estim_params_.var_endo(i,1),: ...
+                         )),bayestopt_.pmean(ip), ...
+             xparam1(ip),stdh(ip),tstath(ip), ...
+             pnames(bayestopt_.pshape(ip)+1,:), ...
+             bayestopt_.pstdev(ip)));
+    eval(['oo_.posterior_mode.measurement_errors_std.' deblank(options_.varobs(estim_params_.var_endo(i,1),:)) ' = xparam1(ip);']);
+    eval(['oo_.posterior_std.measurement_errors_std.' deblank(options_.varobs(estim_params_.var_endo(i,1),:)) ' = stdh(ip);']); 
+        ip = ip+1;
       end
     end
     if ncx
@@ -338,17 +345,17 @@ for iter1 = 1:length(options_.nobs)
       disp(tit1)
       ip = nvx+nvn+1;
       for i=1:ncx
-	k1 = estim_params_.corrx(i,1);
-      	k2 = estim_params_.corrx(i,2);
-      	name = [deblank(lgx_(k1,:)) ',' deblank(lgx_(k2,:))];
-      	disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
-		     bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip),  ...
-		     pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.pstdev(ip)));
-      	Sigma_e_(k1,k2) = xparam1(ip)*sqrt(Sigma_e_(k1,k1)*Sigma_e_(k2,k2));
-      	Sigma_e_(k2,k1) = Sigma_e_(k1,k2);
-	eval(['oo_.posterior_mode.shocks_corr.' deblank(lgx_(k1,:)) '_' deblank(lgx_(k2,:)) ' = xparam1(ip);']);
-	eval(['oo_.posterior_std.shocks_corr.' deblank(lgx_(k1,:)) '_' deblank(lgx_(k2,:)) ' = stdh(ip);']); 
-      	ip = ip+1;
+    k1 = estim_params_.corrx(i,1);
+        k2 = estim_params_.corrx(i,2);
+        name = [deblank(lgx_(k1,:)) ',' deblank(lgx_(k2,:))];
+        disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
+             bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip),  ...
+             pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.pstdev(ip)));
+        Sigma_e_(k1,k2) = xparam1(ip)*sqrt(Sigma_e_(k1,k1)*Sigma_e_(k2,k2));
+        Sigma_e_(k2,k1) = Sigma_e_(k1,k2);
+    eval(['oo_.posterior_mode.shocks_corr.' deblank(lgx_(k1,:)) '_' deblank(lgx_(k2,:)) ' = xparam1(ip);']);
+    eval(['oo_.posterior_std.shocks_corr.' deblank(lgx_(k1,:)) '_' deblank(lgx_(k2,:)) ' = stdh(ip);']); 
+        ip = ip+1;
       end
     end
     if ncn
@@ -356,20 +363,20 @@ for iter1 = 1:length(options_.nobs)
       disp(tit1)
       ip = nvx+nvn+ncx+1;
       for i=1:ncn
-    	k1 = estim_params_.corrn(i,1);
-      	k2 = estim_params_.corrn(i,2);
-      	name = [deblank(lgy_(k1,:)) ',' deblank(lgy_(k2,:))];
-      	disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
-		     bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip), ...
-		     pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.pstdev(ip)));
-	eval(['oo_.posterior_mode.measurement_errors_corr.' deblank(lgy_(k1,:)) '_' deblank(lgy_(k2,:)) ' = xparam1(ip);']);
-	eval(['oo_.posterior_std.measurement_errors_corr.' deblank(lgy_(k1,:)) '_' deblank(lgy_(k2,:)) ' = stdh(ip);']); 
-	ip = ip+1;
+        k1 = estim_params_.corrn(i,1);
+        k2 = estim_params_.corrn(i,2);
+        name = [deblank(lgy_(k1,:)) ',' deblank(lgy_(k2,:))];
+        disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
+             bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip), ...
+             pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.pstdev(ip)));
+    eval(['oo_.posterior_mode.measurement_errors_corr.' deblank(lgy_(k1,:)) '_' deblank(lgy_(k2,:)) ' = xparam1(ip);']);
+    eval(['oo_.posterior_std.measurement_errors_corr.' deblank(lgy_(k1,:)) '_' deblank(lgy_(k2,:)) ' = stdh(ip);']); 
+    ip = ip+1;
       end
     end
     %%% Laplace approximation to the marginal log density: 
     md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
-	- DsgeLikelihood(xparam1,gend,data);
+    - DsgeLikelihood(xparam1,gend,data);
     oo_.MarginalDensity.LaplaceApproximation = md_Laplace;    
     disp(' ')
     disp(sprintf('Log data density [Laplace approximation] is %f.',md_Laplace))
@@ -382,18 +389,18 @@ for iter1 = 1:length(options_.nobs)
       tstath(i) = abs(xparam1(i))/stdh(i);
     end
     tit1 = sprintf('%10s %10s %7s %6s\n',' ', ...
-		   'Estimate','s.d.','t-stat');
+           'Estimate','s.d.','t-stat');
     if np
       ip = nvx+nvn+ncx+ncn+1;
       disp('parameters')
       disp(tit1)
       for i=1:np
-    	disp(sprintf('%12s %8.4f %7.4f %7.4f', ...
-		     deblank(estim_params_.param_names(i,:)), ...
-		     xparam1(ip),stdh(ip),tstath(ip)));
-	eval(['oo_.mle_mode.parameters.' deblank(estim_params_.param_names(i,:)) ' = xparam1(ip);']);
-	eval(['oo_.mle_std.parameters.' deblank(estim_params_.param_names(i,:)) ' = stdh(ip);']); 
-      	ip = ip+1;
+        disp(sprintf('%12s %8.4f %7.4f %7.4f', ...
+             deblank(estim_params_.param_names(i,:)), ...
+             xparam1(ip),stdh(ip),tstath(ip)));
+    eval(['oo_.mle_mode.parameters.' deblank(estim_params_.param_names(i,:)) ' = xparam1(ip);']);
+    eval(['oo_.mle_std.parameters.' deblank(estim_params_.param_names(i,:)) ' = stdh(ip);']); 
+        ip = ip+1;
       end
     end
     if nvx
@@ -401,14 +408,14 @@ for iter1 = 1:length(options_.nobs)
       disp('standard deviation of shocks')
       disp(tit1)
       for i=1:nvx
-	k = estim_params_.var_exo(i,1);
-      	disp(sprintf('%12s %8.4f %7.4f %7.4f', ...
-		     deblank(lgx_(k,:)),xparam1(ip), ...
-		     stdh(ip),tstath(ip)));
-      	Sigma_e_(k,k) = xparam1(ip)*xparam1(ip);
-	eval(['oo_.mle_mode.shocks_std.' deblank(lgx_(k,:)) ' = xparam1(ip);']);
-	eval(['oo_.mle_std.shocks_std.' deblank(lgx_(k,:)) ' = stdh(ip);']); 
-	ip = ip+1;
+    k = estim_params_.var_exo(i,1);
+        disp(sprintf('%12s %8.4f %7.4f %7.4f', ...
+             deblank(lgx_(k,:)),xparam1(ip), ...
+             stdh(ip),tstath(ip)));
+        Sigma_e_(k,k) = xparam1(ip)*xparam1(ip);
+    eval(['oo_.mle_mode.shocks_std.' deblank(lgx_(k,:)) ' = xparam1(ip);']);
+    eval(['oo_.mle_std.shocks_std.' deblank(lgx_(k,:)) ' = stdh(ip);']); 
+    ip = ip+1;
       end
     end
     if nvn
@@ -416,13 +423,13 @@ for iter1 = 1:length(options_.nobs)
       disp(tit1)
       ip = nvx+1;
       for i=1:nvn
-	disp(sprintf('%12s %8.4f %7.4f %7.4f', ...
-		     deblank(options_.varobs(estim_params_.var_endo(i,1),: ...
-					     )), ...
-		     xparam1(ip),stdh(ip),tstath(ip)))
-	eval(['oo_.mle_mode.measurement_errors_std.' deblank(options_.varobs(estim_params_.var_endo(i,1),:)) ' = xparam1(ip);']);
-	eval(['oo_.mle_std.measurement_errors_std.' deblank(options_.varobs(estim_params_.var_endo(i,1),:)) ' = stdh(ip);']);      
-	ip = ip+1;
+    disp(sprintf('%12s %8.4f %7.4f %7.4f', ...
+             deblank(options_.varobs(estim_params_.var_endo(i,1),: ...
+                         )), ...
+             xparam1(ip),stdh(ip),tstath(ip)))
+    eval(['oo_.mle_mode.measurement_errors_std.' deblank(options_.varobs(estim_params_.var_endo(i,1),:)) ' = xparam1(ip);']);
+    eval(['oo_.mle_std.measurement_errors_std.' deblank(options_.varobs(estim_params_.var_endo(i,1),:)) ' = stdh(ip);']);      
+    ip = ip+1;
       end
     end
     if ncx
@@ -430,16 +437,16 @@ for iter1 = 1:length(options_.nobs)
       disp(tit1)
       ip = nvx+nvn+1;
       for i=1:ncx
-      	k1 = estim_params_.corrx(i,1);
-      	k2 = estim_params_.corrx(i,2);
-      	name = [deblank(lgx_(k1,:)) ',' deblank(lgx_(k2,:))];
-      	disp(sprintf('%12s %8.4f %7.4f %7.4f', name, ...
-		     xparam1(ip),stdh(ip),tstath(ip)));
-      	Sigma_e_(k1,k2) = xparam1(ip)*sqrt(Sigma_e_(k1,k1)*Sigma_e_(k2,k2));
-      	Sigma_e_(k2,k1) = Sigma_e_(k1,k2);
-	eval(['oo_.mle_mode.shocks_corr.' deblank(lgx_(k1,:)) '_' deblank(lgx_(k2,:)) ' = xparam1(ip);']);
-	eval(['oo_.mle_std.shocks_corr.' deblank(lgx_(k1,:)) '_' deblank(lgx_(k2,:)) ' = stdh(ip);']);      
-      	ip = ip+1;
+        k1 = estim_params_.corrx(i,1);
+        k2 = estim_params_.corrx(i,2);
+        name = [deblank(lgx_(k1,:)) ',' deblank(lgx_(k2,:))];
+        disp(sprintf('%12s %8.4f %7.4f %7.4f', name, ...
+             xparam1(ip),stdh(ip),tstath(ip)));
+        Sigma_e_(k1,k2) = xparam1(ip)*sqrt(Sigma_e_(k1,k1)*Sigma_e_(k2,k2));
+        Sigma_e_(k2,k1) = Sigma_e_(k1,k2);
+    eval(['oo_.mle_mode.shocks_corr.' deblank(lgx_(k1,:)) '_' deblank(lgx_(k2,:)) ' = xparam1(ip);']);
+    eval(['oo_.mle_std.shocks_corr.' deblank(lgx_(k1,:)) '_' deblank(lgx_(k2,:)) ' = stdh(ip);']);      
+        ip = ip+1;
       end
     end
     if ncn
@@ -447,14 +454,14 @@ for iter1 = 1:length(options_.nobs)
       disp(tit1)
       ip = nvx+nvn+ncx+1;
       for i=1:ncn
-	k1 = estim_params_.corrn(i,1);
-	k2 = estim_params_.corrn(i,2);
-	name = [deblank(lgy_(k1,:)) ',' deblank(lgy_(k2,:))];
-	disp(sprintf('%12s %8.4f %7.4f %7.4f', name, ...
-		     xparam1(ip),stdh(ip),tstath(ip)));
-	eval(['oo_.mle_mode.measurement_error_corr.' deblank(lgy_(k1,:)) '_' deblank(lgy_(k2,:)) ' = xparam1(ip);']);
-	eval(['oo_.mle_std.measurement_error_corr.' deblank(lgy_(k1,:)) '_' deblank(lgy_(k2,:)) ' = stdh(ip);']);      
-	ip = ip+1;
+    k1 = estim_params_.corrn(i,1);
+    k2 = estim_params_.corrn(i,2);
+    name = [deblank(lgy_(k1,:)) ',' deblank(lgy_(k2,:))];
+    disp(sprintf('%12s %8.4f %7.4f %7.4f', name, ...
+             xparam1(ip),stdh(ip),tstath(ip)));
+    eval(['oo_.mle_mode.measurement_error_corr.' deblank(lgy_(k1,:)) '_' deblank(lgy_(k2,:)) ' = xparam1(ip);']);
+    eval(['oo_.mle_std.measurement_error_corr.' deblank(lgy_(k1,:)) '_' deblank(lgy_(k2,:)) ' = stdh(ip);']);      
+    ip = ip+1;
       end
     end
   end
@@ -477,14 +484,14 @@ for iter1 = 1:length(options_.nobs)
       fprintf(fidTeX,'\\hline \\\\ \n');
       ip = nvx+nvn+ncx+ncn+1;
       for i=1:np
-	fprintf(fidTeX,'$%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n',...
-		deblank(estim_params_.tex(i,:)),...
-		deblank(pnames(bayestopt_.pshape(ip)+1,:)),...
-		bayestopt_.pmean(ip),...
-		estim_params_.param_vals(i,6),...
-		xparam1(ip),...
-		stdh(ip));
-	ip = ip + 1;    
+    fprintf(fidTeX,'$%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n',...
+        deblank(estim_params_.tex(i,:)),...
+        deblank(pnames(bayestopt_.pshape(ip)+1,:)),...
+        bayestopt_.pmean(ip),...
+        estim_params_.param_vals(i,6),...
+        xparam1(ip),...
+        stdh(ip));
+    ip = ip + 1;    
       end
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -512,15 +519,15 @@ for iter1 = 1:length(options_.nobs)
       fprintf(fidTeX,'\\hline \\\\ \n');
       ip = 1;
       for i=1:nvx
-	k = estim_params_.var_exo(i,1);
-	fprintf(fidTeX,[ '$%s$ & %4s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n'],...
-		deblank(lgx_TeX_(k,:)),...
-		deblank(pnames(bayestopt_.pshape(ip)+1,:)),...
-		bayestopt_.pmean(ip),...
-		estim_params_.var_exo(i,7),...
-		xparam1(ip), ...
-		stdh(ip)); 
-	ip = ip+1;
+    k = estim_params_.var_exo(i,1);
+    fprintf(fidTeX,[ '$%s$ & %4s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n'],...
+        deblank(lgx_TeX_(k,:)),...
+        deblank(pnames(bayestopt_.pshape(ip)+1,:)),...
+        bayestopt_.pmean(ip),...
+        estim_params_.var_exo(i,7),...
+        xparam1(ip), ...
+        stdh(ip)); 
+    ip = ip+1;
       end
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -547,14 +554,14 @@ for iter1 = 1:length(options_.nobs)
       fprintf(fidTeX,'\\hline \\\\ \n');
       ip = nvx+1;
       for i=1:nvn
-	fprintf(fidTeX,'$%s$ & %4s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n',...
-		deblank(options_.varobs_TeX(estim_params_.var_endo(i,1),:)), ...
-		deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...        
-		bayestopt_.pmean(ip), ...
-		estim_params_.var_endo(i,7),...        
-		xparam1(ip),...
-		stdh(ip)); 
-	ip = ip+1;
+    fprintf(fidTeX,'$%s$ & %4s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n',...
+        deblank(options_.varobs_TeX(estim_params_.var_endo(i,1),:)), ...
+        deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...        
+        bayestopt_.pmean(ip), ...
+        estim_params_.var_endo(i,7),...        
+        xparam1(ip),...
+        stdh(ip)); 
+    ip = ip+1;
       end
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -580,16 +587,16 @@ for iter1 = 1:length(options_.nobs)
       fprintf(fidTeX,'\\hline \\\\ \n');
       ip = nvx+nvn+1;
       for i=1:ncx
-	k1 = estim_params_.corrx(i,1);
-	k2 = estim_params_.corrx(i,2);
-	fprintf(fidTeX,[ '$%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n'],...
-		[deblank(lgx_TeX_(k1,:)) ',' deblank(lgx_TeX_(k2,:))], ...
-		deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
-		bayestopt_.pmean(ip), ...
-		estim_params_.corrx(i,8), ...
-		xparam1(ip), ...
-		stdh(ip));
-	ip = ip+1;
+    k1 = estim_params_.corrx(i,1);
+    k2 = estim_params_.corrx(i,2);
+    fprintf(fidTeX,[ '$%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n'],...
+        [deblank(lgx_TeX_(k1,:)) ',' deblank(lgx_TeX_(k2,:))], ...
+        deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
+        bayestopt_.pmean(ip), ...
+        estim_params_.corrx(i,8), ...
+        xparam1(ip), ...
+        stdh(ip));
+    ip = ip+1;
       end
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -615,16 +622,16 @@ for iter1 = 1:length(options_.nobs)
       fprintf(fidTeX,'\\hline \\\\ \n');
       ip = nvx+nvn+ncx+1;
       for i=1:ncn
-	k1 = estim_params_.corrn(i,1);
-	k2 = estim_params_.corrn(i,2);
-	fprintf(fidTeX,'$%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n',...
-		[deblank(lgy_(k1,:)) ',' deblank(lgy_(k2,:))], ...
-		pnames(bayestopt_.pshape(ip)+1,:), ...
-		bayestopt_.pmean(ip), ...
-		estim_params_.corrn(i,8), ...
-		xparam1(ip), ...
-		stdh(ip));
-	ip = ip+1;
+    k1 = estim_params_.corrn(i,1);
+    k2 = estim_params_.corrn(i,2);
+    fprintf(fidTeX,'$%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n',...
+        [deblank(lgy_(k1,:)) ',' deblank(lgy_(k2,:))], ...
+        pnames(bayestopt_.pshape(ip)+1,:), ...
+        bayestopt_.pmean(ip), ...
+        estim_params_.corrn(i,8), ...
+        xparam1(ip), ...
+        stdh(ip));
+    ip = ip+1;
       end
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -650,9 +657,9 @@ for iter1 = 1:length(options_.nobs)
   end
 
   if (all(bayestopt_.pshape == 0) ...                                  % ML estimation 
-	| (options_.mh_replic == 0 & options_.load_mh_file == 0) ...   % no metropolis 
-	| ~options_.smoother) ...                                      % ~smoother
-	& options_.nobs(1) == options_.nobs(end)                       % no recursive estimation
+    | (options_.mh_replic == 0 & options_.load_mh_file == 0) ...   % no metropolis 
+    | ~options_.smoother) ...                                      % ~smoother
+    & options_.nobs(1) == options_.nobs(end)                       % no recursive estimation
 %    options_.lik_algo = 2;
     [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam1,gend,data);
     for i=1:endo_nbr
@@ -671,437 +678,437 @@ for iter1 = 1:length(options_.nobs)
       NAMES = [];
       if options_.TeX, TeXNAMES = [], end
       for i=1:exo_nbr
-	subplot(nr,nc,i);
-	plot(1:gend,innov(i,:),'-k','linewidth',1)
-	hold on
-	plot([1 gend],[0 0],'-r','linewidth',.5)
-	hold off
-	xlim([1 gend])
-	name    = deblank(lgx_(i,:));
-	NAMES   = strvcat(NAMES,name);
-	if ~isempty(options_.XTick)
-	  set(gca,'XTick',options_.XTick)
-	  set(gca,'XTickLabel',options_.XTickLabel)
-	end
-	if options_.TeX
-	  texname = lgx_TeX_(i,1);
-	  TeXNAMES   = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-	end
-	title(name,'Interpreter','none')
-	eval(['oo_.SmoothedShocks.' deblank(lgx_(i,:)) ' = innov(i,:)'';']);
+    subplot(nr,nc,i);
+    plot(1:gend,innov(i,:),'-k','linewidth',1)
+    hold on
+    plot([1 gend],[0 0],'-r','linewidth',.5)
+    hold off
+    xlim([1 gend])
+    name    = deblank(lgx_(i,:));
+    NAMES   = strvcat(NAMES,name);
+    if ~isempty(options_.XTick)
+      set(gca,'XTick',options_.XTick)
+      set(gca,'XTickLabel',options_.XTickLabel)
+    end
+    if options_.TeX
+      texname = lgx_TeX_(i,1);
+      TeXNAMES   = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+    end
+    title(name,'Interpreter','none')
+    eval(['oo_.SmoothedShocks.' deblank(lgx_(i,:)) ' = innov(i,:)'';']);
       end
       eval(['print -depsc2 ' fname_ '_SmoothedShocks' int2str(1)]);
       eval(['print -dpdf ' fname_ '_SmoothedShocks' int2str(1)]);
       saveas(hh,[fname_ '_SmoothedShocks' int2str(1) '.fig']);
       if options_.nograph, close(hh), end
       if options_.TeX
-	fprintf(fidTeX,'\\begin{figure}[H]\n');
-	for jj = 1:exo_nbr
-	  fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-	end    
-	fprintf(fidTeX,'\\centering \n');
-	fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',fname_,int2str(1));
-	fprintf(fidTeX,'\\caption{Smoothed shocks.}');
-	fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(1));
-	fprintf(fidTeX,'\\end{figure}\n');
-	fprintf(fidTeX,'\n');
-	fprintf(fidTeX,'%% End of TeX file.\n');
-	fclose(fidTeX);
+    fprintf(fidTeX,'\\begin{figure}[H]\n');
+    for jj = 1:exo_nbr
+      fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+    end    
+    fprintf(fidTeX,'\\centering \n');
+    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',fname_,int2str(1));
+    fprintf(fidTeX,'\\caption{Smoothed shocks.}');
+    fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(1));
+    fprintf(fidTeX,'\\end{figure}\n');
+    fprintf(fidTeX,'\n');
+    fprintf(fidTeX,'%% End of TeX file.\n');
+    fclose(fidTeX);
       end    
     else
       for plt = 1:nbplt-1
-	hh = figure('Name','Smoothed shocks');
-	set(0,'CurrentFigure',hh)
-	NAMES = [];
-	if options_.TeX, TeXNAMES = [], end
-	for i=1:nstar
-	  k = (plt-1)*nstar+i;
-	  subplot(nr,nc,i);
-	  plot([1 gend],[0 0],'-r','linewidth',.5)
-	  hold on
-	  plot(1:gend,innov(k,:),'-k','linewidth',1)
-	  hold off
-	  name = deblank(lgx_(k,:));
-	  NAMES = strvcat(NAMES,name);
-	  if ~isempty(options_.XTick)
-	    set(gca,'XTick',options_.XTick)
-	    set(gca,'XTickLabel',options_.XTickLabel)
-	  end
-	  xlim([1 gend])
-	  if options_.TeX
-	    texname = lgx_TeX_(k,:);
-	    TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-	  end    
-	  title(name,'Interpreter','none')
-	  eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
-	end
-	eval(['print -depsc2 ' fname_ '_SmoothedShocks' int2str(plt)]);
-	eval(['print -dpdf ' fname_ '_SmoothedShocks' int2str(plt)]);
-	saveas(hh,[fname_ '_SmoothedShocks' int2str(plt) '.fig']);
-	if options_.nograph, close(hh), end
-	if options_.TeX
-	  fprintf(fidTeX,'\\begin{figure}[H]\n');
-	  for jj = 1:nstar
-	    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-	  end    
-	  fprintf(fidTeX,'\\centering \n');
-	  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',fname_,int2str(plt));
-	  fprintf(fidTeX,'\\caption{Smoothed shocks.}');
-	  fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(plt));
-	  fprintf(fidTeX,'\\end{figure}\n');
-	  fprintf(fidTeX,'\n');
-	end    
+    hh = figure('Name','Smoothed shocks');
+    set(0,'CurrentFigure',hh)
+    NAMES = [];
+    if options_.TeX, TeXNAMES = [], end
+    for i=1:nstar
+      k = (plt-1)*nstar+i;
+      subplot(nr,nc,i);
+      plot([1 gend],[0 0],'-r','linewidth',.5)
+      hold on
+      plot(1:gend,innov(k,:),'-k','linewidth',1)
+      hold off
+      name = deblank(lgx_(k,:));
+      NAMES = strvcat(NAMES,name);
+      if ~isempty(options_.XTick)
+        set(gca,'XTick',options_.XTick)
+        set(gca,'XTickLabel',options_.XTickLabel)
+      end
+      xlim([1 gend])
+      if options_.TeX
+        texname = lgx_TeX_(k,:);
+        TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+      end    
+      title(name,'Interpreter','none')
+      eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
+    end
+    eval(['print -depsc2 ' fname_ '_SmoothedShocks' int2str(plt)]);
+    eval(['print -dpdf ' fname_ '_SmoothedShocks' int2str(plt)]);
+    saveas(hh,[fname_ '_SmoothedShocks' int2str(plt) '.fig']);
+    if options_.nograph, close(hh), end
+    if options_.TeX
+      fprintf(fidTeX,'\\begin{figure}[H]\n');
+      for jj = 1:nstar
+        fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+      end    
+      fprintf(fidTeX,'\\centering \n');
+      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',fname_,int2str(plt));
+      fprintf(fidTeX,'\\caption{Smoothed shocks.}');
+      fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(plt));
+      fprintf(fidTeX,'\\end{figure}\n');
+      fprintf(fidTeX,'\n');
+    end    
       end
       hh = figure('Name','Smoothed shocks');
       set(0,'CurrentFigure',hh)
       NAMES = [];
       if options_.TeX, TeXNAMES = [], end
       for i=1:exo_nbr-(nbplt-1)*nstar
-	k = (nbplt-1)*nstar+i;
-	if lr ~= 0
-	  subplot(lr,lc,i);
-	else
-	  subplot(nr,nc,i);
-	end    
-	plot([1 gend],[0 0],'-r','linewidth',0.5)
-	hold on
-	plot(1:gend,innov(k,:),'-k','linewidth',1)
-	hold off
-	name     = deblank(lgx_(k,:));
-	NAMES    = strvcat(NAMES,name);
-	if ~isempty(options_.XTick)
-	  set(gca,'XTick',options_.XTick)
-	  set(gca,'XTickLabel',options_.XTickLabel)
-	end
-	xlim([1 gend])
-	if options_.TeX
-	  texname  = lgx_TeX_(k,:);
-	  TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-	end
-	title(name,'Interpreter','none')
-	eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
+    k = (nbplt-1)*nstar+i;
+    if lr ~= 0
+      subplot(lr,lc,i);
+    else
+      subplot(nr,nc,i);
+    end    
+    plot([1 gend],[0 0],'-r','linewidth',0.5)
+    hold on
+    plot(1:gend,innov(k,:),'-k','linewidth',1)
+    hold off
+    name     = deblank(lgx_(k,:));
+    NAMES    = strvcat(NAMES,name);
+    if ~isempty(options_.XTick)
+      set(gca,'XTick',options_.XTick)
+      set(gca,'XTickLabel',options_.XTickLabel)
+    end
+    xlim([1 gend])
+    if options_.TeX
+      texname  = lgx_TeX_(k,:);
+      TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+    end
+    title(name,'Interpreter','none')
+    eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
       end
       eval(['print -depsc2 ' fname_ '_SmoothedShocks' int2str(nbplt)]);
       eval(['print -dpdf ' fname_ '_SmoothedShocks' int2str(nbplt)]);
       saveas(hh,[fname_ '_SmoothedShocks' int2str(nbplt) '.fig']);
       if options_.nograph, close(hh), end
       if options_.TeX
-	fprintf(fidTeX,'\\begin{figure}[H]\n');
-	for jj = 1:size(NAMES,1);
-	  fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-	end    
-	fprintf(fidTeX,'\\centering \n');
-	fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',fname_,int2str(nbplt));
-	fprintf(fidTeX,'\\caption{Smoothed shocks.}');
-	fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(nbplt));
-	fprintf(fidTeX,'\\end{figure}\n');
-	fprintf(fidTeX,'\n');
-	fprintf(fidTeX,'%% End of TeX file.\n');
-	fclose(fidTeX);
+    fprintf(fidTeX,'\\begin{figure}[H]\n');
+    for jj = 1:size(NAMES,1);
+      fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+    end    
+    fprintf(fidTeX,'\\centering \n');
+    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',fname_,int2str(nbplt));
+    fprintf(fidTeX,'\\caption{Smoothed shocks.}');
+    fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(nbplt));
+    fprintf(fidTeX,'\\end{figure}\n');
+    fprintf(fidTeX,'\n');
+    fprintf(fidTeX,'%% End of TeX file.\n');
+    fclose(fidTeX);
       end    
     end
     %%
-    %%	Smooth observational errors...
+    %%  Smooth observational errors...
     %%
     yf = zeros(gend,n_varobs);
     if options_.prefilter == 1
       yf = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
     elseif options_.loglinear == 1
       yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+...
-	   trend_coeff*[1:gend];
+       trend_coeff*[1:gend];
     else
       yf = atT(bayestopt_.mf,:)+repmat(ys(bayestopt_.mfys),1,gend)+...
-	   trend_coeff*[1:gend];
+       trend_coeff*[1:gend];
     end
     if nvn
       number_of_plots_to_draw = 0;
       index = [];
       for i=1:n_varobs
-	if max(abs(measurement_error(10:end))) > 0.000000001
-	  number_of_plots_to_draw = number_of_plots_to_draw + 1;
-	  index = cat(1,index,i);
-	end
-	eval(['oo_.SmoothedMeasurementErrors.' deblank(options_.varobs(i,:)) ...
-	      ' = measurement_error(i,:)'';']);
+    if max(abs(measurement_error(10:end))) > 0.000000001
+      number_of_plots_to_draw = number_of_plots_to_draw + 1;
+      index = cat(1,index,i);
+    end
+    eval(['oo_.SmoothedMeasurementErrors.' deblank(options_.varobs(i,:)) ...
+          ' = measurement_error(i,:)'';']);
       end
       [nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
       if options_.TeX
-	fidTeX = fopen([fname_ '_SmoothedObservationErrors.TeX'],'w');
-	fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
-	fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-	fprintf(fidTeX,' \n');
+    fidTeX = fopen([fname_ '_SmoothedObservationErrors.TeX'],'w');
+    fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
+    fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
+    fprintf(fidTeX,' \n');
       end    
       if nbplt == 1
-	hh = figure('Name','Smoothed observation errors');
-	set(0,'CurrentFigure',hh)
-	NAMES = [];
-	if options_.TeX, TeXNAMES = [], end
-	for i=1:number_of_plots_to_draw
-	  subplot(nr,nc,i);
-	  plot(1:gend,measurement_error(index(i),:),'-k','linewidth',1)
-	  hold on
-	  plot([1 gend],[0 0],'-r','linewidth',.5)
-	  hold off
-	  name    = deblank(options_.varobs(index(i),:));
-	  NAMES   = strvcat(NAMES,name);
-	  if ~isempty(options_.XTick)
-	    set(gca,'XTick',options_.XTick)
-	    set(gca,'XTickLabel',options_.XTickLabel)
-	  end
-	  if options_.TeX
-	    texname = options_.varobs_TeX(index(i),:);
-	    TeXNAMES   = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-	  end
-	  title(name,'Interpreter','none')
-	end
-	eval(['print -depsc2 ' fname_ '_SmoothedObservationErrors' int2str(1)]);
-	eval(['print -dpdf ' fname_ '_SmoothedObservationErrors' int2str(1)]);
-	saveas(hh,[fname_ '_SmoothedObservationErrors' int2str(1) '.fig']);
-	if options_.nograph, close(hh), end
-	if options_.TeX
-	  fprintf(fidTeX,'\\begin{figure}[H]\n');
-	  for jj = 1:number_of_plots_to_draw
-	    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-	  end    
-	  fprintf(fidTeX,'\\centering \n');
-	  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',fname_,int2str(1));
-	  fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
-	  fprintf(fidTeX,'\\label{Fig:SmoothedObservationErrors:%s',int2str(1));
-	  fprintf(fidTeX,'\\end{figure}\n');
-	  fprintf(fidTeX,'\n');
-	  fprintf(fidTeX,'%% End of TeX file.\n');
-	  fclose(fidTeX);
-	end    
-      else
-	for plt = 1:nbplt-1
-	  hh = figure('Name','Smoothed observation errors');
-	  set(0,'CurrentFigure',hh)
-	  NAMES = [];
-	  if options_.TeX, TeXNAMES = [], end
-	  for i=1:nstar
-	    k = (plt-1)*nstar+i;
-	    subplot(nr,nc,i);
-	    plot([1 gend],[0 0],'-r','linewidth',.5)
-	    hold on
-	    plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
-	    hold off
-	    name = deblank(options_.varobs(index(k),:));
-	    NAMES = strvcat(NAMES,name);
-	    if ~isempty(options_.XTick)
-	      set(gca,'XTick',options_.XTick)
-	      set(gca,'XTickLabel',options_.XTickLabel)
-	    end
-	    if options_.TeX
-	      texname = options_.varobs_TeX(k,:);
-	      TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-	    end    
-	    title(name,'Interpreter','none')
-	  end
-	  eval(['print -depsc2 ' fname_ '_SmoothedObservationErrors' int2str(plt)]);
-	  eval(['print -dpdf ' fname_ '_SmoothedObservationErrors' int2str(plt)]);
-	  saveas(hh,[fname_ '_SmoothedObservationErrors' int2str(plt) '.fig']);
-	  if options_.nograph, close(hh), end
-	  if options_.TeX
-	    fprintf(fidTeX,'\\begin{figure}[H]\n');
-	    for jj = 1:nstar
-	      fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-	    end    
-	    fprintf(fidTeX,'\\centering \n');
-	    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',fname_,int2str(plt));
-	    fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
-	    fprintf(fidTeX,'\\label{Fig:SmoothedObservationErrors:%s}\n',int2str(plt));
-	    fprintf(fidTeX,'\\end{figure}\n');
-	    fprintf(fidTeX,'\n');
-	  end    
-	end
-	hh = figure('Name','Smoothed observation errors');
-	set(0,'CurrentFigure',hh)
-	NAMES = [];
-	if options_.TeX, TeXNAMES = [], end
-	for i=1:number_of_plots_to_draw-(nbplt-1)*nstar
-	  k = (nbplt-1)*nstar+i;
-	  if lr ~= 0
-	    subplot(lr,lc,i);
-	  else
-	    subplot(nr,nc,i);
-	  end    
-	  plot([1 gend],[0 0],'-r','linewidth',0.5)
-	  hold on
-	  plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
-	  hold off
-	  name     = deblank(options_.varobs(index(k),:));
-	  NAMES    = strvcat(NAMES,name);
-	  if ~isempty(options_.XTick)
-	    set(gca,'XTick',options_.XTick)
-	    set(gca,'XTickLabel',options_.XTickLabel)
-	  end
-	  if options_.TeX
-	    texname  = options_.varobs_TeX(index(k),:);
-	    TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-	  end
-	  title(name,'Interpreter','none');
-	end
-	eval(['print -depsc2 ' fname_ '_SmoothedObservationErrors' int2str(nbplt)]);
-	eval(['print -dpdf ' fname_ '_SmoothedObservationErrors' int2str(nbplt)]);
-	saveas(hh,[fname_ '_SmoothedObservationErrors' int2str(nbplt) '.fig']);
-	if options_.nograph, close(hh), end
-	if options_.TeX
-	  fprintf(fidTeX,'\\begin{figure}[H]\n');
-	  for jj = 1:size(NAMES,1);
-	    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-	  end    
-	  fprintf(fidTeX,'\\centering \n');
-	  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservedErrors%s}\n',fname_,int2str(nbplt));
-	  fprintf(fidTeX,'\\caption{Smoothed observed errors.}');
-	  fprintf(fidTeX,'\\label{Fig:SmoothedObservedErrors:%s}\n',int2str(nbplt));
-	  fprintf(fidTeX,'\\end{figure}\n');
-	  fprintf(fidTeX,'\n');
-	  fprintf(fidTeX,'%% End of TeX file.\n');
-	  fclose(fidTeX);
-	end    
+    hh = figure('Name','Smoothed observation errors');
+    set(0,'CurrentFigure',hh)
+    NAMES = [];
+    if options_.TeX, TeXNAMES = [], end
+    for i=1:number_of_plots_to_draw
+      subplot(nr,nc,i);
+      plot(1:gend,measurement_error(index(i),:),'-k','linewidth',1)
+      hold on
+      plot([1 gend],[0 0],'-r','linewidth',.5)
+      hold off
+      name    = deblank(options_.varobs(index(i),:));
+      NAMES   = strvcat(NAMES,name);
+      if ~isempty(options_.XTick)
+        set(gca,'XTick',options_.XTick)
+        set(gca,'XTickLabel',options_.XTickLabel)
       end
-    end	
+      if options_.TeX
+        texname = options_.varobs_TeX(index(i),:);
+        TeXNAMES   = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+      end
+      title(name,'Interpreter','none')
+    end
+    eval(['print -depsc2 ' fname_ '_SmoothedObservationErrors' int2str(1)]);
+    eval(['print -dpdf ' fname_ '_SmoothedObservationErrors' int2str(1)]);
+    saveas(hh,[fname_ '_SmoothedObservationErrors' int2str(1) '.fig']);
+    if options_.nograph, close(hh), end
+    if options_.TeX
+      fprintf(fidTeX,'\\begin{figure}[H]\n');
+      for jj = 1:number_of_plots_to_draw
+        fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+      end    
+      fprintf(fidTeX,'\\centering \n');
+      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',fname_,int2str(1));
+      fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
+      fprintf(fidTeX,'\\label{Fig:SmoothedObservationErrors:%s',int2str(1));
+      fprintf(fidTeX,'\\end{figure}\n');
+      fprintf(fidTeX,'\n');
+      fprintf(fidTeX,'%% End of TeX file.\n');
+      fclose(fidTeX);
+    end    
+      else
+    for plt = 1:nbplt-1
+      hh = figure('Name','Smoothed observation errors');
+      set(0,'CurrentFigure',hh)
+      NAMES = [];
+      if options_.TeX, TeXNAMES = [], end
+      for i=1:nstar
+        k = (plt-1)*nstar+i;
+        subplot(nr,nc,i);
+        plot([1 gend],[0 0],'-r','linewidth',.5)
+        hold on
+        plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
+        hold off
+        name = deblank(options_.varobs(index(k),:));
+        NAMES = strvcat(NAMES,name);
+        if ~isempty(options_.XTick)
+          set(gca,'XTick',options_.XTick)
+          set(gca,'XTickLabel',options_.XTickLabel)
+        end
+        if options_.TeX
+          texname = options_.varobs_TeX(k,:);
+          TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+        end    
+        title(name,'Interpreter','none')
+      end
+      eval(['print -depsc2 ' fname_ '_SmoothedObservationErrors' int2str(plt)]);
+      eval(['print -dpdf ' fname_ '_SmoothedObservationErrors' int2str(plt)]);
+      saveas(hh,[fname_ '_SmoothedObservationErrors' int2str(plt) '.fig']);
+      if options_.nograph, close(hh), end
+      if options_.TeX
+        fprintf(fidTeX,'\\begin{figure}[H]\n');
+        for jj = 1:nstar
+          fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+        end    
+        fprintf(fidTeX,'\\centering \n');
+        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',fname_,int2str(plt));
+        fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
+        fprintf(fidTeX,'\\label{Fig:SmoothedObservationErrors:%s}\n',int2str(plt));
+        fprintf(fidTeX,'\\end{figure}\n');
+        fprintf(fidTeX,'\n');
+      end    
+    end
+    hh = figure('Name','Smoothed observation errors');
+    set(0,'CurrentFigure',hh)
+    NAMES = [];
+    if options_.TeX, TeXNAMES = [], end
+    for i=1:number_of_plots_to_draw-(nbplt-1)*nstar
+      k = (nbplt-1)*nstar+i;
+      if lr ~= 0
+        subplot(lr,lc,i);
+      else
+        subplot(nr,nc,i);
+      end    
+      plot([1 gend],[0 0],'-r','linewidth',0.5)
+      hold on
+      plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
+      hold off
+      name     = deblank(options_.varobs(index(k),:));
+      NAMES    = strvcat(NAMES,name);
+      if ~isempty(options_.XTick)
+        set(gca,'XTick',options_.XTick)
+        set(gca,'XTickLabel',options_.XTickLabel)
+      end
+      if options_.TeX
+        texname  = options_.varobs_TeX(index(k),:);
+        TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+      end
+      title(name,'Interpreter','none');
+    end
+    eval(['print -depsc2 ' fname_ '_SmoothedObservationErrors' int2str(nbplt)]);
+    eval(['print -dpdf ' fname_ '_SmoothedObservationErrors' int2str(nbplt)]);
+    saveas(hh,[fname_ '_SmoothedObservationErrors' int2str(nbplt) '.fig']);
+    if options_.nograph, close(hh), end
+    if options_.TeX
+      fprintf(fidTeX,'\\begin{figure}[H]\n');
+      for jj = 1:size(NAMES,1);
+        fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+      end    
+      fprintf(fidTeX,'\\centering \n');
+      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservedErrors%s}\n',fname_,int2str(nbplt));
+      fprintf(fidTeX,'\\caption{Smoothed observed errors.}');
+      fprintf(fidTeX,'\\label{Fig:SmoothedObservedErrors:%s}\n',int2str(nbplt));
+      fprintf(fidTeX,'\\end{figure}\n');
+      fprintf(fidTeX,'\n');
+      fprintf(fidTeX,'%% End of TeX file.\n');
+      fclose(fidTeX);
+    end    
+      end
+    end 
     %%
-    %%	Historical and smoothed variabes
+    %%  Historical and smoothed variabes
     %%
     if nvn 
       [nbplt,nr,nc,lr,lc,nstar] = pltorg(n_varobs);
       if options_.TeX
-	fidTeX = fopen([fname_ '_HistoricalAndSmoothedVariables.TeX'],'w');
-	fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
-	fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-	fprintf(fidTeX,' \n');
+    fidTeX = fopen([fname_ '_HistoricalAndSmoothedVariables.TeX'],'w');
+    fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
+    fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
+    fprintf(fidTeX,' \n');
       end    
       if nbplt == 1
-	hh = figure('Name','Historical and smoothed variables');
-	NAMES = [];
-	if options_.TeX, TeXNAMES = [], end
-	for i=1:n_varobs
-	  subplot(nr,nc,i);
-	  plot(1:gend,yf(i,:),'-r','linewidth',1)
-	  hold on
-	  plot(1:gend,rawdata(options_.first_obs+(0:gend-1),i),'-k','linewidth',1)
-	  hold off
-	  name    = deblank(options_.varobs(i,:));
-	  NAMES   = strvcat(NAMES,name);
-	  if ~isempty(options_.XTick)
-	    set(gca,'XTick',options_.XTick)
-	    set(gca,'XTickLabel',options_.XTickLabel)
-	  end
-	  xlim([1 gend])
-	  if options_.TeX
-	    texname = options_.varobs_TeX(i,1);
-	    TeXNAMES   = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-	  end
-	  title(name,'Interpreter','none')
-	end
-	eval(['print -depsc2 ' fname_ '_HistoricalAndSmoothedVariables' int2str(1)]);
-	eval(['print -dpdf ' fname_ '_HistoricalAndSmoothedVariables' int2str(1)]);
-	saveas(hh,[fname_ '_HistoricalAndSmoothedVariables' int2str(1) '.fig']);
-	if options_.nograph, close(hh), end
-	if options_.TeX
-	  fprintf(fidTeX,'\\begin{figure}[H]\n');
-	  for jj = 1:n_varobs
-	    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-	  end    
-	  fprintf(fidTeX,'\\centering \n');
-	  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',fname_,int2str(1));
-	  fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
-	  fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(1));
-	  fprintf(fidTeX,'\\end{figure}\n');
-	  fprintf(fidTeX,'\n');
-	  fprintf(fidTeX,'%% End of TeX file.\n');
-	  fclose(fidTeX);
-	end    
+    hh = figure('Name','Historical and smoothed variables');
+    NAMES = [];
+    if options_.TeX, TeXNAMES = [], end
+    for i=1:n_varobs
+      subplot(nr,nc,i);
+      plot(1:gend,yf(i,:),'-r','linewidth',1)
+      hold on
+      plot(1:gend,rawdata(options_.first_obs+(0:gend-1),i),'-k','linewidth',1)
+      hold off
+      name    = deblank(options_.varobs(i,:));
+      NAMES   = strvcat(NAMES,name);
+      if ~isempty(options_.XTick)
+        set(gca,'XTick',options_.XTick)
+        set(gca,'XTickLabel',options_.XTickLabel)
+      end
+      xlim([1 gend])
+      if options_.TeX
+        texname = options_.varobs_TeX(i,1);
+        TeXNAMES   = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+      end
+      title(name,'Interpreter','none')
+    end
+    eval(['print -depsc2 ' fname_ '_HistoricalAndSmoothedVariables' int2str(1)]);
+    eval(['print -dpdf ' fname_ '_HistoricalAndSmoothedVariables' int2str(1)]);
+    saveas(hh,[fname_ '_HistoricalAndSmoothedVariables' int2str(1) '.fig']);
+    if options_.nograph, close(hh), end
+    if options_.TeX
+      fprintf(fidTeX,'\\begin{figure}[H]\n');
+      for jj = 1:n_varobs
+        fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+      end    
+      fprintf(fidTeX,'\\centering \n');
+      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',fname_,int2str(1));
+      fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
+      fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(1));
+      fprintf(fidTeX,'\\end{figure}\n');
+      fprintf(fidTeX,'\n');
+      fprintf(fidTeX,'%% End of TeX file.\n');
+      fclose(fidTeX);
+    end    
       else
-	for plt = 1:nbplt-1
-	  hh = figure('Name','Historical and smoothed variables');
-	  set(0,'CurrentFigure',hh)
-	  NAMES = [];
-	  if options_.TeX, TeXNAMES = [], end
-	  for i=1:nstar
-	    k = (plt-1)*nstar+i;
-	    subplot(nr,nc,i);
-	    plot(1:gend,yf(k,:),'-r','linewidth',1)
-	    hold on
-	    plot(1:gend,rawdata(options_.first_obs+(0:gend-1),k),'-k','linewidth',1)
-	    hold off
-	    name = deblank(options_.varobs(k,:));
-	    NAMES = strvcat(NAMES,name);
-	    if ~isempty(options_.XTick)
-	      set(gca,'XTick',options_.XTick)
-	      set(gca,'XTickLabel',options_.XTickLabel)
-	    end
-	    xlim([1 gend])
-	    if options_.TeX
-	      texname = options_.varobs_TeX(k,:);
-	      TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-	    end    
-	    title(name,'Interpreter','none')
-	  end
-	  eval(['print -depsc2 ' fname_ '_HistoricalAndSmoothedVariables' int2str(plt)]);
-	  eval(['print -dpdf ' fname_ '_HistoricalAndSmoothedVariables' int2str(plt)]);
-	  saveas(hh,[fname_ '_HistoricalAndSmoothedVariables' int2str(plt) '.fig']);
-	  if options_.nograph, close(hh), end
-	  if options_.TeX
-	    fprintf(fidTeX,'\\begin{figure}[H]\n');
-	    for jj = 1:nstar
-	      fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-	    end    
-	    fprintf(fidTeX,'\\centering \n');
-	    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',fname_,int2str(plt));
-	    fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
-	    fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(plt));
-	    fprintf(fidTeX,'\\end{figure}\n');
-	    fprintf(fidTeX,'\n');
-	  end    
-	end
-	hh = figure('Name','Historical and smoothed variables');
-	set(0,'CurrentFigure',hh)
-	NAMES = [];
-	if options_.TeX, TeXNAMES = [], end
-	for i=1:n_varobs-(nbplt-1)*nstar
-	  k = (nbplt-1)*nstar+i;
-	  if lr ~= 0
-	    subplot(lr,lc,i);
-	  else
-	    subplot(nr,nc,i);
-	  end    
-	  plot(1:gend,yf(k,:),'-r','linewidth',1)
-	  hold on
-	  plot(1:gend,rawdata(options_.first_obs+(0:gend-1),k),'-k','linewidth',1)
-	  hold off
-	  name = deblank(options_.varobs(k,:));
-	  NAMES    = strvcat(NAMES,name);
-	  if ~isempty(options_.XTick)
-	    set(gca,'XTick',options_.XTick)
-	    set(gca,'XTickLabel',options_.XTickLabel)
-	  end
-	  xlim([1 gend])
-	  if options_.TeX
-	    texname  = options_.varobs_TeX(k,:);
-	    TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-	  end
-	  title(name,'Interpreter','none');
-	end
-	eval(['print -depsc2 ' fname_ '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
-	eval(['print -dpdf ' fname_ '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
-	saveas(hh,[fname_ '_HistoricalAndSmoothedVariables' int2str(nbplt) '.fig']);
-	if options_.nograph, close(hh), end
-	if options_.TeX
-	  fprintf(fidTeX,'\\begin{figure}[H]\n');
-	  for jj = 1:size(NAMES,1);
-	    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-	  end    
-	  fprintf(fidTeX,'\\centering \n');
-	  fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',fname_,int2str(nbplt));
-	  fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
-	  fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(nbplt));
-	  fprintf(fidTeX,'\\end{figure}\n');
-	  fprintf(fidTeX,'\n');
-	  fprintf(fidTeX,'%% End of TeX file.\n');
-	  fclose(fidTeX);
-	end    
+    for plt = 1:nbplt-1
+      hh = figure('Name','Historical and smoothed variables');
+      set(0,'CurrentFigure',hh)
+      NAMES = [];
+      if options_.TeX, TeXNAMES = [], end
+      for i=1:nstar
+        k = (plt-1)*nstar+i;
+        subplot(nr,nc,i);
+        plot(1:gend,yf(k,:),'-r','linewidth',1)
+        hold on
+        plot(1:gend,rawdata(options_.first_obs+(0:gend-1),k),'-k','linewidth',1)
+        hold off
+        name = deblank(options_.varobs(k,:));
+        NAMES = strvcat(NAMES,name);
+        if ~isempty(options_.XTick)
+          set(gca,'XTick',options_.XTick)
+          set(gca,'XTickLabel',options_.XTickLabel)
+        end
+        xlim([1 gend])
+        if options_.TeX
+          texname = options_.varobs_TeX(k,:);
+          TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+        end    
+        title(name,'Interpreter','none')
+      end
+      eval(['print -depsc2 ' fname_ '_HistoricalAndSmoothedVariables' int2str(plt)]);
+      eval(['print -dpdf ' fname_ '_HistoricalAndSmoothedVariables' int2str(plt)]);
+      saveas(hh,[fname_ '_HistoricalAndSmoothedVariables' int2str(plt) '.fig']);
+      if options_.nograph, close(hh), end
+      if options_.TeX
+        fprintf(fidTeX,'\\begin{figure}[H]\n');
+        for jj = 1:nstar
+          fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+        end    
+        fprintf(fidTeX,'\\centering \n');
+        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',fname_,int2str(plt));
+        fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
+        fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(plt));
+        fprintf(fidTeX,'\\end{figure}\n');
+        fprintf(fidTeX,'\n');
+      end    
+    end
+    hh = figure('Name','Historical and smoothed variables');
+    set(0,'CurrentFigure',hh)
+    NAMES = [];
+    if options_.TeX, TeXNAMES = [], end
+    for i=1:n_varobs-(nbplt-1)*nstar
+      k = (nbplt-1)*nstar+i;
+      if lr ~= 0
+        subplot(lr,lc,i);
+      else
+        subplot(nr,nc,i);
+      end    
+      plot(1:gend,yf(k,:),'-r','linewidth',1)
+      hold on
+      plot(1:gend,rawdata(options_.first_obs+(0:gend-1),k),'-k','linewidth',1)
+      hold off
+      name = deblank(options_.varobs(k,:));
+      NAMES    = strvcat(NAMES,name);
+      if ~isempty(options_.XTick)
+        set(gca,'XTick',options_.XTick)
+        set(gca,'XTickLabel',options_.XTickLabel)
+      end
+      xlim([1 gend])
+      if options_.TeX
+        texname  = options_.varobs_TeX(k,:);
+        TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+      end
+      title(name,'Interpreter','none');
+    end
+    eval(['print -depsc2 ' fname_ '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
+    eval(['print -dpdf ' fname_ '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
+    saveas(hh,[fname_ '_HistoricalAndSmoothedVariables' int2str(nbplt) '.fig']);
+    if options_.nograph, close(hh), end
+    if options_.TeX
+      fprintf(fidTeX,'\\begin{figure}[H]\n');
+      for jj = 1:size(NAMES,1);
+        fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+      end    
+      fprintf(fidTeX,'\\centering \n');
+      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',fname_,int2str(nbplt));
+      fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
+      fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(nbplt));
+      fprintf(fidTeX,'\\end{figure}\n');
+      fprintf(fidTeX,'\n');
+      fprintf(fidTeX,'%% End of TeX file.\n');
+      fclose(fidTeX);
+    end    
       end % if nbplt == 1
     end   % if nvn
   end     % if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) 
@@ -1113,19 +1120,19 @@ for iter1 = 1:length(options_.nobs)
     end
     for i = 1:size(varlist,1)
       eval(['oo_.RecursiveForecast.Mean.' varlist(i,:) '(' int2str(iter1) ',:) =' ...
-		    ' oo_.Forecast.Mean.' varlist(i,:) ';']); 
+            ' oo_.Forecast.Mean.' varlist(i,:) ';']); 
       eval(['oo_.RecursiveForecast.Median.' varlist(i,:) '(' int2str(iter1) ',:) =' ...
-		    ' oo_.Forecast.Median.' varlist(i,:) ';']); 
+            ' oo_.Forecast.Median.' varlist(i,:) ';']); 
       eval(['oo_.RecursiveForecast.Std.' varlist(i,:) '(' int2str(iter1) ',:) =' ...
-		    ' oo_.Forecast.Std.' varlist(i,:) ';']); 
+            ' oo_.Forecast.Std.' varlist(i,:) ';']); 
       eval(['oo_.RecursiveForecast.HPDinf.' varlist(i,:) '(' int2str(iter1) ',:) =' ...
-		    ' oo_.Forecast.HPDinf.' varlist(i,:) ';']); 
+            ' oo_.Forecast.HPDinf.' varlist(i,:) ';']); 
       eval(['oo_.RecursiveForecast.HPDsup.' varlist(i,:) '(' int2str(iter1) ',:) =' ...
-		    ' oo_.Forecast.HPDsup.' varlist(i,:) ';']); 
+            ' oo_.Forecast.HPDsup.' varlist(i,:) ';']); 
       eval(['oo_.RecursiveForecast.HPDTotalinf.' varlist(i,:) '(' int2str(iter1) ',:) =' ...
-		    ' oo_.Forecast.HPDTotalinf.' varlist(i,:) ';']); 
+            ' oo_.Forecast.HPDTotalinf.' varlist(i,:) ';']); 
       eval(['oo_.RecursiveForecast.HPDTotalsup.' varlist(i,:) '(' int2str(iter1) ',:) =' ...
-		    ' oo_.Forecast.HPDTotalsup.' varlist(i,:) ';']); 
+            ' oo_.Forecast.HPDTotalsup.' varlist(i,:) ';']); 
     end
     iter1 = iter1+1;    
   end
@@ -1134,32 +1141,32 @@ end        % end for gend=options_.nobs(1):options_.nobs(end)
 if options_.nobs(1) < options_.nobs(end) & options_.forecast > 1
   if isempty(varlist)
     varlist = lgy_;
-    nvar	= size(lgy_,1);
+    nvar    = size(lgy_,1);
     SelecVariables = transpose(1:nvar);
   else
     nvar = size(varlist,1);
     SelecVariables = [];
     for i=1:nvar
       if ~isempty(strmatch(varlist(i,:),lgy_,'exact'))
-	SelecVariables = [SelecVariables;strmatch(varlist(i,:),lgy_, ...
-						  'exact')];
+    SelecVariables = [SelecVariables;strmatch(varlist(i,:),lgy_, ...
+                          'exact')];
       else
-	error(['Estimation: ' varlist(i,:) ' isn''t an endogenous' ...
-	       'variable'])
-      end	
+    error(['Estimation: ' varlist(i,:) ' isn''t an endogenous' ...
+           'variable'])
+      end   
     end
     IdObs    = zeros(n_varobs,1);
     for j=1:n_varobs
       for i=1:nvar
-	iobs = strmatch(options_.varobs(j,:),varlist,'exact');
+    iobs = strmatch(options_.varobs(j,:),varlist,'exact');
       end
       if ~isempty(iobs)
-	IdObs(j,1) = iobs;
-      end	 
-    end	
+    IdObs(j,1) = iobs;
+      end    
+    end 
   end
   k = 3+min(options_.nobs(end)-options_.nobs(1)+options_.forecast, ...
-	  size(rawdata,1)-options_.nobs(1));
+      size(rawdata,1)-options_.nobs(1));
   data2 = rawdata(end-k+1:end,:);
   [nbplt,nr,nc,lr,lc,nstar] = pltorg(nvar);
   for i = 1:size(varlist,1)
@@ -1171,9 +1178,9 @@ if options_.nobs(1) < options_.nobs(end) & options_.forecast > 1
     if any(i==IdObs)
       k2 = find(i==IdObs);
       if options_.loglinear == 1
-	plot(1:k,exp(data2(end-k+1:end,k2))','-k','linewidth',2);
+    plot(1:k,exp(data2(end-k+1:end,k2))','-k','linewidth',2);
       else
-	plot(1:k,data2(k2,end-k+1:end,k2)','-k','linewidth',2);
+    plot(1:k,data2(k2,end-k+1:end,k2)','-k','linewidth',2);
       end
       offsetx = 3;
     else
@@ -1187,16 +1194,16 @@ if options_.nobs(1) < options_.nobs(end) & options_.forecast > 1
       y4 = eval(['oo_.RecursiveForecast.HPDTotalsup.' varlist(i,:) '(j,:)']);
       plot(offsetx+[j:j+options_.forecast-1],y,'-b','linewidth',2)
       plot(offsetx+[j:j+options_.forecast-1],y1,'--g', ...
-	   'linewidth',1.5)
+       'linewidth',1.5)
       plot(offsetx+[j:j+options_.forecast-1],y2,'--g', ...
-	   'linewidth',1.5)
+       'linewidth',1.5)
       plot(offsetx+[j:j+options_.forecast-1],y3,'--r', ...
-	   'linewidth',1.5)
+       'linewidth',1.5)
       plot(offsetx+[j:j+options_.forecast-1],y4,'--r','linewidth',1.5)
     end
 %    set(gca,'XTick',offsetx+[1 10 20 30 40 50 60 70 80 90]);
 %    set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});
-    %	xlim([1 options_.forecast+10]);
+    %   xlim([1 options_.forecast+10]);
     if any(k==IdObs)
       plot([offsetx+1 offsetx+1],ylim,'-c')
     end
@@ -1213,16 +1220,16 @@ end
 
 
       
-% SA 07-31-2004		* Added TeX output.
-%					* Prior plots are done by calling plot_priors.m.
-%					* All the computations related to the metropolis-hastings are made
-%					in a new version of metropolis.m.
-%					* Corrected a bug related to prior's bounds.
-%					* ...
-%					* If you do not want to see all the figures generated by dynare, you can use the option
-%					nograph. The figures will be done and saved in formats eps, pdf and fig (so that you
-%					should be able to modify the plots within matlab) but each figure will be erased from the
-%					workspace when completed.
-% SA 08-04-2004		Corrected a bug related to the display of the Smooth shocks and variables plots,
-%					for ML and posterior mode estimation. 
-% SA 09-03-2004		Compilation of TeX appendix moved to dynare.m.	                                                                                                                                                                       h
+% SA 07-31-2004     * Added TeX output.
+%                   * Prior plots are done by calling plot_priors.m.
+%                   * All the computations related to the metropolis-hastings are made
+%                   in a new version of metropolis.m.
+%                   * Corrected a bug related to prior's bounds.
+%                   * ...
+%                   * If you do not want to see all the figures generated by dynare, you can use the option
+%                   nograph. The figures will be done and saved in formats eps, pdf and fig (so that you
+%                   should be able to modify the plots within matlab) but each figure will be erased from the
+%                   workspace when completed.
+% SA 08-04-2004     Corrected a bug related to the display of the Smooth shocks and variables plots,
+%                   for ML and posterior mode estimation. 
+% SA 09-03-2004     Compilation of TeX appendix moved to dynare.m.                                                                                                                                                                         h
