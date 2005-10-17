@@ -1,6 +1,6 @@
 function d1 = bksupk(ny,fid,jcf,icc1)
 
-global ykmax_ iter_ jcf
+global ykmax_ iter_
 
 icf = [1:jcf-1] ;
 ir = [(iter_-1)*ny+1:ny*iter_] ;
