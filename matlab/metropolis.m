@@ -311,7 +311,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   end %end if nruns
   if nblck == 1
     files = eval(['dir(''' fname_ '_mh*.mat'');']);
-    nfile = length(files)-1;
+    nfile = length(files)-2;
     number_of_simulations_per_file = zeros(nfile+1,1);
     instr = [fname_ '_mh' int2str(0)];
     eval(['load ' instr]);
