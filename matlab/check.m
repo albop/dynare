@@ -3,7 +3,7 @@
 
 function result = check
   global fname_ ys_ eigenvalues_ lambda_ dynatol_ it_ ykmin_ valf_ ex_ ...
-      exe_ xkmin_ xkmax_ options_
+      exe_ xkmin_ xkmax_ options_ dr_
   
   temp_options = options_;
   tempex = ex_;
@@ -15,7 +15,7 @@ function result = check
   options_ = set_default_option(options_,'order',1);  
   options_ = set_default_option(options_,'dr_algo',0);  
 
-  [dr, info] = resol(ys_,1);
+  info = resol(ys_,1);
   
   if info(1) ~= 0 & info(1) ~= 3 & info(1) ~= 4
     print_info(info);

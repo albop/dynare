@@ -1,5 +1,5 @@
 function [Sigma_e_,info] = calib(var_indices,targets,var_weights,nar,cova,Sigma_e_)
-  global ys_ endo_nbr exo_nbr lgy_ lgx_ ykmin_ vx options_
+  global ys_ endo_nbr exo_nbr lgy_ lgx_ ykmin_ vx options_ dr_
   
   ncstr = 0;
   ni = size(var_indices,1);
@@ -21,7 +21,7 @@ function [Sigma_e_,info] = calib(var_indices,targets,var_weights,nar,cova,Sigma_
   check_model;
   
   % computes approximate solution at order 1
-  [dr_, info] = resol(ys_,0);
+  info = resol(ys_,0);
 
   if info(1)
     print_info(info);
