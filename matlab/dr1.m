@@ -157,7 +157,7 @@ if ykmax_ == 0;  % backward model
   if exo_nbr
     dr_.ghu = -fu;
   end
-  dr_.eigval = eig(transition_matrix(dr_));
+  dr_.eigval = eig(transition_matrix);
   dr_.rank = 0;
   if any(abs(dr_.eigval) > options_.qz_criterium)
     temp = sort(abs(dr_.eigval));

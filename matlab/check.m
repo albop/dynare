@@ -15,6 +15,7 @@ function result = check
   options_ = set_default_option(options_,'order',1);  
   options_ = set_default_option(options_,'dr_algo',0);  
 
+  set_state_space;
   info = resol(ys_,1);
   
   if info(1) ~= 0 & info(1) ~= 3 & info(1) ~= 4
@@ -23,8 +24,8 @@ function result = check
 
   ex_ = tempex;
   
-  eigenvalues_ = dr.eigval;
-  nyf = nnz(dr.kstate(:,2)>ykmin_+1);
+  eigenvalues_ = dr_.eigval;
+  nyf = nnz(dr_.kstate(:,2)>ykmin_+1);
   [m_lambda,i]=sort(abs(eigenvalues_));
   
   if options_.noprint == 0
@@ -39,7 +40,7 @@ function result = check
     disp(sprintf('for %d forward-looking variable(s)',nyf));
     disp(' ')
     if info(1) == 0
-      if dr.rank == nyf
+      if dr_.rank == nyf
 	disp('The rank condition is verified.')
       else
 	disp('The rank conditions ISN''T verified!')

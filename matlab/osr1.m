@@ -1,4 +1,4 @@
-function [dr_,info]=osr1(params,weights)
+function info=osr1(params,weights)
   global xkmax_ xkmin_ ykmin_ ykmax_ ys_ iy_ exo_nbr endo_nbr fname_ ...
       dynatol_ options_ it_ dr_
 
