@@ -267,7 +267,7 @@ for iter1 = 1:length(options_.nobs)
 		asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend,data);   
         else
             [fval,xparam1,grad,hessian_asamin,exitflag] = ...
-		asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend);   
+		asamin('minimize','DsgeVarLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend);   
         end  
     elseif options_.mode_compute == 3
         if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
