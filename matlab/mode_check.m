@@ -1,5 +1,5 @@
 function mode_check(x,fval,hessian,gend,data,lb,ub)
-global bayestopt_ fname_ options_
+global bayestopt_ fname_ options_ dsge_prior_weight
 
 TeX = options_.TeX;
 [s_min,k] = min(diag(hessian))
@@ -40,7 +40,11 @@ if nbplt == 1
         y = zeros(length(z),1);
         for i=1:length(z)
             xx(k) = z(i); % kk -> k
-            y(i) = DsgeLikelihood(xx,gend,data);
+            if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+                y(i) = DsgeLikelihood(xx,gend,data);
+            else
+                y(i) = DsgeVarLikelihood(xx,gend);
+            end    
         end
         plot(z,y)
         hold on
@@ -91,7 +95,11 @@ else
             y = zeros(length(z),1);
             for i=1:length(z)
                 xx(kk) = z(i);
-                y(i) = DsgeLikelihood(xx,gend,data);
+                if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+                    y(i) = DsgeLikelihood(xx,gend,data);
+                else
+                    y(i) = DsgeVarLikelihood(xx,gend);
+                end
             end
             plot(z,y);
             hold on
@@ -144,7 +152,11 @@ else
         y = zeros(length(z),1);
         for i=1:length(z)
             xx(kk) = z(i);
-            y(i) = DsgeLikelihood(xx,gend,data);
+            if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+                y(i) = DsgeLikelihood(xx,gend,data);
+            else
+                y(i) = DsgeVarLikelihood(xx,gend);
+            end
         end
         plot(z,y)
         hold on
@@ -175,7 +187,7 @@ else
     end
 end
 
-% SA 07-31-2004		* New default : no more than nine plots per figure.
-%					* Figures are automatically saved in eps, pdf and fig formats.
-%					* Figures are automatically closed (this should be an option).
-%					* Creation of a TeX-loader file for the postcript file. 
+% SA 07-31-2004     * New default : no more than nine plots per figure.
+%                   * Figures are automatically saved in eps, pdf and fig formats.
+%                   * Figures are automatically closed (this should be an option).
+%                   * Creation of a TeX-loader file for the postcript file. 

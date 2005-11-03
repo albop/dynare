@@ -3,6 +3,8 @@ global options_ bayestopt_ estim_params_ lgy_ lgx_ Sigma_e_ exo_nbr endo_nbr
 global lgy_ lgx_ fname_ oo_  trend_coeff_  iy_ ykmin_ lgx_TeX_ lgy_TeX_
 global dsge_prior_weight
 
+
+
 options_.varlist = varlist;
 
 options_.lgyidx2varobs = zeros(size(lgy_,1),1);
@@ -241,38 +243,72 @@ for iter1 = 1:length(options_.nobs)
   else
     data = rawdata(options_.first_obs+(0:gend-1),:)';
   end
+  
   initial_estimation_checks(xparam1,gend,data);
 
   if options_.mode_compute > 0
-    fh=str2func('DsgeLikelihood');
-    if options_.mode_compute == 1  
-      [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-      fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
+    if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+        fh=str2func('DsgeLikelihood');
+    else
+        fh=str2func('DsgeVarLikelihood');        
+    end
+    if options_.mode_compute == 1
+        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+            [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
+            fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
+        else
+            [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
+            fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend);
+        end
     elseif options_.mode_compute == 2
-      % asamin('set','maximum_cost_repeat',0);
-      [fval,xparam1,grad,hessian_asamin,exitflag] = ...
-      asamin('minimize','DsgeLikelihood',xparam1,lb,ub,- ...
-         ones(size(xparam1)),gend,data);   
+    %   asamin('set','maximum_cost_repeat',0);
+        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+            [fval,xparam1,grad,hessian_asamin,exitflag] = ...
+		asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend,data);   
+        else
+            [fval,xparam1,grad,hessian_asamin,exitflag] = ...
+		asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend);   
+        end  
     elseif options_.mode_compute == 3
-      [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend, ...
-                    data);
+        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data);
+        else
+            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
+        end  
     elseif options_.mode_compute == 4
-      H0 = 1e-4*eye(nx);
-      crit = 1e-7;
-      nit = 1000;
-      verbose = 2;
-      [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-      csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,gend,data);
-      disp(sprintf('Objective function at mode: %f',fval))
-      disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
+        H0 = 1e-4*eye(nx);
+        crit = 1e-7;
+        nit = 1000;
+        verbose = 2;
+        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+            [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+		csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,gend,data);
+            disp(sprintf('Objective function at mode: %f',fval))
+            disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
+        else
+            [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+		csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,gend);
+            disp(sprintf('Objective function at mode: %f',fval))
+            disp(sprintf('Objective function at mode: %f',DsgeVarLikelihood(xparam1,gend)))
+        end
     elseif options_.mode_compute == 5
-      flag = 0;
-      [xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
-      eval(['save ' fname_ '_mode xparam1 hh gg fval;']);
+        flag = 0;
+        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+            [xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
+            eval(['save ' fname_ '_mode xparam1 hh gg fval;']);
+        else
+            [xparam1, hh, gg, fval] = newrat('DsgeVarLikelihood',xparam1,[],[],flag,gend);
+            eval(['save ' fname_ '_mode xparam1 hh gg fval;']);
+        end
     end
     if options_.mode_compute ~= 5
-      hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
-      eval(['save ' fname_ '_mode xparam1 hh fval;']);
+        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+            hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
+            eval(['save ' fname_ '_mode xparam1 hh fval;']);
+        else
+            hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
+            eval(['save ' fname_ '_mode xparam1 hh fval;']);
+        end  
     end
     eval(['save ' fname_ '_mode xparam1 hh;']);
   end
@@ -374,9 +410,14 @@ for iter1 = 1:length(options_.nobs)
     ip = ip+1;
       end
     end
-    %%% Laplace approximation to the marginal log density: 
-    md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
-    - DsgeLikelihood(xparam1,gend,data);
+    %%% Laplace approximation to the marginal log density:
+    if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+        md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
+        - DsgeLikelihood(xparam1,gend,data);
+    else
+        md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
+        - DsgeVarLikelihood(xparam1,gend);
+    end
     oo_.MarginalDensity.LaplaceApproximation = md_Laplace;    
     disp(' ')
     disp(sprintf('Log data density [Laplace approximation] is %f.',md_Laplace))
