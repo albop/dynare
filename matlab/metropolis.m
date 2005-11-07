@@ -3672,11 +3672,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
              StdDecomp(i,j),...
              HPDDecomp(i,j,1),...
              HPDDecomp(i,j,2)));
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx_(j,:)) ' = MeanDecomp(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx_(j,:)) ' = MedianDecomp(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx_(j,:)) ' = StdDecomp(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx_(j,:)) ' = HPDDecomp(i,j,1);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx_(j,:)) ' = HPDDecomp(i,j,2);']);
+    eval(['oo_.PosteriorTheoreticalMoment.Decomp.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = MeanDecomp(i,j);']);
+    eval(['oo_.PosteriorTheoreticalMoment.Decomp.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = MedianDecomp(i,j);']);
+    eval(['oo_.PosteriorTheoreticalMoment.Decomp.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = StdDecomp(i,j);']);
+    eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = HPDDecomp(i,j,1);']);
+    eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = HPDDecomp(i,j,2);']);
       end       
     end
     if TeX
