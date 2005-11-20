@@ -21,5 +21,5 @@ stderr e_y,INV_GAMMA_PDF,0.01,inf;
 end;
 
 varobs x y;
-options_.unit_root_vars = {'x'; 'y'};
-estimation(datafile=data1,nobs=1000,mh_replic=0,load_mh_file,mode_compute=0,mode_file=mod1b_mode,lik_init=2);
+unit_root_vars  x y;
+estimation(datafile=data1,nobs=1000,mh_replic=10000);
