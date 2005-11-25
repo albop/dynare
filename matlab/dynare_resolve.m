@@ -10,5 +10,5 @@ function [A,B,ys,info] = dynare_resolve()
     return
   end
   
-  [A,B] = kalman_transition_matrix(dr_);
+  [A,B] = kalman_transition_matrix;
   ys = dr_.ys;

@@ -34,7 +34,7 @@ function osr(var_list,params,W)
   disp(' ')
   disp('OPTIMAL SIMPLE RULE')
   disp(' ')
-  info = osr1(params,W);
+  [dr_,info] = osr1(params,W);
   if info > 0
     options_ = options_old;
     return

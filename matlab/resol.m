@@ -1,6 +1,6 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function info = resol(ys,check_flag)
+function [dr,info]=resol(ys,check_flag)
 % info: same as dr1 
 % plus: 
 % 11 .... same as dr1 for dr_algo = 2
@@ -10,7 +10,7 @@ function info = resol(ys,check_flag)
   global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
 global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ 
 global fname_ means_ stderrs_ lgy_ maxit_
-global dynatol_ options_ dr_
+global dynatol_ options_
 
 options_ = set_default_option(options_,'olr',0);
 info = 0;
@@ -31,9 +31,9 @@ end
 fh = str2func([fname_ '_fff']);
 if max(abs(feval(fh,ys))) > dynatol_ & options_.olr == 0
   if exist([fname_ '_steadystate'])
-    [dr_.ys,check1] = feval([fname_ '_steadystate'],ys);
+    [dr.ys,check1] = feval([fname_ '_steadystate'],ys);
   else
-    [dr_.ys,check1] = dynare_solve([fname_ '_fff'],ys);
+    [dr.ys,check1] = dynare_solve([fname_ '_fff'],ys);
   end
   if check1
     info(1) = 20;
@@ -42,22 +42,22 @@ if max(abs(feval(fh,ys))) > dynatol_ & options_.olr == 0
     return
   end
 else 
-  dr_.ys = ys;
+  dr.ys = ys;
 end
 
-dr_.fbias = zeros(endo_nbr,1);
-info = dr1(check_flag);
+dr.fbias = zeros(endo_nbr,1);
+[dr,info] = dr1(dr,check_flag);
 
 if info(1)
   return
 end
 
 if options_.dr_algo == 1 & options_.order > 1
-  dr_.ys = dynare_solve('dr2',ys);
-  dr_.fbias = 2*feval([fname_ '_fff'],dr_.ys);
-  info1 = dr1(check_flag);
+  dr.ys = dynare_solve('dr2',ys,dr);
+  dr.fbias = 2*feval([fname_ '_fff'],dr.ys);
+  [dr, info1] = dr1(dr,check_flag);
   if info1(1)
-    info(1) = info1(1)+10;
+    info(1) = info(1)+10;
     return
   end
 end

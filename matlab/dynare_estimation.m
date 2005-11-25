@@ -1,7 +1,7 @@
 function dynare_estimation(varlist)
 global options_ bayestopt_ estim_params_ lgy_ lgx_ Sigma_e_ exo_nbr endo_nbr
 global lgy_ lgx_ fname_ oo_  trend_coeff_  iy_ ykmin_ lgx_TeX_ lgy_TeX_
-global dsge_prior_weight dr_
+global dsge_prior_weight
 
 
 
@@ -66,7 +66,7 @@ if isfield(options_,'optim_opt')
 end
 
 n_varobs = size(options_.varobs,1);
-set_state_space;
+dr = set_state_space([]);
 
 % load data
 if exist(options_.datafile)
@@ -82,7 +82,7 @@ k = [];
 k1 = [];
 for i=1:n_varobs
   rawdata = [rawdata eval(deblank(options_.varobs(i,:)))];
-  k = [k strmatch(deblank(options_.varobs(i,:)),lgy_(dr_.order_var,:), ...
+  k = [k strmatch(deblank(options_.varobs(i,:)),lgy_(dr.order_var,:), ...
           'exact')];
   k1 = [k1 strmatch(deblank(options_.varobs(i,:)),lgy_, 'exact')];
 end
@@ -160,7 +160,7 @@ if ~isempty(options_.unit_root_vars)
   n_ur = length(options_.unit_root_vars);
   i_ur = zeros(n_ur,1);
   for i=1:n_ur
-    i1 = strmatch(options_.unit_root_vars{i},lgy_(dr_.order_var,:),'exact');
+    i1 = strmatch(options_.unit_root_vars{i},lgy_(dr.order_var,:),'exact');
     if isempty(i1)
       error('Undeclared variable in unit_root_vars statement')
     end
@@ -170,7 +170,7 @@ if ~isempty(options_.unit_root_vars)
   i_stable(i_ur) = zeros(n_ur,1);
   i_stable = find(i_stable);
   if ykmin_ > 1
-    l1 = flipud([cumsum(iy_(1:ykmin_-1,dr_.order_var),1);ones(1, ...
+    l1 = flipud([cumsum(iy_(1:ykmin_-1,dr.order_var),1);ones(1, ...
                           endo_nbr)]);
     n1 = nnz(l1);
     bayestopt_.Pinf = zeros(n1,n1);
@@ -704,8 +704,8 @@ for iter1 = 1:length(options_.nobs)
 %    options_.lik_algo = 2;
     [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam1,gend,data);
     for i=1:endo_nbr
-      eval(['oo_.SmoothedVariables.' deblank(lgy_(dr_.order_var(i),:)) ' = atT(i,:)'';']);
-      eval(['oo_.FilteredVariables.' deblank(lgy_(dr_.order_var(i),:)) ' = filtered_state_vector(i,:)'';']);
+      eval(['oo_.SmoothedVariables.' deblank(lgy_(dr.order_var(i),:)) ' = atT(i,:)'';']);
+      eval(['oo_.FilteredVariables.' deblank(lgy_(dr.order_var(i),:)) ' = filtered_state_vector(i,:)'';']);
     end
     [nbplt,nr,nc,lr,lc,nstar] = pltorg(exo_nbr);
     if options_.TeX

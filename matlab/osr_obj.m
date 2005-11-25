@@ -1,6 +1,6 @@
 % the beginning and the end of this function may be adapted by the userx
 function [loss,vx]=osr_obj(x,params,weights);
-  global ys_ Sigma_e_ endo_nbr exo_nbr optimal_Q_ it_ ykmin_ options_ dr_
+  global ys_ Sigma_e_ endo_nbr exo_nbr optimal_Q_ it_ ykmin_ options_
   
   vx = [];
   % set parameters of the policiy rule
@@ -11,7 +11,7 @@ function [loss,vx]=osr_obj(x,params,weights);
   
   % don't change below until the part where the loss function is computed
   it_ = ykmin_+1;
-  info = resol(ys_,0);
+  [dr_,info] = resol(ys_,0);
   
   switch info(1)
    case 1

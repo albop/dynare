@@ -6,6 +6,6 @@ function ghs2=dr2(ys)
   
   dr_.ys = ys;
   fh = str2func([fname_ '_fff']);
-  dr_.fbias = 2*feval(fh,dr_.ys);
+  dr_.fbias = 2*feval(fh,dr.ys);
   dr1(0);
   ghs2 = dr_.ghs2;

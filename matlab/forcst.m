@@ -5,7 +5,7 @@ function [yf,var_yf]=forcst(dr,y0,k,var_list)
   make_ex_;
   yf = simult_(y0,dr,ex_(1:k,:),1);
 
-  [A,B] = kalman_transition_matrix(dr_);
+  [A,B] = kalman_transition_matrix(dr);
   
   sigma_u = B*Sigma_e_*B';
   sigma_y = 0;
