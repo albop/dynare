@@ -43,7 +43,7 @@ function info=stoch_simul(var_list)
 
   check_model;
 
-  info = resol(ys_,0);
+  [dr_, info] = resol(ys_,0);
 
   if info(1)
     print_info(info);

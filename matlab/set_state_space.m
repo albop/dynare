@@ -1,10 +1,10 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function set_state_space( )
+function dr=set_state_space(dr)
 
 global iy_ ykmin_ ykmax_ exo_nbr endo_nbr
 global ex_ valf_ it_ exe_ xkmin_ xkmax_ ys_
-global fname_ lgy_ dr_
+global fname_ lgy_
 
 
 xlen = xkmax_ + xkmin_ + 1;
@@ -73,16 +73,16 @@ kstate(ykmax_*endo_nbr+1:end,4) = kiy((ykmax_+1)*endo_nbr+1:end);
 % put in E only the current variables that are not already in D
 kstate = kstate(i_kmask,:);
 
-dr_.order_var = order_var;
-dr_.nstatic = nstatic;
-dr_.npred = npred+nboth;
-dr_.kstate = kstate;
-dr_.kad = kad;
-dr_.kae = kae;
-dr_.nboth = nboth;
-dr_.nfwrd = nfwrd;
+dr.order_var = order_var;
+dr.nstatic = nstatic;
+dr.npred = npred+nboth;
+dr.kstate = kstate;
+dr.kad = kad;
+dr.kae = kae;
+dr.nboth = nboth;
+dr.nfwrd = nfwrd;
 % number of forward variables in the state vector
-dr_.nsfwrd = sum(kstate(:,2) > ykmin_+1);
+dr.nsfwrd = sum(kstate(:,2) > ykmin_+1);
 % number of predetermined variables in the state vector
-dr_.nspred = sum(kstate(:,2) <= ykmin_+1);
+dr.nspred = sum(kstate(:,2) <= ykmin_+1);
 

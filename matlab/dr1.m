@@ -1,6 +1,6 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function info=dr1(task)
+function [dr,info]=dr1(dr,task)
 
 % info = 1: the model doesn't define current variables uniquely
 % info = 2: problem in mjdgges.dll info(2) contains error code
@@ -13,7 +13,7 @@ function info=dr1(task)
   global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
   global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ stdexo_
   global fname_ means_ Sigma_e_ lgy_
-  global eigval options_ M_ olr_state_ dr_
+  global eigval options_ M_ olr_state_
 
 
   info = 0;
@@ -41,7 +41,7 @@ it_ = ykmin_ + 1;
 if options_.olr
   z = repmat(zeros(endo_nbr,1),1,klen);
 else
-  z = repmat(dr_.ys,1,klen);
+  z = repmat(dr.ys,1,klen);
 end
 z = z(iyr0) ;
 jacobia_=real(jacob_a('ff1_',[z(:); exe_])) ;
@@ -108,28 +108,28 @@ if options_.olr
   % computes steady state
   resid = feval([fname_ '_fff'],zeros(olr_state_.old_endo_nbr,1));
   if resid'*resid < 1e-12
-    dr_.ys =[dr_.ys; zeros(nj,1)];
+    dr.ys =[dr.ys; zeros(nj,1)];
   else
     AA = zeros(endo_nbr,endo_nbr);
     for i=1:ykmin_+ykmax_+1
       [junk,k1,k2] = find(iy_(i,:));
       AA(:,k1) = AA(:,k1)+jacobia_(:,k2);
     end
-    dr_.ys = -AA\[resid; zeros(nj,1)];
+    dr.ys = -AA\[resid; zeros(nj,1)];
   end
-  dr_=set_state_space;
 end
 % end of code section for Optimal Linear Regulator
 
 klen = ykmin_ + ykmax_ + 1;
-kstate = dr_.kstate;
-kad = dr_.kad;
-kae = dr_.kae;
-nstatic = dr_.nstatic;
-nfwrd = dr_.nfwrd;
-npred = dr_.npred;
-nboth = dr_.nboth;
-order_var = dr_.order_var;
+dr=set_state_space(dr);
+kstate = dr.kstate;
+kad = dr.kad;
+kae = dr.kae;
+nstatic = dr.nstatic;
+nfwrd = dr.nfwrd;
+npred = dr.npred;
+nboth = dr.nboth;
+order_var = dr.order_var;
 nd = size(kstate,1);
 
 sdyn = endo_nbr - nstatic;
@@ -147,21 +147,21 @@ if exo_nbr
 end
 
 if ykmax_ == 0;  % backward model
-  dr_.ghx = zeros(size(a));
+  dr.ghx = zeros(size(a));
   m = 0;
   for i=ykmin_:-1:1
     k = nonzeros(iy_(i,order_var));
-    dr_.ghx(:,m+[1:length(k)]) = -a(:,k);
+    dr.ghx(:,m+[1:length(k)]) = -a(:,k);
     m = m+length(k);
   end
   if exo_nbr
-    dr_.ghu = -fu;
+    dr.ghu = -fu;
   end
-  dr_.eigval = eig(transition_matrix(dr_));
-  dr_.rank = 0;
-  if any(abs(dr_.eigval) > options_.qz_criterium)
-    temp = sort(abs(dr_.eigval));
-    nba = nnz(abs(dr_.eigval) > options_.qz_criterium);
+  dr.eigval = eig(transition_matrix(dr));
+  dr.rank = 0;
+  if any(abs(dr.eigval) > options_.qz_criterium)
+    temp = sort(abs(dr.eigval));
+    nba = nnz(abs(dr.eigval) > options_.qz_criterium);
     temp = temp(nd-nba+1:nd)-1-options_.qz_criterium;
     info(1) = 3;
     info(2) = temp'*temp;
@@ -200,12 +200,12 @@ if ~exist('mjdgges')
   tt1=diag(tt);
   warning_state = warning;
   warning off;
-  dr_.eigval = ss1./tt1 ;
+  dr.eigval = ss1./tt1 ;
   warning warning_state;
-  nba = nnz(abs(dr_.eigval) > options_.qz_criterium);
+  nba = nnz(abs(dr.eigval) > options_.qz_criterium);
 else
   use_qzdiv = 0;
-  [ss,tt,w,sdim,dr_.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+  [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
   if info1
     info(1) = 2;
     info(2) = info1;
@@ -217,13 +217,13 @@ end
 nyf = sum(kstate(:,2) > ykmin_+1);
 
 if task == 1
-  dr_.rank = rank(w(1:nyf,nd-nyf+1:end));
-  dr_.eigval = eig(e,d);
+  dr.rank = rank(w(1:nyf,nd-nyf+1:end));
+  dr.eigval = eig(e,d);
   return
 end
 
 if nba ~= nyf
-  temp = sort(abs(dr_.eigval));
+  temp = sort(abs(dr.eigval));
   if nba > nyf
     temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
     info(1) = 3
@@ -256,7 +256,7 @@ hx = (tt(1:np,1:np)*hx)\(ss(1:np,1:np)*hx);
 
 k1 = find(kstate(n4:nd,2) == ykmin_+1);
 k2 = find(kstate(1:n3,2) == ykmin_+2);
-dr_.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
+dr.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
 
 %lead variables actually present in the model
 j3 = nonzeros(kstate(:,3));
@@ -268,7 +268,7 @@ if exo_nbr
   if nstatic > 0
     aa1 = a1(:,1:nstatic);
   end
-  dr_.ghu = -[aa1 a(:,j3)*gx(j4,1:npred)+a1(:,nstatic+1:nstatic+ ...
+  dr.ghu = -[aa1 a(:,j3)*gx(j4,1:npred)+a1(:,nstatic+1:nstatic+ ...
 						  npred) a1(:,nstatic+npred+1:end)]\fu;
 end
 
@@ -277,26 +277,26 @@ if nstatic > 0
   temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
   j5 = find(kstate(n4:nd,4));
   temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
-  dr_.ghx = [temp; dr_.ghx];
+  dr.ghx = [temp; dr.ghx];
   temp = [];
 end
 
 if options_.loglinear == 1
-    k = find(dr_.kstate(:,2) <= ykmin_+1);
-    klag = dr_.kstate(k,[1 2]);
-    k1 = dr_.order_var;
+    k = find(dr.kstate(:,2) <= ykmin_+1);
+    klag = dr.kstate(k,[1 2]);
+    k1 = dr.order_var;
 
-    dr_.ghx = repmat(1./dr_.ys(k1),1,size(dr_.ghx,2)).*dr_.ghx.* ...
-	     repmat(dr_.ys(k1(klag(:,1)))',size(dr_.ghx,1),1);
-    dr_.ghu = repmat(1./dr_.ys(k1),1,size(dr_.ghu,2)).*dr_.ghu;
+    dr.ghx = repmat(1./dr.ys(k1),1,size(dr.ghx,2)).*dr.ghx.* ...
+	     repmat(dr.ys(k1(klag(:,1)))',size(dr.ghx,1),1);
+    dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
 end
 
 %necessary when using Sims' routines
 if use_qzdiv
   gx = real(gx);
   hx = real(hx);
-  dr_.ghx = real(dr_.ghx);
-  dr_.ghu = real(dr_.ghu);
+  dr.ghx = real(dr.ghx);
+  dr.ghu = real(dr.ghu);
 end
 
 %exogenous deterministic variables
@@ -306,10 +306,10 @@ if exo_det_nbr > 1
   fudet = sparse(jacobia_(:,nz+exo_nbr+1:end));
   M1 = inv(f0+[zeros(endo_nbr,nstatic) f1*gx zeros(endo_nbr,nyf-nboth)]);
   M2 = M1*f1;
-  dr_.ghud = cell(M_.ex_det_length,1);
-  dr_.ghud{1} = -M1*fudet;
+  dr.ghud = cell(M_.ex_det_length,1);
+  dr.ghud{1} = -M1*fudet;
   for i = 2:M_.ex_det_length
-    dr_.ghud{i} = -M2*dr_.ghud{i-1}(end-nyf+1:end,:);
+    dr.ghud{i} = -M2*dr.ghud{i-1}(end-nyf+1:end,:);
   end
 end
 
@@ -355,10 +355,10 @@ for i=2:ykmin_+1
 end
 kk = flipud(cumsum(flipud(iy_(ykmin_+1:end,order_var)),1));
 k0 = [1:endo_nbr];
-gx1 = dr_.ghx;
-hu = dr_.ghu(nstatic+[1:npred],:);
+gx1 = dr.ghx;
+hu = dr.ghu(nstatic+[1:npred],:);
 zx = [zx; gx1];
-zu = [zu; dr_.ghu];
+zu = [zu; dr.ghu];
 for i=1:ykmax_
   k1 = find(kk(i+1,k0) > 0);
   zu = [zu; gx1(k1,1:npred)*hu];
@@ -389,7 +389,7 @@ n = endo_nbr+sum(kstate(:,2) > ykmin_+1 & kstate(:,2) < ykmin_+ykmax_+1);
 A = zeros(n,n);
 B = zeros(n,n);
 [junk,k1,k2] = find(iy_(ykmin_+ykmax_+1,order_var));
-gx2 = dr_.ghx(k1,:);
+gx2 = dr.ghx(k1,:);
 A(1:endo_nbr,1:endo_nbr) = jacobia_(:,iy_(ykmin_+1,order_var));
 A(1:endo_nbr,nstatic+1:nstatic+npred)=...
     A(1:endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx2(:,1:npred);
@@ -430,11 +430,11 @@ C = hx;
 D = [rhs; zeros(n-endo_nbr,size(rhs,2))];
 %x0 = sylvester3(A,B,C,D);
 %dr.ghxx = sylvester3a(x0,A,B,C,D);
-dr_.ghxx = gensylv(2,A,B,C,D);
+dr.ghxx = gensylv(2,A,B,C,D);
 
 %ghxu
 %rhs
-hu = dr_.ghu(nstatic+1:nstatic+npred,:);
+hu = dr.ghu(nstatic+1:nstatic+npred,:);
 %kk = reshape([1:np*np],np,np);
 %kk = kk(1:npred,1:npred);
 %rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));
@@ -453,10 +453,10 @@ end
 nyf1 = sum(kstate(:,2) == ykmin_+2);
 hu1 = [hu;zeros(np-npred,exo_nbr)];
 B1 = [B(1:endo_nbr,:);zeros(size(A,1)-endo_nbr,size(B,2))];
-rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B1*dr_.ghxx*kron(hx,hu1);
+rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B1*dr.ghxx*kron(hx,hu1);
 
 %lhs
-dr_.ghxu = A\rhs;
+dr.ghxu = A\rhs;
 
 %ghuu
 %rhs
@@ -475,17 +475,17 @@ else
   rhs = hessian*kron(zu,zu);
 end
 
-rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B*dr_.ghxx*kron(hu1,hu1);
+rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hu1,hu1);
 
 %lhs
-dr_.ghuu = A\rhs;
+dr.ghuu = A\rhs;
 
-dr_.ghxx = dr_.ghxx(1:endo_nbr,:);
-dr_.ghxu = dr_.ghxu(1:endo_nbr,:);
-dr_.ghuu = dr_.ghuu(1:endo_nbr,:);
+dr.ghxx = dr.ghxx(1:endo_nbr,:);
+dr.ghxu = dr.ghxu(1:endo_nbr,:);
+dr.ghuu = dr.ghuu(1:endo_nbr,:);
 
 
-% dr_.ghs2
+% dr.ghs2
 % derivatives of F with respect to forward variables
 % reordering predetermined variables in diminishing lag order
 O1 = zeros(endo_nbr,nstatic);
@@ -493,10 +493,10 @@ O2 = zeros(endo_nbr,endo_nbr-nstatic-npred);
 LHS = jacobia_(:,iy_(ykmin_+1,order_var));
 RHS = zeros(endo_nbr,exo_nbr^2);
 kk = find(kstate(:,2) == ykmin_+2);
-gu = dr_.ghu; 
-guu = dr_.ghuu; 
-Gu = [dr_.ghu(nstatic+[1:npred],:); zeros(np-npred,exo_nbr)];
-Guu = [dr_.ghuu(nstatic+[1:npred],:); zeros(np-npred,exo_nbr*exo_nbr)];
+gu = dr.ghu; 
+guu = dr.ghuu; 
+Gu = [dr.ghu(nstatic+[1:npred],:); zeros(np-npred,exo_nbr)];
+Guu = [dr.ghuu(nstatic+[1:npred],:); zeros(np-npred,exo_nbr*exo_nbr)];
 E = eye(endo_nbr);
 iy_ordered = flipud(cumsum(flipud(iy_(ykmin_+1:end,order_var)),1));
 if ykmin_ > 0
@@ -511,7 +511,7 @@ kh = reshape([1:nk^2],nk,nk);
 kp = sum(kstate(:,2) <= ykmin_+1);
 E1 = [eye(npred); zeros(kp-npred,npred)];
 H = E1;
-hxx = dr_.ghxx(nstatic+[1:npred],:);
+hxx = dr.ghxx(nstatic+[1:npred],:);
 for i=1:ykmax_
   for j=i:ykmax_
     [junk,k2a,k2] = find(iy_(ykmin_+j+1,order_var));
@@ -522,16 +522,16 @@ for i=1:ykmax_
 
   % LHS
   [junk,k2a,k2] = find(iy_(ykmin_+i+1,order_var));
-  LHS = LHS + jacobia_(:,k2)*(E(k2a,:)+[O1(k2a,:) dr_.ghx(k2a,:)*H O2(k2a,:)]);
+  LHS = LHS + jacobia_(:,k2)*(E(k2a,:)+[O1(k2a,:) dr.ghx(k2a,:)*H O2(k2a,:)]);
   
   if i == ykmax_ 
     break
   end
   
   kk = find(kstate(:,2) == ykmin_+i+1);
-  gu = dr_.ghx*Gu;
+  gu = dr.ghx*Gu;
   GuGu = kron(Gu,Gu);
-  guu = dr_.ghx*Guu+dr_.ghxx*GuGu;
+  guu = dr.ghx*Guu+dr.ghxx*GuGu;
   Gu = hx*Gu;
   Guu = hx*Guu;
   Guu(end-npred+1:end,:) = Guu(end-npred+1:end,:) + hxx*GuGu;
@@ -539,59 +539,59 @@ for i=1:ykmax_
   H = E1 + hx*H;
 end
 RHS = RHS*Sigma_e_(:);
-dr_.fuu = RHS;
-RHS = -RHS-dr_.fbias;
-dr_.ghs2 = LHS\RHS;
+dr.fuu = RHS;
+RHS = -RHS-dr.fbias;
+dr.ghs2 = LHS\RHS;
 
 % deterministic exogenous variables
 if exo_det_nbr > 0
-  hud = dr_.ghud{1}(nstatic+1:nstatic+npred,:);
-  zud=[zeros(np,exo_det_nbr);dr_.ghud{1};gx(:,1:npred)*hud;zeros(exo_nbr,exo_det_nbr);eye(exo_det_nbr)];
+  hud = dr.ghud{1}(nstatic+1:nstatic+npred,:);
+  zud=[zeros(np,exo_det_nbr);dr.ghud{1};gx(:,1:npred)*hud;zeros(exo_nbr,exo_det_nbr);eye(exo_det_nbr)];
   R1 = hessian*kron(zx,zud);
-  dr_.ghxud = cell(M_.ex_det_length,1);
+  dr.ghxud = cell(M_.ex_det_length,1);
   kf = [endo_nbr-nyf+1:endo_nbr];
   kp = nstatic+[1:npred];
-  dr_.ghxud{1} = -M1*(R1+f1*dr_.ghxx(kf,:)*kron(dr_.ghx(kp,:),dr_.ghud{1}(kp,:)));
+  dr.ghxud{1} = -M1*(R1+f1*dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{1}(kp,:)));
   Eud = eye(exo_det_nbr);
   for i = 2:M_.ex_det_length
-    hudi = dr_.ghud{i}(kp,:);
-    zudi=[zeros(np,exo_det_nbr);dr_.ghud{i};gx(:,1:npred)*hudi;zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
+    hudi = dr.ghud{i}(kp,:);
+    zudi=[zeros(np,exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi;zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
     R2 = hessian*kron(zx,zudi);
-    dr_.ghxud{i} = -M2*(dr_.ghxud{i-1}(kf,:)*kron(hx,Eud)+dr_.ghxx(kf,:)*kron(dr_.ghx(kp,:),dr_.ghud{i}(kp,:)))-M1*R2;
+    dr.ghxud{i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(hx,Eud)+dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{i}(kp,:)))-M1*R2;
   end
   R1 = hessian*kron(zu,zud);
-  dr_.ghudud = cell(M_.ex_det_length,1);
+  dr.ghudud = cell(M_.ex_det_length,1);
   kf = [endo_nbr-nyf+1:endo_nbr];
 
-  dr_.ghuud{1} = -M1*(R1+f1*dr_.ghxx(kf,:)*kron(dr_.ghu(kp,:),dr_.ghud{1}(kp,:)));
+  dr.ghuud{1} = -M1*(R1+f1*dr.ghxx(kf,:)*kron(dr.ghu(kp,:),dr.ghud{1}(kp,:)));
   Eud = eye(exo_det_nbr);
   for i = 2:M_.ex_det_length
-    hudi = dr_.ghud{i}(kp,:);
-    zudi=[zeros(np,exo_det_nbr);dr_.ghud{i};gx(:,1:npred)*hudi;zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
+    hudi = dr.ghud{i}(kp,:);
+    zudi=[zeros(np,exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi;zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
     R2 = hessian*kron(zu,zudi);
-    dr_.ghuud{i} = -M2*dr_.ghxud{i-1}(kf,:)*kron(hu,Eud)-M1*R2;
+    dr.ghuud{i} = -M2*dr.ghxud{i-1}(kf,:)*kron(hu,Eud)-M1*R2;
   end
   R1 = hessian*kron(zud,zud);
-  dr_.ghudud = cell(M_.ex_det_length,M_.ex_det_length);
-  dr_.ghudud{1,1} = -M1*R1-M2*dr_.ghxx(kf,:)*kron(hud,hud);
+  dr.ghudud = cell(M_.ex_det_length,M_.ex_det_length);
+  dr.ghudud{1,1} = -M1*R1-M2*dr.ghxx(kf,:)*kron(hud,hud);
   for i = 2:M_.ex_det_length
-    hudi = dr_.ghud{i}(nstatic+1:nstatic+npred,:);
-    zudi=[zeros(np,exo_det_nbr);dr_.ghud{i};gx(:,1:npred)*hudi+dr_.ghud{i-1}(kf,:);zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
+    hudi = dr.ghud{i}(nstatic+1:nstatic+npred,:);
+    zudi=[zeros(np,exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi+dr.ghud{i-1}(kf,:);zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
     R2 = hessian*kron(zudi,zudi);
-    dr_.ghudud{i,i} = -M2*(dr_.ghudud{i-1,i-1}(kf,:)+...
-			  2*dr_.ghxud{i-1}(kf,:)*kron(hudi,Eud) ...
-			  +dr_.ghxx(kf,:)*kron(hudi,hudi))-M1*R2;
+    dr.ghudud{i,i} = -M2*(dr.ghudud{i-1,i-1}(kf,:)+...
+			  2*dr.ghxud{i-1}(kf,:)*kron(hudi,Eud) ...
+			  +dr.ghxx(kf,:)*kron(hudi,hudi))-M1*R2;
     R2 = hessian*kron(zud,zudi);
-    dr_.ghudud{1,i} = -M2*(dr_.ghxud{i-1}(kf,:)*kron(hud,Eud)+...
-			  dr_.ghxx(kf,:)*kron(hud,hudi))...
+    dr.ghudud{1,i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(hud,Eud)+...
+			  dr.ghxx(kf,:)*kron(hud,hudi))...
 	-M1*R2;
     for j=2:i-1
-      hudj = dr_.ghud{j}(kp,:);
-      zudj=[zeros(np,exo_det_nbr);dr_.ghud{j};gx(:,1:npred)*hudj;zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
+      hudj = dr.ghud{j}(kp,:);
+      zudj=[zeros(np,exo_det_nbr);dr.ghud{j};gx(:,1:npred)*hudj;zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
       R2 = hessian*kron(zudj,zudi);
-      dr_.ghudud{j,i} = -M2*(dr_.ghudud{j-1,i-1}(kf,:)+dr_.ghxud{j-1}(kf,:)* ...
-			    kron(hudi,Eud)+dr_.ghxud{i-1}(kf,:)* ...
-			    kron(hudj,Eud)+dr_.ghxx(kf,:)*kron(hudj,hudi))-M1*R2;
+      dr.ghudud{j,i} = -M2*(dr.ghudud{j-1,i-1}(kf,:)+dr.ghxud{j-1}(kf,:)* ...
+			    kron(hudi,Eud)+dr.ghxud{i-1}(kf,:)* ...
+			    kron(hudj,Eud)+dr.ghxx(kf,:)*kron(hudj,hudi))-M1*R2;
     end
     
   end

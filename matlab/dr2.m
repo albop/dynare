@@ -1,11 +1,11 @@
 % Copyright (C) 2001 Michel Juillard
 %
 % function used for dr_algo == 1
-function ghs2=dr2(ys)
-  global fname_ dr_
+function ghs2=dr2(ys,dr)
+  global fname_
   
-  dr_.ys = ys;
+  dr.ys = ys;
   fh = str2func([fname_ '_fff']);
-  dr_.fbias = 2*feval(fh,dr.ys);
-  dr1(0);
-  ghs2 = dr_.ghs2;
+  dr.fbias = 2*feval(fh,dr.ys);
+  dr=dr1(dr,0);
+  ghs2 = dr.ghs2;
