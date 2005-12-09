@@ -860,6 +860,25 @@ void print_exo()
 	  exo_nbr++ ;
 	}
     }
+  for (i=0; i < var_nbr; i++)
+    {
+      if ( var_list[i].endo_exo == 0)
+        {
+          if ( var_list[i].nbr == 0 )
+            {
+              sprintf(buff,"lgx_orig_ord_ = [%d",var_list[i].original_nbr+1);
+            }
+          else
+            {
+              sprintf(buff," %d",var_list[i].original_nbr+1);
+            }
+          str_output(buff);
+        }
+    }
+  if (exo_nbr > 0)
+    {
+      str_output("];\n");
+    }
 #endif
 
   sprintf(buff,"exo_nbr = %d;\n",exo_nbr);
