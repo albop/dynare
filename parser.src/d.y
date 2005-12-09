@@ -47,7 +47,8 @@
 %token NOCORR NOMOMENTS NOFUNCTIONS NODIAGNOSTIC NOPRINT NOGRAPH
 %token MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION LAPLACE
 %token MODIFIEDHARMONICMEAN
-%token <string> INUMBER DNUMBER NAME OPERATORS POUND EOL INDEX 
+%token COMPILE_DEFINE COMPILE_IF COMPILE_ELSEIF COMPILE_ELSE COMPILE_ENDIF
+%token <string> INUMBER DNUMBER NAME OPERATORS POUND EOL INDEX EQ NE LE GE
 %token <p_tok> VAR_ID
 
 %type <p_queue> equation_list equation other_inst p_expr expression elem_exp 
@@ -56,7 +57,7 @@
 %type <p_queue> var_exp var_id_exp indexed_var_exp 
 %type <p_queue> triangular_matrix triangular_row
 %type <p_loop> loop_init
-%type <string> value prior filename filename_elem
+%type <string> value prior filename filename_elem compile_operator
 %expect 5
 %%
 
@@ -108,6 +109,7 @@
       | observation_trends
       | unit_root_vars
       | model_comparison
+      | compile_statement
       ;
  
  longnames : LONGNAMES ';'
@@ -117,16 +119,16 @@
       | PERIODS '=' INUMBER ';' {print_iter($3);}
       ;
 
- var : VAR {varlist_flag=1;} varlist ';'
+var : VAR {varlist_flag=1;} varlist ';' {print_endo();}
       ;
 
- varexo : VAREXO {varlist_flag=0;} varlist ';'
+varexo : VAREXO {varlist_flag=0;} varlist ';' {print_exo();}
       ;
 
- varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';'
+varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
       ;
 
- varrecur : VARRECUR {varlist_flag=3;} varlist ';'
+ varrecur : VARRECUR {varlist_flag=3;} varlist ';' {print_recur();}
       ;
 
  varlist : varlist NAME '-' NAME {add_var_range($2,$4,varlist_flag);}
@@ -140,8 +142,10 @@
  parameters : PARAMETERS {varlist_flag=4;} varlist ';' {print_param();}
       ;
 
- model : MODEL ';' {print_var();} equation_list END   {model=$4;print_model(model);}
-      | MODEL '(' LINEAR ')' ';' {print_var();} equation_list END   {check.linear=1;model=$7;p_option("linear","1");print_model(model);}
+ model : MODEL ';' equation_list END   {model=$3;print_model(model);}
+      | MODEL '(' LINEAR ')' ';' equation_list END   {check.linear=1;model=$6;p_option("linear","1");print_model(model);}
+      | MODEL ';' compile_statement equation_list END   {model=$4;print_model(model);}
+      | MODEL '(' LINEAR ')' ';' compile_statement equation_list END   {check.linear=1;model=$7;p_option("linear","1");print_model(model);}
       ;
 
  initval : INITVAL ';' {p_initval();} initval_list END 
@@ -165,8 +169,9 @@
       | equation_list other_inst {$$=add_to_queue($1,$2);}
       | equation_list do_loop {$$=copy_queue($$,$2);}
       | equation {$$=create_queue($1);}
+      | equation compile_statement {$$=$1;}
       | other_inst {$$=create_queue($1);}
-      | do_loop      
+      | do_loop
       ;
 
  equation : expression EQUAL expression ';' 
@@ -247,10 +252,12 @@
       ;
 
  initval_elem : VAR_ID EQUAL expression ';' {p_init($1,$3);}
+      | compile_statement
       ;
 
  histval_list : histval_list histval_elem
       | histval_elem
+      | compile_statement
       ;
 
  histval_elem : VAR_ID '(' INUMBER ')' EQUAL expression ';' {p_hist($1,$3,$6);}
@@ -264,6 +271,7 @@
             | VAR VAR_ID ';' STDERR expression ';' {simul_algo=1; p_stderr($2,$5);}
             | VAR VAR_ID EQUAL expression ';' {simul_algo=1; p_variance($2,$2,$4);}
             | VAR VAR_ID ',' VAR_ID EQUAL expression ';' {simul_algo=1; p_variance($2,$4,$6);}
+            | compile_statement
             ;
 
  period_list : period_list INUMBER  {$$=add_to_queue($1,periods($2,0));}
@@ -535,6 +543,7 @@
                     | optim_weights_list VAR_ID ',' VAR_ID expression ';' {p_optim_weights2($2, $4, $5);}
                     | VAR_ID expression ';' {p_optim_weights1($1, $2);}
                     | VAR_ID ',' VAR_ID expression ';' {p_optim_weights2($1, $3, $4);}
+                    | compile_statement
                     ;
 
  osr_params : OSR_PARAMS osr_params_list ';'
@@ -542,7 +551,8 @@
 
  osr_params_list : osr_params_list ',' NAME {p_osr_params($3);}
                  | osr_params_list NAME {p_osr_params($2);}
-                 | NAME {p_osr_params($1);}   
+                 | NAME {p_osr_params($1);}
+                 | compile_statement   
                  ;
 
  osr : OSR ';' {p_osr();}
@@ -594,6 +604,7 @@
                 | AUTOCORR VAR_ID '(' INUMBER ')' '(' DNUMBER ')' EQUAL expression ';' {p_calib_ac($2,$4,$10,$7);}
                 | AUTOCORR VAR_ID '(' INUMBER ')' '(' INUMBER ')' EQUAL expression ';' {p_calib_ac($2,$4,$10,$7);}
                 | AUTOCORR VAR_ID '(' INUMBER ')' EQUAL expression ';' {p_calib_ac($2,$4,$7,"1");}
+                | compile_statement
                 ;
 
  calib : CALIB ';' {p_calib(0);}
@@ -637,6 +648,7 @@
 
  estimated_list : estimated_list {estim_params_init();} estimated_elem {p_estimated_elem();}
                 | {estim_params_init();} estimated_elem {p_estimated_elem();}
+                | compile_statement
                 ;
 
  estimated_elem : estimated_elem1 ',' estimated_elem2 ';'
@@ -664,6 +676,7 @@
 
  estimated_init_list : estimated_init_list estimated_init_elem
                      | estimated_init_elem
+                     | compile_statement
                      ;
 
  estimated_init_elem : STDERR VAR_ID ',' value ';' {p_estimated_init_elem1($2,$4);}
@@ -676,6 +689,7 @@
 
  estimated_bounds_list : estimated_bounds_list estimated_bounds_elem
                      | estimated_bounds_elem
+                     | compile_statement
                      ;
 
  estimated_bounds_elem : STDERR VAR_ID ',' value ',' value ';' {p_estimated_bounds_elem1($2,$4,$6);}
@@ -756,6 +770,7 @@
 
  trend_list : trend_list trend_element
             | trend_element
+            | compile_statement
             ;
 
  trend_element :  VAR_ID '(' expression ')' ';' {p_trend_element($1,$3);}
@@ -801,6 +816,32 @@
         | ':' {$$ = ":";}
         | '.' {$$ = ".";}
         ;
+
+  compile_statement : compile_define_statement
+        | compile_if_statement
+        | compile_elseif_statement
+        | COMPILE_ELSE {compile_else();}
+        | COMPILE_ENDIF {compile_endif();}
+        ;
+
+  compile_define_statement:
+            COMPILE_DEFINE NAME ';' {compile_define($2);}
+          | COMPILE_DEFINE NAME INUMBER ';'{compile_define($2,$3);}
+	  ;
+
+  compile_operator: EQ 
+          | '<' {$$=strdup("<");} 
+          | '>' {$$=strdup(">");} 
+          | NE
+          | LE
+          | GE
+          ; 
+
+  compile_if_statement: 
+    COMPILE_IF NAME compile_operator INUMBER ';' {compile_if($2,$3,$4);};
+
+  compile_elseif_statement: 
+    COMPILE_ELSEIF NAME compile_operator INUMBER ';' {compile_elseif($2,$3,$4);};
 
 %%
 int yyerror (char *s)

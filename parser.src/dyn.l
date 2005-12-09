@@ -18,6 +18,7 @@ int name_var(char *);
 %x DYNARE2
 %x DYNARE3
 %x DYNARE4
+%x SKIP
 %x THRU
 
 %%
@@ -72,6 +73,14 @@ estimated_params_bounds {BEGIN DYNARE2; return ESTIMATED_PARAMS_BOUNDS;}
 estimated_params {BEGIN DYNARE2; return ESTIMATED_PARAMS;}
 unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
 model_comparison {BEGIN DYNARE1; return MODEL_COMPARISON;}
+
+<*>@define {yy_push_state(DYNARE1); return COMPILE_DEFINE;}
+<*>@if {yy_push_state(DYNARE1); return COMPILE_IF;}
+<*>@elseif {yy_push_state(DYNARE1); return COMPILE_ELSEIF;}
+<*>@else[ \t\n]*; {return COMPILE_ELSE;}
+<*>@endif[ \t\n]*; {return COMPILE_ENDIF;}
+
+<SKIP>. ;
 
  /* \r is always ignored */
 <*>\r ;
@@ -225,11 +234,15 @@ model_comparison {BEGIN DYNARE1; return MODEL_COMPARISON;}
 
  /* integer number */
 <DYNARE1,DYNARE2,DYNARE3,DYNARE4>-?[0-9]+ {
-  yylval.string=strdup(yytext);
+  yylval.string=strdup(yytext); 
   return INUMBER;}
  
 <DYNARE1,DYNARE2>: {return yytext[0];}
 <DYNARE2>= {return EQUAL;}
+<DYNARE1>"="+"=" {yylval.string=strdup(yytext); return EQ;}
+<DYNARE1>"<"+"=" {yylval.string=strdup(yytext); return LE;}
+<DYNARE1>">"+"=" {yylval.string=strdup(yytext); return GE;}
+<DYNARE1>"!"+"=" {yylval.string=strdup(yytext); return NE;}
 <DYNARE1,DYNARE3>= {return yytext[0];}
 <DYNARE2>, {return yytext[0];}
 <DYNARE2,DYNARE4>\$ {return DOLLAR;}
@@ -268,6 +281,16 @@ int name_var(char *s)
   }
 }
  
+void start_skipping(void)
+{
+  yy_push_state(SKIP);
+}
+
+void pop_flex_state(void)
+{
+  yy_pop_state();
+}
+
 /*
 01/01/03 MJ added DYNASAVE
 12/31/02 MJ corrected THRU mode to permit native lines without a final ;

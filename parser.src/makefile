@@ -1,9 +1,12 @@
 all: dynare_m.exe dynare_s.exe dynare_g.exe dynare_OxPro.exe dynare_Oxcons.exe
 
+precompiler.o: precompiler.cc precompiler.hh d_ll.c d_tab.c
+	g++ -mno-cygwin -c precompiler.cc
+
 dynare_mb: dynare_m.o
 	gcc -mno-cygwin -g -o dynare_m.exe dynare_m.o d_tab.o d_ll.o -lefence
-dynare_m.exe: dynare_m.o d_tab.o d_ll.o
-	gcc -mno-cygwin -g -o dynare_m.exe dynare_m.o d_tab.o d_ll.o
+dynare_m.exe: dynare_m.o d_tab.o d_ll.o precompiler.o
+	gcc -mno-cygwin -g -o dynare_m.exe dynare_m.o d_tab.o d_ll.o precompiler.o -lstdc++
 	cp dynare_m.exe ../matlab
 
 dynare_m.o: dynare.c d.h d_tab.h

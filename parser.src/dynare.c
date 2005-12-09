@@ -748,25 +748,11 @@ void p_histval(void)
   str_output("HISTVAL \n");
 #endif
 }
-
-void print_var()
+  
+void print_endo()
 {
-  int i ;
-  char buff[200];
-  int n_exo, n_endo;
-  n_exo = 0;
-  n_endo = 0;
-  for( i = 0; i < var_nbr; ++i)
-    {
-      if (var_list[i].endo_exo == 0)
-	{
-	  var_list[i].original_nbr = n_exo++;
-	}
-      else if (var_list[i].endo_exo == 1)
-	{
-	  var_list[i].original_nbr = n_endo++;
-	}
-    }
+  char buff[2000];
+  int i;
   sort_var();
 
 #ifdef GAUSS  
@@ -775,61 +761,20 @@ void print_var()
     str_output(" string");
   str_output(" _lgy = ");
 
-  i=0;
-  while (i < var_nbr){
-    if (var_list[i].endo_exo == 1){
-      var_list[i].nbr=endo_nbr;
-      if (endo_nbr > 0) str_output(", ");
-      strcpy(buff,"\"");
-      strcat(buff,var_list[i].name);
-      strcat(buff,"\"");
-      str_output(buff);
-      endo_nbr++;
+  for (i=0; i < var_nbr;i++)
+    {
+      if (var_list[i].endo_exo == 1)
+	{
+	  var_list[i].nbr=endo_nbr;
+	  if (endo_nbr > 0) str_output(", ");
+	  strcpy(buff,"\"");
+	  strcat(buff,var_list[i].name);
+	  strcat(buff,"\"");
+	  str_output(buff);
+	  endo_nbr++;
+	}
     }
-    i++;
-  }
   str_output(";\n");
-
-  i=0;
-  while (i < var_nbr){
-    if (var_list[i].endo_exo == 0){
-      if (exo_nbr==0){
-	str_output("\nlet");
-	if (longname) str_output(" string");
-	str_output(" _lgx = ");
-      }
-      var_list[i].nbr=exo_nbr;
-      if (exo_nbr > 0) str_output(", ");
-      strcpy(buff,"\"");
-      strcat(buff,var_list[i].name);
-      strcat(buff,"\"");
-      str_output(buff);
-      exo_nbr++;
-    }
-    i++;
-  }
-  if (exo_nbr > 0) str_output(";\n");
-
-  i=0;
-  while (i < var_nbr){
-    if (var_list[i].endo_exo == 3){
-      if (recur_nbr==0){
-	str_output("\nlet");
-	if (longname) str_output(" string");
-	str_output(" _lgr = ");
-      }
-      var_list[i].nbr=recur_nbr;
-      if (recur_nbr > 0) str_output(", ");
-      strcpy(buff,"\"");
-      strcat(buff,var_list[i].name);
-      strcat(buff,"\"");
-      str_output(buff);
-      recur_nbr++;
-    }
-    i++;
-  }
-  if (recur_nbr > 0) str_output(";\n");
-
 #elif defined MATLAB || defined SCILAB
   for (i=0; i < var_nbr; i++)
     {
@@ -852,6 +797,48 @@ void print_var()
 	  endo_nbr++ ;
 	}
     }
+#endif
+
+  sprintf(buff,"endo_nbr = %d;\n",endo_nbr);
+  str_output(buff);
+  iy=(int *)calloc(endo_nbr,sizeof(int));
+}      
+  
+void print_exo()
+{
+  char buff[2000];
+  int i;
+  int n = 0;
+
+  for(i = 0; i < var_nbr; ++i)
+    {
+      if (var_list[i].endo_exo == 0)
+	{
+	  var_list[i].original_nbr = n++;
+	}
+    }
+
+  sort_var();
+
+#ifdef GAUSS  
+  str_output("\nlet");
+  if (longname) 
+    str_output(" string");
+  str_output(" _lgx = ");
+
+  for (i=0; i < var_nbr; i++){
+    if (var_list[i].endo_exo == 0){
+      var_list[i].nbr=endo_nbr;
+      if (exo_nbr > 0) str_output(", ");
+      strcpy(buff,"\"");
+      strcat(buff,var_list[i].name);
+      strcat(buff,"\"");
+      str_output(buff);
+      exo_nbr++;
+    }
+  }
+  str_output(";\n");
+#elif defined MATLAB || defined SCILAB
   for (i=0; i < var_nbr; i++)
     {
       if ( var_list[i].endo_exo == 0)
@@ -868,51 +855,43 @@ void print_var()
 	      sprintf(buff,"lgx_ = [lgx_;'%s'];\n",var_list[i].name);
 #endif
 	    }
-	  str_output(buff);
+	  str_output(buff) ;
 	  var_list[i].nbr=exo_nbr ;
 	  exo_nbr++ ;
 	}
     }
-  for (i=0; i < var_nbr; i++)
-    {
-      if ( var_list[i].endo_exo == 0)
-	{
-	  if ( var_list[i].nbr == 0 )
-	    {
-	      sprintf(buff,"lgx_orig_ord_ = [%d",var_list[i].original_nbr+1);
-	    }
-	  else
-	    {
-	      sprintf(buff," %d",var_list[i].original_nbr+1);
-	    }
-	  str_output(buff);
-	}
-    }
-  if (exo_nbr > 0)
-    {
-      str_output("];\n");
-    }
-  for (i=0; i < var_nbr; i++)
-    {
-      if ( var_list[i].endo_exo == 3)
-	{
-	  if ( recur_nbr == 0 )
-	    {
-	      sprintf(buff,"lgr_ = '%s';\n",var_list[i].name);
-	    }
-	  else
-	    {
-#ifdef MATLAB
-	      sprintf(buff,"lgr_ = str2mat(lgr_,'%s');\n",var_list[i].name);
-#else
-	      sprintf(buff,"lgr_ = [lgr_;'%s'];\n",var_list[i].name);
 #endif
-	    }
-	  str_output(buff);
-	  var_list[i].nbr=recur_nbr ;
-	  recur_nbr++ ;
-	}
+
+  sprintf(buff,"exo_nbr = %d;\n",exo_nbr);
+  str_output(buff);
+}      
+  
+void print_exo_det()
+{
+  char buff[2000];
+  int i;
+
+  sort_var();
+
+#ifdef GAUSS  
+  str_output("\nlet");
+  if (longname) 
+    str_output(" string");
+  str_output(" _lgx_det = ");
+
+  for (i=0; i < var_nbr;i++){
+    if (var_list[i].endo_exo == 5){
+      var_list[i].nbr=exo_det_nbr;
+      if (exo_det_nbr > 0) str_output(", ");
+      strcpy(buff,"\"");
+      strcat(buff,var_list[i].name);
+      strcat(buff,"\"");
+      str_output(buff);
+      exo_det_nbr++;
     }
+  }
+  str_output(";\n");
+#elif defined MATLAB || defined SCILAB
   for (i=0; i < var_nbr; i++)
     {
       if ( var_list[i].endo_exo == 5)
@@ -929,24 +908,71 @@ void print_var()
 	      sprintf(buff,"lgx_det_ = [lgx_det_;'%s'];\n",var_list[i].name);
 #endif
 	    }
-	  str_output(buff);
+	  str_output(buff) ;
 	  var_list[i].nbr=exo_det_nbr ;
 	  exo_det_nbr++ ;
 	}
     }
 #endif
 
-  sprintf(buff,"endo_nbr = %d;\n",endo_nbr);
-  str_output(buff);
-  sprintf(buff,"exo_nbr = %d;\n",exo_nbr);
-  str_output(buff);
   sprintf(buff,"exo_det_nbr = %d;\n",exo_det_nbr);
   str_output(buff);
-  sprintf(buff,"recur_nbr = %d;\n",recur_nbr);
-  str_output(buff);
-  iy=(int *)calloc(endo_nbr,sizeof(int));
 }      
   
+void print_recur()
+{
+  char buff[2000];
+  int i;
+
+  sort_var();
+
+#ifdef GAUSS  
+  str_output("\nlet");
+  if (longname) 
+    str_output(" string");
+  str_output(" _lgr = ");
+
+  for (i =0; < var_nbr, ++i){
+    if (var_list[i].endo_exo == 3){
+      var_list[i].nbr=endo_nbr;
+      if (recur_nbr > 0) str_output(", ");
+      strcpy(buff,"\"");
+      strcat(buff,var_list[i].name);
+      strcat(buff,"\"");
+      str_output(buff);
+      recur_nbr++;
+    }
+  }
+  str_output(";\n");
+#elif defined MATLAB || defined SCILAB
+  for (i=0; i < var_nbr; i++)
+    {
+      if ( var_list[i].endo_exo == 3)
+	{
+	  if ( recur_nbr == 0 )
+	    {
+	      sprintf(buff,"lgr_ = '%s';\n",var_list[i].name);
+	    }
+	  else
+	    {
+#ifdef MATLAB
+	      sprintf(buff,"lgr_ = str2mat(lgr_,'%s');\n",var_list[i].name);
+#else
+	      sprintf(buff,"lgr_ = [lgr_;'%s'];\n",var_list[i].name);
+#endif
+	    }
+	  str_output(buff) ;
+	  var_list[i].nbr=recur_nbr ;
+	  recur_nbr++ ;
+	}
+    }
+#endif
+
+  sprintf(buff,"recur_nbr = %d;\n",recur_nbr);
+  str_output(buff);
+}      
+  
+
 void str_output(char *str)
 {
   int static column=0,p;
@@ -1345,6 +1371,7 @@ void dynare_init(char* fname,struct s_runtime_options runtime_options)
   str_output("M_.dname = '");
   str_output(fname);
   str_output("';\n");
+  str_output("endo_nbr=0;exo_nbr=0;exo_det_nbr=0;\n");
   str_output("dsmpl_=0;\ndynatol_=0.00001;\nmaxit_=10;\nslowc_=1;\ntiming_=0;\nct_=0;\ngstep_=1e-2;\n");
   str_output("endval_=0;rplottype_=0;\nvalf_=0;\n");
   str_output("y_=[];\nex_=[];\nex_det_=[];\n");
@@ -1696,6 +1723,8 @@ void p_steady_linear(struct queue *p)
 void print_param(void)
 {
   int i;
+
+  sort_var();
 
 #if defined MATLAB || defined SCILAB
   param_nbr = 0;
