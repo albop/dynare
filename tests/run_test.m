@@ -1,5 +1,6 @@
 function run_test()
 test_files = {
+'.' 'precompiler';
 '.'  'ramst';
 '.'  'ramst_a';
 '.' 'example1';
