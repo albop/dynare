@@ -16,13 +16,13 @@ global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test
 
   if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
-    fval = bayestopt_.penalty*min(1e3,exp(sum(bayestopt_.lb(k)-xparam1(k))));
+    fval = bayestopt_.penalty+sum((bayestopt_.lb(k)-xparam1(k)).^2);
     cost_flag = 0;
     return;
   end
   if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
     k = find(xparam1 > bayestopt_.ub);
-    fval = bayestopt_.penalty*min(1e3,exp(sum(xparam1(k)-bayestopt_.ub(k))));
+    fval = bayestopt_.penalty+sum((xparam1(k)-bayestopt_.ub(k)).^2);
     cost_flag = 0;
     return;
   end
@@ -53,7 +53,7 @@ global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test
 		a = eig(Q);
 		k = a<0;
 		if k > 0
-		  fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
+		  fval = bayestopt_.penalty+sum(-a(k));
 		  cost_flag = 0;
 		  return
 		end
@@ -72,7 +72,7 @@ global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test
       a = eig(H);
       k = a<0;
       if k > 0
-	fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
+	fval = bayestopt_.penalty+sum(-a(k));
 	cost_flag = 0;
 	return
       end
@@ -88,11 +88,11 @@ global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test
   %------------------------------------------------------------------------------
   [T,R,SteadyState,info] = dynare_resolve;
   if info(1) == 1 | info(1) == 2 | info(1) == 5
-    fval = bayestopt_.penalty;
+    fval = bayestopt_.penalty+1;
     cost_flag = 0;
     return
   elseif info(1) == 3 | info(1) == 4 | info(1) == 20
-    fval = bayestopt_.penalty*min(1e3,exp(info(2)));
+    fval = bayestopt_.penalty+info(2)^2;
     cost_flag = 0;
     return
   end
