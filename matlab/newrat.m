@@ -9,6 +9,7 @@ function [xparam1, hh, gg, fval] = newrat(func0,x,hh,gg,flag,varargin)
 %
 %  flag = 1, to start with the compelte Newton search
 
+  global bayestopt_
 icount=0;
 nx=length(x);
 xparam1=x;
@@ -42,6 +43,7 @@ check=0;
 if max(eig(hh))<0, disp('Negative definite Hessian! Local maximum!'), pause, end,
 while norm(gg)>1.e-3 & check==0,
     icount=icount+1;
+    bayestopt_.penalty = fval0(icount);
     disp([' '])
     disp(['Iteration ',num2str(icount)])
     x0=xparam1-inv(hh)*gg;
