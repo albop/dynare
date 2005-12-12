@@ -8,7 +8,7 @@ dynare_mb: dynare_m.o
 
 dynare_m: dynare_m.o d_tab.o d_ll.o precompiler.o
 	gcc  -g -o dynare_m dynare_m.o d_tab.o d_ll.o precompiler.o -lstdc++
-#	cp dynare_m ../matlab
+	cp dynare_m ../matlab
 
 dynare_m.o: dynare.c d.h d_tab.h
 	gcc  -g  -c dynare.c -o dynare_m.o -DMATLAB -Wall #-DDEBUG

@@ -1,4 +1,5 @@
 function run_test()
+
 test_files = {
 '.' 'precompiler';
 '.'  'ramst';
@@ -18,6 +19,7 @@ test_files = {
 'fs2000' 'fs2000a';
 }
 
+diary run_test.log
 results = cell(length(test_files),1);
 
 for i=1:length(test_files)
@@ -28,6 +30,8 @@ for i=1:length(test_files)
   disp(test_files{i,2})
   disp(results{i})
 end
+diary off
+
 function msg=run_test1(path1,mod_file)
      global options_
      clear options_
