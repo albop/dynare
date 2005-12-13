@@ -59,6 +59,8 @@ modified versions.
 <indexterm zone="rplot"><primary>rplot</primary></indexterm>
 <indexterm zone="dynasave"><primary>dynasave</primary></indexterm>
 <indexterm zone="dynatype"><primary>dynatype</primary></indexterm>
+<indexterm zone="define"><primary>@define</primary></indexterm>
+<indexterm zone="if_elseif_else_end"><primary>@if...@elseif...@else...@end</primary></indexterm>
   </bookinfo>
 
 <preface><title>Preface</title><para>
@@ -99,6 +101,10 @@ Currently the development team of Dynare is composed of S. Adjemian, A. Benzouga
 </para>
 
 <section><title>Changes</title>
+<para>December 13, 2005</para>
+<itemizedlist>
+<listitem><para>added conditional compilation commands <xref linkend="define"/> and <xref linkend="if_elseif_else_end"/>.</para></listitem>
+</itemizedlist>
 <para>May 3, 2005</para>
 <itemizedlist>
 <listitem><para>added option <command>noprint</command> in <xref linkend="stoch_simul"/></para></listitem>
@@ -247,7 +253,7 @@ In the description of Dynare commands, the following conventions are observed:
 <listitem><para><command><replaceable>INTEGER</replaceable></command> indicates an integer number</para></listitem>
 <listitem><para><command><replaceable>DOUBLE</replaceable></command> indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1d3, 1.1D3.</para></listitem>
 <listitem><para><command><replaceable>EXPRESSION</replaceable></command> indicates a mathematical expression valid in the underlying language (Matlab, Scilab or Gauss)</para></listitem>
-<listitem><para><command><replaceable>VARIABLE_NAME</replaceable></command> indicates a variable name starting with an alphabetical charcater and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
+<listitem><para><command><replaceable>VARIABLE_NAME</replaceable></command> indicates a variable name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
 <listitem><para><command><replaceable>PARAMETER_NAME</replaceable></command> indicates a parameter name starting with an alphabetical charcater and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
 <listitem><para><command><replaceable>FILENAME</replaceable></command> indicates a file name valid under your operating system (Windows, Linux or Unix)</para></listitem>
 </itemizedlist>
@@ -257,17 +263,17 @@ In the description of Dynare commands, the following conventions are observed:
 
 <refentry id="Dynare">
   <refmeta>
-    <refentrytitle>Dynare</refentrytitle>
+    <refentrytitle>dynare</refentrytitle>
   </refmeta>
 
   <refnamediv>
-    <refname>Dynare</refname>
+    <refname>dynare</refname>
     <refpurpose>executes Dynare</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>Dynare</command>
+      <command>dynare</command>
       <arg choice="plain">
       <replaceable>FILENAME</replaceable>[.mod]
       </arg>
@@ -276,7 +282,7 @@ In the description of Dynare commands, the following conventions are observed:
 
 <refsect1><title>Description</title>
 <para>
-<command>Dynare</command> executes instruction included in <filename>filename.mod</filename>.
+<command>dynare</command> executes instruction included in <filename>filename.mod</filename>.
 <filename>filename.mod</filename> is the name of the model file containing the
 model and the processing instructions.
 </para>
@@ -284,7 +290,7 @@ model and the processing instructions.
 
 <refsect1><title>Details</title>
 <para>
-In Matlab, <command>Dynare</command> creates three intermediary files:
+In Matlab, <command>dynare</command> creates three intermediary files:
 <itemizedlist spacing='compact'>
 <listitem><para> <filename>filename.m</filename> with the instructions for the simulations</para></listitem>
 <listitem><para> <filename>filename_ff.m</filename> with the dynamic model equations</para></listitem>
@@ -292,7 +298,7 @@ In Matlab, <command>Dynare</command> creates three intermediary files:
 </itemizedlist>
 </para>
 <para>
-In Scilab, <command>Dynare</command> creates three intermediary files:
+In Scilab, <command>dynare</command> creates three intermediary files:
 <itemizedlist spacing='compact'>
 <listitem><para> <filename>filename.sci</filename> with the instructions for the simulations</para></listitem>
 <listitem><para> <filename>filename_ff.sci</filename> with the dynamic model equations</para></listitem>
@@ -300,7 +306,7 @@ In Scilab, <command>Dynare</command> creates three intermediary files:
 </itemizedlist>
 </para>
 <para>
-In Gauss, <command>Dynare</command> creates an intermediary file <filename>filename.gau</filename> with the instructions for the simulations. The Gauss version still accepts the former <filename>.mdl</filename> extension, but it is now deprecated.
+In Gauss, <command>dynare</command> creates an intermediary file <filename>filename.gau</filename> with the instructions for the simulations. The Gauss version still accepts the former <filename>.mdl</filename> extension, but it is now deprecated.
 </para>
 <para>
 These files may be looked at to understand errors reported at the simulation stage.
@@ -309,11 +315,11 @@ These files may be looked at to understand errors reported at the simulation sta
 
 <refsect1><title>Examples</title>
 <programlisting>
-Dynare ramst
+dynare ramst
 </programlisting>
 <para>or</para>
 <programlisting>
-Dynare ramst.mod
+dynare ramst.mod
 </programlisting>
 </refsect1>
 </refentry>
@@ -1861,6 +1867,123 @@ In Matlab, variables saved with the <command>dynasave</command> command can be r
 </refsect1>
 </refentry>
 </sect1>
+
+<sect1><title>Conditional compilation</title>
+<para>
+Dynare has the following commands to choose which part of the *.mod file is executed. This is useful to maintain several versions of a model in the same *.mod file.
+</para>
+<itemizedlist>
+<listitem><para><xref linkend='define'/></para></listitem>
+<listitem><para><xref linkend='if_elseif_else_end'/></para></listitem>
+</itemizedlist>
+
+<refentry id="define">
+  <refmeta>
+    <refentrytitle>@define</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>@define</refname>
+    <refpurpose>defines a macro</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>@define</command>
+      <arg choice="plain">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">
+      <replaceable>INTEGER</replaceable>
+      </arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+<refsect1><title>Description</title>
+<para>
+<command>@define</command> defines a macro with name <replaceable>VARIABLE_NAME</replaceable> and value <replaceable>INTEGER</replaceable>. This macro can be used later in the *.mod file only in <command>@if</command> or <command>@elseif</command> statements. The macros can't be used to replace arbitrary part of codes like in C, for example.
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<para>
+<informalexample>
+<programlisting>
+  @define version 1;
+</programlisting>
+</informalexample>
+</para>
+</refsect1>
+
+</refentry>
+
+<refentry id="if_elseif_else_end">
+  <refmeta>
+    <refentrytitle>@if ... @elseif ... @else ... @end</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>@if ... @elseif ... @else ... @end</refname>
+    <refpurpose>defines conditional compilation of the *.mod file</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>@if</command>
+      <arg choice="plain">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">
+      <replaceable>LOGICAL_OPERATOR</replaceable>
+      </arg>
+      <arg choice="plain">
+      <replaceable>INTEGER</replaceable>
+      </arg>
+      <arg choice="plain">;</arg><sbr/>
+      <arg choice="plain">...</arg><sbr/>
+	
+    </cmdsynopsis>
+  </refsynopsisdiv>
+<refsect1><title>Description</title>
+<para><replaceable>LOGICAL_OPERATOR</replaceable> are
+<itemizedlist>
+<listitem><para>== equal</para></listitem>
+<listitem><para>!= not equal</para></listitem>
+<listitem><para>&lt; lesser than</para></listitem>
+<listitem><para>&gt; greater than</para></listitem>
+<listitem><para>&lt;= lesser or equal than</para></listitem>
+<listitem><para>&gt;= greater or equal than</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+These commands let the user define which part of the *.mod file should be handled by Dynare
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<para>
+<informalexample>
+<programlisting>
+  @define version 1;
+  parameters alph bet;
+  alph = 0.3;
+  @if version == 1;
+    bet = 0.9;
+  @elseif version == 2;
+    bet = 0.95;
+  @else;
+    bet = 0.98;
+  @end;
+</programlisting>
+</informalexample>
+</para>
+</refsect1>
+
+</refentry>
+
+</sect1>
+
 
 </chapter>
 
