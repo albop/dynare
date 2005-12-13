@@ -55,8 +55,11 @@ options_ = set_default_option(options_,'kalman_algo',1);
 options_ = set_default_option(options_,'kalman_tol',10^(-12));
 options_ = set_default_option(options_,'diffuse_d',[]);
 options_ = set_default_option(options_,'nk',1);
-options_ = set_default_option(options_,'varlag',3);
-
+options_ = set_default_option(options_,'varlag',4);
+options_ = set_default_option(options_,'Opt6Iter',3);
+options_ = set_default_option(options_,'Opt6Numb',40000);
+options_ = set_default_option(options_,'ExcludedParams',[]);
+options_ = set_default_option(options_,'ParamSubSet','All');
 
 optim_options = optimset('display','iter','LargeScale','off',...
              'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
@@ -213,25 +216,31 @@ k = find(isnan(bayestopt_.jscale));
 bayestopt_.jscale(k) = options_.mh_jscale;
 
 % transform data 
-
-
 if options_.loglinear == 1
   rawdata = log(rawdata);
 end
-
 if ~isreal(rawdata)
   error(['There are complex values in the data. Probably  a wrong' ...
      ' transformation'])
 end
 
+% load a previous posterior mode if any
 if length(options_.mode_file) > 0
-  eval(['load ' options_.mode_file ';']');
+  eval(['load ' options_.mode_file ';']);
+  if exist('Scale')
+    options_.mh_jscale = Scale;
+    bayestopt_.jscale = ones(length(xparam1),1)*Scale;
+  end
+  if exist('PostMean')
+    MeanPar = PostMean;
+  end  
 end
 
+% compute sample moments if needed (var-dsge)
 if ~isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) | ~isempty(dsge_prior_weight)
     evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
-       'VarSampleMoments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);'])
-end  
+	   'VarSampleMoments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);'])
+end
 
 iter1 = 1;
 for iter1 = 1:length(options_.nobs)
@@ -239,86 +248,160 @@ for iter1 = 1:length(options_.nobs)
   if options_.prefilter == 1
     bayestopt_.mean_varobs = mean(rawdata(options_.first_obs+(0:gend-1),:),1);
     data = rawdata(options_.first_obs+(0:gend-1),:)'-...
-       repmat(bayestopt_.mean_varobs',1,gend);
+	   repmat(bayestopt_.mean_varobs',1,gend);
   else
     data = rawdata(options_.first_obs+(0:gend-1),:)';
-  end
-  
+  end  
   initial_estimation_checks(xparam1,gend,data);
-
   if options_.mode_compute > 0
     if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-        fh=str2func('DsgeLikelihood');
+      fh=str2func('DsgeLikelihood');
     else
-        fh=str2func('DsgeVarLikelihood');        
+      fh=str2func('DsgeVarLikelihood');        
     end
     if options_.mode_compute == 1
-        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-            [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
+      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	[xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
             fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
-        else
-            [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
+      else
+	[xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
             fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend);
-        end
+      end
     elseif options_.mode_compute == 2
-    %   asamin('set','maximum_cost_repeat',0);
-        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-            [fval,xparam1,grad,hessian_asamin,exitflag] = ...
-		asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend,data);   
-        else
-            [fval,xparam1,grad,hessian_asamin,exitflag] = ...
-		asamin('minimize','DsgeVarLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend);   
-        end  
+      %   asamin('set','maximum_cost_repeat',0);
+      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	[fval,xparam1,grad,hessian_asamin,exitflag] = ...
+	    asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend,data);   
+      else
+	[fval,xparam1,grad,hessian_asamin,exitflag] = ...
+	    asamin('minimize','DsgeVarLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend);   
+      end  
     elseif options_.mode_compute == 3
-        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data);
-        else
-            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
-        end  
+      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	[xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data);
+      else
+	[xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
+      end  
     elseif options_.mode_compute == 4
-        H0 = 1e-4*eye(nx);
-        crit = 1e-7;
-        nit = 1000;
-        verbose = 2;
-        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-            [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-		csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,gend,data);
-            disp(sprintf('Objective function at mode: %f',fval))
-            disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
-        else
-            [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-		csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,gend);
-            disp(sprintf('Objective function at mode: %f',fval))
-            disp(sprintf('Objective function at mode: %f',DsgeVarLikelihood(xparam1,gend)))
-        end
+      H0 = 1e-4*eye(nx);
+      crit = 1e-7;
+      nit = 1000;
+      verbose = 2;
+      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	[fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+	    csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,gend,data);
+	disp(sprintf('Objective function at mode: %f',fval))
+	disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
+      else
+	[fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+	    csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,gend);
+	disp(sprintf('Objective function at mode: %f',fval))
+	disp(sprintf('Objective function at mode: %f',DsgeVarLikelihood(xparam1,gend)))
+      end
     elseif options_.mode_compute == 5
-        flag = 0;
-        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-            [xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
-            eval(['save ' fname_ '_mode xparam1 hh gg fval;']);
-        else
-            [xparam1, hh, gg, fval] = newrat('DsgeVarLikelihood',xparam1,[],[],flag,gend);
-            eval(['save ' fname_ '_mode xparam1 hh gg fval;']);
-        end
+      flag = 0;
+      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	[xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
+	eval(['save ' fname_ '_mode xparam1 hh gg fval;']);
+      else
+	[xparam1, hh, gg, fval] = newrat('DsgeVarLikelihood',xparam1,[],[],flag,gend);
+	eval(['save ' fname_ '_mode xparam1 hh gg fval;']);
+      end
+    elseif options_.mode_compute == 6% New routine!
+      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	fval = DsgeLikelihood(xparam1,gend,data);
+      else
+	fval = DsgeVarLikelihood(xparam1,gend);
+      end      
+      OldMode = fval;
+      if ~exist('MeanPar')
+	MeanPar = xparam1;
+      end  
+      for i=1:options_.Opt6Iter
+	if exist('hh')
+	  CovJump = inv(hh);
+	else% The covariance matrix is initialized with the prior
+	  % covariance (a diagonal matrix)
+	  stdev = bayestopt_.pstdev;
+	  indx = find(isinf(stdev));
+	  stdev(indx) = 10*ones(length(indx),1);
+	  CovJump = diag(stdev).^2;
+	end
+	OldPostVar = CovJump;
+	if i == 1;
+	  if options_.Opt6Iter > 1
+	    [xparam1,PostVar,Scale,PostMean] = ...
+		metropolis99(xparam1,gend,data,bounds,options_.Opt6Numb,options_.mh_jscale,'',MeanPar,CovJump);
+	  else
+	    [xparam1,PostVar,Scale,PostMean] = ...
+		metropolis99(xparam1,gend,data,bounds,options_.Opt6Numb,options_.mh_jscale,'LastCall',MeanPar,CovJump);
+	  end
+	  options_.mh_jscale = Scale;
+	  mouvement = max(max(abs(PostVar-OldPostVar)));
+	  if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	    fval = DsgeLikelihood(xparam1,gend,data);
+	  else
+	    fval = DsgeVarLikelihood(xparam1,gend);
+	  end
+	  disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
+	  disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+	  OldMode = fval;
+	else
+	  OldPostVar = PostVar;
+	  if i<options_.Opt6Iter
+	    [xparam1,PostVar,Scale,PostMean] = ...
+		metropolis99(xparam1,gend,data,bounds,options_.Opt6Numb,options_.mh_jscale,'',PostMean,PostVar);
+	  else
+	    [xparam1,PostVar,Scale,PostMean] = ...
+		metropolis99(xparam1,gend,data,bounds,options_.Opt6Numb,options_.mh_jscale,'LastCall',PostMean,PostVar);
+	  end
+	  options_.mh_jscale = Scale;
+	  mouvement = max(max(abs(PostVar-OldPostVar)));
+	  if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	    fval = DsgeLikelihood(xparam1,gend,data);
+	  else
+	    fval = DsgeVarLikelihood(xparam1,gend);
+	  end
+	  disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
+	  disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+	  OldMode = fval;
+	end
+	options_.mh_jscale = Scale;
+	bayestopt_.jscale = ones(length(xparam1),1)*Scale;
+      end
+      hh = inv(PostVar);
+      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	fval = DsgeLikelihood(xparam1,gend,data);
+      else
+	fval = DsgeVarLikelihood(xparam1,gend);
+      end
     end
-    if options_.mode_compute ~= 5
-        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-            hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
-            eval(['save ' fname_ '_mode xparam1 hh fval;']);
-        else
-            hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
-            eval(['save ' fname_ '_mode xparam1 hh fval;']);
-        end  
+    if options_.mode_compute ~= 5 & options_.mode_compute ~= 6 
+      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
+	eval(['save ' fname_ '_mode xparam1 hh fval;']);
+      else
+	hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
+	eval(['save ' fname_ '_mode xparam1 hh fval;']);
+      end
     end
-    eval(['save ' fname_ '_mode xparam1 hh;']);
+    if options_.mode_compute ~= 6
+      eval(['save ' fname_ '_mode xparam1 hh;']);
+    elseif options_.mode_compute == 6
+      eval(['save ' fname_ '_mode xparam1 hh Scale PostMean;']);
+    end
   end
 
   if options_.mode_check == 1
     mode_check(xparam1,0,hh,gend,data,lb,ub);
   end
 
-  hh = generalized_cholesky(hh);
-  invhess = inv(hh);
+  if options_.mode_compute ~= 6
+    hh = generalized_cholesky(hh);
+    invhess = inv(hh);
+  else
+    invhess = PostVar;
+  end
   stdh = sqrt(diag(invhess));
   if any(bayestopt_.pshape > 0)
     disp(' ')

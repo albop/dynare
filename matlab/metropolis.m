@@ -33,13 +33,15 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   MAX_nerro = ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8);
   MAX_nfilt = ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8);
   if options_.bayesian_irf
-    MAX_nirfs = ceil(MaxNumberOfBytes/(options_.irf*length(ys_)*exo_nbr)/8);
+    MAX_nirfs_dsge = ceil(MaxNumberOfBytes/(options_.irf*length(ys_)*exo_nbr)/8);
+    if exist('dsge_prior_weight')
+      MAX_nirfs_dsgevar = ceil(MaxNumberOfBytes/(options_.irf*nvobs*exo_nbr)/8)
+    end
   end
   MAX_nthm1 = ceil(MaxNumberOfBytes/(length(ys_)*8));
   MAX_nthm2 = ceil(MaxNumberOfBytes/(length(ys_)*length(ys_)*8));
   MAX_nthm3 = ceil(MaxNumberOfBytes/(length(ys_)*exo_nbr*8));
   MAX_nthm4 = ceil(MaxNumberOfBytes/(length(ys_)*options_.ar*8));
-
 
   d     = chol(vv);
   options_.lik_algo = 1;
@@ -54,110 +56,110 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       end
       files = eval(['dir(''' fname_ '_mh*.mat'');']);
       if length(files)
-    delete([fname_ '_mh*.mat']);
-    disp('MH: Old _mh files succesfully erased!')
+	delete([fname_ '_mh*.mat']);
+	disp('MH: Old _mh files succesfully erased!')
       end   
       nops = 0;         % Number Of Past Simulations.
       lfile = -1;       % Index for the last mh file.
       if nblck > 1
-    disp('MH: Searching for initial values...')
-    ix2 = zeros(1,npar,nblck);
-    ilogpo2 = zeros(1,nblck);
-    for j=1:nblck
-      validate  = 0;
-      init_iter = 0;
-      trial     = 1;
-      while validate == 0 & trial <= 10 
-        candidate = options_.mh_init_scale*randn(1,npar)*d + transpose(xparam1);
-        if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
-            ix2(1,:,j) = candidate;
-            if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	disp('MH: Searching for initial values...')
+	ix2 = zeros(1,npar,nblck);
+	ilogpo2 = zeros(1,nblck);
+	for j=1:nblck
+	  validate  = 0;
+	  init_iter = 0;
+	  trial     = 1;
+	  while validate == 0 & trial <= 10 
+	    candidate = options_.mh_init_scale*randn(1,npar)*d + transpose(xparam1);
+	    if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
+	      ix2(1,:,j) = candidate;
+	      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
                 ilogpo2(1,j) = -DsgeLikelihood(ix2(1,:,j)',gend,data);
-            else
+	      else
                 ilogpo2(1,j) = -DsgeVarLikelihood(ix2(1,:,j)',gend);
-            end
-            j = j+1;
-            validate = 1;
-        end
-        init_iter = init_iter + 1;
-        if init_iter > 100 & validate == 0
-          disp(['MH: I couldn''t get a valid initial value in 100 trials.'])
-          disp(['MH: You should Reduce mh_init_scale...'])
-          disp(sprintf('MH: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
-          options_.mh_init_scale = input('MH: Enter a new value...  ');
-          trial = trial+1;
-        end
-      end
-      if trial > 10 & ~validate
-        error(['MH: I''m unable to find a starting value for block ' int2str(j)]);
-      end
-    end
-    disp('MH: Initial values found!')
-    disp(' ')
+	      end
+	      j = j+1;
+	      validate = 1;
+	    end
+	    init_iter = init_iter + 1;
+	    if init_iter > 100 & validate == 0
+	      disp(['MH: I couldn''t get a valid initial value in 100 trials.'])
+	      disp(['MH: You should Reduce mh_init_scale...'])
+	      disp(sprintf('MH: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
+	      options_.mh_init_scale = input('MH: Enter a new value...  ');
+	      trial = trial+1;
+	    end
+	  end
+	  if trial > 10 & ~validate
+	    error(['MH: I''m unable to find a starting value for block ' int2str(j)]);
+	  end
+	end
+	disp('MH: Initial values found!')
+	disp(' ')
       else
-    candidate = transpose(xparam1);
-    if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
-      ix2 = candidate;
-      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-        ilogpo2 = -DsgeLikelihood(ix2',gend,data);
-      else
-        ilogpo2 = -DsgeVarLikelihood(ix2',gend);
-      end
-      disp('MH: Initialization at the posterior mode.')
-      disp(' ')
-    else
-      disp('MH: Initialization failed...')
-      error('MH: The posterior mode lies outside the prior bounds.')
-    end
+	candidate = transpose(xparam1);
+	if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
+	  ix2 = candidate;
+	  if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	    ilogpo2 = -DsgeLikelihood(ix2',gend,data);
+	  else
+	    ilogpo2 = -DsgeVarLikelihood(ix2',gend);
+	  end
+	  disp('MH: Initialization at the posterior mode.')
+	  disp(' ')
+	else
+	  disp('MH: Initialization failed...')
+	  error('MH: The posterior mode lies outside the prior bounds.')
+	end
       end
       save([fname_ '_MhInitialization'],'ix2','ilogpo2');
     elseif options_.load_mh_file == 1
       disp('MH: I''m loading past metropolis-hastings simulations...')
       files = eval(['dir(''' fname_ '_mh*_blck*.mat'');']);
       if ~length(files)
-    error('MH: FAILURE :: there is no MH file to load here!')    
+	error('MH: FAILURE :: there is no MH file to load here!')    
       end
       bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
       past_number_of_blocks = length(bfiles);
       if length(bfiles)>0 & past_number_of_blocks ~= nblck
-    disp('MH: The specified number of blocks doesn''t match with the previous number of blocks!')
-    disp(['MH: You declared ' int2str(nblck) ' blocks, but the previous number of blocks was ' int2str(past_number_of_blocks) '.'])
-    disp(['MH: I will run the Metropolis-Hastings with ' int2str(past_number_of_blocks) ' blocks.' ])
-    nblck = past_number_of_blocks;
-    options_.mh_nblck = nblck;
+	disp('MH: The specified number of blocks doesn''t match with the previous number of blocks!')
+	disp(['MH: You declared ' int2str(nblck) ' blocks, but the previous number of blocks was ' int2str(past_number_of_blocks) '.'])
+	disp(['MH: I will run the Metropolis-Hastings with ' int2str(past_number_of_blocks) ' blocks.' ])
+	nblck = past_number_of_blocks;
+	options_.mh_nblck = nblck;
       end
       lfile = length(files)/nblck-1;
       if nblck == 1
-    instr = [fname_ '_mh' int2str(lfile)];
-    eval(['load ' instr]);
-    clear post2;
-    nops = size(logpo2,1);  
-    ix2 = x2(nops,:);   
-    ilogpo2 = logpo2(nops);
-    clear x2  logpo2;     
-    for file = 0:lfile-1
-      instr = [fname_ '_mh' int2str(file)];
-      eval(['load ' instr]);
-      clear post2 x2;
-      nops = nops + size(logpo2,1);
-    end
+	instr = [fname_ '_mh' int2str(lfile)];
+	eval(['load ' instr]);
+	clear post2;
+	nops = size(logpo2,1);  
+	ix2 = x2(nops,:);   
+	ilogpo2 = logpo2(nops);
+	clear x2  logpo2;     
+	for file = 0:lfile-1
+	  instr = [fname_ '_mh' int2str(file)];
+	  eval(['load ' instr]);
+	  clear post2 x2;
+	  nops = nops + size(logpo2,1);
+	end
       else 
-    for b = 1:nblck
-      instr = [fname_ '_mh' int2str(lfile) '_blck' int2str(b)];
-      eval(['load ' instr]);
-      clear post2;
-      nops = length(logpo2);
-      ix2(1,:,b) = x2(nops,:);  
-      ilogpo2(b) = logpo2(nops);
-      clear x2  logpo2;     
-    end
-    for file = 0:lfile-1
-      instr = [fname_ '_mh' int2str(file) '_blck1'];
-      eval(['load ' instr]);
-      clear post2 x2;
-      nops = nops + length(logpo2);
-      clear logpo2;
-    end
+	for b = 1:nblck
+	  instr = [fname_ '_mh' int2str(lfile) '_blck' int2str(b)];
+	  eval(['load ' instr]);
+	  clear post2;
+	  nops = length(logpo2);
+	  ix2(1,:,b) = x2(nops,:);  
+	  ilogpo2(b) = logpo2(nops);
+	  clear x2  logpo2;     
+	end
+	for file = 0:lfile-1
+	  instr = [fname_ '_mh' int2str(file) '_blck1'];
+	  eval(['load ' instr]);
+	  clear post2 x2;
+	  nops = nops + length(logpo2);
+	  clear logpo2;
+	end
       end
       % nops is the Number Of Past Simulations. 
       disp(['MH: ... It''s done. I''ve loaded ' int2str(nops) 'simulations.'])
@@ -173,8 +175,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       % Count the number of saved mh files per block
       NumberOfMhFilesPerBlock = zeros(nblck,1); 
       for i = 1:nblck
-    BlckMhFiles = eval(['dir(''' fname_ '_mh*_blck' int2str(i) '.mat'');']);
-    NumberOfMhFilesPerBlock(i) = length(BlckMhFiles);
+	BlckMhFiles = eval(['dir(''' fname_ '_mh*_blck' int2str(i) '.mat'');']);
+	NumberOfMhFilesPerBlock(i) = length(BlckMhFiles);
       end
       NumberOfMhFilesPerBlock
       return
@@ -184,142 +186,142 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       hh   = waitbar(0,'Please wait... Metropolis-Hastings...');
       set(hh,'Name','Metropolis-Hastings')
       if nruns <= MAX_nruns
-    x2 = zeros(nruns,npar); 
-    x2(1,:) = ix2(1,:);
-    logpo2 = zeros(nruns,1);    
-    logpo2(1) = ilogpo2;    
+	x2 = zeros(nruns,npar); 
+	x2(1,:) = ix2(1,:);
+	logpo2 = zeros(nruns,1);    
+	logpo2(1) = ilogpo2;    
       else
-    x2 = zeros(MAX_nruns,npar);
-    x2(1,:) = ix2(1,:);
-    logpo2 = zeros(MAX_nruns,1);
-    logpo2(1) = ilogpo2;
+	x2 = zeros(MAX_nruns,npar);
+	x2(1,:) = ix2(1,:);
+	logpo2 = zeros(MAX_nruns,1);
+	logpo2(1) = ilogpo2;
       end
       irun = ~options_.load_mh_file;    %%%% irun=0 <-- previous files are loaded
       rruns = nruns-irun;
       j=1;
       while j<=rruns
-    irun = irun + 1;
-    if irun <= MAX_nruns
-      par = randn(1,npar)*d;
-      par = par.*bayestopt_.jscale' + ix2;  
-      if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
-        if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-          logpost = -DsgeLikelihood(transpose(par),gend,data);
-        else
-          logpost = -DsgeVarLikelihood(transpose(par),gend);
-        end
-      else
-        logpost = -inf;
-      end    
-      if logpost > -inf & log(rand) < logpost - ilogpo2
-        x2(irun,:) = par; 
-        ix2 = par;
-        logpo2(irun) = logpost; 
-        ilogpo2 = logpost;
-        isux = isux + 1;
-      else    
-        x2(irun,:) = ix2;
-        logpo2(irun) = ilogpo2;
-      end   
-      prtfrc = j/nruns;
-      waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
-    else
-      post2 = exp(logpo2);
-      save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
-      clear x2 logpo2 post2;
-      x2 = zeros(MAX_nruns,npar);
-      logpo2 = zeros(MAX_nruns,1);
-      lfile = lfile + 1;
-      irun = 0;
-      j = j - 1;
-    end
-    j = j + 1;
+	irun = irun + 1;
+	if irun <= MAX_nruns
+	  par = randn(1,npar)*d;
+	  par = par.*bayestopt_.jscale' + ix2;  
+	  if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
+	    if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+	      logpost = -DsgeLikelihood(transpose(par),gend,data);
+	    else
+	      logpost = -DsgeVarLikelihood(transpose(par),gend);
+	    end
+	  else
+	    logpost = -inf;
+	  end    
+	  if logpost > -inf & log(rand) < logpost - ilogpo2
+	    x2(irun,:) = par; 
+	    ix2 = par;
+	    logpo2(irun) = logpost; 
+	    ilogpo2 = logpost;
+	    isux = isux + 1;
+	  else    
+	    x2(irun,:) = ix2;
+	    logpo2(irun) = ilogpo2;
+	  end   
+	  prtfrc = j/nruns;
+	  waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
+	else
+	  post2 = exp(logpo2);
+	  save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
+	  clear x2 logpo2 post2;
+	  x2 = zeros(MAX_nruns,npar);
+	  logpo2 = zeros(MAX_nruns,1);
+	  lfile = lfile + 1;
+	  irun = 0;
+	  j = j - 1;
+	end
+	j = j + 1;
       end
       if nruns <= MAX_nruns
-    post2 = exp(logpo2);
-    save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
-    clear post2 x2 logpo2;
+	post2 = exp(logpo2);
+	save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
+	clear post2 x2 logpo2;
       elseif irun <= MAX_nruns    
-    x2 = x2(1:irun,:);
-    logpo2 = logpo2(1:irun,1); 
-    post2 = exp(logpo2);
-    save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
-    clear post2 x2 logpo2;
+	x2 = x2(1:irun,:);
+	logpo2 = logpo2(1:irun,1); 
+	post2 = exp(logpo2);
+	save([fname_ '_mh' int2str(lfile+1)],'x2','logpo2','post2');
+	clear post2 x2 logpo2;
       end
       close(hh)
       disp(sprintf('Acceptation rate : %f',isux/nruns))
     else
       disp('Acceptation rates :')
       for b=1:nblck
-    hh   = waitbar(0,'Please wait... Metropolis-Hastings...');
-    set(hh,'Name',['Metropolis-Hastings, Block ',int2str(b)]);
-    if nruns <= MAX_nruns
-      x2 = zeros(nruns,npar);   
-      x2(1,:) = ix2(1,:,b);
-      logpo2 = zeros(nruns,1);  
-      logpo2(1) = ilogpo2(1,b); 
-    else
-      x2 = zeros(MAX_nruns,npar);
-      x2(1,:) = ix2(1,:,b);
-      logpo2 = zeros(MAX_nruns,1);
-      logpo2(1) = ilogpo2(1,b);
-    end 
-    irun  = ~options_.load_mh_file; % Previous files are loaded <-- irun=0
-    rruns = nruns-irun;
-    isav = 0;
-    isux = 0;
-    j = 1;
-    while j <= rruns
-      irun = irun + 1;
-      if irun <= MAX_nruns
-        par = randn(1,npar)*d;
-        par = par.*transpose(bayestopt_.jscale) + ix2(1,:,b);  
-        if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
-          if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-            logpost = -DsgeLikelihood(transpose(par),gend,data);
-          else
-            logpost = -DsgeVarLikelihood(transpose(par),gend);
-          end
-        else
-          logpost = -inf;
-        end    
-        if logpost > -inf & log(rand) < logpost - ilogpo2(1,b)
-          x2(irun,:) = par; 
-          ix2(1,:,b) = par;
-          logpo2(irun) = logpost; 
-          ilogpo2(1,b) = logpost;
-          isux = isux + 1;
-        else    
-          x2(irun,:) = ix2(1,:,b);
-          logpo2(irun) = ilogpo2(1,b);
-        end 
-        prtfrc = j/nruns;
-        waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
-      else
-        post2 = exp(logpo2);
-        save([fname_ '_mh' int2str(lfile+1+isav) '_blck' int2str(b)],'x2','logpo2','post2');
-        clear post2;
-        x2 = zeros(MAX_nruns,npar);
-        logpo2 = zeros(MAX_nruns,1);
-        isav = isav + 1;
-        irun = 0;
-        j=j-1;
-      end
-      j = j+1; 
-    end
-    if nruns <= MAX_nruns
-      post2 = exp(logpo2);
-      save([fname_ '_mh' int2str(lfile+isav+1) '_blck' int2str(b)],'x2','logpo2','post2');
-      clear post2 x2 logpo2;
-    elseif irun <= MAX_nruns    
-      x2 = x2(1:irun,:);
-      logpo2 = logpo2(1:irun,1); 
-      post2 = exp(logpo2);
-      save([fname_ '_mh' int2str(lfile+isav+1) '_blck' int2str(b)],'x2','logpo2','post2');
-      clear post2 x2 logpo2;
-    end
-    disp(sprintf('Block %d: %f',b,isux/nruns))
-    close(hh)
+	hh   = waitbar(0,'Please wait... Metropolis-Hastings...');
+	set(hh,'Name',['Metropolis-Hastings, Block ',int2str(b)]);
+	if nruns <= MAX_nruns
+	  x2 = zeros(nruns,npar);   
+	  x2(1,:) = ix2(1,:,b);
+	  logpo2 = zeros(nruns,1);  
+	  logpo2(1) = ilogpo2(1,b); 
+	else
+	  x2 = zeros(MAX_nruns,npar);
+	  x2(1,:) = ix2(1,:,b);
+	  logpo2 = zeros(MAX_nruns,1);
+	  logpo2(1) = ilogpo2(1,b);
+	end 
+	irun  = ~options_.load_mh_file; % Previous files are loaded <-- irun=0
+	rruns = nruns-irun;
+	isav = 0;
+	isux = 0;
+	j = 1;
+	while j <= rruns
+	  irun = irun + 1;
+	  if irun <= MAX_nruns
+	    par = randn(1,npar)*d;
+	    par = par.*transpose(bayestopt_.jscale) + ix2(1,:,b);  
+	    if all(transpose(par) > mh_bounds(:,1)) & all(transpose(par) < mh_bounds(:,2))
+	      if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+		logpost = -DsgeLikelihood(transpose(par),gend,data);
+	      else
+		logpost = -DsgeVarLikelihood(transpose(par),gend);
+	      end
+	    else
+	      logpost = -inf;
+	    end    
+	    if logpost > -inf & log(rand) < logpost - ilogpo2(1,b)
+	      x2(irun,:) = par; 
+	      ix2(1,:,b) = par;
+	      logpo2(irun) = logpost; 
+	      ilogpo2(1,b) = logpost;
+	      isux = isux + 1;
+	    else    
+	      x2(irun,:) = ix2(1,:,b);
+	      logpo2(irun) = ilogpo2(1,b);
+	    end 
+	    prtfrc = j/nruns;
+	    waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
+	  else
+	    post2 = exp(logpo2);
+	    save([fname_ '_mh' int2str(lfile+1+isav) '_blck' int2str(b)],'x2','logpo2','post2');
+	    clear post2;
+	    x2 = zeros(MAX_nruns,npar);
+	    logpo2 = zeros(MAX_nruns,1);
+	    isav = isav + 1;
+	    irun = 0;
+	    j=j-1;
+	  end
+	  j = j+1; 
+	end
+	if nruns <= MAX_nruns
+	  post2 = exp(logpo2);
+	  save([fname_ '_mh' int2str(lfile+isav+1) '_blck' int2str(b)],'x2','logpo2','post2');
+	  clear post2 x2 logpo2;
+	elseif irun <= MAX_nruns    
+	  x2 = x2(1:irun,:);
+	  logpo2 = logpo2(1:irun,1); 
+	  post2 = exp(logpo2);
+	  save([fname_ '_mh' int2str(lfile+isav+1) '_blck' int2str(b)],'x2','logpo2','post2');
+	  clear post2 x2 logpo2;
+	end
+	disp(sprintf('Block %d: %f',b,isux/nruns))
+	close(hh)
       end
     end
     disp(' ')
@@ -335,10 +337,10 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     number_of_simulations_per_file(1) = length(logpo2);
     if nfile >= 1
       for file = 1:nfile
-    instr = [fname_ '_mh' int2str(file)];
-    eval(['load ' instr]);
-    clear post2 x2;
-    number_of_simulations_per_file(file+1) = length(logpo2);
+	instr = [fname_ '_mh' int2str(file)];
+	eval(['load ' instr]);
+	clear post2 x2;
+	number_of_simulations_per_file(file+1) = length(logpo2);
       end
     end
     clear logpo2;
@@ -356,10 +358,10 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     number_of_simulations_per_file(1) = length(logpo2);
     if nfile >= 1
       for file = 1:nfile
-    instr = [fname_ '_mh' int2str(file) '_blck1'];
-    eval(['load ' instr]);
-    clear post2 x2;
-    number_of_simulations_per_file(file+1) = length(logpo2);
+	instr = [fname_ '_mh' int2str(file) '_blck1'];
+	eval(['load ' instr]);
+	clear post2 x2;
+	number_of_simulations_per_file(file+1) = length(logpo2);
       end
     end
     clear logpo2;
@@ -369,8 +371,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
       past_number_of_blocks = length(bfiles);
       if past_number_of_blocks ~= nblck
-    nblck = past_number_of_blocks;
-    options_.mh_nblck = nblck;
+	nblck = past_number_of_blocks;
+	options_.mh_nblck = nblck;
       end
     end
   end
@@ -632,11 +634,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       MDIAG(ligne,3) = sum((temp(:,1)-moyenne).^2)/(nblck*n-1);
       MDIAG(ligne,5) = sum(abs(temp(:,1)-moyenne).^3)/(nblck*n-1);
       for i=1:nblck
-    pmet = temp(find(temp(:,2)==i));
-    MDIAG(ligne,2) = MDIAG(ligne,2) + pmet(csup,1)-pmet(cinf,1);
-    moyenne = mean(pmet,1); %% Within mean. 
-    MDIAG(ligne,4) = MDIAG(ligne,4) + sum((pmet(:,1)-moyenne).^2)/(n-1);
-    MDIAG(ligne,6) = MDIAG(ligne,6) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
+	pmet = temp(find(temp(:,2)==i));
+	MDIAG(ligne,2) = MDIAG(ligne,2) + pmet(csup,1)-pmet(cinf,1);
+	moyenne = mean(pmet,1); %% Within mean. 
+	MDIAG(ligne,4) = MDIAG(ligne,4) + sum((pmet(:,1)-moyenne).^2)/(n-1);
+	MDIAG(ligne,6) = MDIAG(ligne,6) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
       end
     end
     MDIAG(:,[2 4 6],:) = MDIAG(:,[2 4 6],:)/nblck;  
@@ -644,20 +646,20 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     boxplot = 1;
     for crit = 1:3
       if crit == 1
-    plt1 = MDIAG(:,1);
-    plt2 = MDIAG(:,2);
-    namnam  = 'Interval'; 
+	plt1 = MDIAG(:,1);
+	plt2 = MDIAG(:,2);
+	namnam  = 'Interval'; 
       elseif crit == 2
-    plt1 = MDIAG(:,3);
-    plt2 = MDIAG(:,4);
-    namnam  = 'm2';
+	plt1 = MDIAG(:,3);
+	plt2 = MDIAG(:,4);
+	namnam  = 'm2';
       elseif crit == 3    
-    plt1 = MDIAG(:,5);
-    plt2 = MDIAG(:,6);
-    namnam  = 'm3';
+	plt1 = MDIAG(:,5);
+	plt2 = MDIAG(:,6);
+	namnam  = 'm3';
       end
       if TeX
-    NAMES = strvcat(NAMES,namnam);
+	NAMES = strvcat(NAMES,namnam);
       end
       subplot(3,1,boxplot);
       plot(xx,plt1,'-b');  % Pooled
@@ -675,7 +677,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     if TeX
       fprintf(fidTeX,'\\begin{figure}[H]\n');
       for jj = 1:3
-    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),' ');
+	fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),' ');
       end    
       fprintf(fidTeX,'\\centering \n');
       fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_mdiag}\n',fname_);
@@ -690,7 +692,6 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fclose(fidTeX);
     end
   end % End of if ~options_.nodiagnostic
-  
   %%
   %% Now i discard some simulations...
   %%
@@ -734,9 +735,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   for n = ffil+1:nfile
     for b = 1:nblck
       if nblck > 1
-    instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
+	instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
       else
-    instr = [fname_ '_mh' int2str(n)];
+	instr = [fname_ '_mh' int2str(n)];
       end
       eval(['load ' instr]);
       clear post2;
@@ -758,14 +759,14 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     eval(['load ' instr]);
     clear post2 logpo2;
     SIGMA = SIGMA + transpose(x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU)*...
-        (x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU);
+	    (x2(ifil:end,:)-ones(size(x2(ifil:end,:),1),1)*MU);
   end               
   for n = ffil+1:nfile
     for b = 1:nblck
       if nblck > 1
-    instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
+	instr = [fname_ '_mh' int2str(n) '_blck' int2str(b)];
       else
-    instr = [fname_ '_mh' int2str(n)];
+	instr = [fname_ '_mh' int2str(n)];
       end
       eval(['load ' instr]);
       clear post2 logpo2;
@@ -817,29 +818,29 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     end
     if abs((marginal(9,2)-marginal(1,2))/marginal(9,2)) > 0.01 | isinf(marginal(1,2))
       if increase == 1
-    disp('MH: The support of the weighting density function is not large enough...')
-    disp('MH: I increase the variance of this distribution.')
-    increase = 1.2*increase;
-    invSIGMA = inv(SIGMA*increase);
-    detSIGMA = det(SIGMA*increase);
-    linee    = 0;   
+	disp('MH: The support of the weighting density function is not large enough...')
+	disp('MH: I increase the variance of this distribution.')
+	increase = 1.2*increase;
+	invSIGMA = inv(SIGMA*increase);
+	detSIGMA = det(SIGMA*increase);
+	linee    = 0;   
       else
-    disp('MH: Let me try again.')
-    increase = 1.2*increase;
-    invSIGMA = inv(SIGMA*increase);
-    detSIGMA = det(SIGMA*increase);
-    linee    = 0;
-    if increase > 20
-      check_coverage = 0;
-      clear invSIGMA detSIGMA increase;
-      disp('MH: There''s probably a problem with the modified harmonic mean estimator.')    
-    end    
+	disp('MH: Let me try again.')
+	increase = 1.2*increase;
+	invSIGMA = inv(SIGMA*increase);
+	detSIGMA = det(SIGMA*increase);
+	linee    = 0;
+	if increase > 20
+	  check_coverage = 0;
+	  clear invSIGMA detSIGMA increase;
+	  disp('MH: There''s probably a problem with the modified harmonic mean estimator.')    
+	end    
       end    
     else
       check_coverage = 0;
       clear invSIGMA detSIGMA increase;
       disp('MH: Modified harmonic mean estimator, done!')
-    end    
+    end
   end
   %
   %%
@@ -852,7 +853,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %
   disp(' ')
   fprintf('MH: I''m computing the Highest Probability Intervals... ');
-  post_mean = transpose(MU); clear MU;
+  post_mean = transpose(MU);
   n = trun*nblck;
   n1    = round((1-options_.mh_conf_sig)*n);
   k = zeros(n1,1);
@@ -866,19 +867,19 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       tmp(1:EndOfFile) = x2(ifil:end,i);
       OldEndOfFile = EndOfFile;
       for f = ffil+1:nfile
-    NewEndOfFile = number_of_simulations_per_file(f+1);
-    instr = [fname_ '_mh' int2str(f)];
-    eval(['load ' instr]);
-    clear post2 logpo2;
-    tmp(OldEndOfFile+1:OldEndOfFile+NewEndOfFile) = x2(:,i);
-    OldEndOfFile = OldEndOfFile + NewEndOfFile;
+	NewEndOfFile = number_of_simulations_per_file(f+1);
+	instr = [fname_ '_mh' int2str(f)];
+	eval(['load ' instr]);
+	clear post2 logpo2;
+	tmp(OldEndOfFile+1:OldEndOfFile+NewEndOfFile) = x2(:,i);
+	OldEndOfFile = OldEndOfFile + NewEndOfFile;
       end
       clear x2;
       tmp = sort(tmp);
       j2 = n-n1;
       for j1 = 1:n1
-    k(j1) = tmp(j2)-tmp(j1);
-    j2 = j2 + 1;
+	k(j1) = tmp(j2)-tmp(j1);
+	j2 = j2 + 1;
       end
       [kmin,k1] = min(k);
       min_interval(i,:) = [tmp(k1) tmp(k1)+kmin];
@@ -890,29 +891,29 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       NewStartLine = 0;
       inst = [fname_ '_mh' int2str(ffil)];
       for b = 1:nblck
-    instr = [inst '_blck' int2str(b)];
-    eval(['load ' instr]);
-    clear post2 logpo2;
-    tmp(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(ifil:end,i);
-    NewStartLine = NewStartLine + EndOfFile;
+	instr = [inst '_blck' int2str(b)];
+	eval(['load ' instr]);
+	clear post2 logpo2;
+	tmp(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(ifil:end,i);
+	NewStartLine = NewStartLine + EndOfFile;
       end
       for f = ffil+1:nfile
-    EndOfFile = number_of_simulations_per_file(f+1);
-    inst = [fname_ '_mh' int2str(f)];
-    for B = 1:nblck
-      instr = [inst '_blck' int2str(b)];
-      eval(['load ' instr]);
-      clear post2 logpo2;
-      tmp(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(:,i);
-      NewStartLine = NewStartLine + EndOfFile;
-    end
+	EndOfFile = number_of_simulations_per_file(f+1);
+	inst = [fname_ '_mh' int2str(f)];
+	for B = 1:nblck
+	  instr = [inst '_blck' int2str(b)];
+	  eval(['load ' instr]);
+	  clear post2 logpo2;
+	  tmp(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(:,i);
+	  NewStartLine = NewStartLine + EndOfFile;
+	end
       end
       clear x2;
       tmp = sort(tmp);
       j2 = n-n1;
       for j1 = 1:n1
-    k(j1) = tmp(j2)-tmp(j1);
-    j2 = j2 + 1;
+	k(j1) = tmp(j2)-tmp(j1);
+	j2 = j2 + 1;
       end
       [kmin,k1] = min(k);
       min_interval(i,:) = [tmp(k1) tmp(k1)+kmin];
@@ -1056,15 +1057,15 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Post. mean & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
       for i=1:np
-    fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
-        deblank(estim_params_.tex(i,:)), ...
-        deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
-        bayestopt_.pmean(ip), ...
-        bayestopt_.pstdev(ip), ...
-        post_mean(ip), ...
-        min_interval(ip,1), ...
-        min_interval(ip,2));
-    ip = ip+1;
+	fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
+		deblank(estim_params_.tex(i,:)), ...
+		deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
+		bayestopt_.pmean(ip), ...
+		bayestopt_.pstdev(ip), ...
+		post_mean(ip), ...
+		min_interval(ip,1), ...
+		min_interval(ip,2));
+	ip = ip+1;
       end   
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -1091,16 +1092,16 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Post. mean & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
       for i=1:nvx
-    k = estim_params_.var_exo(i,1);
-    fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
-        deblank(lgx_TeX_(k,:)),...
-        deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
-        bayestopt_.pmean(ip), ...
-        bayestopt_.pstdev(ip), ...
-        post_mean(ip), ...
-        min_interval(ip,1), ...
-        min_interval(ip,1));
-    ip = ip+1;
+	k = estim_params_.var_exo(i,1);
+	fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
+		deblank(lgx_TeX_(k,:)),...
+		deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
+		bayestopt_.pmean(ip), ...
+		bayestopt_.pstdev(ip), ...
+		post_mean(ip), ...
+		min_interval(ip,1), ...
+		min_interval(ip,1));
+	ip = ip+1;
       end
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -1127,15 +1128,15 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Post. mean & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
       for i=1:nvn
-    fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
-        deblank(options_.varobs_TeX(estim_params_.var_endo(i,1),:)), ...
-        deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
-        bayestopt_.pmean(ip), ...
-        bayestopt_.pstdev(ip), ...
-        post_mean(ip), ...
-        min_interval(ip,1), ...
-        min_interval(ip,2));
-    p = ip+1;
+	fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
+		deblank(options_.varobs_TeX(estim_params_.var_endo(i,1),:)), ...
+		deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
+		bayestopt_.pmean(ip), ...
+		bayestopt_.pstdev(ip), ...
+		post_mean(ip), ...
+		min_interval(ip,1), ...
+		min_interval(ip,2));
+	p = ip+1;
       end
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -1162,18 +1163,18 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Post. mean & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
       for i=1:ncx
-    k1 = estim_params_.corrx(i,1);
-    k2 = estim_params_.corrx(i,2);
-    name = [deblank(lgx_TeX_(k1,:)) ',' deblank(lgx_TeX_(k2,:))];
-    fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
-        name, ...
-        deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
-        bayestopt_.pmean(ip), ...
-        bayestopt_.pstdev(ip), ...
-        post_mean(ip), ...
-        min_interval(ip,1), ...
-        min_interval(ip,2));
-    ip = ip+1;
+	k1 = estim_params_.corrx(i,1);
+	k2 = estim_params_.corrx(i,2);
+	name = [deblank(lgx_TeX_(k1,:)) ',' deblank(lgx_TeX_(k2,:))];
+	fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
+		name, ...
+		deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
+		bayestopt_.pmean(ip), ...
+		bayestopt_.pstdev(ip), ...
+		post_mean(ip), ...
+		min_interval(ip,1), ...
+		min_interval(ip,2));
+	ip = ip+1;
       end
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -1200,18 +1201,18 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Post. mean & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
       for i=1:ncn
-    k1 = estim_params_.corrn(i,1);
-    k2 = estim_params_.corrn(i,2);
-    name = [deblank(lgy_TeX_(k1,:)) ',' deblank(lgy_TeX_(k2,:))];
-    fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
-        name, ...
-        deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
-        bayestopt_.pmean(ip), ...
-        bayestopt_.pstdev(ip), ...
-        post_mean(ip), ...
-        min_interval(ip,1), ...
-        min_interval(ip,2));
-    ip = ip+1;
+	k1 = estim_params_.corrn(i,1);
+	k2 = estim_params_.corrn(i,2);
+	name = [deblank(lgy_TeX_(k1,:)) ',' deblank(lgy_TeX_(k2,:))];
+	fprintf(fidTeX,' $%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f & %7.4f \\\\ \n',...
+		name, ...
+		deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
+		bayestopt_.pmean(ip), ...
+		bayestopt_.pstdev(ip), ...
+		post_mean(ip), ...
+		min_interval(ip,1), ...
+		min_interval(ip,2));
+	ip = ip+1;
       end
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -1223,7 +1224,6 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fclose(fidTeX);
     end
   end % if TeX
-  
   %                                                               
   %%                                                              
   %%%                                                             
@@ -1254,7 +1254,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       eval(['oo_.posterior_density.' deblank(nam) ' = [x1,f1];']);
       eval(['oo_.prior_density.' deblank(nam) ' = [x2,f2];']); 
       if TeX
-    TeXNAMES = strvcat(TeXNAMES,texnam);
+	TeXNAMES = strvcat(TeXNAMES,texnam);
       end    
       NAMES = strvcat(NAMES,nam);
       subplot(nr,nc,i);
@@ -1275,7 +1275,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     if TeX
       fprintf(fidTeX,'\\begin{figure}[H]\n');
       for jj = 1:npar
-    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+	fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
       end    
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_PriorsAndPosteriors%s}\n',fname_,int2str(1));
@@ -1291,47 +1291,47 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     for plt = 1:nbplt-1
       hplt = figure('Name',figurename);
       if TeX
-    TeXNAMES = [];
+	TeXNAMES = [];
       end    
       NAMES    = []; 
       for index=1:nstar
-    names = [];
-    i = (plt-1)*nstar + index;
-    [borneinf,bornesup,x1,x2,f1,f2,top,nam,texnam] = ...
-        posterior_distribution(i,nfile,ffil,ifil,...
-                   nblck,n,number_of_simulations_per_file,TeX);
-    eval(['oo_.posterior_density.' deblank(nam) ' = [x1,f1];']);
-    eval(['oo_.prior_density.' deblank(nam) ' = [x2,f2];']);                     
-    if TeX
-      TeXNAMES = strvcat(TeXNAMES,texnam);
-    end    
-    NAMES = strvcat(NAMES,nam);
-    subplot(nr,nc,index);
-    hh = plot(x2,f2,'-k','linewidth',2);
-    set(hh,'color',[0.7 0.7 0.7]);
-    hold on;
-    plot(x1,f1,'-k','linewidth',2);
-    plot( [xparam1(i) xparam1(i)], [0,1.1*top], '--g', 'linewidth', 2);
-    box on;
-    axis([borneinf bornesup 0 1.1*top]);
-    title(nam,'Interpreter','none');
-    hold off;
-    drawnow;
+	names = [];
+	i = (plt-1)*nstar + index;
+	[borneinf,bornesup,x1,x2,f1,f2,top,nam,texnam] = ...
+	    posterior_distribution(i,nfile,ffil,ifil,...
+				   nblck,n,number_of_simulations_per_file,TeX);
+	eval(['oo_.posterior_density.' deblank(nam) ' = [x1,f1];']);
+	eval(['oo_.prior_density.' deblank(nam) ' = [x2,f2];']);                     
+	if TeX
+	  TeXNAMES = strvcat(TeXNAMES,texnam);
+	end    
+	NAMES = strvcat(NAMES,nam);
+	subplot(nr,nc,index);
+	hh = plot(x2,f2,'-k','linewidth',2);
+	set(hh,'color',[0.7 0.7 0.7]);
+	hold on;
+	plot(x1,f1,'-k','linewidth',2);
+	plot( [xparam1(i) xparam1(i)], [0,1.1*top], '--g', 'linewidth', 2);
+	box on;
+	axis([borneinf bornesup 0 1.1*top]);
+	title(nam,'Interpreter','none');
+	hold off;
+	drawnow;
       end  % index=1:nstar
       eval(['print -depsc2 ' fname_ '_PriorsAndPosteriors' int2str(plt)]);
       eval(['print -dpdf ' fname_ '_PriorsAndPosteriors' int2str(plt)]);
       saveas(hplt,[fname_ '_PriorsAndPosteriors' int2str(plt) '.fig']);
       if TeX
-    fprintf(fidTeX,'\\begin{figure}[H]\n');
-    for jj = 1:nstar
-      fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-    end    
-    fprintf(fidTeX,'\\centering\n');
-    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_PriorsAndPosteriors%s}\n',fname_,int2str(plt));
-    fprintf(fidTeX,'\\caption{Priors and posteriors.}');
-    fprintf(fidTeX,'\\label{Fig:PriorsAndPosteriors:%s}\n',int2str(plt));
-    fprintf(fidTeX,'\\end{figure}\n');
-    fprintf(fidTeX,' \n');
+	fprintf(fidTeX,'\\begin{figure}[H]\n');
+	for jj = 1:nstar
+	  fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+	end    
+	fprintf(fidTeX,'\\centering\n');
+	fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_PriorsAndPosteriors%s}\n',fname_,int2str(plt));
+	fprintf(fidTeX,'\\caption{Priors and posteriors.}');
+	fprintf(fidTeX,'\\label{Fig:PriorsAndPosteriors:%s}\n',int2str(plt));
+	fprintf(fidTeX,'\\end{figure}\n');
+	fprintf(fidTeX,' \n');
       end    
       if options_.nograph, close(hplt), end
     end % plt = 1:nbplt-1
@@ -1343,18 +1343,18 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     for index=1:npar-(nbplt-1)*nstar
       i = (nbplt-1)*nstar +  index;
       [borneinf,bornesup,x1,x2,f1,f2,top,nam,texnam] = ...
-      posterior_distribution(i,nfile,ffil,ifil,...
-                 nblck,n,number_of_simulations_per_file,TeX);
+	  posterior_distribution(i,nfile,ffil,ifil,...
+				 nblck,n,number_of_simulations_per_file,TeX);
       eval(['oo_.posterior_density.' deblank(nam) ' = [x1,f1];']);
       eval(['oo_.prior_density.' deblank(nam) ' = [x2,f2];']);             
       if TeX
-    TeXNAMES = strvcat(TeXNAMES,texnam);
+	TeXNAMES = strvcat(TeXNAMES,texnam);
       end
       NAMES = strvcat(NAMES,nam);
       if lr
-    subplot(lc,lr,index);
+	subplot(lc,lr,index);
       else
-    subplot(nr,nc,index);
+	subplot(nr,nc,index);
       end    
       hh = plot(x2,f2,'-k','linewidth',2);
       set(hh,'color',[0.7 0.7 0.7]);
@@ -1373,7 +1373,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     if TeX
       fprintf(fidTeX,'\\begin{figure}[H]\n');
       for jj = 1:npar-(nbplt-1)*nstar
-    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+	fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
       end    
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_PriorsAndPosteriors%s}\n',fname_,int2str(nbplt));
@@ -1429,14 +1429,14 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   nvar     = endo_nbr;
   B        = min(500,nruns);
   deciles = [round(0.1*B) ...
-         round(0.2*B)...
-         round(0.3*B)...
-         round(0.4*B)...
-         round(0.5*B)...
-         round(0.6*B)...
-         round(0.7*B)...
-         round(0.8*B)...
-         round(0.9*B)];
+	     round(0.2*B)...
+	     round(0.3*B)...
+	     round(0.4*B)...
+	     round(0.5*B)...
+	     round(0.6*B)...
+	     round(0.7*B)...
+	     round(0.8*B)...
+	     round(0.9*B)];
   %                                                               
   %%                                                              
   %%%                                                             
@@ -1447,38 +1447,40 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %%                                                              
   %                                                               
   if options_.forecast | options_.smoother | options_.filtered_vars
+    deep = MU;
+    subindx = subset();
     % [1] I delete some old files...    
     disp(' ')
     disp(' ')
     if options_.forecast
       files = eval(['dir(''' fname_ '_forecast*.mat'');']);
       if length(files)
-    delete([fname_ '_forecast*.mat']);
-    disp(['MH: Old ' fname_ '_forecast files deleted! '])
+	delete([fname_ '_forecast*.mat']);
+	disp(['MH: Old ' fname_ '_forecast files deleted! '])
       end
     end
     if options_.smoother        
       files = eval(['dir(''' fname_ '_smooth*.mat'');']);
       if length(files)
-    delete([fname_ '_smooth*.mat']);
-    disp(['MH: Old ' fname_ '_smooth files deleted! '])
+	delete([fname_ '_smooth*.mat']);
+	disp(['MH: Old ' fname_ '_smooth files deleted! '])
       end
       files = eval(['dir(''' fname_ '_innovation*.mat'');']);
       if length(files)
-    delete([fname_ '_innovation*.mat']);
-    disp(['MH: Old ' fname_ '_innovation files deleted! '])
+	delete([fname_ '_innovation*.mat']);
+	disp(['MH: Old ' fname_ '_innovation files deleted! '])
       end
       files = eval(['dir(''' fname_ '_error*.mat'');']);
       if length(files)
-    delete([fname_ '_error*.mat']);
-    disp(['MH: Old ' fname_ '_error files deleted! '])
+	delete([fname_ '_error*.mat']);
+	disp(['MH: Old ' fname_ '_error files deleted! '])
       end
     end
     if options_.filtered_vars
       files = eval(['dir(''' fname_ '_filter*.mat'');']);     
       if length(files)                                        
-    delete([fname_ '_filter*.mat']);                    
-    disp(['MH: Old ' fname_ '_filter files deleted! ']) 
+	delete([fname_ '_filter*.mat']);                    
+	disp(['MH: Old ' fname_ '_filter files deleted! ']) 
       end                                                         
     end
     disp(' ')
@@ -1498,28 +1500,28 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     end 
     if options_.smoother
       if B <= MAX_nsmoo
-    stock_smooth = zeros(endo_nbr,gend,B);
+	stock_smooth = zeros(endo_nbr,gend,B);
       else
-    stock_smooth = zeros(endo_nbr,gend,MAX_nsmoo);
+	stock_smooth = zeros(endo_nbr,gend,MAX_nsmoo);
       end
       if B <= MAX_ninno 
-    stock_innov  = zeros(exo_nbr,gend,B);
+	stock_innov  = zeros(exo_nbr,gend,B);
       else
-    stock_innov  = zeros(exo_nbr,gend,MAX_ninno);
+	stock_innov  = zeros(exo_nbr,gend,MAX_ninno);
       end
       if nvn & B <= MAX_nerro
-    %stock_error = zeros(gend,nvobs,B);
-    stock_error = zeros(nvobs,gend,B);
+	%stock_error = zeros(gend,nvobs,B);
+	stock_error = zeros(nvobs,gend,B);
       else nvn & B > MAX_nerro
-    %stock_error = zeros(gend,nvobs,MAX_nerro);
-    stock_error = zeros(nvobs,gend,MAX_nerro);
+	%stock_error = zeros(gend,nvobs,MAX_nerro);
+	stock_error = zeros(nvobs,gend,MAX_nerro);
       end
     end
     if options_.filtered_vars
       if B <= MAX_nfilt
-    stock_filter = zeros(endo_nbr,gend+1,B);
+	stock_filter = zeros(endo_nbr,gend+1,B);
       else
-    stock_filter = zeros(endo_nbr,gend+1,MAX_nfilt);
+	stock_filter = zeros(endo_nbr,gend+1,MAX_nfilt);
       end
     end
     h = waitbar(0,'SDGE model based forecasts...');
@@ -1570,7 +1572,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	  clear post2 logpo2;
 	  % SECOND, I choose a vector of structural parameters (a line in the _mh file) 
-	  deep  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
+	  DEEP  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
+	  deep(subindx) = DEEP(subindx);
 	  % THIRD, I estimate the smooth and filtered variables. I need the smoothed variables
 	  % to estimate the state of the model at the end of the sample. 
 	  [atT,innov,obs_err,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(transpose(deep),gend,data);
@@ -1742,7 +1745,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if options_.filtered_vars
 	    irun_filt = irun_filt+1;            
 	  end
-	  deep  = x2(floor(rand*NumberOfSimulations)+1,:); 
+	  DEEP  = x2(floor(rand*NumberOfSimulations)+1,:); 
+	  deep(subindx) = DEEP(subindx);
 	  [atT,innov,obs_err,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(transpose(deep),gend,data);
 	  if options_.smoother
 	    if irun_erro < MAX_nerro
@@ -1914,7 +1918,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end    
 	  eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	  clear post2 logpo2;
-	  deep  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
+	  DEEP  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
+	  deep(subindx) = DEEP(subindx);
 	  [atT,innov,obs_err,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(transpose(deep),gend,data);
 	  if options_.smoother
 	    %if irun_erro < MAX_nerro
@@ -2095,7 +2100,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if options_.filtered_vars
 	    irun_filt = irun_filt+1;  			
 	  end	    
-	  deep  = x2(floor(rand*NumberOfSimulations)+1,:); 
+	  DEEP  = x2(floor(rand*NumberOfSimulations)+1,:); 
+	  deep(subindx) = DEEP(subindx);
 	  [atT,innov,obs_err,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(deep',gend,data);
            % removing lagged variables when ykmin_ > 1
            filtered_state_vector = filtered_state_vector(1:endo_nbr,:);
@@ -2466,29 +2472,69 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %%    intervals are also computed and saved).
   %%
   if options_.bayesian_irf
-    if B <= MAX_nirfs
-      stock_irf = zeros(options_.irf,size(lgy_,1),exo_nbr,B);
+    deep = MU;
+    subindx = subset();
+    nirfs = options_.irf;
+    if exist('dsge_prior_weight')
+      files = eval(['dir(''' fname_ '_irf_dsgevar*.mat'');']);     
+      if length(files)                                        
+	delete([fname_ '_irf_dsgevar*.mat']);                    
+	disp(['MH: Old ' fname_ '_irf_dsgevar files deleted! ']) 
+      end
+      files = eval(['dir(''' fname_ '_irf_dsge*.mat'');']);     
+      if length(files)                                        
+	delete([fname_ '_irf_dsge*.mat']);                    
+	disp(['MH: Old ' fname_ '_irf_dsge files deleted! ']) 
+      end
+    else
+      files = eval(['dir(''' fname_ '_irf_dsge*.mat'');']);     
+      if length(files)                                        
+	delete([fname_ '_irf_dsge*.mat']);                    
+	disp(['MH: Old ' fname_ '_irf_dsge files deleted! ']) 
+      end      
+    end    
+    if B <= MAX_nirfs_dsge
+      stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,B);
     elseif nvn & B > MAX_nirfs
-      stock_irf = zeros(options_.irf,size(lgy_,1),exo_nbr,MAX_nirfs);
+      stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,MAX_nirfs_dsge);
+    end
+    if exist('dsge_prior_weight')
+      if B <= MAX_nirfs_dsgevar
+	stock_irf_dsgevar = zeros(nirfs,nvobs,exo_nbr,B);
+      else
+	stock_irf_dsgevar = zeros(nirfs,nvobs,exo_nbr,MAX_nirfs_dsgevar);
+      end
+      [mYY,mXY,mYX,mXX,Ydata,Xdata] = ...
+	  VarSampleMoments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);
+      NumberOfLags = options_.varlag;
+      NumberOfLagsTimesNvobs = NumberOfLags*nvobs;
+      COMP_draw = diag(ones(nvobs*(NumberOfLags-1),1),-nvobs);
     end
     h = waitbar(0,'Bayesian IRFs...');
     if nfile-ffil+1>1
-      sfil_irf = 0;
-      irun_irf = 0;
+      sfil_irf_dsge = 0;
+      irun_irf_dsge = 0;
+      sfil_irf_dsgevar = 0;
+      irun_irf_dsgevar = 0;
       for b = 1:B;
-	irun_irf = irun_irf+1;
-	tmp = zeros(options_.irf,size(lgy_,1),exo_nbr);
+	irun_irf_dsge = irun_irf_dsge+1;
+	tmp_dsge = zeros(nirfs,size(lgy_,1),exo_nbr);
+	if exist('dsge_prior_weight')
+	  irun_irf_dsgevar = irun_irf_dsgevar+1;
+	  tmp_dsgevar = zeros(nirfs,nvobs*exo_nbr);
+	end
 	choose_an_mh_file = rand;
-	mh_file_number = ...
-	    FLN(find(choose_an_mh_file>=FLN(:,3)),1);
+	mh_file_number = FLN(find(choose_an_mh_file>=FLN(:,3)),1);
 	if isempty(mh_file_number)
 	  mh_file_number = ffil;
 	else    
 	  mh_file_number = mh_file_number(1);
-	end    
+	end
 	eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	clear post2 logpo2;
-	deep  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
+	DEEP  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
+	deep(subindx) = DEEP(subindx);
+	% dsge
 	set_parameters(deep);
 	resol(ys_,0);
 	SS(lgx_orig_ord_,lgx_orig_ord_)=Sigma_e_+1e-14* ...
@@ -2497,52 +2543,129 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	tit(lgx_orig_ord_,:) = lgx_;
 	for i = 1:exo_nbr
 	  if SS(i,i) > 1e-13
-	    y=irf(dr_,cs(lgx_orig_ord_,i), options_.irf, options_.drop, ...
+	    y=irf(dr_,cs(lgx_orig_ord_,i),nirfs,options_.drop, ...
 		  options_.replic, options_.order);
 	    if options_.relative_irf
 	      y = 100*y/cs(i,i); 
 	    end
-
-        for j = 1:size(lgy_,1)
-          if max(y(j,:)) - min(y(j,:)) > 1e-10 
-        tmp(:,j,i) = transpose(y(j,:));
-          end   
-        end 
-      end
-    end
-    if irun_irf < MAX_nirfs
-      stock_irf(:,:,:,irun_irf) = tmp;
-    else
-      stock_irf(:,:,:,irun_irf) = tmp;
-      sfil_irf = sfil_irf + 1;
-      instr = [fname_ '_irf' int2str(sfil_irf) ' stock_irf;'];
-      eval(['save ' instr]);
-      irun_irf = 0;
-      stock_irf = zeros(options_.irf,size(lgy_,1),exo_nbr,MAX_nirfs);
-    end 
-    waitbar(b/B,h);    
+	    for j = 1:size(lgy_,1)
+	      if max(y(j,:)) - min(y(j,:)) > 1e-10 
+		tmp_dsge(:,j,i) = transpose(y(j,:));
+	      end
+	    end
+	  end
+	end
+	if irun_irf_dsge < MAX_nirfs_dsge
+	  stock_irf_dsge(:,:,:,irun_irf_dsge) = tmp_dsge;
+	else
+	  stock_irf_dsge(:,:,:,irun_irf_dsge) = tmp_dsge;
+	  sfil_irf_dsge = sfil_irf_dsge + 1;
+	  instr = [fname_ '_irf_dsge' int2str(sfil_irf_dsge) ' stock_irf_dsge;'];
+	  eval(['save ' instr]);
+	  irun_irf_dsge = 0;
+	  stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,MAX_nirfs_dsge);
+	end
+	% bvar-dsge 
+	DsgeVarLikelihood(deep',gend);
+	GYY = evalin('base','GYY');
+	GXX = evalin('base','GXX');
+	GYX = evalin('base','GYX');
+	DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
+	tmp1 = mYY + dsge_prior_weight*gend*GYY;
+	tmp2 = mXY + dsge_prior_weight*gend*GYX';
+	tmp3 = mXX + dsge_prior_weight*gend*GXX;
+	tmp4 = (tmp1-tmp2'*inv(tmp3)*tmp2);
+	PHI = inv(tmp3)*tmp2;
+	val = 1;
+	while val;
+	  % draw from the marginal posterior of sig
+	  tmp5 = chol(inv(tmp4))'*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
+	  SIGMAu_draw = inv(tmp5*tmp5');
+	  % draw from the conditional posterior of PHI
+	  VARvecPHI = kron(SIGMAu_draw,inv(tmp3));
+	  PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
+	  COMP_draw(1:nvobs,:) = reshape(PHI_draw, ...
+					 NumberOfLagsTimesNvobs,nvobs)';
+	  % Check for stationarity
+	  tests = find(abs(eig(COMP_draw))>0.9999999999);
+	  if isempty(tests)
+	    val=0;
+	  end
+	end
+	% Get rotation
+	if dsge_prior_weight > 0
+	  Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
+	  A0 = Atheta(bayestopt_.mf,:);
+	  [OMEGAstar,SIGMAtr] = qr2(A0');
+	end
+	SIGMAu_chol = chol(SIGMAu_draw)';
+	SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
+	PHIpower = eye(NumberOfLagsTimesNvobs);
+	irfs = zeros (nirfs,nvobs*exo_nbr);
+	tmp6 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	irfs(1,:) = tmp6(:)';
+	for t = 2:nirfs
+	  PHIpower = COMP_draw*PHIpower;
+	  tmp7 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	  irfs(t,:)  = tmp7(:)';
+	end            
+	for j = 1:(nvobs*exo_nbr)
+	  if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
+	    tmp_dsgevar(:,j) = (irfs(:,j));
+	  end	
+	end	
+	if irun_irf_dsgevar < MAX_nirfs_dsgevar
+	  stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
+	else
+	  stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
+	  sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
+	  instr = [fname_ '_irf_dsgevar' int2str(sfil_irf_dsgevar) ' stock_irf_dsgevar;'];,
+	  eval(['save ' instr]);
+	  irun_irf_dsgevar  = 0;
+	  stock_irf_dsgevar = zeros(nirfs,nvobs,exo_nbr,MAX_nirfs_dsgevar);
+	end
+	waitbar(b/B,h);    
       end
       clear tmp;
-      if irun_irf
-    stock_irf = stock_irf(:,:,:,1:irun_irf);
-    sfil_irf = sfil_irf + 1;
-    instr = [fname_ '_irf' int2str(sfil_irf) ' stock_irf;'];
-    eval(['save ' instr]);
+      if irun_irf_dsge
+	stock_irf_dsge = stock_irf_dsge(:,:,:,1:irun_irf_dsge);
+	sfil_irf_dsge = sfil_irf_dsge + 1;
+	instr = [fname_ '_irf_dsge' int2str(sfil_irf_dsge) ' stock_irf_dsge;'];
+	eval(['save ' instr]);
       end
-      clear stock_irf;
-    else        
-      sfil_irf = 0;
-      irun_irf = 0;
+      clear stock_irf_dsge;
+      if exist('dsge_prior_weight')
+	if irun_irf_dsgevar
+	  stock_irf_dsgevar = stock_irf_dsgevar(:,:,:,1:irun_irf_dsgevar);
+	  sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
+	  instr = [fname_ '_irf_dsgevar' int2str(sfil_irf_dsgevar) ' stock_irf_dsgevar;'];
+	  eval(['save ' instr]);
+	end
+	clear stock_irf_dsgevar;
+      end
+    else
+      sfil_irf_dsge = 0;
+      irun_irf_dsge = 0;
+      if exist('dsge_prior_weight')
+	sfil_irf_dsgevar = 0;
+	irun_irf_dsgevar = 0;	
+      end
       eval(['load ' instr1 int2str(ffil) instr2]);
       NumberOfSimulations = length(logpo2);
       clear post2 logpo2;
       for b = 1:B;
-	irun_irf = irun_irf+1;
-	tmp = zeros(options_.irf,size(lgy_,1),exo_nbr);
-	deep  = x2(floor(rand*NumberOfSimulations)+1,:);
+	irun_irf_dsge = irun_irf_dsge+1;
+	tmp_dsge = zeros(nirfs,size(lgy_,1),exo_nbr);
+	if exist('dsge_prior_weight')
+	  irun_irf_dsgevar = irun_irf_dsgevar+1;
+	  tmp_dsgevar = zeros(nirfs,nvobs*exo_nbr);	  
+	end
+	DEEP = x2(floor(rand*NumberOfSimulations)+1,:);
+	deep(subindx) = DEEP(subindx);
+	% dsge
 	set_parameters(deep);
 	resol(ys_,0);
-	SS(lgx_orig_ord_,lgx_orig_ord_)=Sigma_e_+1e-14*eye(exo_nbr);
+	SS(lgx_orig_ord_,lgx_orig_ord_) = Sigma_e_+1e-14*eye(exo_nbr);
 	SS = transpose(chol(SS));
 	tit(lgx_orig_ord_,:) = lgx_;
 	for i = 1:exo_nbr
@@ -2554,58 +2677,131 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end
 	    for j = 1:size(lgy_,1)
 	      if max(y(j,:)) - min(y(j,:)) > 1e-10 
-		tmp(:,j,i) = transpose(y(j,:));
-	      end	
-	    end	
+		tmp_dsge(:,j,i) = transpose(y(j,:));
+	      end
+	    end
 	  end
 	end
-	if irun_irf < MAX_nirfs
-	  stock_irf(:,:,:,irun_irf) = tmp;
+	if irun_irf_dsge < MAX_nirfs_dsge
+	  stock_irf_dsge(:,:,:,irun_irf_dsge) = tmp_dsge;
 	else
-	  stock_irf(:,:,:,irun_irf) = tmp;
-	  sfil_irf = sfil_irf + 1;
-	  instr = [fname_ '_irf' int2str(sfil_irf) ' stock_irf;'];
+	  stock_irf_dsge(:,:,:,irun_irf_dsge) = tmp_dsge;
+	  sfil_irf_dsge = sfil_irf_dsge + 1;
+	  instr = [fname_ '_irf_dsge' int2str(sfil_irf_dsge) ' stock_irf_dsge;'];
 	  eval(['save ' instr]);
-	  irun_irf = 0;
-	  stock_irf = zeros(options_.irf,size(lgy_,1),exo_nbr,MAX_nirfs);
+	  irun_irf_dsge = 0;
+	  stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,MAX_nirfs_dsge);
+	end
+	% bvar-dsge
+	DsgeVarLikelihood(deep',gend);
+	GYY = evalin('base','GYY');
+	GXX = evalin('base','GXX');
+	GYX = evalin('base','GYX');
+	DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
+	tmp1 = mYY + dsge_prior_weight*gend*GYY;
+	tmp2 = mXY + dsge_prior_weight*gend*GYX';
+	tmp3 = mXX + dsge_prior_weight*gend*GXX;
+	tmp4 = (tmp1-tmp2'*inv(tmp3)*tmp2);
+	PHI = inv(tmp3)*tmp2;
+	val = 1;
+	while val;
+	  % draw from the marginal posterior of sig
+	  tmp5 = chol(inv(tmp4))'*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
+	  SIGMAu_draw = inv(tmp5*tmp5');
+	  % draw from the conditional posterior of PHI
+	  VARvecPHI = kron(SIGMAu_draw,inv(tmp3));
+	  PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
+	  COMP_draw(1:nvobs,:) = reshape(PHI_draw, ...
+					 NumberOfLagsTimesNvobs,nvobs)';
+	  % Check for stationarity
+	  tests = find(abs(eig(COMP_draw))>0.9999999999);
+	  if isempty(tests)
+	    val=0;
+	  end
+	end
+	% Get rotation
+	if dsge_prior_weight > 0
+	  Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
+	  A0 = Atheta(bayestopt_.mf,:);
+	  [OMEGAstar,SIGMAtr] = qr2(A0');
+	end
+	SIGMAu_chol = chol(SIGMAu_draw)';
+	SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
+	PHIpower = eye(NumberOfLagsTimesNvobs);
+	irfs = zeros (nirfs,nvobs*exo_nbr);
+	tmp6 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	irfs(1,:) = tmp6(:)';
+	for t = 2:nirfs
+	  PHIpower = COMP_draw*PHIpower;
+	  tmp7 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	  irfs(t,:)  = tmp7(:)';
+	end            
+	for j = 1:(nvobs*exo_nbr)
+	  if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
+	    tmp_dsgevar(:,j) = (irfs(:,j));
+	  end	
 	end	
-	waitbar(b/B,h);    
+	if irun_irf_dsgevar < MAX_nirfs_dsgevar
+	  stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
+	else
+	  stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
+	  sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
+	  instr = [fname_ '_irf_dsgevar' int2str(sfil_irf_dsgevar) ' stock_irf_dsgevar;'];,
+	  eval(['save ' instr]);
+	  irun_irf_dsgevar = 0;
+	  stock_irf_dsgevar = zeros(nirfs,nvobs,exo_nbr,MAX_nirfs_dsgevar);
+	end
+	waitbar(b/B,h);
       end
-      if irun_irf
-	stock_irf = stock_irf(:,:,:,1:irun_irf);
-	sfil_irf = sfil_irf + 1;
-	instr = [fname_ '_irf' int2str(sfil_irf) ' stock_irf;'];
+      if irun_irf_dsge
+	stock_irf_dsge = stock_irf_dsge(:,:,:,1:irun_irf_dsge);
+	sfil_irf_dsge = sfil_irf_dsge + 1;
+	instr = [fname_ '_irf_dsge' int2str(sfil_irf_dsge) ' stock_irf_dsge;'];
 	eval(['save ' instr]);
       end
-      clear stock_irf;
-    end     
+      clear stock_irf_dsge;
+      if exist('dsge_prior_weight')
+	if irun_irf_dsgevar
+	  stock_irf_dsgevar = stock_irf_dsgevar(:,:,:,1:irun_irf_dsgevar);
+	  sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
+	  instr = [fname_ '_irf_dsgevar' int2str(sfil_irf_dsgevar) ' stock_irf_dsgevar;'];
+	  eval(['save ' instr]);
+	end
+	clear stock_irf_dsgevar;    
+      end
+    end
     close(h)
     %%
     %%  Now i compute some statistics (mean, median, std, deciles, HPD intervals)
     %%
+    %%  DSGE:
     tmp = zeros(B,1);
-    MeanIRF = zeros(options_.irf,nvar,exo_nbr);
-    MedianIRF = zeros(options_.irf,nvar,exo_nbr);
-    StdIRF = zeros(options_.irf,nvar,exo_nbr);
-    DistribIRF = zeros(options_.irf,nvar,exo_nbr,9);
-    HPDIRF = zeros(options_.irf,nvar,exo_nbr,2);
-    fprintf('MH: Posterior IRFs...\n')
+    MeanIRF_dsge = zeros(nirfs,nvar,exo_nbr);
+    MedianIRF_dsge = zeros(nirfs,nvar,exo_nbr);
+    StdIRF_dsge = zeros(nirfs,nvar,exo_nbr);
+    DistribIRF_dsge = zeros(nirfs,nvar,exo_nbr,9);
+    HPDIRF_dsge = zeros(nirfs,nvar,exo_nbr,2);
+    if exist('dsge_prior_weight')
+      SelecVariables = bayestopt_.mfys;
+      nvar = length(SelecVariables);
+    end
+    fprintf('MH: Posterior IRFs (dsge)...\n')
     for i = 1:exo_nbr
       for j = 1:nvar
-	for k = 1:options_.irf
+	for k = 1:nirfs
 	  StartLine = 0;
-	  for file = 1:sfil_irf;
-	    instr = [fname_ '_irf' int2str(file)];
+	  for file = 1:sfil_irf_dsge;
+	    instr = [fname_ '_irf_dsge' int2str(file)];
 	    eval(['load ' instr]);
-	    MeanIRF(k,j,i) = MeanIRF(k,j,i)+sum(stock_irf(k,SelecVariables(j),i,:),4);
-	    DeProfundis = size(stock_irf,4); 
-	    tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_irf(k,SelecVariables(j),i,:)); 
+	    MeanIRF_dsge(k,j,i) = MeanIRF_dsge(k,j,i)+sum(stock_irf_dsge(k,SelecVariables(j),i,:),4);
+	    DeProfundis = size(stock_irf_dsge,4); 
+	    tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_irf_dsge(k,SelecVariables(j),i,:)); 
 	    StartLine = StartLine+DeProfundis;
 	  end
 	  tmp = sort(tmp);
-	  MedianIRF(k,j,i) = tmp(round(B*0.5));
-	  StdIRF(k,j,i) = std(tmp);
-	  DistribIRF(k,j,i,:) = reshape(tmp(deciles),1,1,1,9);
+	  MedianIRF_dsge(k,j,i) = tmp(round(B*0.5));
+	  StdIRF_dsge(k,j,i) = std(tmp);
+	  DistribIRF_dsge(k,j,i,:) = reshape(tmp(deciles),1,1,1,9);
 	  tt = floor(options_.mh_conf_sig*B);
 	  a = 1; 
 	  b = tt;
@@ -2616,28 +2812,96 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    b = b + 1;
 	    if tmp1(3,1) < tmp2(3,1)
 	      tmp2 = tmp1;     
-	    end    
+	    end
 	  end
-	  HPDIRF(k,j,i,1) = tmp(tmp2(1,1));
-	  HPDIRF(k,j,i,2) = tmp(tmp2(2,1));
+	  HPDIRF_dsge(k,j,i,1) = tmp(tmp2(1,1));
+	  HPDIRF_dsge(k,j,i,2) = tmp(tmp2(2,1));
 	end
 	disp(['    Variable: ' deblank(lgy_(SelecVariables(j),:)) ', orthogonalized shock to ' deblank(tit(i,:))])  
-      end   
+      end
     end
-    clear stock_irf;
-    MeanIRF = MeanIRF/B;
+    clear stock_irf_dsge;
+    MeanIRF_dsge = MeanIRF_dsge/B;
     for i = 1:exo_nbr
       for j = 1:nvar
-    eval(['oo_.PosteriorIRF.Mean.' deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = MeanIRF(:,j,i);']);
-    eval(['oo_.PosteriorIRF.Median.' deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = MedianIRF(:,j,i);']);
-    eval(['oo_.PosteriorIRF.Std.' deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = StdIRF(:,j,i);']);
-    eval(['oo_.PosteriorIRF.Distribution.' deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = squeeze(DistribIRF(:,j,i,:));']);
-    eval(['oo_.PosteriorIRF.HPDinf.' deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = squeeze(HPDIRF(:,j,i,1));']);
-    eval(['oo_.PosteriorIRF.HPDsup.' deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = squeeze(HPDIRF(:,j,i,2));']);
+	eval(['oo_.PosteriorIRF.Dsge.Mean.' ...
+	      deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = MeanIRF_dsge(:,j,i);']);
+	eval(['oo_.PosteriorIRF.Dsge.Median.' ...
+	      deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = MedianIRF_dsge(:,j,i);']);
+	eval(['oo_.PosteriorIRF.Dsge.Std.' ...
+	      deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = StdIRF_dsge(:,j,i);']);
+	eval(['oo_.PosteriorIRF.Dsge.Distribution.' ...
+	      deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = squeeze(DistribIRF_dsge(:,j,i,:));']);
+	eval(['oo_.PosteriorIRF.Dsge.HPDinf.' ...
+	      deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = squeeze(HPDIRF_dsge(:,j,i,1));']);
+	eval(['oo_.PosteriorIRF.Dsge.HPDsup.' ...
+	      deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = squeeze(HPDIRF_dsge(:,j,i,2));']);
       end
-    end 
+    end
+    if exist('dsge_prior_weight')% BVAR-DSGE:
+      tmp = zeros(B,1);
+      MeanIRF_dsgevar = zeros(nirfs,nvar,exo_nbr);
+      MedianIRF_dsgevar = zeros(nirfs,nvar,exo_nbr);
+      StdIRF_dsgevar = zeros(nirfs,nvar,exo_nbr);
+      DistribIRF_dsgevar = zeros(nirfs,nvar,exo_nbr,9);
+      HPDIRF_dsgevar = zeros(nirfs,nvar,exo_nbr,2);
+      disp('')
+      fprintf('MH: Posterior IRFs (bvar-dsge)...\n')
+      for i = 1:exo_nbr
+	for j = 1:nvobs
+	  for k = 1:nirfs
+	    StartLine = 0;
+	    for file = 1:sfil_irf_dsgevar
+	      instr = [fname_ '_irf_dsgevar' int2str(file)];
+	      eval(['load ' instr]);
+	      MeanIRF_dsgevar(k,j,i) = MeanIRF_dsgevar(k,j,i)+sum(stock_irf_dsgevar(k,j,i,:),4);
+	      DeProfundis = size(stock_irf_dsgevar,4); 
+	      tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_irf_dsgevar(k,j,i,:)); 
+	      StartLine = StartLine+DeProfundis;
+	    end
+	    tmp = sort(tmp);
+	    MedianIRF_dsgevar(k,j,i) = tmp(round(B*0.5));
+	    StdIRF_dsgevar(k,j,i) = std(tmp);
+	    DistribIRF_dsgevar(k,j,i,:) = reshape(tmp(deciles),1,1,1,9);
+	    tt = floor(options_.mh_conf_sig*B);
+	    a = 1; 
+	    b = tt;
+	    tmp2 = [1;tt;tmp(tt)-tmp(1)];
+	    while b <= B
+	      tmp1 = [a;b;tmp(b)-tmp(a)];
+	      a = a + 1;
+	      b = b + 1;
+	      if tmp1(3,1) < tmp2(3,1)
+		tmp2 = tmp1;     
+	      end    
+	    end
+	    HPDIRF_dsgevar(k,j,i,1) = tmp(tmp2(1,1));
+	    HPDIRF_dsgevar(k,j,i,2) = tmp(tmp2(2,1));
+	  end
+	  disp(['    Variable: ' deblank(options_.varobs(j,:)) ', orthogonalized shock to ' deblank(tit(i,:))])  
+	end   
+      end
+      clear stock_irf_dsgevar;
+      MeanIRF_dsgevar = MeanIRF_dsgevar/B;
+      for i = 1:exo_nbr
+	for j = 1:nvobs
+	  eval(['oo_.PosteriorIRF.BvarDsge.Mean.' ...
+		deblank(options_.varobs(j,:)) '_' deblank(tit(i,:)) ' = MeanIRF_dsgevar(:,j,i);']);
+	  eval(['oo_.PosteriorIRF.BvarDsge.Median.' ...
+		deblank(options_.varobs(j,:)) '_' deblank(tit(i,:)) ' = MedianIRF_dsgevar(:,j,i);']);
+	  eval(['oo_.PosteriorIRF.BvarDsge.Std.' ...
+		deblank(options_.varobs(j,:)) '_' deblank(tit(i,:)) ' = StdIRF_dsgevar(:,j,i);']);
+	  eval(['oo_.PosteriorIRF.BvarDsge.Distribution.' ...
+		deblank(options_.varobs(j,:)) '_' deblank(tit(i,:)) ' = squeeze(DistribIRF_dsgevar(:,j,i,:));']);
+	  eval(['oo_.PosteriorIRF.BvarDsge.HPDinf.' ...
+		deblank(options_.varobs(j,:)) '_' deblank(tit(i,:)) ' = squeeze(HPDIRF_dsgevar(:,j,i,1));']);
+	  eval(['oo_.PosteriorIRF.BvarDsge.HPDsup.' ...
+		deblank(options_.varobs(j,:)) '_' deblank(tit(i,:)) ' = squeeze(HPDIRF_dsgevar(:,j,i,2));']);
+	end
+      end
+    end
     %%
-    %%  Finally i build the plots.
+    %%  Finally I build the plots.
     %%
     if TeX
       fidTeX = fopen([fname_ '_BayesianIRF.TeX'],'w');
@@ -2650,155 +2914,220 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     for i=1:exo_nbr
       number_of_plots_to_draw = 0;
       index = [];
-      for j=1:nvar
-    if MeanIRF(1,j,i)
-      number_of_plots_to_draw = number_of_plots_to_draw + 1;
-      index = cat(1,index,j);
-    end
+      if ~exist('dsge_prior_weight') 
+	for j=1:nvar
+	  if MeanIRF(1,j,i)
+	    number_of_plots_to_draw = number_of_plots_to_draw + 1;
+	    index = cat(1,index,j);
+	  end
+	end
+      else% BVAR-DSGE
+	number_of_plots_to_draw = nvar;
+	index = (1:nvar)';
       end
       [nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);  
       if nbplt == 1
-    if options_.relative_irf
-      hh = figure('Name',['Relative response to orthogonalized' ...
-                  ' shock to ' tit(i,:)]);
-    else
-      hh = figure('Name',['Orthogonalized shock to ' tit(i, ...
-                          :)]);
-    end
-    NAMES = [];
-    if TeX; TEXNAMES = []; end;
-    for j=1:number_of_plots_to_draw
-      set(0,'CurrentFigure',hh)
-      subplot(nr,nc,j);
-      plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
-      hold on
-      for k = 1:9
-        plot(1:options_.irf,DistribIRF(:,index(j),i,k),'-g','linewidth',0.5)
-      end
-      plot(1:options_.irf,MeanIRF(:,index(j),i),'-k','linewidth',1)
-      xlim([1 options_.irf]);
-      hold off
-      name    = deblank(lgy_(SelecVariables(index(j)),:));
-      NAMES   = strvcat(NAMES,name);
-      if TeX
-        texname = deblank(lgy_TeX_(SelecVariables(index(j)),:));
-        TEXNAMES   = strvcat(TEXNAMES,['$' texname '$']);
-      end
-      title(name,'Interpreter','none')
-    end
-    eval(['print -depsc2 ' fname_ '_Bayesian_IRF_' deblank(tit(i,:))]);
-    eval(['print -dpdf ' fname_  '_Bayesian_IRF_' deblank(tit(i,:))]);
-    saveas(hh,[fname_  '_Bayesian_IRF_' deblank(tit(i,:)) '.fig']);
-    if options_.nograph, close(hh), end
-    if TeX
-      fprintf(fidTeX,'\\begin{figure}[H]\n');
-      for jj = 1:number_of_plots_to_draw
-        fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-      end    
-      fprintf(fidTeX,'\\centering \n');
-      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRF_%s}\n',fname_,deblank(tit(i,:)));
-      if options_.relative_irf
-        fprintf(fidTeX,['\\caption{Bayesian relative' ...
-                ' IRF.}']);
-      else
-        fprintf(fidTeX,'\\caption{Bayesian IRF.}');
-      end
-      fprintf(fidTeX,'\\label{Fig:BayesianIRF:%s}\n',deblank(tit(i,:)));
-      fprintf(fidTeX,'\\end{figure}\n');
-      fprintf(fidTeX,' \n');
-    end    
+	if options_.relative_irf
+	  hh = figure('Name',['Relative response to orthogonalized shock to ' tit(i,:)]);
+	else
+	  hh = figure('Name',['Orthogonalized shock to ' tit(i,:)]);
+	end
+	NAMES = [];
+	if TeX; TEXNAMES = []; end;
+	for j=1:number_of_plots_to_draw
+	  set(0,'CurrentFigure',hh)
+	  subplot(nr,nc,j);
+	  plot([1 nirfs],[0 0],'-r','linewidth',0.5);% zero line.
+	  hold on
+	  for k = 1:9
+	    plot(1:nirfs,DistribIRF_dsge(:,index(j),i,k),'-k','linewidth',0.5,'Color',[0 0 0])
+	    if exist('dsge_prior_weight')
+	      plot(1:nirfs,DistribIRF_dsgevar(:,j,i,k),'-k','linewidth',0.5,'Color',[0.80 0.80 0.80])
+	    end
+	  end
+	  plot(1:nirfs,MeanIRF_dsge(:,index(j),i),'-k','linewidth',3,'Color',[0 0 0])
+	  plot(1:nirfs,MeanIRF_dsgevar(:,j,i),'-k','linewidth',3,'Color',[0.80 0.80 0.80])
+	  xlim([1 nirfs]);
+	  hold off
+	  name = deblank(lgy_(SelecVariables(index(j)),:));
+	  NAMES = strvcat(NAMES,name);
+	  if TeX
+	    texname = deblank(lgy_TeX_(SelecVariables(index(j)),:));
+	    TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
+	  end
+	  title(name,'Interpreter','none')
+	end
+	if ~exist('dsge_prior_weight')
+	  eval(['print -depsc2 ' fname_ '_Bayesian_IRFdsge_' deblank(tit(i,:))]);
+	  eval(['print -dpdf ' fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:))]);
+	  saveas(hh,[fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) '.fig']);
+	else
+	  eval(['print -depsc2 ' fname_ '_Bayesian_IRFbvardsge_' deblank(tit(i,:))]);
+	  eval(['print -dpdf ' fname_  '_Bayesian_IRFbvardsge_' deblank(tit(i,:))]);
+	  saveas(hh,[fname_  '_Bayesian_IRFbvardsge_' deblank(tit(i,:)) '.fig']);	  
+	end
+	if options_.nograph, close(hh), end
+	if TeX
+	  fprintf(fidTeX,'\\begin{figure}[H]\n');
+	  for jj = 1:number_of_plots_to_draw
+	    fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+	  end    
+	  fprintf(fidTeX,'\\centering \n');
+	  if ~exist('dsge_prior_weight')
+	    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRFdsge_%s}\n',fname_,deblank(tit(i,:)));
+	  else
+	    fprintf(fidTeX,['\\includegraphics[scale=0.5]{%s_Bayesian_IRFbvardsge_%s}\n',fname_,deblank(tit(i,:))]);
+	  end  
+	  if options_.relative_irf
+	    fprintf(fidTeX,['\\caption{Bayesian relative IRF.}']);
+	  else
+	    if ~exist('dsge_prior_weight')
+	      fprintf(fidTeX,'\\caption{Bayesian IRF (DSGE model).}');
+	    else
+	      fprintf(fidTeX,'\\caption{Bayesian IRF (BVAR-DSGE model).}');
+	    end
+	  end
+	  if ~exist('dsge_prior_weight')
+	    fprintf(fidTeX,'\\label{Fig:BayesianIRFdsge:%s}\n',deblank(tit(i,:)));
+	  else
+	    fprintf(fidTeX,'\\label{Fig:BayesianIRFbvardsge:%s}\n',deblank(tit(i,:)));
+	  end  
+	  fprintf(fidTeX,'\\end{figure}\n');
+	  fprintf(fidTeX,' \n');
+	end    
       elseif nbplt > 1
-    for fig = 1:nbplt-1
-      if options_.relative_irf
-        hh = figure('Name',['Relative response to orthogonalized' ...
-                ' shock to ' tit(i,:) ' figure ' int2str(fig) '.']);
-      else
-        hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ...
-                ' figure ' int2str(fig) '.']);
-      end
-      NAMES = [];
-      if TeX; TEXNAMES = []; end;
-      for j=1:nstar
-        jj = (fig-1)*nstar + j;
-        subplot(nr,nc,j);
-        plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
-        hold on
-        for k = 1:9
-          plot(1:options_.irf,DistribIRF(:,index(jj),i,k),'-g','linewidth',0.5)
-        end
-        plot(1:options_.irf,MeanIRF(:,index(jj),i),'-k','linewidth',1)
-        xlim([1 options_.irf]);
-        hold off
-        name    = deblank(lgy_(SelecVariables(index(jj)),:));
-        NAMES   = strvcat(NAMES,name);
-        if TeX
-          texname = deblank(lgy_TeX_(SelecVariables(index(jj)),:));
-          TEXNAMES   = strvcat(TEXNAMES,['$' texname '$']);
-        end
-        title(name,'Interpreter','none')
-      end
-      eval(['print -depsc2 ' fname_ '_Bayesian_IRF_' deblank(tit(i,:)) int2str(fig)]);
-      eval(['print -dpdf ' fname_  '_Bayesian_IRF_' deblank(tit(i,:)) int2str(fig)]);
-      saveas(hh,[fname_  '_Bayesian_IRF_' deblank(tit(i,:)) int2str(fig) '.fig']);
-      if options_.nograph, close(hh), end
-      if TeX
-        fprintf(fidTeX,'\\begin{figure}[H]\n');
-        for jj = 1:nstar
-          fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-        end    
-        fprintf(fidTeX,'\\centering \n');
-        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRF_%s%s}\n',fname_,deblank(tit(i,:)),int2str(fig));
-        if options_.relative_irf == 1
-          fprintf(fidTeX,['\\caption{Bayesian relative' ...
-                  ' IRF.}']);
-        else
-          fprintf(fidTeX,'\\caption{Bayesian IRF.}');
-        end
-        fprintf(fidTeX,'\\label{Fig:BayesianIRF:%s:%s}\n',deblank(tit(i,:)), int2str(fig));
-        fprintf(fidTeX,'\\end{figure}\n');
-        fprintf(fidTeX,' \n');
-      end    
-    end
-    hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
-    NAMES = [];
-    if TeX; TEXNAMES = []; end;
-    for j=1:number_of_plots_to_draw -(nbplt-1)*nstar
-      jj = (nbplt-1)*nstar + j;
-      subplot(nr,nc,j);
-      plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
-      hold on
-      for k = 1:9
-        plot(1:options_.irf,DistribIRF(:,index(jj),i,k),'-g','linewidth',0.5)
-      end
-      plot(1:options_.irf,MeanIRF(:,index(jj),i),'-k','linewidth',1)
-      xlim([1 options_.irf]);
-      hold off
-      name    = deblank(lgy_(SelecVariables(index(jj)),:));
-      NAMES   = strvcat(NAMES,name);
-      if TeX
-        texname = deblank(lgy_TeX_(SelecVariables(index(jj)),:));
-        TEXNAMES   = strvcat(TEXNAMES,['$' texname '$']);
-      end
-      title(name,'Interpreter','none')
-    end
-    eval(['print -depsc2 ' fname_ '_Bayesian_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
-    eval(['print -dpdf ' fname_  '_Bayesian_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
-    saveas(hh,[fname_  '_Bayesian_IRF_' deblank(tit(i,:)) int2str(nbplt) '.fig']);
-    if options_.nograph, close(hh), end
-    if TeX
-      fprintf(fidTeX,'\\begin{figure}[H]\n');
-      for jj = 1:nstar
-        fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-      end    
-      fprintf(fidTeX,'\\centering \n');
-      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRF_%s%s}\n',fname_,deblank(tit(i,:)),int2str(nbplt));
-      fprintf(fidTeX,'\\caption{Bayesian IRF.}');
-      fprintf(fidTeX,'\\label{Fig:BayesianIRF:%s:%s}\n',deblank(tit(i,:)), int2str(nbplt));
-      fprintf(fidTeX,'\\end{figure}\n');
-      fprintf(fidTeX,' \n');
-    end    
+	for fig = 1:nbplt-1
+	  if options_.relative_irf
+	    hh = figure('Name',['Relative response to orthogonalized' ...
+				' shock to ' tit(i,:) ' figure ' int2str(fig) '.']);
+	  else
+	    hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ...
+				' figure ' int2str(fig) '.']);
+	  end
+	  NAMES = [];
+	  if TeX; TEXNAMES = []; end;
+	  for j=1:nstar
+	    jj = (fig-1)*nstar + j;
+	    subplot(nr,nc,j);
+	    plot([1 nirfs],[0 0],'-r','linewidth',0.5)
+	    hold on
+	    for k = 1:9
+	      plot(1:options_.irf,DistribIRF_dsge(:,index(jj),i,k),'-k','linewidth',0.5,'Color',[0 0 0])
+	      if exist('dsge_prior_weight')
+		plot(1:nirfs,DistribIRF_dsgevar(:,jj,i,k),'-k','linewidth',0.5,'Color',[0.80 0.80 0.80])
+	      end
+	    end
+	    plot(1:nirfs,MeanIRF_dsge(:,index(jj),i),'-k','linewidth',3,'Color',[0 0 0])
+	    if exist('dsge_prior_weight')
+	      plot(1:nirfs,MeanIRF_dsgevar(:,jj,i),'-k','linewidth',3,'Color',[0.80 0.80 0.80])
+	    end
+	    xlim([1 nirfs]);
+	    hold off
+	    name = deblank(lgy_(SelecVariables(index(jj)),:));
+	    NAMES = strvcat(NAMES,name);
+	    if TeX
+	      texname = deblank(lgy_TeX_(SelecVariables(index(jj)),:));
+	      TEXNAMES   = strvcat(TEXNAMES,['$' texname '$']);
+	    end
+	    title(name,'Interpreter','none')
+	  end
+	  if ~exist('dsge_prior_weight')
+	    eval(['print -depsc2 ' fname_ '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(fig)]);
+	    eval(['print -dpdf ' fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(fig)]);
+	    saveas(hh,[fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(fig) '.fig']);
+	  else
+	    eval(['print -depsc2 ' fname_ '_Bayesian_IRFbvardsge_' deblank(tit(i,:)) int2str(fig)]);
+	    eval(['print -dpdf ' fname_  '_Bayesian_IRFbvardsge_' deblank(tit(i,:)) int2str(fig)]);
+	    saveas(hh,[fname_  '_Bayesian_IRFbvardsge_' deblank(tit(i,:)) int2str(fig) '.fig']);
+	  end
+	  if options_.nograph, close(hh), end
+	  if TeX
+	    fprintf(fidTeX,'\\begin{figure}[H]\n');
+	    for jj = 1:nstar
+	      fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+	    end    
+	    fprintf(fidTeX,'\\centering \n');
+	    if ~exist('dsge_prior_weight')
+	      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRFdsge_%s%s}\n',fname_,deblank(tit(i,:)),int2str(fig));
+	    else
+	      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRFbvardsge_%s%s}\n',fname_,deblank(tit(i,:)),int2str(fig));
+	    end
+	    if options_.relative_irf == 1
+	      fprintf(fidTeX,['\\caption{Bayesian relative IRF.}']);
+	    else
+	      if ~exist('dsge_prior_weight')
+		fprintf(fidTeX,'\\caption{Bayesian IRF (DSGE model).}');
+	      else
+		fprintf(fidTeX,['\\caption{Bayesian IRF (BVAR-DSGE model).}']);
+	      end
+	    end
+	    if ~exist('dsge_prior_weight')
+	      fprintf(fidTeX,'\\label{Fig:BayesianIRFdsge:%s:%s}\n',deblank(tit(i,:)), int2str(fig));
+	    else
+	      fprintf(fidTeX,'\\label{Fig:BayesianIRFbvardsge:%s:%s}\n',deblank(tit(i,:)), int2str(fig));
+	    end
+	    fprintf(fidTeX,'\\end{figure}\n');
+	    fprintf(fidTeX,' \n');
+	  end    
+	end
+	hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
+	NAMES = [];
+	if TeX; TEXNAMES = []; end;
+	for j=1:number_of_plots_to_draw -(nbplt-1)*nstar
+	  jj = (nbplt-1)*nstar + j;
+	  subplot(nr,nc,j);
+	  plot([1 nirfs],[0 0],'-r','linewidth',0.5);
+	  hold on
+	  for k = 1:9
+	    plot(1:options_.irf,DistribIRF_dsge(:,index(jj),i,k),'-k','linewidth',0.5,'Color',[0 0 0])
+	    if exist('dsge_prior_weight')
+	      plot(1:nirfs,DistribIRF_dsgevar(:,jj,i,k),'-k','linewidth',0.5,'Color',[0.80 0.80 0.80])
+	    end
+	  end
+	  plot(1:nirfs,MeanIRF(:,index(jj),i),'-k','linewidth',3,'Color',[0 0 0])
+	  if exist('dsge_prior_weight')
+	    plot(1:nirfs,MeanIRF(:,jj,i),'-k','linewidth',3,'Color',[0.80 0.80 0.80])
+	  end  
+	  xlim([1 nirfs]);
+	  hold off
+	  name = deblank(lgy_(SelecVariables(index(jj)),:));
+	  NAMES = strvcat(NAMES,name);
+	  if TeX
+	    texname = deblank(lgy_TeX_(SelecVariables(index(jj)),:));
+	    TEXNAMES   = strvcat(TEXNAMES,['$' texname '$']);
+	  end
+	  title(name,'Interpreter','none')
+	end
+	if ~exist('dsge_prior_weight')
+	  eval(['print -depsc2 ' fname_ '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(nbplt)]);
+	  eval(['print -dpdf ' fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(nbplt)]);
+	  saveas(hh,[fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(nbplt) '.fig']);
+	else
+	  eval(['print -depsc2 ' fname_ '_Bayesian_IRFbvardsge_' deblank(tit(i,:)) int2str(nbplt)]);
+	  eval(['print -dpdf ' fname_  '_Bayesian_IRFbvardsge_' deblank(tit(i,:)) int2str(nbplt)]);
+	  saveas(hh,[fname_  '_Bayesian_IRFbvardsge_' deblank(tit(i,:)) int2str(nbplt) '.fig']);	  
+	end  
+	  if options_.nograph, close(hh), end
+	if TeX
+	  fprintf(fidTeX,'\\begin{figure}[H]\n');
+	  for jj = 1:nstar
+	    fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+	  end    
+	  fprintf(fidTeX,'\\centering \n');
+	  if ~exist('dsge_prior_weight')
+	    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRFdsge_%s%s}\n',fname_,deblank(tit(i,:)),int2str(nbplt));
+	    fprintf(fidTeX,'\\caption{Bayesian IRF (DSGE model).}');
+	    fprintf(fidTeX,'\\label{Fig:BayesianIRFdsge:%s:%s}\n',deblank(tit(i,:)), int2str(nbplt));
+	  else
+	    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRFbvardsge_%s%s}\n',fname_,deblank(tit(i,:)),int2str(nbplt));
+	    fprintf(fidTeX,'\\caption{Bayesian IRF (BVAR-DSGE model).}');
+	    fprintf(fidTeX,'\\label{Fig:BayesianIRF:%s:%s}\n',deblank(tit(i,:)), int2str(nbplt));
+	  end
+	  fprintf(fidTeX,'\\end{figure}\n');
+	  fprintf(fidTeX,' \n');
+	end    
       else % nbplt = 0
-    disp('There''s nothing to plot here!')
+	disp('There''s nothing to plot here!')
       end
     end
     if TeX
@@ -2820,13 +3149,15 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     vartan = []; 
     for i=1:nvar
       if isempty(strmatch(deblank(varlist(i,:)),options_.unit_root_vars,'exact'))       
-    vartan = strvcat(vartan,varlist(i,:));
-      end   
+	vartan = strvcat(vartan,varlist(i,:));
+      end
     end
   else
     vartan = varlist;
   end
   if options_.moments_varendo & ~isempty(vartan)
+    deep = MU;
+    subindx = subset();
     nvar    = size(vartan,1);
     ivar = zeros(nvar,1);
     for i = 1:nvar
@@ -2878,7 +3209,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	end    
 	eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	clear post2 logpo2;
-	deep  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
+	DEEP  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
+	deep(subindx) = DEEP(subindx);
 	set_parameters(deep);
 	resol(ys_,0);
 	Gamma_y = th_autocovariances(dr_,ivar);
@@ -2936,31 +3268,31 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       end
       clear m_mean variance Gamma_y;
       if irun_thm1
-    stock_thm1 = stock_thm1(:,1:irun_thm1);
-    sfil_thm1 = sfil_thm1 + 1;
-    instr = [fname_ '_thm1' int2str(sfil_thm1) ' stock_thm1;'];
-    eval(['save ' instr]);
+	stock_thm1 = stock_thm1(:,1:irun_thm1);
+	sfil_thm1 = sfil_thm1 + 1;
+	instr = [fname_ '_thm1' int2str(sfil_thm1) ' stock_thm1;'];
+	eval(['save ' instr]);
       end
       clear stock_thm1;
       if irun_thm2
-    stock_thm2 = stock_thm2(:,:,1:irun_thm2);
-    sfil_thm2 = sfil_thm2 + 1;
-    instr = [fname_ '_thm2' int2str(sfil_thm2) ' stock_thm2;'];
-    eval(['save ' instr]);
+	stock_thm2 = stock_thm2(:,:,1:irun_thm2);
+	sfil_thm2 = sfil_thm2 + 1;
+	instr = [fname_ '_thm2' int2str(sfil_thm2) ' stock_thm2;'];
+	eval(['save ' instr]);
       end
       clear stock_thm2;
       if irun_thm3
-    stock_thm3 = stock_thm3(:,:,1:irun_thm3);
-    sfil_thm3 = sfil_thm3 + 1;
-    instr = [fname_ '_thm3' int2str(sfil_thm3) ' stock_thm3;'];
-    eval(['save ' instr]);
+	stock_thm3 = stock_thm3(:,:,1:irun_thm3);
+	sfil_thm3 = sfil_thm3 + 1;
+	instr = [fname_ '_thm3' int2str(sfil_thm3) ' stock_thm3;'];
+	eval(['save ' instr]);
       end
       clear stock_thm3;
       if irun_thm4
-    stock_thm4 = stock_thm4(:,:,1:irun_thm4);
-    sfil_thm4 = sfil_thm4 + 1;
-    instr = [fname_ '_thm4' int2str(sfil_thm4) ' stock_thm4;'];
-    eval(['save ' instr]);
+	stock_thm4 = stock_thm4(:,:,1:irun_thm4);
+	sfil_thm4 = sfil_thm4 + 1;
+	instr = [fname_ '_thm4' int2str(sfil_thm4) ' stock_thm4;'];
+	eval(['save ' instr]);
       end
       clear stock_thm4;
     else        
@@ -2982,7 +3314,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	irun_thm2 = irun_thm2+1;
 	irun_thm3 = irun_thm3+1;
 	irun_thm4 = irun_thm4+1;
-	deep  = x2(floor(rand*NumberOfSimulations)+1,:);
+	DEEP  = x2(floor(rand*NumberOfSimulations)+1,:);
+	deep(subindx) = DEEP(subindx);
 	set_parameters(deep);
 	resol(ys_,0);
 	Gamma_y = th_autocovariances(dr_,ivar1);
@@ -3040,31 +3373,31 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       end
       clear m_mean variance Gamma_y;
       if irun_thm1
-    stock_thm1 = stock_thm1(:,1:irun_thm1);
-    sfil_thm1 = sfil_thm1 + 1;
-    instr = [fname_ '_thm1' int2str(sfil_thm1) ' stock_thm1;'];
-    eval(['save ' instr]);
+	stock_thm1 = stock_thm1(:,1:irun_thm1);
+	sfil_thm1 = sfil_thm1 + 1;
+	instr = [fname_ '_thm1' int2str(sfil_thm1) ' stock_thm1;'];
+	eval(['save ' instr]);
       end
       clear stock_thm1;
       if irun_thm2
-    stock_thm2 = stock_thm2(:,:,1:irun_thm2);
-    sfil_thm2 = sfil_thm2 + 1;
-    instr = [fname_ '_thm2' int2str(sfil_thm2) ' stock_thm2;'];
-    eval(['save ' instr]);
+	stock_thm2 = stock_thm2(:,:,1:irun_thm2);
+	sfil_thm2 = sfil_thm2 + 1;
+	instr = [fname_ '_thm2' int2str(sfil_thm2) ' stock_thm2;'];
+	eval(['save ' instr]);
       end
       clear stock_thm2;
       if irun_thm3
-    stock_thm3 = stock_thm3(:,:,1:irun_thm3);
-    sfil_thm3 = sfil_thm3 + 1;
-    instr = [fname_ '_thm3' int2str(sfil_thm3) ' stock_thm3;'];
-    eval(['save ' instr]);
+	stock_thm3 = stock_thm3(:,:,1:irun_thm3);
+	sfil_thm3 = sfil_thm3 + 1;
+	instr = [fname_ '_thm3' int2str(sfil_thm3) ' stock_thm3;'];
+	eval(['save ' instr]);
       end
       clear stock_thm3;
       if irun_thm4
-    stock_thm4 = stock_thm4(:,:,1:irun_thm4);
-    sfil_thm4 = sfil_thm4 + 1;
-    instr = [fname_ '_thm4' int2str(sfil_thm4) ' stock_thm4;'];
-    eval(['save ' instr]);
+	stock_thm4 = stock_thm4(:,:,1:irun_thm4);
+	sfil_thm4 = sfil_thm4 + 1;
+	instr = [fname_ '_thm4' int2str(sfil_thm4) ' stock_thm4;'];
+	eval(['save ' instr]);
       end
       clear stock_thm4;
     end     
@@ -3081,11 +3414,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     for i = 1:nvar
       StartLine = 0;
       for file = 1:sfil_thm1 
-    instr = [fname_ '_thm1' int2str(file)];
-    eval(['load ' instr]);
-    DeProfundis = size(stock_thm1,2);
-    tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm1(i,:));
-    StartLine = StartLine+DeProfundis;
+	instr = [fname_ '_thm1' int2str(file)];
+	eval(['load ' instr]);
+	DeProfundis = size(stock_thm1,2);
+	tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm1(i,:));
+	StartLine = StartLine+DeProfundis;
       end
       tmp = sort(tmp);
       MeanMean(i) = mean(tmp);
@@ -3097,12 +3430,12 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       b = tt;
       tmp2 = [1;tt;tmp(tt)-tmp(1)];
       while b <= B
-    tmp1 = [a;b;tmp(b)-tmp(a)];
-    a = a + 1;
-    b = b + 1;
-    if tmp1(3,1) < tmp2(3,1)
-      tmp2 = tmp1;     
-    end    
+	tmp1 = [a;b;tmp(b)-tmp(a)];
+	a = a + 1;
+	b = b + 1;
+	if tmp1(3,1) < tmp2(3,1)
+	  tmp2 = tmp1;     
+	end    
       end
       HPDMean(i,1) = tmp(tmp2(1,1));
       HPDMean(i,2) = tmp(tmp2(2,1));
@@ -3147,13 +3480,13 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' Variables & mean & median  & std & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
       for i=1:nvar
-    fprintf(fidTeX,' $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
-        deblank(lgy_TeX_(ivar(i),:)), ...
-        MeanMean(i),...
-        MedianMean(i),...
-        StdMean(i),...
-        HPDMean(i,1),...
-        HPDMean(i,2));
+	fprintf(fidTeX,' $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
+		deblank(lgy_TeX_(ivar(i),:)), ...
+		MeanMean(i),...
+		MedianMean(i),...
+		StdMean(i),...
+		HPDMean(i,1),...
+		HPDMean(i,2));
       end   
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -3171,34 +3504,34 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     HPDVariance = zeros(nvar,nvar,2);
     for i = 1:nvar
       for j=1:nvar
-    StartLine = 0;
-    tmp = zeros(B,1);
-    for file = 1:sfil_thm2 
-      instr = [fname_ '_thm2' int2str(file)];
-      eval(['load ' instr]);
-      DeProfundis = size(stock_thm2,3);
-      tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm2(i,j,:));
-      StartLine = StartLine+DeProfundis;
-    end 
-    tmp = sort(tmp);
-    MeanVariance(i,j) = mean(tmp);
-    MedianVariance(i,j) = tmp(round(B*0.5));
-    StdVariance(i,j) = std(tmp);
-    DistribVariance(i,j,:) = reshape(tmp(deciles),1,1,9);
-    tt = floor(options_.mh_conf_sig*B);
-    a = 1; 
-    b = tt;
-    tmp2 = [1;tt;tmp(tt)-tmp(1)];
-    while b <= B
-      tmp1 = [a;b;tmp(b)-tmp(a)];
-      a = a + 1;
-      b = b + 1;
-      if tmp1(3,1) < tmp2(3,1)
-        tmp2 = tmp1;     
-      end    
-    end
-    HPDVariance(i,j,1) = tmp(tmp2(1,1));
-    HPDVariance(i,j,2) = tmp(tmp2(2,1));
+	StartLine = 0;
+	tmp = zeros(B,1);
+	for file = 1:sfil_thm2 
+	  instr = [fname_ '_thm2' int2str(file)];
+	  eval(['load ' instr]);
+	  DeProfundis = size(stock_thm2,3);
+	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm2(i,j,:));
+	  StartLine = StartLine+DeProfundis;
+	end 
+	tmp = sort(tmp);
+	MeanVariance(i,j) = mean(tmp);
+	MedianVariance(i,j) = tmp(round(B*0.5));
+	StdVariance(i,j) = std(tmp);
+	DistribVariance(i,j,:) = reshape(tmp(deciles),1,1,9);
+	tt = floor(options_.mh_conf_sig*B);
+	a = 1; 
+	b = tt;
+	tmp2 = [1;tt;tmp(tt)-tmp(1)];
+	while b <= B
+	  tmp1 = [a;b;tmp(b)-tmp(a)];
+	  a = a + 1;
+	  b = b + 1;
+	  if tmp1(3,1) < tmp2(3,1)
+	    tmp2 = tmp1;     
+	  end    
+	end
+	HPDVariance(i,j,1) = tmp(tmp2(1,1));
+	HPDVariance(i,j,2) = tmp(tmp2(2,1));
       end   
     end
     disp(' ')
@@ -3216,19 +3549,19 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     disp(titre)
     for i=1:nvar
       for j=i:nvar
-    disp(sprintf('%15s \t %15s \t %9.3g \t %9.3g \t %9.3g \t %9.3g \t %9.3g',...
-             deblank(lgy_(ivar(i),:)), ...
-             deblank(lgy_(ivar(j),:)), ...
-             MeanVariance(i,j),...
-             MedianVariance(i,j),...
-             StdVariance(i,j),...
-             HPDVariance(i,j,1),...
-             HPDVariance(i,j,2)));
-    eval(['oo_.PosteriorTheoreticalMoment.Variance.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = MeanVariance(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Variance.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = MedianVariance(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Variance.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = StdVariance(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Variance.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = HPDVariance(i,j,1);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Variance.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = HPDVariance(i,j,2);']);
+	disp(sprintf('%15s \t %15s \t %9.3g \t %9.3g \t %9.3g \t %9.3g \t %9.3g',...
+		     deblank(lgy_(ivar(i),:)), ...
+		     deblank(lgy_(ivar(j),:)), ...
+		     MeanVariance(i,j),...
+		     MedianVariance(i,j),...
+		     StdVariance(i,j),...
+		     HPDVariance(i,j,1),...
+		     HPDVariance(i,j,2)));
+	eval(['oo_.PosteriorTheoreticalMoment.Variance.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = MeanVariance(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Variance.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = MedianVariance(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Variance.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = StdVariance(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Variance.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = HPDVariance(i,j,1);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Variance.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = HPDVariance(i,j,2);']);
       end       
     end
     if TeX
@@ -3245,16 +3578,16 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' Variables & Variables & mean & median  & std & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
       for i=1:nvar
-    for j=i:nvar
-      fprintf(fidTeX,' $%s$ & $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
-          deblank(lgy_TeX_(ivar(i),:)), ...
-          deblank(lgy_TeX_(ivar(j),:)), ...
-          MeanVariance(i,j),...
-          MedianVariance(i,j),...
-          StdVariance(i,j),...
-          HPDVariance(i,j,1),...
-          HPDVariance(i,j,2));
-    end     
+	for j=i:nvar
+	  fprintf(fidTeX,' $%s$ & $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
+		  deblank(lgy_TeX_(ivar(i),:)), ...
+		  deblank(lgy_TeX_(ivar(j),:)), ...
+		  MeanVariance(i,j),...
+		  MedianVariance(i,j),...
+		  StdVariance(i,j),...
+		  HPDVariance(i,j,1),...
+		  HPDVariance(i,j,2));
+	end     
       end   
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -3274,36 +3607,36 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     tmppp   = zeros(B,1);
     for i = 1:nvar
       for j=1:nvar
-    StartLine = 0;
-    tmp = zeros(B,1);
-    for file = 1:sfil_thm2 
-      instr = [fname_ '_thm2' int2str(file)];
-      eval(['load ' instr]);
-      DeProfundis = size(stock_thm2,3);
-      tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm2(i,j,:));
-      tmpp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm2(i,i,:));
-      tmppp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm2(j,j,:));
-      StartLine = StartLine+DeProfundis;
-    end
-    tmp = sort(tmp./sqrt(tmpp.*tmppp));
-    MeanCorrelation(i,j) = mean(tmp);
-    MedianCorrelation(i,j) = tmp(round(B*0.5));
-    StdCorrelation(i,j) = std(tmp);
-    DistribCorrelation(i,j,:) = reshape(tmp(deciles),1,1,9);
-    tt = floor(options_.mh_conf_sig*B);
-    a = 1; 
-    b = tt;
-    tmp2 = [1;tt;tmp(tt)-tmp(1)];
-    while b <= B
-      tmp1 = [a;b;tmp(b)-tmp(a)];
-      a = a + 1;
-      b = b + 1;
-      if tmp1(3,1) < tmp2(3,1)
-        tmp2 = tmp1;     
-      end    
-    end
-    HPDCorrelation(i,j,1) = tmp(tmp2(1,1));
-    HPDCorrelation(i,j,2) = tmp(tmp2(2,1));
+	StartLine = 0;
+	tmp = zeros(B,1);
+	for file = 1:sfil_thm2 
+	  instr = [fname_ '_thm2' int2str(file)];
+	  eval(['load ' instr]);
+	  DeProfundis = size(stock_thm2,3);
+	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm2(i,j,:));
+	  tmpp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm2(i,i,:));
+	  tmppp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm2(j,j,:));
+	  StartLine = StartLine+DeProfundis;
+	end
+	tmp = sort(tmp./sqrt(tmpp.*tmppp));
+	MeanCorrelation(i,j) = mean(tmp);
+	MedianCorrelation(i,j) = tmp(round(B*0.5));
+	StdCorrelation(i,j) = std(tmp);
+	DistribCorrelation(i,j,:) = reshape(tmp(deciles),1,1,9);
+	tt = floor(options_.mh_conf_sig*B);
+	a = 1; 
+	b = tt;
+	tmp2 = [1;tt;tmp(tt)-tmp(1)];
+	while b <= B
+	  tmp1 = [a;b;tmp(b)-tmp(a)];
+	  a = a + 1;
+	  b = b + 1;
+	  if tmp1(3,1) < tmp2(3,1)
+	    tmp2 = tmp1;     
+	  end    
+	end
+	HPDCorrelation(i,j,1) = tmp(tmp2(1,1));
+	HPDCorrelation(i,j,2) = tmp(tmp2(2,1));
       end   
     end
     clear tmpp tmppp;
@@ -3322,19 +3655,19 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     disp(titre)
     for i=1:nvar-1
       for j=i+1:nvar
-    disp(sprintf('%15s \t %15s \t %6.3f \t %6.3f \t %6.3f \t %6.3f \t %6.3f',...
-             deblank(lgy_(ivar(i),:)), ...
-             deblank(lgy_(ivar(j),:)), ...
-             MeanCorrelation(i,j),...
-             MedianCorrelation(i,j),...
-             StdCorrelation(i,j),...
-             HPDCorrelation(i,j,1),...
-             HPDCorrelation(i,j,2)));
-    eval(['oo_.PosteriorTheoreticalMoment.Correlation.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = MeanCorrelation(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Correlation.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = MedianCorrelation(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Correlation.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = StdCorrelation(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Correlation.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = HPDCorrelation(i,j,1);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Correlation.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = HPDCorrelation(i,j,2);']);
+	disp(sprintf('%15s \t %15s \t %6.3f \t %6.3f \t %6.3f \t %6.3f \t %6.3f',...
+		     deblank(lgy_(ivar(i),:)), ...
+		     deblank(lgy_(ivar(j),:)), ...
+		     MeanCorrelation(i,j),...
+		     MedianCorrelation(i,j),...
+		     StdCorrelation(i,j),...
+		     HPDCorrelation(i,j,1),...
+		     HPDCorrelation(i,j,2)));
+	eval(['oo_.PosteriorTheoreticalMoment.Correlation.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = MeanCorrelation(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Correlation.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = MedianCorrelation(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Correlation.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = StdCorrelation(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Correlation.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = HPDCorrelation(i,j,1);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Correlation.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgy_(ivar(j),:)) ' = HPDCorrelation(i,j,2);']);
       end       
     end
     if TeX
@@ -3351,16 +3684,16 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' Variables & Variables & mean & median  & std & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
       for i=1:nvar-1
-    for j=i+1:nvar
-      fprintf(fidTeX,' $%s$ & $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
-          deblank(lgy_TeX_(ivar(i),:)), ...
-          deblank(lgy_TeX_(ivar(j),:)), ...
-          MeanCorrelation(i,j),...
-          MedianCorrelation(i,j),...
-          StdCorrelation(i,j),...
-          HPDCorrelation(i,j,1),...
-          HPDCorrelation(i,j,2));
-    end
+	for j=i+1:nvar
+	  fprintf(fidTeX,' $%s$ & $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
+		  deblank(lgy_TeX_(ivar(i),:)), ...
+		  deblank(lgy_TeX_(ivar(j),:)), ...
+		  MeanCorrelation(i,j),...
+		  MedianCorrelation(i,j),...
+		  StdCorrelation(i,j),...
+		  HPDCorrelation(i,j,1),...
+		  HPDCorrelation(i,j,2));
+	end
       end   
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -3378,33 +3711,33 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     HPDDecomp = zeros(nvar,exo_nbr,2);
     for i = 1:nvar
       for j=1:exo_nbr
-    StartLine = 0;
-    for file = 1:sfil_thm3 
-      instr = [fname_ '_thm3' int2str(file)];
-      eval(['load ' instr]);
-      DeProfundis = size(stock_thm3,3);
-      tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm3(i,j,:));
-      StartLine = StartLine+DeProfundis;
-    end
-    tmp = sort(tmp);
-    MeanDecomp(i,j) = mean(tmp);
-    MedianDecomp(i,j) = tmp(round(B*0.5));
-    StdDecomp(i,j) = std(tmp);
-    DistribDecomp(i,j,:) = reshape(tmp(deciles),1,1,9);
-    tt = floor(options_.mh_conf_sig*B);
-    a = 1; 
-    b = tt;
-    tmp2 = [1;tt;tmp(tt)-tmp(1)];
-    while b <= B
-      tmp1 = [a;b;tmp(b)-tmp(a)];
-      a = a + 1;
-      b = b + 1;
-      if tmp1(3,1) < tmp2(3,1)
-        tmp2 = tmp1;     
-      end    
-    end
-    HPDDecomp(i,j,1) = tmp(tmp2(1,1));
-    HPDDecomp(i,j,2) = tmp(tmp2(2,1));
+	StartLine = 0;
+	for file = 1:sfil_thm3 
+	  instr = [fname_ '_thm3' int2str(file)];
+	  eval(['load ' instr]);
+	  DeProfundis = size(stock_thm3,3);
+	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm3(i,j,:));
+	  StartLine = StartLine+DeProfundis;
+	end
+	tmp = sort(tmp);
+	MeanDecomp(i,j) = mean(tmp);
+	MedianDecomp(i,j) = tmp(round(B*0.5));
+	StdDecomp(i,j) = std(tmp);
+	DistribDecomp(i,j,:) = reshape(tmp(deciles),1,1,9);
+	tt = floor(options_.mh_conf_sig*B);
+	a = 1; 
+	b = tt;
+	tmp2 = [1;tt;tmp(tt)-tmp(1)];
+	while b <= B
+	  tmp1 = [a;b;tmp(b)-tmp(a)];
+	  a = a + 1;
+	  b = b + 1;
+	  if tmp1(3,1) < tmp2(3,1)
+	    tmp2 = tmp1;     
+	  end    
+	end
+	HPDDecomp(i,j,1) = tmp(tmp2(1,1));
+	HPDDecomp(i,j,2) = tmp(tmp2(2,1));
       end   
     end
     disp(' ')
@@ -3423,19 +3756,19 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     lgx1(lgx_orig_ord_,:) = lgx_;
     for i=1:nvar
       for j=1:exo_nbr
-    disp(sprintf('%15s \t %15s \t %6.3f \t %6.3f \t %6.3f \t %6.3f \t %6.3f',...
-             deblank(lgy_(ivar(i),:)), ...
-             deblank(lgx1(j,:)), ...
-             MeanDecomp(i,j),...
-             MedianDecomp(i,j),...
-             StdDecomp(i,j),...
-             HPDDecomp(i,j,1),...
-             HPDDecomp(i,j,2)));
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = MeanDecomp(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = MedianDecomp(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = StdDecomp(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = HPDDecomp(i,j,1);']);
-    eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = HPDDecomp(i,j,2);']);
+	disp(sprintf('%15s \t %15s \t %6.3f \t %6.3f \t %6.3f \t %6.3f \t %6.3f',...
+		     deblank(lgy_(ivar(i),:)), ...
+		     deblank(lgx1(j,:)), ...
+		     MeanDecomp(i,j),...
+		     MedianDecomp(i,j),...
+		     StdDecomp(i,j),...
+		     HPDDecomp(i,j,1),...
+		     HPDDecomp(i,j,2)));
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = MeanDecomp(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = MedianDecomp(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = StdDecomp(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = HPDDecomp(i,j,1);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = HPDDecomp(i,j,2);']);
       end       
     end
     if TeX
@@ -3453,16 +3786,16 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,'\\hline \\\\ \n');
       lgx_TeX1(lgx_orig_ord_) = lgx_Tex_;
       for i=1:nvar
-    for j=1:exo_nbr
-      fprintf(fidTeX,' $%s$ & $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
-          deblank(lgy_TeX_(ivar(i),:)), ...
-          deblank(lgx_TeX1(j,:)), ...
-          MeanDecomp(i,j),...
-          MedianDecomp(i,j),...
-          StdDecomp(i,j),...
-          HPDDecomp(i,j,1),...
-          HPDDecomp(i,j,2));
-    end     
+	for j=1:exo_nbr
+	  fprintf(fidTeX,' $%s$ & $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
+		  deblank(lgy_TeX_(ivar(i),:)), ...
+		  deblank(lgx_TeX1(j,:)), ...
+		  MeanDecomp(i,j),...
+		  MedianDecomp(i,j),...
+		  StdDecomp(i,j),...
+		  HPDDecomp(i,j,1),...
+		  HPDDecomp(i,j,2));
+	end     
       end   
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
@@ -3480,33 +3813,33 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     HPDAutoCorr = zeros(nvar,nar,2);
     for i = 1:nvar
       for j=1:nar
-    StartLine = 0;
-    for file = 1:sfil_thm4 
-      instr = [fname_ '_thm4' int2str(file)];
-      eval(['load ' instr]);
-      DeProfundis = size(stock_thm4,3);
-      tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm4(i,j,:));
-      StartLine = StartLine+DeProfundis;
-    end
-    tmp = sort(tmp);
-    MeanAutoCorr(i,j) = mean(tmp);
-    MedianAutoCorr(i,j) = tmp(round(B*0.5));
-    StdAutoCorr(i,j) = std(tmp);
-    DistribAutoCorr(i,j,:) = reshape(tmp(deciles),1,1,9);
-    tt = floor(options_.mh_conf_sig*B);
-    a = 1; 
-    b = tt;
-    tmp2 = [1;tt;tmp(tt)-tmp(1)];
-    while b <= B
-      tmp1 = [a;b;tmp(b)-tmp(a)];
-      a = a + 1;
-      b = b + 1;
-      if tmp1(3,1) < tmp2(3,1)
-        tmp2 = tmp1;     
-      end    
-    end
-    HPDAutoCorr(i,j,1) = tmp(tmp2(1,1));
-    HPDAutoCorr(i,j,2) = tmp(tmp2(2,1));
+	StartLine = 0;
+	for file = 1:sfil_thm4 
+	  instr = [fname_ '_thm4' int2str(file)];
+	  eval(['load ' instr]);
+	  DeProfundis = size(stock_thm4,3);
+	  tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_thm4(i,j,:));
+	  StartLine = StartLine+DeProfundis;
+	end
+	tmp = sort(tmp);
+	MeanAutoCorr(i,j) = mean(tmp);
+	MedianAutoCorr(i,j) = tmp(round(B*0.5));
+	StdAutoCorr(i,j) = std(tmp);
+	DistribAutoCorr(i,j,:) = reshape(tmp(deciles),1,1,9);
+	tt = floor(options_.mh_conf_sig*B);
+	a = 1; 
+	b = tt;
+	tmp2 = [1;tt;tmp(tt)-tmp(1)];
+	while b <= B
+	  tmp1 = [a;b;tmp(b)-tmp(a)];
+	  a = a + 1;
+	  b = b + 1;
+	  if tmp1(3,1) < tmp2(3,1)
+	    tmp2 = tmp1;     
+	  end    
+	end
+	HPDAutoCorr(i,j,1) = tmp(tmp2(1,1));
+	HPDAutoCorr(i,j,2) = tmp(tmp2(2,1));
       end   
     end
     disp(' ')
@@ -3524,19 +3857,19 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     disp(titre)
     for i=1:nvar
       for j=1:nar
-    disp(sprintf('%15s \t %3s \t %6.3f \t %6.3f \t %6.3f \t %6.3f \t %6.3f',...
-             deblank(lgy_(ivar(i),:)), ...
-             [int2str(j) ' '], ...
-             MeanAutoCorr(i,j),...
-             MedianAutoCorr(i,j),...
-             StdAutoCorr(i,j),...
-             HPDAutoCorr(i,j,1),...
-             HPDAutoCorr(i,j,2)));
-    eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.Mean.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = MeanAutoCorr(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.Median.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = MedianAutoCorr(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.Std.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = StdAutoCorr(i,j);']);
-    eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.HPDinf.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = HPDAutoCorr(i,j,1);']);
-    eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.HPDsup.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = HPDAutoCorr(i,j,2);']);
+	disp(sprintf('%15s \t %3s \t %6.3f \t %6.3f \t %6.3f \t %6.3f \t %6.3f',...
+		     deblank(lgy_(ivar(i),:)), ...
+		     [int2str(j) ' '], ...
+		     MeanAutoCorr(i,j),...
+		     MedianAutoCorr(i,j),...
+		     StdAutoCorr(i,j),...
+		     HPDAutoCorr(i,j,1),...
+		     HPDAutoCorr(i,j,2)));
+	eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.Mean.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = MeanAutoCorr(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.Median.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = MedianAutoCorr(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.Std.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = StdAutoCorr(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.HPDinf.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = HPDAutoCorr(i,j,1);']);
+	eval(['oo_.PosteriorTheoreticalMoment.AutoCorrelation.HPDsup.' deblank(lgy_(ivar(i),:)) '_lag' int2str(j) ' = HPDAutoCorr(i,j,2);']);
       end       
     end
     if TeX
@@ -3553,16 +3886,16 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' Variables & Lag & mean & median  & std & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
       for i=1:nvar
-    for j=1:nar
-      fprintf(fidTeX,' $%s$ & $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
-          deblank(lgy_TeX_(ivar(i),:)), ...
-          int2str(j), ...
-          MeanAutoCorr(i,j),...
-          MedianAutoCorr(i,j),...
-          StdAutoCorr(i,j),...
-          HPDAutoCorr(i,j,1),...
-          HPDAutoCorr(i,j,2));
-    end     
+	for j=1:nar
+	  fprintf(fidTeX,' $%s$ & $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
+		  deblank(lgy_TeX_(ivar(i),:)), ...
+		  int2str(j), ...
+		  MeanAutoCorr(i,j),...
+		  MedianAutoCorr(i,j),...
+		  StdAutoCorr(i,j),...
+		  HPDAutoCorr(i,j,1),...
+		  HPDAutoCorr(i,j,2));
+	end     
       end   
       fprintf(fidTeX,'\\hline\\hline \n');
       fprintf(fidTeX,'\\end{tabular}\n ');    
