@@ -853,7 +853,7 @@ for iter1 = 1:length(options_.nobs)
     %%
     yf = zeros(gend,n_varobs);
     if options_.prefilter == 1
-      yf = atT(bayestopt_.mf,:)+repmat(mean_varobs',1,gend);
+      yf = atT(bayestopt_.mf,:)+repmat(bayestopt_.mean_varobs',1,gend);
     elseif options_.loglinear == 1
       yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+...
        trend_coeff*[1:gend];
