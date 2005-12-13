@@ -43,6 +43,7 @@ if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(ds
 else
   ilogpo2 = -DsgeVarLikelihood(ix2,gend);% initial posterior density
 end
+mlogpo2 = ilogpo2;
 dd = transpose(chol(CovJump));
 while j<=MaxNumberOfTuningSimulations
   proposal = init_scale*dd*randn(npar,1) + ix2;
@@ -58,8 +59,9 @@ while j<=MaxNumberOfTuningSimulations
   % I move if the proposal is enough likely...
   if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
     ix2 = proposal; 
-    if logpo2 > ilogpo2
+    if logpo2 > mlogpo2
       ModePar = proposal;
+      mlogpo2 = logpo2;
     end
     ilogpo2 = logpo2;
     isux = isux + 1;
@@ -69,9 +71,9 @@ while j<=MaxNumberOfTuningSimulations
   end	
   prtfrc = j/MaxNumberOfTuningSimulations;
   waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));  
-  if  j/500 == round(j/500) 
+  if  j/500 == round(j/500)
     test1 = jsux/jj;
-    test2 = isux/j;  
+    test2 = isux/j;
     cfactor = (test1/AcceptanceTarget)^1.0*(test2/AcceptanceTarget)^0.0;
     init_scale = init_scale*cfactor;
     jsux = 0; jj = 0;
@@ -112,8 +114,9 @@ while j<=NumberOfIterationsForInitialization
   % I move if the proposal is enough likely...
   if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
     ix2 = proposal; 
-    if logpo2 > ilogpo2
+    if logpo2 > mlogpo2
       ModePar = proposal;
+      mlogpo2 = logpo2;
     end
     ilogpo2 = logpo2;
     isux = isux + 1;
@@ -164,8 +167,9 @@ if strcmpi(info,'LastCall')
     % I move if the proposal is enough likely...
     if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
       ix2 = proposal;
-      if logpo2 > ilogpo2
+      if logpo2 > mlogpo2
 	ModePar = proposal;
+	mlogpo2 = logpo2;
       end
       ilogpo2 = logpo2;
       isux = isux + 1;
@@ -201,15 +205,14 @@ if strcmpi(info,'LastCall')
   hh = waitbar(0,'');
   set(hh,'Name','Now I am climbing the hill...')
   j = 1; jj  = 1;
-  %isux = 0;
   jsux = 0;
   test = 0;
   % ix2 = ModePar;%% I start from the point with the highest posterior density... 
-  if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-    ilogpo2 = -DsgeLikelihood(ix2,gend,data);% initial posterior density
-  else
-    ilogpo2 = -DsgeVarLikelihood(ix2,gend);% initial posterior density
-  end
+  % if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+  %  ilogpo2 = -DsgeLikelihood(ix2,gend,data);% initial posterior density
+  % else
+  %  ilogpo2 = -DsgeVarLikelihood(ix2,gend);% initial posterior density
+  % end
   dd = transpose(chol(CovJump));
   while j<=MaxNumberOfClimbingSimulations
     proposal = init_scale*dd*randn(npar,1) + ModePar;
@@ -222,10 +225,9 @@ if strcmpi(info,'LastCall')
     else
       logpo2 = -inf;
     end
-    if logpo2 > ilogpo2% I move if the proposal is higher...
+    if logpo2 > mlogpo2% I move if the proposal is higher...
       ModePar = proposal;
-      ilogpo2 = logpo2;
-      %isux = isux + 1;
+      mlogpo2 = logpo2;
       jsux = jsux + 1;
     else
       % otherwise I don't move...
@@ -243,6 +245,7 @@ if strcmpi(info,'LastCall')
       end
       if test>4% If I do not progress enough I reduce the scale parameter
                % of the jumping distribution (cooling down the system).
+	
 	init_scale = init_scale/1.20;
       end
     end
