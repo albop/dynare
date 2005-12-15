@@ -2554,66 +2554,66 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,MAX_nirfs_dsge);
 	end
 	% bvar-dsge 
-if exist('dsge_prior_weight')
-	DsgeVarLikelihood(deep',gend);
-	GYY = evalin('base','GYY');
-	GXX = evalin('base','GXX');
-	GYX = evalin('base','GYX');
-	DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
-	tmp1 = mYY + dsge_prior_weight*gend*GYY;
-	tmp2 = mXY + dsge_prior_weight*gend*GYX';
-	tmp3 = mXX + dsge_prior_weight*gend*GXX;
-	tmp4 = (tmp1-tmp2'*inv(tmp3)*tmp2);
-	PHI = inv(tmp3)*tmp2;
-	val = 1;
-	while val;
-	  % draw from the marginal posterior of sig
-	  tmp5 = chol(inv(tmp4))'*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
-	  SIGMAu_draw = inv(tmp5*tmp5');
-	  % draw from the conditional posterior of PHI
-	  VARvecPHI = kron(SIGMAu_draw,inv(tmp3));
-	  PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
-	  COMP_draw(1:nvobs,:) = reshape(PHI_draw, ...
-					 NumberOfLagsTimesNvobs,nvobs)';
-	  % Check for stationarity
-	  tests = find(abs(eig(COMP_draw))>0.9999999999);
-	  if isempty(tests)
-	    val=0;
+	if exist('dsge_prior_weight')
+	  DsgeVarLikelihood(deep',gend);
+	  GYY = evalin('base','GYY');
+	  GXX = evalin('base','GXX');
+	  GYX = evalin('base','GYX');
+	  DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
+	  tmp1 = mYY + dsge_prior_weight*gend*GYY;
+	  tmp2 = mXY + dsge_prior_weight*gend*GYX';
+	  tmp3 = mXX + dsge_prior_weight*gend*GXX;
+	  tmp4 = (tmp1-tmp2'*inv(tmp3)*tmp2);
+	  PHI = inv(tmp3)*tmp2;
+	  val = 1;
+	  while val;
+	    % draw from the marginal posterior of sig
+	    tmp5 = chol(inv(tmp4))'*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
+	    SIGMAu_draw = inv(tmp5*tmp5');
+	    % draw from the conditional posterior of PHI
+	    VARvecPHI = kron(SIGMAu_draw,inv(tmp3));
+	    PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
+	    COMP_draw(1:nvobs,:) = reshape(PHI_draw, ...
+					   NumberOfLagsTimesNvobs,nvobs)';
+	    % Check for stationarity
+	    tests = find(abs(eig(COMP_draw))>0.9999999999);
+	    if isempty(tests)
+	      val=0;
+	    end
+	  end
+	  % Get rotation
+	  if dsge_prior_weight > 0
+	    Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
+	    A0 = Atheta(bayestopt_.mf,:);
+	    [OMEGAstar,SIGMAtr] = qr2(A0');
+	  end
+	  SIGMAu_chol = chol(SIGMAu_draw)';
+	  SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
+	  PHIpower = eye(NumberOfLagsTimesNvobs);
+	  irfs = zeros (nirfs,nvobs*exo_nbr);
+	  tmp6 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	  irfs(1,:) = tmp6(:)';
+	  for t = 2:nirfs
+	    PHIpower = COMP_draw*PHIpower;
+	    tmp7 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	    irfs(t,:)  = tmp7(:)';
+	  end            
+	  for j = 1:(nvobs*exo_nbr)
+	    if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
+	      tmp_dsgevar(:,j) = (irfs(:,j));
+	    end	
+	  end	
+	  if irun_irf_dsgevar < MAX_nirfs_dsgevar
+	    stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
+	  else
+	    stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
+	    sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
+	    instr = [fname_ '_irf_dsgevar' int2str(sfil_irf_dsgevar) ' stock_irf_dsgevar;'];,
+	    eval(['save ' instr]);
+	    irun_irf_dsgevar  = 0;
+	    stock_irf_dsgevar = zeros(nirfs,nvobs,exo_nbr,MAX_nirfs_dsgevar);
 	  end
 	end
-	% Get rotation
-	if dsge_prior_weight > 0
-	  Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
-	  A0 = Atheta(bayestopt_.mf,:);
-	  [OMEGAstar,SIGMAtr] = qr2(A0');
-	end
-	SIGMAu_chol = chol(SIGMAu_draw)';
-	SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
-	PHIpower = eye(NumberOfLagsTimesNvobs);
-	irfs = zeros (nirfs,nvobs*exo_nbr);
-	tmp6 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-	irfs(1,:) = tmp6(:)';
-	for t = 2:nirfs
-	  PHIpower = COMP_draw*PHIpower;
-	  tmp7 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-	  irfs(t,:)  = tmp7(:)';
-	end            
-	for j = 1:(nvobs*exo_nbr)
-	  if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
-	    tmp_dsgevar(:,j) = (irfs(:,j));
-	  end	
-	end	
-	if irun_irf_dsgevar < MAX_nirfs_dsgevar
-	  stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
-	else
-	  stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
-	  sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
-	  instr = [fname_ '_irf_dsgevar' int2str(sfil_irf_dsgevar) ' stock_irf_dsgevar;'];,
-	  eval(['save ' instr]);
-	  irun_irf_dsgevar  = 0;
-	  stock_irf_dsgevar = zeros(nirfs,nvobs,exo_nbr,MAX_nirfs_dsgevar);
-	end
-end
 	waitbar(b/B,h);    
       end
       clear tmp;
@@ -2683,63 +2683,65 @@ end
 	  stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,MAX_nirfs_dsge);
 	end
 	% bvar-dsge
-	DsgeVarLikelihood(deep',gend);
-	GYY = evalin('base','GYY');
-	GXX = evalin('base','GXX');
-	GYX = evalin('base','GYX');
-	DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
-	tmp1 = mYY + dsge_prior_weight*gend*GYY;
-	tmp2 = mXY + dsge_prior_weight*gend*GYX';
-	tmp3 = mXX + dsge_prior_weight*gend*GXX;
-	tmp4 = (tmp1-tmp2'*inv(tmp3)*tmp2);
-	PHI = inv(tmp3)*tmp2;
-	val = 1;
-	while val;
-	  % draw from the marginal posterior of sig
-	  tmp5 = chol(inv(tmp4))'*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
-	  SIGMAu_draw = inv(tmp5*tmp5');
-	  % draw from the conditional posterior of PHI
-	  VARvecPHI = kron(SIGMAu_draw,inv(tmp3));
-	  PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
-	  COMP_draw(1:nvobs,:) = reshape(PHI_draw, ...
-					 NumberOfLagsTimesNvobs,nvobs)';
-	  % Check for stationarity
-	  tests = find(abs(eig(COMP_draw))>0.9999999999);
-	  if isempty(tests)
-	    val=0;
+	if exist('dsge_prior_weight')
+	  DsgeVarLikelihood(deep',gend);
+	  GYY = evalin('base','GYY');
+	  GXX = evalin('base','GXX');
+	  GYX = evalin('base','GYX');
+	  DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
+	  tmp1 = mYY + dsge_prior_weight*gend*GYY;
+	  tmp2 = mXY + dsge_prior_weight*gend*GYX';
+	  tmp3 = mXX + dsge_prior_weight*gend*GXX;
+	  tmp4 = (tmp1-tmp2'*inv(tmp3)*tmp2);
+	  PHI = inv(tmp3)*tmp2;
+	  val = 1;
+	  while val;
+	    % draw from the marginal posterior of sig
+	    tmp5 = chol(inv(tmp4))'*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
+	    SIGMAu_draw = inv(tmp5*tmp5');
+	    % draw from the conditional posterior of PHI
+	    VARvecPHI = kron(SIGMAu_draw,inv(tmp3));
+	    PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
+	    COMP_draw(1:nvobs,:) = reshape(PHI_draw, ...
+					   NumberOfLagsTimesNvobs,nvobs)';
+	    % Check for stationarity
+	    tests = find(abs(eig(COMP_draw))>0.9999999999);
+	    if isempty(tests)
+	      val=0;
+	    end
 	  end
-	end
-	% Get rotation
-	if dsge_prior_weight > 0
-	  Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
-	  A0 = Atheta(bayestopt_.mf,:);
-	  [OMEGAstar,SIGMAtr] = qr2(A0');
-	end
-	SIGMAu_chol = chol(SIGMAu_draw)';
-	SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
-	PHIpower = eye(NumberOfLagsTimesNvobs);
-	irfs = zeros (nirfs,nvobs*exo_nbr);
-	tmp6 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-	irfs(1,:) = tmp6(:)';
-	for t = 2:nirfs
-	  PHIpower = COMP_draw*PHIpower;
-	  tmp7 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-	  irfs(t,:)  = tmp7(:)';
-	end            
-	for j = 1:(nvobs*exo_nbr)
-	  if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
-	    tmp_dsgevar(:,j) = (irfs(:,j));
+	  % Get rotation
+	  if dsge_prior_weight > 0
+	    Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
+	    A0 = Atheta(bayestopt_.mf,:);
+	    [OMEGAstar,SIGMAtr] = qr2(A0');
+	  end
+	  SIGMAu_chol = chol(SIGMAu_draw)';
+	  SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
+	  PHIpower = eye(NumberOfLagsTimesNvobs);
+	  irfs = zeros (nirfs,nvobs*exo_nbr);
+	  tmp6 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	  irfs(1,:) = tmp6(:)';
+	  for t = 2:nirfs
+	    PHIpower = COMP_draw*PHIpower;
+	    tmp7 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	    irfs(t,:)  = tmp7(:)';
+	  end            
+	  for j = 1:(nvobs*exo_nbr)
+	    if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
+	      tmp_dsgevar(:,j) = (irfs(:,j));
+	    end	
 	  end	
-	end	
-	if irun_irf_dsgevar < MAX_nirfs_dsgevar
-	  stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
-	else
-	  stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
-	  sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
-	  instr = [fname_ '_irf_dsgevar' int2str(sfil_irf_dsgevar) ' stock_irf_dsgevar;'];,
-	  eval(['save ' instr]);
-	  irun_irf_dsgevar = 0;
-	  stock_irf_dsgevar = zeros(nirfs,nvobs,exo_nbr,MAX_nirfs_dsgevar);
+	  if irun_irf_dsgevar < MAX_nirfs_dsgevar
+	    stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
+	  else
+	    stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
+	    sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
+	    instr = [fname_ '_irf_dsgevar' int2str(sfil_irf_dsgevar) ' stock_irf_dsgevar;'];,
+	    eval(['save ' instr]);
+	    irun_irf_dsgevar = 0;
+	    stock_irf_dsgevar = zeros(nirfs,nvobs,exo_nbr,MAX_nirfs_dsgevar);
+	  end
 	end
 	waitbar(b/B,h);
       end
