@@ -1,6 +1,6 @@
   function [MeanX,MedianX,StdX,DistribX,HPDX] = GetPosteriorStatistics(gend,B,infotype)
   % stephane.adjemian@gmail.com [05-26-2005]
-  global options_ fname_ lgy_ lgx_ lgy_TeX_ lgx_TeX_ dr_ bayestopt_
+  global options_ fname_ lgy_ lgx_ lgy_TeX_ lgx_TeX_ dr_ bayestopt_ oo_
   
   deciles = [round(0.1*B) ...
 	     round(0.2*B)...
@@ -56,9 +56,9 @@
 	   for file = 1:sfile;
 	     instr = [fname_ NonGenericName int2str(file)];
 	     eval(['load ' instr]);
-         eval(['X = stock_' varname ';'])
+	     eval(['X = stock_' varname ';'])
 	     MeanX(i,t) = MeanX(i,t)+sum(X(i,t,:),3);
-         DeProfundis = size(X,3);
+	     DeProfundis = size(X,3);
 	     tmp(StartLine+1:StartLine+DeProfundis) = squeeze(X(i,t,:)); 
 	     StartLine = StartLine+DeProfundis;
 	   end
