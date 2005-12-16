@@ -34,7 +34,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   MAX_nfilt = ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8);
   if options_.bayesian_irf
     MAX_nirfs_dsge = ceil(MaxNumberOfBytes/(options_.irf*length(ys_)*exo_nbr)/8);
-    if exist('dsge_prior_weight')
+    if ~isempty(dsge_prior_weight)
       MAX_nirfs_dsgevar = ceil(MaxNumberOfBytes/(options_.irf*nvobs*exo_nbr)/8)
     end
   end
@@ -2267,7 +2267,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %%                                    %%
   if options_.forecast
     tmp = zeros(B,1);
-    tmp_big = zeros(2*B,1);
+    tmp_big = zeros(B,1);
     fprintf('MH: Out of sample forecasts...\n');
     MeanForecast = zeros(options_.forecast,nvar);
     MedianForecast = zeros(options_.forecast,nvar);
@@ -2309,11 +2309,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	end
 	HPD(step,i,1) = tmp(tmp2(1));
 	HPD(step,i,2) = tmp(tmp2(2));
-	t = floor(options_.mh_conf_sig*B*2);
+	t = floor(options_.mh_conf_sig*B);
 	a = 1; 
 	b = t;
 	tmp2_big = [1;t;tmp_big(t)-tmp_big(1)];
-	while b <= 2*B
+	while b <= B
 	  tmp1_big = [a;b;tmp_big(b)-tmp_big(a)];
 	  a = a + 1;
 	  b = b + 1;
@@ -2463,7 +2463,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     deep = MU;
     subindx = subset();
     nirfs = options_.irf;
-    if exist('dsge_prior_weight')
+    if ~isempty(dsge_prior_weight)
       files = eval(['dir(''' fname_ '_irf_dsgevar*.mat'');']);     
       if length(files)                                        
 	delete([fname_ '_irf_dsgevar*.mat']);                    
@@ -2486,7 +2486,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     elseif nvn & B > MAX_nirfs
       stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,MAX_nirfs_dsge);
     end
-    if exist('dsge_prior_weight')
+    if ~isempty(dsge_prior_weight)
       if B <= MAX_nirfs_dsgevar
 	stock_irf_dsgevar = zeros(nirfs,nvobs,exo_nbr,B);
       else
@@ -2507,7 +2507,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       for b = 1:B;
 	irun_irf_dsge = irun_irf_dsge+1;
 	tmp_dsge = zeros(nirfs,size(lgy_,1),exo_nbr);
-	if exist('dsge_prior_weight')
+	if ~isempty(dsge_prior_weight)
 	  irun_irf_dsgevar = irun_irf_dsgevar+1;
 	  tmp_dsgevar = zeros(nirfs,nvobs*exo_nbr);
 	end
@@ -2554,7 +2554,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,MAX_nirfs_dsge);
 	end
 	% bvar-dsge 
-	if exist('dsge_prior_weight')
+	if ~isempty(dsge_prior_weight)
 	  DsgeVarLikelihood(deep',gend);
 	  GYY = evalin('base','GYY');
 	  GXX = evalin('base','GXX');
@@ -2624,7 +2624,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	eval(['save ' instr]);
       end
       clear stock_irf_dsge;
-      if exist('dsge_prior_weight')
+      if ~isempty(dsge_prior_weight)
 	if irun_irf_dsgevar
 	  stock_irf_dsgevar = stock_irf_dsgevar(:,:,:,1:irun_irf_dsgevar);
 	  sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
@@ -2636,7 +2636,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     else
       sfil_irf_dsge = 0;
       irun_irf_dsge = 0;
-      if exist('dsge_prior_weight')
+      if ~isempty(dsge_prior_weight)
 	sfil_irf_dsgevar = 0;
 	irun_irf_dsgevar = 0;	
       end
@@ -2646,7 +2646,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       for b = 1:B;
 	irun_irf_dsge = irun_irf_dsge+1;
 	tmp_dsge = zeros(nirfs,size(lgy_,1),exo_nbr);
-	if exist('dsge_prior_weight')
+	if ~isempty(dsge_prior_weight)
 	  irun_irf_dsgevar = irun_irf_dsgevar+1;
 	  tmp_dsgevar = zeros(nirfs,nvobs*exo_nbr);	  
 	end
@@ -2683,7 +2683,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,MAX_nirfs_dsge);
 	end
 	% bvar-dsge
-	if exist('dsge_prior_weight')
+	if ~isempty(dsge_prior_weight)
 	  DsgeVarLikelihood(deep',gend);
 	  GYY = evalin('base','GYY');
 	  GXX = evalin('base','GXX');
@@ -2752,7 +2752,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	eval(['save ' instr]);
       end
       clear stock_irf_dsge;
-      if exist('dsge_prior_weight')
+      if ~isempty(dsge_prior_weight)
 	if irun_irf_dsgevar
 	  stock_irf_dsgevar = stock_irf_dsgevar(:,:,:,1:irun_irf_dsgevar);
 	  sfil_irf_dsgevar = sfil_irf_dsgevar + 1;
@@ -2773,7 +2773,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     StdIRF_dsge = zeros(nirfs,nvar,exo_nbr);
     DistribIRF_dsge = zeros(nirfs,nvar,exo_nbr,9);
     HPDIRF_dsge = zeros(nirfs,nvar,exo_nbr,2);
-    if exist('dsge_prior_weight')
+    if ~isempty(dsge_prior_weight)
       SelecVariables = bayestopt_.mfys;
       nvar = length(SelecVariables);
     end
@@ -2830,7 +2830,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      deblank(lgy_(SelecVariables(j),:)) '_' deblank(tit(i,:)) ' = squeeze(HPDIRF_dsge(:,j,i,2));']);
       end
     end
-    if exist('dsge_prior_weight')% BVAR-DSGE:
+    if ~isempty(dsge_prior_weight)% BVAR-DSGE:
       tmp = zeros(B,1);
       MeanIRF_dsgevar = zeros(nirfs,nvar,exo_nbr);
       MedianIRF_dsgevar = zeros(nirfs,nvar,exo_nbr);
@@ -2906,9 +2906,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     for i=1:exo_nbr
       number_of_plots_to_draw = 0;
       index = [];
-      if ~exist('dsge_prior_weight') 
+      if ~~isempty(dsge_prior_weight) 
 	for j=1:nvar
-	  if MeanIRF(1,j,i)
+	  if MeanIRF_dsge(1,j,i)
 	    number_of_plots_to_draw = number_of_plots_to_draw + 1;
 	    index = cat(1,index,j);
 	  end
@@ -2933,12 +2933,16 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  hold on
 	  for k = 1:9
 	    plot(1:nirfs,DistribIRF_dsge(:,index(j),i,k),'-k','linewidth',0.5,'Color',[0 0 0])
-	    if exist('dsge_prior_weight')
+	    if ~isempty(dsge_prior_weight)
 	      plot(1:nirfs,DistribIRF_dsgevar(:,j,i,k),'-k','linewidth',0.5,'Color',[0.80 0.80 0.80])
 	    end
 	  end
-	  plot(1:nirfs,MeanIRF_dsge(:,index(j),i),'-k','linewidth',3,'Color',[0 0 0])
-	  plot(1:nirfs,MeanIRF_dsgevar(:,j,i),'-k','linewidth',3,'Color',[0.80 0.80 0.80])
+	  plot(1:nirfs,MeanIRF_dsge(:,index(j),i),'-k','linewidth',3,'Color',[0 ...
+		    0 0])
+	  if ~isempty(dsge_prior_weight)
+	    plot(1:nirfs,MeanIRF_dsgevar(:,j,i),'-k','linewidth',3,'Color',[0.80 ...
+		    0.80 0.80])
+	  end
 	  xlim([1 nirfs]);
 	  hold off
 	  name = deblank(lgy_(SelecVariables(index(j)),:));
@@ -2949,7 +2953,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end
 	  title(name,'Interpreter','none')
 	end
-	if ~exist('dsge_prior_weight')
+	if isempty(dsge_prior_weight)
 	  eval(['print -depsc2 ' fname_ '_Bayesian_IRFdsge_' deblank(tit(i,:))]);
 	  eval(['print -dpdf ' fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:))]);
 	  saveas(hh,[fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) '.fig']);
@@ -2965,7 +2969,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
 	  end    
 	  fprintf(fidTeX,'\\centering \n');
-	  if ~exist('dsge_prior_weight')
+	  if ~~isempty(dsge_prior_weight)
 	    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRFdsge_%s}\n',fname_,deblank(tit(i,:)));
 	  else
 	    fprintf(fidTeX,['\\includegraphics[scale=0.5]{%s_Bayesian_IRFbvardsge_%s}\n',fname_,deblank(tit(i,:))]);
@@ -2973,13 +2977,13 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  if options_.relative_irf
 	    fprintf(fidTeX,['\\caption{Bayesian relative IRF.}']);
 	  else
-	    if ~exist('dsge_prior_weight')
+	    if ~~isempty(dsge_prior_weight)
 	      fprintf(fidTeX,'\\caption{Bayesian IRF (DSGE model).}');
 	    else
 	      fprintf(fidTeX,'\\caption{Bayesian IRF (BVAR-DSGE model).}');
 	    end
 	  end
-	  if ~exist('dsge_prior_weight')
+	  if ~~isempty(dsge_prior_weight)
 	    fprintf(fidTeX,'\\label{Fig:BayesianIRFdsge:%s}\n',deblank(tit(i,:)));
 	  else
 	    fprintf(fidTeX,'\\label{Fig:BayesianIRFbvardsge:%s}\n',deblank(tit(i,:)));
@@ -3005,12 +3009,12 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    hold on
 	    for k = 1:9
 	      plot(1:options_.irf,DistribIRF_dsge(:,index(jj),i,k),'-k','linewidth',0.5,'Color',[0 0 0])
-	      if exist('dsge_prior_weight')
+	      if ~isempty(dsge_prior_weight)
 		plot(1:nirfs,DistribIRF_dsgevar(:,jj,i,k),'-k','linewidth',0.5,'Color',[0.80 0.80 0.80])
 	      end
 	    end
 	    plot(1:nirfs,MeanIRF_dsge(:,index(jj),i),'-k','linewidth',3,'Color',[0 0 0])
-	    if exist('dsge_prior_weight')
+	    if ~isempty(dsge_prior_weight)
 	      plot(1:nirfs,MeanIRF_dsgevar(:,jj,i),'-k','linewidth',3,'Color',[0.80 0.80 0.80])
 	    end
 	    xlim([1 nirfs]);
@@ -3023,7 +3027,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end
 	    title(name,'Interpreter','none')
 	  end
-	  if ~exist('dsge_prior_weight')
+	  if ~~isempty(dsge_prior_weight)
 	    eval(['print -depsc2 ' fname_ '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(fig)]);
 	    eval(['print -dpdf ' fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(fig)]);
 	    saveas(hh,[fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(fig) '.fig']);
@@ -3039,7 +3043,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
 	    end    
 	    fprintf(fidTeX,'\\centering \n');
-	    if ~exist('dsge_prior_weight')
+	    if ~~isempty(dsge_prior_weight)
 	      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRFdsge_%s%s}\n',fname_,deblank(tit(i,:)),int2str(fig));
 	    else
 	      fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRFbvardsge_%s%s}\n',fname_,deblank(tit(i,:)),int2str(fig));
@@ -3047,13 +3051,13 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    if options_.relative_irf == 1
 	      fprintf(fidTeX,['\\caption{Bayesian relative IRF.}']);
 	    else
-	      if ~exist('dsge_prior_weight')
+	      if ~~isempty(dsge_prior_weight)
 		fprintf(fidTeX,'\\caption{Bayesian IRF (DSGE model).}');
 	      else
 		fprintf(fidTeX,['\\caption{Bayesian IRF (BVAR-DSGE model).}']);
 	      end
 	    end
-	    if ~exist('dsge_prior_weight')
+	    if ~~isempty(dsge_prior_weight)
 	      fprintf(fidTeX,'\\label{Fig:BayesianIRFdsge:%s:%s}\n',deblank(tit(i,:)), int2str(fig));
 	    else
 	      fprintf(fidTeX,'\\label{Fig:BayesianIRFbvardsge:%s:%s}\n',deblank(tit(i,:)), int2str(fig));
@@ -3072,13 +3076,13 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  hold on
 	  for k = 1:9
 	    plot(1:options_.irf,DistribIRF_dsge(:,index(jj),i,k),'-k','linewidth',0.5,'Color',[0 0 0])
-	    if exist('dsge_prior_weight')
+	    if ~isempty(dsge_prior_weight)
 	      plot(1:nirfs,DistribIRF_dsgevar(:,jj,i,k),'-k','linewidth',0.5,'Color',[0.80 0.80 0.80])
 	    end
 	  end
-	  plot(1:nirfs,MeanIRF(:,index(jj),i),'-k','linewidth',3,'Color',[0 0 0])
-	  if exist('dsge_prior_weight')
-	    plot(1:nirfs,MeanIRF(:,jj,i),'-k','linewidth',3,'Color',[0.80 0.80 0.80])
+	  plot(1:nirfs,MeanIRF_dsge(:,index(jj),i),'-k','linewidth',3,'Color',[0 0 0])
+	  if ~isempty(dsge_prior_weight)
+	    plot(1:nirfs,MeanIRF_dsgevar(:,jj,i),'-k','linewidth',3,'Color',[0.80 0.80 0.80])
 	  end  
 	  xlim([1 nirfs]);
 	  hold off
@@ -3090,7 +3094,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end
 	  title(name,'Interpreter','none')
 	end
-	if ~exist('dsge_prior_weight')
+	if ~~isempty(dsge_prior_weight)
 	  eval(['print -depsc2 ' fname_ '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(nbplt)]);
 	  eval(['print -dpdf ' fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(nbplt)]);
 	  saveas(hh,[fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(nbplt) '.fig']);
@@ -3106,7 +3110,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
 	  end    
 	  fprintf(fidTeX,'\\centering \n');
-	  if ~exist('dsge_prior_weight')
+	  if ~~isempty(dsge_prior_weight)
 	    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRFdsge_%s%s}\n',fname_,deblank(tit(i,:)),int2str(nbplt));
 	    fprintf(fidTeX,'\\caption{Bayesian IRF (DSGE model).}');
 	    fprintf(fidTeX,'\\label{Fig:BayesianIRFdsge:%s:%s}\n',deblank(tit(i,:)), int2str(nbplt));
@@ -3756,11 +3760,11 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 		     StdDecomp(i,j),...
 		     HPDDecomp(i,j,1),...
 		     HPDDecomp(i,j,2)));
-	eval(['oo_.PosteriorTheoreticalMoment.Decomp.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = MeanDecomp(i,j);']);
-	eval(['oo_.PosteriorTheoreticalMoment.Decomp.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = MedianDecomp(i,j);']);
-	eval(['oo_.PosteriorTheoreticalMoment.Decomp.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = StdDecomp(i,j);']);
-	eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = HPDDecomp(i,j,1);']);
-	eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1_(j,:)) ' = HPDDecomp(i,j,2);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.Mean.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1(j,:)) ' = MeanDecomp(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.Median.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1(j,:)) ' = MedianDecomp(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.Std.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1(j,:)) ' = StdDecomp(i,j);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDinf.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1(j,:)) ' = HPDDecomp(i,j,1);']);
+	eval(['oo_.PosteriorTheoreticalMoment.Decomp.HPDsup.' deblank(lgy_(ivar(i),:)) '_' deblank(lgx1(j,:)) ' = HPDDecomp(i,j,2);']);
       end       
     end
     if TeX
