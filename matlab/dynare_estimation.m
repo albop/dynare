@@ -778,14 +778,15 @@ for iter1 = 1:length(options_.nobs)
       error('Mode values are outside prior bounds. Reduce prior_trunc.')
     end
     metropolis(xparam1,invhess,gend,data,rawdata,bounds);
+    get_posterior_parameters('posterior_mean');
   end
 
-  if (all(bayestopt_.pshape == 0) ...                                  % ML estimation 
-    | (options_.mh_replic == 0 & options_.load_mh_file == 0) ...   % no metropolis 
-    | ~options_.smoother) ...                                      % ~smoother
-    & options_.nobs(1) == options_.nobs(end)                       % no recursive estimation
-%    options_.lik_algo = 2;
-    [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam1,gend,data);
+  % computes smoothed variables for posterior_mode or posterior_mean, if
+  % metropolis). Except if options_.smoother or recursive forecast
+  
+  if ~options_.smoother & options_.nobs(1) == options_.nobs(end) 
+    [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] ...
+	= DsgeSmoother(xparam1,gend,data);
     for i=1:endo_nbr
       eval(['oo_.SmoothedVariables.' deblank(lgy_(dr.order_var(i),:)) ' = atT(i,:)'';']);
       eval(['oo_.FilteredVariables.' deblank(lgy_(dr.order_var(i),:)) ' = filtered_state_vector(i,:)'';']);
