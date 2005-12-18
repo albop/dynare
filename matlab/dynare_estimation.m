@@ -779,6 +779,7 @@ for iter1 = 1:length(options_.nobs)
     end
     metropolis(xparam1,invhess,gend,data,rawdata,bounds);
     get_posterior_parameters('posterior_mean');
+    dr_ = resol(ys_,0);
   end
 
   % computes smoothed variables for posterior_mode or posterior_mean, if
