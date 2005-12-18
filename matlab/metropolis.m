@@ -1624,11 +1624,10 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end    			
 	  if options_.forecast
 	    % FIFTH, I update variable dr_ 
-	    resol(ys_,0);
+	    dr_ = resol(ys_,0);
 	    % SIXTH, I do and save the forecasts (for all the endogenous variables)
 	    % The state of the economy at the end of the sample 
-	    % depends on the structural parameters.
-	    
+	    % depends on the structural parameters.	    
 	    yyyy(:,1:ykmin_) = atT(1:endo_nbr,size(atT,2)-ykmin_+1:size(atT,2));
 	    yf = forcst2a(yyyy,dr_,ex_);
 	    if options_.prefilter == 1
@@ -1790,9 +1789,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end                                                                  
 	  end
 	  if options_.forecast
-	    dr = resol(ys_,0);
+	    dr_ = resol(ys_,0);
 	    yyyy(:,1:ykmin_) = atT(1:endo_nbr,size(atT,2)-ykmin_+1:size(atT,2));
-	    yf = forcst2a(yyyy,dr,ex_);
+	    yf = forcst2a(yyyy,dr_,ex_);
 	    if options_.prefilter == 1
 	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
 					       horizon+ykmin_,1);
@@ -1805,7 +1804,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      yf = yf+repmat(ys',horizon+ykmin_,1);
 	    end
 	    stock_forcst(:,:,irun_forc) = yf;
-	    yf1 = forcst2(yyyy,horizon,dr,1);
+	    yf1 = forcst2(yyyy,horizon,dr_,1);
 	    if options_.prefilter == 1
 	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
 		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,1]);
@@ -1982,7 +1981,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end
 	  end
 	  if options_.forecast	    
-	    resol(ys_,0);
+	    dr_ = resol(ys_,0);
 	    for j = 1:nvar 
 	      yyyy(j,1:ykmin_) = atT(j,size(atT,2)-ykmin_+1:size(atT,2));
 	    end
@@ -2153,79 +2152,79 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end	
 	  end    			
 	  if options_.forecast	    
-        dr = resol(ys_,0);
-        yyyy(:,1:ykmin_) = atT(1:endo_nbr,size(atT,2)-ykmin_+1:size(atT,2));
-        yf = forcst2a(yyyy,dr,ex_);
-        if options_.prefilter == 1
-          yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-                           horizon+ykmin_,1);
-        end
-        yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
-        if options_.loglinear == 1
-          yf = yf+repmat(log(ys'),horizon+ykmin_,1);
-          yf = exp(yf);
-        else
-          yf = yf+repmat(ys',horizon+ykmin_,1);
-        end
-        stock_forcst(:,:,irun_forc) = yf;
-        yf1 = forcst2(yyyy,horizon,dr,1);
-        if options_.prefilter == 1
-          yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-          repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,1]);
-        end
-        yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
-        trend_coeff',[1,1,1]);
-        if options_.loglinear == 1
-          yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,1]);
-          yf1 = exp(yf1);
-        else
-          yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,1]);
-        end
-        stock_forcst1(:,:,irun_forc) = yf1;
-        if irun_forc == MAX_nforc
-          sfil_forc = sfil_forc + 1;
-          save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
-          irun_forc = 0;
-          stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
-          stock_forcst1 = zeros(horizon+ykmin_,nvar,MAX_nforc);
-        end
-      end   
-      waitbar(b/B,h);    
-    end
-    if options_.smoother
-      if irun_smoo
-        stock_smooth = stock_smooth(:,:,1:irun_smoo);
-        sfil_smoo = sfil_smoo + 1;
-        instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
-        eval(['save ' instr]);
-      end
-      clear stock_smooth;
-      if irun_inno
-        stock_innov = stock_innov(:,:,1:irun_inno);
-        sfil_inno = sfil_inno + 1;
-        instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
-        eval(['save ' instr]);
-      end
-      clear stock_innov;
-    end
-    if options_.forecast    
-      if irun_forc
-        stock_forcst = stock_forcst(:,:,1:irun_forc);  
-        stock_forcst1 = stock_forcst1(:,:,1:irun_forc);  
-        sfil_forc = sfil_forc + 1;
-        save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
-      end
-      clear stock_forcst stock_forcst1
-    end
-    if options_.filtered_vars   
-      if irun_filt
-        stock_filter = stock_filter(:,:,1:irun_filt);
-        sfil_filt = sfil_filt + 1;
-        instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];
-        eval(['save ' instr]);
-      end
-      clear stock_filter;
-    end   
+	    dr_ = resol(ys_,0);
+	    yyyy(:,1:ykmin_) = atT(1:endo_nbr,size(atT,2)-ykmin_+1:size(atT,2));
+	    yf = forcst2a(yyyy,dr_,ex_);
+	    if options_.prefilter == 1
+	      yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
+					       horizon+ykmin_,1);
+	    end
+	    yf(:,IdObs) = yf(:,IdObs)+(gend+[1-ykmin_:horizon]')*trend_coeff';
+	    if options_.loglinear == 1
+	      yf = yf+repmat(log(ys'),horizon+ykmin_,1);
+	      yf = exp(yf);
+	    else
+	      yf = yf+repmat(ys',horizon+ykmin_,1);
+	    end
+	    stock_forcst(:,:,irun_forc) = yf;
+	    yf1 = forcst2(yyyy,horizon,dr_,1);
+	    if options_.prefilter == 1
+	      yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
+		  repmat(bayestopt_.mean_varobs',[horizon+ykmin_,1,1]);
+	    end
+	    yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-ykmin_:horizon]')* ...
+						   trend_coeff',[1,1,1]);
+	    if options_.loglinear == 1
+	      yf1 = yf1 + repmat(log(ys'),[horizon+ykmin_,1,1]);
+	      yf1 = exp(yf1);
+	    else
+	      yf1 = yf1 + repmat(ys',[horizon+ykmin_,1,1]);
+	    end
+	    stock_forcst1(:,:,irun_forc) = yf1;
+	    if irun_forc == MAX_nforc
+	      sfil_forc = sfil_forc + 1;
+	      save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
+	      irun_forc = 0;
+	      stock_forcst = zeros(horizon+ykmin_,nvar,MAX_nforc);
+	      stock_forcst1 = zeros(horizon+ykmin_,nvar,MAX_nforc);
+	    end
+	  end   
+	  waitbar(b/B,h);    
+	end
+	if options_.smoother
+	  if irun_smoo
+	    stock_smooth = stock_smooth(:,:,1:irun_smoo);
+	    sfil_smoo = sfil_smoo + 1;
+	    instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
+	    eval(['save ' instr]);
+	  end
+	  clear stock_smooth;
+	  if irun_inno
+	    stock_innov = stock_innov(:,:,1:irun_inno);
+	    sfil_inno = sfil_inno + 1;
+	    instr = [fname_ '_innovation' int2str(sfil_inno) ' stock_innov;'];
+	    eval(['save ' instr]);
+	  end
+	  clear stock_innov;
+	end
+	if options_.forecast    
+	  if irun_forc
+	    stock_forcst = stock_forcst(:,:,1:irun_forc);  
+	    stock_forcst1 = stock_forcst1(:,:,1:irun_forc);  
+	    sfil_forc = sfil_forc + 1;
+	    save([fname_ '_forecast' int2str(sfil_forc)],'stock_forcst','stock_forcst1');
+	  end
+	  clear stock_forcst stock_forcst1
+	end
+	if options_.filtered_vars   
+	  if irun_filt
+	    stock_filter = stock_filter(:,:,1:irun_filt);
+	    sfil_filt = sfil_filt + 1;
+	    instr = [fname_ '_filter' int2str(sfil_filt) ' stock_filter;'];
+	    eval(['save ' instr]);
+	  end
+	  clear stock_filter;
+	end   
       end
     end
     close(h);
@@ -2524,7 +2523,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	deep(subindx) = DEEP(subindx);
 	% dsge
 	set_parameters(deep);
-	resol(ys_,0);
+	dr_ = resol(ys_,0);
 	SS(lgx_orig_ord_,lgx_orig_ord_)=Sigma_e_+1e-14* ...
 	    eye(exo_nbr);
 	cs = transpose(chol(SS));
@@ -2654,7 +2653,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	deep(subindx) = DEEP(subindx);
 	% dsge
 	set_parameters(deep);
-	resol(ys_,0);
+	dr_ = resol(ys_,0);
 	SS(lgx_orig_ord_,lgx_orig_ord_) = Sigma_e_+1e-14*eye(exo_nbr);
 	SS = transpose(chol(SS));
 	tit(lgx_orig_ord_,:) = lgx_;
@@ -3208,7 +3207,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	DEEP  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
 	deep(subindx) = DEEP(subindx);
 	set_parameters(deep);
-	resol(ys_,0);
+	dr_ = resol(ys_,0);
 	Gamma_y = th_autocovariances(dr_,ivar);
 	if options_.order == 2
 	  m_mean = dr_.ys(ivar) + Gamma_y{options_.ar+3};
@@ -3313,7 +3312,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	DEEP  = x2(floor(rand*NumberOfSimulations)+1,:);
 	deep(subindx) = DEEP(subindx);
 	set_parameters(deep);
-	resol(ys_,0);
+	dr_ = resol(ys_,0);
 	Gamma_y = th_autocovariances(dr_,ivar1);
 	if options_.order == 2
 	  m_mean = dr_.ys(ivar) + Gamma_y{options_.ar+3};

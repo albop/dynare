@@ -17,15 +17,15 @@ nx  = nvx+nvn+ncx+ncn+np;
 
 if strcmpi(info,'All')
   indx = (1:nx)';
-elseif stcmpi('DeepParameters')
+elseif strcmpi(info,'DeepParameters')
   indx = (nvx+nvn+ncx+ncn+1:nx)';
-elseif strcmpi('StructuralShocks')
+elseif strcmpi(info,'StructuralShocks')
   indx = [(1:nvx),nvx+nvn+1:nvx+nvn+ncx]';
-elseif stcmpi('StructuralShocksWithoutCorrelations')
+elseif strcmpi(info,'StructuralShocksWithoutCorrelations')
   indx = (1:nvx)';
-elseif strcmpi('MeasurementErrors')
+elseif strcmpi(info,'MeasurementErrors')
   indx = [(nvx+1:nvx+nvn),(nvx+nvn+ncx+1:nvx+nvn+ncx+ncn)]';
-elseif strcmpi('MeasurementErrorsWithoutCorrelations')
+elseif strcmpi(info,'MeasurementErrorsWithoutCorrelations')
   indx = (nvx+1:nvx+nvn)';
 elseif strcmpi(info,'AllWithoutMeasurementErros')
   indx = [(1:nvx),nvx+nvn+1:nvx+nvn+ncx,nvx+nvn+ncx+ncn+1:nx]';
@@ -34,8 +34,8 @@ end
 
 if ~isempty(ExcludedParamNames)
   tt = [];
-  for i = 1:length(ParamNames)
-    tmp = strmatch(deblank(ExcludedParamNames(i,:)),lgx_);
+  for i = 1:length(ExcludedParamNames)
+    tmp = strmatch(ExcludedParamNames{i},lgx_);
     if ~isempty(tmp)% The parameter the user wants to exclude is related to the size of the structural innovations.
       if ncx
 	disp(['I cannot exclude some the structural variances if the'])
@@ -44,7 +44,7 @@ if ~isempty(ExcludedParamNames)
       end
       tt = [tt;tmp];
     elseif isempty(tmp) & nvn
-      tmp = strmatch(deblank(ExcludedParamNames(i,:)),options_.varobs);
+      tmp = strmatch(ExcludedParamNames{i},options_.varobs);
       if ~isempty(tmp)% The parameter the user wants to exclude is related to the size of the measurement errors.
 		      % variances:
 	tmp = nvx+tmp;
@@ -56,7 +56,7 @@ if ~isempty(ExcludedParamNames)
 	tt = [tt;tmp];
       end
     else% Excluded parameters are deep parameters...  
-      tmp = strmatch(deblank(ExcludedParamNames(i,:)),estim_params_.param_names);
+      tmp = strmatch(ExcludedParamNames{i},estim_params_.param_names);
       if ~isempty(tmp)
 	tt = [tt,nvx+nvn+ncx+ncn+tmp];
       else
@@ -65,7 +65,7 @@ if ~isempty(ExcludedParamNames)
       end
     end
   end
-  for i=1:size(ParamNames,1)
+  for i=1:length(ExcludedParamNames)
     indx = indx(indx~=tt)
   end
 end
