@@ -46,6 +46,7 @@ windx = strmatch(vName,lgy_(kk,:),'exact');
 deep = get_posterior_parameters('posterior_mean');
 % [2.3] Compute the posterior distribution of Welfare:
 hfid = waitbar(0,'Posterior welfare distribution...');
+compt = 0;
 for i=1:B
   linea = 1+floor(rand*TotalNumberOfDraws);
   tmp = find(METRO(:,3)<linea);
@@ -60,34 +61,36 @@ for i=1:B
   eval(['load ' file.name ';'])
   DEEP = x2(linee,:);
   deep(subindx) = DEEP(subindx);
-  deep
   set_parameters(deep);
   [dr,info] = resol(ys_,0);
   if ~info(1)
-    WelfDistribution = dr.ys(kk(windx))+.5*dr.ghs2(windx);
+    WelfDistribution(i) = dr.ys(kk(windx))+.5*dr.ghs2(windx);
   else
-    WelDistribution = Inf;
+    WelfDistribution(i) = Inf;
+    compt = compt+1;
   end
   waitbar(i/B,hfid);
 end
 close(hfid);
 indx = find(~isinf(WelfDistribution));
-WelfDistribution = WelfDistribution(indx);
-oo_.Welfare.PosteriorDraws = WelfDistribution;
-oo_.Welfare.PosteriorMean = mean(WelfDistribution);
-oo_.Welfare.posteriorStd = std(WelfDistribution);
+WelfareDistribution = WelfDistribution(indx);
+oo_.Welfare.PosteriorDraws = WelfareDistribution;
+oo_.Welfare.PosteriorMean = mean(WelfareDistribution);
+oo_.Welfare.posteriorStd = std(WelfareDistribution);
 % [3] Non parametric estimation of the posterior density.
 % [3.1] Set some parameters:
 number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
 bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
 kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.
 % [3.2] Compute the optimal bandwidth parameter:
-optimal_bandwidth = mh_optimal_bandwidth(WelfDistribution,length(indx),bandwidth,kernel_function); 
+optimal_bandwidth = mh_optimal_bandwidth(WelfareDistribution,length(indx),bandwidth,kernel_function); 
 % [3.3] Estimation of the posterior density:
-[x1,f1] = kernel_density_estimate(WelfDistribution,number_of_grid_points,...
+[x1,f1] = kernel_density_estimate(WelfareDistribution,number_of_grid_points,...
     optimal_bandwidth,kernel_function);
 oo_.Welfare.PosteriorDensity.abscissa = x1;
 oo_.Welfare.PosteriorDensity.density = f1;
+disp(['Percentage of mh-draws violating the B&K conditions: ' num2str(compt/B*100)  '%.'])
+disp(' ')
 % [4] Plot.
 if pltOpt
   figure('Name','Posterior distribution of the Welfare.')

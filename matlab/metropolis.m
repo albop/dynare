@@ -50,9 +50,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     if options_.load_mh_file == 0
       % Delete old mh files...
       if nblck > 1
-    disp('MH: Multiple chains mode.')
+	disp('MH: Multiple chains mode.')
       else
-    disp('MH: One Chain mode.')
+	disp('MH: One Chain mode.')
       end
       files = eval(['dir(''' fname_ '_mh*.mat'');']);
       if length(files)
@@ -115,11 +115,16 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       save([fname_ '_MhInitialization'],'ix2','ilogpo2');
     elseif options_.load_mh_file == 1
       disp('MH: I''m loading past metropolis-hastings simulations...')
-      files = eval(['dir(''' fname_ '_mh*_blck*.mat'');']);
+      if nblck>1
+	files = eval(['dir(''' fname_ '_mh*_blck*.mat'');']);
+	bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
+      else
+	files = eval(['dir(''' fname_ '_mh*.mat'');']);
+	bfiles = 1;
+      end
       if ~length(files)
 	error('MH: FAILURE :: there is no MH file to load here!')    
       end
-      bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
       past_number_of_blocks = length(bfiles);
       if length(bfiles)>0 & past_number_of_blocks ~= nblck
 	disp('MH: The specified number of blocks doesn''t match with the previous number of blocks!')
