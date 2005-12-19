@@ -47,6 +47,7 @@ deep = get_posterior_parameters('posterior_mean');
 % [2.3] Compute the posterior distribution of Welfare:
 hfid = waitbar(0,'Posterior welfare distribution...');
 compt = 0;
+ys = ys_;
 for i=1:B
   linea = 1+floor(rand*TotalNumberOfDraws);
   tmp = find(METRO(:,3)<linea);
@@ -62,9 +63,10 @@ for i=1:B
   DEEP = x2(linee,:);
   deep(subindx) = DEEP(subindx);
   set_parameters(deep);
-  [dr,info] = resol(ys_,0);
+  [dr,info] = resol(ys,0);
   if ~info(1)
-    WelfDistribution(i) = dr.ys(kk(windx))+.5*dr.ghs2(windx);
+    ys = dr.ys;
+    WelfDistribution(i) = ys(kk(windx))+.5*dr.ghs2(windx);
   else
     WelfDistribution(i) = Inf;
     compt = compt+1;
