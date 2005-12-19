@@ -1,7 +1,7 @@
 function dynare_estimation(varlist)
 global options_ bayestopt_ estim_params_ lgy_ lgx_ Sigma_e_ exo_nbr endo_nbr
 global lgy_ lgx_ fname_ oo_  trend_coeff_  iy_ ykmin_ lgx_TeX_ lgy_TeX_
-global dsge_prior_weight
+global dsge_prior_weight ys_
 
 
 
