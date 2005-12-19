@@ -399,13 +399,17 @@ void p_shocks(struct token *var, struct queue *per, struct queue *val, int ms_fl
   struct queue *p_q;
   struct token **p_t;
   char buffer[200];
+  char* name;
+
   check.determ = 1;
-  if (per->imax != val->imax){
-    fprintf(stdout,"Error in SHOCKS: periods and values don't match for shocks on variable %s\n",var->var_ptr->name);
+  if (var->endo_exo != 0 && var->endo_exo != 5){
+    if (var->var_ptr != 0) name = var->var_ptr->name;
+    else name = var->name;
+    fprintf(stdout,"Error in SHOCKS: %s isn't an exogenous variable\n",name); 
     return;
   }
-  if (var->endo_exo != 0 && var->endo_exo != 5){
-    fprintf(stdout,"Error in SHOCKS: %s isn't an exogenous variable\n",var->var_ptr->name); 
+  if (per->imax != val->imax){
+    fprintf(stdout,"Error in SHOCKS: periods and values don't match for shocks on variable %s\n",var->var_ptr->name);
     return;
   }
   for (i=0; i < per->imax;i++){
