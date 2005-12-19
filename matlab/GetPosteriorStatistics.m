@@ -85,7 +85,7 @@
   end
   clear X;
   MeanX = MeanX/B;
-  for i=1:size(NumberOfX,1)
+  for i=1:NumberOfX
     eval(['oo_.Posterior' SaveName '.Mean.' deblank(XNames(i,:)) ' = MeanX(i,:)'';']);
     eval(['oo_.Posterior' SaveName '.Median.' deblank(XNames(i,:)) ' = MedianX(i,:)'';']);
     eval(['oo_.Posterior' SaveName '.Std.' deblank(XNames(i,:)) ' = StdX(i,:)'';']);
