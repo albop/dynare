@@ -102,3 +102,4 @@ if pltOpt
   xlabel('Welfare')
   ylabel('Posterior density')
 end
+options_.order = 1;

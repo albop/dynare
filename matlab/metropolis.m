@@ -118,9 +118,16 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       if nblck>1
 	files = eval(['dir(''' fname_ '_mh*_blck*.mat'');']);
 	bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
+	lfile = length(files)/length(bfiles)-1;
       else
 	files = eval(['dir(''' fname_ '_mh*.mat'');']);
 	bfiles = 1;
+	ifiles = eval(['dir(''' fname_ '_MhInitialization.mat'');']);
+	if isempty(ifiles)
+	  lfile = length(files)-1;
+	else
+	  lfile = length(files)-2;
+	end
       end
       if ~length(files)
 	error('MH: FAILURE :: there is no MH file to load here!')    
@@ -133,7 +140,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	nblck = past_number_of_blocks;
 	options_.mh_nblck = nblck;
       end
-      lfile = length(files)/nblck-1;
+      %lfile = length(files)/nblck-1;
       if nblck == 1
 	instr = [fname_ '_mh' int2str(lfile)];
 	eval(['load ' instr]);
