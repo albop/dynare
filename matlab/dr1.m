@@ -425,12 +425,15 @@ for i=1:ykmax_-1
   k0 = k1;
   offset = offset + n1;
 end
-%C = kron(hx,hx);
-C = hx;
 D = [rhs; zeros(n-endo_nbr,size(rhs,2))];
-%x0 = sylvester3(A,B,C,D);
-%dr.ghxx = sylvester3a(x0,A,B,C,D);
-dr.ghxx = gensylv(2,A,B,C,D);
+if exist('gensylv')
+  C = hx;
+  dr.ghxx = gensylv(2,A,B,C,D);
+else
+  C = kron(hx,hx); 
+  x0 = sylvester3(A,B,C,D);
+  dr.ghxx = sylvester3a(x0,A,B,C,D);
+end
 
 %ghxu
 %rhs
