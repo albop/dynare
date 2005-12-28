@@ -44,7 +44,7 @@ else
   z = repmat(dr.ys,1,klen);
 end
 z = z(iyr0) ;
-jacobia_=real(jacob_a('ff1_',[z(:); exe_])) ;
+jacobia_=real(jacob_a('ff1_',[z(:); exe_;exe_det_])) ;
 
 ex_ = tempex ;
 tempex = [];
@@ -143,7 +143,7 @@ if any(isinf(a(:)))
   return
 end
 if exo_nbr
-  fu = b\jacobia_(:,nz+1:end);
+  fu = b\jacobia_(:,nz+(1:exo_nbr));
 end
 
 if ykmax_ == 0;  % backward model
@@ -300,7 +300,7 @@ if use_qzdiv
 end
 
 %exogenous deterministic variables
-if exo_det_nbr > 1
+if exo_det_nbr > 0
   f1 = sparse(jacobia_(:,nonzeros(iy_(ykmin_+2:end,order_var))));
   f0 = sparse(jacobia_(:,nonzeros(iy_(ykmin_+1,order_var))));
   fudet = sparse(jacobia_(:,nz+exo_nbr+1:end));
@@ -327,18 +327,18 @@ if ykmin_ > 0
 end
 kk = kk';
 kk = find(kk(:));
-nk = size(kk,1)+exo_nbr;
+nk = size(kk,1)+exo_nbr+exo_det_nbr;
 k1 = iy_(:,order_var);
 k1 = k1';
 k1 = k1(:);
 k1 = k1(kk);
 k2 = find(k1);
 kk1(k1(k2)) = k2;
-kk1 = [kk1 length(k1)+1:length(k1)+exo_nbr];
+kk1 = [kk1 length(k1)+1:length(k1)+exo_nbr+exo_det_nbr];
 kk = reshape([1:nk^2],nk,nk);
 kk1 = kk(kk1,kk1);
 hessian = zeros(endo_nbr,nk^2);
-hessian(:,kk1(:)) = real(hessian_sparse('ff1_',[z; exe_])) ;
+hessian(:,kk1(:)) = real(hessian_sparse('ff1_',[z; exe_;exe_det_])) ;
 
 ex_ = tempex ;
 clear tempex
@@ -367,8 +367,8 @@ for i=1:ykmax_
   kk = kk(:,k0);
   k0 = k1;
 end
-zx=[zx; zeros(exo_nbr,np)];
-zu=[zu; eye(exo_nbr)];
+zx=[zx; zeros(exo_nbr,np);zeros(exo_det_nbr,np)];
+zu=[zu; eye(exo_nbr);zeros(exo_det_nbr,exo_nbr)];
 [n1,n2] = size(zx);
 if n1*n1*n2*n2 > 1e7
   rhs = zeros(endo_nbr,n2*n2);
