@@ -1,5 +1,5 @@
 function xparam=get_posterior_parameters(type)
-  global estim_params_ oo_ Sigma_e_ lgx_ lgy_
+  global estim_params_ oo_ Sigma_e_ lgx_ options_
   
   nvx = estim_params_.nvx;
   nvn = estim_params_.nvn;
@@ -20,7 +20,7 @@ function xparam=get_posterior_parameters(type)
   
   for i=1:nvn
     k1 = estim_params_.var_endo(i,1);
-    name1 = deblank(lgy_(k1,:));
+    name1 = deblank(options_.varobs(k1,:));
     xparam(m) = eval(['oo_.' type '.measurement_errors_std.' name1]);
     m = m+1;
   end
@@ -39,8 +39,8 @@ function xparam=get_posterior_parameters(type)
   for i=1:ncn
     k1 = estim_params_.var_endo(i,1);
     k2 = estim_params_.var_endo(i,1);
-    name1 = deblank(lgy_(k1,:));
-    name2 = deblank(lgy_(k2,:));
+    name1 = deblank(options_.varobs(k1,:));
+    name2 = deblank(options_.varobs(k2,:));
     xparam(m) = eval(['oo_.' type '.measurement_errors_corr.' name1 '_' name2]);
     m = m+1;
   end
