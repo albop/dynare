@@ -398,7 +398,7 @@ void p_shocks(struct token *var, struct queue *per, struct queue *val, int ms_fl
   int i,j,i1,i2,i_par,flag;
   struct queue *p_q;
   struct token **p_t;
-  char buffer[200];
+  char buffer[2000];
   char* name;
 
   check.determ = 1;
@@ -1346,6 +1346,7 @@ void p_i_shocks(void)
 #elif defined MATLAB
   str_output("% (M)SHOCKS \n");
   str_output("make_ex_;\n");
+  str_output("shocks_file;\n");
 #elif defined SCILAB
   str_output("// (M)SHOCKS \n");
   str_output("make_ex_();\n");
@@ -1356,8 +1357,11 @@ void p_e_shocks(void)
 {
   char buffer[2000];
 #if defined MATLAB || defined SCILAB
-  sprintf(buffer,"M_.ex_det_length = %d;\n",ex_det_length);
-  str_output(buffer);
+  if (ex_det_length > 0)
+    {
+      sprintf(buffer,"M_.ex_det_length = %d;\n",ex_det_length);
+      str_output(buffer);
+    }
 #endif
 }
 
@@ -1386,7 +1390,7 @@ void dynare_init(char* fname,struct s_runtime_options runtime_options)
     {
       str_output("clear all\n");
     }
-  str_output("global scalv_ ex_ ex_det_ recur_ recurs_ ys_ y_ exe_ exe_det_ lgy_ lgx_ lgr_ dsmpl_ endval_\n");
+  str_output("global scalv_ ex_ ex_det_ recur_ recurs_ ys_ y_ exe_ exe_det_ lgy_ lgx_ lgx_det_ lgr_ dsmpl_ endval_\n");
   str_output("global endo_nbr exo_nbr exo_det_nbr iy_  ykmin_  ykmax_  xkmin_  xkmax_ zkmin_ zkmax_ iter_\n"); 
   str_output("global dynatol_ slowc_ maxit_ valf_ ys0_ recurs0_ ex0_ timing_ ct_ gstep_ Sigma_e_ fname_ lgx_orig_ord_ iter_ options_ dr_ oo_ trend_coeff_ eigenvalues_\n");
   str_output("global M_\n");
@@ -3130,6 +3134,50 @@ void p_model_comparison(int flag_model_prior)
     }
   str_output("];\n");
   str_output("model_comparison(ModelNames_,ModelPriors_);\n");
+}
+
+void p_forecast()
+{
+  char buffer[2000];
+  int i;
+#ifdef SCILAB
+  str_output("global ");
+  for(i=0;i < var_nbr; i++)
+    {
+      if (var_list[i].endo_exo == 1)
+	{
+	  str_output(var_list[i].name);
+	  str_output(" ");
+	}
+    }
+  str_output("\n");
+#endif
+#if defined MATLAB || defined SCILAB
+  if (nbr_tmpvar == 0)
+    {
+      str_output("var_list_ = [];\n");
+    }
+  else
+    {
+      strcpy(buffer,"var_list_ = '");
+      strcat(buffer,tmpvar_list[0]);
+      strcat(buffer,"';\n");
+      for(i=2;i<nbr_tmpvar;i+=2)
+	{
+#ifdef MATLAB
+	  strcat(buffer,"var_list_ = str2mat(var_list_,'");
+	  strcat(buffer,tmpvar_list[i]);
+	  strcat(buffer,"');\n");
+#else
+	  strcat(buffer,"var_list_ = [var_list_;'");
+	  strcat(buffer,tmpvar_list[i]);
+	  strcat(buffer,"'];\n");
+#endif
+	}
+      str_output(buffer);
+    }
+  str_output("forecast(var_list_);\n");
+#endif
 }
 
 /*

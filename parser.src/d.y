@@ -46,7 +46,7 @@
 %token CORR MOMENTS FUNCTIONS DIAGNOSTIC PRINT GRAPH
 %token NOCORR NOMOMENTS NOFUNCTIONS NODIAGNOSTIC NOPRINT NOGRAPH
 %token MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION LAPLACE
-%token MODIFIEDHARMONICMEAN
+%token MODIFIEDHARMONICMEAN SHOCKS_FILE IRF_TYPE
 %token COMPILE_DEFINE COMPILE_IF COMPILE_ELSEIF COMPILE_ELSE COMPILE_ENDIF
 %token <string> INUMBER DNUMBER NAME OPERATORS POUND EOL INDEX EQ NE LE GE
 %token <p_tok> VAR_ID
@@ -110,6 +110,7 @@
       | unit_root_vars
       | model_comparison
       | compile_statement
+      | forecast
       ;
  
  longnames : LONGNAMES ';'
@@ -160,10 +161,20 @@ varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
       ;
 
  shocks: SHOCKS ';' {ms_flag=0;p_i_shocks();} shock_list END {p_e_shocks();}
-      ;
+       | SHOCKS '(' options_shocks ')' ';' 
+                    {ms_flag=0;p_i_shocks();} shock_list END {p_e_shocks();}
+       ;
 
  mshocks: MSHOCKS ';' {ms_flag=1;p_i_shocks();} shock_list END {p_e_shocks();}
+      | MSHOCKS '(' options_shocks ')' ';' 
+                      {ms_flag=1;p_i_shocks();} shock_list END {p_e_shocks();}
       ;
+
+ options_shocks: option_shocks
+       | options_shocks ',' option_shocks
+       ;
+
+ option_shocks: o_shocks_file ; 
 
  equation_list : equation_list equation {$$=add_to_queue($1,$2);}
       | equation_list other_inst {$$=add_to_queue($1,$2);}
@@ -418,8 +429,9 @@ varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
  o_nk : NK '=' INUMBER {p_option("nk",$3);};
  o_model_comparison_approximation: MODEL_COMPARISON_APPROXIMATION '=' LAPLACE {p_s_option("model_comparison_approximation","Laplace");}
    | MODEL_COMPARISON_APPROXIMATION '=' MODIFIEDHARMONICMEAN {p_s_option("model_comparison_approximation","ModifiedHarmonicMean");}
- o_olr_beta : OLR_BETA '=' value {p_option("olr_beta",$3);}
-   ;
+ o_olr_beta : OLR_BETA '=' value {p_option("olr_beta",$3);};
+ o_shocks_file : SHOCKS_FILE '=' NAME {p_s_option("file",$3);};
+
 
  optim_option1: '\'' NAME '\'' ',' '\'' NAME '\'' {p_optim_options($2,$6,2);}
               | '\'' NAME '\'' ',' value {p_optim_options($2,$5,2);}
@@ -842,6 +854,21 @@ varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
 
   compile_elseif_statement: 
     COMPILE_ELSEIF NAME compile_operator INUMBER ';' {compile_elseif($2,$3,$4);};
+
+  forecast: FORECAST ';' {p_forecast();}
+          | FORECAST '(' forecast_options ')' ';' {p_forecast();}
+          | FORECAST varlist4 ';' {p_forecast();}
+          | FORECAST '(' forecast_options ')' varlist4 ';' {p_forecast();}
+          ;
+
+  forecast_options: forecast_option
+          | forecast_options ',' forecast_option
+          ;
+
+  forecast_option: o_periods
+          | o_conf_sig
+          ;
+
 
 %%
 int yyerror (char *s)

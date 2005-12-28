@@ -73,6 +73,7 @@ estimated_params_bounds {BEGIN DYNARE2; return ESTIMATED_PARAMS_BOUNDS;}
 estimated_params {BEGIN DYNARE2; return ESTIMATED_PARAMS;}
 unit_root_vars {BEGIN DYNARE1; return UNIT_ROOT_VARS;}
 model_comparison {BEGIN DYNARE1; return MODEL_COMPARISON;}
+forecast {BEGIN DYNARE1; return FORECAST;}
 
 <*>@define {yy_push_state(DYNARE1); return COMPILE_DEFINE;}
 <*>@if {yy_push_state(DYNARE1); return COMPILE_IF;}
@@ -148,14 +149,16 @@ model_comparison {BEGIN DYNARE1; return MODEL_COMPARISON;}
 <DYNARE1>functions {return FUNCTIONS;}
 <DYNARE1>nofunctions {return NOFUNCTIONS;}
 <DYNARE1>irf {return IRF;}
+<DYNARE1>irf_type {return IRF_TYPE;}
 <DYNARE1>hp_filter {return HP_FILTER;}
 <DYNARE1>hp_ngrid {return HP_NGRID;}
 <DYNARE1>simul_seed {return SIMUL_SEED;}
 <DYNARE1>simul {return SIMUL;}
 <DYNARE1>periods {return PERIODS;}
 <DYNARE1>qz_criterium {return QZ_CRITERIUM;}
-<DYNARE1>optim {return OPTIM;
-}
+<DYNARE1>optim {return OPTIM;}
+<DYNARE1>shocks_file {return SHOCKS_FILE;}
+
  /* calib options */
 <DYNARE2>autocorr {return AUTOCORR;}
 
