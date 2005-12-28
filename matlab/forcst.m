@@ -1,4 +1,4 @@
-function [yf,var_yf]=forcst(dr,y0,k,var_list)
+function [yf,var_yf] = forcst(dr,y0,k,var_list)
   global endo_nbr exo_nbr ykmin_ Sigma_e_ ex_ options_ lgy_
   
   options_.periods = k;

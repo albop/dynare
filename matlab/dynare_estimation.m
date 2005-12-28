@@ -72,25 +72,17 @@ n_varobs = size(options_.varobs,1);
 dr = set_state_space([]);
 
 % load data
-if exist(options_.datafile)
-  instr = options_.datafile;
-else
-  instr = ['load ' options_.datafile];
-end
+rawdata = read_variables(options_.datafile,options_.varobs,[]);
 
-eval(instr);
-
-rawdata = [];
 k = [];
 k1 = [];
 for i=1:n_varobs
-  rawdata = [rawdata eval(deblank(options_.varobs(i,:)))];
   k = [k strmatch(deblank(options_.varobs(i,:)),lgy_(dr.order_var,:), ...
           'exact')];
   k1 = [k1 strmatch(deblank(options_.varobs(i,:)),lgy_, 'exact')];
 end
 
-% check initial parameter values
+% check initial parameter values and creates bayestopt_
 pnames=['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
 [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_);
 if any(bayestopt_.pshape > 0)
