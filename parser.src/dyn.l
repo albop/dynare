@@ -157,7 +157,7 @@ forecast {BEGIN DYNARE1; return FORECAST;}
 <DYNARE1>periods {return PERIODS;}
 <DYNARE1>qz_criterium {return QZ_CRITERIUM;}
 <DYNARE1>optim {return OPTIM;}
-<DYNARE1>shocks_file {return SHOCKS_FILE;}
+<DYNARE2>shocks_file {return SHOCKS_FILE;}
 
  /* calib options */
 <DYNARE2>autocorr {return AUTOCORR;}
