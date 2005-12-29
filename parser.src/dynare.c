@@ -1336,8 +1336,9 @@ void var_output(struct token * p_t, int flag_steady)
   }
 }
 
-void p_i_shocks(void)
+void p_i_shocks(ms_flag)
 {
+  char buff[2000];
 #ifdef GAUSS
   str_output("/* (M)SHOCKS */\n");
   str_output("if not _valf;\n");
@@ -1346,7 +1347,8 @@ void p_i_shocks(void)
 #elif defined MATLAB
   str_output("% (M)SHOCKS \n");
   str_output("make_ex_;\n");
-  str_output("shocks_file;\n");
+  sprintf(buff,"shocks_file(%d);\n",ms_flag);
+  str_output(buff);
 #elif defined SCILAB
   str_output("// (M)SHOCKS \n");
   str_output("make_ex_();\n");
