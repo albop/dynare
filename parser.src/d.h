@@ -81,7 +81,7 @@ void var_output(struct token *, int);
 int * periods(char *, char *);
 void p_shocks(struct token *, struct queue *, struct queue *, int);
 void p_init(struct token *, struct queue *);
-void p_initval(void),p_endval(void),p_i_shocks(void);
+void p_initval(void),p_endval(void),p_i_shocks(int);
 void dynare_init(char *, struct s_runtime_options);
 void print_iter(char *);
 void pe_initval(void);

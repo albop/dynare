@@ -160,14 +160,14 @@ varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
  histval : HISTVAL ';' {p_histval();} histval_list END
       ;
 
- shocks: SHOCKS ';' {ms_flag=0;p_i_shocks();} shock_list END {p_e_shocks();}
+ shocks: SHOCKS ';' {ms_flag=0;p_i_shocks(ms_flag);} shock_list END {p_e_shocks();}
        | SHOCKS '(' options_shocks ')' ';' 
-                    {ms_flag=0;p_i_shocks();} shock_list END {p_e_shocks();}
+                    {ms_flag=0;p_i_shocks(ms_flag);} shock_list END {p_e_shocks();}
        ;
 
- mshocks: MSHOCKS ';' {ms_flag=1;p_i_shocks();} shock_list END {p_e_shocks();}
+ mshocks: MSHOCKS ';' {ms_flag=1;p_i_shocks(ms_flag);} shock_list END {p_e_shocks();}
       | MSHOCKS '(' options_shocks ')' ';' 
-                      {ms_flag=1;p_i_shocks();} shock_list END {p_e_shocks();}
+                      {ms_flag=1;p_i_shocks(ms_flag);} shock_list END {p_e_shocks();}
       ;
 
  options_shocks: option_shocks
@@ -430,7 +430,7 @@ varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
  o_model_comparison_approximation: MODEL_COMPARISON_APPROXIMATION '=' LAPLACE {p_s_option("model_comparison_approximation","Laplace");}
    | MODEL_COMPARISON_APPROXIMATION '=' MODIFIEDHARMONICMEAN {p_s_option("model_comparison_approximation","ModifiedHarmonicMean");}
  o_olr_beta : OLR_BETA '=' value {p_option("olr_beta",$3);};
- o_shocks_file : SHOCKS_FILE '=' NAME {p_s_option("file",$3);};
+ o_shocks_file : SHOCKS_FILE EQUAL NAME {p_s_option("shocks_file",$3);};
 
 
  optim_option1: '\'' NAME '\'' ',' '\'' NAME '\'' {p_optim_options($2,$6,2);}
