@@ -24,16 +24,20 @@ function forecast(var_list)
       ex_det_ = [ ex_det_; repmat(exe_det_',options_.periods- ...
 				  size(ex_det_,1),1)];
     end
-    [yf,var_yf] = simultxdet(y0,dr_,ex,ex_det_,options_.order, ...
+    [yf,int_width] = simultxdet(y0,dr_,ex,ex_det_,options_.order, ...
 				  var_list);
   end
   
   for i=1:endo_nbr
     eval(['oo_.forecast.Mean.' lgy_(i,:) '= yf(' int2str(i) ',:)'';']);
+    eval(['oo_.forecast.HPDinf.' lgy_(i,:) '= yf(' int2str(i) ',2:end)''-' ...
+		    ' int_width(:,' int2str(i) ');']);
+    eval(['oo_.forecast.HPDsup.' lgy_(i,:) '= yf(' int2str(i) ',2:end)''+' ...
+		    ' int_width(:,' int2str(i) ');']);
   end
 
   for i=1:exo_det_nbr
-    eval(['oo_.forecast.Mean.' lgx_det_(i,:) '= ex_det_(:,' int2str(i) ');']);
+    eval(['oo_.forecast.Exogenous.' lgx_det_(i,:) '= ex_det_(:,' int2str(i) ');']);
   end
   
   options_ = old_options;
