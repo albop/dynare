@@ -31,7 +31,9 @@ elseif strcmpi(info,'AllWithoutMeasurementErros')
   indx = [(1:nvx),nvx+nvn+1:nvx+nvn+ncx,nvx+nvn+ncx+ncn+1:nx]';
 end
 
-if ~isempty(ExcludedParamNames)
+if isempty(ExcludedParamNames)
+  jndx = indx;
+else
   tt = [];
   for i = 1:length(ExcludedParamNames)
     tmp = strmatch(ExcludedParamNames{i},lgx_);
