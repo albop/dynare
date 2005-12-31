@@ -40,6 +40,7 @@ modified versions.
 <indexterm zone="Dynare"><primary>Dynare</primary></indexterm>
 <indexterm zone="var"><primary>var</primary></indexterm>
 <indexterm zone="varexo"><primary>varexo</primary></indexterm>
+<indexterm zone="varexo_det"><primary>varexo_det</primary></indexterm>
 <indexterm zone="parameters"><primary>parameters</primary></indexterm>
 <indexterm zone="model"><primary>model</primary></indexterm>
 <indexterm zone="initval"><primary>initval</primary></indexterm>
@@ -60,6 +61,7 @@ modified versions.
 <indexterm zone="dynasave"><primary>dynasave</primary></indexterm>
 <indexterm zone="dynatype"><primary>dynatype</primary></indexterm>
 <indexterm zone="define"><primary>@define</primary></indexterm>
+<indexterm zone="forecast"><primary>forecast</primary></indexterm>
 <indexterm zone="if_elseif_else_end"><primary>@if...@elseif...@else...@end</primary></indexterm>
   </bookinfo>
 
@@ -101,9 +103,13 @@ Currently the development team of Dynare is composed of S. Adjemian, A. Benzouga
 </para>
 
 <section><title>Changes</title>
-<para>December 13, 2005</para>
+<para>December 30, 2005</para>
 <itemizedlist>
-<listitem><para>added conditional compilation commands <xref linkend="define"/> and <xref linkend="if_elseif_else_end"/>.</para></listitem>
+<listitem><para>added details about parameter transformation in <xref linkend="model"/> and in <xref linkend="estimated_params"/></para></listitem>
+<listitem><para>added conditional compilation commands <xref linkend="define"/> and <xref linkend="if_elseif_else_end"/></para></listitem>
+<listitem><para>enhanced output section of command <xref linkend="estimation"/></para></listitem>
+<listitem><para>added exogenous deterministic shocks in stochastic models. See <xref linkend="varexo_det"/>, <xref linkend="forecast"/>, <xref linkend="shocks"/>, <xref linkend="stoch_simul"/></para></listitem>
+<listitem><para>added a forecast command for calibrated models. See <xref linkend="forecast"/>.</para></listitem>
 </itemizedlist>
 <para>May 3, 2005</para>
 <itemizedlist>
@@ -313,6 +319,16 @@ These files may be looked at to understand errors reported at the simulation sta
 </para>
 </refsect1>
 
+<refsect1><title>Output</title>
+<para>
+Depending on the computing tasks requested in the *.mod file, executing command <command>dynare</command> will leave in the workspace variables containing results available for further processing. More details are given under the relevant computing tasks.
+</para>
+
+<para>
+Under Matlab, some results are also saved in a file called <replaceable>FILENAME</replaceable><filename>_results.mat</filename>. Currently, this file contains when available the structures <varname>dr_</varname> and <varname>oo_</varname>.
+</para>
+</refsect1>
+
 <refsect1><title>Examples</title>
 <programlisting>
 dynare ramst
@@ -332,6 +348,7 @@ dynare ramst.mod
 <listitem><para><xref linkend='periods'/> (deprecated)</para></listitem>
 <listitem><para><xref linkend='var'/></para></listitem>
 <listitem><para><xref linkend='varexo'/></para></listitem>
+<listitem><para><xref linkend='varexo_det'/></para></listitem>
 <listitem><para><xref linkend='parameters'/></para></listitem>
 </itemizedlist>
 
@@ -453,6 +470,48 @@ varexo m gov;
 </refsect1>
 </refentry>
 
+<refentry id="varexo_det">
+  <refmeta>
+    <refentrytitle>varexo_det</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>varexo_det</refname>
+    <refpurpose>declares exogenous deterministic variables in a stochastic  model</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>varexo_det</command>
+      <arg choice="plain">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg>
+	,
+      </arg>
+      <arg rep="repeat">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+    <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+This optional command declares exogenous deterministic variables in a stochastic model. See command <xref linkend="var"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
+</para>
+<para>It is possible to mix deterministic and stochastic shocks to build models where agents know from the start of the simulation about future exogenous changes. In that case <xref linkend="stoch_simul"/> will compute the rational expectation solution adding future information to the state space (nothing is shown in the output of <xref linkend="stoch_simul"/>) and <xref linkend="forecast"/> will compute a simulation conditional on initial  conditions and future information.
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+varexo m gov;
+varexo_det tau;
+</programlisting>
+</refsect1>
+</refentry>
+
 <refentry id="parameters">
   <refmeta>
     <refentrytitle>parameters</refentrytitle>
@@ -520,6 +579,16 @@ bet = sqrt(2);
       ;
       </arg><sbr/>
       <arg choice="plain">
+	<synopfragmentref linkend="pound_exp">MATLAB EXPRESSION</synopfragmentref>;
+      </arg><sbr/>
+      <arg rep="repeat">
+	<synopfragmentref linkend="pound_exp">MATLAB EXPRESSION</synopfragmentref>;
+      </arg><sbr/>
+      <arg choice="plain">
+	end;
+      </arg>
+
+      <arg choice="plain">
 	<synopfragmentref linkend="eq">EQUATION</synopfragmentref>;
       </arg><sbr/>
       <arg rep="repeat">
@@ -528,6 +597,12 @@ bet = sqrt(2);
       <arg choice="plain">
 	end;
       </arg>
+
+      <synopfragment id="pound_exp">
+	<arg choice="plain">#<replaceable>EXPRESSION</replaceable></arg>
+	<arg>= #<replaceable>EXPRESSION</replaceable></arg>
+	<arg choice="plain">;</arg>
+      </synopfragment>
 
       <synopfragment id="eq">
 	<arg choice="plain"><replaceable>EXPRESSION</replaceable></arg>
@@ -547,6 +622,10 @@ There must be as many equations as there are endogenous variables in the model, 
 <para>
 When the equations are written in homogenous form, it is possible to omit the "= 0" part and write only the left hand side of the equation.
 </para>
+<para>
+It is possible to include arbitrary Matlab expressions in a model. It must be preceeded by a pound sign (#) as the first character of the line. This is particularily usefull to declare tansformation of parameters for estimation purpose (see <xref linkend="estimated_params"/>).
+</para>
+
 <para>
 The option <command>linear</command> declares the model as being linear. It avoids to have to declare initial values for computing the steady state and it sets automatically <command>order=1</command> in <command>stoch_simul</command>.
 </para>
@@ -573,6 +652,7 @@ end;
 <refsect1><title>Example 3</title>
 <programlisting>
 model(linear);
+# b = 1/c;
 x = a*x(-1)+b*y(+1)+e_x;
 y = d*y(-1)+e_y;
 end;
@@ -824,7 +904,8 @@ If the variance of an exogenous variable is set to zero, this variable will appe
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>shocks;</command><sbr/>
+      <command>shocks</command>
+      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>);</arg><sbr/>
       <group choice="plain">
 	<arg choice="plain">
 	  <synopfragmentref linkend="det_shock">DETERMINISTIC SHOCK STATEMENT</synopfragmentref>
@@ -884,6 +965,14 @@ If the variance of an exogenous variable is set to zero, this variable will appe
       </synopfragment>
     </cmdsynopsis>
   </refsynopsisdiv>
+<refsect1><title>Options</title>
+<itemizedlist spacing='compact'>
+<listitem>
+  <para><command>shocks_file</command> = FILENAME: reads sequence of deterministic shocks from FILENAME. It can be either a *.m or a *.mat file. The file must create vectors with the same names as the deterministic exogenous variables.</para>
+</listitem>
+</itemizedlist>
+</refsect1>
+
 <refsect1><title>Description</title>
 <refsect2><title>In deterministic context</title>
 <para>
@@ -935,6 +1024,34 @@ end;
 </para>
 </refsect3>
 </refsect2>
+
+<refsect2><title>Mixing determininistic and stochastic shocks</title>
+<para>It is possible to mix deterministic and stochastic shocks to build models where agents know from the start of the simulation about future exogenous changes. In that case <xref linkend="stoch_simul"/> will compute the rational expectation solution adding future information to the state space (nothing is shown in the output of <xref linkend="stoch_simul"/>) and <xref linkend="forecast"/> will compute a simulation conditional on initial  conditions and future information.
+</para>
+
+<refsect3><title>Example</title>
+<informalexample>
+  <programlisting>
+varexo_det tau;
+varexo e;
+
+...
+
+shocks;
+var e; stderr 0.01;
+var tau;
+periods 1:9;
+values -0.15;
+end;
+
+stoch_simul(irf=0);
+
+forecast;
+  </programlisting>
+</informalexample>
+</refsect3>
+</refsect2>
+
 </refsect1>
 </refentry>
 
@@ -1008,6 +1125,7 @@ Dynare has special commands for the computation of the static equilibrium of the
 <itemizedlist>
 <listitem><para><xref linkend='steady'/></para></listitem>
 <listitem><para><xref linkend='check'/></para></listitem>
+<listitem><para><xref linkend='forecast'/></para></listitem>
 <listitem><para><xref linkend='simul'/></para></listitem>
 <listitem><para><xref linkend='stoch_simul'/></para></listitem>
 </itemizedlist>
@@ -1105,6 +1223,77 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
 </refsect1>
 </refentry>
 
+<refentry id="forecast">
+  <refmeta>
+    <refentrytitle>forecast</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>forecast</refname>
+    <refpurpose>computes a simulation of a stochastic model from a given state</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>forecast</command>
+      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>)</arg>
+      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+<itemizedlist spacing='compact'>
+<listitem><para><command>periods</command> = INTEGER: number of periods of the forecast (default = 40)</para></listitem>
+<listitem><para><command>conf_sig</command> = DOUBLE: level of significance for confidence interval (default = 0.90)</para></listitem>
+</itemizedlist>
+</refsect1>
+
+<refsect1><title>Description</title>
+<para><command>forecast</command> computes a simulation of a stochastic model from an arbitrary initial point.</para>
+<para>When the model also contains deterministic exogenous shocks, the simulation is computed conditionaly to the agents knowing the future values of the deterministic exogenous variables.</para>
+
+<para><command>forecast</command> must be called after <xref linkend="stoch_simul"/>.</para>
+
+<para> <command>forecast</command> plots the trajectory of endogenous variables. When a list of variable names follows the command, only those variables are ploted. A 90% confidence interval is ploted around the mean trajectory. Use option <command>conf_sig</command> to change the level of the confidence interval.</para>
+</refsect1>
+
+<refsect1><title>Output variables</title>
+<para>The following variables are set in structure <varname>oo_</varname>:
+<itemizedlist spacing="compact">
+<listitem><para><varname>oo_.forecast.Mean.</varname><replaceable>VARIABLE NAME</replaceable>: mean forecast of endogenous variables</para></listitem>
+<listitem><para><varname>oo_.forecast.HPDinf.</varname><replaceable>VARIABLE NAME</replaceable>: lower bound of a confidence interval around the forecast</para></listitem>
+<listitem><para><varname>oo_.forecast.HPDsup.</varname><replaceable>VARIABLE NAME</replaceable>: upper bound of a confidence interval around the forecast</para></listitem>
+<listitem><para><varname>oo_.forecast.Exogenous.</varname><replaceable>VARIABLE NAME</replaceable>: trajectory of the deterministic exogenous variables</para></listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+
+<refsect1><title>Example</title>
+<informalexample>
+  <programlisting>
+varexo_det tau;
+varexo e;
+
+...
+
+shocks;
+var e; stderr 0.01;
+var tau;
+periods 1:9;
+values -0.15;
+end;
+
+stoch_simul(irf=0);
+
+forecast;
+  </programlisting>
+</informalexample>
+</refsect1>
+</refentry>
+
 <refentry id="simul">
   <refmeta>
     <refentrytitle>simul</refentrytitle>
@@ -1160,7 +1349,7 @@ the simulated variables are available in global matrix <varname>y_</varname>. Th
 
 <refsect1><title>Options</title>
 <itemizedlist spacing='compact'>
-<listitem><para> <command>ar</command> = <replaceable>INTEGER</replaceable>:
+<listitem><para><anchor id="ar" xreflabel="ar"/> <command>ar</command> = <replaceable>INTEGER</replaceable>:
 Order of autocorrelation coefficients to compute and to print (default = 5)
 n</para></listitem>
 <listitem><para> <command>dr_algo = 0 | 1</command>: 
@@ -1535,6 +1724,36 @@ Each line corresponds to an estimated parameter and follows this syntax:
 </para></note>
 </para>
 </refsect1>
+
+<refsect1><title>Parameter transformation</title>
+<para>
+Sometimes, it is desirable to estimate a transformation of a parameter appearing in the model, rather than the parameter itself. It is of course possible to replace the original parameter by a function of the estimated parameter everywhere is the model, but it is often unpractical.
+</para>
+
+<para>
+In such a case, it is possible to declare the parameter to be estimated in the <xref linkend="parameters"/> statement and to define the transformation at the top of the <xref linkend="model"/> section, as a Matlab expression. The first character of the line must be a pound  sign (#).
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<informalexample>
+    <programlisting>
+      parameters bet;
+
+      model;
+      # sig = 1/bet;
+      c = sig*c(+1)*mpk;
+      end;
+
+      estimated_params;
+      bet,normal_pdf,1,0.05;
+      end;
+    </programlisting>
+  </informalexample>
+</refsect1>
+
+
+
 </refentry>
 
 <refentry id="estimated_params_init">
@@ -1583,6 +1802,7 @@ Each line corresponds to an estimated parameter and follows this syntax:
 </itemizedlist>
 </para>
 </refsect1>
+
 </refentry>
 
 <refentry id="estimated_params_bounds">
@@ -1671,8 +1891,8 @@ Each line corresponds to an estimated parameter and follows this syntax:
   <listitem><para>2: for nonstationary models: a wide prior is used with an initial matrix of variance of the error of forecast diagonal with 10 on the diagonal.</para></listitem>
 </itemizedlist>
 </para></listitem>
-<listitem><para> <command>conf_sig</command> = <replaceable>{INTEGER | DOUBLE}</replaceable>: the level for the confidence intervals reported in the results (default = 0.90)</para></listitem>
-<listitem><para> <command>mh_replic</command> = <replaceable>INTEGER</replaceable>: number of replication for Metropolis Hasting algorithm. For the time being, mh_replic should be larger than 1200 (default = 20000.)</para></listitem>
+<listitem><anchor id="conf_sig" xreflabel="conf_sig"/><para><command>conf_sig</command> = <replaceable>{INTEGER | DOUBLE}</replaceable>: the level for the confidence intervals reported in the results (default = 0.90)</para></listitem>
+<listitem><anchor id="mh_replic" xreflabel="mh_replic"/><para> <command>mh_replic</command> = <replaceable>INTEGER</replaceable>: number of replication for Metropolis Hasting algorithm. For the time being, mh_replic should be larger than 1200 (default = 20000.)</para></listitem>
 <listitem><para> <command>mh_nblocks</command> = <replaceable>INTEGER</replaceable>: number of paralletl chains for Metropolis Hasting algorithm (default = 2).</para></listitem>
 <listitem><para> <command>mh_drop</command> = <replaceable>DOUBLE</replaceable>: the fraction of initially generated parameter vectors to be dropped before using posterior simulations (default = 0.5)</para></listitem>
 <listitem><para> <command>mh_jscale</command> = <replaceable>DOUBLE</replaceable>: the scale to be used for the jumping distribution in MH algorithm. The default value is rarely satisfactory. This option must be tune to obtain, ideally, an accpetation rate of 25% in the Metropolis-Hastings algorithm (default = 0.2).</para></listitem>
@@ -1689,7 +1909,7 @@ Each line corresponds to an estimated parameter and follows this syntax:
 </itemizedlist></para></listitem>
 <listitem><para><command>mode_check</command>: when <command>mode_check</command> is set, Dynare plots the posterior density for values around the computed mode for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer.</para></listitem>
 <listitem><para><command>prior_trunc</command>=<replaceable>DOUBLE</replaceable>: probability of extreme values of the prior density that is ignored when computing bounds for the parameters (default=1e-32).</para></listitem>
-<listitem><para><command>load_mh_file</command>: when <command>load_mh_file</command> is declared, Dynare adds to previous Metropolis-Hastings simulations instead of starting from scratch.</para></listitem>
+<listitem><anchor id="load_mh_file" xreflabel="load_mh_file"/><para><command>load_mh_file</command>: when <command>load_mh_file</command> is declared, Dynare adds to previous Metropolis-Hastings simulations instead of starting from scratch.</para></listitem>
 <listitem><para><command>optim</command>=(<replaceable>fmincon options</replaceable>): can be used to set options for fmincon, the optimizing function of Matlab Optimizaiton toolbox. Use Matlab syntax for these options</para>
 <para> (default: ('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6))</para></listitem>
 <listitem>
@@ -1697,16 +1917,16 @@ Each line corresponds to an estimated parameter and follows this syntax:
     <command>nodiagnostic</command>: doesn't compute the convergence diagnostics for Metropolis (default: diagnostics are computed and displayed).
   </para>
 </listitem>
-<listitem><para><command>bayesian_irf</command> triggers the computation of the posterior distribution of IRFs. The length of the IRFs are controlled by the <command>irf</command> option</para></listitem>
-<listitem><para><command>moments_varendo</command> triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables</para></listitem>
-<listitem><para><command>filtered_vars</command> triggers the computation of the posterior distribution of filtered endogenous variables and shocks</para></listitem>
-<listitem><para><command>smoother</command> triggers the computation of the posterior distribution of smoothered endogenous variables and shocks</para></listitem>
-<listitem><para><command>forecast = </command><replaceable>INTEGER</replaceable> computes the posterior distribution of a forecast on <replaceable>INTEGER</replaceable> periods after the end of the sample used in estimation</para></listitem>
+<listitem><para><anchor id="bayesian_irf" xreflabel="bayesian_irf"/><command>bayesian_irf</command> triggers the computation of the posterior distribution of IRFs. The length of the IRFs are controlled by the <command>irf</command> option</para></listitem>
+<listitem><para><anchor id="moments_varendo" xreflabel="moments_varendo"/><command>moments_varendo</command> triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables</para></listitem>
+<listitem><para><anchor id="filtered_vars" xreflabel="filtered_vars"/><command>filtered_vars</command> triggers the computation of the posterior distribution of filtered endogenous variables and shocks</para></listitem>
+<listitem><anchor id="smoother" xreflabel="smoother"/><para><command>smoother</command> triggers the computation of the posterior distribution of smoothered endogenous variables and shocks</para></listitem>
+<listitem><para><anchor id="forecast_opt" xreflabel="forecast"/><command>forecast = </command><replaceable>INTEGER</replaceable> computes the posterior distribution of a forecast on <replaceable>INTEGER</replaceable> periods after the end of the sample used in estimation</para></listitem>
 <listitem><para><command>tex</command> requests the printing of results and graphs in TeX tables and graphics that can be later directly included in Latex files</para></listitem>
 <listitem><para>All options for <xref linkend="stoch_simul"/></para></listitem>
 </itemizedlist>
 
-<note><para> If no <command>jscale</command> parameter is used in estimated_params, the procedure uses <command>mh_jscale</command> for all parameters. If <command>mh_jscale</command> option isn't set, the procedure uses 0.2 for all parameters.
+<note><para> If no <command>mh_jscale</command> parameter is used in estimated_params, the procedure uses <command>mh_jscale</command> for all parameters. If <command>mh_jscale</command> option isn't set, the procedure uses 0.2 for all parameters.
 </para></note>
 </refsect1>
 
@@ -1721,6 +1941,119 @@ Each line corresponds to an estimated parameter and follows this syntax:
 </itemizedlist>
 </refsect1>
 
+<refsect1><title>Output</title>
+<para>After running <command>estimation</command>, the parameters and the variance matrix of the shocks are set to the mode for maximum likelihood estimation or posterior mode computation without Metropolis iterations.
+</para>
+
+<para>After <command>estimation</command> with Metropolis iterations (option <command>mh_replic</command> > 0 or option <command>load_mh_file</command> set) the parameters and the variance matrix of the shocks are set to the posterior mean.</para>
+
+<para>Depending on the options, <command>estimation</command> stores results in the following fields of structure <varname>oo_</varname>:
+<table orient="land"><title>Content of <varname>oo_</varname></title><tgroup cols='2'>
+<thead>
+<row><entry>Field 1</entry><entry>Field 2</entry><entry>Field 3</entry><entry>Field 4</entry><entry>Field 5</entry><entry>Required options</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>Forecast</varname></entry><entry>See <xref linkend="ForecastsMoments"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><xref linkend="forecast_opt"/></entry></row>
+<row><entry morerows='1'><varname>MarginalDensity</varname></entry><entry><varname>LaplaceApproximation</varname></entry><entry/><entry></entry><entry></entry><entry>Always provided</entry></row>
+<row><entry><varname>ModifiedHarmonicMean</varname></entry><entry></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&lt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>PosteriorFilteredVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="filtered_vars"/></para></entry></row>
+<row><entry><varname>PosteriorIRF</varname></entry><entry><varname>Dsge</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><para>IRF name: name of endogenous variable '_' name of shock</para></entry><entry></entry><entry><xref linkend="bayesian_irf"/></entry></row>
+<row><entry><varname>PosteriorSmoothedObservationErrors</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
+<row><entry><varname>PosteriorSmoothedShocks</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
+<row><entry><varname>PosteriorSmoothedVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
+<row><entry><varname>PosteriorTheoreticalMoments</varname></entry><entry>See <xref linkend="TheoreticalMoments"/></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry><xref linkend="moments_varendo"/></entry></row>
+<row><entry><varname>posterior_density</varname></entry><entry><replaceable>Parameter name</replaceable></entry><entry></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&lt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_hpdinf</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&lt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_hpdsup</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&lt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_mean</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&lt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_mode</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&lt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_std</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&lt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+</tbody>
+</tgroup>
+</table>
+</para>
+
+<para><anchor id="ForecastsMoments" xreflabel="Moments of forecasts"/>
+<table><title>Moments of forecasts</title>
+<tgroup cols='2'>
+<thead>
+<row><entry>Field name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig"><para>See option <xref linkend="conf_sig"/> to change the size of the HPD interval</para></footnote> of forecast  due to parameter uncertainty</entry></row> 
+<row><entry><varname>HPDsup</varname></entry><entry>Lower bound of a 90% HPD interval <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty</entry></row> 
+<row><entry><varname>HPDTotalinf</varname></entry><entry>Lower bound of a 90% HPD interval of forecast <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty and future shocks</entry></row> 
+<row><entry><varname>HPDTotalsup</varname></entry><entry>Lower bound of a 90% HPD interval <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty and future shocks</entry></row>
+<row><entry><varname>Mean</varname></entry><entry>Mean of the posterior distribution of forecasts</entry></row> 
+<row><entry><varname>Median</varname></entry><entry>Median of the posterior distribution of forecasts</entry></row>  
+<row><entry><varname>Std</varname></entry> <entry>Standard deviation of the posterior distribution of forecasts</entry></row> 
+</tbody>
+</tgroup>
+</table>
+</para>
+<para><anchor id="MomentsNames" xreflabel="Moments Names"/>
+<table><title>Moments Names</title>
+<tgroup cols='2'>
+<thead>
+<row><entry>Field name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig1"><para>See option <xref linkend="conf_sig"/> to change the size of the HPD interval</para></footnote></entry></row> 
+<row><entry><varname>HPDsup</varname></entry><entry>Upper bound of a 90% HPD interval <footnoteref linkend="see_conf_sig1"/> </entry></row> 
+<row><entry><varname>Mean</varname></entry><entry>Mean of the posterior distribution</entry></row> 
+<row><entry><varname>Median</varname></entry><entry>Median of the posterior distribution</entry></row>  
+<row><entry><varname>Std</varname></entry> <entry>Standard deviation of the posterior distribution</entry></row> 
+</tbody>
+</tgroup>
+</table>
+</para>
+<para><anchor id="TheoreticalMoments" xreflabel="Theoretical Moments"/>
+<table><title>Theoretical Moments</title>
+<tgroup cols='2'>
+<thead>
+<row><entry>Field name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>Autocorrelation</varname></entry><entry>Autocorrelation of endogenous variables<footnote><para>The autocorrlation coefficients are computed for the number of periods specified in option <xref linkend="ar"/>.</para></footnote></entry></row>
+<row><entry><varname>Correlation</varname></entry><entry>Correlation between two endogenous variables</entry></row>
+<row><entry><varname>Decomp</varname></entry><entry>Decomposition of variance<footnote><para>When the shocks are correlated, it is the decomposition of orthogonalized shocks via Cholesky decompostion according to the order of declaration of shocks (see <xref linkend="varexo"/>).</para></footnote> </entry></row>
+<row><entry><varname>Expectation</varname></entry><entry>Expectation of endogenous variables</entry></row>
+<row><entry><varname>Variance</varname></entry><entry>(co-)variance of endogenous variables</entry></row>
+</tbody>
+</tgroup>
+</table>
+</para>
+
+<para><anchor id="EstimatedObjects" xreflabel="Estimated Objects"/>
+<table><title>Estimated objects</title>
+<tgroup cols='2'>
+<thead>
+<row><entry>Field name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>measurement_errors_corr</varname></entry><entry>Correlation between two measurement errors</entry></row>
+<row><entry><varname>measurement_errors_std</varname></entry><entry>Standard deviation of measurement errors</entry></row>
+<row><entry><varname>parameters</varname></entry><entry>Parameters</entry></row>
+<row><entry><varname>shocks_corr</varname></entry><entry>Correlation between two structural shocks</entry></row>
+<row><entry><varname>shocks_std</varname></entry><entry>Standard deviation of structural shocks</entry></row>
+</tbody>
+</tgroup>
+</table>
+</para>
+
+<refsect2><title>Examples</title>
+<para>
+<informalexample>
+<programlisting>
+oo_.posterior_mode.parameters.alp
+oo_.posterior_mean.shocks_std.ex
+oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
+</programlisting>
+</informalexample>
+</para>
+</refsect2>
+
+</refsect1>
 
 </refentry>
 
