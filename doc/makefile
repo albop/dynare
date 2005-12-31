@@ -11,3 +11,7 @@ manual.pdf: manual.xml
 	xsltproc dynare_fo.xsl manual.xml >manual.fo
 	pdfxmltex manual.fo	
 	pdfxmltex manual.fo	
+
+install: manual.pdf manual/index.html
+	scp manual.pdf pythie.cepremap.cnrs.fr:public_html/mambo/download/manual/
+	scp manual/* pythie.cepremap.cnrs.fr:public_html/mambo/download/manual/

@@ -8,7 +8,7 @@
 <!-- It is important to use indent="no" here, otherwise verbatim -->
 <!-- environments get broken by indented tags...at least when the -->
 <!-- callout extension is used...at least with some processors -->
-<xsl:import href="c:/cygwin/usr/share/docbook-xsl/fo/docbook.xsl"/>
+<xsl:import href="e:/docbook-xsl-1.66.1/fo/docbook.xsl"/>
 <xsl:import href="dynare.xsl"/>
 
 <xsl:import href="dynare_lists.xsl"/>
