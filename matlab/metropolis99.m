@@ -16,7 +16,7 @@ nx    	= nvx+nvn+ncx+ncn+np;
 npar  	= length(xparam1);
 nvobs 	= size(options_.varobs,1);
 options_.lik_algo = 1;
-MaxNumberOfTuningSimulations = 40000;
+MaxNumberOfTuningSimulations = 100000;
 MaxNumberOfClimbingSimulations = 20000;
 AcceptanceTarget = 0.33;
 
@@ -70,12 +70,14 @@ while j<=MaxNumberOfTuningSimulations
     % ... otherwise I don't move.
   end	
   prtfrc = j/MaxNumberOfTuningSimulations;
-  waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));  
+  waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
   if  j/500 == round(j/500)
     test1 = jsux/jj;
     test2 = isux/j;
     cfactor = (test1/AcceptanceTarget)^1.0*(test2/AcceptanceTarget)^0.0;
-    init_scale = init_scale*cfactor;
+    if cfactor>0
+      init_scale = init_scale*cfactor;
+    end
     jsux = 0; jj = 0;
     if test1>AcceptanceTarget*0.90 & test1<AcceptanceTarget*1.10
       test = test+1;
@@ -252,6 +254,7 @@ if strcmpi(info,'LastCall')
     j = j+1;
     jj = jj + 1;
   end
+  close(hh);
 else
   PostVar = CovJump;
   PostMean = MeanPar;
