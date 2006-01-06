@@ -1,17 +1,15 @@
 function [PostMod,PostVar,Scale,PostMean] = ...
     samaxwell(xparam1,gend,data,mh_bounds,NumberOfIterationsForInitialization,init_scale,info,MeanPar,VarCov)
 % stephane.adjemian@cepremap.cnrs.fr [11-22-2005]
-% Adapted from an older version of metropolis.m 
-
 global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam_test
 global lgy_ lgx_ fname_ ys_ xkmin_ xkmax_ ykmin_ ykmax_ endo_nbr mean_varobs
 global oo_ lgx_orig_ord_ lgy_TeX_ lgx_TeX_ dsge_prior_weight
-
 nvx   	= estim_params_.nvx;
 nvn   	= estim_params_.nvn;
 ncx   	= estim_params_.ncx;
 ncn   	= estim_params_.ncn;
 np    	= estim_params_.np ;
+ns      = nvx+nvn+ncx+ncn; 
 nx    	= nvx+nvn+ncx+ncn+np;
 npar  	= length(xparam1);
 nvobs 	= size(options_.varobs,1);
@@ -96,7 +94,7 @@ set(hh,'Name','Looking for the posterior covariance...')
 j = 1;
 isux = 0;
 % ix2 = xparam1;% initial condition! 
-if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
+if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & Isempty(dsge_prior_weight)
   ilogpo2 = -DsgeLikelihood(ix2,gend,data);
 else
   ilogpo2 = -DsgeVarLikelihood(ix2,gend);
@@ -178,7 +176,7 @@ if strcmpi(info,'LastCall')
       jsux = jsux + 1;
     else
       % ... otherwise I don't move.
-    end	
+    end
     prtfrc = j/MaxNumberOfTuningSimulations;
     waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));  
     if  j/500 == round(j/500) 
@@ -204,18 +202,14 @@ if strcmpi(info,'LastCall')
   %%
   %% Now I climb the hill
   %%
-  hh = waitbar(0,'');
+  hh = waitbar(0,' ');
   set(hh,'Name','Now I am climbing the hill...')
   j = 1; jj  = 1;
   jsux = 0;
   test = 0;
-  % ix2 = ModePar;%% I start from the point with the highest posterior density... 
-  % if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
-  %  ilogpo2 = -DsgeLikelihood(ix2,gend,data);% initial posterior density
-  % else
-  %  ilogpo2 = -DsgeVarLikelihood(ix2,gend);% initial posterior density
-  % end
   dd = transpose(chol(CovJump));
+  init_scale = eye(length(dd))*init_scale;
+  indx = strmatch('dsge_prior_weight',estim_params_.param_names,'exact');
   while j<=MaxNumberOfClimbingSimulations
     proposal = init_scale*dd*randn(npar,1) + ModePar;
     if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
@@ -242,13 +236,18 @@ if strcmpi(info,'LastCall')
       %init_scale = init_scale*cfactor;
       jsux = 0; 
       jj = 0;
-      if test1<0.005
+      if test1<0.001
 	test = test+1;
       end
       if test>4% If I do not progress enough I reduce the scale parameter
                % of the jumping distribution (cooling down the system).
-	
-	init_scale = init_scale/1.20;
+	if isempty(indx)
+          init_scale = init_scale/1.10;
+        else
+          init_scale = init_scale/1.10;
+          % USEFUL IF THE MODEL IS TRUE:
+          % init_scale(indx+ns,indx+ns) = init_scale(indx+ns,indx+ns)*1.10/1.001; 
+        end
       end
     end
     j = j+1;

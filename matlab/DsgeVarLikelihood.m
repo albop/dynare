@@ -1,8 +1,8 @@
-function [fval,cost_flag,ys,trend_coeff,info] = DsgeVarLikelihood(xparam1,gend)
+function [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,tmp2] = DsgeVarLikelihood(xparam1,gend)
 % stephane.adjemian@ens.fr [06-17-2005]
 
 global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test trend_coeff_ 
-global dsge_prior_weight targ_ xparam_
+global dsge_prior_weight targ_ xparam_ dr_
 
 nvx = estim_params_.nvx;
 nvn = estim_params_.nvn;
@@ -39,7 +39,7 @@ if strcmpi(targ_,'deep')
   end
 elseif strcmpi(targ_,'lambda')
     indx = strmatch('dsge_prior_weight',estim_params_.param_names,'exact');
-    if ~isempty(indx) 
+    if ~isempty(indx)
       xparam1 = xparam_;
       xparam1(indx) = xparam_tmp;
     end 
@@ -160,6 +160,10 @@ end
 % 3. theorretical moments (second order)
 %------------------------------------------------------------------------------
 tmp = lyapunov_symm(T,R*Q*R');
+
+tmpbis = R*Q*R';
+tmpbis = tmpbis(bayestopt_.mf,bayestopt_.mf);
+
 NumberOfObservedVariables = size(options_.varobs,1);
 NumberOfLags = options_.varlag;
 k = NumberOfObservedVariables*NumberOfLags ;
@@ -197,17 +201,17 @@ assignin('base','GYX',GYX);
 
 if ~isinf(dsge_prior_weight) 
   SIGMAu = dsge_prior_weight*gend*TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) + mYY ;
-  tmp = dsge_prior_weight*gend*GYX + mYX;
-  SIGMAu = SIGMAu - tmp*inv(dsge_prior_weight*gend*GXX+mXX)*tmp';
-  SIGMAu = SIGMAu/(gend*(dsge_prior_weight+1));
-
+  tmp1 = dsge_prior_weight*gend*GYX + mYX;
+  tmp2 = inv(dsge_prior_weight*gend*GXX+mXX);
+  SIGMAu = SIGMAu - tmp1*tmp2*tmp1';
+  SIGMAu = SIGMAu / (gend*(dsge_prior_weight+1));
+  PHI = tmp2*tmp1';
   prodlng1 = sum(gammaln(.5*((1+dsge_prior_weight)*gend- ...
 			     NumberOfObservedVariables*NumberOfLags ...
 			     +1-(1:NumberOfObservedVariables)')));
   prodlng2 = sum(gammaln(.5*(dsge_prior_weight*gend- ...
 			     NumberOfObservedVariables*NumberOfLags ...
-			     +1-(1:NumberOfObservedVariables)')));
-  
+			     +1-(1:NumberOfObservedVariables)')));  
   lik = .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX+mXX)) ...
 	+ .5*((dsge_prior_weight+1)*gend-k)*log(det((dsge_prior_weight+1)*gend*SIGMAu)) ...
 	- .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX)) ...
@@ -216,16 +220,14 @@ if ~isinf(dsge_prior_weight)
 	- .5*log(2)*NumberOfObservedVariables*((dsge_prior_weight+1)*gend-k) ...
 	+ .5*log(2)*NumberOfObservedVariables*(dsge_prior_weight*gend-k) ...
 	- prodlng1 + prodlng2;
-  
-else 
-  
-  tmp1 = inv(GXX)*GYX';
-  tmp2 = GYY -GYX*tmp1;
-  
-  lik = -.5*sum(diag(inv(tmp2)*(mYY-2*tmp1'*mYX'+tmp1'*mXX*tmp1))) ...
+else % codé par SM (sûrement pas exact... Que font ici les moments empiriques ?).    
+  tmp1 = GYX;
+  tmp2 = inv(GXX);
+  PHI  = tmp2*tmp1';
+  SIGMAu = GYY - tmp1*tmp2*tmp1;
+  % à finir de corriger...
+  lik  = -.5*sum(diag(inv(tmp2)*(mYY-2*tmp1'*mYX'+tmp1'*mXX*tmp1))) ...
 	-(gend/2)*log(det(tmp2));
-  
-  
 end      
 
 lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);

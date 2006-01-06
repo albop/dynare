@@ -621,10 +621,3 @@ end
 % 08/28/2003 MJ corrected bug in computation of 2nd order (ordering of
 %               forward variable in LHS)
 % 08/29/2003 MJ use Sims routine if mjdgges isn't available
-
-   
-
-
-
-
-

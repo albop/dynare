@@ -7,7 +7,6 @@ VarObs = options_.varobs;
 VarExo = lgx_;
 info = options_.ParamSubSet;
 
-
 nvx = estim_params_.nvx;
 nvn = estim_params_.nvn;
 ncx = estim_params_.ncx;
@@ -27,8 +26,10 @@ elseif strcmpi(info,'MeasurementErrors')
   indx = [(nvx+1:nvx+nvn),(nvx+nvn+ncx+1:nvx+nvn+ncx+ncn)]';
 elseif strcmpi(info,'MeasurementErrorsWithoutCorrelations')
   indx = (nvx+1:nvx+nvn)';
-elseif strcmpi(info,'AllWithoutMeasurementErros')
+elseif strcmpi(info,'AllWithoutMeasurementErrors')
   indx = [(1:nvx),nvx+nvn+1:nvx+nvn+ncx,nvx+nvn+ncx+ncn+1:nx]';
+elseif strcmpi(info,'None')
+  indx = [];
 end
 
 if isempty(ExcludedParamNames)

@@ -49,7 +49,7 @@ for t=1:NumberOfObservations
     elseif trend == 1
         X(t,indx) = [ 1 , t ];
     end
-end    
+end 
 
 YtY = Y'*Y;
 YtX = Y'*X;

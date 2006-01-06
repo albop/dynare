@@ -2370,7 +2370,6 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
         plot(1:10+options_.forecast,...
              [data(idx,size(data,2)-10+1:end)';...
               MeanForecast(:,k)],'-b','linewidth',2)
-        
       end
       offsetx = 10;
     else
@@ -2566,26 +2565,19 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	end
 	% bvar-dsge 
 	if ~isempty(dsge_prior_weight)
-	  DsgeVarLikelihood(deep',gend);
-	  GYY = evalin('base','GYY');
-	  GXX = evalin('base','GXX');
-	  GYX = evalin('base','GYX');
+	  [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(deep',gend);
 	  DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
-	  tmp1 = mYY + dsge_prior_weight*gend*GYY;
-	  tmp2 = mXY + dsge_prior_weight*gend*GYX';
-	  tmp3 = mXX + dsge_prior_weight*gend*GXX;
-	  tmp4 = (tmp1-tmp2'*inv(tmp3)*tmp2);
-	  PHI = inv(tmp3)*tmp2;
-	  val = 1;
+	  tmp1 = SIGMAu*gend*(dsge_prior_weight+1);
+          val  = 1;
+          tmp1 = chol(inv(tmp1))'; 
 	  while val;
 	    % draw from the marginal posterior of sig
-	    tmp5 = chol(inv(tmp4))'*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
-	    SIGMAu_draw = inv(tmp5*tmp5');
-	    % draw from the conditional posterior of PHI
-	    VARvecPHI = kron(SIGMAu_draw,inv(tmp3));
+	    tmp2 = tmp1*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
+	    SIGMAu_draw = inv(tmp2*tmp2');
+            % draw from the conditional posterior of PHI
+	    VARvecPHI = kron(SIGMAu_draw,iXX);
 	    PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
-	    COMP_draw(1:nvobs,:) = reshape(PHI_draw, ...
-					   NumberOfLagsTimesNvobs,nvobs)';
+	    COMP_draw(1:nvobs,:) = reshape(PHI_draw,NumberOfLagsTimesNvobs,nvobs)';
 	    % Check for stationarity
 	    tests = find(abs(eig(COMP_draw))>0.9999999999);
 	    if isempty(tests)
@@ -2595,25 +2587,26 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  % Get rotation
 	  if dsge_prior_weight > 0
 	    Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
-	    A0 = Atheta(bayestopt_.mf,:);
+	    A0 = Atheta(bayestopt_.mfys,:);
 	    [OMEGAstar,SIGMAtr] = qr2(A0');
 	  end
+          % SIGMAu_draw = A0*A0';
 	  SIGMAu_chol = chol(SIGMAu_draw)';
 	  SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
 	  PHIpower = eye(NumberOfLagsTimesNvobs);
 	  irfs = zeros (nirfs,nvobs*exo_nbr);
-	  tmp6 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-	  irfs(1,:) = tmp6(:)';
+	  tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	  irfs(1,:) = tmp3(:)';
 	  for t = 2:nirfs
 	    PHIpower = COMP_draw*PHIpower;
-	    tmp7 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-	    irfs(t,:)  = tmp7(:)';
+	    tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	    irfs(t,:)  = tmp3(:)';
 	  end            
 	  for j = 1:(nvobs*exo_nbr)
 	    if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
 	      tmp_dsgevar(:,j) = (irfs(:,j));
-	    end	
-	  end	
+	    end
+	  end
 	  if irun_irf_dsgevar < MAX_nirfs_dsgevar
 	    stock_irf_dsgevar(:,:,:,irun_irf_dsgevar) = reshape(tmp_dsgevar,nirfs,nvobs,exo_nbr);
 	  else
@@ -2649,7 +2642,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       irun_irf_dsge = 0;
       if ~isempty(dsge_prior_weight)
 	sfil_irf_dsgevar = 0;
-	irun_irf_dsgevar = 0;	
+	irun_irf_dsgevar = 0;
       end
       eval(['load ' instr1 int2str(ffil) instr2]);
       NumberOfSimulations = length(logpo2);
@@ -2695,26 +2688,19 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	end
 	% bvar-dsge
 	if ~isempty(dsge_prior_weight)
-	  DsgeVarLikelihood(deep',gend);
-	  GYY = evalin('base','GYY');
-	  GXX = evalin('base','GXX');
-	  GYX = evalin('base','GYX');
+	  [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(deep',gend);
 	  DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
-	  tmp1 = mYY + dsge_prior_weight*gend*GYY;
-	  tmp2 = mXY + dsge_prior_weight*gend*GYX';
-	  tmp3 = mXX + dsge_prior_weight*gend*GXX;
-	  tmp4 = (tmp1-tmp2'*inv(tmp3)*tmp2);
-	  PHI = inv(tmp3)*tmp2;
-	  val = 1;
+          tmp1 = SIGMAu*gend*(1+dsge_prior_weight);
+	  tmp1 = chol(inv(tmp1))';
+          val = 1;
 	  while val;
 	    % draw from the marginal posterior of sig
-	    tmp5 = chol(inv(tmp4))'*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
-	    SIGMAu_draw = inv(tmp5*tmp5');
+	    tmp2 = tmp1*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
+	    SIGMAu_draw = inv(tmp2*tmp2');
 	    % draw from the conditional posterior of PHI
-	    VARvecPHI = kron(SIGMAu_draw,inv(tmp3));
+	    VARvecPHI = kron(SIGMAu_draw,iXX);
 	    PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
-	    COMP_draw(1:nvobs,:) = reshape(PHI_draw, ...
-					   NumberOfLagsTimesNvobs,nvobs)';
+	    COMP_draw(1:nvobs,:) = reshape(PHI_draw,NumberOfLagsTimesNvobs,nvobs)';
 	    % Check for stationarity
 	    tests = find(abs(eig(COMP_draw))>0.9999999999);
 	    if isempty(tests)
@@ -2724,20 +2710,20 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  % Get rotation
 	  if dsge_prior_weight > 0
 	    Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
-	    A0 = Atheta(bayestopt_.mf,:);
+	    A0 = Atheta(bayestopt_.mfys,:);
 	    [OMEGAstar,SIGMAtr] = qr2(A0');
 	  end
 	  SIGMAu_chol = chol(SIGMAu_draw)';
 	  SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
 	  PHIpower = eye(NumberOfLagsTimesNvobs);
 	  irfs = zeros (nirfs,nvobs*exo_nbr);
-	  tmp6 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-	  irfs(1,:) = tmp6(:)';
+	  tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	  irfs(1,:) = tmp3(:)';
 	  for t = 2:nirfs
 	    PHIpower = COMP_draw*PHIpower;
-	    tmp7 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-	    irfs(t,:)  = tmp7(:)';
-	  end            
+	    tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+	    irfs(t,:)  = tmp3(:)';
+	  end
 	  for j = 1:(nvobs*exo_nbr)
 	    if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
 	      tmp_dsgevar(:,j) = (irfs(:,j));
