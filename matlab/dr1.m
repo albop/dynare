@@ -177,7 +177,7 @@ b11 = b(1:nstatic,nstatic+1:end);
 b2 = b(nstatic+1:end,nstatic+1:end);
 nz = nnz(iy_);
 if exo_nbr
-  fu = aa(:,nz+1:end);
+  fu = aa(:,nz+[1:exo_nbr]);
 end
 clear aa;
 

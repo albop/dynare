@@ -19,10 +19,12 @@ function forecast(var_list)
   if exo_det_nbr == 0
     [yf,var_yf] = forcst(dr_,y0,options_.periods,var_list);
   else
-    ex = zeros(options_.periods,exo_nbr);
     if options_.periods > size(ex_det_,1)
+      ex = zeros(options_.periods,exo_nbr);
       ex_det_ = [ ex_det_; repmat(exe_det_',options_.periods- ...
 				  size(ex_det_,1),1)];
+    elseif options_.periods < size(ex_det_,1)
+      ex = zeros(size(ex_det_,1),exo_nbr); 
     end
     [yf,int_width] = simultxdet(y0,dr_,ex,ex_det_,options_.order, ...
 				  var_list);
