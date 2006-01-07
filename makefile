@@ -1,6 +1,6 @@
 DATE = $(shell date +%m%d)
-VERSION = v3_021
-DYNARE_ROOT = dynare_v3.021
+VERSION = v3_062
+DYNARE_ROOT = dynare_v3
 FNAME_MAT = $(DYNARE_ROOT)/zips/dyn_mat_$(VERSION)
 FNAME_PAR = $(DYNARE_ROOT)/zips/dyn_parser_$(VERSION)
 MZIP_FILE = dyn_mat_$(VERSION).zip 

@@ -98,4 +98,6 @@ end;
 options_.unit_root_vars = {'P_obs'; 'Y_obs'};
 
 //stoch_simul(order=1,nomoments,irf=0);
-estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=2000,mh_nblocks=2,mh_drop=0.45);
+//estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=2000,mh_nblocks=2,mh_drop=0.45,smoother,forecast=5,bayesian_irf,moments_varendo,filtered_vars,load_mh_file,mode_compute=0,mode_file=fs2000a_mode,nodiagnostic) P_obs Y_obs gp_obs gy_obs c;
+//estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=0,mh_nblocks=2,mh_drop=0.45,forecast=5,load_mh_file,mode_compute=0,mode_file=fs2000a_mode,nodiagnostic) P_obs Y_obs gp_obs gy_obs c;
+estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=0,mh_nblocks=2,mh_drop=0.45,bayesian_irf,moments_varendo,load_mh_file,mode_compute=0,mode_file=fs2000a_mode,nodiagnostic) P_obs Y_obs gp_obs gy_obs c;
