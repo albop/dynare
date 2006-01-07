@@ -134,28 +134,22 @@ nd = size(kstate,1);
 
 sdyn = endo_nbr - nstatic;
 
+k0 = iy_(ykmin_+1,order_var);
 k1 = iy_(find([1:klen] ~= ykmin_+1),:);
-b = jacobia_(:,iy_(ykmin_+1,order_var));
-a = b\jacobia_(:,nonzeros(k1')); 
-nz = nnz(iy_);
-if any(isinf(a(:)))
-  info = 1;
-  return
-end
-if exo_nbr
-  fu = b\jacobia_(:,nz+(1:exo_nbr));
-end
+b = jacobia_(:,k0);
 
-if ykmax_ == 0;  % backward model
+if ykmax_ == 0;  % backward models
+  a = jacobia_(:,nonzeros(k1'));
   dr.ghx = zeros(size(a));
   m = 0;
   for i=ykmin_:-1:1
     k = nonzeros(iy_(i,order_var));
-    dr.ghx(:,m+[1:length(k)]) = -a(:,k);
+    dr.ghx(:,m+[1:length(k)]) = -b\a(:,k);
     m = m+length(k);
   end
   if exo_nbr
-    dr.ghu = -fu;
+    nz = nnz(iy_);
+    dr.ghu = -b\jacobia_(:,nz+1:end);
   end
   dr.eigval = eig(transition_matrix(dr));
   dr.rank = 0;
@@ -169,6 +163,24 @@ if ykmax_ == 0;  % backward model
   return;
 end
 
+%forward--looking models
+if nstatic > 0
+  [Q,R] = qr(b(:,1:nstatic));
+  aa = Q'*jacobia_;
+else
+  aa = jacobia_;
+end
+a = aa(:,nonzeros(k1'));
+b = aa(:,k0);
+b10 = b(1:nstatic,1:nstatic);
+b11 = b(1:nstatic,nstatic+1:end);
+b2 = b(nstatic+1:end,nstatic+1:end);
+nz = nnz(iy_);
+if exo_nbr
+  fu = aa(:,nz+1:end);
+end
+clear aa;
+
 % buildind D and E
 d = zeros(nd,nd) ;
 e = d ;
@@ -176,13 +188,12 @@ e = d ;
 k = find(kstate(:,2) >= ykmin_+2 & kstate(:,3));
 d(1:sdyn,k) = a(nstatic+1:end,kstate(k,3)) ;
 k1 = find(kstate(:,2) == ykmin_+2);
-a1 = eye(sdyn);
-e(1:sdyn,k1) =  -a1(:,kstate(k1,1)-nstatic);
+e(1:sdyn,k1) =  -b2(:,kstate(k1,1)-nstatic);
 k = find(kstate(:,2) <= ykmin_+1 & kstate(:,4));
 e(1:sdyn,k) = -a(nstatic+1:end,kstate(k,4)) ;
 k2 = find(kstate(:,2) == ykmin_+1);
 k2 = k2(~ismember(kstate(k2,1),kstate(k1,1)));
-d(1:sdyn,k2) = a1(:,kstate(k2,1)-nstatic);
+d(1:sdyn,k2) = b2(:,kstate(k2,1)-nstatic);
 
 if ~isempty(kad)
   for j = 1:size(kad,1)
@@ -263,7 +274,7 @@ j3 = nonzeros(kstate(:,3));
 j4  = find(kstate(:,3));
 % derivatives with respect to exogenous variables
 if exo_nbr
-  a1 = eye(endo_nbr);
+  a1 = b;
   aa1 = [];
   if nstatic > 0
     aa1 = a1(:,1:nstatic);
@@ -277,6 +288,7 @@ if nstatic > 0
   temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
   j5 = find(kstate(n4:nd,4));
   temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
+  temp = b10\(temp-b11*dr.ghx);
   dr.ghx = [temp; dr.ghx];
   temp = [];
 end
