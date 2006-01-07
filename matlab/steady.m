@@ -13,12 +13,14 @@ function steady(linear)
     disp(sprintf('%s \t\t %g',lgy_(i,:),ys_(i)));
   end
   
-%  if isempty(ys0_)
-%    y_(:,1:ykmin_) = ys_ * ones(1,ykmin_);
-%  else
-%    options_ =set_default_option(options_,'periods',1);
-%    y_(:,ykmin_+1:ykmin_+options_.periods+ykmax_) = ys_ * ones(1,options_.periods+ykmax_);
-%  end
+% overwrites the initialization of y_ in case it was
+% set by initval
+  if isempty(ys0_)
+    y_(:,1:ykmin_) = ys_ * ones(1,ykmin_);
+  else
+    options_ =set_default_option(options_,'periods',1);
+    y_(:,ykmin_+1:ykmin_+options_.periods+ykmax_) = ys_ * ones(1,options_.periods+ykmax_);
+  end
   
 % 06/24/01 MJ steady print results; steady_ doesn't
 % 09/22/01 FC corrected lgy(i,:)
