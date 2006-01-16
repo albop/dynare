@@ -20,7 +20,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   npar      = length(xparam1);
   nvobs     = size(options_.varobs,1);
   horizon = options_.forecast;
-
+  bayestopt_.penalty = 1e8;
+  
   % options_.load_mh_file = -1;
   
 
