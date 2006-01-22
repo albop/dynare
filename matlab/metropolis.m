@@ -2587,11 +2587,10 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end
 	  % Get rotation
 	  if dsge_prior_weight > 0
-	    Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
+	    Atheta(dr_.order_var,:) = dr_.ghu(:,lgx_orig_ord_)*sqrt(Sigma_e_(lgx_orig_ord_,lgx_orig_ord_));%%%
 	    A0 = Atheta(bayestopt_.mfys,:);
 	    [OMEGAstar,SIGMAtr] = qr2(A0');
 	  end
-          % SIGMAu_draw = A0*A0';
 	  SIGMAu_chol = chol(SIGMAu_draw)';
 	  SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
 	  PHIpower = eye(NumberOfLagsTimesNvobs);
@@ -2710,7 +2709,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end
 	  % Get rotation
 	  if dsge_prior_weight > 0
-	    Atheta(dr_.order_var,:) = dr_.ghu*sqrt(Sigma_e_);
+	    Atheta(dr_.order_var,:) = dr_.ghu(:,lgx_orig_ord_)*sqrt(Sigma_e_(lgx_orig_ord_,lgx_orig_ord_));%%%
 	    A0 = Atheta(bayestopt_.mfys,:);
 	    [OMEGAstar,SIGMAtr] = qr2(A0');
 	  end
@@ -2935,11 +2934,9 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	      plot(1:nirfs,DistribIRF_dsgevar(:,j,i,k),'-k','linewidth',0.5,'Color',[0.80 0.80 0.80])
 	    end
 	  end
-	  plot(1:nirfs,MeanIRF_dsge(:,index(j),i),'-k','linewidth',3,'Color',[0 ...
-		    0 0])
+	  plot(1:nirfs,MeanIRF_dsge(:,index(j),i),'-k','linewidth',3,'Color',[0 0 0])
 	  if ~isempty(dsge_prior_weight)
-	    plot(1:nirfs,MeanIRF_dsgevar(:,j,i),'-k','linewidth',3,'Color',[0.80 ...
-		    0.80 0.80])
+	    plot(1:nirfs,MeanIRF_dsgevar(:,j,i),'-k','linewidth',3,'Color',[0.80 0.80 0.80])
 	  end
 	  xlim([1 nirfs]);
 	  hold off
