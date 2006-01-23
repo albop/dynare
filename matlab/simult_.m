@@ -1,6 +1,5 @@
 % Copyright (C) 2001 Michel Juillard
 %
-
 function y_ = simult_(y0,dr,ex_,iorder)
 global endo_nbr ykmin_ xkmin_ it_ options_ iy_
   iter = size(ex_,1)-xkmin_;

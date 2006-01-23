@@ -2542,8 +2542,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	tit(lgx_orig_ord_,:) = lgx_;
 	for i = 1:exo_nbr
 	  if SS(i,i) > 1e-13
-	    y=irf(dr_,cs(lgx_orig_ord_,i),nirfs,options_.drop, ...
-		  options_.replic, options_.order);
+	    y=irf(dr_,cs(lgx_orig_ord_,i),nirfs,options_.drop,options_.replic, options_.order);
 	    if options_.relative_irf
 	      y = 100*y/cs(i,i); 
 	    end
@@ -2587,7 +2586,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end
 	  % Get rotation
 	  if dsge_prior_weight > 0
-	    Atheta(dr_.order_var,:) = dr_.ghu(:,lgx_orig_ord_)*sqrt(Sigma_e_(lgx_orig_ord_,lgx_orig_ord_));%%%
+	    Atheta(dr_.order_var,lgx_orig_ord_) = dr_.ghu*sqrt(Sigma_e_);
 	    A0 = Atheta(bayestopt_.mfys,:);
 	    [OMEGAstar,SIGMAtr] = qr2(A0');
 	  end
@@ -2709,7 +2708,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end
 	  % Get rotation
 	  if dsge_prior_weight > 0
-	    Atheta(dr_.order_var,:) = dr_.ghu(:,lgx_orig_ord_)*sqrt(Sigma_e_(lgx_orig_ord_,lgx_orig_ord_));%%%
+	    Atheta(dr_.order_var,lgx_orig_ord_) = dr_.ghu*sqrt(Sigma_e_);%%%
 	    A0 = Atheta(bayestopt_.mfys,:);
 	    [OMEGAstar,SIGMAtr] = qr2(A0');
 	  end
