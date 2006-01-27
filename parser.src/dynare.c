@@ -2916,11 +2916,11 @@ void p_estimated_bounds_elem2(struct token* id_var1, struct token* id_var2, char
   /* missing tests for arguments */
   if (id_var1->endo_exo == 0 && id_var2->endo_exo == 0)
     {
-      sprintf(buffer,"tmp1 = find(estim_params_.corrx(:,1)==%d & estim_params.corrx(:,2)==%d);\nestim_params_.corrx(tmp1,4) = %s;\nestim_params_.corrx(tmp1,5) = %s;\n",id_var1->nbr+1,id_var2->nbr+1,value1,value2);
+      sprintf(buffer,"tmp1 = find(estim_params_.corrx(:,1)==%d & estim_params_.corrx(:,2)==%d);\nestim_params_.corrx(tmp1,4) = %s;\nestim_params_.corrx(tmp1,5) = %s;\n",id_var1->nbr+1,id_var2->nbr+1,value1,value2);
     }
   else if (id_var1->endo_exo == 1 && id_var2->endo_exo == 1)
     {
-      sprintf(buffer,"tmp1 = find(estim_params_.corrn(:,1)==%d & estim_params.corrn(:,2)==%d);\nestim_params_.corrn(tmp1,4) = %s;\nestim_params_.corrn(tmp1,5) = %s;\n",id_var1->nbr+1,id_var2->nbr+1,value1,value2);
+      sprintf(buffer,"tmp1 = find(estim_params_.corrn(:,1)==%d & estim_params_.corrn(:,2)==%d);\nestim_params_.corrn(tmp1,4) = %s;\nestim_params_.corrn(tmp1,5) = %s;\n",id_var1->nbr+1,id_var2->nbr+1,value1,value2);
     }
   else
     {
