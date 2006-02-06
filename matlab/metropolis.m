@@ -2494,7 +2494,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     end    
     if B <= MAX_nirfs_dsge
       stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,B);
-    elseif nvn & B > MAX_nirfs
+    elseif nvn & B > MAX_nirfs_dsge
       stock_irf_dsge = zeros(nirfs,size(lgy_,1),exo_nbr,MAX_nirfs_dsge);
     end
     if ~isempty(dsge_prior_weight)
