@@ -3,6 +3,10 @@
 function [x,check] = dynare_solve(func,x,varargin)
   global gstep_ options_ debug_
   
+
+% unfinished
+  jacobian_flag = 0;   
+
   options_ = set_default_option(options_,'solve_algo',2);
   check = 0;
   func = str2func(func);
@@ -26,7 +30,7 @@ function [x,check] = dynare_solve(func,x,varargin)
 
   if options_.solve_algo == 1
     nn = size(x,1) ;
-    [x,check]=solve1(func,x,1:nn,1:nn,varargin{:});
+    [x,check]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
   elseif options_.solve_algo == 2
     nn = size(x,1) ;
     %    tolf = eps^(2/3) ;
