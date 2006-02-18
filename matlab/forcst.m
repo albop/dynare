@@ -1,7 +1,10 @@
-function [yf,var_yf] = forcst(dr,y0,k,var_list)
+function [yf,int_width] = forcst(dr,y0,k,var_list)
   global endo_nbr exo_nbr ykmin_ Sigma_e_ ex_ options_ lgy_
   
+  old_options = options_;
   options_.periods = k;
+  options_ = set_default_option(options_,'conf_sig',0.9);
+
   make_ex_;
   yf = simult_(y0,dr,ex_(1:k,:),1);
 
@@ -36,18 +39,26 @@ function [yf,var_yf] = forcst(dr,y0,k,var_list)
     end
   end
 
+  fact = qnorm((1-options_.conf_sig)/2,0,1);
+  
+  int_width = zeros(k,endo_nbr);
+  for i=1:endo_nbr
+    int_width(:,i) = fact*sqrt(var_yf(:,i));
+  end
+  
+
   for i=1:nvar
     my_subplot(i,nvar,2,3,'Forecasts');
     
     plot([-ykmin_+1:0],y0(ivar(i),1:ykmin_),'b-',...
 	 [1:k],yf(ivar(i),ykmin_+1:end),'g-',...
-	 [1:k],yf(ivar(i),ykmin_+1:end)'+2*sqrt(var_yf(:,ivar(i))),'g:',...
-	 [1:k],yf(ivar(i),ykmin_+1:end)'-2*sqrt(var_yf(:,ivar(i))),'g:',...
+	 [1:k],yf(ivar(i),ykmin_+1:end)'+int_width(:,ivar(i)),'g:',...
+	 [1:k],yf(ivar(i),ykmin_+1:end)'-int_width(:,ivar(i)),'g:',...
 	 [1 k],repmat(dr.ys(ivar(i)),1,2),'r-');
     title(lgy_(ivar(i),:));
   end
 
-
+  options_ = old_options;
 
 
 

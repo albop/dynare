@@ -9,6 +9,7 @@ function forecast(var_list)
   if options_.periods == 0
     options_.periods = 40;
   end
+  options_ = set_default_option(options_,'conf_sig',0.9);
   
   if size(y_,2) < ykmin_
     y0 = repmat(ys_,ykmin_);
@@ -17,7 +18,7 @@ function forecast(var_list)
   end
   
   if exo_det_nbr == 0
-    [yf,var_yf] = forcst(dr_,y0,options_.periods,var_list);
+    [yf,int_width] = forcst(dr_,y0,options_.periods,var_list);
   else
     if options_.periods > size(ex_det_,1)
       ex = zeros(options_.periods,exo_nbr);
@@ -31,10 +32,10 @@ function forecast(var_list)
   end
   
   for i=1:endo_nbr
-    eval(['oo_.forecast.Mean.' lgy_(i,:) '= yf(' int2str(i) ',:)'';']);
-    eval(['oo_.forecast.HPDinf.' lgy_(i,:) '= yf(' int2str(i) ',2:end)''-' ...
+    eval(['oo_.forecast.Mean.' lgy_(i,:) '= yf(' int2str(i) ',ykmin_+1:end)'';']);
+    eval(['oo_.forecast.HPDinf.' lgy_(i,:) '= yf(' int2str(i) ',ykmin_+1:end)''-' ...
 		    ' int_width(:,' int2str(i) ');']);
-    eval(['oo_.forecast.HPDsup.' lgy_(i,:) '= yf(' int2str(i) ',2:end)''+' ...
+    eval(['oo_.forecast.HPDsup.' lgy_(i,:) '= yf(' int2str(i) ',ykmin_+1:end)''+' ...
 		    ' int_width(:,' int2str(i) ');']);
   end
 

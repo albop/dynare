@@ -1,7 +1,7 @@
 % Copyright (C) 2005 Michel Juillard
 %
 
-function [y_,var_yf]=simultexdet(y0,dr,ex_,ex_det, iorder,var_list)
+function [y_,int_width]=simultexdet(y0,dr,ex_,ex_det, iorder,var_list)
   global endo_nbr ykmin_ xkmin_ it_ options_ iy_ M_ exe_det_ Sigma_e_ lgy_
 
   iter = size(ex_,1)-xkmin_;
@@ -120,15 +120,18 @@ function [y_,var_yf]=simultexdet(y0,dr,ex_,ex_det, iorder,var_list)
 
   fact = qnorm((1-options_.conf_sig)/2,0,1);
   
+  int_width = zeros(iter,endo_nbr);
+  for i=1:endo_nbr
+    int_width(:,i) = fact*sqrt(var_yf(:,i));
+  end
+  
   for i=1:nvar
     my_subplot(i,nvar,2,3,'Forecasts');
     
-    interval_width = fact*sqrt(var_yf(:,ivar(i)));
-    
     plot([-ykmin_+1:0],y0(ivar(i),1:ykmin_),'b-',...
 	 [1:iter],y_(ivar(i),ykmin_+1:end),'g-',...
-	 [1:iter],y_(ivar(i),ykmin_+1:end)'+interval_width,'g:',...
-	 [1:iter],y_(ivar(i),ykmin_+1:end)'-interval_width,'g:',...
+	 [1:iter],y_(ivar(i),ykmin_+1:end)'+int_width(:,ivar(i)),'g:',...
+	 [1:iter],y_(ivar(i),ykmin_+1:end)'-int_width(:,ivar(i)),'g:',...
 	 [1 iter],repmat(dr.ys(ivar(i)),1,2),'r-');
     title(lgy_(ivar(i),:));
   end
