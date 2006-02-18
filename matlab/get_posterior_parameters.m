@@ -26,8 +26,8 @@ function xparam=get_posterior_parameters(type)
   end
   
   for i=1:ncx
-    k1 = estim_params_.var_exo(i,1);
-    k2 = estim_params_.var_exo(i,1);
+    k1 = estim_params_.corrx(i,1);
+    k2 = estim_params_.corrx(i,2);
     name1 = deblank(lgx_(k1,:));
     name2 = deblank(lgx_(k2,:));
     xparam(m) = eval(['oo_.' type '.shocks_corr.' name1 '_' name2]);
@@ -37,8 +37,8 @@ function xparam=get_posterior_parameters(type)
   end
   
   for i=1:ncn
-    k1 = estim_params_.var_endo(i,1);
-    k2 = estim_params_.var_endo(i,1);
+    k1 = estim_params_.corrn(i,1);
+    k2 = estim_params_.corrn(i,2);
     name1 = deblank(options_.varobs(k1,:));
     name2 = deblank(options_.varobs(k2,:));
     xparam(m) = eval(['oo_.' type '.measurement_errors_corr.' name1 '_' name2]);
