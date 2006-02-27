@@ -1063,7 +1063,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{l|lccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');
@@ -1098,7 +1098,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{l|lccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');
@@ -1134,7 +1134,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{l|lccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');
@@ -1169,7 +1169,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{l|lccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');
@@ -1207,7 +1207,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{l|lccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');
@@ -2254,17 +2254,17 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     nvar = size(varlist,1);
     SelecVariables = [];
     for i=1:nvar
-      if ~isempty(strmatch(varlist(i,:),lgy_,'exact'))
-    SelecVariables = [SelecVariables;strmatch(varlist(i,:),lgy_,'exact')];
-      end   
+      if ~isempty(strmatch(deblank(varlist(i,:)),lgy_,'exact'))
+        SelecVariables = [ SelecVariables ; strmatch(deblank(varlist(i,:)),lgy_,'exact') ];
+      end
     end
     IdObs    = zeros(nvobs,1);
     for j=1:nvobs
       for i=1:nvar
-    iobs = strmatch(options_.varobs(j,:),varlist,'exact');
+        iobs = strmatch(options_.varobs(j,:),varlist,'exact');
       end
       if ~isempty(iobs)
-    IdObs(j,1) = iobs;
+        IdObs(j,1) = iobs;
       end    
     end 
   end
@@ -2350,77 +2350,75 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     end    
     for plt = 1:nbplt
       if TeX
-    NAMES = [];
-    TEXNAMES = [];
+        NAMES = [];
+        TEXNAMES = [];
       end
       hfig = figure('Name','Out of sample forecasts');
       for i = 1:nstar
-    k = (plt-1)*nstar+i;
-    if k > nvar
-      break
-    end
-    subplot(nr,nc,i)
-    hold on
-    if any(k==IdObs)
-      idx = find(k==IdObs);
-      if options_.loglinear == 1
-        plot(1:10+options_.forecast,...
-             [exp(data(idx,size(data,2)-10+1:end))';...
-              MeanForecast(:,k)],'-b','linewidth',2)
-      else
-        plot(1:10+options_.forecast,...
-             [data(idx,size(data,2)-10+1:end)';...
-              MeanForecast(:,k)],'-b','linewidth',2)
-      end
-      offsetx = 10;
-    else
-      plot(1:options_.forecast,MeanForecast(:,k),'-b', ...
-         'linewidth',2)
-      offsetx = 0;
-    end   
-    plot(offsetx+[1:options_.forecast],HPD(:,k,1),'--g', ...
-         'linewidth',1.5)
-    plot(offsetx+[1:options_.forecast],HPD(:,k,2),'--g', ...
-         'linewidth',1.5)
-    plot(offsetx+[1:options_.forecast],HPD_total(:,k,1),'--r', ...
-         'linewidth',1.5)
-    plot(offsetx+[1:options_.forecast],HPD_total(:,k,2),'--r','linewidth',1.5)
-    set(gca,'XTick',offsetx+[1 10 20 30 40 50 60 70 80 90]);
-    set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});
-    %   xlim([1 options_.forecast+10]);
-    if any(k==IdObs)
-      plot([11 11],ylim,'-c')
-    end
-    box on
-    title(deblank(varlist(k,:)),'Interpreter','none')
-    hold off
-    eval(['oo_.Forecast.Mean.' deblank(varlist(k,:)) ' = MeanForecast(:,k)'';']);
-    eval(['oo_.Forecast.Median.' deblank(varlist(k,:)) ' = MedianForecast(:,k)'';']);
-    eval(['oo_.Forecast.Std.' deblank(varlist(k,:)) ' = StdForecast(:,k)'';']);
-    eval(['oo_.Forecast.HPDinf.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,1))'';']);
-    eval(['oo_.Forecast.HPDsup.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,2))'';']);
-    eval(['oo_.Forecast.HPDTotalinf.' deblank(varlist(k,:)) ' = squeeze(HPD_total(:,k,1))'';']);
-    eval(['oo_.Forecast.HPDTotalsup.' deblank(varlist(k,:)) ' = squeeze(HPD_total(:,k,2))'';']);
-    if TeX
-      NAMES = strvcat(NAMES,deblank(varlist(k,:)));
-      TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(k,:)) ' $']);
-    end
+        k = (plt-1)*nstar+i;
+        if k > nvar
+          break
+        end
+        subplot(nr,nc,i)
+        hold on
+        if any(k==IdObs)
+          idx = find(k==IdObs);
+          if options_.loglinear == 1
+            plot(1:10+options_.forecast,...
+                 [exp(data(idx,size(data,2)-10+1:end))';...
+                  MeanForecast(:,k)],'-b','linewidth',2)
+          else
+            plot(1:10+options_.forecast,[data(idx,size(data,2)-10+1:end)';MeanForecast(:,k)],'-b','linewidth',2)
+          end
+          offsetx = 10;
+        else
+          plot(1:options_.forecast,MeanForecast(:,k),'-b', ...
+               'linewidth',2)
+          offsetx = 0;
+        end   
+        plot(offsetx+[1:options_.forecast],HPD(:,k,1),'--g', ...
+             'linewidth',1.5)
+        plot(offsetx+[1:options_.forecast],HPD(:,k,2),'--g', ...
+             'linewidth',1.5)
+        plot(offsetx+[1:options_.forecast],HPD_total(:,k,1),'--r', ...
+             'linewidth',1.5)
+        plot(offsetx+[1:options_.forecast],HPD_total(:,k,2),'--r','linewidth',1.5)
+        set(gca,'XTick',offsetx+[1 10 20 30 40 50 60 70 80 90]);
+        set(gca,'XTickLabel',{'1';'10';'20';'30';'40';'50';'60';'70';'80';'90'});
+        %   xlim([1 options_.forecast+10]);
+        if any(k==IdObs)
+          plot([11 11],ylim,'-c')
+        end
+        box on
+        title(deblank(varlist(k,:)),'Interpreter','none')
+        hold off
+        eval(['oo_.Forecast.Mean.' deblank(varlist(k,:)) ' = MeanForecast(:,k)'';']);
+        eval(['oo_.Forecast.Median.' deblank(varlist(k,:)) ' = MedianForecast(:,k)'';']);
+        eval(['oo_.Forecast.Std.' deblank(varlist(k,:)) ' = StdForecast(:,k)'';']);
+        eval(['oo_.Forecast.HPDinf.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,1))'';']);
+        eval(['oo_.Forecast.HPDsup.' deblank(varlist(k,:)) ' = squeeze(HPD(:,k,2))'';']);
+        eval(['oo_.Forecast.HPDTotalinf.' deblank(varlist(k,:)) ' = squeeze(HPD_total(:,k,1))'';']);
+        eval(['oo_.Forecast.HPDTotalsup.' deblank(varlist(k,:)) ' = squeeze(HPD_total(:,k,2))'';']);
+        if TeX
+          NAMES = strvcat(NAMES,deblank(varlist(k,:)));
+          TEXNAMES = strvcat(TEXNAMES,['$ ' deblank(varlist_TeX(k,:)) ' $']);
+        end
       end
       eval(['print -depsc2 ' fname_ '_Forecasts' int2str(plt)]);
       eval(['print -dpdf ' fname_ '_Forecasts' int2str(plt)]);
       saveas(hfig,[fname_ '_Forecasts' int2str(plt) '.fig']);
       if options_.nograph, close(hfig), end
       if TeX
-    fprintf(fidTeX,'\\begin{figure}[H]\n');
-    for jj = 1:nstar
-      fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-    end    
-    fprintf(fidTeX,'\\centering \n');
-    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Forecasts%s}\n',fname_,int2str(plt));
-    fprintf(fidTeX,'\\caption{DSGE posterior mean forecats with HPD intervals.}');
-    fprintf(fidTeX,'\\label{Fig:Forecasts:%s}\n',int2str(plt));
-    fprintf(fidTeX,'\\end{figure}\n');
-    fprintf(fidTeX,' \n');
+        fprintf(fidTeX,'\\begin{figure}[H]\n');
+        for jj = 1:nstar
+          fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+        end    
+        fprintf(fidTeX,'\\centering \n');
+        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Forecasts%s}\n',fname_,int2str(plt));
+        fprintf(fidTeX,'\\caption{DSGE posterior mean forecats with HPD intervals.}');
+        fprintf(fidTeX,'\\label{Fig:Forecasts:%s}\n',int2str(plt));
+        fprintf(fidTeX,'\\end{figure}\n');
+        fprintf(fidTeX,' \n');
       end
     end
     fprintf('MH: Out of sample forecasts, done!\n')
@@ -3463,7 +3461,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{l|ccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');
@@ -3561,7 +3559,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{ll|ccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');
@@ -3667,7 +3665,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{ll|ccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');
@@ -3768,13 +3766,13 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{ll|ccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');
       fprintf(fidTeX,' Variables & Sources & mean & median  & std & HPD inf & HPD sup  \\\\ \n');
       fprintf(fidTeX,'\\hline \\\\ \n');
-      lgx_TeX1(lgx_orig_ord_) = lgx_Tex_;
+      lgx_TeX1(lgx_orig_ord_,:) = lgx_TeX_;
       for i=1:nvar
 	for j=1:exo_nbr
 	  fprintf(fidTeX,' $%s$ & $%s$ & %6.3f & %6.3f & %6.3f & %6.3f & %6.3f \\\\ \n',...
@@ -3869,7 +3867,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,' \n');
       fprintf(fidTeX,'{\\tiny \n');
-      fprintf(fidTeX,'\\begin{table}\n');
+      fprintf(fidTeX,'\\begin{table}[H]\n');
       fprintf(fidTeX,'\\centering\n');
       fprintf(fidTeX,'\\begin{tabular}{ll|ccccc} \n');
       fprintf(fidTeX,'\\hline\\hline \\\\ \n');

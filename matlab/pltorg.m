@@ -12,34 +12,39 @@ if number == 1
     nbplt = 1;
     nr    = 1;
     nc    = 1;
+    nstar = number;
 elseif number == 2
     nbplt = 1;
     nr    = 2;
     nc    = 1;
+    nstar = number;
 elseif number == 3
     nbplt = 1;
     nr    = 3;
     nc    = 1;
+    nstar = number;
 elseif number == 4
     nbplt = 1;
     nr    = 2;
     nc    = 2;
+    nstar = number;
 elseif number == 5
     nbplt = 1;
     nr    = 3;
     nc    = 2;
+    nstar = number;
 elseif number == 6
     nbplt = 1;
     nr    = 3;
-    nc    = 2;    
+    nstar = number;    
 elseif number == 7
     nbplt = 1;
     nr    = 3;
-    nc    = 3;    
+    nstar = number;    
 elseif number == 8
     nbplt = 1;
     nr    = 3;
-    nc    = 3;
+    nstar = number;
 elseif number == 9
     nbplt = 1;
     nr    = 3;
@@ -82,4 +87,4 @@ else
             lc    = 3;
         end
     end
-end    
+end
