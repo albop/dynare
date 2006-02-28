@@ -20,6 +20,8 @@ else
   [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data);
 end
 
+disp(['Initial value of the posterior (or likelihood): ' num2str(fval)]);
+
 if info(1) > 0
   disp('Error in computing likelihood for initial parameter values')
   print_info(info)
