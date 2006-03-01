@@ -213,9 +213,9 @@ forecast {BEGIN DYNARE1; return FORECAST;}
  <DYNARE2>gamma_pdf {return GAMMA_PDF;}
  <DYNARE2>beta_pdf {return BETA_PDF;}
  <DYNARE2>normal_pdf {return NORMAL_PDF;}
- <DYNARE2>inv_gamma_pdf {return INV_GAMMA_PDF;}
  <DYNARE2>inv_gamma1_pdf {return INV_GAMMA_PDF;}
- <DYNARE2>inv_gamma2_pdf {return INV_GAMMA_PDF;}
+ <DYNARE2>inv_gamma2_pdf {return INV_GAMMA2_PDF;}
+ <DYNARE2>inv_gamma_pdf {return INV_GAMMA_PDF;}
  <DYNARE2>uniform_pdf {return UNIFORM_PDF;}
  <DYNARE2>corr {return CORR;}
 
