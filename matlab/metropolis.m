@@ -56,7 +56,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	disp('MH: One Chain mode.')
       end
       files = eval(['dir(''' fname_ '_mh*.mat'');']);
-      if length(files)
+      if size(files,1)
 	delete([fname_ '_mh*.mat']);
 	disp('MH: Old _mh files succesfully erased!')
       end   
@@ -119,29 +119,29 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       if nblck>1
 	files = eval(['dir(''' fname_ '_mh*_blck*.mat'');']);
 	bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
-	lfile = length(files)/length(bfiles)-1;
+	lfile = size(files,1)/size(bfiles,1)-1;
       else
 	files = eval(['dir(''' fname_ '_mh*.mat'');']);
 	bfiles = 1;
 	ifiles = eval(['dir(''' fname_ '_MhInitialization.mat'');']);
 	if isempty(ifiles)
-	  lfile = length(files)-1;
+	  lfile = size(files,1)-1;
 	else
-	  lfile = length(files)-2;
+	  lfile = size(files,1)-2;
 	end
       end
-      if ~length(files)
+      if ~size(files,1)
 	error('MH: FAILURE :: there is no MH file to load here!')    
       end
-      past_number_of_blocks = length(bfiles);
-      if length(bfiles)>0 & past_number_of_blocks ~= nblck
+      past_number_of_blocks = size(bfiles,1);
+      if size(bfiles,1)>0 & past_number_of_blocks ~= nblck
 	disp('MH: The specified number of blocks doesn''t match with the previous number of blocks!')
 	disp(['MH: You declared ' int2str(nblck) ' blocks, but the previous number of blocks was ' int2str(past_number_of_blocks) '.'])
 	disp(['MH: I will run the Metropolis-Hastings with ' int2str(past_number_of_blocks) ' blocks.' ])
 	nblck = past_number_of_blocks;
 	options_.mh_nblck = nblck;
       end
-      %lfile = length(files)/nblck-1;
+      %lfile = size(files,1)/nblck-1;
       if nblck == 1
 	instr = [fname_ '_mh' int2str(lfile)];
 	eval(['load ' instr]);
@@ -184,12 +184,12 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       options_.mh_nblck = nblck;
       % Count the total number of saved mh files
       AllMhFiles = eval(['dir(''' fname_ '_mh*_blck*.mat'');']);
-      TotalNumberOfMhFiles = length(AllMhFiles);
+      TotalNumberOfMhFiles = size(AllMhFiles,1);
       % Count the number of saved mh files per block
       NumberOfMhFilesPerBlock = zeros(nblck,1); 
       for i = 1:nblck
 	BlckMhFiles = eval(['dir(''' fname_ '_mh*_blck' int2str(i) '.mat'');']);
-	NumberOfMhFilesPerBlock(i) = length(BlckMhFiles);
+	NumberOfMhFilesPerBlock(i) = size(BlckMhFiles,1);
       end
       NumberOfMhFilesPerBlock
       return
@@ -342,7 +342,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   end %end if nruns
   if nblck == 1
     files = eval(['dir(''' fname_ '_mh*.mat'');']);
-    nfile = length(files)-2;
+    nfile = size(files,1)-2;
     number_of_simulations_per_file = zeros(nfile+1,1);
     instr = [fname_ '_mh' int2str(0)];
     eval(['load ' instr]);
@@ -363,7 +363,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     end
   else
     files = eval(['dir(''' fname_ '_mh*_blck1.mat'');']);   
-    nfile = length(files)-1;
+    nfile = size(files,1)-1;
     number_of_simulations_per_file = zeros(nfile+1,1);
     instr = [fname_ '_mh' int2str(0) '_blck' int2str(1)];
     eval(['load ' instr]);
@@ -382,7 +382,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
       tmp  = cumsum(number_of_simulations_per_file);
       nops = tmp(nfile+1); clear tmp;
       bfiles = eval(['dir(''' fname_ '_mh0_blck*.mat'');']);
-      past_number_of_blocks = length(bfiles);
+      past_number_of_blocks = size(bfiles,1);
       if past_number_of_blocks ~= nblck
 	nblck = past_number_of_blocks;
 	options_.mh_nblck = nblck;
@@ -1467,31 +1467,31 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     disp(' ')
     if options_.forecast
       files = eval(['dir(''' fname_ '_forecast*.mat'');']);
-      if length(files)
+      if size(files,1)
 	delete([fname_ '_forecast*.mat']);
 	disp(['MH: Old ' fname_ '_forecast files deleted! '])
       end
     end
     if options_.smoother        
       files = eval(['dir(''' fname_ '_smooth*.mat'');']);
-      if length(files)
+      if size(files,1)
 	delete([fname_ '_smooth*.mat']);
 	disp(['MH: Old ' fname_ '_smooth files deleted! '])
       end
       files = eval(['dir(''' fname_ '_innovation*.mat'');']);
-      if length(files)
+      if size(files,1)
 	delete([fname_ '_innovation*.mat']);
 	disp(['MH: Old ' fname_ '_innovation files deleted! '])
       end
       files = eval(['dir(''' fname_ '_error*.mat'');']);
-      if length(files)
+      if size(files,1)
 	delete([fname_ '_error*.mat']);
 	disp(['MH: Old ' fname_ '_error files deleted! '])
       end
     end
     if options_.filtered_vars
       files = eval(['dir(''' fname_ '_filter*.mat'');']);     
-      if length(files)                                        
+      if size(files,1)                                        
 	delete([fname_ '_filter*.mat']);                    
 	disp(['MH: Old ' fname_ '_filter files deleted! ']) 
       end                                                         
@@ -2474,18 +2474,18 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
     nirfs = options_.irf;
     if ~isempty(dsge_prior_weight)
       files = eval(['dir(''' fname_ '_irf_dsgevar*.mat'');']);     
-      if length(files)                                        
+      if size(files,1)                                        
 	delete([fname_ '_irf_dsgevar*.mat']);                    
 	disp(['MH: Old ' fname_ '_irf_dsgevar files deleted! ']) 
       end
       files = eval(['dir(''' fname_ '_irf_dsge*.mat'');']);     
-      if length(files)                                        
+      if size(files,1)                                        
 	delete([fname_ '_irf_dsge*.mat']);                    
 	disp(['MH: Old ' fname_ '_irf_dsge files deleted! ']) 
       end
     else
       files = eval(['dir(''' fname_ '_irf_dsge*.mat'');']);     
-      if length(files)                                        
+      if size(files,1)                                        
 	delete([fname_ '_irf_dsge*.mat']);                    
 	disp(['MH: Old ' fname_ '_irf_dsge files deleted! ']) 
       end      
