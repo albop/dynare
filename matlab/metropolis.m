@@ -3086,7 +3086,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end
 	  title(name,'Interpreter','none')
 	end
-	if ~~isempty(dsge_prior_weight)
+	if isempty(dsge_prior_weight)
 	  eval(['print -depsc2 ' fname_ '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(nbplt)]);
 	  eval(['print -dpdf ' fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(nbplt)]);
 	  saveas(hh,[fname_  '_Bayesian_IRFdsge_' deblank(tit(i,:)) int2str(nbplt) '.fig']);
