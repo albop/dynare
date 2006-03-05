@@ -36,14 +36,17 @@ elseif number == 5
 elseif number == 6
     nbplt = 1;
     nr    = 3;
+    nc    = 2;
     nstar = number;    
 elseif number == 7
     nbplt = 1;
     nr    = 3;
+    nc    = 3;
     nstar = number;    
 elseif number == 8
     nbplt = 1;
     nr    = 3;
+    nc    = 3;
     nstar = number;
 elseif number == 9
     nbplt = 1;
