@@ -23,7 +23,7 @@ function []=shocks_file(ms_flag)
 	end
       end
     else
-      x = read_variables(options_.shocks_file,lgx_det_);
+      x = read_variables(options_.shocks_file,lgx_,[]);
       n = size(x,1);
       if size(ex_,1) >= n
 	if ms_flag == 1
