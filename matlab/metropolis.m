@@ -1602,8 +1602,30 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end
 	    if irun_smoo < MAX_nsmoo
 	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
+	      if options_.prefilter == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(bayestopt_.mean_varobs',1,gend);
+	      elseif options_.loglinear == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+		     trend_coeff*[1:gend];
+	      else
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(ys(bayestopt_.mfys),1,gend)+...
+		     trend_coeff*[1:gend];
+	      end
 	    else
 	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
+	      if options_.prefilter == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(bayestopt_.mean_varobs',1,gend);
+	      elseif options_.loglinear == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+		     trend_coeff*[1:gend];
+	      else
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(ys(bayestopt_.mfys),1,gend)+...
+		     trend_coeff*[1:gend];
+	      end
 	      sfil_smoo = sfil_smoo + 1;
 	      instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	      eval(['save ' instr]);
@@ -1768,8 +1790,30 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    end
 	    if irun_smoo < MAX_nsmoo
 	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
+	      if options_.prefilter == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(bayestopt_.mean_varobs',1,gend);
+	      elseif options_.loglinear == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+		     trend_coeff*[1:gend];
+	      else
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(ys(bayestopt_.mfys),1,gend)+...
+		     trend_coeff*[1:gend];
+	      end
 	    else
 	      stock_smooth(:,:,irun_smoo) = atT(1:endo_nbr,1:gend);
+	      if options_.prefilter == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+repmat(bayestopt_.mean_varobs',1,gend);
+	      elseif options_.loglinear == 1
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+		     trend_coeff*[1:gend];
+	      else
+		stock_smooth(bayestopt_.mf,:,irun_smoo) = atT(bayestopt_.mf,:)+...
+		    repmat(ys(bayestopt_.mfys),1,gend)+...
+		     trend_coeff*[1:gend];
+	      end
 	      sfil_smoo = sfil_smoo + 1;
 	      instr = [fname_ '_smooth' int2str(sfil_smoo) ' stock_smooth;'];
 	      eval(['save ' instr]);
@@ -3202,10 +3246,13 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	set_parameters(deep);
 	dr_ = resol(ys_,0);
 	Gamma_y = th_autocovariances(dr_,ivar);
-	if options_.order == 2
-	  m_mean = dr_.ys(ivar) + Gamma_y{options_.ar+3};
+	if options_.loglinear
+	  m_mean = log(dr_.ys(ivar));
 	else
 	  m_mean = dr_.ys(ivar);
+	end
+	if options_.order == 2
+	  m_mean = m_mean + Gamma_y{options_.ar+3};
 	end
 	variance =  Gamma_y{1};
 	if irun_thm1 < MAX_nthm1
@@ -3307,10 +3354,13 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	set_parameters(deep);
 	dr_ = resol(ys_,0);
 	Gamma_y = th_autocovariances(dr_,ivar1);
-	if options_.order == 2
-	  m_mean = dr_.ys(ivar) + Gamma_y{options_.ar+3};
+	if options_.loglinear
+	  m_mean = log(dr_.ys(ivar));
 	else
 	  m_mean = dr_.ys(ivar);
+	end
+	if options_.order == 2
+	  m_mean = m_mean + Gamma_y{options_.ar+3};
 	end
 	variance = Gamma_y{1};
 	if irun_thm1 < MAX_nthm1
