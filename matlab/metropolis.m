@@ -1574,12 +1574,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  end    			
 	  % FIRST, I choose an _mh file (where the posterior distribution is stored)
 	  choose_an_mh_file = rand;
-	  mh_file_number = FLN(find(choose_an_mh_file>=FLN(:,3)),1);
-	  if isempty(mh_file_number)
-	    mh_file_number = ffil;
-	  else    
-	    mh_file_number = mh_file_number(1);
-	  end    
+	  mh_file_number = FLN(find(choose_an_mh_file<=FLN(:,3)),1);
+	  mh_file_number = mh_file_number(1);
 	  eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	  clear post2 logpo2;
 	  % SECOND, I choose a vector of structural parameters (a line in the _mh file) 
@@ -1958,12 +1954,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    irun_filt = irun_filt+1;  			
 	  end	    
 	  choose_an_mh_file = rand;
-	  mh_file_number = FLN(find(choose_an_mh_file>=FLN(:,3)),1);
-	  if isempty(mh_file_number)
-	    mh_file_number = ffil;
-	  else    
-	    mh_file_number = mh_file_number(1);
-	  end    
+	  mh_file_number = FLN(find(choose_an_mh_file<=FLN(:,3)),1);
+	  mh_file_number = mh_file_number(1);
 	  eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	  clear post2 logpo2;
 	  DEEP  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
@@ -2565,12 +2557,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	  tmp_dsgevar = zeros(nirfs,nvobs*exo_nbr);
 	end
 	choose_an_mh_file = rand;
-	mh_file_number = FLN(find(choose_an_mh_file>=FLN(:,3)),1);
-	if isempty(mh_file_number)
-	  mh_file_number = ffil;
-	else    
-	  mh_file_number = mh_file_number(1);
-	end
+	mh_file_number = FLN(find(choose_an_mh_file<=FLN(:,3)),1);
+	mh_file_number = mh_file_number(1);
 	eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	clear post2 logpo2;
 	DEEP  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
@@ -3233,12 +3221,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	irun_thm4 = irun_thm4+1;
 	choose_an_mh_file = rand;
 	mh_file_number = ...
-	    FLN(find(choose_an_mh_file>=FLN(:,3)),1);
-	if isempty(mh_file_number)
-	  mh_file_number = ffil;
-	else    
-	  mh_file_number = mh_file_number(1);
-	end    
+	    FLN(find(choose_an_mh_file<=FLN(:,3)),1);
+	mh_file_number = mh_file_number(1);
 	eval(['load ' instr1 int2str(mh_file_number) instr2]);
 	clear post2 logpo2;
 	DEEP  = x2(floor(rand*FLN(find(mh_file_number == FLN(:,1)),2))+1,:);
