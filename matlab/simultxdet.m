@@ -79,7 +79,7 @@ function [y_,int_width]=simultexdet(y0,dr,ex_,ex_det, iorder,var_list)
 	    dr.ghu*tempu+0.5*(dr.ghxx*tempxx+dr.ghuu*tempuu)+dr.ghxu* ...
 	    tempxu;
 	for j=1:min(iter+ykmin_-i-M_.ex_det_length+1,M_.ex_det_length)
-	  tempud = ex_det(i+j-1,:)'-exe_det_';
+	  tempud = ex_det(i+j-1,:)'-exe_det_;
 	  tempudud = kron(tempud,tempud);
 	  tempxud = kron(tempx,tempud);
 	  tempuud = kron(tempu,tempud);
