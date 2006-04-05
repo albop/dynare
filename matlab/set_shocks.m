@@ -6,13 +6,11 @@ function set_shocks(flag,k,ivar,values)
   
   n1 = size(ex_,1);
   n2 = size(ex_det_,1);
-  if k(end) > n1 
-    if flag <= 1
-      ex_ = [ex_; ones(k(end)-n1,1)*exe_'];
-    else
+  if k(end) > n1 & flag <= 1
+    ex_ = [ex_; ones(k(end)-n1,1)*exe_'];
+  else if k(end) > n2 & flag > 1
       ex_det_ = [ex_det_; ones(k(end)-n2,1)*exe_det_'];
-    end
-  end  
+  end
   
   if flag == 0
     ex_(k,ivar) = ones(length(k),1).*values;
