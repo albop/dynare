@@ -61,41 +61,47 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
   i_pred = [nstatic+(1:npred) endo_nbr+1:length(A)];
   A = A(i_pred,i_pred);
 
-  [v,d] = eig(A);
-  abs_root = abs(diag(d));
-  i_ur = find(abs_root > 2-options_.qz_criterium & ...
-	      abs_root < options_.qz_criterium);
-
-  if ~isempty(i_ur)
-    % non-stationary variables have non-zero entries in eigenvectors
-    % associated with unit roots
-    ns_var = find(any(abs(v(1:npred,i_ur))>1e-7,2));
-
-    %right eigenvectors
-    v1 = inv(v);
-
-    % remove zero frequency from A
-    A = A-real(v(:,i_ur)*d(i_ur,i_ur)*v1(i_ur,:));
-    
-    % return only variance of stationary variables
-    i_ivar = find(~ismember(ivar,dr.order_var(ns_var+nstatic)));
-    ivar = ivar(i_ivar);
-  end
+% $$$   [v,d] = eig(A);
+% $$$   abs_root = abs(diag(d));
+% $$$   i_ur = find(abs_root > 2-options_.qz_criterium & ...
+% $$$ 	      abs_root < options_.qz_criterium);
+% $$$ 
+% $$$   if ~isempty(i_ur)
+% $$$     % non-stationary variables have non-zero entries in eigenvectors
+% $$$     % associated with unit roots
+% $$$     ns_var = find(any(abs(v(1:npred,i_ur))>1e-7,2));
+% $$$ 
+% $$$     %right eigenvectors
+% $$$     v1 = inv(v);
+% $$$ 
+% $$$     % remove zero frequency from A
+% $$$     A = A-real(v(:,i_ur)*d(i_ur,i_ur)*v1(i_ur,:));
+% $$$     
+% $$$     % return only variance of stationary variables
+% $$$     i_ivar = find(~ismember(ivar,dr.order_var(ns_var+nstatic)));
+% $$$     ivar = ivar(i_ivar);                                        
+% $$$   end
   % order of variables with preset variances in ghx and ghu
-  iky = iv(ivar);
-  
-  aa = ghx(iky,:);
-  bb = ghu(iky,:);
 
   if options_.order == 2
-    vx =  lyapunov_symm(A,b); 
+    [vx,ns_var] =  lyapunov_symm(A,b);
+    i_ivar = find(~ismember(ivar,dr.order_var(ns_var+nstatic)));
+    ivar = ivar(i_ivar);
+    iky = iv(ivar);  
+    aa = ghx(iky,:);
+    bb = ghu(iky,:);
     Ex = (dr.ghs2(ikx)+dr.ghxx(ikx,:)*vx(:)+dr.ghuu(ikx,:)*Sigma_e_(:))/2;
     Ex = (eye(n0)-AS(ikx,:))\Ex;
     Gamma_y{nar+3} = AS(iky,:)*Ex+(dr.ghs2(iky)+dr.ghxx(iky,:)*vx(:)+dr.ghuu(iky,:)*Sigma_e_(:))/2;
   end
   if options_.hp_filter == 0
     if options_.order < 2
-      vx =  lyapunov_symm(A,b);
+      [vx, ns_var] =  lyapunov_symm(A,b);
+      i_ivar = find(~ismember(ivar,dr.order_var(ns_var+nstatic)));
+      ivar = ivar(i_ivar);
+      iky = iv(ivar);  
+      aa = ghx(iky,:);
+      bb = ghu(iky,:);
     end
     Gamma_y{1} = aa*vx*aa'+ bb*Sigma_e_*bb';
     k = find(abs(Gamma_y{1}) < 1e-12);
@@ -132,6 +138,11 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
       end
     end
   else
+    if options_.order < 2
+      iky = iv(ivar);  
+      aa = ghx(iky,:);
+      bb = ghu(iky,:);
+    end
     lambda = options_.hp_filter;
     ngrid = options_.hp_ngrid;
     freqs = 0 : ((2*pi)/ngrid) : (2*pi*(1 - .5/ngrid)); 

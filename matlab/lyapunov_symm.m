@@ -1,14 +1,20 @@
 % solves x-a*x*a'=b for b (and then x) symmetrical
-function [x,info]=lyapunov_symm(a,b)
+function [x,ns_var]=lyapunov_symm(a,b)
+  global options_ 
+  
   info = 0;
-  n = size(b,1);
-  if n == 1
+  if size(a,1) == 1
     x=b/(1-a*a);
     return
   end
+  [u,t] = schur(a);
+  e1 = abs(ordeig(t)>2-options_.qz_criterium);
+  k = sum(e1);
+  [u,t] = ordschur(u,t,e1); 
+  n = length(e1)-k;
+  b=u(:,k+1:end)'*b*u(:,k+1:end);
+  t = t(k+1:end,k+1:end);
   x=zeros(n,n);
-  [u,t]=schur(a);
-  b=u'*b*u;
   for i=n:-1:2
     if t(i,i-1) == 0
       if i == n
@@ -46,4 +52,6 @@ function [x,info]=lyapunov_symm(a,b)
     c = t(1,:)*(x(:,2:end)*t(1,2:end)')+t(1,1)*t(1,2:end)*x(2:end,1);
     x(1,1)=(b(1,1)+c)/(1-t(1,1)*t(1,1));
   end
-  x=u*x*u';
+  x=u(:,k+1:end)*x*u(:,k+1:end)';
+  ns_var = [];
+  ns_var = find(any(abs(u(:,1:k)) > 1e-8,2)); 
