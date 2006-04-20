@@ -8,7 +8,11 @@ function [x,ns_var]=lyapunov_symm(a,b)
     return
   end
   [u,t] = schur(a);
-  e1 = abs(ordeig(t)>2-options_.qz_criterium);
+  if exist('ordeig','builtin')
+    e1 = abs(ordeig(t)) > 2-options_.qz_criterium;
+  else
+    e1 = abs(my_ordeig(t)) > 2-options_.qz_criterium;
+  end
   k = sum(e1);
   [u,t] = ordschur(u,t,e1); 
   n = length(e1)-k;
