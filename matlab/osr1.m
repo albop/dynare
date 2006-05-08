@@ -23,10 +23,13 @@ function [dr_,info]=osr1(params,weights)
     disp('OSR: bad initial value for the parameters');
     return
   end
-  [p,f]=fminsearch(@osr_obj,t0,[],params,weights);
+  options = optimset('fminsearch');
+%  options = optimset(options,'display','iter');
+  [p,f]=fminsearch(@osr_obj,t0,options,params,weights);
 
-  [f,info] = osr_obj(p,params,weights);
+  [f,vx,info] = osr_obj(p,params,weights);
   if info > 0
+    print_info(info);
     disp(['OSR ends on a pathological case, try different initial values' ...
 	  ' for the parameters']);
     return
