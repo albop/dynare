@@ -1,4 +1,4 @@
-function [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,tmp2] = DsgeVarLikelihood(xparam1,gend)
+function [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
 % stephane.adjemian@ens.fr [06-17-2005]
 
 global bayestopt_ exo_nbr dr_ estim_params_ Sigma_e_ options_ xparam1_test trend_coeff_ 
@@ -232,3 +232,4 @@ end
 
 lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
 fval = (lik-lnprior);
+iXX = tmp2;

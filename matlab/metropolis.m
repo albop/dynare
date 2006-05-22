@@ -3103,7 +3103,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 	    if ~isempty(dsge_prior_weight)
 	      plot(1:nirfs,DistribIRF_dsgevar(:,jj,i,k),'-k','linewidth',0.5,'Color',[0.80 0.80 0.80])
 	    end
-	  end
+	  end 
 	  plot(1:nirfs,MeanIRF_dsge(:,index(jj),i),'-k','linewidth',3,'Color',[0 0 0])
 	  if ~isempty(dsge_prior_weight)
 	    plot(1:nirfs,MeanIRF_dsgevar(:,jj,i),'-k','linewidth',3,'Color',[0.80 0.80 0.80])
