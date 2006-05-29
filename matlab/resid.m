@@ -28,8 +28,12 @@ function resid(iter_)
     iyr0 = iyr0 + n;
   end
 
-  disp([[1:iter_]' z']); 
-
+  % disp([[1:iter_]' z']); 
+  % disp([1:iter_]')
+  for i=1:length(z)
+    disp(['Equation n° ' int2str(i) ', deviation from steady state = ' num2str(z(i))])
+  end
+  
 
 
 
