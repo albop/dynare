@@ -1,6 +1,7 @@
 % solves x-a*x*a'=b for b (and then x) symmetrical
 function [x,ns_var]=lyapunov_symm(a,b)
   global options_ 
+  ns_var = [];
   
   info = 0;
   if size(a,1) == 1
@@ -68,5 +69,4 @@ function [x,ns_var]=lyapunov_symm(a,b)
     x(1,1)=(b(1,1)+c)/(1-t(1,1)*t(1,1));
   end
   x=u(:,k+1:end)*x*u(:,k+1:end)';
-  ns_var = [];
   ns_var = find(any(abs(u(:,1:k)) > 1e-8,2)); 
