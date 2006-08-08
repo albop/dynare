@@ -53,7 +53,8 @@ function [y_,int_width]=simultexdet(y0,dr,ex_,ex_det, iorder,var_list)
       if options_.simul_algo == 0
 	y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* ...
 	    ex_(i+xkmin_-ykmin_,:)';
-	for j=1:min(iter+ykmin_-i-M_.ex_det_length+1,M_.ex_det_length)
+	for j=1:min(ykmin_+M_.ex_det_length+1-i,M_.ex_det_length)
+	  disp([i j])
 	  y_(dr.order_var,i) = y_(dr.order_var,i) + dr.ghud{j}*(ex_det(i+j-1,:)'-exe_det_');
 	end
       elseif options_.simul_algo == 1
