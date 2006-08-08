@@ -30,7 +30,8 @@ function info=stoch_simul(var_list)
   options_ = set_default_option(options_,'simul',0);
   options_ = set_default_option(options_,'periods',0);
   options_ = set_default_option(options_,'noprint',0);
-
+  options_ = set_default_option(options_,'nograph',0);
+  
   TeX = options_.TeX;
 
   if options_.simul & ~isempty(iter_) & options_.periods == 0
@@ -142,6 +143,8 @@ function info=stoch_simul(var_list)
 	  mylistTeX = [];
 	end
 	for j = 1:n
+	  assignin('base',[deblank(lgy_(j,:)) '_' deblank(lgx_(i,:))],...
+		   y(j,:)');
 	  if max(y(ivar(j),:)) - min(y(ivar(j),:)) > 1e-10
 	    irfs  = cat(1,irfs,y(ivar(j),:));
 	    mylist = strvcat(mylist,deblank(var_list(j,:)));
@@ -152,28 +155,34 @@ function info=stoch_simul(var_list)
 	end
 	number_of_plots_to_draw = size(irfs,1);
 	[nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
+	nograph = options_.nograph;
 	if nbplt == 0
 	elseif nbplt == 1
-	  if options_.relative_irf
-	    hh = figure('Name',['Relative response to' ...
-				' orthogonalized shock to ' tit(i,:)]);
-	  else
-	    hh = figure('Name',['Orthogonalized shock to' ...
-				' ' tit(i,:)]);
+	  if nograph == 0
+	    if options_.relative_irf
+	      hh = figure('Name',['Relative response to' ...
+				  ' orthogonalized shock to ' tit(i,:)]);
+	    else
+	      hh = figure('Name',['Orthogonalized shock to' ...
+				  ' ' tit(i,:)]);
+	    end
 	  end
 	  for j = 1:number_of_plots_to_draw
-	    subplot(nr,nc,j);
-	    plot(1:options_.irf,transpose(irfs(j,:)),'-k','linewidth',1);
-	    hold on
-	    plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
-	    hold off
-	    xlim([1 options_.irf]);
-	    title(deblank(mylist(j,:)),'Interpreter','none');
-	    assignin('base',[deblank(mylist(j,:)) '_' deblank(tit(i,:))],transpose(irfs(j,:)));
+	    if nograph == 0
+	      subplot(nr,nc,j);
+	      plot(1:options_.irf,transpose(irfs(j,:)),'-k','linewidth',1);
+	      hold on
+	      plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
+	      hold off
+	      xlim([1 options_.irf]);
+	      title(deblank(mylist(j,:)),'Interpreter','none');
+	    end
 	  end
-	  eval(['print -depsc2 ' fname_ '_IRF_' deblank(tit(i,:))]);
-	  eval(['print -dpdf ' fname_  '_IRF_' deblank(tit(i,:))]);
-	  saveas(hh,[fname_  '_IRF_' deblank(tit(i,:)) '.fig']);
+	  if nograph == 0
+	    eval(['print -depsc2 ' fname_ '_IRF_' deblank(tit(i,:))]);
+	    eval(['print -dpdf ' fname_  '_IRF_' deblank(tit(i,:))]);
+	    saveas(hh,[fname_  '_IRF_' deblank(tit(i,:)) '.fig']);
+	  end
 	  if TeX
 	    fprintf(fidTeX,'\\begin{figure}[H]\n');
 	    for j = 1:number_of_plots_to_draw
@@ -189,26 +198,33 @@ function info=stoch_simul(var_list)
 	  %				close(hh)
 	else
 	  for fig = 1:nbplt-1
-	    if options_.relative_irf == 1
-	      hh = figure('Name',['Relative response to orthogonalized shock' ...
-				  ' to ' tit(i,:) ' figure ' int2str(fig)]);
-	    else
-	      hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ...
-				  ' figure ' int2str(fig)]);
+	    if nograph == 0
+	      if options_.relative_irf == 1
+		hh = figure('Name',['Relative response to orthogonalized shock' ...
+				    ' to ' tit(i,:) ' figure ' int2str(fig)]);
+	      else
+		hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ...
+				    ' figure ' int2str(fig)]);
+	      end
 	    end
 	    for plt = 1:nstar
-	      subplot(nr,nc,plt);
-	      plot(1:options_.irf,transpose(irfs((fig-1)*nstar+plt,:)),'-k','linewidth',1);
-	      hold on
-	      plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
-	      hold off
-	      xlim([1 options_.irf]);
-	      title(deblank(mylist((fig-1)*nstar+plt,:)),'Interpreter','none');
-	      assignin('base',[deblank(mylist((fig-1)*nstar+plt,:)) '_' deblank(tit(i,:))],transpose(irfs((fig-1)*nstar+plt,:)));
+	      if nograph == 0
+		subplot(nr,nc,plt);
+		plot(1:options_.irf,transpose(irfs((fig-1)*nstar+plt,:)),'-k','linewidth',1);
+		hold on
+		plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
+		hold off
+		xlim([1 options_.irf]);
+		title(deblank(mylist((fig-1)*nstar+plt,:)), ...
+		      'Interpreter','none');
+	      end
 	    end
-	    eval(['print -depsc2 ' fname_ '_IRF_' deblank(tit(i,:)) int2str(fig)]);
-	    eval(['print -dpdf ' fname_  '_IRF_' deblank(tit(i,:)) int2str(fig)]);
-	    saveas(hh,[fname_  '_IRF_' deblank(tit(i,:)) int2str(fig) '.fig']);
+	    if nograph == 0
+	      eval(['print -depsc2 ' fname_ '_IRF_' deblank(tit(i,:)) int2str(fig)]);
+	      eval(['print -dpdf ' fname_  '_IRF_' deblank(tit(i,:)) int2str(fig)]);
+	      saveas(hh,[fname_  '_IRF_' deblank(tit(i,:)) int2str(fig) ...
+			 '.fig']);
+	    end
 	    if TeX
 	      fprintf(fidTeX,'\\begin{figure}[H]\n');
 	      for j = 1:nstar
@@ -229,22 +245,29 @@ function info=stoch_simul(var_list)
 	    end
 	    %					close(hh);
 	  end
-	  hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
+	  if nograph == 0
+	    hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
+	  end
 	  m = 0; 
 	  for plt = 1:number_of_plots_to_draw-(nbplt-1)*nstar;
 	    m = m+1;
-	    subplot(lr,lc,m);
-	    plot(1:options_.irf,transpose(irfs((nbplt-1)*nstar+plt,:)),'-k','linewidth',1);
-	    hold on
-	    plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
-	    hold off
-	    xlim([1 options_.irf]);
-	    title(deblank(mylist((nbplt-1)*nstar+plt,:)),'Interpreter','none');
-	    assignin('base',[deblank(mylist((nbplt-1)*nstar+plt,:)) '_' deblank(tit(i,:))],transpose(irfs((nbplt-1)*nstar+plt,:)));
+	    if nograph == 0
+	      subplot(lr,lc,m);
+	      plot(1:options_.irf,transpose(irfs((nbplt-1)*nstar+plt,:)),'-k','linewidth',1);
+	      hold on
+	      plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
+	      hold off
+	      xlim([1 options_.irf]);
+	      title(deblank(mylist((nbplt-1)*nstar+plt,:)), ...
+		    'Interpreter','none');
+	    end
 	  end
-	  eval(['print -depsc2 ' fname_ '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
-	  eval(['print -dpdf ' fname_  '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
-	  saveas(hh,[fname_  '_IRF_' deblank(tit(i,:)) int2str(nbplt) '.fig']);
+	  if nograph == 0
+	    eval(['print -depsc2 ' fname_ '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
+	    eval(['print -dpdf ' fname_  '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
+	    saveas(hh,[fname_  '_IRF_' deblank(tit(i,:)) int2str(nbplt) ...
+		       '.fig']);
+	  end
 	  if TeX
 	    fprintf(fidTeX,'\\begin{figure}[H]\n');
 	    for j = 1:m
