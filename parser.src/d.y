@@ -396,7 +396,7 @@ varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
  o_lik_init: LIK_INIT '=' INUMBER {p_option("lik_init",$3);}; 
  o_graph: GRAPH {p_option("nograph","0");}; 
  o_nograph: NOGRAPH {p_option("nograph","1");}; 
- o_print: PRINT {p_option("print","0");}; 
+ o_print: PRINT {p_option("noprint","0");}; 
  o_noprint: NOPRINT {p_option("noprint","1");}; 
  o_conf_sig: CONF_SIG '=' DNUMBER {p_option("conf_sig",$3);}; 
  o_mh_replic: MH_REPLIC '=' INUMBER {p_option("mh_replic",$3);}; 
@@ -465,6 +465,8 @@ varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
          | o_qz_criterium
          | o_print
          | o_noprint
+         | o_graph
+         | o_nograph
          ;
 
  options_list1: options_list1 ',' o_list1
@@ -744,8 +746,6 @@ varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
                    | o_presample
                    | o_lik_algo 
                    | o_lik_init 
-                   | o_graph
-                   | o_nograph
                    | o_conf_sig 
                    | o_mh_replic
                    | o_mh_drop
