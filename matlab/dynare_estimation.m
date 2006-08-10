@@ -247,7 +247,11 @@ for iter1 = 1:length(options_.nobs)
     data = rawdata(options_.first_obs+(0:gend-1),:)';
   end  
   initial_estimation_checks(xparam1,gend,data);
-  if options_.mode_compute > 0
+  if options_.mode_compute == 0
+    if length(options_.mode_file) == 0
+      return
+    end
+  else
     if isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) & isempty(dsge_prior_weight)
       fh=str2func('DsgeLikelihood');
     else
@@ -391,8 +395,8 @@ for iter1 = 1:length(options_.nobs)
   end
 
   if options_.mode_compute ~= 6
-    hh = generalized_cholesky(hh);
-    invhess = inv(hh);
+      hh = generalized_cholesky(hh);
+      invhess = inv(hh);
   else
     invhess = PostVar;
   end
