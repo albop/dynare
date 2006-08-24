@@ -1519,7 +1519,7 @@ void dyn2vec(flag)
 	}
 #endif
     }
-
+  nbr_tmpvar = 0;
 }
 
 void print_rplot(void)
@@ -1554,6 +1554,7 @@ void print_rplot(void)
   strcat(buffer,"rplot(plot_list_, rplottype_) ;\n");
 #endif
   str_output(buffer);
+  nbr_tmpvar = 0;
 }
 
 
@@ -1814,6 +1815,7 @@ void p_stoch_simul()
     }
   str_output("info=stoch_simul(var_list_);\n");
 #endif
+  nbr_tmpvar = 0;
 }
 
 void p_resol(int dr_algo, int linear, int order, struct queue *p)
@@ -1901,6 +1903,7 @@ void p_irf(char * varexo, double shock_size, int iter, int drop, int replic, int
   sprintf(buffer,"y_=irf(dr_,'%s',%f,%d,%d,%d,%d,var_list_);\n",varexo,shock_size,iter+drop,drop,replic,order);
 #endif
   str_output(buffer);
+  nbr_tmpvar = 0;
 }
 
 void p_d_corr()
@@ -1942,6 +1945,7 @@ void p_d_corr()
     }
   strcat(buffer,");\n");
   str_output(buffer);
+  nbr_tmpvar = 0;
 }
 
 void p_disp_dr(order)
@@ -1975,6 +1979,7 @@ void p_disp_dr(order)
   sprintf(buffer,"disp_dr(dr_,%d,var_list_);\n",order);
 #endif
   str_output(buffer);
+  nbr_tmpvar = 0;
 }
 
 void p_disp_moments(order)
@@ -2008,6 +2013,7 @@ void p_disp_moments(order)
   sprintf(buffer,"disp_moments(y_,%d,var_list_);\n",order);
 #endif
   str_output(buffer);
+  nbr_tmpvar = 0;
 }
 
 void p_optim_weights_init(void)
@@ -2330,6 +2336,7 @@ void p_dynatype(char *fname, char *ext)
 
 #endif
   str_output(buffer);
+  nbr_tmpvar = 0;
 }
 
 void p_dynasave(char *fname, char *ext)
@@ -2392,6 +2399,7 @@ void p_dynasave(char *fname, char *ext)
 
 #endif
   str_output(buffer);
+  nbr_tmpvar = 0;
 }
 
 void p_sigma_e(struct queue *p_q)
@@ -2557,6 +2565,7 @@ void p_osr()
     }
   str_output("osr(var_list_,osr_params_,optim_weights_);\n");
 #endif
+  nbr_tmpvar = 0;
 }
 
 void p_olr()
@@ -2606,6 +2615,7 @@ void p_olr()
   str_output("info = stoch_simul(var_list_);\n");
   //  str_output("olr(var_list_,olr_inst_,obj_var_,optim_weights_);\n");
 #endif
+  nbr_tmpvar = 0;
 }
 
 void p_olr_inst_init()
@@ -3004,6 +3014,7 @@ void p_estimation(void)
     }
   str_output("dynare_estimation(var_list_);\n");
 #endif
+  nbr_tmpvar = 0;
 }
 
 void print_varobs(void)
@@ -3016,6 +3027,7 @@ void print_varobs(void)
       sprintf(buffer,"options_.varobs = strvcat(options_.varobs,'%s');\n",tmpvar_list[i]);
       str_output(buffer);
     }
+  nbr_tmpvar = 0;
 }
 
 void print_unit_root_vars(void)
@@ -3033,6 +3045,7 @@ void print_unit_root_vars(void)
       str_output(buffer);
     }
   str_output("};\n");
+  nbr_tmpvar = 0;
 }
 
 void p_optim_options(char* str1, char* str2, int task)
@@ -3136,6 +3149,7 @@ void p_model_comparison(int flag_model_prior)
     }
   str_output("];\n");
   str_output("model_comparison(ModelNames_,ModelPriors_);\n");
+  nbr_tmpvar = 0;
 }
 
 void p_forecast()
@@ -3180,6 +3194,7 @@ void p_forecast()
     }
   str_output("forecast(var_list_);\n");
 #endif
+  nbr_tmpvar = 0;
 }
 
 /*

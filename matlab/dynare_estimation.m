@@ -1293,18 +1293,20 @@ if options_.nobs(1) < options_.nobs(end) & options_.forecast > 1
       size(rawdata,1)-options_.nobs(1));
   data2 = rawdata(end-k+1:end,:);
   [nbplt,nr,nc,lr,lc,nstar] = pltorg(nvar);
+  m = 1;
   for i = 1:size(varlist,1)
     if mod(i,nstar) == 1
       hfig = figure('Name','Out of sample forecasts');
+      m = 1;
     end
-    subplot(nr,nc,i)
+    subplot(nr,nc,m)
     hold on
     if any(i==IdObs)
       k2 = find(i==IdObs);
       if options_.loglinear == 1
     plot(1:k,exp(data2(end-k+1:end,k2))','-k','linewidth',2);
       else
-    plot(1:k,data2(k2,end-k+1:end,k2)','-k','linewidth',2);
+    plot(1:k,data2(end-k+1:end,k2)','-k','linewidth',2);
       end
       offsetx = 3;
     else
@@ -1334,6 +1336,7 @@ if options_.nobs(1) < options_.nobs(end) & options_.forecast > 1
     box on
     title(deblank(varlist(i,:)),'Interpreter','none')
     hold off
+    m = m + 1;
   end
 end
 
