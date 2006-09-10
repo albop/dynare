@@ -31,6 +31,7 @@ npred = length(pred_var);
 nfwrd = length(fwrd_var);
 nstatic = length(stat_var);
 order_var = [ stat_var; pred_var; both_var; fwrd_var];
+inv_order_var(order_var) = (1:endo_nbr)';
 
 % building kmask for z state vector in t+1
 if ykmin_ > 0
@@ -74,6 +75,7 @@ kstate(ykmax_*endo_nbr+1:end,4) = kiy((ykmax_+1)*endo_nbr+1:end);
 kstate = kstate(i_kmask,:);
 
 dr.order_var = order_var;
+dr.inv_order_var = inv_order_var;
 dr.nstatic = nstatic;
 dr.npred = npred+nboth;
 dr.kstate = kstate;
