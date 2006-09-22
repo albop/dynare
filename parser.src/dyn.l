@@ -205,7 +205,7 @@ forecast {BEGIN DYNARE1; return FORECAST;}
 <DYNARE1>kalman_tol {return KALMAN_TOL;}
 <DYNARE1>diffuse_d {return DIFFUSE_D;}
 <DYNARE1>nk {return NK;}
-<DYNARE1>model_comparison_approximation {return MODEL_COMPARISON;}
+<DYNARE1>model_comparison_approximation {return MODEL_COMPARISON_APPROXIMATION;}
 <DYNARE1>laplace {return LAPLACE;}
 <DYNARE1>modifiedharmonicmean {return MODIFIEDHARMONICMEAN;}
 
