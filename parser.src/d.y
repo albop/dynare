@@ -25,8 +25,8 @@
 
 %token  END ENDVAL INITVAL HISTVAL MODEL PERIODS SHOCKS VALUES VAR VAREXO 
 %token VAREXO_DET VARRECUR EQUAL
-%token VARF VARP DEL SUM PROD TO MSHOCKS LONGNAMES PARAMETERS DYN2VEC RPLOT
-%token DO TO ENDO PROD BY DOLLAR STEADY STDERR DSAMPLE
+%token VARF VARP DEL SUM PROD MSHOCKS LONGNAMES PARAMETERS DYN2VEC RPLOT
+%token DO TO ENDO BY DOLLAR STEADY STDERR DSAMPLE
 %token STOCH_SIMUL DR_ALGO SIMUL_ALGO SOLVE_ALGO 
 %token DROP LINEAR ORDER REPLIC AR
 %token SIGMA_E HP_FILTER HP_NGRID SIMUL_SEED
@@ -58,7 +58,7 @@
 %type <p_queue> triangular_matrix triangular_row
 %type <p_loop> loop_init
 %type <string> value prior filename filename_elem compile_operator
-%expect 5
+%expect 4
 %%
 
  statement_list: statement
