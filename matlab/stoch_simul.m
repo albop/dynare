@@ -143,7 +143,7 @@ function info=stoch_simul(var_list)
 	  mylistTeX = [];
 	end
 	for j = 1:n
-	  assignin('base',[deblank(lgy_(j,:)) '_' deblank(lgx_(i,:))],...
+	  assignin('base',[deblank(var_list(j,:)) '_' deblank(tit(i,:))],...
 		   y(j,:)');
 	  if max(y(ivar(j),:)) - min(y(ivar(j),:)) > 1e-10
 	    irfs  = cat(1,irfs,y(ivar(j),:));
