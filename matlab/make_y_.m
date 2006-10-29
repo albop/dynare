@@ -25,12 +25,7 @@ function make_y_
 						     ykmax_)]];
     end
   elseif size(y_,2) < ykmin_+ykmax_+options_.periods
-    if isempty(ys0_)
       y_ = [y_ ys_*ones(1,ykmin_+options_.periods+ykmax_-size(y_,2),1)];
-    else
-      y_ = [ys0_*ones(1,ykmin_) y_  ys_*ones(1,options_.periods+ykmax_-size(y_, ...
-						  2))];
-    end
   end
     
 	     

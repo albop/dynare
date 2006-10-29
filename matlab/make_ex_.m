@@ -29,12 +29,7 @@ function make_ex_
 						1)*exe_(k)']];
     end
   elseif size(ex_,1) < xkmin_+xkmax_+options_.periods
-    if isempty(ex0_)
-      ex_ = [ex_; ones(xkmin_+options_.periods+xkmax_-size(ex_,1),1)*exe_'];
-    else
-      ex_ = [ones(xkmin_,1)*ex0_'; ex_; ones(options_.periods+xkmax_-size(ex_, ...
-						  1),1)*exe_'];
-    end
+    ex_ = [ex_; ones(xkmin_+options_.periods+xkmax_-size(ex_,1),1)*exe_'];
   end
   
   if exo_det_nbr > 0
@@ -53,12 +48,7 @@ function make_ex_
 						  1)*exe_det_(k)']];
       end
     elseif size(ex_det_,1) < ykmin_+ykmax_+options_.periods
-      if isempty(ex_det0_)
-	ex_det_ = [ex_det_; ones(ykmin_+options_.periods+ykmax_-size(ex_det_,1),1)*exe_det_'];
-      else
-	ex_det_ = [ones(ykmin_,1)*ex_det0_'; ex_det_; ones(options_.periods+ykmax_-size(ex_det_, ...
-						  1),1)*exe_det_'];
-      end
+      ex_det_ = [ex_det_; ones(ykmin_+options_.periods+ykmax_-size(ex_det_,1),1)*exe_det_'];
     end
   end
 	     
