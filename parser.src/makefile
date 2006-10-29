@@ -1,26 +1,34 @@
-all: dynare_m.exe dynare_s.exe dynare_g.exe dynare_OxPro.exe dynare_Oxcons.exe
+CC = gcc
+CPP = c++
+ifeq ($(DEBUG),yes)
+	CPPFLAGS = -ggdb -pg -Wall
+	FLEXFLAGS = -i -d
+else
+	CPPFLAGS = -mno-cygwin -O2
+	FLEXFLAGS = -i
+endif
+
+all: dynare_m.exe dynare_s.exe
 
 precompiler.o: precompiler.cc precompiler.hh d_ll.c d_tab.c
-	g++ -mno-cygwin -c precompiler.cc
+	$(CPP) $(CPPFLAGS) -c precompiler.cc
 
-dynare_mb: dynare_m.o
-	gcc -mno-cygwin -g -o dynare_m.exe dynare_m.o d_tab.o d_ll.o -lefence
 dynare_m.exe: dynare_m.o d_tab.o d_ll.o precompiler.o
-	gcc -mno-cygwin -g -o dynare_m.exe dynare_m.o d_tab.o d_ll.o precompiler.o -lstdc++
+	$(CC) $(CPPFLAGS) -o dynare_m.exe dynare_m.o d_tab.o d_ll.o precompiler.o -lstdc++
 	cp dynare_m.exe ../matlab
 
 dynare_m.o: dynare.c d.h d_tab.h
-	gcc -mno-cygwin -g  -c dynare.c -o dynare_m.o -DMATLAB -Wall #-DDEBUG
+	$(CC) $(CPPFLAGS)  -c dynare.c -o dynare_m.o -DMATLAB
 
-dynare_s.exe: dynare_s.o d_tab.o d_ll.o
-	gcc -mno-cygwin -g  -o dynare_s.exe dynare_s.o d_tab.o d_ll.o
+dynare_s.exe: dynare_s.o d_tab.o d_ll.o  precompiler.o
+	$(CC) $(CPPFLAGS)  -o dynare_s.exe dynare_s.o d_tab.o d_ll.o precompiler.o -lstdc++
 	cp dynare_s.exe ../scilab
 
 dynare_s.o: dynare.c d.h d_tab.h
-	gcc -mno-cygwin -g  -c dynare.c -o dynare_s.o -DSCILAB -Wall
+	$(CC) $(CPPFLAGS)  -c dynare.c -o dynare_s.o -DSCILAB
 
-dynare_g.exe: dynare_g.o d_tab.o d_ll.o
-	gcc -mno-cygwin -g  -o dynare_g.exe dynare_g.o d_tab.o d_ll.o
+dynare_g.exe: dynare_g.o d_tab.o d_ll.o  precompiler.o
+	gcc -mno-cygwin -g  -o dynare_g.exe dynare_g.o d_tab.o d_ll.o precompiler.o
 	cp dynare_g.exe ../gauss
 
 dynare_g.o: dynare.c d.h d_tab.h
@@ -41,11 +49,11 @@ dynare_Oxcons.o: dynare.c d.h d_tab.h
 	gcc -mno-cygwin -g  -c dynare.c -o dynare_Oxcons.o -DGAUSS -DOXGAUSS -DOXGAUSS_GNU -Wall
 
 d_ll.o: d_ll.c d_tab.h
-	gcc -mno-cygwin -g -c d_ll.c
+	$(CC) $(CPPFLAGS) -c d_ll.c
 
 
 d_tab.o: d_tab.c
-	gcc -mno-cygwin -g -c -DYYDEBUG=1 d_tab.c
+	$(CC) $(CPPFLAGS) -c -DYYDEBUG=1 d_tab.c
 
 d_tab.c d_tab.h: d.y d.h
 	bison -d --verbose -od_tab.c d.y
