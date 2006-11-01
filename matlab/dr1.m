@@ -381,12 +381,12 @@ for i=1:ykmax_
 end
 zx=[zx; zeros(exo_nbr,np);zeros(exo_det_nbr,np)];
 zu=[zu; eye(exo_nbr);zeros(exo_det_nbr,exo_nbr)];
-[n1,n2] = size(zx);
-if n1*n1*n2*n2 > 1e7
-  rhs = zeros(endo_nbr,n2*n2);
+[nrzx,nczx] = size(zx);
+if nrzx*nrzx*nczx*nczx > 1e7
+  rhs = zeros(endo_nbr,nczx*nczx);
   k1 = 1;
-  for i1 = 1:n2
-      for i2 = 1:n2
+  for i1 = 1:nczx
+      for i2 = 1:nczx
 	rhs(:,k1) = hessian*kron(zx(:,i1),zx(:,i2));
 	k1 = k1 + 1; 
       end
@@ -453,10 +453,10 @@ hu = dr.ghu(nstatic+1:nstatic+npred,:);
 %kk = reshape([1:np*np],np,np);
 %kk = kk(1:npred,1:npred);
 %rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));
-if n1*n1*n2*exo_nbr > 1e7
-  rhs = zeros(endo_nbr,n2*exo_nbr);
+if nrzx*nrzx*nczx*exo_nbr > 1e7
+  rhs = zeros(endo_nbr,nczx*exo_nbr);
   k1 = 1;
-  for i1 = 1:n2
+  for i1 = 1:nczx
       for i2 = 1:exo_nbr
 	rhs(:,k1) = hessian*kron(zx(:,i1),zu(:,i2));
 	k1 = k1 + 1; 
@@ -477,7 +477,7 @@ dr.ghxu = A\rhs;
 %rhs
 kk = reshape([1:np*np],np,np);
 kk = kk(1:npred,1:npred);
-if n1*n1*exo_nbr*exo_nbr > 1e7
+if nrzx*nrzx*exo_nbr*exo_nbr > 1e7
   rhs = zeros(endo_nbr,exo_nbr*exo_nbr);
   k1 = 1;
   for i1 = 1:exo_nbr
