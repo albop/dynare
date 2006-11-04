@@ -1461,7 +1461,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %                                                               
   if options_.forecast | options_.smoother | options_.filtered_vars
     deep = MU;
-    subindx = subset();
+    subindx = subset;
     % [1] I delete some old files...    
     disp(' ')
     disp(' ')
@@ -2506,7 +2506,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   %%
   if options_.bayesian_irf
     deep = MU;
-    subindx = subset();
+    subindx = subset;
     nirfs = options_.irf;
     if ~isempty(dsge_prior_weight)
       files = eval(['dir(''' fname_ '_irf_dsgevar*.mat'');']);     
@@ -3177,7 +3177,7 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
   end
   if options_.moments_varendo & ~isempty(vartan)
     deep = MU;
-    subindx = subset();
+    subindx = subset;
     nvar    = size(vartan,1);
     ivar = zeros(nvar,1);
     for i = 1:nvar

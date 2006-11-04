@@ -8,7 +8,7 @@ global options_ oo_ lgy_ ys_ fname_ dr_ info
 options_.order = 2;
 options_ = set_default_option(options_,'dr_algo',0);
 options_ = set_default_option(options_,'simul_algo',0);
-subindx = subset();
+subindx = subset;
 
 if isempty(NumberOfDraws)
   B = 500;
