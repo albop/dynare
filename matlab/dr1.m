@@ -440,11 +440,11 @@ end
 D = [rhs; zeros(n-endo_nbr,size(rhs,2))];
 if exist('gensylv')
   C = hx;
-  dr.ghxx = gensylv(2,A,B,C,D);
+  ghxx = gensylv(2,A,B,C,D);
 else
   C = kron(hx,hx); 
   x0 = sylvester3(A,B,C,D);
-  dr.ghxx = sylvester3a(x0,A,B,C,D);
+  ghxx = sylvester3a(x0,A,B,C,D);
 end
 
 %ghxu
@@ -468,7 +468,20 @@ end
 nyf1 = sum(kstate(:,2) == ykmin_+2);
 hu1 = [hu;zeros(np-npred,exo_nbr)];
 B1 = [B(1:endo_nbr,:);zeros(size(A,1)-endo_nbr,size(B,2))];
-rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B1*dr.ghxx*kron(hx,hu1);
+ng = size(ghxx,1);
+if np*np*nczx*exo_nbr > 1e7
+  B2 = zeros(ng,nczx*exo_nbr);
+  k1 = 1;
+  for i1 = 1:nczx
+      for i2 = 1:exo_nbr
+	B2(:,k1) = ghxx*kron(hx(:,i1),hu1(:,i2));
+	k1 = k1 + 1; 
+      end
+  end
+else
+  B2 = ghxx*kron(hx,hu1);
+end
+rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B1*B2;
 
 %lhs
 dr.ghxu = A\rhs;
@@ -490,12 +503,12 @@ else
   rhs = hessian*kron(zu,zu);
 end
 
-rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hu1,hu1);
+rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B*ghxx*kron(hu1,hu1);
 
 %lhs
 dr.ghuu = A\rhs;
 
-dr.ghxx = dr.ghxx(1:endo_nbr,:);
+dr.ghxx = ghxx(1:endo_nbr,:);
 dr.ghxu = dr.ghxu(1:endo_nbr,:);
 dr.ghuu = dr.ghuu(1:endo_nbr,:);
 
@@ -526,7 +539,7 @@ kh = reshape([1:nk^2],nk,nk);
 kp = sum(kstate(:,2) <= ykmin_+1);
 E1 = [eye(npred); zeros(kp-npred,npred)];
 H = E1;
-hxx = dr.ghxx(nstatic+[1:npred],:);
+hxx = ghxx(nstatic+[1:npred],:);
 for i=1:ykmax_
   for j=i:ykmax_
     [junk,k2a,k2] = find(iy_(ykmin_+j+1,order_var));
@@ -546,7 +559,7 @@ for i=1:ykmax_
   kk = find(kstate(:,2) == ykmin_+i+1);
   gu = dr.ghx*Gu;
   GuGu = kron(Gu,Gu);
-  guu = dr.ghx*Guu+dr.ghxx*GuGu;
+  guu = dr.ghx*Guu+ghxx*GuGu;
   Gu = hx*Gu;
   Guu = hx*Guu;
   Guu(end-npred+1:end,:) = Guu(end-npred+1:end,:) + hxx*GuGu;
@@ -566,19 +579,19 @@ if exo_det_nbr > 0
   dr.ghxud = cell(M_.ex_det_length,1);
   kf = [endo_nbr-nyf+1:endo_nbr];
   kp = nstatic+[1:npred];
-  dr.ghxud{1} = -M1*(R1+f1*dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{1}(kp,:)));
+  dr.ghxud{1} = -M1*(R1+f1*ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{1}(kp,:)));
   Eud = eye(exo_det_nbr);
   for i = 2:M_.ex_det_length
     hudi = dr.ghud{i}(kp,:);
     zudi=[zeros(np,exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi;zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
     R2 = hessian*kron(zx,zudi);
-    dr.ghxud{i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(hx,Eud)+dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{i}(kp,:)))-M1*R2;
+    dr.ghxud{i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(hx,Eud)+ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{i}(kp,:)))-M1*R2;
   end
   R1 = hessian*kron(zu,zud);
   dr.ghudud = cell(M_.ex_det_length,1);
   kf = [endo_nbr-nyf+1:endo_nbr];
 
-  dr.ghuud{1} = -M1*(R1+f1*dr.ghxx(kf,:)*kron(dr.ghu(kp,:),dr.ghud{1}(kp,:)));
+  dr.ghuud{1} = -M1*(R1+f1*ghxx(kf,:)*kron(dr.ghu(kp,:),dr.ghud{1}(kp,:)));
   Eud = eye(exo_det_nbr);
   for i = 2:M_.ex_det_length
     hudi = dr.ghud{i}(kp,:);
@@ -588,7 +601,7 @@ if exo_det_nbr > 0
   end
   R1 = hessian*kron(zud,zud);
   dr.ghudud = cell(M_.ex_det_length,M_.ex_det_length);
-  dr.ghudud{1,1} = -M1*R1-M2*dr.ghxx(kf,:)*kron(hud,hud);
+  dr.ghudud{1,1} = -M1*R1-M2*ghxx(kf,:)*kron(hud,hud);
   for i = 2:M_.ex_det_length
     hudi = dr.ghud{i}(nstatic+1:nstatic+npred,:);
     zudi=[zeros(np,exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi+dr.ghud{i-1}(kf,:);zeros(exo_nbr+exo_det_nbr,exo_det_nbr)];
@@ -598,7 +611,7 @@ if exo_det_nbr > 0
 			  +dr.ghxx(kf,:)*kron(hudi,hudi))-M1*R2;
     R2 = hessian*kron(zud,zudi);
     dr.ghudud{1,i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(hud,Eud)+...
-			  dr.ghxx(kf,:)*kron(hud,hudi))...
+			  ghxx(kf,:)*kron(hud,hudi))...
 	-M1*R2;
     for j=2:i-1
       hudj = dr.ghud{j}(kp,:);
@@ -606,7 +619,7 @@ if exo_det_nbr > 0
       R2 = hessian*kron(zudj,zudi);
       dr.ghudud{j,i} = -M2*(dr.ghudud{j-1,i-1}(kf,:)+dr.ghxud{j-1}(kf,:)* ...
 			    kron(hudi,Eud)+dr.ghxud{i-1}(kf,:)* ...
-			    kron(hudj,Eud)+dr.ghxx(kf,:)*kron(hudj,hudi))-M1*R2;
+			    kron(hudj,Eud)+ghxx(kf,:)*kron(hudj,hudi))-M1*R2;
     end
     
   end
