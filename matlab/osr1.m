@@ -1,6 +1,6 @@
 function [dr_,info]=osr1(params,weights)
   global xkmax_ xkmin_ ykmin_ ykmax_ ys_ iy_ exo_nbr endo_nbr fname_ ...
-      dynatol_ options_ it_ dr_
+      dynatol_ options_ it_ dr_ lgy_
 
   it_ = ykmin_ + 1 ;
 
@@ -43,6 +43,28 @@ function [dr_,info]=osr1(params,weights)
     disp(sprintf('Objective function : %16.6g\n',f));
     disp(' ')
     dr_=resol(ys_,0);
+    disp(' ')
+    disp('Contributions to the objective function')
+    disp('Variables           (Co)variance         Weight     Contribution')
+    vx1(dr_.order_var,dr_.order_var) = vx;
+    for i=1:endo_nbr
+      for j=1:i
+	if weights(i,j) > 0
+	  if i==j
+	    x1 = weights(i,i);
+	    vname = deblank(lgy_(i,:));
+	  else
+	    x1 = 2*weights(i,j);
+	    vname = [deblank(lgy_(i,:)) ', ' deblank(lgy_(j,:))];
+	  end
+	  st = sprintf('%15s %14.4f  %14.1f  %14.4f',...
+		       vname,vx1(i,j),x1,x1*vx1(i,j));
+	  disp(st)
+	end
+      end
+    end
+    disp(' ')
+    disp(' ')
   end
 
   % 05/10/03 MJ modified to work with osr.m and give full report

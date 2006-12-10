@@ -89,6 +89,41 @@ function info=stoch_simul(var_list)
     end
   end
 
+  if options_.olr
+    if options_.olr_beta == 1
+      global oo_
+      disp(' ')
+      disp(' ')
+      disp('OPTIMAL LINEAR REGULATOR')
+      disp(' ')
+      weights = options_.olr_w;
+      n = size(options_.olr_w,1);
+      vx1 = oo_.var(1:n,1:n);
+      disp(sprintf('Objective function : %16.6g\n',trace(weights*vx1)));
+      disp(' ')
+      dr_=resol(ys_,0);
+      disp('Contributions to the objective function')
+      disp('Variables           (Co)variance         Weight     Contribution')
+      for i=1:n
+	for j=1:i
+	  if weights(i,j) > 0
+	    if i==j
+	      x1 = weights(i,i);
+	      vname = deblank(lgy_(i,:));
+	    else
+	      x1 = 2*weights(i,j);
+	      vname = [deblank(lgy_(i,:)) ', ' deblank(lgy_(j,:))];
+	    end
+	    st = sprintf('%15s %14.4f  %14.1f  %14.4f',...
+			 vname,vx1(i,j),x1,x1*vx1(i,j));
+	    disp(st)
+	  end
+	end
+      end
+      disp(' ')
+      disp(' ')
+    end
+  end
 
 
   if options_.irf 
