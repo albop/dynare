@@ -9,10 +9,18 @@ function [dr,info]=resol(ys,check_flag)
 global jacobia_ iy_ ykmin_ ykmax_ gstep_ exo_nbr exo_det_nbr endo_nbr
 global ex_ ex_det_ valf_ it_ exe_ exe_det_ xkmin_ xkmax_ 
 global fname_ means_ stderrs_ lgy_ maxit_
-global dynatol_ options_
+global dynatol_ options_ olr_state_
 
 options_ = set_default_option(options_,'olr',0);
 info = 0;
+
+if isfield(olr_state_,'done')
+  ykmin_ = olr_state_.old_ykmin_;
+  ykmax_ = olr_state_.old_ykmax_;
+  endo_nbr = olr_state_.old_endo_nbr;
+  iy_ = olr_state_.old_iy_;
+  lgy_ = olr_state_.old_lgy_;
+end
 
 it_ = ykmin_ + 1 ;
 

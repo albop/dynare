@@ -55,21 +55,21 @@ if options_.olr
   jacobia1 = [];
   n_inst = size(options_.olr_inst,1);
 
-  if ~isfield(olr_state_,'done')
-    olr_state_.done = 1;
-    olr_state_.old_ykmin_ = ykmin_;
-    olr_state_.old_ykmax_ = ykmax_;
-    olr_state_.old_endo_nbr = endo_nbr;
-    olr_state_.old_iy_ = iy_;
-    
-    for i=1:endo_nbr
-      temp = ['mult_' int2str(i)];
-      lgy_ = strvcat(lgy_,temp);
-    end
-    endo_nbr = 2*endo_nbr-n_inst;
-    ykmin_ = max(ykmin_,ykmax_);
-    ykmax_ = ykmin_;
-  end    
+  olr_state_.done = 1;
+  olr_state_.old_ykmin_ = ykmin_;
+  olr_state_.old_ykmax_ = ykmax_;
+  olr_state_.old_endo_nbr = endo_nbr;
+  olr_state_.old_iy_ = iy_;
+  olr_state_.old_lgy_ = lgy_;
+  
+  for i=1:endo_nbr
+    temp = ['mult_' int2str(i)];
+    lgy_ = strvcat(lgy_,temp);
+  end
+  endo_nbr = 2*endo_nbr-n_inst;
+  ykmin_ = max(ykmin_,ykmax_);
+  ykmax_ = ykmin_;
+
   nj = olr_state_.old_endo_nbr-n_inst;
   offset_min = ykmin_ - olr_state_.old_ykmin_;
   offset_max = ykmax_ - olr_state_.old_ykmax_;

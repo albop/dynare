@@ -2018,12 +2018,14 @@ void p_disp_moments(order)
 
 void p_optim_weights_init(void)
 {
+  char buffer[200];
+
   str_output(OPEN_COMMENTS);
   str_output(" OPTIM_WEIGHTS\n");
   str_output(CLOSE_COMMENTS);
 
 #if defined MATLAB
-  str_output("optim_weights_ = sparse(endo_nbr,endo_nbr);\n");
+  sprintf(buffer,"optim_weights_ = sparse(%d,%d);\n",endo_nbr,endo_nbr);
   str_output("obj_var_ = [];\n\n");
 #endif
 }
