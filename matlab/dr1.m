@@ -507,12 +507,13 @@ if np*np*exo_nbr*exo_nbr > 1e7
   k1 = 1;
   for i1 = 1:nchu1
       for i2 = 1:nchu1
-	B1(:,k1) = dr.ghxx*kron(hu1(:,i1),hu1(:,i2));
+	B1(:,k1) = ghxx*kron(hu1(:,i1),hu1(:,i2));
 	k1 = k1 + 1; 
       end
   end
+  B1 = B*B1;	
 else
-  B1 = B*dr.ghxx*kron(hu1,hu1);
+  B1 = B*ghxx*kron(hu1,hu1);
 end
 
 rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B1;
