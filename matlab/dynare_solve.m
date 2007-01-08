@@ -30,7 +30,7 @@ function [x,check] = dynare_solve(func,x,varargin)
 
   if options_.solve_algo == 1
     nn = size(x,1) ;
-    [x,check]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
+    [x,check]=solve1(func,x,1:nn,1:nn,varargin{:});
   elseif options_.solve_algo == 2
     nn = size(x,1) ;
     %    tolf = eps^(2/3) ;
