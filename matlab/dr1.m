@@ -502,8 +502,20 @@ if nrzx*nrzx*exo_nbr*exo_nbr > 1e7
 else
   rhs = hessian*kron(zu,zu);
 end
+if np*np*exo_nbr*exo_nbr > 1e7
+  B1 = zeros(endo_nbr,exo_nbr*exo_nbr);
+  k1 = 1;
+  for i1 = 1:nchu1
+      for i2 = 1:nchu1
+	B1(:,k1) = dr.ghxx*kron(hu1(:,i1),hu1(:,i2));
+	k1 = k1 + 1; 
+      end
+  end
+else
+  B1 = B*dr.ghxx*kron(hu1,hu1);
+end
 
-rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B*ghxx*kron(hu1,hu1);
+rhs = -[rhs; zeros(n-endo_nbr,size(rhs,2))]-B1;
 
 %lhs
 dr.ghuu = A\rhs;
@@ -544,8 +556,22 @@ for i=1:ykmax_
   for j=i:ykmax_
     [junk,k2a,k2] = find(iy_(ykmin_+j+1,order_var));
     [junk,k3a,k3] = find(iy_ordered(ykmin_+j+1,:));
-    RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+hessian(:,kh(k3,k3))* ...
-	  kron(gu(k3a,:),gu(k3a,:));
+    nk3a = length(k3a);
+    if nk3a*nk3a*exo_nbr*exo_nbr > 1e7
+      B1 = zeros(endo_nbr,exo_nbr*exo_nbr);
+      k1 = 1;
+      H = hessian(:,kh(k3,k3));
+      guk3a = gu(k3a,:);
+      for i1 = 1:M_.exo_nbr
+	for i2 = 1:M_.exo_nbr
+	  B1(:,k1) = H*kron(guk3a(:,i1),guk3a(:,i2));
+	  k1 = k1 + 1; 
+	end
+      end
+    else
+      B1 = hessian(:,kh(k3,k3))*kron(gu(k3a,:),gu(k3a,:));
+    end
+    RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
   end
 
   % LHS
@@ -558,11 +584,28 @@ for i=1:ykmax_
   
   kk = find(kstate(:,2) == ykmin_+i+1);
   gu = dr.ghx*Gu;
-  GuGu = kron(Gu,Gu);
-  guu = dr.ghx*Guu+ghxx*GuGu;
+  [nrGu,ncGu] = size(Gu);
+  if nrGu*nrGu*ncGu*ncGu > 1e7
+    G1 = zeros(endo_nbr,ncGu*ncGu);
+    G2 = zeros(size(hxx,1),ncGu*ncGu);
+    k1 = 1;
+    for i1 = 1:nchx
+      for i2 = 1:nchu1
+	GuGu = kron(Gu(:,i1),Gu(:,i2));
+	G1(:,k1) = dr.ghxx*GuGu
+	G2(:,k1) = hxx*GuGu
+	k1 = k1 + 1; 
+      end
+    end
+  else
+    GuGu = kron(Gu,Gu);
+    G1 = dr.ghxx*GuGu;
+    G2 = hxx*GuGu;
+  end
+  guu = dr.ghx*Guu + G1;
   Gu = hx*Gu;
   Guu = hx*Guu;
-  Guu(end-npred+1:end,:) = Guu(end-npred+1:end,:) + hxx*GuGu;
+  Guu(end-npred+1:end,:) = Guu(end-npred+1:end,:) + G2;
 
   H = E1 + hx*H;
 end
