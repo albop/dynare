@@ -503,7 +503,7 @@ else
   rhs = hessian*kron(zu,zu);
 end
 if np*np*exo_nbr*exo_nbr > 1e7
-  B1 = zeros(endo_nbr,exo_nbr*exo_nbr);
+  B1 = zeros(size(ghxx,1),exo_nbr*exo_nbr);
   k1 = 1;
   for i1 = 1:nchu1
       for i2 = 1:nchu1
