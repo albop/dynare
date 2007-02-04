@@ -179,7 +179,7 @@ function info=stoch_simul(var_list)
 	end
 	for j = 1:n
 	  assignin('base',[deblank(var_list(j,:)) '_' deblank(tit(i,:))],...
-		   y(j,:)');
+		   y(ivar(j),:)');
 	  if max(y(ivar(j),:)) - min(y(ivar(j),:)) > 1e-10
 	    irfs  = cat(1,irfs,y(ivar(j),:));
 	    mylist = strvcat(mylist,deblank(var_list(j,:)));
