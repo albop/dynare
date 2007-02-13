@@ -149,8 +149,8 @@ while notsteady & t<smpl
   P1(:,:,t) = P(:,:,t);
   for i=1:pp
     v(i,t)  = Y(i,t) - a(mf(i),t) - trend(i,t);
-    Fi(i,t) = P(mf(i),mf(i),t);
-    Ki(:,i,t) = P(:,mf(i),t) + H(i,i);
+    Fi(i,t) = P(mf(i),mf(i),t) + H(i,i);
+    Ki(:,i,t) = P(:,mf(i),t);
     if Fi(i,t) > crit
       Li(:,:,i,t)    = eye(mm)-Ki(:,i,t)*Z(i,:)/Fi(i,t);
       a(:,t) = a(:,t) + Ki(:,i,t)*v(i,t)/Fi(i,t);
