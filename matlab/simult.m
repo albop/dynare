@@ -18,7 +18,7 @@ nxs = length(i_exo_var);
 ex_ = zeros(xkmin_+xkmax_+iter_,exo_nbr);
 chol_S = chol(Sigma_e_(i_exo_var,i_exo_var));
 
-if isempty(seed)
+if seed == 0
   randn('state',sum(100*clock));
 else
   randn('state',seed);

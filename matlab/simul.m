@@ -40,7 +40,7 @@ if options_.simul_algo == 0
   end
 else
   set_default_option('replic',1);
-  set_default_option('simul_seed',1);
+  set_default_option('simul_seed',0);
   if isfield(dr,'ghxx')
     set_default_option('order',2);
   else
