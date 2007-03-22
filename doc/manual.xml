@@ -109,6 +109,11 @@ Currently the development team of Dynare is composed of S. Adjemian, M. Juillard
 </para>
 
 <section><title>Changes</title>
+<para>March 31, 2006</para>
+<itemizedlist>
+<listitem><para>modified installation  instructions for Scilab, to take into account Scilab version 4.0</para>
+</listitem>
+</itemizedlist>
 <para>December 30, 2005</para>
 <itemizedlist>
 <listitem><para>added details about parameter transformation in <xref linkend="model"/> and in <xref linkend="estimated_params"/></para></listitem>
@@ -170,7 +175,7 @@ This version of Dynare works only under Windows 98/NT/2000/XP. For a Unix versio
 The Matlab version has been written with Matlab 6.5.1.
 </para>
 <para>
-The Scilab version has been tested with Scilab 3.0.
+The Scilab version has been tested with Scilab 3.0 and 4.0.
 </para>
 <para>
 The Gauss version of Dynare has been written with Gauss version 3.2. It most likely doesn't work with previous versions.
@@ -230,6 +235,15 @@ command = 'c:\dynare\scilab\dynare_s '+fname;
 </informalexample>
 Then, restart Scilab and run the command <command>uplib()</command>.
 </para>
+<para>With Scilab version 4.0 and above, it is necessary to also recompile <command>uplib</command>, in the following manner:
+</para>
+<informalexample>
+<programlisting>
+cd c:\dynare\scilab
+getf('uplib.sci')
+uplib()
+</programlisting>
+</informalexample>
 </sect2>
 
 <sect2><title>Installing the Gauss version</title>

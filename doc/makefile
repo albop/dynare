@@ -1,4 +1,4 @@
-all: guide.pdf manual.pdf manual/index.html
+all: guide.pdf manual/index.html #manual.pdf
 
 guide.pdf: guide.tex
 	pdflatex guide

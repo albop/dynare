@@ -2026,6 +2026,7 @@ void p_optim_weights_init(void)
 
 #if defined MATLAB
   sprintf(buffer,"optim_weights_ = sparse(%d,%d);\n",endo_nbr,endo_nbr);
+  str_output(buffer);
   str_output("obj_var_ = [];\n\n");
 #endif
 }

@@ -25,6 +25,11 @@ a2,NORMAL_PDF,0.2,0.1;
 
 stderr e_x,INV_GAMMA_PDF,0.01,inf;
 stderr e_y,INV_GAMMA_PDF,0.01,inf;
+corr e_x,e_y, normal_pdf,0,0.02;
+end;
+
+estimated_params_bounds;
+corr e_x,e_y,-0.99,0.99;
 end;
 
 varobs x y;
