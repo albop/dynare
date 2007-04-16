@@ -698,27 +698,27 @@ void p_hist(struct token *v, char *lag, struct queue *q)
   if (v->endo_exo == 1)
     {
 #ifdef GAUSS
-      sprintf(buffer,"_y[%d,_ykmin+(%s)+1]=",v->nbr+1,lag);
+      sprintf(buffer,"_y[%d,_ykmin+(%s)]=",v->nbr+1,lag);
 #elif defined MATLAB || defined SCILAB
-      sprintf(buffer,"y_(%d,ykmin_+(%s)+1)=",v->nbr+1,lag);
+      sprintf(buffer,"y_(%d,ykmin_+(%s))=",v->nbr+1,lag);
 #endif
     }
   else if (v->endo_exo == 0)
     {
       initval_check1[offset] = 1;
 #ifdef GAUSS
-      sprintf(buffer,"_ex[_xkmin+(%s)+1,%d]=",lag,v->nbr+1);
+      sprintf(buffer,"_ex[_xkmin+(%s),%d]=",lag,v->nbr+1);
 #elif defined MATLAB || defined SCILAB
-      sprintf(buffer,"ex_(xkmin_+(%s)+1,%d)=",lag,v->nbr+1);
+      sprintf(buffer,"ex_(xkmin_+(%s),%d)=",lag,v->nbr+1);
 #endif
     }
   else if (v->endo_exo == 5)
     {
       initval_check1[offset] = 1;
 #ifdef GAUSS
-      sprintf(buffer,"_ex_det[_xkmin+(%s)+1,%d]=",lag,v->nbr+1);
+      sprintf(buffer,"_ex_det[_xkmin+(%s),%d]=",lag,v->nbr+1);
 #elif defined MATLAB || defined SCILAB
-      sprintf(buffer,"ex_det_(ykmin_+(%s)+1,%d)=",lag,v->nbr+1);
+      sprintf(buffer,"ex_det_(ykmin_+(%s),%d)=",lag,v->nbr+1);
 #endif
     }
 /*   else if (v->endo_exo == 3) */
