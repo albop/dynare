@@ -12,7 +12,7 @@ tmp_oo = oo_;
 if isfield(options_,'model_comparison_approximation')
   type = options_.model_comparison_approximation;
 else
-  type = '';
+  type = 'LaplaceApproximation';
 end
 
 if strcmp(type,'Laplace')
@@ -21,35 +21,20 @@ end
 
 NumberOfModels = size(ModelNames,1);
 MarginalLogDensity = zeros(NumberOfModels,1);
+empty_prior = 1;
 if isempty(ModelPriors)
-  ModelPriors = ones(NumberOfModels,1);
+  empty_prior = 0;
+  ModelPriors = ones(NumberOfModels,1)/NumberOfModels;
 end
 
-% Get the estimates of the (logged) marginal densities
-
-init_loop = 1;
-if isempty(type)
-  if strcmp(ModelNames{1},fname_)
-    oo_ = tmp_oo;
-  else
-    load([ModelNames{1} '_results.mat' ],'oo_');
-  end
-  try
-    type = 'LaplaceApproximation';
-    eval(['MarginalLogDensity(1) =' ...
-	  ' oo_.MarginalDensity.LaplaceApproximation;']);
-  catch
-    try
-      type = 'ModifiedHarmonicMean';
-      eval(['MarginalLogDensity(1) = oo_.MarginalDensity.ModifiedHarmonicMean;']); 
-    catch
-      disp(['CompareModels :: I cant''t find any marginal density approximation associated to model ' ModelNames{1}])
-      return
-    end
-  end
-  init_loop = 2;
+if abs(sum(ModelPriors)-1) > 1e-6
+  disp('MODEL_COMPARISON: model priors renormalized so as to sum to 1 !');
+  ModelPriors = ModelPriors/sum(ModelPriors);
 end
-for i = init_loop:NumberOfModels
+
+% Get the estimates of the log marginal densities
+
+for i = 1:NumberOfModels
   if strcmp(ModelNames{i},fname_)
     oo_ = tmp_oo;
   else
@@ -59,34 +44,39 @@ for i = init_loop:NumberOfModels
     eval(['MarginalLogDensity(i) = oo_.MarginalDensity.' type ';']) 
   catch
     if strcmpi(type,'LaplaceApproximation')
-      disp(['CompareModels :: I cant''t find the Laplace approximation associated to model ' ModelNames{i}])
+      disp(['MODEL_COMPARISON: I cant''t find the Laplace approximation associated to model ' ModelNames{i}])
+      oo_ = tmp_oo;
       return
     elseif strcmpi(type,'ModifiedHarmonicMean')
-      disp(['CompareModels :: I cant''t find the modified harmonic mean estimate associated to model ' ModelNames{i}])
+      disp(['MODEL_COMPARISON: I cant''t find the modified harmonic mean' ...
+	    ' estimate associated to model ' ModelNames{i}])
+      oo_ = tmp_oo;
       return
     end
   end
 end
 
-%MarginalDensity = exp(MarginalLogDensity);
-LogConstantOfIntegration  = sum(log(ModelPriors)+MarginalLogDensity);
-PosteriorProbabilities = log(ModelPriors) + MarginalLogDensity - ...
-    LogConstantOfIntegration;
+%in order to avoid overflow, we divide the numerator and the denominator
+%of th Posterior Odds Ratio by the largest Marginal Posterior Density
+lmpd = log(ModelPriors)+MarginalLogDensity;
+[maxval,k] = max(lmpd);
+elmpd = exp(lmpd-maxval);
 
-PosteriorOddsTable = exp(repmat(PosteriorProbabilities,1,NumberOfModels)- ...
-			 repmat(PosteriorProbabilities',NumberOfModels,1));
-
-% Now I display the posterior probabilities:
-if NumberOfModels == 2
-    disp(' ')
-    disp(['Posterior odd (' ModelNames{1} '/' ModelNames{2} ') =  ' num2str(PosteriorOddsTable(1,2))])
-    disp(' ')
+% Now I display the posterior probabilities
+title = 'Model Comparison'; 
+headers = strvcat('Model',ModelNames{:});
+if empty_prior
+  labels = strvcat('Priors','Log Marginal Density','Bayes Ratio', ...
+		   'Posterior Model Probability');
+  values = [ModelPriors';MarginalLogDensity';exp(lmpd-lmpd(1))'; ...
+	    elmpd'/sum(elmpd)];
 else
-    disp(' ')
-    disp(' Posterior probabilities:')
-    for i=1:NumberOfModels
-            disp([ 'Model ' int2str(i) ' (' ModelNames{i} ') = ' num2str(PosteriorProbabilities(i))])
-    end
-    disp(' ')
+  labels = strvcat('Priors','Log Marginal Density','Bayes Ratio','Posterior Odds Ratio', ...
+		   'Posterior Model Probability');
+  values = [ModelPriors';MarginalLogDensity'; exp(MarginalLogDensity-MarginalLogDensity(1))'; ...
+	    exp(lmpd-lmpd(1))'; elmpd'/sum(elmpd)];
 end
+  
+table(title,headers,labels,values, 0, 15, 6)
+
 oo_ = tmp_oo;
