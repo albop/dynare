@@ -10,7 +10,7 @@ if ~ isstr(fname)
 end
 
 pathfile = mfilename('fullpath');
-command = [pathfile,'_m ',fname];
+command = ['"' pathfile '_m" ',fname];
 for i=2:nargin
   command = [command ' ' varargin{i-1}];
 end
