@@ -1,11 +1,29 @@
 CC = gcc
-CPP = c++
+CPP = g++
+
+CPPFLAGS = -Wall
+
+ifeq ($(shell uname -o), Cygwin)
+	# Detection of uninitialized variables is buggy in Cygwin and generates spurious warnings
+	CPPFLAGS += -Wno-uninitialized
+	CPPFLAGS += -mno-cygwin
+endif
+
+ifeq ($(CROSS_WIN32), yes)
+	CC = i586-mingw32msvc-cc
+	CPP = i586-mingw32msvc-g++
+	# Detection of uninitialized variables is buggy in MinGW and generates spurious warnings
+	CPPFLAGS += -Wno-uninitialized
+endif
+
 ifeq ($(DEBUG),yes)
-	CPPFLAGS = -ggdb -pg -Wall
-	FLEXFLAGS = -i -d
+	CPPFLAGS += -ggdb
 else
-	CPPFLAGS = -mno-cygwin -O2
-	FLEXFLAGS = -i
+	CPPFLAGS += -O3
+endif
+
+ifeq ($(VALGRIND), yes)
+	CPPFLAGS = -Wall -O -g -fno-inline
 endif
 
 all: dynare_m.exe dynare_s.exe
