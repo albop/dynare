@@ -179,8 +179,8 @@ varexo_det : VAREXO_DET {varlist_flag=5;} varlist ';' {print_exo_det();}
  equation_list : equation_list equation {$$=add_to_queue($1,$2);}
       | equation_list other_inst {$$=add_to_queue($1,$2);}
       | equation_list do_loop {$$=copy_queue($$,$2);}
+      | equation_list compile_statement {$$=$1;}
       | equation {$$=create_queue($1);}
-      | equation compile_statement {$$=$1;}
       | other_inst {$$=create_queue($1);}
       | do_loop
       ;
