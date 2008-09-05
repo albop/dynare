@@ -978,7 +978,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
     eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
     eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = squeeze(aK(1,i,:))'';']);
     eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ...
-          ' = updated variables(i,:)'';']);
+          ' = updated_variables(i,:)'';']);
   end
   [nbplt,nr,nc,lr,lc,nstar] = pltorg(M_.exo_nbr);
   if options_.TeX
