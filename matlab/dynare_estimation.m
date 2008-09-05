@@ -924,7 +924,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
       McMCDiagnostics(options_, estim_params_, M_);
   end
   %% Here i discard first half of the draws:
-  CutSample;
+  CutSample(M_, options_, estim_params_);
   %% Estimation of the marginal density from the Mh draws:
   if options_.mh_replic
       [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);

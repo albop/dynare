@@ -32,8 +32,6 @@ function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bay
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global estim_params_ M_ options_ bayestopt_ oo_
-
 %if ~options_.mh_replic & options_.load_mh_file
 %   load([M_.fname '_results.mat'],'oo_'); 
 %end
