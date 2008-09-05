@@ -276,7 +276,7 @@ else% if the steady state file is not provided.
    oo_.steady_state = dd.ys; clear('dd');
 end
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
-    disp('no constant')
+    disp('No constant.')
     options_.noconstant = 1;
 else
     options_.noconstant = 0;
@@ -934,7 +934,6 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   %% Results are saved (in case of an anormal exit from dynare or matlab)...
   %%save([M_.fname '_results.mat'],'oo_','M_');
   %%
-  oo_
   oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
   metropolis_draw(1);
   if options_.bayesian_irf

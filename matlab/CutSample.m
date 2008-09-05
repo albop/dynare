@@ -48,7 +48,7 @@ else
 end
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8)
+MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 FirstDraw = max(1,floor(options_.mh_drop*TotalNumberOfMhDraws));
 FirstMhFile = ceil(FirstDraw/MAX_nruns);
 FirstLine = FirstDraw-(FirstMhFile-1)*MAX_nruns+1;
