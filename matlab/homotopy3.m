@@ -53,7 +53,7 @@ function homotopy3(values, step_nbr)
   ixd = find(values(:,1) == 2); % Exogenous deterministic
 
   if length([ip, ix, ixd]) ~= nv
-    error('HOMOTOPY: incorrect variable types specified')
+    error('HOMOTOPY mode 3: incorrect variable types specified')
   end
 
   % Construct vector of starting values, using previously initialized values
@@ -69,7 +69,7 @@ function homotopy3(values, step_nbr)
   targetvalues = values(:,4);
 
   if min(abs(targetvalues - oldvalues)) < tol
-    error('HOMOTOPY: distance between initial and final values should be at least %e for all variables', tol)
+    error('HOMOTOPY mode 3: distance between initial and final values should be at least %e for all variables', tol)
   end
   iplus = find(targetvalues > oldvalues);
   iminus = find(targetvalues < oldvalues);
@@ -78,14 +78,17 @@ function homotopy3(values, step_nbr)
   inc = (targetvalues-oldvalues)/2;
   kplus = [];
   kminus = [];
-  old_ss = oo_.steady_state;
+
+  disp('HOMOTOPY mode 3: launching solver at initial point...')
 
   iter = 1;
   while iter < step_nbr
+    
     M_.params(values(ip,2)) = curvalues(ip);
     oo_.exo_steady_state(values(ix,2)) = curvalues(ix);
     oo_.exo_det_steady_state(values(ixd,2)) = curvalues(ixd);
     
+    old_ss = oo_.steady_state;
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
                                             oo_.steady_state,...
                                             options_.jacobian_flag, ...	    
@@ -93,25 +96,31 @@ function homotopy3(values, step_nbr)
                         oo_.exo_det_steady_state], M_.params);
   
     if check
+      disp('HOMOTOPY mode 3: failed step, now dividing increment by 2...')
       inc = inc/2;
       oo_.steady_state = old_ss;
     else
       if length([kplus; kminus]) == nv
         return
       end
+      if iter == 1
+        disp('HOMOTOPY mode 3: successful step, now jumping to final point...')
+      else
+        disp('HOMOTOPY mode 3: successful step, now multiplying increment by 2...')
+      end
       oldvalues = curvalues;
       inc = 2*inc;
     end
     curvalues = oldvalues + inc;
     kplus = find(curvalues(iplus) >= targetvalues(iplus));
-    curvalues(kplus) = targetvalues(kplus);
+    curvalues(iplus(kplus)) = targetvalues(iplus(kplus));
     kminus = find(curvalues(iminus) <= targetvalues(iminus));
-    curvalues(kminus) = targetvalues(kminus);
+    curvalues(iminus(kminus)) = targetvalues(iminus(kminus));
 
     if max(abs(inc)) < tol
-        error('HOMOTOPY didn''t succeed')
+        error('HOMOTOPY mode 3: failed, increment has become too small')
     end
     
     iter = iter + 1;
   end
-  error('HOMOTOPY didn''t succeed')
+  error('HOMOTOPY mode 3: failed, maximum iterations reached')
