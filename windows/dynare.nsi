@@ -10,7 +10,7 @@
 # - run "makensis dynare.nsi" to create the installer
 # - if there is no failure, this will create a file "dynare-VERSION-win32.exe" in the current directory
 
-!define VERSION "4.0.0"
+!define VERSION "4.0.1"
 
 Name "Dynare ${VERSION}"
 
