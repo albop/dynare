@@ -793,7 +793,7 @@ DynaSaveStatement::writeOutput(ostream &output, const string &basename) const
   symbol_list.writeOutput("var_list_", output);
   output << "dynasave('" << filename;
   if (ext.size() > 0)
-    output << "," << ext;
+    output << "." << ext;
   output << "',var_list_);\n";
 }
 
@@ -809,10 +809,10 @@ void
 DynaTypeStatement::writeOutput(ostream &output, const string &basename) const
 {
   symbol_list.writeOutput("var_list_", output);
-  output << "dynatype(" << filename;
+  output << "dynatype('" << filename;
   if (ext.size() > 0)
-    output << "," << ext;
-  output << ",var_list_);\n";
+    output << "." << ext;
+  output << "',var_list_);\n";
 }
 
 ModelComparisonStatement::ModelComparisonStatement(const filename_list_type &filename_list_arg,
