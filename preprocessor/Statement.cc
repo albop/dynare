@@ -22,8 +22,14 @@
 ModFileStructure::ModFileStructure() :
   check_present(false),
   simul_present(false),
-  stoch_simul_or_similar_present(false),
-  order_option(0)
+  stoch_simul_present(false),
+  estimation_present(false),
+  forecast_present(false),
+  osr_present(false),
+  ramsey_policy_present(false),
+  order_option(0),
+  bvar_density_present(false),
+  bvar_forecast_present(false)
 {
 }
 

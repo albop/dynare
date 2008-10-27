@@ -165,7 +165,7 @@ StochSimulStatement::StochSimulStatement(const SymbolList &symbol_list_arg,
 void
 StochSimulStatement::checkPass(ModFileStructure &mod_file_struct)
 {
-  mod_file_struct.stoch_simul_or_similar_present = true;
+  mod_file_struct.stoch_simul_present = true;
 
   // Fill in option_order of mod_file_struct
   OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
@@ -191,7 +191,7 @@ ForecastStatement::ForecastStatement(const SymbolList &symbol_list_arg,
 void
 ForecastStatement::checkPass(ModFileStructure &mod_file_struct)
 {
-  mod_file_struct.stoch_simul_or_similar_present = true;
+  mod_file_struct.forecast_present = true;
 
   // Fill in option_order of mod_file_struct
   OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
@@ -217,7 +217,7 @@ RamseyPolicyStatement::RamseyPolicyStatement(const SymbolList &symbol_list_arg,
 void
 RamseyPolicyStatement::checkPass(ModFileStructure &mod_file_struct)
 {
-  mod_file_struct.stoch_simul_or_similar_present = true;
+  mod_file_struct.ramsey_policy_present = true;
 
   /* Fill in option_order of mod_file_struct
      Since ramsey policy needs one further order of derivation (for example, for 1st order
@@ -245,7 +245,7 @@ EstimationStatement::EstimationStatement(const SymbolList &symbol_list_arg,
 void
 EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
 {
-  mod_file_struct.stoch_simul_or_similar_present = true;
+  mod_file_struct.estimation_present = true;
 
   // Fill in option_order of mod_file_struct
   OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
@@ -718,7 +718,7 @@ OsrStatement::OsrStatement(const SymbolList &symbol_list_arg,
 void
 OsrStatement::checkPass(ModFileStructure &mod_file_struct)
 {
-  mod_file_struct.stoch_simul_or_similar_present = true;
+  mod_file_struct.osr_present = true;
 
   // Fill in option_order of mod_file_struct
   OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
@@ -854,7 +854,7 @@ PlannerObjectiveStatement::checkPass(ModFileStructure &mod_file_struct)
 {
   if (model_tree->equation_number() != 1)
     {
-      cerr << "Error: planer_objective: should have only one equation!" << endl;
+      cerr << "ERROR: planer_objective: should have only one equation!" << endl;
       exit(-1);
     }
 }
@@ -879,6 +879,12 @@ BVARDensityStatement::BVARDensityStatement(int maxnlags_arg, const OptionsList &
 }
 
 void
+BVARDensityStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.bvar_density_present = true;
+}
+
+void
 BVARDensityStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
@@ -889,6 +895,12 @@ BVARForecastStatement::BVARForecastStatement(int nlags_arg, const OptionsList &o
   nlags(nlags_arg),
   options_list(options_list_arg)
 {
+}
+
+void
+BVARForecastStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.bvar_forecast_present = true;
 }
 
 void
