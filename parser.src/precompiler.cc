@@ -1,6 +1,7 @@
 #include <map>
 #include <stack>
 #include <iostream>
+#include <cstdlib>
 
 #include "precompiler.hh"
 
