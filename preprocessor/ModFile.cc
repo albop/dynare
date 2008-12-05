@@ -211,7 +211,7 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all) const
       it != statements.end(); it++)
     (*it)->writeOutput(mOutputFile, basename);
 
-  mOutputFile << "save('" << basename << "_results.mat', 'oo_');" << endl;
+  mOutputFile << "save('" << basename << "_results.mat', 'oo_', 'M_');" << endl;
   mOutputFile << "diary off" << endl;
 
   mOutputFile << endl << "disp(['Total computing time : ' dynsec2hms(toc) ]);" << endl;
