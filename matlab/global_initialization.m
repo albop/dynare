@@ -198,10 +198,6 @@ function global_initialization()
   % BVAR
   M_.bvar = [];
 
-  % rplot
-
-  options_.dsample = 0;
-  
   % homotopy
   options_.homotopy_mode = 0;
   options_.homotopy_steps = 1;
