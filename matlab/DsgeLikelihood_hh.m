@@ -1,6 +1,6 @@
-function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
+function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,gend,data)
 
-% function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
+% function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,gend,data)
 % Evaluates the likelihood at each observation and the marginal density of a dsge model  
 % used in the optimization algorithm number 5
 % 
@@ -19,10 +19,23 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend
 %               
 % SPECIAL REQUIREMENTS
 %   Adapted from dsgelikelihood.m
-%  
-% copyright marco.ratto@jrc.it [13-03-2007] 
 
-
+% Copyright (C) 2006-2009 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
   global bayestopt_ estim_params_ options_ trend_coeff_ M_ oo_ xparam1_test
 
