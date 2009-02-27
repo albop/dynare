@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2008 Dynare Team
+ * Copyright (C) 2003-2009 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -30,7 +30,11 @@
 
 #include "ModFile.hh"
 #include "SymbolList.hh"
+
+class ParsingDriver;
+#include "ExprNode.hh"
 #include "DynareBison.hh"
+
 #include "ComputingTasks.hh"
 #include "Shocks.hh"
 #include "SigmaeInitialization.hh"
