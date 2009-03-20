@@ -4,7 +4,7 @@ Upstream source for Dynare can be found on:
 
 It can also be downloaded via subversion at:
 
-  http://www.cepremap.cnrs.fr/svn/
+  http://www.dynare.org/svn/dynare
 
 Debian packaging was done by Sébastien Villemot <sebastien.villemot@ens.fr>.
 

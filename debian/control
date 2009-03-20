@@ -10,7 +10,7 @@ Package: dynare
 Architecture: any
 Depends: octave3.0, ${shlibs:Depends}
 Description: Software suite for non-linear models with forward looking variables
- Dynare is a pre-preprocesser and a collection of Octave and Matlab (R) routines
+ Dynare is a pre-preprocessor and a collection of Octave and Matlab (R) routines
  which can solve, simulate and estimate non-linear models with forward looking
  variables.
  .
