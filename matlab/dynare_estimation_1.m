@@ -90,11 +90,11 @@ n_varobs = size(options_.varobs,1);
 
 %% Set priors over the estimated parameters.
 if ~isempty(estim_params_)
-    [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
+    [xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_);
     if any(bayestopt_.pshape > 0)
         % Plot prior densities.
 	if options_.mode_compute
-	    plot_priors(bayestopt_,M_,options_)
+	    plot_priors
 	end
         % Set prior bounds
         bounds = prior_bounds(bayestopt_);
@@ -255,21 +255,21 @@ if ~isreal(rawdata)
     error('There are complex values in the data! Probably  a wrong transformation')
 end
 % Test for missing observations.
-options_.missing_data = any(any(isnan(rawdata)));
+%options_.missing_data = any(any(isnan(rawdata)));
 % Prefilter the data if needed.
 if options_.prefilter == 1
-    if options_.missing_data
-        bayestopt_.mean_varobs = zeros(n_varobs,1);
-        for variable=1:n_varobs
-            rdx = find(~isnan(rawdata(:,variable)));
-            m = mean(rawdata(rdx,variable));
-            rawdata(rdx,variable) = rawdata(rdx,variable)-m;
-            bayestopt_.mean_varobs(variable) = m;
-        end
-    else
+    %    if options_.missing_data
+    %    bayestopt_.mean_varobs = zeros(n_varobs,1);
+    %    for variable=1:n_varobs
+    %        rdx = find(~isnan(rawdata(:,variable)));
+    %        m = mean(rawdata(rdx,variable));
+    %        rawdata(rdx,variable) = rawdata(rdx,variable)-m;
+    %        bayestopt_.mean_varobs(variable) = m;
+    %    end
+    %else
         bayestopt_.mean_varobs = mean(rawdata,1)';
         rawdata = rawdata-repmat(bayestopt_.mean_varobs',gend,1);
-    end
+        %end
 end
 % Transpose the dataset array.
 data = transpose(rawdata);
@@ -302,9 +302,9 @@ end
 
 %% compute sample moments if needed (bvar-dsge)
 if options_.bvar_dsge
-    if options_.missing_data
-        error('I cannot estimate a DSGE-VAR model with missing observations!')
-    end
+    %    if options_.missing_data
+    %    error('I cannot estimate a DSGE-VAR model with missing observations!')
+    %end
     if options_.noconstant
         evalin('base',...
                ['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
@@ -319,14 +319,14 @@ if options_.bvar_dsge
     end
 end
 
-[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
-missing_value = ~(number_of_observations == gend*n_varobs);
+%[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
+%missing_value = ~(number_of_observations == gend*n_varobs);
 
-initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+initial_estimation_checks(xparam1,gend,data);
 
 if options_.mode_compute == 0 & length(options_.mode_file) == 0
     if options_.smoother == 1
-	[atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
+	[atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data);
 	oo_.Smoother.SteadyState = ys;
 	oo_.Smoother.TrendCoeffs = trend_coeff;
 	oo_.Smoother.integration_order = d;
@@ -366,7 +366,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         end
         if ~options_.bvar_dsge
             [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-                fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
         else
             [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
                 fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend);
@@ -379,7 +379,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
         if ~options_.bvar_dsge
-            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
+            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data);
         else
             [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
         end
@@ -390,9 +390,9 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         verbose = 2;
         if ~options_.bvar_dsge
             [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend,data);
             disp(sprintf('Objective function at mode: %f',fval))
-            disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)))
+            disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
         else
             [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
                 csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend);
@@ -421,14 +421,14 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
             nit=1000;
         end
         if ~options_.bvar_dsge
-            [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data,data_index,number_of_observations,no_more_missing_observations);
+            [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data);
         else
             [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
         end
         save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','bayestopt_');
       case 6
         if ~options_.bvar_dsge
-            fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+            fval = DsgeLikelihood(xparam1,gend,data);
         else
             fval = DsgeVarLikelihood(xparam1,gend);
         end
@@ -466,9 +466,8 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 end
                 if ~options_.bvar_dsge
                     [xparam1,PostVar,Scale,PostMean] = ...
-                        gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data,...
-                                  data_index,number_of_observations,no_more_missing_observations);
-                    fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                        gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data);
+                    fval = DsgeLikelihood(xparam1,gend,data);
                 else
                     [xparam1,PostVar,Scale,PostMean] = ...
                         gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend);
@@ -489,8 +488,8 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 if ~options_.bvar_dsge
                     [xparam1,PostVar,Scale,PostMean] = ...
                         gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
-                                  options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data,data_index,number_of_observations,no_more_missing_observations);
-                    fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                                  options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data);
+                    fval = DsgeLikelihood(xparam1,gend,data);
                 else
                     [xparam1,PostVar,Scale,PostMean] = ...
                         gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,...
@@ -499,7 +498,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 end
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
-                fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                fval = DsgeLikelihood(xparam1,gend,data);
                 disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
                 disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
                 OldMode = fval;
@@ -513,7 +512,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
         if ~options_.bvar_dsge
-            [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
+            [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend,data);
         else
             [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend);
         end
@@ -523,9 +522,9 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     if options_.mode_compute ~= 5
         if options_.mode_compute ~= 6
             if ~options_.bvar_dsge
-                hh = reshape(hessian('DsgeLikelihood',xparam1,options_.gstep,gend,data,data_index,number_of_observations,no_more_missing_observations),nx,nx);
+                hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
             else
-                hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
+                hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
             end
         end
         save([M_.fname '_mode.mat'],'xparam1','hh','bayestopt_');
@@ -533,7 +532,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
 end
 
 if options_.mode_check == 1 & options_.posterior_mode_estimation
-  mode_check(xparam1,0,hh,gend,data,lb,ub,data_index,number_of_observations,no_more_missing_observations);
+  mode_check(xparam1,0,hh,gend,data,lb,ub);
 end
 
 if options_.posterior_mode_estimation
@@ -647,7 +646,7 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
   log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
   if ~options_.bvar_dsge
     md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
-        - DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        - DsgeLikelihood(xparam1,gend,data);
   else
     md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
         - DsgeVarLikelihood(xparam1,gend);
@@ -943,8 +942,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     if options_.bvar_dsge
         feval(options_.posterior_sampling_method,'DsgeVarLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend);
     else
-        feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend,data,...
-              data_index,number_of_observations,no_more_missing_observations);
+        feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend,data);
     end
   end
   if ~options_.nodiagnostic & options_.mh_replic > 1000 & options_.mh_nblck > 1
@@ -966,7 +964,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
       oo_ = compute_moments_varendo(options_,M_,oo_,var_list_);
   end
   if options_.smoother | ~isempty(options_.filter_step_ahead) | options_.forecast
-    prior_posterior_statistics('posterior',data,gend,data_index,missing_value);
+    prior_posterior_statistics('posterior',data);
   end
   xparam = get_posterior_parameters('mean');
   set_all_parameters(xparam);
@@ -976,7 +974,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
 						  > 0) & options_.load_mh_file)) ...
     | ~options_.smoother ) & M_.endo_nbr^2*gend < 1e7 % to be fixed   
     %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
-  [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
+  [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data);
   oo_.Smoother.SteadyState = ys;
   oo_.Smoother.TrendCoeffs = trend_coeff;
   oo_.Smoother.integration_order = d;
