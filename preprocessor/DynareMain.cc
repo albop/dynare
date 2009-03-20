@@ -37,7 +37,7 @@ void main2(stringstream &in, string &basename, bool debug, bool clear_all, bool 
 void
 usage()
 {
-  cerr << "Dynare usage: dynare mod_file [debug] [noclearall] [savemacro]" << endl;
+  cerr << "Dynare usage: dynare mod_file [debug] [noclearall] [savemacro] [notmpterms]" << endl;
   exit(EXIT_FAILURE);
 }
 
