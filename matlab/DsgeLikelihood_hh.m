@@ -195,8 +195,72 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,g
         T0(j,:) = T0(j,:)-RR(j,i).*T(ivd(i),:);
         R1(j,:) = R1(j,:)-RR(j,i).*R(ivd(i),:);
       end
-    end
-    Pstar = lyapunov_symm(T0,R1*Q*R1',options_.qz_criterium);
+
+      [QT,ST] = schur(T);
+      if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
+          e1 = abs(my_ordeig(ST)) > 2-options_.qz_criterium;
+      else
+          e1 = abs(ordeig(ST)) > 2-options_.qz_criterium;
+      end
+      [QT,ST] = ordschur(QT,ST,e1);
+      if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
+          k = find(abs(my_ordeig(ST)) > 2-options_.qz_criterium);
+      else
+          k = find(abs(ordeig(ST)) > 2-options_.qz_criterium);
+      end
+      nk = length(k);
+      nk1 = nk+1;
+      Pinf = zeros(np,np);
+      Pinf(1:nk,1:nk) = eye(nk);
+      Pstar = zeros(np,np);
+      B = QT'*R*Q*R'*QT;
+      for i=np:-1:nk+2
+          if ST(i,i-1) == 0
+              if i == np
+                  c = zeros(np-nk,1);
+              else
+                  c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
+                      ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
+              end
+              q = eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i);
+              Pstar(nk1:i,i) = q\(B(nk1:i,i)+c);
+              Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
+          else
+              if i == np
+                  c = zeros(np-nk,1);
+                  c1 = zeros(np-nk,1);
+              else
+                  c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
+                      ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i)+...
+                      ST(i,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1);
+                  c1 = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i-1,i+1:end)')+...
+                       ST(i-1,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1)+...
+                       ST(i-1,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
+              end
+              q = [eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i) -ST(nk1:i,nk1:i)*ST(i,i-1);...
+                   -ST(nk1:i,nk1:i)*ST(i-1,i) eye(i-nk)-ST(nk1:i,nk1:i)*ST(i-1,i-1)];
+              z =  q\[B(nk1:i,i)+c;B(nk1:i,i-1)+c1];
+              Pstar(nk1:i,i) = z(1:(i-nk));
+              Pstar(nk1:i,i-1) = z(i-nk+1:end);
+              Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
+              Pstar(i-1,nk1:i-2) = Pstar(nk1:i-2,i-1)';
+              i = i - 1;
+          end
+      end
+      if i == nk+2
+          c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
+          Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
+      end
+      Z = QT(mf,:);
+      R1 = QT'*R;
+      [QQ,RR,EE] = qr(Z*ST(:,1:nk),0);
+      k = find(abs(diag([RR; zeros(nk-size(Z,1),size(RR,2))])) < 1e-8);
+      if length(k) > 0
+          k1 = EE(:,k);
+	  dd =ones(nk,1);
+	  dd(k1) = zeros(length(k1),1);
+	  Pinf(1:nk,1:nk) = diag(dd);
+      end
   end
   %------------------------------------------------------------------------------
   % 4. Likelihood evaluation
