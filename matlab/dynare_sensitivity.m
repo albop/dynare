@@ -214,6 +214,10 @@ options_gsa = set_default_option(options_gsa,'alpha2_rmse',1);
 options_.opt_gsa = options_gsa;
 if options_gsa.rmse,
   if ~options_gsa.ppost
+  set_default_option(options_,'filter_step_ahead',1);   
+  if isempty(options_.filter_step_ahead),
+    options_.filter_step_ahead=1;
+  end
   if options_gsa.pprior
     a=whos('-file',[OutputDirectoryName,'\',fname_,'_prior'],'logpo2');
   else
