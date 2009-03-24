@@ -1,3 +1,29 @@
+dynare (4.0.3) unstable; urgency=low
+
+  * Many bugfixes, including:
+    - fixed estimation of constants in linear models
+    - determistic exogenous now work when there is more than one such variable
+    - fixed recursive estimation
+    - fixed OSR
+    - fix to interface to Global Sensity Analysis toolbox
+    - "simul" and "periods" options are now accepted simultaneously by "stoch_simul"
+    - preprocessor no longer crashes when there is an unexpected EOF
+    - operator precedence is now correct in macro-processor
+    - estimated_params_init and estimated_params_bounds now work in conjunction with correlation of endogenous variables
+    - fixed bug in the macro-processor, when the body of a @#for loop is empty
+    - fixed memory management bug in the preprocessor related to the filename being parsed
+    - fixing bug for mode_compute=5,6
+  * build_matlab.m script works on Matlab for Windows 64 bits
+  * Structures M_ and options_ are saved in the "_results.mat" output file
+  * Structure bayestopt_ is saved in the "_mode.mat" output file
+  * Added option "notmpterms" to preprocessor, for disabling computation of temporary terms
+  * Macro processor reports the location of @#for or @#if statement when not matched by an @#endfor or an @#endif
+  * Many updates to the reference manual for 4.0 (which is not yet finished)
+  * All code source is now under a free license (GNU General Public License 3 for most of them)
+  * All documentation (including user guide) now licensed under the GNU Free Documentation License 1.3
+
+ -- Sébastien Villemot <sebastien.villemot@ens.fr>  Tue, 24 Mar 2009 10:48:36 +0100
+
 dynare (4.0.2) unstable; urgency=low
 
   * Fixed bugs in Kalman filter and smoother
