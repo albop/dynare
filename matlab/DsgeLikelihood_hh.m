@@ -179,23 +179,9 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,g
     Pstar = 10*eye(np);
     Pinf	= [];
   elseif options_.lik_init == 3	% Diffuse Kalman filter
-    Pstar = zeros(np,np);
-    ivs = bayestopt_.restrict_var_list_stationary;
-    ivd = bayestopt_.restrict_var_list_nonstationary;
-    RR=T(:,bayestopt_.restrict_var_list_nonstationary);
-    i=find(abs(RR)>1.e-10);
-    R0=zeros(size(RR));
-    R0(i)=sign(RR(i));
-    Pinf=R0*R0';
-    
-    T0 = T;
-    R1 = R;
-    for j=1:size(T,1),
-      for i=1:length(ivd),
-        T0(j,:) = T0(j,:)-RR(j,i).*T(ivd(i),:);
-        R1(j,:) = R1(j,:)-RR(j,i).*R(ivd(i),:);
+      if kalman_algo ~= 4
+          kalman_algo = 3;
       end
-
       [QT,ST] = schur(T);
       if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
           e1 = abs(my_ordeig(ST)) > 2-options_.qz_criterium;
