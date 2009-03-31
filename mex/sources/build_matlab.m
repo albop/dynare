@@ -49,7 +49,7 @@ else
     error('Unsupported platform')
 end
 
-% mwSize and mwIndex appeared in Matlab 7.3
+% mwSize, mwIndex and mwSignedIndex appeared in Matlab 7.3
 if matlab_ver_less_than('7.3')
     COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DMWTYPES_NOT_DEFINED' ];
 end
