@@ -100,7 +100,7 @@ class ParsingDriver;
 %token HISTVAL HP_FILTER HP_NGRID
 %token INITVAL INITVAL_FILE
 %token <string_val> INT_NUMBER
-%token INV_GAMMA1_PDF INV_GAMMA2_PDF IRF
+%token INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF
 %token KALMAN_ALGO KALMAN_TOL
 %token LAPLACE LCC_COMPILER LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR LU MARKOWITZ MAX
 %token METHOD MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER MIN
@@ -921,6 +921,8 @@ prior : BETA_PDF
         { $$ = new string("2"); }
       | NORMAL_PDF
         { $$ = new string("3"); }
+      | INV_GAMMA_PDF
+        { $$ = new string("4"); }
       | INV_GAMMA1_PDF
         { $$ = new string("4"); }
       | UNIFORM_PDF
