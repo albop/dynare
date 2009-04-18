@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include "mex.h"
+#include "../matlab_versions_compatibility.h"
 
 #ifdef MWTYPES_NOT_DEFINED
 typedef int mwIndex;
@@ -35,14 +36,14 @@ typedef int mwSize;
 #  define dgemm dgemm_
 # endif
 extern "C" {
-  int dgemm(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
+  lapack_int dgemm(char*, char*, lapack_int*, lapack_int*, lapack_int*, double*, double*, lapack_int*, double*, lapack_int*, double*, double*, lapack_int*);
 }
 #else /* NO_BLAS_H */
 # include "blas.h"
 #endif /* NO_BLAS_H */
 
 void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
-				int mA, int nA, int mB, int nB, int mC, int nC)
+				lapack_int mA, int nA, int mB, int nB, lapack_int mC, lapack_int nC)
 {
   const unsigned long shiftA = mA*mC ;
   const unsigned long shiftD = mA*nC ;
@@ -62,7 +63,7 @@ void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
 }
 
 
-void full_A_times_kronecker_B_B(double *A, double *B, double *D, int mA, int nA, int mB, int nB)
+void full_A_times_kronecker_B_B(double *A, double *B, double *D, lapack_int mA, int nA, lapack_int mB, lapack_int nB)
 {
   const unsigned long int shiftA = mA*mB ;
   const unsigned long int shiftD = mA*nB ;
@@ -139,10 +140,10 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
   // Computational part:
   if (nrhs == 2)
     {
-      full_A_times_kronecker_B_B(A, B, &D[0], (int) mA, (int) nA, (int) mB, (int) nB);
+      full_A_times_kronecker_B_B(A, B, &D[0], mA,  nA, mB, nB);
     }
   else
     {
-      full_A_times_kronecker_B_C(A, B, C, &D[0], (int) mA, (int) nA, (int) mB, (int) nB, (int) mC, (int) nC);
+      full_A_times_kronecker_B_C(A, B, C, &D[0], mA, nA, mB, nB, mC, nC);
     }
 }
