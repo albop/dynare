@@ -28,4 +28,4 @@ function v = dynare_version
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    v = '4.0.3';
+    v = '4.0.4';
