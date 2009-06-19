@@ -1,3 +1,14 @@
+dynare (4.0.4) unstable; urgency=low
+
+  * Fixed forecasting after stoch_simul
+  * Fixed crash of the smoother when only one exogenous variable
+  * Fixed issue with compilation of MEX files under 64 bits platforms with Matlab R2009a
+  * Fixed name clash when MOD file is called "ramsey.mod" and computes optimal policy
+  * Fixed USE_DLL option at order 2
+  * Updates to the reference manual in sections on model resolution and estimation
+
+ -- Sébastien Villemot <sebastien.villemot@ens.fr>  Fri, 19 Jun 2009 16:48:54 +0200
+
 dynare (4.0.3) unstable; urgency=low
 
   * Many bugfixes, including:
