@@ -54,7 +54,6 @@ function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,start)
   LIK  = Inf;
   notsteady   = 1;
   crit        = options_.kalman_tol;
-  reste       = 0;
   while rank(Pinf,crit) & t < smpl
     t     = t+1;
     v  	  = Y(:,t)-Z*a;
