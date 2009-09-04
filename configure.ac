@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.63])
-AC_INIT([dynare], [4.1-unstable])
+AC_INIT([dynare], [4.1-alpha1])
 AC_CONFIG_SRCDIR([preprocessor/DynareMain.cc])
 
 AC_PROG_CXX
