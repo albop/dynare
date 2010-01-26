@@ -1,4 +1,4 @@
-function [JJ, H, gam] = getJJ(A, B, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
+function [JJ, H, gam, gp] = getJJ(A, B, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
 
 % Copyright (C) 2009 Dynare Team
 %
@@ -36,14 +36,14 @@ if kronflag == -1,
     assignin('base','M_', M_);
     assignin('base','oo_', oo_);
 else
-    [H, dA, dOm, dYss] = getH(A, B, M_,oo_,kronflag,indx,indexo);
+  [H, dA, dOm, dYss, gp] = getH(A, B, M_,oo_,kronflag,indx,indexo);  
+  gp = reshape(gp,size(gp,1)*size(gp,2),size(gp,3));
     %   if isempty(H),
     %     JJ = [];
     %     GAM = [];
     %     return
     %   end
     m = length(A);
-
     GAM =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold,1);
     k = find(abs(GAM) < 1e-12);
     GAM(k) = 0;
