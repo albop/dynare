@@ -68,9 +68,9 @@ else
             dum1=dum;
             dum1 = (dum1.*sy-dsy.*GAM)./(sy.*sy);
             dum1 = dum1-diag(diag(dum1))+diag(diag(dum));
-            dumm = vech(dum1(mf,mf));
+            dumm = dyn_vech(dum1(mf,mf));
         else
-            dumm = vech(dum(mf,mf));
+            dumm = dyn_vech(dum(mf,mf));
         end
         for i=1:nlags,
             dum1 = A^i*dum;
@@ -93,9 +93,9 @@ else
             dum1=dum;
             dum1 = (dum1.*sy-dsy.*GAM)./(sy.*sy);
             dum1 = dum1-diag(diag(dum1))+diag(diag(dum));
-            dumm = vech(dum1(mf,mf));
+            dumm = dyn_vech(dum1(mf,mf));
         else
-            dumm = vech(dum(mf,mf));
+            dumm = dyn_vech(dum(mf,mf));
         end
         for i=1:nlags,
             dum1 = A^i*dum;
@@ -126,7 +126,7 @@ else
                 GAM{j+1}=GAM{j+1}.*sy;
             end
         end
-        gam = vech(GAM{1});
+        gam = dyn_vech(GAM{1});
         for j=1:nlags,
             gam = [gam; vec(GAM{j+1})];
         end
