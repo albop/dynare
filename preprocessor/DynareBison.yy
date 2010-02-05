@@ -413,7 +413,7 @@ expression : '(' expression ')'
              { $$ = driver.add_max($3, $5); }
            | MIN '(' expression COMMA expression ')'
              { $$ = driver.add_min($3, $5); }
-           | symbol '(' comma_expression ')'
+           | symbol { driver.push_unknown_function_arg_vector_onto_stack(); } '(' comma_expression ')'
              { $$ = driver.add_unknown_function($1); }
            | NORMCDF '(' expression COMMA expression COMMA expression ')'
              { $$ = driver.add_normcdf($3, $5, $7); }
@@ -427,7 +427,7 @@ expression : '(' expression ')'
 
 comma_expression : expression
                    { driver.add_unknown_function_arg($1); }
-                   | comma_expression COMMA expression
+                 | comma_expression COMMA expression
                    { driver.add_unknown_function_arg($3); }
                  ;
 

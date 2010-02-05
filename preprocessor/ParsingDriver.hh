@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include <istream>
+#include <stack>
 
 #include "ModFile.hh"
 #include "SymbolList.hh"
@@ -154,7 +155,7 @@ private:
   bool svar_lower_cholesky;
 
   //! Temporary storage for argument list of unknown function
-  vector<NodeID> unknown_function_args;
+  stack<vector<NodeID> > stack_unknown_function_args;
 
   //! The mod file representation constructed by this ParsingDriver
   ModFile *mod_file;
@@ -465,6 +466,8 @@ public:
   NodeID add_normcdf(NodeID arg);
   //! Writes token "steadyState(arg1)" to model tree
   NodeID add_steady_state(NodeID arg1);
+  //! Pushes unknown_function_args vector onto stack_unknown_function_args and clears unknown_function_args
+  void push_unknown_function_arg_vector_onto_stack();
   //! Adds an unknwon function argument
   void add_unknown_function_arg(NodeID arg);
   //! Adds an unknown function call node
