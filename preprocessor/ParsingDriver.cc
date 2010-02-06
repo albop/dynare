@@ -1590,9 +1590,16 @@ ParsingDriver::add_steady_state(NodeID arg1)
 }
 
 void
+ParsingDriver::push_unknown_function_arg_vector_onto_stack()
+{
+  vector<NodeID> emptyvec;
+  stack_unknown_function_args.push(emptyvec);
+}
+
+void
 ParsingDriver::add_unknown_function_arg(NodeID arg)
 {
-  unknown_function_args.push_back(arg);
+  stack_unknown_function_args.top().push_back(arg);
 }
 
 NodeID
@@ -1606,8 +1613,8 @@ ParsingDriver::add_unknown_function(string *function_name)
   else
     mod_file->symbol_table.addSymbol(*function_name, eUnknownFunction);
 
-  NodeID id = data_tree->AddUnknownFunction(*function_name, unknown_function_args);
-  unknown_function_args.clear();
+  NodeID id = data_tree->AddUnknownFunction(*function_name, stack_unknown_function_args.top());
+  stack_unknown_function_args.pop();
   return id;
 }
 
