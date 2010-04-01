@@ -180,7 +180,9 @@ else
     cL = size(constrained_paths,2);
 end
 
-constrained_paths = bsxfun(@minus,constrained_paths,trend(idx,1:cL));
+for t=1:cL
+    constrained_paths(:,t) = constrained_paths(:,t)-trend(idx,t);
+end
 
 randn('state',0);
 
