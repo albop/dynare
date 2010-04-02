@@ -342,9 +342,16 @@ if options_.mode_compute == 0
         oo_.Smoother.variance = P;
         i_endo_nbr = 1:M_.endo_nbr;
         if options_.nk ~= 0
-            oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo_nbr,:);
-            oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,i_endo_nbr,i_endo_nbr,:);
-            oo_.FilteredVariablesShockDecomposition = decomp(options_.filter_step_ahead,i_endo_nbr,:,:);
+            oo_.FilteredVariablesKStepAhead = ...
+                aK(options_.filter_step_ahead,i_endo_nbr,:);
+            if ~isempty(PK)
+                oo_.FilteredVariablesKStepAheadVariances = ...
+                    PK(options_.filter_step_ahead,i_endo_nbr,i_endo_nbr,:);
+            end
+            if ~isempty(decomp)
+                oo_.FilteredVariablesShockDecomposition = ...
+                    decomp(options_.filter_step_ahead,i_endo_nbr,:,:);
+            end
         end
         for i=1:M_.endo_nbr
             eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
@@ -1091,9 +1098,15 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                                              i_endo_nbr,:);
         if isfield(options_,'kalman_algo')
             if options_.kalman_algo > 2
-                oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,i_endo_nbr,i_endo_nbr,:);
-                oo_.FilteredVariablesShockDecomposition = ...
-                    decomp(options_.filter_step_ahead,i_endo_nbr,:,:);
+                if ~isempty(PK)
+                    oo_.FilteredVariablesKStepAheadVariances = ...
+                        PK(options_.filter_step_ahead,i_endo_nbr,i_endo_nbr,:);
+                end
+                if ~isempty(decomp)
+                    oo_.FilteredVariablesShockDecomposition = ...
+                        decomp(options_.filter_step_ahead,i_endo_nbr,:,: ...
+                               );
+                end
             end
         end
     end
