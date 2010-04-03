@@ -335,12 +335,12 @@ initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no
 
 if options_.mode_compute == 0 
     if options_.smoother == 1
-        [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
+        [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
         oo_.Smoother.SteadyState = ys;
         oo_.Smoother.TrendCoeffs = trend_coeff;
-        oo_.Smoother.integration_order = d;
         oo_.Smoother.variance = P;
         i_endo_nbr = 1:M_.endo_nbr;
+
         if options_.nk ~= 0
             oo_.FilteredVariablesKStepAhead = ...
                 aK(options_.filter_step_ahead,i_endo_nbr,:);
@@ -1087,10 +1087,9 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                                                       > 0) & options_.load_mh_file)) ...
     | ~options_.smoother ) & M_.endo_nbr^2*gend < 1e7 % to be fixed   
     %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
-    [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
+    [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
     oo_.Smoother.SteadyState = ys;
     oo_.Smoother.TrendCoeffs = trend_coeff;
-    oo_.Smoother.integration_order = d;
     oo_.Smoother.variance = P;
     i_endo_nbr = 1:M_.endo_nbr;
     if options_.nk ~= 0
