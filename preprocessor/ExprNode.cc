@@ -2954,8 +2954,8 @@ TrinaryOpNode::compile(ostream &CompileCode, bool lhs_rhs, const temporary_terms
   arg1->compile(CompileCode, lhs_rhs, temporary_terms, map_idx, dynamic, steady_dynamic);
   arg2->compile(CompileCode, lhs_rhs, temporary_terms, map_idx, dynamic, steady_dynamic);
   arg3->compile(CompileCode, lhs_rhs, temporary_terms, map_idx, dynamic, steady_dynamic);
-  FBINARY_ fbinary(op_code);
-  fbinary.write(CompileCode);
+  FTRINARY_ ftrinary(op_code);
+  ftrinary.write(CompileCode);
 }
 
 void

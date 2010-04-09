@@ -85,6 +85,7 @@ enum Tags
 
     FUNARY,       //!< A Unary operator - 14
     FBINARY,      //!< A binary operator - 15
+    FTRINARY,     //!< A trinary operator -15'
 
     FCUML,        //!< Cumulates the result - 16
 
@@ -565,6 +566,22 @@ public:
   };
 };
 
+class FTRINARY_ : public TagWithOneArgument<uint8_t>
+{
+public:
+  inline FTRINARY_() : TagWithOneArgument<uint8_t>::TagWithOneArgument(FTRINARY)
+  {
+  };
+  inline FTRINARY_(const int op_type_arg) : TagWithOneArgument<uint8_t>::TagWithOneArgument(FTRINARY, op_type_arg)
+  {
+  };
+  inline uint8_t
+  get_op_type()
+  {
+    return arg1;
+  };
+};
+
 class FOK_ : public TagWithOneArgument<int>
 {
 public:
@@ -1009,6 +1026,13 @@ public:
 # endif
             tags_liste.push_back(make_pair(FBINARY, code));
             code += sizeof(FBINARY_);
+            break;
+          case FTRINARY:
+# ifdef DEBUGL
+            mexPrintf("FTRINARY\n");
+# endif
+            tags_liste.push_back(make_pair(FTRINARY, code));
+            code += sizeof(FTRINARY_);
             break;
           case FOK:
 # ifdef DEBUGL

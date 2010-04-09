@@ -96,7 +96,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
 {
   int var, lag = 0, op;
   ostringstream tmp_out;
-  double v1, v2;
+  double v1, v2, v3;
   bool go_on = true;
   double ll;
   while (go_on)
@@ -635,6 +635,26 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
               Stack.push(sqrt(v1));
 #ifdef DEBUG
               tmp_out << " |sqrt(" << v1 << ")|";
+#endif
+              break;
+            default:
+              ;
+            }
+          break;
+        case FTRINARY:
+          op = ((FTRINARY_ *) it_code->second)->get_op_type();
+          v3 = Stack.top();
+          Stack.pop();
+          v2 = Stack.top();
+          Stack.pop();
+          v1 = Stack.top();
+          Stack.pop();
+          switch (op)
+            {
+            case oNormcdf:
+              Stack.push(0.5*(1+erf((v1-v2)/v3/M_SQRT2)));
+#ifdef DEBUG
+              tmp_out << " |normcdf(" << v1 << ", " << v2 << ", " << v2  << ")|";
 #endif
               break;
             default:
