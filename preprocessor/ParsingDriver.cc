@@ -487,6 +487,10 @@ void
 ParsingDriver::add_stderr_shock(string *var, NodeID value)
 {
   check_symbol_existence(*var);
+
+  if (mod_file->symbol_table.getType(*var) != eExogenous)
+    error("shocks: stderr can only be set for an exogenous variable");
+
   if (var_shocks.find(*var) != var_shocks.end()
       || std_shocks.find(*var) != std_shocks.end())
     error("shocks: variance or stderr of shock on " + *var + " declared twice");
@@ -500,6 +504,10 @@ void
 ParsingDriver::add_var_shock(string *var, NodeID value)
 {
   check_symbol_existence(*var);
+
+  if (mod_file->symbol_table.getType(*var) != eExogenous)
+    error("shocks: variance can only be set for an exogenous variable");
+
   if (var_shocks.find(*var) != var_shocks.end()
       || std_shocks.find(*var) != std_shocks.end())
     error("shocks: variance or stderr of shock on " + *var + " declared twice");
@@ -514,6 +522,10 @@ ParsingDriver::add_covar_shock(string *var1, string *var2, NodeID value)
 {
   check_symbol_existence(*var1);
   check_symbol_existence(*var2);
+
+  if (mod_file->symbol_table.getType(*var1) != eExogenous
+      || mod_file->symbol_table.getType(*var2) != eExogenous)
+    error("shocks: covariance can only be set for exogenous variables");
 
   pair<string, string> key(*var1, *var2), key_inv(*var2, *var1);
 
@@ -535,6 +547,10 @@ ParsingDriver::add_correl_shock(string *var1, string *var2, NodeID value)
 {
   check_symbol_existence(*var1);
   check_symbol_existence(*var2);
+
+  if (mod_file->symbol_table.getType(*var1) != eExogenous
+      || mod_file->symbol_table.getType(*var2) != eExogenous)
+    error("shocks: correlation can only be set for exogenous variables");
 
   pair<string, string> key(*var1, *var2), key_inv(*var2, *var1);
 
