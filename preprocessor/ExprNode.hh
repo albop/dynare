@@ -311,6 +311,20 @@ public:
 
   virtual NodeID decreaseLeadsLagsPredeterminedVariables() const = 0;
 
+  //! Return true if the nodeID is a numerical constant equal to value and false otherwise
+  /*!
+    \param[in] value of the numerical constante
+    \param[out] the boolean equal to true if NodeId is a constant equal to value
+    */
+  virtual bool isNumConstNodeEqualTo(double value) const = 0;
+
+  //! Return true if the nodeID is a variable withe a type equal to type_arg, a specific variable id aqual to varfiable_id and a lag equal to lag_arg and false otherwise
+  /*!
+    \param[in] the type (type_arg), specifique variable id (variable_id and the lag (lag_arg)
+    \param[out] the boolean equal to true if NodeId is the variable
+    */
+  virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const = 0;
+
 };
 
 //! Object used to compare two nodes (using their indexes)
@@ -356,6 +370,8 @@ public:
   virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
   virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
   virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  virtual bool isNumConstNodeEqualTo(double value) const;
+  virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
 };
 
 //! Symbol or variable node
@@ -398,6 +414,8 @@ public:
   virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
   virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
   virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  virtual bool isNumConstNodeEqualTo(double value) const;
+  virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
 };
 
 //! Unary operator node
@@ -454,6 +472,8 @@ public:
   virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
   virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
   virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  virtual bool isNumConstNodeEqualTo(double value) const;
+  virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
 };
 
 //! Binary operator node
@@ -517,6 +537,8 @@ public:
   virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
   virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
   virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  virtual bool isNumConstNodeEqualTo(double value) const;
+  virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
 };
 
 //! Trinary operator node
@@ -562,6 +584,8 @@ public:
   virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
   virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
   virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  virtual bool isNumConstNodeEqualTo(double value) const;
+  virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
 };
 
 //! Unknown function node
@@ -599,6 +623,8 @@ public:
   virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
   virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
   virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  virtual bool isNumConstNodeEqualTo(double value) const;
+  virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
 };
 
 #endif

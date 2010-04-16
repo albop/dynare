@@ -216,6 +216,18 @@ ExprNode::createExoLeadAuxiliaryVarForMyself(subst_table_t &subst_table, vector<
   return dynamic_cast<VariableNode *>(substexpr);
 }
 
+bool
+ExprNode::isNumConstNodeEqualTo(double value) const
+{
+  return false;
+}
+
+bool
+ExprNode::isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const
+{
+  return false;
+}
+
 NumConstNode::NumConstNode(DataTree &datatree_arg, int id_arg) :
   ExprNode(datatree_arg),
   id(id_arg)
@@ -347,6 +359,21 @@ NodeID
 NumConstNode::substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const
 {
   return const_cast<NumConstNode *>(this);
+}
+
+bool
+NumConstNode::isNumConstNodeEqualTo(double value) const
+{
+  if (datatree.num_constants.getDouble(id) == value)
+    return true;
+  else
+    return false;
+}
+
+bool
+NumConstNode::isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const
+{
+  return false;
 }
 
 VariableNode::VariableNode(DataTree &datatree_arg, int symb_id_arg, int lag_arg) :
@@ -974,6 +1001,21 @@ NodeID
 VariableNode::substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const
 {
   return const_cast<VariableNode *>(this);
+}
+
+bool
+VariableNode::isNumConstNodeEqualTo(double value) const
+{
+  return false;
+}
+
+bool
+VariableNode::isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const
+{
+  if (type == type_arg && datatree.symbol_table.getTypeSpecificID(symb_id) == variable_id && lag == lag_arg)
+    return true;
+  else
+    return false;
 }
 
 UnaryOpNode::UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const NodeID arg_arg, const int expectation_information_set_arg) :
@@ -1734,6 +1776,18 @@ UnaryOpNode::substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNo
       NodeID argsubst = arg->substituteExpectation(subst_table, neweqs, partial_information_model);
       return buildSimilarUnaryOpNode(argsubst, datatree);
     }
+}
+
+bool
+UnaryOpNode::isNumConstNodeEqualTo(double value) const
+{
+  return false;
+}
+
+bool
+UnaryOpNode::isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const
+{
+  return false;
 }
 
 BinaryOpNode::BinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
@@ -2714,6 +2768,18 @@ BinaryOpNode::substituteExpectation(subst_table_t &subst_table, vector<BinaryOpN
   return buildSimilarBinaryOpNode(arg1subst, arg2subst, datatree);
 }
 
+bool
+BinaryOpNode::isNumConstNodeEqualTo(double value) const
+{
+  return false;
+}
+
+bool
+BinaryOpNode::isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const
+{
+  return false;
+}
+
 TrinaryOpNode::TrinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
                              TrinaryOpcode op_code_arg, const NodeID arg2_arg, const NodeID arg3_arg) :
   ExprNode(datatree_arg),
@@ -3143,6 +3209,18 @@ TrinaryOpNode::substituteExpectation(subst_table_t &subst_table, vector<BinaryOp
   return buildSimilarTrinaryOpNode(arg1subst, arg2subst, arg3subst, datatree);
 }
 
+bool
+TrinaryOpNode::isNumConstNodeEqualTo(double value) const
+{
+  return false;
+}
+
+bool
+TrinaryOpNode::isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const
+{
+  return false;
+}
+
 UnknownFunctionNode::UnknownFunctionNode(DataTree &datatree_arg,
                                          int symb_id_arg,
                                          const vector<NodeID> &arguments_arg) :
@@ -3339,4 +3417,16 @@ UnknownFunctionNode::substituteExpectation(subst_table_t &subst_table, vector<Bi
 {
   cerr << "UnknownFunctionNode::substituteExpectation: not implemented!" << endl;
   exit(EXIT_FAILURE);
+}
+
+bool
+UnknownFunctionNode::isNumConstNodeEqualTo(double value) const
+{
+  return false;
+}
+
+bool
+UnknownFunctionNode::isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const
+{
+  return false;
 }
