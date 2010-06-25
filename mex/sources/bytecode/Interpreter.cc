@@ -652,9 +652,14 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           switch (op)
             {
             case oNormcdf:
+#ifndef _MSC_VER
               Stack.push(0.5*(1+erf((v1-v2)/v3/M_SQRT2)));
-#ifdef DEBUG
+# ifdef DEBUG
               tmp_out << " |normcdf(" << v1 << ", " << v2 << ", " << v2  << ")|";
+# endif
+#else
+              // erf() does not exist in Microsoft Visual C++
+              mexErrMsgTxt("bytecode: normcdf() not supported on your platform");
 #endif
               break;
             default:
