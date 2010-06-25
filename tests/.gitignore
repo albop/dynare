@@ -26,6 +26,7 @@
 !/kalman/likelihood/test3.m
 !/kalman_filter_smoother/test.mat
 !/kalman_filter_smoother/testsmoother.m
+!/k_order_perturbation/run_fs2000kplusplus.m
 !/ls2003/data_ca1.m
 !/objectives/sgu_ex1.mat
 !/parallel/data_ca1.m
