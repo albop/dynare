@@ -78,7 +78,9 @@ if(options_.block)
         eval([M_.fname '_dynamic']);
     end;
 else
-    if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
+    if M_.maximum_endo_lead == 0
+        error('simul doesn''t simulate purely backward models')
+    elseif M_.maximum_endo_lag == 1 && M_.maximum_endo_lead == 1
         sim1 ;
     else
         simk ;
