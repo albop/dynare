@@ -578,12 +578,16 @@ DynamicModel::writeModelEquationsOrdered_M(const string &dynamic_basename) const
               unsigned int varr = getBlockVariableID(block, var);
               NodeID id = it->second.second;
               int lag = it->second.first;
-              output << "    g1(" << eq+1 << ", " << var+1-block_recursive << ") = ";
-              id->writeOutput(output, local_output_type, local_temporary_terms);
-              output << "; % variable=" << symbol_table.getName(symbol_table.getID(eEndogenous, varr))
-                     << "(" << lag
-                     << ") " << varr+1
-                     << ", equation=" << eqr+1 << endl;
+              if (lag == 0)
+                {
+                  output << "    g1(" << eq+1 << ", " << var+1-block_recursive << ") = ";
+                  id->writeOutput(output, local_output_type, local_temporary_terms);
+                  output << "; % variable=" << symbol_table.getName(symbol_table.getID(eEndogenous, varr))
+                         << "(" << lag
+                         << ") " << varr+1
+                         << ", equation=" << eqr+1 << endl;
+                }
+
             }
           output << "  end;\n";
           break;
@@ -900,6 +904,8 @@ DynamicModel::writeModelEquationsCodeOrdered(const string file_name, const strin
                   int lag = it->second.first;
                   if (eq >= block_recursive and var >= block_recursive)
                     {
+                      if (lag != 0 && (simulation_type == SOLVE_FORWARD_COMPLETE || simulation_type == SOLVE_BACKWARD_COMPLETE))
+                        continue;
                       if (!Uf[eqr].Ufl)
                         {
                           Uf[eqr].Ufl = (Uff_l *) malloc(sizeof(Uff_l));
@@ -1136,6 +1142,8 @@ DynamicModel::Write_Inf_To_Bin_File(const string &dynamic_basename, const string
       unsigned int eq = it->first.first;
       unsigned int var = it->first.second;
       int lag = it->second.first;
+      if (lag != 0 && !is_two_boundaries)
+        continue;
       if (eq >= block_recursive and var >= block_recursive)
         {
           int v = eq - block_recursive;
