@@ -26,6 +26,12 @@ global bayestopt_ estim_params_ options_  M_ oo_
 
 struct2local(myinputs);
 
+if whoiam,
+    % initialize persistent variables in priordens()
+priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, ...
+          bayestopt_.p3,bayestopt_.p4,1);
+end
+
 
 MhDirectoryName = CheckPath('metropolis');
 
