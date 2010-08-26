@@ -3460,7 +3460,7 @@ UnknownFunctionNode::maxExoLead() const
 }
 
 int
-ExternalFunctionNode::maxEndoLag() const
+UnknownFunctionNode::maxEndoLag() const
 {
   int val = 0;
   for (vector<NodeID>::const_iterator it = arguments.begin();
@@ -3470,7 +3470,7 @@ ExternalFunctionNode::maxEndoLag() const
 }
 
 int
-ExternalFunctionNode::maxExoLag() const
+UnknownFunctionNode::maxExoLag() const
 {
   int val = 0;
   for (vector<NodeID>::const_iterator it = arguments.begin();
