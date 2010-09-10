@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2009 Dynare Team
+ * Copyright (C) 2003-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -191,6 +191,13 @@ public:
     \return the symbol ID of the new symbol
   */
   int addExpectationAuxiliaryVar(int information_set, int index) throw (FrozenException);
+  //! Searches auxiliary variables by symbol_id and lead_lag
+  /*!
+    \return the symbol ID of the auxiliary variable and -1 if not found
+  */
+  int searchAuxiliaryVars(int orig_symb_id, int orig_lead_lag) const;
+  //! Returns the number of auxiliary variables
+  int AuxVarsSize() const {return aux_vars.size();};
   //! Tests if symbol already exists
   inline bool exists(const string &name) const;
   //! Get symbol name (by ID)

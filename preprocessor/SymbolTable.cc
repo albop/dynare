@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2009 Dynare Team
+ * Copyright (C) 2003-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -341,6 +341,15 @@ SymbolTable::addExpectationAuxiliaryVar(int information_set, int index) throw (F
   aux_vars.push_back(avi);
 
   return symb_id;
+}
+
+int 
+SymbolTable::searchAuxiliaryVars(int orig_symb_id, int orig_lead_lag) const
+{
+  for (int i=0; i < aux_vars.size();++i)
+    if ((aux_vars[i].orig_symb_id == orig_symb_id) && (aux_vars[i].orig_lead_lag == orig_lead_lag))
+      return aux_vars[i].symb_id;
+  return -1;
 }
 
 void
