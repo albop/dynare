@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2009 Dynare Team
+ * Copyright (C) 2003-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -105,7 +105,7 @@ class ParsingDriver;
 %token <string_val> INT_NUMBER
 %token INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF
 %token KALMAN_ALGO KALMAN_TOL
-%token LABELS LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_IDENT_FILES LOAD_MH_FILE LOAD_PARAMS_AND_STEADY_STATE LOGLINEAR
+%token LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_IDENT_FILES LOAD_MH_FILE LOAD_PARAMS_AND_STEADY_STATE LOGLINEAR
 %token MARKOWITZ MARGINAL_DENSITY MAX
 %token MFS MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER MIN MINIMAL_SOLVING_PERIODS
 %token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_INFO MSHOCKS
@@ -822,24 +822,6 @@ symbol_list_ext : symbol_list
                   }
                 ;
 
-list_of_symbol_lists : symbol_list ';' symbol
-                       {
-                         string *semicolon = new string(";");
-			 driver.add_in_symbol_list(semicolon);
-			 driver.add_in_symbol_list($3);
-		       }
-                     | list_of_symbol_lists  symbol
-                       { driver.add_in_symbol_list($2); }
-                     | list_of_symbol_lists COMMA symbol
-                       { driver.add_in_symbol_list($3); }
-                     | list_of_symbol_lists ';' symbol
-                       {
-                         string *semicolon = new string(";");
-			 driver.add_in_symbol_list(semicolon);
-			 driver.add_in_symbol_list($3);
-		       }
-                     ;
-
 signed_integer : PLUS INT_NUMBER
                  { $$ = $2; }
                | MINUS INT_NUMBER
@@ -1275,11 +1257,7 @@ write_latex_static_model : WRITE_LATEX_STATIC_MODEL ';'
 
 shock_decomposition : SHOCK_DECOMPOSITION ';'
                       {driver.shock_decomposition(); }
-                    | SHOCK_DECOMPOSITION '(' shock_decomposition_options_list ')' ';'
-                      { driver.shock_decomposition(); }
                     | SHOCK_DECOMPOSITION symbol_list ';'
-                      { driver.shock_decomposition(); }
-                    | SHOCK_DECOMPOSITION '(' shock_decomposition_options_list ')' symbol_list ';'
                       { driver.shock_decomposition(); }
                     ;
 
@@ -1525,15 +1503,6 @@ dynare_sensitivity_option : o_gsa_identification
                           | o_ar
                           ;
 
-shock_decomposition_options_list : shock_decomposition_option COMMA shock_decomposition_options_list
-                                 | shock_decomposition_option
-                                 ;
-
-shock_decomposition_option : o_parameters
-                           | o_shocks
-                           | o_labels
-                           ;
-
 homotopy_setup: HOMOTOPY_SETUP ';' homotopy_list END
                { driver.end_homotopy();};
 
@@ -1760,10 +1729,6 @@ o_parameter_set : PARAMETER_SET EQUAL PRIOR_MODE
                 | PARAMETER_SET EQUAL POSTERIOR_MEDIAN
                   { driver.option_str("parameter_set", "posterior_median"); }
                 ;
-
-o_parameters : PARAMETERS EQUAL symbol {driver.option_str("parameters",$3);};
-o_shocks : SHOCKS EQUAL '(' list_of_symbol_lists ')' { driver.option_symbol_list("shocks"); };
-o_labels : LABELS EQUAL '(' symbol_list ')' { driver.option_symbol_list("labels"); };
 
 o_freq : FREQ EQUAL INT_NUMBER {driver.option_num("ms.freq",$3); };
 o_initial_year : INITIAL_YEAR EQUAL INT_NUMBER {driver.option_num("ms.initial_year",$3); };

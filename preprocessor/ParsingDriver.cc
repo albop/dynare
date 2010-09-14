@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2009 Dynare Team
+ * Copyright (C) 2003-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -1291,9 +1291,8 @@ ParsingDriver::markov_switching()
 void
 ParsingDriver::shock_decomposition()
 {
-  mod_file->addStatement(new ShockDecompositionStatement(symbol_list, options_list));
+  mod_file->addStatement(new ShockDecompositionStatement(symbol_list));
   symbol_list.clear();
-  options_list.clear();
 }
 
 void

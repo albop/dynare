@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2009 Dynare Team
+ * Copyright (C) 2003-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -441,10 +441,8 @@ class ShockDecompositionStatement : public Statement
 {
 private:
   const SymbolList symbol_list;
-  const OptionsList options_list;
 public:
-  ShockDecompositionStatement(const SymbolList &symbol_list_arg,
-                              const OptionsList &options_list_arg);
+  ShockDecompositionStatement(const SymbolList &symbol_list_arg);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
