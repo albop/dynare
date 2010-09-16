@@ -320,12 +320,20 @@ EstimatedParamsStatement::EstimatedParamsStatement(const vector<EstimationParams
 {
   for (vector<EstimationParams>::const_iterator it = estim_params_list.begin();
        it != estim_params_list.end(); it++)
+    // Handle case of degenerate beta prior
     if (it->prior == "1") //BETA_PDF is associated with "1" in DynareBison.yy
-      if (dynamic_cast<NumConstNode *>(it->mean)->isNumConstNodeEqualTo(0.5) &&
-          dynamic_cast<NumConstNode *>(it->std)->isNumConstNodeEqualTo(0.5))
+      try
         {
-          cerr << "The prior density is not defined for the beta distribution when the mean = standard deviation = 0.5." << endl;
-          exit(EXIT_FAILURE);
+          if (it->mean->eval(eval_context_type()) == 0.5 &&
+              it->std->eval(eval_context_type()) == 0.5)
+            {
+              cerr << "ERROR: The prior density is not defined for the beta distribution when the mean = standard deviation = 0.5." << endl;
+              exit(EXIT_FAILURE);
+            }
+        }
+      catch (ExprNode::EvalException &e)
+        {
+          // We don't have enough information to compute the numerical value, skip the test
         }
 }
 
