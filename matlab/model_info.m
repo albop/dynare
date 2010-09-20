@@ -56,7 +56,7 @@ if(isfield(M_,'block_structure'))
             IM=[];
         end;
         size_IM=size(IM,1);
-        last=99999999;
+        last=0;
         for i=1:size_IM
             if(last~=IM(i,2))
                 fprintf('\n%-30s',M_.endo_names(IM(i,2),:));
