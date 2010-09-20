@@ -557,7 +557,11 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
           output << "oo_.steady_state(" << tsid + 1 << ")";
           break;
         case oMatlabDynamicSteadyStateOperator:
+        case oMatlabDynamicSparseSteadyStateOperator:
           output << "oo_.steady_state(" << tsid + 1 << ")";
+          break;
+        case oCDynamicSteadyStateOperator:
+          output << "steady_state[" << tsid << "]";
           break;
         default:
           assert(false);
@@ -1409,12 +1413,12 @@ UnaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
           new_output_type = oLatexDynamicSteadyStateOperator;
           break;
         case oCDynamicModel:
-          cerr << "Steady State Operator not implemented for oCDynamicModel." << endl;
-          exit(EXIT_FAILURE);
+          new_output_type = oCDynamicSteadyStateOperator;
+          break;
         case oMatlabDynamicModelSparse:
         case oMatlabDynamicModelSparseLocalTemporaryTerms:
-          cerr << "Steady State Operator not implemented for oMatlabDynamicModelSparse." << endl;
-          exit(EXIT_FAILURE);
+          new_output_type = oMatlabDynamicSparseSteadyStateOperator;
+          break;
         default:
           new_output_type = output_type;
           break;

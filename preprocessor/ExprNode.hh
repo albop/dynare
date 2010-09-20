@@ -66,7 +66,8 @@ enum ExprNodeOutputType
     oLatexDynamicModel,                                      //!< LaTeX code, dynamic model declarations
     oLatexDynamicSteadyStateOperator,            //!< LaTeX code, dynamic model steady state declarations
     oMatlabDynamicSteadyStateOperator,           //!< Matlab code, dynamic model steady state declarations
-    oMatlabDynamicModelSparseSteadyStateOperator, //!< Matlab code, dynamic block decomposed model steady state declarations
+    oMatlabDynamicSparseSteadyStateOperator,      //!< Matlab code, dynamic block decomposed model, inside a steady state operator
+    oCDynamicSteadyStateOperator,                 //!< C code, dynamic model, inside a steady state operator
     oMatlabDynamicModelSparseLocalTemporaryTerms  //!< Matlab code, dynamic block decomposed model local temporary_terms
   };
 
@@ -77,9 +78,9 @@ enum ExprNodeOutputType
                                 || (output_type) == oMatlabDynamicModelSparse \
                                 || (output_type) == oMatlabDynamicModelSparseLocalTemporaryTerms \
                                 || (output_type) == oMatlabDynamicSteadyStateOperator \
-                                || (output_type) == oMatlabDynamicModelSparseSteadyStateOperator)
+                                || (output_type) == oMatlabDynamicSparseSteadyStateOperator)
 
-#define IS_C(output_type) ((output_type) == oCDynamicModel)
+#define IS_C(output_type) ((output_type) == oCDynamicModel || (output_type) == oCDynamicSteadyStateOperator)
 
 #define IS_LATEX(output_type) ((output_type) == oLatexStaticModel       \
                                || (output_type) == oLatexDynamicModel   \
