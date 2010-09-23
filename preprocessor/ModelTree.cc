@@ -1009,11 +1009,18 @@ ModelTree::writeTemporaryTerms(const temporary_terms_type &tt, ostream &output,
 void
 ModelTree::writeModelLocalVariables(ostream &output, ExprNodeOutputType output_type) const
 {
-  for (map<int, NodeID>::const_iterator it = local_variables_table.begin();
-       it != local_variables_table.end(); it++)
+  /* Collect all model local variables appearing in equations, and print only
+     them. Printing unused model local variables can lead to a crash (see
+     ticket #101). */
+  set<int> used_local_vars;
+  for (size_t i = 0; i < equations.size(); i++)
+    equations[i]->collectModelLocalVariables(used_local_vars);
+
+  for (set<int>::const_iterator it = used_local_vars.begin();
+       it != used_local_vars.end(); ++it)
     {
-      int id = it->first;
-      NodeID value = it->second;
+      int id = *it;
+      NodeID value = local_variables_table.find(id)->second;
 
       if (IS_C(output_type))
         output << "double ";
