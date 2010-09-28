@@ -22,7 +22,8 @@ EXTRA_DIST = \
 	uncrustify.cfg \
 	license.txt \
 	windows/dynare.nsi \
-	windows/mexopts.bat \
+	windows/mexopts-win32.bat \
+	windows/mexopts-win64.bat \
 	windows/README.txt \
 	examples
 
