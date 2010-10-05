@@ -60,12 +60,6 @@ public:
   virtual ~DynamicModelDLL();
 
   // evaluate Dynamic model DLL
-  void eval(double *y, double *x, int nb_row_x, double *params,
-            int it_, double *residual, double *g1, double *g2, double *g3);
   void eval(const Vector &y, const Vector &x,  const Vector *params,
-            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
-  void eval(const Vector &y, const TwoDMatrix &x,  const Vector *params,
-            int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
-  void eval(const Vector &y, const TwoDMatrix &x,  const Vector *params,
             Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
 };

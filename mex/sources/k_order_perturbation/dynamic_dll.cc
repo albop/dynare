@@ -94,16 +94,8 @@ DynamicModelDLL::~DynamicModelDLL()
 }
 
 void
-DynamicModelDLL::eval(double *y, double *x, int nb_row_x, double *params,
-                      int it_, double *residual, double *g1, double *g2, double *g3)
-{
-  double *steady_state = const_cast<double *>(ySteady.base());
-  Dynamic(y, x, nb_row_x, params, steady_state, it_, residual, g1, g2, g3);
-}
-
-void
-DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modParams,
-                      int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
+DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector *modParams,
+                      Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
 {
   double  *dresidual, *dg1 = NULL, *dg2 = NULL, *dg3 = NULL;
 
@@ -127,26 +119,5 @@ DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modPa
   double *dbParams = const_cast<double *>(modParams->base());
   double *steady_state = const_cast<double *>(ySteady.base());
 
-  Dynamic(dy, dx, nExog, dbParams, steady_state, it_, dresidual, dg1, dg2, dg3);
-}
-
-void
-DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const Vector *modParams,
-                      Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
-{
-  eval(y, x, modParams, nMax_lag, residual, g1, g2, g3);
-}
-
-void
-DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector *modParams,
-                      Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
-{
-  /** ignore given exogens and create new 2D x matrix since
-   * when calling <model>_dynamic(z,x,params,it_) x must be equal to
-   * zeros(M_.maximum_lag+1,M_.exo_nbr)
-   **/
-  TwoDMatrix mx(nMax_lag+1, nExog);
-  mx.zeros(); // initialise shocks to 0s
-
-  eval(y, mx, modParams, nMax_lag, residual, g1, g2, g3);
+  Dynamic(dy, dx, 1, dbParams, steady_state, 0, dresidual, dg1, dg2, dg3);
 }
