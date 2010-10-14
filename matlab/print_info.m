@@ -56,6 +56,8 @@ if ~noprint
         error('The steady state is complex.')
       case 30 
         error('Variance can''t be computed')
+      case 43
+        error('Covariance matrix of shocks is not positive definite')
       otherwise
         error('This case shouldn''t happen. Contact the authors of Dynare')
     end
