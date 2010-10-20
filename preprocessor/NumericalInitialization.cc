@@ -186,13 +186,14 @@ HistValStatement::writeOutput(ostream &output, const string &basename) const
       const NodeID expression = it->second;
 
       SymbolType type = symbol_table.getType(symb_id);
-      if (type == eEndogenous && lag < 0)
+      if ((type == eEndogenous && lag < 0) || type == eExogenous)
 	{
 	  const int new_symb_id = symbol_table.searchAuxiliaryVars(symb_id,lag);
 	  if (new_symb_id != -1)
 	    {
 	      symb_id = new_symb_id;
 	      lag = 0;
+        type = eEndogenous;
 	    }
 	  else if (symbol_table.AuxVarsSize() > 0)
 	    {
