@@ -347,7 +347,8 @@ int
 SymbolTable::searchAuxiliaryVars(int orig_symb_id, int orig_lead_lag) const
 {
   for (int i=0; i < aux_vars.size();++i)
-    if ((aux_vars[i].orig_symb_id == orig_symb_id) && (aux_vars[i].orig_lead_lag == orig_lead_lag))
+    if ((aux_vars[i].type == avEndoLag || aux_vars[i].type == avExoLag)
+        && aux_vars[i].symb_id == orig_symb_id && aux_vars[i].orig_lead_lag == orig_lead_lag)
       return aux_vars[i].symb_id;
   return -1;
 }
