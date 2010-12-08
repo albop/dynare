@@ -1079,7 +1079,8 @@ UnaryOpNode::UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const 
   op_code(op_code_arg)
 {
   // Add myself to the unary op map
-  datatree.unary_op_node_map[make_pair(arg, op_code)] = this;
+  datatree.unary_op_node_map[make_pair(make_pair(arg, op_code),
+                                       expectation_information_set)] = this;
 }
 
 void

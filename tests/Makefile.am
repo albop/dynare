@@ -14,6 +14,7 @@ OCTAVE_MODS = \
 	ramst_normcdf.mod \
 	example1_varexo_det.mod \
 	predetermined_variables.mod \
+	expectation.mod \
 	steady_state_operator/standard.mod \
 	steady_state_operator/use_dll.mod \
 	steady_state_operator/block.mod \

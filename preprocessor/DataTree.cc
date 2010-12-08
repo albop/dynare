@@ -488,7 +488,7 @@ DataTree::isUnaryOpUsed(UnaryOpcode opcode) const
 {
   for (unary_op_node_map_type::const_iterator it = unary_op_node_map.begin();
        it != unary_op_node_map.end(); it++)
-    if (it->first.second == opcode)
+    if (it->first.first.second == opcode)
       return true;
 
   return false;
