@@ -508,9 +508,13 @@ ModelTree::computeBlockDecompositionAndFeedbackVariablesForEachBlock(jacob_map &
 {
   int nb_var = variable_reordered.size();
   int n = nb_var - prologue - epilogue;
-  typedef adjacency_list<vecS, vecS, directedS> DirectedGraph;
 
-  GraphvizDigraph G2(n);
+  AdjacencyList_type G2(n);
+
+  // It is necessary to manually initialize vertex_index property since this graph uses listS and not vecS as underlying vertex container
+  property_map<AdjacencyList_type, vertex_index_t>::type v_index = get(vertex_index, G2);
+  for (int i = 0; i < n; i++)
+    put(v_index, vertex(i, G2), i);
 
   vector<int> reverse_equation_reordered(nb_var), reverse_variable_reordered(nb_var);
 
@@ -524,12 +528,15 @@ ModelTree::computeBlockDecompositionAndFeedbackVariablesForEachBlock(jacob_map &
     if (reverse_equation_reordered[it->first.first] >= prologue && reverse_equation_reordered[it->first.first] < nb_var - epilogue
         && reverse_variable_reordered[it->first.second] >= prologue && reverse_variable_reordered[it->first.second] < nb_var - epilogue
         && it->first.first != endo2eq[it->first.second])
-      add_edge(reverse_equation_reordered[endo2eq[it->first.second]]-prologue, reverse_equation_reordered[it->first.first]-prologue, G2);
+      add_edge(vertex(reverse_equation_reordered[endo2eq[it->first.second]]-prologue, G2),
+               vertex(reverse_equation_reordered[it->first.first]-prologue, G2),
+               G2);
 
   vector<int> endo2block(num_vertices(G2)), discover_time(num_vertices(G2));
+  iterator_property_map<int*, property_map<AdjacencyList_type, vertex_index_t>::type, int, int&> endo2block_map(&endo2block[0], get(vertex_index, G2));
 
   // Compute strongly connected components
-  int num = strong_components(G2, &endo2block[0]);
+  int num = strong_components(G2, endo2block_map);
 
   blocks = vector<pair<int, int> >(num, make_pair(0, 0));
 
@@ -539,12 +546,12 @@ ModelTree::computeBlockDecompositionAndFeedbackVariablesForEachBlock(jacob_map &
 
   for (unsigned int i = 0; i < num_vertices(G2); i++)
     {
-      GraphvizDigraph::out_edge_iterator it_out, out_end;
-      GraphvizDigraph::vertex_descriptor vi = vertex(i, G2);
+      AdjacencyList_type::out_edge_iterator it_out, out_end;
+      AdjacencyList_type::vertex_descriptor vi = vertex(i, G2);
       for (tie(it_out, out_end) = out_edges(vi, G2); it_out != out_end; ++it_out)
         {
-          int t_b = endo2block[target(*it_out, G2)];
-          int s_b = endo2block[source(*it_out, G2)];
+          int t_b = endo2block_map[target(*it_out, G2)];
+          int s_b = endo2block_map[source(*it_out, G2)];
           if (s_b != t_b)
             add_edge(s_b, t_b, dag);
         }
@@ -585,13 +592,13 @@ ModelTree::computeBlockDecompositionAndFeedbackVariablesForEachBlock(jacob_map &
             or variable_lag_lead[variable_reordered[i+prologue]].second > 0 or variable_lag_lead[variable_reordered[i+prologue]].first > 0
             or equation_lag_lead[equation_reordered[i+prologue]].second > 0 or equation_lag_lead[equation_reordered[i+prologue]].first > 0
             or mfs == 0)
-          add_edge(i, i, G2);
+          add_edge(vertex(i, G2), vertex(i, G2), G2);
     }
   else
     {
       for (int i = 0; i < n; i++)
         if (Equation_Type[equation_reordered[i+prologue]].first == E_SOLVE || mfs == 0)
-          add_edge(i, i, G2);
+          add_edge(vertex(i, G2), vertex(i, G2), G2);
     }
   //For each block, the minimum set of feedback variable is computed
   // and the non-feedback variables are reordered to get
@@ -599,7 +606,7 @@ ModelTree::computeBlockDecompositionAndFeedbackVariablesForEachBlock(jacob_map &
 
   for (int i = 0; i < num; i++)
     {
-      AdjacencyList_type G = GraphvizDigraph_2_AdjacencyList(G2, components_set[i].first);
+      AdjacencyList_type G = extract_subgraph(G2, components_set[i].first);
       set<int> feed_back_vertices;
       //Print(G);
       AdjacencyList_type G1 = Minimal_set_of_feedback_vertex(feed_back_vertices, G);
