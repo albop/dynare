@@ -29,6 +29,9 @@ elseif options_.order == 3
     options_.k_order_solver = 1;
 end
 
+if isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-6;
+end
 
 TeX = options_.TeX;
 
