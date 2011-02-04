@@ -43,7 +43,6 @@ addpath([dynareroot '/kalman/likelihood'])
 addpath([dynareroot '/kalman/smoother'])
 addpath([dynareroot '/AIM/'])
 addpath([dynareroot '/partial_information/'])
-addpath([dynareroot '/ms-sbvar/'])
 addpath([dynareroot '/parallel/'])
 
 % For functions that exist only under some Octave versions

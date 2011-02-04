@@ -54,22 +54,14 @@ FFLAGS="$FFLAGS -Wall"
 CXXFLAGS="$CXXFLAGS -Wall -Wno-parentheses"
 
 AC_PROG_F77
-AM_CONDITIONAL([HAVE_FORT], [test "x$F77" != "x"])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
 AX_PROG_LN_S
 AC_PROG_MKDIR_P
 AX_PTHREAD
-# Check for boost libraries used in estimation DLL
-AC_LANG_PUSH([C++])
+# Check for boost libraries used in libdynare++
 AX_BOOST_BASE([1.36])
-CPPFLAGS_SAVED="$CPPFLAGS"
-CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-AC_CHECK_HEADER([boost/random/linear_congruential.hpp], [], [AC_MSG_ERROR([Can't find Boost Random Library])])
-AC_CHECK_HEADER([boost/math/distributions/beta.hpp], [], [AC_MSG_ERROR([Can't find Boost Math Library])])
-CPPFLAGS="$CPPFLAGS_SAVED"
-AC_LANG_POP([C++])
 # Check for dlopen(), needed by k_order_perturbation DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
@@ -84,12 +76,6 @@ if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x
   fi
 else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
-fi
-
-if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$F77" != "x"; then
-   BUILD_KALMAN_STEADY_STATE_MATLAB="yes"
-else
-   BUILD_KALMAN_STEADY_STATE_MATLAB="no (missing Fortran Compiler for compilation of libslicot)"
 fi
 
 AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
@@ -115,9 +101,8 @@ AC_MSG_NOTICE([
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for MATLAB (except Kalman Steady State):     $BUILD_MEX_MATLAB
- Kalman Steady State MEX file for MATLAB:               $BUILD_KALMAN_STEADY_STATE_MATLAB
- M2HTML documentation:                                  $BUILD_M2HTML
+ MEX files for MATLAB:     $BUILD_MEX_MATLAB
+ M2HTML documentation:     $BUILD_M2HTML
 
 ])
 
@@ -128,9 +113,6 @@ AC_CONFIG_FILES([Makefile
                  libdynare++/Makefile
                  gensylv/Makefile
                  k_order_perturbation/Makefile
-                 dynare_simul_/Makefile
-                 estimation/Makefile
-                 libslicot/Makefile
-                 kalman_steady_state/Makefile])
+                 dynare_simul_/Makefile])
 
 AC_OUTPUT

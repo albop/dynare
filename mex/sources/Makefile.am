@@ -1,5 +1,3 @@
-SUBDIRS = estimation
-
 EXTRA_DIST = \
 	dynblas.h \
 	dynlapack.h \
@@ -9,9 +7,7 @@ EXTRA_DIST = \
 	bytecode \
 	qzcomplex \
 	k_order_perturbation \
-	ordschur \
-	libslicot \
-	kalman_steady_state
+	ordschur
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`
