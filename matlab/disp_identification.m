@@ -19,7 +19,7 @@ function disp_identification(pdraws, idemodel, idemoments, name, advanced)
 
 global options_
 
-if nargin<5 | isempty(advanced),
+if nargin<5 || isempty(advanced),
     advanced=0;
 end
 
@@ -192,19 +192,19 @@ if ~any(idemoments.ino) && ~any(any(idemoments.ind==0))
     disp(' ')
 end
 
-if ~ options_.noprint & advanced,
-    disp('Press KEY to continue with identification analysis')
-    pause;
-    dyntable('Multi collinearity in the model:',char('param','min','mean','max'), ...
-             char(name(kok)),[mmin, mmean, mmax],10,10,6);
-    disp(' ')
-    dyntable('Multi collinearity for moments in J:',char('param','min','mean','max'), ...
-             char(name(kokJ)),[mminJ, mmeanJ, mmaxJ],10,10,6);
-    disp(' ')
-end
+% if ~ options_.noprint && advanced,
+%     disp('Press KEY to continue with identification analysis')
+%     pause;
+%     dyntable('Multi collinearity in the model:',char('param','min','mean','max'), ...
+%              char(name(kok)),[mmin, mmean, mmax],10,10,6);
+%     disp(' ')
+%     dyntable('Multi collinearity for moments in J:',char('param','min','mean','max'), ...
+%              char(name(kokJ)),[mminJ, mmeanJ, mmaxJ],10,10,6);
+%     disp(' ')
+% end
 
 
-% if advanced & (~options_.noprint),
+% if advanced && (~options_.noprint),
 %     for j=1:length(kokP),
 %         dyntable([name{kokP(j)},' pairwise correlations in the model'],char(' ','min','mean','max'), ...
 %                  char(name{jpM{j}}),[pminM{j}' pmeanM{j}' pmaxM{j}'],10,10,3);  
