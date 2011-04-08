@@ -87,7 +87,7 @@ else
                 addpath(mexpath)
             end
         else
-            mexpath = [dynareroot '../mex/matlab/win32-7.5-7.11'];
+            mexpath = [dynareroot '../mex/matlab/win32-7.5-7.12'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
@@ -112,7 +112,7 @@ else
                 addpath(mexpath)
             end
         else
-            mexpath = [dynareroot '../mex/matlab/win64-7.8-7.11'];
+            mexpath = [dynareroot '../mex/matlab/win64-7.8-7.12'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
