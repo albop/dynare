@@ -326,8 +326,10 @@ if iload <=0,
                     identification_checks(H(indH,:)./normH(:,ones(nparam,1)),JJ(indJJ,:)./normJ(:,ones(nparam,1)), gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)));
                 %                  identification_checks(H(indH,:),JJ(indJJ,:), gp(indLRE,:), bayestopt_);
                 indok = find(max(idemoments.indno{iteration},[],1)==0);
-                ide_strength_J=NaN(1,nparam);
-                ide_strength_J_prior=NaN(1,nparam);
+                if iteration ==1,
+                    ide_strength_J=NaN(1,nparam);
+                    ide_strength_J_prior=NaN(1,nparam);
+                end
                 if iteration ==1 && advanced,
                     [pars, cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ(:,ones(nparam,1)),max_ord_bruteforce,options_.TeX,name_tex);
                 end
