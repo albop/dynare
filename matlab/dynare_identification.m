@@ -53,6 +53,7 @@ options_ident = set_default_option(options_ident,'prior_range',0);
 options_ident = set_default_option(options_ident,'periods',300);
 options_ident = set_default_option(options_ident,'replic',100);
 options_ident = set_default_option(options_ident,'advanced',0);
+
 if nargin==2,
     options_ident.prior_mc=size(pdraws0,1);
 end
@@ -78,7 +79,7 @@ options_.Schur_vec_tol = 1.e-8;
 options_ = set_default_option(options_,'datafile',[]);
 options_.mode_compute = 0;
 options_.plot_priors = 0;
-[data,rawdata,xparam1,data_info]=dynare_estimation_init([],fname_,1);
+[data,rawdata,xparam1,data_info]=dynare_estimation_init(M_.endo_names,fname_,1);
 if isempty(data_info),
     data_info.gend = periods;
     data_info.data = [];
@@ -137,6 +138,10 @@ else
     name = [cellstr(M_.exo_names); cellstr(M_.param_names)];
     name_tex = [cellstr(M_.exo_names_tex); cellstr(M_.param_names_tex)];
 end
+
+options_ident = set_default_option(options_ident,'max_ord_bruteforce',min([2,nparam-1]));
+max_ord_bruteforce = options_ident.max_ord_bruteforce;
+
 
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
 
@@ -321,12 +326,12 @@ if iload <=0,
                     identification_checks(H(indH,:)./normH(:,ones(nparam,1)),JJ(indJJ,:)./normJ(:,ones(nparam,1)), gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)));
                 %                  identification_checks(H(indH,:),JJ(indJJ,:), gp(indLRE,:), bayestopt_);
                 indok = find(max(idemoments.indno{iteration},[],1)==0);
+                ide_strength_J=NaN(1,nparam);
+                ide_strength_J_prior=NaN(1,nparam);
+                if iteration ==1 && advanced,
+                    [pars, cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ(:,ones(nparam,1)),max_ord_bruteforce,options_.TeX,name_tex);
+                end
                 if iteration ==1 && ~isempty(indok),
-                    ide_strength_J=NaN(1,nparam);
-                    ide_strength_J_prior=NaN(1,nparam);
-                    if advanced,
-                        [pars, cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ(:,ones(nparam,1)),2,1,name_tex);
-                    end
                     normaliz = abs(params);
                     if prior_exist,
                         if ~isempty(estim_params_.var_exo),
@@ -338,6 +343,8 @@ if iload <=0,
                             normaliz1 = [normaliz1; estim_params_.param_vals(:,7)]'; % normalize with prior standard deviation
                         end
 %                         normaliz = max([normaliz; normaliz1]);
+                        normaliz1(isinf(normaliz1)) = 1;
+
                     else
                         normaliz1 = ones(1,nparam);
                     end
@@ -385,7 +392,7 @@ if iload <=0,
                     quant(isok,:) = siLRE(isok,:)./repmat(LRE(isok,iteration),1,np);
                     quant(inok,:) = siLRE(inok,:)./repmat(mean(abs(LRE(:,iteration))),length(inok),np);
                     siLREnorm(iteration,:) = vnorm(quant).*normaliz(offset+1:end);
-                    %                 siLREnorm(iteration,:) = vnorm(siLRE./repmat(LRE(:,iteration),1,nparam-offset)).*normaliz(offset+1:end);
+                    %                 siLREnorm(iteration,:) = vnorm(siLRE./repmat(LRE(:,iteration),1,nparam-offset)).*normaliz(offset+1:end);                    
                 end,
                 if run_index==MAX_tau || iteration==SampleSize,
                     file_index = file_index + 1;
@@ -408,7 +415,22 @@ if iload <=0,
     
     
     if SampleSize > 1,
-        close(h)
+        close(h),
+        normTAU=std(TAU')';
+        normLRE=std(LRE')';
+        normGAM=std(GAM')';
+        normaliz1=std(pdraws);
+        iter=0;
+        for ifile_index = 1:file_index,
+            load([IdentifDirectoryName '/' M_.fname '_identif_' int2str(ifile_index) '.mat'], 'stoH', 'stoJJ', 'stoLRE')
+            for irun=1:size(stoH,3),
+                iter=iter+1;
+                siJnorm(iter,:) = vnorm(stoJJ(:,:,irun)./repmat(normGAM,1,nparam)).*normaliz1;
+                siHnorm(iter,:) = vnorm(stoH(:,:,irun)./repmat(normTAU,1,nparam)).*normaliz1;
+                siLREnorm(iter,:) = vnorm(stoLRE(:,:,irun)./repmat(normLRE,1,nparam-offset)).*normaliz1(offset+1:end);
+            end
+            
+        end
     end
     
     
@@ -474,44 +496,44 @@ else
     close(h);
 end  
 
-if SampleSize>1,
-    siJmean = siJmean.*(ones(length(indJJ),1)*std(pdraws));
-    siHmean = siHmean.*(ones(length(indH),1)*std(pdraws));
-    siLREmean = siLREmean.*(ones(length(indLRE),1)*std(pdraws(:, offset+1:end )));
-
-    derJmean = derJmean.*(ones(length(indJJ),1)*std(pdraws));
-    derHmean = derHmean.*(ones(length(indH),1)*std(pdraws));
-    derLREmean = derLREmean.*(ones(length(indLRE),1)*std(pdraws(:, offset+1:end )));
-
-    derHmean = abs(derHmean./(max(siHmean')'*ones(1,size(pdraws,2))));
-    derJmean = abs(derJmean./(max(siJmean')'*ones(1,size(pdraws,2))));
-    derLREmean = abs(derLREmean./(max(siLREmean')'*ones(1,np)));
-
-    siHmean = siHmean./(max(siHmean')'*ones(1,size(pdraws,2)));
-    siJmean = siJmean./(max(siJmean')'*ones(1,size(pdraws,2)));
-    siLREmean = siLREmean./(max(siLREmean')'*ones(1,np));
-
-    tstJmean = derJmean*0;
-    tstHmean = derHmean*0;
-    tstLREmean = derLREmean*0;
-
-    if exist('OCTAVE_VERSION')
-        warning('off'),
-    else
-        warning off,
-    end
-
-    for j=1:nparam,
-        indd = 1:length(siJmean(:,j));
-        tstJmean(indd,j) = abs(derJmean(indd,j))./siJmean(indd,j);
-        indd = 1:length(siHmean(:,j));
-        tstHmean(indd,j) = abs(derHmean(indd,j))./siHmean(indd,j);
-        if j>offset
-            indd = 1:length(siLREmean(:,j-offset));
-            tstLREmean(indd,j-offset) = abs(derLREmean(indd,j-offset))./siLREmean(indd,j-offset);
-        end
-    end
-end
+% if SampleSize>1,
+%     siJmean = siJmean.*(ones(length(indJJ),1)*std(pdraws));
+%     siHmean = siHmean.*(ones(length(indH),1)*std(pdraws));
+%     siLREmean = siLREmean.*(ones(length(indLRE),1)*std(pdraws(:, offset+1:end )));
+% 
+%     derJmean = derJmean.*(ones(length(indJJ),1)*std(pdraws));
+%     derHmean = derHmean.*(ones(length(indH),1)*std(pdraws));
+%     derLREmean = derLREmean.*(ones(length(indLRE),1)*std(pdraws(:, offset+1:end )));
+% 
+%     derHmean = abs(derHmean./(max(siHmean')'*ones(1,size(pdraws,2))));
+%     derJmean = abs(derJmean./(max(siJmean')'*ones(1,size(pdraws,2))));
+%     derLREmean = abs(derLREmean./(max(siLREmean')'*ones(1,np)));
+% 
+%     siHmean = siHmean./(max(siHmean')'*ones(1,size(pdraws,2)));
+%     siJmean = siJmean./(max(siJmean')'*ones(1,size(pdraws,2)));
+%     siLREmean = siLREmean./(max(siLREmean')'*ones(1,np));
+% 
+%     tstJmean = derJmean*0;
+%     tstHmean = derHmean*0;
+%     tstLREmean = derLREmean*0;
+% 
+%     if exist('OCTAVE_VERSION')
+%         warning('off'),
+%     else
+%         warning off,
+%     end
+% 
+%     for j=1:nparam,
+%         indd = 1:length(siJmean(:,j));
+%         tstJmean(indd,j) = abs(derJmean(indd,j))./siJmean(indd,j);
+%         indd = 1:length(siHmean(:,j));
+%         tstHmean(indd,j) = abs(derHmean(indd,j))./siHmean(indd,j);
+%         if j>offset
+%             indd = 1:length(siLREmean(:,j-offset));
+%             tstLREmean(indd,j-offset) = abs(derLREmean(indd,j-offset))./siLREmean(indd,j-offset);
+%         end
+%     end
+% end
 
 
 if nargout>3 && iload,
@@ -530,141 +552,22 @@ end
 
 disp_identification(pdraws, idemodel, idemoments, name, advanced)
 
-
-if advanced,
-    figure('Name','Identification LRE model form'),
-    subplot(211)
-    if SampleSize > 1,
-        mmm = mean(siLREnorm);
-    else
-        mmm = (siLREnorm);
-    end
-    [ss, is] = sort(mmm);
-    if SampleSize ==1,
-        bar(siLREnorm(:,is))
-    else
-        myboxplot(log(siLREnorm(:,is)))
-    end
-    % mmm = mean(siLREmean);
-    % [ss, is] = sort(mmm);
-    % myboxplot(siLREmean(:,is))
-    % set(gca,'ylim',[0 1.05])
-    set(gca,'xticklabel','')
-    for ip=1:np,
-        text(ip,-0.02,deblank(M_.param_names(indx(is(ip)),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-    end
-    title('Sensitivity in the LRE model')
-    
-    subplot(212)
-    if SampleSize>1,
-        mmm = mean(-idelre.Mco');
-    else
-        mmm = (-idelre.Mco');
-    end
-    [ss, is] = sort(mmm);
-    if SampleSize ==1,
-        bar(idelre.Mco(is,:)')
-    else
-        myboxplot(idelre.Mco(is,:)')
-    end
-    set(gca,'ylim',[0 1])
-    set(gca,'xticklabel','')
-    for ip=1:np,
-        text(ip,-0.02,deblank(M_.param_names(indx(is(ip)),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-    end
-    title('Multicollinearity in the LRE model')
-    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_LRE'])
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_LRE']);
-    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_LRE']);
-    if options_.nograph, close(gcf); end
-    
-    figure('Name','Identification in the model'),
-    % subplot(311)
-    %
-    % if SampleSize>1,
-    % mmm = mean(ide_strength_H);
-    % else
-    % mmm = (ide_strength_H);
-    % end
-    % [ss, is] = sort(mmm);
-    % if SampleSize>1,
-    % myboxplot(ide_strength_H(:,is))
-    % else
-    % bar(ide_strength_H(:,is))
-    % end
-    % % set(gca,'ylim',[0 1.05])
-    % set(gca,'xticklabel','')
-    % dy = get(gca,'ylim');
-    % % dy=dy(2)-dy(1);
-    % for ip=1:nparam,
-    %     text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-    % end
-    % title('Identification strength in the model')
-    
-    subplot(211)
-    % mmm = mean(siHmean);
-    % [ss, is] = sort(mmm);
-    % myboxplot(siHmean(:,is))
-    if SampleSize>1,
-        mmm = mean(siHnorm);
-    else
-        mmm = (siHnorm);
-    end
-    [ss, is] = sort(mmm);
-    if SampleSize>1,
-        myboxplot(log(siHnorm(:,is)))
-    else
-        bar(siHnorm(:,is))
-    end
-    % set(gca,'ylim',[0 1.05])
-    set(gca,'xticklabel','')
-    dy = get(gca,'ylim');
-    % dy=dy(2)-dy(1);
-    for ip=1:nparam,
-        text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-    end
-    title('Sensitivity in the model')
-    
-    subplot(212)
-    if SampleSize>1,
-        mmm = mean(-idemodel.Mco');
-    else
-        mmm = (-idemodel.Mco');
-    end
-    % [ss, is] = sort(mmm);
-    if SampleSize>1,
-        myboxplot(idemodel.Mco(is,:)')
-    else
-        bar(idemodel.Mco(is,:)')
-    end
-    set(gca,'ylim',[0 1])
-    set(gca,'xticklabel','')
-    for ip=1:nparam,
-        text(ip,-0.02,name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-    end
-    title('Multicollinearity in the model')
-    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_model'])
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_model']);
-    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_model']);
-    if options_.nograph, close(gcf); end
-end
-
 figure('Name','Identification in the moments'),
 subplot(211)
 % mmm = mean(siHmean);
 % [ss, is] = sort(mmm);
 % myboxplot(siHmean(:,is))
-if SampleSize>1,
-    mmm = mean(ide_strength_J);
-else
+% if SampleSize>1,
+%     mmm = mean(ide_strength_J);
+% else
     mmm = (ide_strength_J);
-end
+% end
 [ss, is] = sort(mmm);
-if SampleSize>1,
-    myboxplot(log(ide_strength_J(:,is)))
-else
+% if SampleSize>1,
+%     myboxplot(log(ide_strength_J(:,is)))
+% else
     bar(log([ide_strength_J(:,is)' ide_strength_J_prior(:,is)']))
-end
+% end
 % set(gca,'ylim',[0 1.05])
 set(gca,'xlim',[0 nparam+1])
 set(gca,'xticklabel','')
@@ -686,11 +589,11 @@ else
     mmm = (siJnorm);
 end
 % [ss, is] = sort(mmm);
-if SampleSize > 1,
-    myboxplot(log(siJnorm(:,is)))
-else
-    bar(siJnorm(:,is))
-end
+% if SampleSize > 1,
+%     myboxplot(log(siJnorm(:,is)))
+% else
+    bar(mmm(is))
+% end
 % set(gca,'ylim',[0 1.05])
 set(gca,'xlim',[0 nparam+1])
 set(gca,'xticklabel','')
@@ -701,32 +604,62 @@ for ip=1:nparam,
 end
 title('Sensitivity in the moments')
 
-% subplot(313)
-% if SampleSize>1,
-% mmm = mean(-idemoments.Mco');
-% else
-% mmm = (-idemoments.Mco');
-% end
-% % [ss, is] = sort(mmm);
-% if SampleSize>1,
-% myboxplot(idemoments.Mco(is,:)')
-% else
-% bar(idemoments.Mco(is,:)')
-% end
-% set(gca,'ylim',[0 1])
-% set(gca,'xticklabel','')
-% for ip=1:nparam,
-%     text(ip,-0.02,name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-% end
-% title('Multicollinearity in the moments')
-% saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_moments'])
-% eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_moments']);
-% eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_moments']);
-% if options_.nograph, close(gcf); end
+if advanced,
+    figure('Name','Identification in the model'),
+    subplot(211)
+    if SampleSize > 1,
+        mmm = mean(siLREnorm);
+    else
+        mmm = (siLREnorm);
+    end
+    mmm = [NaN(1, offset), mmm];
+%     [ss, is] = sort(mmm);
+%     if SampleSize ==1,
+        bar(mmm(is))
+%     else
+%         myboxplot(log(siLREnorm(:,is)))
+%     end
+    % mmm = mean(siLREmean);
+    % [ss, is] = sort(mmm);
+    % myboxplot(siLREmean(:,is))
+    % set(gca,'ylim',[0 1.05])
+    set(gca,'xticklabel','')
+%     for ip=1:np,
+%         text(ip,-0.02,deblank(M_.param_names(indx(is(ip)),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    for ip=1:nparam,
+        text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    end
+    title('Sensitivity in the LRE model')
+        
+    subplot(212)
+    % mmm = mean(siHmean);
+    % [ss, is] = sort(mmm);
+    % myboxplot(siHmean(:,is))
+    if SampleSize>1,
+        mmm = mean(siHnorm);
+    else
+        mmm = (siHnorm);
+    end
+%     [ss, is] = sort(mmm);
+%     if SampleSize>1,
+%         myboxplot(log(siHnorm(:,is)))
+%     else
+        bar(mmm(is))
+%     end
+    % set(gca,'ylim',[0 1.05])
+    set(gca,'xticklabel','')
+    dy = get(gca,'ylim');
+    % dy=dy(2)-dy(1);
+    for ip=1:nparam,
+        text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    end
+    title('Sensitivity in the model')
+    
+    if options_.nograph, close(gcf); end
 
-if SampleSize==1 && advanced,
     % identificaton patterns
     for  j=1:size(cosnJ,2),
+        pax=NaN(nparam,nparam);
         fprintf('\n\n')
         disp(['Collinearity patterns with ', int2str(j) ,' parameter(s)'])
         fprintf('%-15s [%-*s] %10s\n','Parameter',(15+1)*j,' Expl. params ','cosn')
@@ -736,7 +669,24 @@ if SampleSize==1 && advanced,
                 namx=[namx ' ' sprintf('%-15s',name{pars{i,j}(in)})];
             end
             fprintf('%-15s [%s] %10.3f\n',name{i},namx,cosnJ(i,j))
+            pax(i,pars{i,j})=cosnJ(i,j);
         end
+        figure('name',['Collinearity patterns with ', int2str(j) ,' parameter(s)']), 
+        imagesc(pax,[0 1]);
+        set(gca,'xticklabel','')
+        set(gca,'yticklabel','')
+        for ip=1:nparam,
+            text(ip,(0.5),name{ip},'rotation',90,'HorizontalAlignment','left','interpreter','none')
+            text(0.5,ip,name{ip},'rotation',0,'HorizontalAlignment','right','interpreter','none')
+        end
+        colorbar;
+        ax=colormap;
+        ax(1,:)=[0.9 0.9 0.9];
+        colormap(ax);
+        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_collinearity_', int2str(j)])
+        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j)]);
+        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j)]);
+        if options_.nograph, close(gcf); end
     end
     disp('')
     [U,S,V]=svd(siJ./normJ(:,ones(nparam,1)),0);
@@ -762,8 +712,8 @@ if SampleSize==1 && advanced,
 %                 xlabel('SMALLEST singular values'), 
 %             end,
         else
-            bar(abs(V(:,j))),
-            Stit = S(j,j);
+            bar(abs(V(:,jj))),
+            Stit = S(jj,jj);
 %             if j==8 || j==nparam, 
 %                 xlabel('LARGEST singular values'), 
 %             end,
@@ -786,10 +736,9 @@ if SampleSize==1 && advanced,
     eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_2']);
     eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_2']);
     end
-end
-
-if advanced,
-    if SampleSize>1
+    
+    if SampleSize>1,
+        options_.nograph=1;
         figure('Name','Condition Number'),
         subplot(221)
         hist(log10(idemodel.cond))
@@ -804,73 +753,26 @@ if advanced,
         eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
         eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
         if options_.nograph, close(gcf); end
-    end
-    
-    
-    pco = NaN(np,np);
-    for j=1:np,
-        if SampleSize>1
-            pco(j+1:end,j) = mean(abs(squeeze(idelre.Pco(j+1:end,j,:))'));
-        else
-            pco(j+1:end,j) = abs(idelre.Pco(j+1:end,j))';
+        ncut=floor(SampleSize/10*9);
+        [~,is]=sort(idelre.cond);
+        [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), 'HighestCondNumberLRE', 1, [], IdentifDirectoryName);
+        [~,is]=sort(idemodel.cond);
+        [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), 'HighestCondNumberModel', 1, [], IdentifDirectoryName);
+        [~,is]=sort(idemoments.cond);
+        [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), 'HighestCondNumberMoments', 1, [], IdentifDirectoryName);
+%         [proba, dproba] = stab_map_1(idemoments.Mco', is(1:ncut), is(ncut+1:end), 'HighestCondNumberMoments_vs_Mco', 1, [], IdentifDirectoryName);
+        for j=1:nparam,
+%             ibeh=find(idemoments.Mco(j,:)<0.9);
+%             inonbeh=find(idemoments.Mco(j,:)>=0.9);
+%             if ~isempty(ibeh) && ~isempty(inonbeh)
+%                 [proba, dproba] = stab_map_1(pdraws, ibeh, inonbeh, ['HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName);
+%             end
+            [~,is]=sort(idemoments.Mco(j,:));
+            [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), ['HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName);
         end
     end
-    figure('name','Pairwise correlations in the LRE model'),
-    imagesc(pco',[0 1]);
-    set(gca,'xticklabel','')
-    set(gca,'yticklabel','')
-    for ip=1:nparam,
-        text(ip,(0.5),name{ip},'rotation',90,'HorizontalAlignment','left','interpreter','none')
-        text(0.5,ip,name{ip},'rotation',0,'HorizontalAlignment','right','interpreter','none')
-    end
-    colorbar;
-    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_LRE'])
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_LRE']);
-    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_LRE']);
-    if options_.nograph, close(gcf); end
     
-    pco = NaN(nparam,nparam);
-    for j=1:nparam,
-        if SampleSize>1
-            pco(j+1:end,j) = mean(abs(squeeze(idemodel.Pco(j+1:end,j,:))'));
-        else
-            pco(j+1:end,j) = abs(idemodel.Pco(j+1:end,j))';
-        end
-    end
-    figure('name','Pairwise correlations in the model'),
-    imagesc(pco',[0 1]);
-    set(gca,'xticklabel','')
-    set(gca,'yticklabel','')
-    for ip=1:nparam,
-        text(ip,(0.5),name{ip},'rotation',90,'HorizontalAlignment','left','interpreter','none')
-        text(0.5,ip,name{ip},'rotation',0,'HorizontalAlignment','right','interpreter','none')
-    end
-    colorbar;
-    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_model'])
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_model']);
-    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_model']);
-    if options_.nograph, close(gcf); end
     
-    for j=1:nparam,
-        if SampleSize>1
-            pco(j+1:end,j) = mean(abs(squeeze(idemoments.Pco(j+1:end,j,:))'));
-        else
-            pco(j+1:end,j) = abs(idemoments.Pco(j+1:end,j))';
-        end
-    end
-    figure('name','Pairwise correlations in the moments'),
-    imagesc(pco',[0 1]);
-    set(gca,'xticklabel','')
-    set(gca,'yticklabel','')
-    for ip=1:nparam,
-        text(ip,(0.5),name{ip},'rotation',90,'HorizontalAlignment','left','interpreter','none')
-        text(0.5,ip,name{ip},'rotation',0,'HorizontalAlignment','right','interpreter','none')
-    end
-    colorbar;
-    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_moments'])
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_moments']);
-    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_moments']);
-    if options_.nograph, close(gcf); end
 end
 
 
