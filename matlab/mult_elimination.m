@@ -36,7 +36,7 @@ npred = dr.npred;
 order_var = dr.order_var;
 nstates = M_.endo_names(order_var(nstatic+(1:npred)),:);
 
-il = strmatch('MULT_',nstates);
+il = strmatch('mult_',nstates);
 nil = setdiff(1:dr.npred,il);
 m_nbr = length(il);
 nm_nbr = length(nil);
@@ -71,7 +71,7 @@ M4 = AA2*E2*[R2_1*Q2(:,1:n2)'*[Q1_12' Q1_22']*[B1;B2]; zeros(m_nbr-n2,size(B,2))
 k1 = nstatic+(1:npred);
 k1 = k1(nil);
 
-endo_nbr = M_.orig_endo_nbr;
+endo_nbr = M_.orig_model.endo_nbr;
 exo_nbr = M_.exo_nbr;
 
 lead_lag_incidence = M_.lead_lag_incidence(:,1:endo_nbr+exo_nbr);
@@ -116,8 +116,8 @@ if nvar > 0
     
     my_title='ELIMINATION OF THE MULTIPLIERS';
     lab = nstates(nil,:);
-    labels = '';
-    for i = 1:size(lab,1)
+    labels = strcat(deblank(lab(i,:)),'(-1)');
+    for i = 2:size(lab,1)
         labels = char(labels,strcat(deblank(lab(i,:)),'(-1)'));
     end
     for i = 1:size(lab,1)
