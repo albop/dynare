@@ -3659,10 +3659,10 @@ Uses a Monte-Carlo based optimization routine (see
 wiki} for more details)
 
 @item 7
-Uses @code{fminsearch}, a simplex based optimization routine
-(available under Octave if the
-@uref{http://octave.sourceforge.net/optim/,optim} package from
-Octave-Forge is installed)
+Uses @code{fminsearch}, a simplex based optimization routine (available
+under MATLAB if the optimization toolbox is installed; available under
+Octave if the @uref{http://octave.sourceforge.net/optim/,optim}
+package from Octave-Forge is installed)
 
 @item @var{FUNCTION_NAME}
 It is also possible to give a @var{FUNCTION_NAME} to this option,
