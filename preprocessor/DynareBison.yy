@@ -159,7 +159,7 @@ class ParsingDriver;
 %token MARKOV_SWITCHING CHAIN STATE DURATION NUMBER_OF_STATES
 %token SVAR COEFFICIENTS VARIANCES CONSTANTS EQUATIONS
 %token EXTERNAL_FUNCTION EXT_FUNC_NAME EXT_FUNC_NARGS FIRST_DERIV_PROVIDED SECOND_DERIV_PROVIDED
-%token SELECTED_VARIABLES_ONLY COVA_COMPUTE
+%token SELECTED_VARIABLES_ONLY COVA_COMPUTE NEIGHBORHOOD_WIDTH
 
 %type <node_val> expression expression_or_empty
 %type <node_val> equation hand_side
@@ -1537,6 +1537,7 @@ dynare_sensitivity_option : o_gsa_identification
                           | o_gsa_namexo
                           | o_gsa_namlagendo
                           | o_gsa_var_rmse
+                          | o_gsa_neighborhood_width
                           | o_datafile
                           | o_nobs
                           | o_first_obs
@@ -1774,6 +1775,7 @@ o_gsa_istart_rmse : ISTART_RMSE EQUAL INT_NUMBER { driver.option_num("istart_rms
 o_gsa_alpha_rmse : ALPHA_RMSE EQUAL non_negative_number { driver.option_num("alpha_rmse", $3); };
 o_gsa_alpha2_rmse : ALPHA2_RMSE EQUAL non_negative_number { driver.option_num("alpha2_rmse", $3); };
 o_gsa_trans_ident : TRANS_IDENT EQUAL INT_NUMBER { driver.option_num("trans_ident", $3); };
+o_gsa_neighborhood_width : NEIGHBORHOOD_WIDTH EQUAL non_negative_number { driver.option_num("neighborhood_width", $3); };
 
 o_load_ident_files : LOAD_IDENT_FILES EQUAL INT_NUMBER { driver.option_num("load_ident_files", $3); }
 o_useautocorr : USEAUTOCORR EQUAL INT_NUMBER { driver.option_num("useautocorr", $3); }

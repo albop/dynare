@@ -522,6 +522,7 @@ string eofbuff;
 <DYNARE_STATEMENT>trans_ident {return token::TRANS_IDENT;}
 <DYNARE_STATEMENT>load_ident_files {return token::LOAD_IDENT_FILES;}
 <DYNARE_STATEMENT>useautocorr {return token::USEAUTOCORR;}
+<DYNARE_STATEMENT>neighborhood_width {return token::NEIGHBORHOOD_WIDTH;}
  /* end of GSA options */
 
  /* For identification() statement */
