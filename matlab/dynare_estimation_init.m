@@ -98,11 +98,15 @@ if options_.prefilter == 1
 end
 
 %% Set options related to filtered variables.
-if options_.filtered_vars ~= 0 && isempty(options_.filter_step_ahead), 
+if ~isequal(options_.filtered_vars,0) && isempty(options_.filter_step_ahead) 
     options_.filter_step_ahead = 1;
 end
 
-if options_.filter_step_ahead ~= 0
+if ~isequal(options_.filtered_vars,0) && isequal(options_.filter_step_ahead,0)
+    options_.filter_step_ahead = 1;
+end
+
+if ~isequal(options_.filter_step_ahead,0)
     options_.nk = max(options_.filter_step_ahead);
 end
 
