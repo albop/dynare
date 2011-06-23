@@ -53,6 +53,7 @@ options_ident = set_default_option(options_ident,'prior_range',0);
 options_ident = set_default_option(options_ident,'periods',300);
 options_ident = set_default_option(options_ident,'replic',100);
 options_ident = set_default_option(options_ident,'advanced',0);
+options_ident = set_default_option(options_ident,'lik_init',1);
 
 if nargin==2,
     options_ident.prior_mc=size(pdraws0,1);

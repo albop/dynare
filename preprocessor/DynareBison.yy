@@ -1245,6 +1245,7 @@ identification_option : o_ar
                       | o_useautocorr
                       | o_load_ident_files
                       | o_prior_mc
+                      | o_lik_init
                       ;
 
 model_comparison : MODEL_COMPARISON mc_filename_list ';'

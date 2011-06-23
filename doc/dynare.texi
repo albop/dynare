@@ -4599,6 +4599,10 @@ computed analyzes. Default: @code{0}
 
 @item prior_mc = @var{INTEGER}
 Size of Monte Carlo sample. Default: @code{2000}
+
+@item lik_init = @var{INTEGER}
+@xref{lik_init}
+
 @end table
 
 @end deffn
