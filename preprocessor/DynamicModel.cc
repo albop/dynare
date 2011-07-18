@@ -789,7 +789,6 @@ DynamicModel::writeModelEquationsOrdered_M(const string &dynamic_basename) const
           break;
         }
       output << "end" << endl;
-      writePowerDeriv(output, false);
       output.close();
     }
 }
@@ -1522,7 +1521,6 @@ DynamicModel::writeDynamicMFile(const string &dynamic_basename) const
 
   writeDynamicModel(mDynamicModelFile, false);
   mDynamicModelFile << "end" << endl; // Close *_dynamic function
-  writePowerDeriv(mDynamicModelFile, false);
   mDynamicModelFile.close();
 }
 
@@ -2031,7 +2029,6 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
   mDynamicModelFile << "  oo_.endo_simul = y';\n";
   mDynamicModelFile << "return;\n";
   mDynamicModelFile << "end" << endl;
-  writePowerDeriv(mDynamicModelFile, false);
 
   mDynamicModelFile.close();
 
@@ -3472,9 +3469,6 @@ DynamicModel::writeParamsDerivativesFile(const string &basename) const
 
   paramsDerivsFile << "end" << endl
                    << "end" << endl;
-
-  writePowerDeriv(paramsDerivsFile, false);
-
   paramsDerivsFile.close();
 }
 
