@@ -45,7 +45,7 @@ function imcforecast(constrained_paths, constrained_vars, options_cond_fcst)
 
 global options_ oo_ M_ bayestopt_
 
-if isfield(options_cond_fcst,'parameter_set') || isempty(options_cond_fcst.parameter_set)
+if ~isfield(options_cond_fcst,'parameter_set') || isempty(options_cond_fcst.parameter_set)
     options_cond_fcst.parameter_set = 'posterior_mode';
 end
 
