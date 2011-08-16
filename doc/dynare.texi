@@ -4310,7 +4310,7 @@ end;
 
 conditional_forecast(parameter_set = calibration, controlled_varexo = (e, u), replic = 3000);
 
-plot_conditional_forecast(periods = 10) e u;
+plot_conditional_forecast(periods = 10) a y;
 @end example
 
 @end deffn
