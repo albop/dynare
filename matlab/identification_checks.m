@@ -70,8 +70,8 @@ eH = zeros(npar,npar);
 eH(ind1,length(find(vnorm(H)<eps))+1:end) = e1; % non-zero eigenvectors
 eH(find(vnorm(H)<eps),1:length(find(vnorm(H)<eps)))=eye(length(find(vnorm(H)<eps)));
 condH = cond(H1);
-rankH = rank(H);
-rankHH = rank(H'*H);
+rankH = rank(HH./norm(HH),1.e-10);
+rankHH = rankH;
 
 ind2 = find(vnorm(JJ)>=eps); % take non-zero columns
 JJ1 = JJ(:,ind2);
@@ -80,8 +80,8 @@ eJ = zeros(npar,npar);
 eJ(ind2,length(find(vnorm(JJ)<eps))+1:end) = ee1; % non-zero eigenvectors
 eJ(find(vnorm(JJ)<eps),1:length(find(vnorm(JJ)<eps)))=eye(length(find(vnorm(JJ)<eps)));
 condJ = cond(JJ1);
-rankJJ = rank(JJ'*JJ);
-rankJ = rank(JJ);
+rankJ = rank(JJ./norm(JJ),1.e-10);
+rankJJ = rankJ;
 
 ind3 = find(vnorm(gp)>=eps); % take non-zero columns
 gp1 = gp(:,ind3);
