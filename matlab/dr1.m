@@ -370,7 +370,7 @@ else  % use original Dynare solver
         end
         for i=1:nd
             if abs(ss(i,i)) < 1e-6 && abs(tt(i,i)) < 1e-6
-                info(7) = 1;
+                info(1) = 7;
             end
         end
         return
