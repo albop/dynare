@@ -1650,7 +1650,7 @@ o_nocorr : NOCORR { driver.option_num("nocorr", "1"); };
 o_nofunctions : NOFUNCTIONS { driver.option_num("nofunctions", "1"); };
 o_nomoments : NOMOMENTS { driver.option_num("nomoments", "1"); };
 o_irf : IRF EQUAL INT_NUMBER { driver.option_num("irf", $3); };
-o_hp_filter : HP_FILTER EQUAL INT_NUMBER { driver.option_num("hp_filter", $3); };
+o_hp_filter : HP_FILTER EQUAL non_negative_number { driver.option_num("hp_filter", $3); };
 o_hp_ngrid : HP_NGRID EQUAL INT_NUMBER { driver.option_num("hp_ngrid", $3); };
 o_periods : PERIODS EQUAL INT_NUMBER { driver.option_num("periods", $3); };
 o_cutoff : CUTOFF EQUAL non_negative_number { driver.cutoff($3); }
