@@ -182,7 +182,7 @@ for i = 1:Size;
         end;
         dr.rank = dr.rank + data(i).rank;
         dr.eigval = [dr.eigval ; data(i).eigval];
-      case 5
+      case 6
         %Solve Forward complete
         if maximum_lag > 0 && n_pred > 0
             data(i).eigval = eig(- jacob(: , 1 : n_pred) / ...
@@ -193,7 +193,7 @@ for i = 1:Size;
             data(i).rank = 0;
         end;
         dr.eigval = [dr.eigval ; data(i).eigval];
-      case 6
+      case 7
         %Solve Backward complete
         if maximum_lead > 0 && n_fwrd > 0
             data(i).eigval = eig(- jacob(: , n_pred + n - n_fwrd + 1: n_pred + n))/ ...
@@ -205,7 +205,7 @@ for i = 1:Size;
         end;
         dr.rank = dr.rank + data(i).rank;
         dr.eigval = [dr.eigval ; data(i).eigval];
-      case 8
+      case {5,8}
         %The lead_lag_incidence contains columns in the following order :
         %  static variables, backward variable, mixed variables and forward variables
         %  
