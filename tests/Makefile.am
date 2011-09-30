@@ -80,6 +80,9 @@ EXTRA_DIST = $(MODS) \
 	block_bytecode/run_block_bytecode_tests.m \
 	block_bytecode/run_ls2003.m \
 	block_bytecode/ls2003.mod \
+	external_function/extFunDeriv.m \
+	external_function/extFunNoDerivs.m \
+	external_function/extFunWithFirstAndSecondDerivs.m \
 	fs2000/fsdat_simul.m \
 	fs2000/fs2000a_steadystate.m \
 	identification/kim/kim2_steadystate.m \
