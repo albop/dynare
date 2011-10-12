@@ -71,7 +71,7 @@ steady_state = steady_state_0;
 check1 = 0;
 % testing for steadystate file
 if (~options_.bytecode)
-    fh = str2func([M_.fname '_static']);
+    fh = [M_.fname '_static'];
 end;
 
 if options_.steadystate_flag
