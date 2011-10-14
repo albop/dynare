@@ -140,7 +140,12 @@ ModFile::checkPass()
       cerr << "ERROR: In 'model' block, 'use_dll' option is not compatible with 'block' or 'bytecode'" << endl;
       exit(EXIT_FAILURE);
     }
-
+  if (block || byte_code)
+    if (dynamic_model.isModelLocalVariableUsed())
+      {
+        cerr << "ERROR: In 'model' block, 'block' or 'bytecode' options are not yet compatible with pound expressions" << endl;
+        exit(EXIT_FAILURE);
+      }
   if ((stochastic_statement_present || mod_file_struct.check_present || mod_file_struct.steady_present) && no_static)
     {
       cerr << "ERROR: no_static option is incompatible with stoch_simul, estimation, osr, ramsey_policy, steady and check commands" << endl;

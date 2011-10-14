@@ -496,6 +496,7 @@ public:
     else
       return (-1);
   };
+  bool isModelLocalVariableUsed() const;
 };
 
 #endif
