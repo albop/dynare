@@ -756,11 +756,11 @@ if advanced,
         eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
         if options_.nograph, close(gcf); end
         ncut=floor(SampleSize/10*9);
-        [~,is]=sort(idelre.cond);
+        [dum,is]=sort(idelre.cond);
         [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), 'HighestCondNumberLRE', 1, [], IdentifDirectoryName);
-        [~,is]=sort(idemodel.cond);
+        [dum,is]=sort(idemodel.cond);
         [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), 'HighestCondNumberModel', 1, [], IdentifDirectoryName);
-        [~,is]=sort(idemoments.cond);
+        [dum,is]=sort(idemoments.cond);
         [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), 'HighestCondNumberMoments', 1, [], IdentifDirectoryName);
 %         [proba, dproba] = stab_map_1(idemoments.Mco', is(1:ncut), is(ncut+1:end), 'HighestCondNumberMoments_vs_Mco', 1, [], IdentifDirectoryName);
         for j=1:nparam,
@@ -769,7 +769,7 @@ if advanced,
 %             if ~isempty(ibeh) && ~isempty(inonbeh)
 %                 [proba, dproba] = stab_map_1(pdraws, ibeh, inonbeh, ['HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName);
 %             end
-            [~,is]=sort(idemoments.Mco(j,:));
+            [dum,is]=sort(idemoments.Mco(j,:));
             [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), ['HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName);
         end
     end
