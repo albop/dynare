@@ -70,7 +70,7 @@ eH = zeros(npar,npar);
 eH(ind1,length(find(vnorm(H)<eps))+1:end) = e1; % non-zero eigenvectors
 eH(find(vnorm(H)<eps),1:length(find(vnorm(H)<eps)))=eye(length(find(vnorm(H)<eps)));
 condH = cond(H1);
-rankH = rank(HH./norm(HH),1.e-10);
+rankH = rank(H./norm(H),1.e-10);
 rankHH = rankH;
 
 ind2 = find(vnorm(JJ)>=eps); % take non-zero columns
