@@ -6,7 +6,7 @@ function [hessian_mat, gg, htol1, ihh, hh_mat0, hh1] = mr_hessian(init,x,func,hf
 %
 % adapted from Michel Juillard original rutine hessian.m
 %
-%  func =  name of the function: func must give two outputs: 
+%  func =  function handle. The function must give two outputs:
 %    - the log-likelihood AND the single contributions at times t=1,...,T
 %    of the log-likelihood to compute outer product gradient
 %  x = parameter values
@@ -148,7 +148,6 @@ while i<n,
         h1(i)=h10;
         i=0;
     end
-    save hess.mat
 end
 
 h_1=h1;
@@ -182,7 +181,6 @@ if hflag==2,
             xh_1(i)=x(i);
             xh_1(j)=x(j);
             j=j+1;
-            save hess.mat
         end
         i=i+1;
     end
@@ -244,7 +242,3 @@ if any(isnan(hessian_mat)),
 end
 hh1=h1;
 htol1=htol;
-save hess.mat
-% 11/25/03 SA Created from Hessian_sparse (removed sparse)
-
-
