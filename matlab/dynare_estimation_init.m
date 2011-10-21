@@ -70,8 +70,9 @@ if options_.order > 1
     end
 end
 
-%% Set options_.lik_init equal to 3 if diffuse filter is used.
-if (options_.diffuse_filter==1) && (options_.lik_init==1)
+% Set options_.lik_init equal to 3 if diffuse filter is used or
+% kalman_algo refers to a diffuse filter algorithm.
+if (options_.diffuse_filter==1) || (options_.kalman_algo > 2)
     options_.lik_init = 3;
 end
 
