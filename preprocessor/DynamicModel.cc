@@ -3605,12 +3605,9 @@ DynamicModel::substituteLeadLagInternal(aux_var_t type, bool deterministic_model
 
   // Order of auxiliary variable definition equations:
   //  - expectation (entered before this function is called)
-  //  - lead variables from lower lead to higher lead (need to be listed in reverse order)
+  //  - lead variables from lower lead to higher lead
   //  - lag variables from lower lag to higher lag
-  if ((type == avEndoLead) || (type == avExoLead))
-    copy(neweqs.begin(), neweqs.end(), back_inserter(aux_equations));
-  else
-    copy(neweqs.begin(), neweqs.end(), back_inserter(aux_equations));
+  copy(neweqs.begin(), neweqs.end(), back_inserter(aux_equations));
 
   if (neweqs.size() > 0)
     {
