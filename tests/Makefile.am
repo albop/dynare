@@ -84,7 +84,9 @@ MODFILES = \
 	identification/kim/kim2.mod \
 	identification/as2007/as2007.mod \
 	simul/example1.mod \
-	conditional_forecasts/fs2000_est.mod
+	conditional_forecasts/fs2000_est.mod \
+	recursive/ls2003.mod \
+	recursive/ls2003_bayesian.mod \
 
 EXTRA_DIST = \
 	$(MODFILES) \
@@ -115,7 +117,8 @@ EXTRA_DIST = \
 	measurement_errors/data_ca1.m \
 	missing/simulate_data_with_missing_observations.m \
 	objectives/sgu_ex1.mat \
-	conditional_forecasts/fsdat_simul.m
+	conditional_forecasts/fsdat_simul.m \
+	recursive/data_ca1.m
 
 TARGETS =
 
