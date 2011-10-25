@@ -1,12 +1,10 @@
-DYNARE_ROOT = $(abs_top_srcdir)/matlab
-
-MODS = \
+MODFILES = \
 	ramst.mod \
 	ramst_a.mod \
 	example1.mod \
 	example2.mod \
 	example1_use_dll.mod \
-	example1_with_tags.mod\
+	example1_with_tags.mod \
 	t_sgu_ex1.mod \
 	osr_example.mod \
 	optimal_policy/ramsey.mod \
@@ -20,7 +18,15 @@ MODS = \
 	comments.mod \
 	histval_sto.mod \
 	histval_det.mod \
-	expectation.mod \
+	auxiliary_variables/test1.mod \
+	expectations/expectation.mod \
+	expectations/expectation_ss.mod \
+	expectations/expectation_ss_old.mod \
+	steady_state/walsh1_initval.mod \
+	steady_state/walsh1_old_ss.mod \
+	steady_state/walsh1_ssm.mod \
+	steady_state/walsh1_ssm_block.mod \
+	steady_state/multi_leads.mod \
 	steady_state_operator/standard.mod \
 	steady_state_operator/use_dll.mod \
 	steady_state_operator/block.mod \
@@ -47,6 +53,7 @@ MODS = \
 	fs2000/fs2000.mod \
 	fs2000/fs2000a.mod \
 	fs2000/fs2000c.mod \
+	fs2000/fs2000d.mod \
 	homotopy/homotopy1_test.mod \
 	homotopy/homotopy2_test.mod \
 	homotopy/homotopy3_test.mod \
@@ -73,51 +80,60 @@ MODS = \
 	external_function/example1_no_deriv_functions_provided.mod \
 	external_function/example1_no_deriv_functions_provided_dll.mod \
 	seeds.mod \
-	simul/example1.mod
+	gsa/ls2003.mod \
+	identification/kim/kim2.mod \
+	identification/as2007/as2007.mod \
+	simul/example1.mod \
+	conditional_forecasts/fs2000_est.mod
 
-EXTRA_DIST = $(MODS) \
-	run_test_octave.m \
-	block_bytecode/run_block_bytecode_tests.m \
-	block_bytecode/run_ls2003.m \
+EXTRA_DIST = \
+	$(MODFILES) \
+	homotopy/common.mod \
 	block_bytecode/ls2003.mod \
+	fs2000_ssfile_aux.m \
+	printMakeCheckMatlabErrMsg.m \
+	printMakeCheckOctaveErrMsg.m \
+	ramst_initval_file_data.m \
+	run_test.m \
+	run_test_matlab.m \
+	run_test_octave.m \
+	test.m \
+	AIM/data_ca1.m \
+	AIM/fs2000_b1L1L_AIM_steadystate.m \
+	AIM/fs2000_b1L1L_steadystate.m \
+	AIM/fsdat.m \
+	block_bytecode/run_ls2003.m \
+	bvar_a_la_sims/bvar_sample.m \
 	external_function/extFunDeriv.m \
 	external_function/extFunNoDerivs.m \
 	external_function/extFunWithFirstAndSecondDerivs.m \
-	fs2000/fsdat_simul.m \
+	expectations/expectation_ss_old_steadystate.m \
 	fs2000/fs2000a_steadystate.m \
-	identification/kim/kim2_steadystate.m \
-	identification/as2007/as2007_steadystate.m \
-	AIM/fs2000_b1L1L_steadystate.m \
-	AIM/fs2000_b1L1L_AIM_steadystate.m \
-	test.m \
-	objectives \
-	ramst_initval_file_data.m \
-	homotopy/common.mod \
-	bvar_a_la_sims/bvar_sample.m \
-	fs2000_ssfile_aux.m
+	fs2000/fsdat_simul.m \
+	k_order_perturbation/run_fs2000kplusplus.m \
+	ls2003/data_ca1.m \
+	measurement_errors/data_ca1.m \
+	missing/simulate_data_with_missing_observations.m \
+	objectives/sgu_ex1.mat \
+	conditional_forecasts/fsdat_simul.m
 
-TARGETS = check-matlab
+TARGETS =
+
+if HAVE_CMD_LINE_MATLAB
+TARGETS += check-matlab
+endif
 
 if HAVE_OCTAVE
-TARGETS += check-octave check-block-bytecode
+TARGETS += check-octave
 endif
 
 check-local: $(TARGETS)
 
-check-octave: $(MODS)
-	@set -e; \
-		for modfile in $(MODS); do \
-			$(OCTAVE) --norc --silent --no-history run_test_octave.m $$modfile $(DYNARE_ROOT) $(PACKAGE_VERSION); \
-		done
-.PHONY: check-octave
+check-matlab:
+	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(MATLAB)/bin/matlab -nodesktop -nosplash -r run_test_matlab
 
-check-block-bytecode:
-	cd block_bytecode && $(OCTAVE) --norc --silent --no-history run_block_bytecode_tests.m $(DYNARE_ROOT) $(PACKAGE_VERSION)
-.PHONY: check-block-bytecode
-
-check-matlab: $(MODS)
-# MATLAB stuff to be added here
-.PHONY: check-matlab
+check-octave:
+	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(OCTAVE) --norc --silent --no-history run_test_octave.m
 
 clean-local:
 	rm -f $(patsubst %.mod, %.m, $(MODS)) \
@@ -159,4 +175,9 @@ clean-local:
 
 	rm -rf partial_information/PItest3aHc0PCLsimModPiYrVarobsAll_PCL* partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR_PCL*
 
-	rm -rf block_bytecode/ws block_bytecode/ls2003_tmp*
+	rm -rf block_bytecode/ls2003_tmp*
+
+	rm -f $(shell find -name wsOct) \
+		$(shell find -name wsMat.mat)
+
+	rm -f run_test_matlab_output.txt run_test_octave_output.txt

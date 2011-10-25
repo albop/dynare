@@ -31,6 +31,7 @@ case ${host_os} in
     # On mingw32, we don't want dynamic libgcc
     # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
     LDFLAGS="$LDFLAGS -static-libgcc -static-libstdc++"
+    have_windows="yes"
     ;;
   *cygwin*)
     AC_MSG_WARN([You are compiling for the Cygwin target. This means that the preprocessor will])
@@ -41,6 +42,7 @@ case ${host_os} in
       # And by default, the AC_PROG_F77 will pick up g77 if it is present (even if gfortran is also here)
       F77=gfortran
     fi
+    have_windows="yes"
     ;;
 esac
 
@@ -196,8 +198,10 @@ AC_CONFIG_FILES([Makefile
 AC_ARG_ENABLE([matlab], AS_HELP_STRING([--disable-matlab], [disable compilation of MEX files for MATLAB]), [], [enable_matlab=yes])
 if test "x$enable_matlab" = "xyes"; then
   AC_CONFIG_SUBDIRS([mex/build/matlab])
+  AX_MATLAB
 fi
 AM_CONDITIONAL([ENABLE_MATLAB], [test "x$enable_matlab" = "xyes"])
+AM_CONDITIONAL([HAVE_CMD_LINE_MATLAB], [test "x$ax_enable_matlab" = "xyes" -a "x$have_windows" = "x"])
 
 AC_ARG_ENABLE([octave], AS_HELP_STRING([--disable-octave], [disable compilation of MEX files for Octave]), [], [enable_octave=yes])
 if test "x$enable_octave" = "xyes"; then
