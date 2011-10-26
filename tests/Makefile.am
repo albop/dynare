@@ -80,7 +80,6 @@ MODFILES = \
 	external_function/example1_no_deriv_functions_provided.mod \
 	external_function/example1_no_deriv_functions_provided_dll.mod \
 	seeds.mod \
-	gsa/ls2003.mod \
 	identification/kim/kim2.mod \
 	identification/as2007/as2007.mod \
 	simul/example1.mod \
