@@ -48,5 +48,5 @@ end;
 
 varobs c i;
 //varobs c i lam; //to check if observing lam identifies phi and theta
-identification(ar=1);
-//identification(prior_mc=100);
+//identification(ar=1);
+identification(prior_mc=100);
