@@ -56,10 +56,7 @@ ntype = [];
 
 if nargin>1
     dim = varargin{1};
-    if isempty(dim)
-        idx = find(size(A)~=1);
-        dim = idx(1);
-    elseif dim~=floor(dim) || dim<1
+    if ~isempty(dim) && (dim~=floor(dim) || dim<1),
         error('Dimension must be positive integer');
     end
     if nargin>2
@@ -67,7 +64,11 @@ if nargin>1
     end
 end
 
-
+if isempty(dim)
+    idx = find(size(A)~=1);
+    dim = idx(1);
+end
+    
 if isempty(ntype)
     y = sqrt(sum( abs(A).^2 , dim) );
 elseif ntype==1

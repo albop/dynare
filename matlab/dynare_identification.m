@@ -163,7 +163,7 @@ if iload <=0,
     run_index = 0;
 
     if SampleSize > 1,
-        h = waitbar(0,'Monte Carlo identification checks ...');
+        h = dyn_waitbar(0,'Monte Carlo identification checks ...');
     end
     [I,J]=find(M_.lead_lag_incidence');
 
@@ -409,7 +409,7 @@ if iload <=0,
                 end
                 
                 if SampleSize > 1,
-                    waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
+                    dyn_waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
                 end
             end
         end
@@ -417,7 +417,7 @@ if iload <=0,
     
     
     if SampleSize > 1,
-        close(h),
+        dyn_waitbar_close(h),
         normTAU=std(TAU')';
         normLRE=std(LRE')';
         normGAM=std(GAM')';
@@ -450,7 +450,7 @@ else
         idemoments0=idemoments;
         idelre0 = idelre;
         iteration = 0;
-        h = waitbar(0,'Monte Carlo identification checks ...');
+        h = dyn_waitbar(0,'Monte Carlo identification checks ...');
         for file_index=1:length(identFiles)
             load([IdentifDirectoryName '/' M_.fname '_identif_' int2str(file_index)], 'stoH', 'stoJJ', 'stoLRE')
             for index=1:size(stoH,3),
@@ -471,14 +471,14 @@ else
                     identification_checks(stoH(:,:,index)./normH(:,ones(nparam,1)), ...
                     stoJJ(:,:,index)./normJ(:,ones(nparam,1)), ...
                     stoLRE(:,:,index)./normLRE(:,ones(size(stoLRE,2),1)));
-                waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
+                dyn_waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
             end
         end
-        close(h);
+        dyn_waitbar_close(h);
         save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idemodel', 'idemoments', 'idelre', '-append')
     end
     iteration = 0;
-    h = waitbar(0,'Monte Carlo identification checks ...');
+    h = dyn_waitbar(0,'Monte Carlo identification checks ...');
     for file_index=1:length(identFiles)
         load([IdentifDirectoryName '/' M_.fname '_identif_' int2str(file_index)], 'stoH', 'stoJJ', 'stoLRE')
         for index=1:size(stoH,3),
@@ -492,10 +492,10 @@ else
             FOCR(iteration,:) = ((GAM(:,iteration)./GAM(:,1)-1)./GAM(:,1))'*stoJJ(:,:,index);
             FOCHR(iteration,:) = ((TAU(:,iteration)./TAU(:,1)-1)./TAU(:,1))'*stoH(:,:,index);
             
-            waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
+            dyn_waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
         end
     end
-    close(h);
+    dyn_waitbar_close(h);
 end  
 
 % if SampleSize>1,
@@ -578,7 +578,7 @@ dy = get(gca,'ylim');
 for ip=1:nparam,
     text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
-legend('relative to param value','relative to prior std','Location','Best')
+legend('relative to param value','relative to prior std',0)
 title('Identification strength in the moments (log-scale)')
 
 subplot(212)
@@ -605,6 +605,11 @@ for ip=1:nparam,
     text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Sensitivity in the moments')
+eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ide_strength.eps']);
+if ~exist('OCTAVE_VERSION'),
+    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ide_strength'])
+    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ide_strength']);
+end
 
 if advanced,
     figure('Name','Identification in the model'),
@@ -657,7 +662,12 @@ if advanced,
     end
     title('Sensitivity in the model')
     
-    if options_.nograph, close(gcf); end
+    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_sensitivity.eps']);
+    if ~exist('OCTAVE_VERSION'),
+        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_sensitivity'])
+        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_sensitivity']);
+    end
+    close(gcf); 
 
     % identificaton patterns
     for  j=1:size(cosnJ,2),
@@ -685,10 +695,12 @@ if advanced,
         ax=colormap;
         ax(1,:)=[0.9 0.9 0.9];
         colormap(ax);
-        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_collinearity_', int2str(j)])
-        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j)]);
-        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j)]);
-        if options_.nograph, close(gcf); end
+        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j) '.eps']);
+        if ~exist('OCTAVE_VERSION'),
+            saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_collinearity_', int2str(j)])
+            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j)]);
+        end
+        close(gcf);
     end
     disp('')
     [U,S,V]=svd(siJ./normJ(:,ones(nparam,1)),0);
@@ -729,18 +741,21 @@ if advanced,
         title(['Singular value ',num2str(Stit)])
     end
     figure(f1);
-    saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_1'])
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_1']);
-    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_1']);
+    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_1.eps']);
+    if ~exist('OCTAVE_VERSION'),
+        saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_1'])
+        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_1']);
+    end
     if nparam>4,
     figure(f2),
-    saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_2'])
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_2']);
-    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_2']);
+    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_2.eps']);
+    if ~exist('OCTAVE_VERSION'),
+        saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_2'])
+        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_2']);
+    end
     end
     
     if SampleSize>1,
-        options_.nograph=1;
         figure('Name','Condition Number'),
         subplot(221)
         hist(log10(idemodel.cond))
@@ -751,10 +766,12 @@ if advanced,
         subplot(223)
         hist(log10(idelre.cond))
         title('log10 of Condition number in the LRE model')
-        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
-        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
-        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
-        if options_.nograph, close(gcf); end
+        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND.eps']);
+        if ~exist('OCTAVE_VERSION'),
+            saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
+            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
+        end
+        close(gcf)
         ncut=floor(SampleSize/10*9);
         [dum,is]=sort(idelre.cond);
         [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), 'HighestCondNumberLRE', 1, [], IdentifDirectoryName);
@@ -770,6 +787,7 @@ if advanced,
 %                 [proba, dproba] = stab_map_1(pdraws, ibeh, inonbeh, ['HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName);
 %             end
             [dum,is]=sort(idemoments.Mco(j,:));
+            options_.nograph=1;
             [proba, dproba] = stab_map_1(pdraws, is(1:ncut), is(ncut+1:end), ['HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName);
         end
     end
