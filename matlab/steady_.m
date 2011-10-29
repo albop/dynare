@@ -78,13 +78,13 @@ if options_.steadystate_flag
                 else
                     [r, g1, ssss] = feval([M_.fname '_static'], b, ss, ...
                                           [oo_.exo_steady_state; oo_.exo_det_steady_state], M_.params);
+                    idx = find(abs(ssss-oo_.steady_state)>10*options_.dynatol);
+                    if ~isempty(idx)
+                        check1 = 1;
+                    end
                 end
             end
-            check1 = any(check2);
-            idx = find(abs(ssss-oo_.steady_state)>10*options_.dynatol);
-            if ~isempty(idx)
-                check1 = 1;
-            end
+            check1 = check1 | any(check2);
         elseif options_.bytecode
             [check1, residuals] = bytecode('evaluate','static',oo_.steady_state,...
                                            [oo_.exo_steady_state; ...
