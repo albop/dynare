@@ -204,7 +204,7 @@ hh_mat0=ggh'*ggh;  % outer product hessian
 A=diag(2.*h1);  % rescaling matrix
 % igg=inv(hh_mat);  % inverted rescaled outer product hessian
 ihh=A'*(hh_mat\A);  % inverted outer product hessian
-if hflag>0 & min(eig(reshape(hessian_mat,n,n)))>0,
+if hflag>0 && min(eig(reshape(hessian_mat,n,n)))>0,
     hh0 = A*reshape(hessian_mat,n,n)*A';  %rescaled second order derivatives
     hh = reshape(hessian_mat,n,n);  %rescaled second order derivatives
     sd0=sqrt(diag(hh0));   %rescaled 'standard errors' using second order derivatives
