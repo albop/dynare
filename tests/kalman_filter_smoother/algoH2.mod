@@ -57,7 +57,7 @@ X = oo_.SmoothedMeasurementErrors;
 ME = [X.dw X.dx X.dy X.z];
 if max(max(abs(dat(1000:1199,:)-S(:,[2:4 1])-ME))) > 1e-10;
    error('Test fails');
-end;
+end;    
 
 o1 = load('algoH1_results');
 obj_endo={'SmoothedVariables'; 'FilteredVariables'; 'UpdatedVariables'};
@@ -90,6 +90,6 @@ for i=1:nobj_exo;
     end;    
 end;
 
-if max(max(abs(o1.oo_.SmoothedMeasurementErrors.z - oo_.SmoothedMeasurementErrors.z))) > 1e-10;
+if max(max(abs(o1.oo_.SmoothedMeasurementErrors.z - oo_.SmoothedMeasurementErrors.z))) > 1e-10; 
    error('Test fails');
-end; 
+end;    

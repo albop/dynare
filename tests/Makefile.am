@@ -86,7 +86,8 @@ MODFILES = \
 	simul/example1.mod \
 	conditional_forecasts/fs2000_est.mod \
 	recursive/ls2003.mod \
-	recursive/ls2003_bayesian.mod
+	recursive/ls2003_bayesian.mod \
+	kalman_filter_smoother/gen_data.mod \
 	kalman_filter_smoother/algo1.mod \
 	kalman_filter_smoother/algo2.mod \
 	kalman_filter_smoother/algo3.mod \
