@@ -55,10 +55,6 @@ var e_a; stderr 0.014;
 var e_m; stderr 0.005;
 end;
 
-steady(nocheck);
-
-check;
-
 estimated_params;
 alp, beta_pdf, 0.356, 0.02;
 bet, beta_pdf, 0.993, 0.002;
