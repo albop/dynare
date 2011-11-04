@@ -134,7 +134,8 @@ EXTRA_DIST = \
 	objectives/sgu_ex1.mat \
 	conditional_forecasts/fsdat_simul.m \
 	recursive/data_ca1.m \
-	kalman_filter_smoother/fsdat_simul.m
+	kalman_filter_smoother/fsdat_simul.m \
+	kalman_filter_smoother/fs200a_steadystate.m
 
 TARGETS =
 
