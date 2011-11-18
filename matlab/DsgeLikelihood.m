@@ -126,7 +126,7 @@ M_.H = H;
 %------------------------------------------------------------------------------
 [T,R,SteadyState,info] = dynare_resolve('restrict');
 
-if info(1) == 1 || info(1) == 2 || info(1) == 5
+if info(1) == 1 || info(1) == 2 || info(1) == 7 || info(1) == 5
     fval = bayestopt_.penalty+1;
     cost_flag = 0;
     return
