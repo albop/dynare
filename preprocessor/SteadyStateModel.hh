@@ -23,6 +23,8 @@
 #include "DataTree.hh"
 #include "StaticModel.hh"
 
+#define STEADY_STATE_GENERATED_HEADER "% Generated file, will be deleted at next run of Dynare"
+
 class SteadyStateModel : public DataTree
 {
 private:

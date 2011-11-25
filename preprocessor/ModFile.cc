@@ -450,6 +450,22 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all, bool console, 
   if (!use_dll)
     mOutputFile << "erase_compiled_function('" + basename + "_dynamic');" << endl;
 
+  // Erase generated steady state file (see ticket #224)
+  string steadystatefile = basename + "_steadystate.m";
+  ifstream in(steadystatefile.c_str(), ios::binary);
+  if (!in.fail())
+    {
+      string line;
+      getline(in, line);
+      if (!line.compare(STEADY_STATE_GENERATED_HEADER))
+        {
+          in.close();
+          unlink(steadystatefile.c_str());
+        }
+      else
+        in.close();
+    }
+  
 #if defined(_WIN32) || defined(__CYGWIN32__)
   // If using USE_DLL with MSVC, check that the user didn't use a function not supported by MSVC (because MSVC doesn't comply with C99 standard)
   if (use_dll && msvc)

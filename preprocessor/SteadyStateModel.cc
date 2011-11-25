@@ -113,7 +113,11 @@ SteadyStateModel::writeSteadyStateFile(const string &basename, bool ramsey_polic
       exit(EXIT_FAILURE);
     }
 
-  output << "function [ys_, check_] = " << basename << "_steadystate(";
+  /* The following header is used when the preprocessor deletes the old
+     generated steady state file: it distinguishes this file from a hand
+     written one (see ticket #224) */
+  output << STEADY_STATE_GENERATED_HEADER << endl
+         << "function [ys_, check_] = " << basename << "_steadystate(";
   if (ramsey_policy)
     output << "ys_";
   else
