@@ -142,6 +142,7 @@ if options_.ramsey_policy
     klen = M_.maximum_lag + M_.maximum_lead + 1;
     dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
     oo_.steady_state = dr.ys;
+    lead_lag_incidence = M_.lead_lag_incidence;
 else
     klen = M_.maximum_lag + M_.maximum_lead + 1;
     iyv = M_.lead_lag_incidence';
