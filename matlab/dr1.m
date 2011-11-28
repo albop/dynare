@@ -545,7 +545,7 @@ mexErrCheck('gensylv', err);
 %ghxu
 %rhs
 hu = dr.ghu(nstatic+1:nstatic+npred,:);
-[rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zx,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+[err, rhs] = sparse_hessian_times_B_kronecker_C(hessian,zx,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
 mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
 hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
@@ -563,7 +563,7 @@ dr.ghxu = A\rhs;
 
 %ghuu
 %rhs
-[rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+[err, rhs] = sparse_hessian_times_B_kronecker_C(hessian,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
 mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
 [err, B1] = A_times_B_kronecker_C(B*dr.ghxx,hu1,options_.threads.kronecker.A_times_B_kronecker_C);
@@ -598,7 +598,7 @@ E1 = [eye(npred); zeros(kp-npred,npred)];
 H = E1;
 hxx = dr.ghxx(nstatic+[1:npred],:);
 [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+2,order_var));
-[B1, err] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k2,k2)),gu(k2a,:),options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+[err, B1] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k2,k2)),gu(k2a,:),options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
 mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
 
