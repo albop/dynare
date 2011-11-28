@@ -26,12 +26,6 @@ info = stoch_simul(var_list);
 
 if options_.noprint == 0
     disp_steady_state(M_,oo_)
-    for i=M_.orig_endo_nbr:M_.endo_nbr
-        if strmatch('mult_',M_.endo_names(i,:))
-            disp(sprintf('%s \t\t %g',M_.endo_names(i,:), ...
-                         oo_.dr.ys(i)));
-        end
-    end
 end
 
 
