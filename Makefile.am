@@ -19,6 +19,7 @@ ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = \
 	matlab \
 	uncrustify.cfg \
+	NEWS \
 	license.txt \
 	dynare.el \
 	windows/dynare.nsi \
