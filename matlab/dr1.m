@@ -599,7 +599,8 @@ E1 = [eye(npred); zeros(kp-npred,npred)];
 H = E1;
 hxx = dr.ghxx(nstatic+[1:npred],:);
 [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+2,order_var));
-[err, B1] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k2,k2)),gu(k2a,:),options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+[junk,k3a,k3] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+2,:));
+[err, B1] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k3a,:),options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
 mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
 
