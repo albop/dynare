@@ -52,7 +52,8 @@ if ~exist('OCTAVE_VERSION')
     addpath([dynareroot '/missing/rows_columns'])
     % Replacement for vec() (inexistent under MATLAB)
     addpath([dynareroot '/missing/vec'])
-    if isempty(license('inuse','statistics_toolbox'))
+    [has_statistics_toolbox junk] = license('checkout','statistics_toolbox');
+    if ~has_statistics_toolbox
         % Replacements for functions of the stats toolbox
         addpath([dynareroot '/missing/stats/'])
     end
