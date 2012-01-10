@@ -983,8 +983,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(1) '.eps']);
         if ~exist('OCTAVE_VERSION')
             eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(1)]);
+            if options_.nograph
+                set(hh, 'Visible','on');
+            end
             saveas(hh,[M_.fname '_SmoothedShocks' int2str(1) '.fig']);
         end
+        if options_.nograph, close(hh); end
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:M_.exo_nbr
@@ -1041,8 +1045,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(plt) '.eps']);
             if ~exist('OCTAVE_VERSION')
                 eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(plt)]);
+                if options_.nograph
+                    set(hh, 'Visible','on');
+                end
                 saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt) '.fig']);
             end
+            if options_.nograph, close(hh); end
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar
@@ -1100,8 +1108,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(nbplt) '.eps']);
         if ~exist('OCTAVE_VERSION')
             eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(nbplt)]);
+            if options_.nograph
+                set(hh, 'Visible','on');
+            end
             saveas(hh,[M_.fname '_SmoothedShocks' int2str(nbplt) '.fig']);
         end
+        if options_.nograph, close(hh); end
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:size(NAMES,1);
@@ -1190,8 +1202,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(1) '.eps']);
             if ~exist('OCTAVE_VERSION')
                 eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(1)]);
+                if options_.nograph
+                    set(hh, 'Visible','on');
+                end
                 saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(1) '.fig']);
             end
+        if options_.nograph, close(hh); end
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:number_of_plots_to_draw
@@ -1247,8 +1263,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(plt) '.eps']);
                 if ~exist('OCTAVE_VERSION')
                     eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(plt)]);
+                    if options_.nograph
+                        set(hh, 'Visible','on');
+                    end
                     saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(plt) '.fig']);
                 end
+                if options_.nograph, close(hh); end
                 if options_.TeX
                     fprintf(fidTeX,'\\begin{figure}[H]\n');
                     for jj = 1:nstar
@@ -1313,8 +1333,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(1) '.eps']);
         if ~exist('OCTAVE_VERSION')
             eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(1)]);
+            if options_.nograph
+                set(hh, 'Visible','on');
+            end
             saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(1) '.fig']);
         end
+        if options_.nograph, close(hh); end
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:n_varobs
@@ -1371,8 +1395,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt) '.eps']);
             if ~exist('OCTAVE_VERSION')
                 eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)]);
+                if options_.nograph
+                    set(hh, 'Visible','on');
+                end
                 saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt) '.fig']);
             end
+            if options_.nograph, close(hh); end
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar
@@ -1430,8 +1458,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt) '.eps']);
         if ~exist('OCTAVE_VERSION')
             eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
+            if options_.nograph
+                set(hh, 'Visible','on');
+            end
             saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt) '.fig']);
         end
+        if options_.nograph, close(hh); end
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:size(NAMES,1);
