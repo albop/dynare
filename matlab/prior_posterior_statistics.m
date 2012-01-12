@@ -220,6 +220,7 @@ if isnumeric(options_.parallel),
     % Parallel execution!
 else
     [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
+    ifil=zeros(7,totCPU);
     for j=1:totCPU-1,
         nfiles = ceil(nBlockPerCPU(j)/MAX_nsmoo);
         ifil(1,j+1) =ifil(1,j)+nfiles;
@@ -227,14 +228,18 @@ else
         ifil(2,j+1) =ifil(2,j)+nfiles;
         nfiles = ceil(nBlockPerCPU(j)/MAX_nerro);
         ifil(3,j+1) =ifil(3,j)+nfiles;
-        nfiles = ceil(nBlockPerCPU(j)/MAX_naK);
-        ifil(4,j+1) =ifil(4,j)+nfiles;
+        if naK
+            nfiles = ceil(nBlockPerCPU(j)/MAX_naK);
+            ifil(4,j+1) =ifil(4,j)+nfiles;
+        end
         nfiles = ceil(nBlockPerCPU(j)/MAX_nruns);
         ifil(5,j+1) =ifil(5,j)+nfiles;
-        nfiles = ceil(nBlockPerCPU(j)/MAX_nforc1);
-        ifil(6,j+1) =ifil(6,j)+nfiles;
-        nfiles = ceil(nBlockPerCPU(j)/MAX_nforc2);
-        ifil(7,j+1) =ifil(7,j)+nfiles;
+        if horizon
+            nfiles = ceil(nBlockPerCPU(j)/MAX_nforc1);
+            ifil(6,j+1) =ifil(6,j)+nfiles;
+            nfiles = ceil(nBlockPerCPU(j)/MAX_nforc2);
+            ifil(7,j+1) =ifil(7,j)+nfiles;
+        end
         %       nfiles = ceil(nBlockPerCPU(j)/MAX_momentsno);
         %       ifil(8,j+1) =ifil(8,j)+nfiles;
     end
