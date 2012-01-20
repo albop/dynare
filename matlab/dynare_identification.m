@@ -156,7 +156,7 @@ if iload <=0,
     if SampleSize==1,
         BurninSampleSize=0;
     else
-        BurninSampleSize=50;
+        BurninSampleSize=min(SampleSize,50);
     end
     loop_indx = 0;
     file_index = 0;
@@ -350,6 +350,7 @@ if iload <=0,
                     else
                         normaliz1 = ones(1,nparam);
                     end
+                    replic=max(replic,3*length(indJJ));
                     cmm = simulated_moment_uncertainty(indJJ, periods, replic);
                     %                 Jinv=(siJ(:,indok)'*siJ(:,indok))\siJ(:,indok)';
                     %                 MIM=inv(Jinv*cmm*Jinv');
