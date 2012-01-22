@@ -267,6 +267,7 @@ if ~isempty(options_.unit_root_vars)
             nonzeros(l2(:,bayestopt_.restrict_var_list_nonstationary)); 
     end
     options_.lik_init = 3;
+    options_.qz_criterium = 1+1e-6;
 end % if ~isempty(options_.unit_root_vars)
 
 %% Test if the data file is declared.
