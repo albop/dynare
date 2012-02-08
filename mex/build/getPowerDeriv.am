@@ -1,0 +1,5 @@
+vpath %.cc $(top_srcdir)/../../sources/get_power_deriv
+
+noinst_PROGRAMS = getPowerDeriv
+
+nodist_getPowerDeriv_SOURCES = getPowerDeriv.cc

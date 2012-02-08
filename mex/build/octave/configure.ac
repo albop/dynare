@@ -131,6 +131,7 @@ AC_CONFIG_FILES([Makefile
                  kalman_steady_state/Makefile
                  ms_sbvar/Makefile
                  block_kalman_filter/Makefile
-		 sobol/Makefile])
+		 sobol/Makefile
+		 get_power_deriv/Makefile])
 
 AC_OUTPUT

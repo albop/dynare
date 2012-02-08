@@ -267,4 +267,17 @@ if verbose
     disp(' ')
 end
 
+% Test if getPowerDeriv DLL is present
+if exist('getPowerDeriv', 'file') == 3
+    message = '[mex] ';
+else
+    message = '[no]  ';
+    addpath([dynareroot 'getPowerDeriv']);
+end
+if verbose
+    disp([ message 'getPowerDeriv routine.' ])
+    disp(' ')
+end
+
+
 cd(origin);
