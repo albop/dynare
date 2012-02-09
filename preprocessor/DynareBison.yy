@@ -1554,6 +1554,7 @@ dynare_sensitivity_option : o_gsa_identification
                           | o_load_ident_files
                           | o_useautocorr
                           | o_ar
+                          | o_lik_init
                           ;
 
 homotopy_setup: HOMOTOPY_SETUP ';' homotopy_list END ';'
