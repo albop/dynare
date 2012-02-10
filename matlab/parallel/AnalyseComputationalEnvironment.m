@@ -267,7 +267,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             % strategy.
 
             if (~isempty(DataInput(Node).RemoteDrive))
-                disp('[WARNING] The fields RemoteDrive should be empty under unix or max!');
+                disp('[WARNING] The fields RemoteDrive should be empty under unix or mac!');
                 disp(' ');
                 disp(['remove the string ',DataInput(Node).RemoteDrive,' from this field!']);
                 disp(' ');
@@ -544,6 +544,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     si0=[];
     de0=[];
 
+    disp('Checking Hardware please wait ...');
     if (DataInput(Node).Local == 1)
         if Environment,
             [si0 de0]=system('grep processor /proc/cpuinfo');
@@ -563,6 +564,10 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     RealCPUnbr=GiveCPUnumber(de0);
 
     % Questo controllo penso che si possa MIGLIORARE!!!!!
+    if  isempty (RealCPUnbr) && Environment==0,
+        [si0 de0]=system(['psinfo \\',DataInput(Node).ComputerName]);
+    end        
+    RealCPUnbr=GiveCPUnumber(de0);
 
     if  isempty (RealCPUnbr)
         % An error occurred when we try to know the Cpu/Cores
