@@ -19,6 +19,7 @@ function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,varargin)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+global bayestopt_
 
 n=size(x,1);
 
@@ -68,6 +69,7 @@ while i<n,
         if gg(i)*(hh(i)*gg(i))/2 > htol,
             [f0 x fc retcode] = csminit(func0,x,f0,gg,0,diag(hh),varargin{:});
             ig(i)=1;
+            fprintf(['Done for param %s = %8.4f\n'],bayestopt_.name{i},x(i))
         end
         xh1=x;
     end
