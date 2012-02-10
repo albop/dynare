@@ -24,6 +24,9 @@ function x0=dynare_sensitivity(options_gsa)
 global M_ options_ oo_ bayestopt_ estim_params_
 
 fname_ = M_.fname;
+if ~isfield(M_,'dname'),
+    M_.dname = M_.fname;
+end
 lgy_ = M_.endo_names;
 x0=[];
 
@@ -54,10 +57,13 @@ if ~isempty(options_gsa.datafile) || isempty(bayestopt_),
     if isfield(options_gsa,'loglinear'),
         options_.loglinear=options_gsa.loglinear;
     end
+    if isfield(options_gsa,'lik_init'),
+        options_.lik_init=options_gsa.lik_init;
+    end
     options_.mode_compute = 0;
     options_.filtered_vars = 1;
     options_.plot_priors = 0;
-    [data,rawdata,xparam1,data_info]=dynare_estimation_init([],fname_,1);
+    [data,rawdata,xparam1,data_info]=dynare_estimation_init(M_.endo_names,fname_,1);
     % computes a first linear solution to set up various variables
 else
     if isempty(options_.qz_criterium)
@@ -109,6 +115,8 @@ options_gsa = set_default_option(options_gsa,'load_rmse',0);
 options_gsa = set_default_option(options_gsa,'load_stab',0);
 options_gsa = set_default_option(options_gsa,'alpha2_stab',0.3);
 options_gsa = set_default_option(options_gsa,'ksstat',0.1);
+options_gsa = set_default_option(options_gsa,'pvalue_ks',0.001);
+options_gsa = set_default_option(options_gsa,'pvalue_corr',0.001);
 %options_gsa = set_default_option(options_gsa,'load_mh',0);
 
 if options_gsa.redform,
@@ -157,7 +165,7 @@ options_.opt_gsa = options_gsa;
 if (options_gsa.load_stab || options_gsa.load_rmse || options_gsa.load_redform) ...
         && options_gsa.pprior,
     filetoload=[OutputDirectoryName '/' fname_ '_prior.mat'];
-    if isempty(ls(filetoload)),
+    if ~exist(filetoload),
         disp([filetoload,' not found!'])
         disp(['You asked to load a non existent analysis'])
         %options_gsa.load_stab=0;
@@ -244,6 +252,17 @@ if options_gsa.rmse,
             a=whos('-file',[OutputDirectoryName,'/',fname_,'_prior'],'logpo2');
         else
             a=whos('-file',[OutputDirectoryName,'/',fname_,'_mc'],'logpo2');
+        end
+        if exist('OCTAVE_VERSION'),
+            aflag=0;
+            for ja=1:length(a),
+                aflag=aflag+strcmp('logpo2',a(ja).name);
+            end
+            if aflag==0,
+                a=[];
+            else
+                a=1;
+            end
         end
         if isempty(a),
 %             dynare_MC([],OutputDirectoryName,data,rawdata,data_info);
