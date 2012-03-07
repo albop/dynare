@@ -70,7 +70,7 @@ double
 Interpreter::pow1(double a, double b)
 {
   double r = pow_(a, b);
-  if (isnan(r))
+  if (isnan(r) || isinf(r))
     {
       res1 = NAN;
       r = 0.0000000000000000000000001;
@@ -83,7 +83,7 @@ double
 Interpreter::divide(double a, double b)
 {
   double r = a / b;
-  if (isinf(r))
+  if (isinf(r) || isnan(r))
     {
       res1 = NAN;
       r = 1e70;
@@ -96,7 +96,7 @@ double
 Interpreter::log1(double a)
 {
   double r = log(a);
-  if (isnan(r))
+  if (isnan(r) || isinf(r))
     {
       res1 = NAN;
       r = -1e70;
@@ -109,7 +109,7 @@ double
 Interpreter::log10_1(double a)
 {
   double r = log(a);
-  if (isnan(r))
+  if (isnan(r) || isinf(r))
     {
       res1 = NAN;
       r = -1e70;
