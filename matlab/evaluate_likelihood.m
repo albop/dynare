@@ -134,10 +134,7 @@ if isempty(load_data)
     load_data = 1;
 end
 
-pshape_original   = bayestopt_.pshape;
-bayestopt_.pshape = Inf(size(bayestopt_.pshape));
-clear('priordens')%
-
 llik = -DsgeLikelihood(parameters,gend,data,data_index,number_of_observations,no_more_missing_observations);
+ldens = evaluate_prior(parameters);
+llik = llik - ldens;
 
-bayestopt_.pshape = pshape_original;
