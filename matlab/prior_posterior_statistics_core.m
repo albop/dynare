@@ -163,7 +163,7 @@ for b=fpar:B
     end
     set_all_parameters(deep);
     [dr,info] = resol(oo_.steady_state,0);
-
+    SteadyState = dr.ys;
     if run_smoother
         [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...
             DsgeSmoother(deep,gend,Y,data_index,missing_value);
@@ -225,7 +225,7 @@ for b=fpar:B
     irun = irun +  ones(7,1);
 
 
-    if irun(1) > MAX_nsmoo || b == B
+    if run_smoother && (irun(1) > MAX_nsmoo || b == B)
         stock = stock_smooth(:,:,1:irun(1)-1);
         ifil(1) = ifil(1) + 1;
         save([DirectoryName '/' M_.fname '_smooth' int2str(ifil(1)) '.mat'],'stock');
@@ -239,7 +239,7 @@ for b=fpar:B
         irun(1) = 1;
     end
 
-    if irun(2) > MAX_ninno || b == B
+    if run_smoother && (irun(2) > MAX_ninno || b == B)
         stock = stock_innov(:,:,1:irun(2)-1);
         ifil(2) = ifil(2) + 1;
         save([DirectoryName '/' M_.fname '_inno' int2str(ifil(2)) '.mat'],'stock');

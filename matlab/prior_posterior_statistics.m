@@ -222,12 +222,14 @@ else
     [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
     ifil=zeros(7,totCPU);
     for j=1:totCPU-1,
-        nfiles = ceil(nBlockPerCPU(j)/MAX_nsmoo);
-        ifil(1,j+1) =ifil(1,j)+nfiles;
-        nfiles = ceil(nBlockPerCPU(j)/MAX_ninno);
-        ifil(2,j+1) =ifil(2,j)+nfiles;
-        nfiles = ceil(nBlockPerCPU(j)/MAX_nerro);
-        ifil(3,j+1) =ifil(3,j)+nfiles;
+        if run_smoother
+            nfiles = ceil(nBlockPerCPU(j)/MAX_nsmoo);
+            ifil(1,j+1) =ifil(1,j)+nfiles;
+            nfiles = ceil(nBlockPerCPU(j)/MAX_ninno);
+            ifil(2,j+1) =ifil(2,j)+nfiles;
+            nfiles = ceil(nBlockPerCPU(j)/MAX_nerro);
+            ifil(3,j+1) =ifil(3,j)+nfiles;
+        end
         if naK
             nfiles = ceil(nBlockPerCPU(j)/MAX_naK);
             ifil(4,j+1) =ifil(4,j)+nfiles;
