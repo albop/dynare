@@ -579,7 +579,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
         disp(sprintf('Log data density [Laplace approximation] is %f.',md_Laplace))
         disp(' ')
     end
-elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
+elseif ~any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
     disp(' ')
     disp('RESULTS FROM MAXIMUM LIKELIHOOD')
     tstath = zeros(nx,1);
