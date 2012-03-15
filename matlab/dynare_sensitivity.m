@@ -118,8 +118,24 @@ options_gsa = set_default_option(options_gsa,'ksstat',0.1);
 options_gsa = set_default_option(options_gsa,'pvalue_ks',0.001);
 options_gsa = set_default_option(options_gsa,'pvalue_corr',0.001);
 %options_gsa = set_default_option(options_gsa,'load_mh',0);
+% REDFORM mapping
+options_gsa = set_default_option(options_gsa,'logtrans_redform',0);
+options_gsa = set_default_option(options_gsa,'threshold_redform',[]);
+options_gsa = set_default_option(options_gsa,'ksstat_redform',0.1);
+options_gsa = set_default_option(options_gsa,'alpha2_redform',0.3);
+options_gsa = set_default_option(options_gsa,'namendo',[]);
+options_gsa = set_default_option(options_gsa,'namlagendo',[]);
+options_gsa = set_default_option(options_gsa,'namexo',[]);
+% RMSE mapping
+options_gsa = set_default_option(options_gsa,'rmse',0);
+options_gsa = set_default_option(options_gsa,'lik_only',0);
+options_gsa = set_default_option(options_gsa,'var_rmse',options_.varobs);
+options_gsa = set_default_option(options_gsa,'pfilt_rmse',0.1);
+options_gsa = set_default_option(options_gsa,'istart_rmse',options_.presample+1);
+options_gsa = set_default_option(options_gsa,'alpha_rmse',0.002);
+options_gsa = set_default_option(options_gsa,'alpha2_rmse',1);
 
-if options_gsa.redform,
+if options_gsa.redform && options_gsa.neighborhood_width==0 && isempty(options_gsa.threshold_redform),
     options_gsa.pprior=1;
     options_gsa.ppost=0;
 end
@@ -160,7 +176,7 @@ else
     OutputDirectoryName = CheckPath('gsa');
 end
 
-options_.opt_gsa = options_gsa;
+% options_.opt_gsa = options_gsa;
 
 if (options_gsa.load_stab || options_gsa.load_rmse || options_gsa.load_redform) ...
         && options_gsa.pprior,
@@ -192,22 +208,14 @@ if (options_gsa.load_stab || options_gsa.load_rmse || options_gsa.load_redform) 
 end
 
 if options_gsa.stab && ~options_gsa.ppost,
-    x0 = stab_map_(OutputDirectoryName);
+    x0 = stab_map_(OutputDirectoryName,options_gsa);
 end
 
 % reduced form
 % redform_map(namendo, namlagendo, namexo, icomp, pprior, ilog, threshold)
-options_gsa = set_default_option(options_gsa,'logtrans_redform',0);
-options_gsa = set_default_option(options_gsa,'threshold_redform',[]);
-options_gsa = set_default_option(options_gsa,'ksstat_redform',0.1);
-options_gsa = set_default_option(options_gsa,'alpha2_redform',0.3);
-options_gsa = set_default_option(options_gsa,'namendo',[]);
-options_gsa = set_default_option(options_gsa,'namlagendo',[]);
-options_gsa = set_default_option(options_gsa,'namexo',[]);
 
-options_.opt_gsa = options_gsa;
 if options_gsa.identification,
-    map_ident_(OutputDirectoryName);
+    map_ident_(OutputDirectoryName,options_gsa);
 end
 
 if options_gsa.redform && ~isempty(options_gsa.namendo) ...
@@ -221,30 +229,24 @@ if options_gsa.redform && ~isempty(options_gsa.namendo) ...
     if strmatch(':',options_gsa.namlagendo,'exact'),
         options_gsa.namlagendo=M_.endo_names;
     end
-    options_.opt_gsa = options_gsa;
+%     options_.opt_gsa = options_gsa;
     if options_gsa.morris==1,
-        redform_screen(OutputDirectoryName);
+        redform_screen(OutputDirectoryName,options_gsa);
     else
         % check existence of the SS_ANOVA toolbox
-        if ~(exist('gsa_sdp','file')==6 || exist('gsa_sdp','file')==2),
+        if isempty(options_gsa.threshold_redform) && ...
+         ~(exist('gsa_sdp','file')==6 || exist('gsa_sdp','file')==2),
             disp('Download Mapping routines at:')
             disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
             disp(' ' )
             error('Mapping routines missing!')
         end
 
-        redform_map(OutputDirectoryName);
+        redform_map(OutputDirectoryName,options_gsa);
     end
 end
 % RMSE mapping
 % function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2)
-options_gsa = set_default_option(options_gsa,'rmse',0);
-options_gsa = set_default_option(options_gsa,'lik_only',0);
-options_gsa = set_default_option(options_gsa,'var_rmse',options_.varobs);
-options_gsa = set_default_option(options_gsa,'pfilt_rmse',0.1);
-options_gsa = set_default_option(options_gsa,'istart_rmse',options_.presample+1);
-options_gsa = set_default_option(options_gsa,'alpha_rmse',0.002);
-options_gsa = set_default_option(options_gsa,'alpha2_rmse',1);
 options_.opt_gsa = options_gsa;
 if options_gsa.rmse,
     if ~options_gsa.ppost
@@ -265,6 +267,12 @@ if options_gsa.rmse,
             end
         end
         if isempty(a),
+           if options_gsa.lik_only,
+               options_.smoother=0;
+               options_.filter_step_ahead=[];
+               options_.forecast=0;
+               options_.filtered_vars=0;               
+           end
 %             dynare_MC([],OutputDirectoryName,data,rawdata,data_info);
             prior_posterior_statistics('gsa',data,data_info.gend,data_info.data_index,data_info.missing_value);
             if options_.bayesian_irf
@@ -289,8 +297,9 @@ if options_gsa.rmse,
     end
     clear a;
 %     filt_mc_(OutputDirectoryName,data_info);
-    filt_mc_(OutputDirectoryName);
+    filt_mc_(OutputDirectoryName,options_gsa);
 end
+options_.opt_gsa = options_gsa;
 
 
 if options_gsa.glue,
