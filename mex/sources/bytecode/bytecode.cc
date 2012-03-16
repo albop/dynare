@@ -299,7 +299,10 @@ main(int nrhs, const char *prhs[])
   else
     {
       solve_algo = stack_solve_algo;
-      solve_tolf = *(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "dynatol"))));
+      mxArray *dynatol = mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "dynatol"));
+      if (mxIsStruct(dynatol))
+        DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, dynatol is not a structure in this version of dynare. \n Use options_.dynatol = value;\n");   
+      solve_tolf = *mxGetPr(dynatol);
     }
 
   mxArray *mxa = mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "fname"));
