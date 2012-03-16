@@ -166,6 +166,8 @@ if options_gsa.morris==1 || options_gsa.morris==3,
     options_gsa.load_rmse=0;
     options_gsa.alpha2_stab=1;
     options_gsa.ksstat=1;
+    options_gsa.pvalue_ks=0;
+    options_gsa.pvalue_corr=0;
     if options_gsa.morris==3,
         options_gsa = set_default_option(options_gsa,'Nsam',256);
         OutputDirectoryName = CheckPath('gsa/identif');
@@ -214,6 +216,7 @@ end
 % reduced form
 % redform_map(namendo, namlagendo, namexo, icomp, pprior, ilog, threshold)
 
+options_.opt_gsa = options_gsa;
 if options_gsa.identification,
     map_ident_(OutputDirectoryName,options_gsa);
 end
