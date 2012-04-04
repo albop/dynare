@@ -32,7 +32,11 @@ x=zeros(n,m);
 [u,t]=schur(c);
 if exist('OCTAVE_VERSION')
     [aa,bb,qq,zz]=qz(full(a),full(b));
-    d=qq'*d*u;
+    if octave_ver_less_than('3.4.0')
+        d=qq'*d*u;
+    else
+        d=qq*d*u;
+    end
 else
     [aa,bb,qq,zz]=qz(full(a),full(b),'real'); % available in Matlab version 6.0
     d=qq*d*u;
