@@ -261,7 +261,7 @@ if M_.maximum_endo_lead == 0
     if options_.loglinear == 1
         klags = find(lead_lag_incidence(1,:));
         dr.ghx = repmat(1./dr.ys,1,size(dr.ghx,2)).*dr.ghx.* ...
-                 repmat(dr.ys(klags),size(dr.ghx,1),1);
+                 repmat(dr.ys(klags)',size(dr.ghx,1),1);
         dr.ghu = repmat(1./dr.ys,1,size(dr.ghu,2)).*dr.ghu;
     end
     return
