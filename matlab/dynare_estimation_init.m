@@ -233,7 +233,7 @@ else
     k3 = (1:M_.endo_nbr)';
 end
 bayestopt_.smoother_var_list = union(k2,k3);
-[junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list(:));
+[junk,junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list(:));
 [junk,ic] = intersect(bayestopt_.smoother_var_list,nstatic+(1:npred)');
 bayestopt_.smoother_restrict_columns = ic;
 [junk,bayestopt_.smoother_mf] = ismember(var_obs_index, ...
