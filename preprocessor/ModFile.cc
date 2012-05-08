@@ -21,6 +21,10 @@
 #include <iostream>
 #include <fstream>
 #include <typeinfo>
+#ifndef _WIN32
+# include <unistd.h>
+#endif
+
 #include "ModFile.hh"
 #include "ConfigFile.hh"
 
