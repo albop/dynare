@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -19,13 +19,14 @@
 
 #include <dynlapack.h>
 
-#include "Vector.hh"
-#include "Matrix.hh"
+#include <Eigen/Core>
+
+using namespace Eigen;
 
 class GeneralizedSchurDecomposition
 {
 private:
-  const size_t n;
+  const ptrdiff_t n;
   const double criterium;
   lapack_int lwork;
   double *alphar, *alphai, *beta, *vsl, *work;
@@ -40,38 +41,44 @@ public:
     GSDException(lapack_int info_arg, lapack_int n_arg) : info(info_arg), n(n_arg) {};
   };
   //! \todo Replace heuristic choice for workspace size by a query to determine the optimal size
-  GeneralizedSchurDecomposition(size_t n_arg, double criterium_arg);
+  GeneralizedSchurDecomposition(ptrdiff_t n_arg, double criterium_arg);
   virtual ~GeneralizedSchurDecomposition();
   //! \todo Add a lock around the modification of criterium_static for making it thread-safe
-  template<class Mat1, class Mat2, class Mat3>
-  void compute(Mat1 &S, Mat2 &T, Mat3 &Z, size_t &sdim) throw (GSDException);
-  template<class Mat1, class Mat2, class Mat3, class Mat4, class Mat5>
+  template<typename Mat1, typename Mat2, typename Mat3>
+  void compute(PlainObjectBase<Mat1> &S, PlainObjectBase<Mat2> &T,
+               PlainObjectBase<Mat3> &Z, ptrdiff_t &sdim) throw (GSDException);
+
   /*!
     \param[out] sdim Number of non-explosive generalized eigenvalues
   */
-  void compute(const Mat1 &D, const Mat2 &E, Mat3 &S, Mat4 &T, Mat5 &Z, size_t &sdim) throw (GSDException);
-  template<class Vec1, class Vec2>
-  void getGeneralizedEigenvalues(Vec1 &eig_real, Vec2 &eig_cmplx);
+  template<typename Mat1, typename Mat2, typename Mat3, typename Mat4, typename Mat5>
+  void compute(const MatrixBase<Mat1> &D, const MatrixBase<Mat2> &E,
+               PlainObjectBase<Mat3> &S, PlainObjectBase<Mat4> &T,
+               PlainObjectBase<Mat5> &Z, ptrdiff_t &sdim) throw (GSDException);
+ 
+  template<typename Vec1, typename Vec2>
+  void getGeneralizedEigenvalues(PlainObjectBase<Vec1> &eig_real,
+                                 PlainObjectBase<Vec2> &eig_cmplx);
 };
 
 std::ostream &operator<<(std::ostream &out, const GeneralizedSchurDecomposition::GSDException &e);
 
-template<class Mat1, class Mat2, class Mat3>
+template<typename Mat1, typename Mat2, typename Mat3>
 void
-GeneralizedSchurDecomposition::compute(Mat1 &S, Mat2 &T, Mat3 &Z, size_t &sdim) throw (GSDException)
+GeneralizedSchurDecomposition::compute(PlainObjectBase<Mat1> &S, PlainObjectBase<Mat2> &T, PlainObjectBase<Mat3> &Z, ptrdiff_t &sdim) throw (GSDException)
 {
-  assert(S.getRows() == n && S.getCols() == n
-         && T.getRows() == n && T.getCols() == n
-         && Z.getRows() == n && Z.getCols() == n);
+  assert(S.rows() == n && S.cols() == n
+         && T.rows() == n && T.cols() == n
+         && Z.rows() == n && Z.cols() == n);
 
   lapack_int n2 = n;
   lapack_int info, sdim2;
-  lapack_int lds = S.getLd(), ldt = T.getLd(), ldz = Z.getLd();
+  lapack_int lds = S.outerStride(), ldt = T.outerStride(), ldz = Z.outerStride();
 
   criterium_static = criterium;
   // Here we are forced to give space for left Schur vectors, even if we don't use them, because of a bug in dgges()
-  dgges("N", "V", "S", &selctg, &n2, S.getData(), &lds, T.getData(), &ldt,
-        &sdim2, alphar, alphai, beta, vsl, &n2, Z.getData(), &ldz,
+  dgges("N", "V", "S", &selctg, &n2, S.data(), &lds, T.data(), &ldt,
+        &sdim2, alphar, alphai, beta, vsl, &n2, Z.data(), &ldz,
         work, &lwork, bwork, &info);
 
   if (info != 0)
@@ -80,26 +87,27 @@ GeneralizedSchurDecomposition::compute(Mat1 &S, Mat2 &T, Mat3 &Z, size_t &sdim) 
   sdim = sdim2;
 }
 
-template<class Mat1, class Mat2, class Mat3, class Mat4, class Mat5>
+template<typename Mat1, typename Mat2, typename Mat3, typename Mat4, typename Mat5>
 void
-GeneralizedSchurDecomposition::compute(const Mat1 &D, const Mat2 &E,
-                                       Mat3 &S, Mat4 &T, Mat5 &Z, size_t &sdim) throw (GSDException)
+GeneralizedSchurDecomposition::compute(const MatrixBase<Mat1> &D, const MatrixBase<Mat2> &E,
+                                       PlainObjectBase<Mat3> &S, PlainObjectBase<Mat4> &T, PlainObjectBase<Mat5> &Z, ptrdiff_t &sdim) throw (GSDException)
 {
-  assert(D.getRows() == n && D.getCols() == n
-         && E.getRows() == n && E.getCols() == n);
+  assert(D.rows() == n && D.cols() == n
+         && E.rows() == n && E.cols() == n);
   S = D;
   T = E;
   compute(S, T, Z, sdim);
 }
 
-template<class Vec1, class Vec2>
+template<typename Vec1, typename Vec2>
 void
-GeneralizedSchurDecomposition::getGeneralizedEigenvalues(Vec1 &eig_real, Vec2 &eig_cmplx)
+GeneralizedSchurDecomposition::getGeneralizedEigenvalues(PlainObjectBase<Vec1> &eig_real,
+                                                         PlainObjectBase<Vec2> &eig_cmplx)
 {
-  assert(eig_real.getSize() == n && eig_cmplx.getSize() == n);
+  assert(eig_real.size() == n && eig_cmplx.size() == n);
 
   double *par = alphar, *pai = alphai, *pb = beta,
-    *per = eig_real.getData(), *pei = eig_cmplx.getData();
+    *per = eig_real.data(), *pei = eig_cmplx.data();
   while (par < alphar + n)
     {
       *per = *par / *pb;
@@ -110,7 +118,7 @@ GeneralizedSchurDecomposition::getGeneralizedEigenvalues(Vec1 &eig_real, Vec2 &e
       par++;
       pai++;
       pb++;
-      per += eig_real.getStride();
-      pei += eig_cmplx.getStride();
+      per += eig_real.innerStride();
+      pei += eig_cmplx.innerStride();
     }
 }

@@ -4,7 +4,7 @@ test_qr_SOURCES = ../QRDecomposition.cc test-qr.cc
 test_qr_LDADD = $(LAPACK_LIBS) $(BLAS_LIBS) $(LIBS) $(FLIBS)
 test_qr_CPPFLAGS = -I.. -I../../../
 
-test_gsd_SOURCES = ../Matrix.cc ../Vector.cc ../GeneralizedSchurDecomposition.cc test-gsd.cc
+test_gsd_SOURCES = ../GeneralizedSchurDecomposition.cc test-gsd.cc
 test_gsd_LDADD = $(LAPACK_LIBS) $(BLAS_LIBS) $(LIBS) $(FLIBS)
 test_gsd_CPPFLAGS = -I.. -I../../../
 

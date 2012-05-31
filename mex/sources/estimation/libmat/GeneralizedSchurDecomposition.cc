@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -24,7 +24,7 @@
 
 double GeneralizedSchurDecomposition::criterium_static;
 
-GeneralizedSchurDecomposition::GeneralizedSchurDecomposition(size_t n_arg, double criterium_arg) :
+GeneralizedSchurDecomposition::GeneralizedSchurDecomposition(ptrdiff_t n_arg, double criterium_arg) :
   n(n_arg), criterium(criterium_arg)
 {
   alphar = new double[n];

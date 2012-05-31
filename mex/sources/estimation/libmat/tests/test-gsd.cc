@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -24,26 +24,22 @@
 int
 main(int argc, char **argv)
 {
-  size_t n = 3;
-  double D_data[] = { 1, 2, 3,
-                      4, 5, 6,
-                      7, 8, 9 };
-  double E_data[] = { 1, -3, 4,
-                      -7, 9, 1,
-                      -3, 4, 0 };
-  MatrixView D(D_data, n, n, n), E(E_data, n, n, n);
-
-  // Need to transpose because internally matrices are in column-major order
-  mat::transpose(D);
-  mat::transpose(E);
+  Matrix3d D, E;
+  D << 1, 2, 3,
+    4, 5, 6,
+    7, 8, 9;
+  
+  E << 1, -3, 4,
+    -7, 9, 1,
+    -3, 4, 0;
 
   std::cout << "D =" << std::endl << D << std::endl;
   std::cout << "E =" << std::endl << E << std::endl;
 
-  GeneralizedSchurDecomposition GSD(n, 1.00001);
+  GeneralizedSchurDecomposition GSD(3, 1.00001);
 
-  Matrix S(n), T(n), Z(n);
-  size_t sdim;
+  Matrix3d S, T, Z;
+  ptrdiff_t sdim;
 
   GSD.compute(D, E, S, T, Z, sdim);
 
@@ -51,7 +47,7 @@ main(int argc, char **argv)
   std::cout << "T =" << std::endl << T << std::endl;
   std::cout << "Z =" << std::endl << Z << std::endl;
 
-  Vector eig_real(n), eig_cmplx(n);
+  Vector3d eig_real, eig_cmplx;
   GSD.getGeneralizedEigenvalues(eig_real, eig_cmplx);
 
   std::cout << "Real part of generalized eigenvalues: " << std::endl << eig_real << std::endl;
