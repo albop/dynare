@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -19,18 +19,19 @@
 
 #include <algorithm> // For std::min()
 
-#include <dynlapack.h>
+#include <Eigen/Core>
 
-#include "Vector.hh"
-#include "Matrix.hh"
-#include "BlasBindings.hh"
+using namespace Eigen;
+
+
+#include <dynlapack.h>
 
 class QRDecomposition
 {
 private:
-  const size_t rows, cols, mind;
+  const ptrdiff_t rows, cols, mind;
   //! Number of columns of the matrix to be left-multiplied by Q
-  const size_t cols2;
+  const ptrdiff_t cols2;
   lapack_int lwork, lwork2;
   double *work, *work2, *tau;
 public:
@@ -40,7 +41,7 @@ public:
     \param[in] cols_arg Number of columns of the matrix to decompose
     \param[in] cols2_arg Number of columns of the matrix to be multiplied by Q
   */
-  QRDecomposition(size_t rows_arg, size_t cols_arg, size_t cols2_arg);
+  QRDecomposition(ptrdiff_t rows_arg, ptrdiff_t cols_arg, ptrdiff_t cols2_arg);
   virtual ~QRDecomposition();
   //! Performs the QR decomposition of a matrix, and left-multiplies another matrix by Q
   /*!
@@ -48,25 +49,27 @@ public:
     \param[in] trans Specifies whether Q should be transposed before the multiplication, either "T" or "N"
     \param[in,out] C The matrix to be left-multiplied by Q, modified in place
   */
-  template<class Mat1, class Mat2>
-  void computeAndLeftMultByQ(Mat1 &A, const char *trans, Mat2 &C);
+  template<typename Derived1, typename Derived2>
+  void computeAndLeftMultByQ(PlainObjectBase<Derived1> &A, const char *trans,
+                             PlainObjectBase<Derived2> &C);
 };
 
-template<class Mat1, class Mat2>
+template<typename Derived1, typename Derived2>
 void
-QRDecomposition::computeAndLeftMultByQ(Mat1 &A, const char *trans, Mat2 &C)
+QRDecomposition::computeAndLeftMultByQ(PlainObjectBase<Derived1> &A, const char *trans,
+                                       PlainObjectBase<Derived2> &C)
 {
-  assert(A.getRows() == rows && A.getCols() == cols);
-  assert(C.getRows() == rows && C.getCols() == cols2);
+  assert(A.rows() == rows && A.cols() == cols);
+  assert(C.rows() == rows && C.cols() == cols2);
 
-  lapack_int m = rows, n = cols, lda = A.getLd();
+  lapack_int m = rows, n = cols, lda = A.outerStride();
   lapack_int info;
-  dgeqrf(&m, &n, A.getData(), &lda, tau, work, &lwork, &info);
+  dgeqrf(&m, &n, A.data(), &lda, tau, work, &lwork, &info);
   assert(info == 0);
 
   n = cols2;
-  lapack_int k = mind, ldc = C.getLd();
-  dormqr("L", trans, &m, &n, &k, A.getData(), &lda, tau, C.getData(), &ldc,
+  lapack_int k = mind, ldc = C.outerStride();
+  dormqr("L", trans, &m, &n, &k, A.data(), &lda, tau, C.data(), &ldc,
          work2, &lwork2, &info);
   assert(info == 0);
 }

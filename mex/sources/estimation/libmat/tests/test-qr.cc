@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -19,14 +19,13 @@
 
 #include <iostream>
 
-#include "BlasBindings.hh"
 #include "QRDecomposition.hh"
 
 int
 main(int argc, char **argv)
 {
   size_t m = 4, n = 3;
-  Matrix S(m, n), Q(m), A(m, n), B(m), S2(m, n);
+  MatrixXd S(m, n), Q(m, m), A(m, n), S2(m, n), B;
   QRDecomposition QRD(m, n, m);
 
   for (size_t i = 0; i < m; i++)
@@ -35,32 +34,27 @@ main(int argc, char **argv)
 
   std::cout << "Matrix to be decomposed:" << std::endl << S << std::endl;
 
-  mat::set_identity(Q);
+  Q.setIdentity();
 
   S2 = S;
   QRD.computeAndLeftMultByQ(S2, "N", Q);
 
   std::cout << "Q =" << std::endl << Q << std::endl;
 
-  blas::gemm("T", "N", 1.0, Q, Q, 0.0, B);
-
+  B = Q.transpose()*Q;
+  
   std::cout << "Q'*Q =" << std::endl << B << std::endl;
 
-  for (size_t j = 0; j < n; j++)
-    mat::col_set(S2, j, j+1, m-j-1, 0);
+  S2 = S2.triangularView<Upper>();
 
   std::cout << "R =" << std::endl << S2 << std::endl;
 
-  blas::gemm("N", "N", 1.0, Q, S2, 0.0, A);
+  A = Q*S2;
 
   std::cout << "Q*R =" << std::endl << A << std::endl;
 
   // Check values
-  Matrix B2(m);
-  mat::set_identity(B2);
-  mat::sub(B2, B);
-  assert(mat::nrminf(B2) < 1e-4);
+  assert((B - MatrixXd::Identity(m,m)).lpNorm<Infinity>() < 1e-4);
 
-  mat::sub(A, S);
-  assert(mat::nrminf(A) < 1e-4);
+  assert((A-S).lpNorm<Infinity>() < 1e-4);
 }

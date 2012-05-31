@@ -1,6 +1,6 @@
 check_PROGRAMS = test-qr test-gsd test-lu test-repmat
 
-test_qr_SOURCES = ../Matrix.cc ../Vector.cc ../QRDecomposition.cc test-qr.cc
+test_qr_SOURCES = ../QRDecomposition.cc test-qr.cc
 test_qr_LDADD = $(LAPACK_LIBS) $(BLAS_LIBS) $(LIBS) $(FLIBS)
 test_qr_CPPFLAGS = -I.. -I../../../
 
