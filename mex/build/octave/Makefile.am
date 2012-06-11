@@ -15,7 +15,4 @@ if HAVE_FORT
 SUBDIRS += libslicot kalman_steady_state
 endif
 
-if HAVE_MATIO
-SUBDIRS += estimation
-endif
 endif

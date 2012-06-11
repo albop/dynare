@@ -82,10 +82,6 @@ CPPFLAGS="$CPPFLAGS_SAVED"
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH], [], [Don't use deprecated STL hash structures])
 
-# Check for dlopen(), needed by tests for estimation DLL
-AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
-AC_SUBST([LIBADD_DLOPEN])
-
 AC_CHECK_PROG([MAKEINFO], [makeinfo], [makeinfo])
 
 AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
@@ -203,10 +199,6 @@ AC_CONFIG_FILES([Makefile
                  dynare++/kord/Makefile
                  dynare++/src/Makefile
                  mex/sources/Makefile
-                 mex/sources/estimation/Makefile
-                 mex/sources/estimation/tests/Makefile
-                 mex/sources/estimation/libmat/Makefile
-                 mex/sources/estimation/libmat/tests/Makefile
 ])
 
 AC_ARG_ENABLE([matlab], AS_HELP_STRING([--disable-matlab], [disable compilation of MEX files for MATLAB]), [], [enable_matlab=yes])

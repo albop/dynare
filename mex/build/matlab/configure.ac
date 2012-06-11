@@ -139,7 +139,6 @@ AC_CONFIG_FILES([Makefile
                  gensylv/Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
-                 estimation/Makefile
                  libslicot/Makefile
                  kalman_steady_state/Makefile
                  ms_sbvar/Makefile
