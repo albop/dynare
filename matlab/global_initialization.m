@@ -214,6 +214,11 @@ particle.mixture_measurement_shocks = 1 ;
 % Copy ep structure in options_ global structure
 options_.particle = particle;
 
+% Simulation of stochastic non linear stochastic models.
+bnlms.innovation_distribution = 'gaussian';
+bnlms.set_dynare_seed_to_default = 1;
+options_.bnlms = bnlms;
+
 % TeX output
 options_.TeX = 0;
 
