@@ -145,7 +145,7 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 % In summary, an initial call to the present function, without triggering
 % any condition, guarantees that 'penalty' is properly initialized when needed.
 
-persistent penalty prior_penalty
+persistent penalty
 
 % Initialization of the returned variables and others...
 fval        = [];
@@ -193,15 +193,6 @@ end
 if ~isequal(DynareOptions.mode_compute,1) && any(xparam1<BayesInfo.lb)
     k = find(xparam1<BayesInfo.lb);
     fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
-    xtemp=xparam1;
-    xtemp(k)=BayesInfo.lb(k);
-    if DynareOptions.prior_trunc || all(BayesInfo.pshape(k)==5),
-        prior1 = priordens(xtemp,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
-    else
-        prior1 = length(k)*log(1.e-20);
-    end
-    prior_correction = max(0,-prior_penalty-prior1);
-    fval = fval+prior_correction;
     exit_flag = 0;
     info = 41;
     if analytic_derivation,
@@ -214,15 +205,6 @@ end
 if ~isequal(DynareOptions.mode_compute,1) && any(xparam1>BayesInfo.ub)
     k = find(xparam1>BayesInfo.ub);
     fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
-    xtemp=xparam1;
-    xtemp(k)=BayesInfo.ub(k);
-    if DynareOptions.prior_trunc || all(BayesInfo.pshape(k)==5),
-        prior1 = priordens(xtemp,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
-    else
-        prior1 = length(k)*log(1.e-20);
-    end
-    prior_correction = max(0,-prior_penalty -prior1);
-    fval = fval+prior_correction;
     exit_flag = 0;
     info = 42;
     if analytic_derivation,
@@ -790,7 +772,6 @@ DynareOptions.kalman_algo = kalman_algo;
 
 % Update the penalty.
 penalty = fval;
-prior_penalty = -lnprior;
 
 if analytic_derivation==0 && nargout==2,
     lik=lik(start:end,:);
