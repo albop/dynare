@@ -89,8 +89,10 @@ KordpDynare::evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
 void
 KordpDynare::calcDerivativesAtSteady() throw (DynareException)
 {
-  g1p = new TwoDMatrix(nY, nJcols);
-  g1p->zeros();
+  TwoDMatrix g1(nY, nJcols);
+  g1.zeros();
+
+  TwoDMatrix *g2p = NULL, *g3p = NULL;
 
   if (nOrder > 1)
     {
@@ -113,10 +115,9 @@ KordpDynare::calcDerivativesAtSteady() throw (DynareException)
   Vector llxSteady(nJcols-nExog);
   LLxSteady(ySteady, llxSteady);
 
-  dynamicModelFile->eval(llxSteady, xx, params, ySteady, out, g1p, g2p, g3p);
+  dynamicModelFile->eval(llxSteady, xx, params, ySteady, out, &g1, g2p, g3p);
 
-  populateDerivativesContainer(*g1p, 1, JacobianIndices);
-  delete g1p;
+  populateDerivativesContainer(g1, 1, JacobianIndices);
 
   if (nOrder > 1)
     {
