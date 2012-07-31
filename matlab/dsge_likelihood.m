@@ -195,7 +195,12 @@ if ~isequal(DynareOptions.mode_compute,1) && any(xparam1<BayesInfo.lb)
     fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
     xtemp=xparam1;
     xtemp(k)=BayesInfo.lb(k);
-    prior_correction = max(0,-prior_penalty-priordens(xtemp,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4));
+    if DynareOptions.prior_trunc,
+        prior1 = priordens(xtemp,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+    else
+        prior1 = length(k)*log(1.e-20);
+    end
+    prior_correction = max(0,-prior_penalty-prior1);
     fval = fval+prior_correction;
     exit_flag = 0;
     info = 41;
@@ -211,7 +216,12 @@ if ~isequal(DynareOptions.mode_compute,1) && any(xparam1>BayesInfo.ub)
     fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
     xtemp=xparam1;
     xtemp(k)=BayesInfo.ub(k);
-    prior_correction = max(0,-prior_penalty -priordens(xtemp,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4));
+    if DynareOptions.prior_trunc,
+        prior1 = priordens(xtemp,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+    else
+        prior1 = length(k)*log(1.e-20);
+    end
+    prior_correction = max(0,-prior_penalty -prior1);
     fval = fval+prior_correction;
     exit_flag = 0;
     info = 42;
