@@ -16,7 +16,7 @@ function PosteriorFilterSmootherAndForecast(Y,gend, type,data_index)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2011 Dynare Team
+% Copyright (C) 2005-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -135,7 +135,7 @@ end
 for b=1:B
     %deep = GetOneDraw(NumberOfDraws,FirstMhFile,LastMhFile,FirstLine,MAX_nruns,DirectoryName);
     [deep, logpo] = GetOneDraw(type);
-    set_all_parameters(deep);
+    M_ = set_all_parameters(deep,estim_params_,M_);
     [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
     [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = ...
         DsgeSmoother(deep,gend,Y,data_index);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2011 Dynare Team
+ * Copyright (C) 2003-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -51,7 +51,7 @@ DataTree::~DataTree()
 }
 
 expr_t
-DataTree::AddNonNegativeConstant(const string &value) throw (NumericalConstants::InvalidFloatingPointNumberException)
+DataTree::AddNonNegativeConstant(const string &value)
 {
   int id = num_constants.AddNonNegativeConstant(value);
 

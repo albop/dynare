@@ -40,9 +40,7 @@ if options_.order > 1
     elseif options_.particle.status && options_.order>2
         error(['Non linear filter are not implemented with order ' int2str(options_.order) ' approximation of the model!'])
     elseif ~options_.particle.status && options_.order==2
-        disp('If you want to estimate the model with a second order approximation using a non linear filter, set options_.particle.status=1;')
-        disp('I set order=1!')
-        options_.order=1;
+        error('For estimating the model with a second order approximation using a non linear filter, one should have options_.particle.status=1;')
     else
         error(['Cannot estimate a model with an order ' int2str(options_.order) ' approximation!'])
     end
@@ -59,6 +57,25 @@ else
 end
 
 [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
+
+% Set sigma_e_is_diagonal flag (needed if the shocks block is not declared in the mod file).
+M_.sigma_e_is_diagonal = 1;
+if estim_params_.ncx || ~isequal(nnz(M_.Sigma_e),length(M_.Sigma_e))
+    M_.sigma_e_is_diagonal = 0;
+end
+
+% Set the correlation matrix if necessary.
+if ~isequal(estim_params_.ncx,nnz(tril(M_.Sigma_e,-1)))
+    M_.Correlation_matrix = diag(1./sqrt(diag(M_.Sigma_e)))*M_.Sigma_e*diag(1./sqrt(diag(M_.Sigma_e)));
+    % Remove NaNs appearing because of variances calibrated to zero.
+    if any(isnan(M_.Correlation_matrix))
+        zero_variance_idx = find(~diag(M_.Sigma_e));
+        for i=1:length(zero_variance_idx)
+            M_.Correlation_matrix(zero_variance_idx(i),:) = 0;
+            M_.Correlation_matrix(:,zero_variance_idx(i)) = 0;
+        end
+    end
+end
 
 data = dataset_.data;
 rawdata = dataset_.rawdata;
@@ -169,7 +186,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
         if options_.analytic_derivation,
-            optim_options = optimset(optim_options,'GradObj','on');
+            optim_options = optimset(optim_options,'GradObj','on','TolX',1e-7);
         end
             [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
                 fmincon(objective_function,xparam1,[],[],[],[],lb,ub,[],optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
@@ -204,22 +221,29 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         else
             flag = 1;
         end
-        if ~exist('igg','var'),  % by M. Ratto
-            hh=[];
-            gg=[];
-            igg=[];
-        end   % by M. Ratto
         if isfield(options_,'ftol')
             crit = options_.ftol;
         else
             crit = 1.e-5;
+        end
+        if options_.analytic_derivation,
+            analytic_grad=1;
+            ana_deriv = options_.analytic_derivation;
+            options_.analytic_derivation = -1;
+            crit = 1.e-7;
+            flag = 0;
+        else
+            analytic_grad=0;
         end
         if isfield(options_,'nit')
             nit = options_.nit;
         else
             nit=1000;
         end
-        [xparam1,hh,gg,fval,invhess] = newrat(objective_function,xparam1,hh,gg,igg,crit,nit,flag,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [xparam1,hh,gg,fval,invhess] = newrat(objective_function,xparam1,analytic_grad,crit,nit,flag,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        if options_.analytic_derivation,
+            options_.analytic_derivation = ana_deriv;
+        end
         parameter_names = bayestopt_.name;
         save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','parameter_names');
       case 6
@@ -402,7 +426,10 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
 end
 
 if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
+    ana_deriv = options_.analytic_derivation;
+    options_.analytic_derivation = 0;
     mode_check(objective_function,xparam1,hh,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+    options_.analytic_derivation = ana_deriv;
 end
 
 oo_.posterior.optimization.mode = xparam1;
@@ -881,8 +908,12 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
             prior_posterior_statistics('posterior',dataset_);
         end
         xparam = get_posterior_parameters('mean');
-        set_all_parameters(xparam);
+        M_ = set_all_parameters(xparam,estim_params_,M_);
     end
+end
+
+if options_.particle.status
+    return
 end
 
 if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape ...

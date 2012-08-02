@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2011 Dynare Team
+ * Copyright (C) 2003-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -39,9 +39,7 @@ enum aux_var_t
     avExoLag = 3,         //!< Substitute for exo lags >= 2
     avExpectation = 4,    //!< Substitute for Expectation Operator
     // Type 5 now unused
-    avMultiplier = 6,     //!< Multipliers for FOC of Ramsey Problem
-    avLog = 7,            //!< Substitute argument of log expression
-    avPow = 8             //!< Substitute argument for power expression
+    avMultiplier = 6      //!< Multipliers for FOC of Ramsey Problem
   };
 
 //! Information on some auxiliary variables

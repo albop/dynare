@@ -1,5 +1,5 @@
-function oo_ = prior_analysis(type,arg1,arg2,arg3,options_,M_,oo_)  
-% Copyright (C) 2009 Dynare Team
+function oo_ = prior_analysis(type,arg1,arg2,arg3,options_,M_,oo_,estim_params_)
+% Copyright (C) 2009-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,13 +28,13 @@ switch info
         drsave=1;
     end
     load([M_.dname '/prior/definition.mat']);
-    prior_sampler(drsave,M_,bayestopt_,options_,oo_);
+    prior_sampler(drsave,M_,bayestopt_,options_,oo_,estim_params_);
     clear('bayestopt_');
     oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_);
   case {4,5}
     oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_);
   case 6
-    [ivar,vartan] = set_stationary_variables_list(options_,M_);
+    [ivar,vartan] = get_variables_list(options_,M_);
     nvar = length(ivar);
     oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_,nvar,vartan);
   otherwise

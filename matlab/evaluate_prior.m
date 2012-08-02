@@ -16,7 +16,7 @@ function [ldens,parameters] = evaluate_prior(parameters)
 % REMARKS
 % [1] This function cannot evaluate the prior density of a dsge-var model...
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -61,5 +61,5 @@ if ischar(parameters)
         error
     end
 end
-clear('priordens');
+
 ldens = priordens(parameters, bayestopt_.pshape, bayestopt_.p6, bayestopt_.p7, bayestopt_.p3, bayestopt_.p4);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2011 Dynare Team
+ * Copyright (C) 2003-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -1910,7 +1910,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
               mDynamicModelFile << "  g1=[];g2=[];g3=[];\n";
               mDynamicModelFile << "  y=" << dynamic_basename << "_" << block + 1 << "(y, x, params, steady_state, 0, y_kmin, periods);\n";
               mDynamicModelFile << "  tmp = y(:,M_.block_structure.block(" << block + 1 << ").variable);\n";
-              mDynamicModelFile << "  if(isnan(tmp) | isinf(tmp))\n";
+              mDynamicModelFile << "  if any(isnan(tmp) | isinf(tmp))\n";
               mDynamicModelFile << "    disp(['Inf or Nan value during the evaluation of block " << block <<"']);\n";
               mDynamicModelFile << "    return;\n";
               mDynamicModelFile << "  end;\n";
@@ -1938,7 +1938,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
               mDynamicModelFile << "  g1=[];g2=[];g3=[];\n";
               mDynamicModelFile << "  " << dynamic_basename << "_" << block + 1 << "(y, x, params, steady_state, 0, y_kmin, periods);\n";
               mDynamicModelFile << "  tmp = y(:,M_.block_structure.block(" << block + 1 << ").variable);\n";
-              mDynamicModelFile << "  if(isnan(tmp) | isinf(tmp))\n";
+              mDynamicModelFile << "  if any(isnan(tmp) | isinf(tmp))\n";
               mDynamicModelFile << "    disp(['Inf or Nan value during the evaluation of block " << block <<"']);\n";
               mDynamicModelFile << "    return;\n";
               mDynamicModelFile << "  end;\n";
@@ -1968,7 +1968,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
                             <<", options_.periods, " << blocks_linear[block]
                             <<", blck_num, y_kmin, options_.maxit_, options_.solve_tolf, options_.slowc, " << cutoff << ", options_.stack_solve_algo, 1, 1, 0);\n";
           mDynamicModelFile << "  tmp = y(:,M_.block_structure.block(" << block + 1 << ").variable);\n";
-          mDynamicModelFile << "  if(isnan(tmp) | isinf(tmp))\n";
+          mDynamicModelFile << "  if any(isnan(tmp) | isinf(tmp))\n";
           mDynamicModelFile << "    disp(['Inf or Nan value during the resolution of block " << block <<"']);\n";
           mDynamicModelFile << "    return;\n";
           mDynamicModelFile << "  end;\n";
@@ -1998,7 +1998,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
                             <<", options_.periods, " << blocks_linear[block]
                             <<", blck_num, y_kmin, options_.maxit_, options_.solve_tolf, options_.slowc, " << cutoff << ", options_.stack_solve_algo, 1, 1, 0);\n";
           mDynamicModelFile << "  tmp = y(:,M_.block_structure.block(" << block + 1 << ").variable);\n";
-          mDynamicModelFile << "  if(isnan(tmp) | isinf(tmp))\n";
+          mDynamicModelFile << "  if any(isnan(tmp) | isinf(tmp))\n";
           mDynamicModelFile << "    disp(['Inf or Nan value during the resolution of block " << block <<"']);\n";
           mDynamicModelFile << "    return;\n";
           mDynamicModelFile << "  end;\n";
@@ -2028,7 +2028,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
                             <<", " << blocks_linear[block]
                             <<", blck_num, y_kmin, options_.maxit_, options_.solve_tolf, options_.slowc, " << cutoff << ", options_.stack_solve_algo);\n";
           mDynamicModelFile << "  tmp = y(:,M_.block_structure.block(" << block + 1 << ").variable);\n";
-          mDynamicModelFile << "  if(isnan(tmp) | isinf(tmp))\n";
+          mDynamicModelFile << "  if any(isnan(tmp) | isinf(tmp))\n";
           mDynamicModelFile << "    disp(['Inf or Nan value during the resolution of block " << block <<"']);\n";
           mDynamicModelFile << "    return;\n";
           mDynamicModelFile << "  end;\n";
@@ -2665,7 +2665,7 @@ DynamicModel::writeOutput(ostream &output, const string &basename, bool block_de
             i_nz_state_var[i] = n;
           unsigned int lp = n_obs;
 
-          for (int block = 0;  block < nb_blocks; block++)
+          for (unsigned int block = 0;  block < nb_blocks; block++)
             {
               int block_size = getBlockSize(block);
               int nze = 0;
@@ -2744,7 +2744,7 @@ DynamicModel::writeOutput(ostream &output, const string &basename, bool block_de
               lp += nze; 
             }
           output << "M_.nz_state_var = [";
-          for (int i = 0; i < lp; i++)
+          for (unsigned int i = 0; i < lp; i++)
             output << i_nz_state_var[i] << " ";
           output << "];" << endl;
           output << "M_.n_diag = " << nb_diag << ";" << endl;

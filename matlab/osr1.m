@@ -1,6 +1,6 @@
 function osr1(i_params,i_var,weights)
 
-% Copyright (C) 2005-2011 Dynare Team
+% Copyright (C) 2005-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,7 +40,7 @@ end
 
 exe =zeros(M_.exo_nbr,1);
 
-oo_.dr = set_state_space(oo_.dr,M_);
+oo_.dr = set_state_space(oo_.dr,M_,options_);
 
 
 np = size(i_params,1);

@@ -28,7 +28,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,de
 % SPECIAL REQUIREMENTS
 %   None
 
-% Copyright (C) 2006-2011 Dynare Team
+% Copyright (C) 2006-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,7 +62,7 @@ decomp        = [];
 nobs            = size(options_.varobs,1);
 smpl          = size(Y,2);
 
-set_all_parameters(xparam1);
+M_ = set_all_parameters(xparam1,estim_params_,M_);
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program

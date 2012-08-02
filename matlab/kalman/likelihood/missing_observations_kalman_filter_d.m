@@ -38,7 +38,7 @@ function [dLIK,dlik,a,Pstar] = missing_observations_kalman_filter_d(data_index,n
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2011 Dynare Team
+% Copyright (C) 2004-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -66,6 +66,11 @@ t    = start;              % Initialization of the time index.
 dlik = zeros(smpl,1);      % Initialization of the vector gathering the densities.
 dLIK = Inf;                % Default value of the log likelihood.
 oldK = Inf;
+
+if isequal(H,0)
+    H = zeros(pp,pp);
+end
+s = 0;
 
 while rank(Pinf,kalman_tol) && (t<=last)
     s = t-start+1;
@@ -107,7 +112,7 @@ while rank(Pinf,kalman_tol) && (t<=last)
             dlik(s) = log(det(Finf));
             iFinf  = inv(Finf);
             Kinf   = Pinf*ZZ'*iFinf;
-            Fstar  = ZZ*Pstar*ZZ' + H;
+            Fstar  = ZZ*Pstar*ZZ' + H(d_index,d_index);
             Kstar  = (Pstar*ZZ'-Kinf*Fstar)*iFinf;
             Pstar  = T*(Pstar-Pstar*ZZ'*Kinf'-Pinf*ZZ'*Kstar')*T'+QQ;
             Pinf   = T*(Pinf-Pinf*ZZ'*Kinf')*T';

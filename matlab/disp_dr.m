@@ -1,3 +1,4 @@
+
 function disp_dr(dr,order,var_list)
 % Display the decision rules
 %
@@ -102,11 +103,11 @@ end
 %
 for k=1:nx
     flag = 0;
-    if options_.block
+    if isfield(dr,'state_var')
         str1 = subst_auxvar(dr.state_var(k),-1);
     else
         str1 = subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2);
-    end;
+    end
     str = sprintf('%-20s',str1);
     for i=1:nvar
         x = dr.ghx(ivar(i),k);

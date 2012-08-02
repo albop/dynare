@@ -401,9 +401,9 @@ ModFile::computingPass(bool no_tmp_terms)
                   cerr << "ERROR: Incorrect order option..." << endl;
                   exit(EXIT_FAILURE);
                 }
-              bool hessian = mod_file_struct.order_option >= 2 || mod_file_struct.identification_present;
+              bool hessian = mod_file_struct.order_option >= 2 || mod_file_struct.identification_present || mod_file_struct.estimation_analytic_derivation;
               bool thirdDerivatives = mod_file_struct.order_option == 3;
-              bool paramsDerivatives = mod_file_struct.identification_present;
+              bool paramsDerivatives = mod_file_struct.identification_present || mod_file_struct.estimation_analytic_derivation;
               dynamic_model.computingPass(true, hessian, thirdDerivatives, paramsDerivatives, global_eval_context, no_tmp_terms, block, use_dll, byte_code);
             }
         }
@@ -462,8 +462,9 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all, bool no_log, b
               << "M_.fname = '" << basename << "';" << endl
               << "%" << endl
               << "% Some global variables initialization" << endl
-              << "%" << endl
-              << "global_initialization;" << endl
+              << "%" << endl;
+  config_file.writeHooks(mOutputFile);
+  mOutputFile << "global_initialization;" << endl
               << "diary off;" << endl;
   if (!no_log)
     mOutputFile << "logname_ = '" << basename << ".log';" << endl

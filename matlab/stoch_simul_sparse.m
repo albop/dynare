@@ -1,7 +1,7 @@
 function info=stoch_simul_sparse(var_list)
 % This file is a modified version of stoch_simul.m: common parts should be factorized!
 
-% Copyright (C) 2001-2010 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,7 +36,7 @@ if M_.exo_nbr > 0
     oo_.exo_simul= ones(iter_ + M_.maximum_lag + M_.maximum_lead,1) * oo_.exo_steady_state';
 end
 
-check_model;
+check_model(M_);
 
 [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
@@ -87,7 +87,8 @@ elseif options_.periods ~= 0
     else
         y0 = M_.endo_histval;
     end
-    oo_.endo_simul = simult(y0,oo_.dr);
+    [ys,oo_] = simult(y0,oo_.dr,M_,options_,M_,options_,oo_);
+    oo_.endo_simul = ys;
     dyn2vec;
     if options_.nomoments == 0
         disp_moments(oo_.endo_simul,var_list);

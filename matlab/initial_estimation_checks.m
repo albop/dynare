@@ -13,7 +13,7 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2011 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,7 +31,11 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if DynareDataset.info.nvobs>Model.exo_nbr+EstimatedParameters.nvn
-    error(['initial_estimation_checks:: Estimation can''t take place because there are less shocks than observed variables!'])
+    error(['initial_estimation_checks:: Estimation can''t take place because there are less declared shocks than observed variables!'])
+end
+
+if DynareDataset.info.nvobs>find(diag(Model.Sigma_e))+EstimatedParameters.nvn
+    error(['initial_estimation_checks:: Estimation can''t take place because too many shocks have been calibrated with a zero variance!'])
 end
 
 % check if steady state solves static model (except if diffuse_filter == 1)
@@ -46,10 +50,15 @@ else
     info = d;
 end
 
-if DynareOptions.mode_compute==5
-    if ~strcmp(func2str(objective_function),'dsge_likelihood')
-        error('Options mode_compute=5 is not compatible with non linear filters or Dsge-VAR models!')
-    end
+% if DynareOptions.mode_compute==5
+%     if ~strcmp(func2str(objective_function),'dsge_likelihood')
+%         error('Options mode_compute=5 is not compatible with non linear filters or Dsge-VAR models!')
+%     end
+% end
+if isnan(fval)
+    error('The initial value of the likelihood is NaN')
+elseif imag(fval)
+    error('The initial value of the likelihood is complex')
 end
 
 if info(1) > 0

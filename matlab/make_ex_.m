@@ -1,4 +1,4 @@
-function make_ex_
+function make_ex_()
 % forms oo_.exo_simul and oo_.exo_det_simul
 %
 % INPUTS
@@ -12,7 +12,7 @@ function make_ex_
 % SPECIAL REQUIREMENTS
 %  
 
-% Copyright (C) 1996-2011 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

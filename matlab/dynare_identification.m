@@ -19,7 +19,7 @@ function [pdraws, TAU, GAM, LRE, gp, H, JJ] = dynare_identification(options_iden
 
 % main 
 %
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -60,6 +60,7 @@ options_ident = set_default_option(options_ident,'replic',100);
 options_ident = set_default_option(options_ident,'advanced',0);
 options_ident = set_default_option(options_ident,'normalize_jacobians',1);
 options_ident = set_default_option(options_ident,'lik_init',1);
+options_ident = set_default_option(options_ident,'analytic_derivation',1);
 if options_ident.gsa_sample_file,
     GSAFolder = checkpath('gsa',M_.dname);
     if options_ident.gsa_sample_file==1,
@@ -117,16 +118,20 @@ options_ = set_default_option(options_,'datafile',[]);
 options_.mode_compute = 0;
 options_.plot_priors = 0;
 [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
+options_ident.analytic_derivation_mode = options_.analytic_derivation_mode;
 if isempty(dataset_),
     dataset_.info.ntobs = periods;
     dataset_.info.nvobs = rows(options_.varobs);
     dataset_.info.varobs = options_.varobs;
     dataset_.rawdata = [];
     dataset_.missing.state = 0;
-    dataset_.missing.aindex = [];
+    for jdata=1:periods,
+        temp1{jdata}=[1:dataset_.info.nvobs]';
+    end
+    dataset_.missing.aindex = temp1;
     dataset_.missing.vindex = [];
     dataset_.missing.number_of_observations = [];
-    dataset_.missing.no_more_missing_observations = [];
+    dataset_.missing.no_more_missing_observations = 1;
     dataset_.descriptive.mean = [];
     dataset_.data = [];
 
@@ -263,8 +268,10 @@ if iload <=0,
 %     normJ = max(abs(siJ)')';
 %     normLRE = max(abs(siLRE)')';
     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_point', 'idemoments_point','idemodel_point', 'idelre_point','store_options_ident')
-    disp_identification(params, idemodel_point, idemoments_point, name);
-    plot_identification(params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName);
+    disp_identification(params, idemodel_point, idemoments_point, name, advanced);
+    if ~options_.nograph,
+        plot_identification(params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName);
+    end
 
     if SampleSize > 1,
         disp(' ')
@@ -289,7 +296,7 @@ if iload <=0,
         end
         [dum1, ideJ, ideH, ideGP, dum2 , info] = ...
             identification_analysis(params,indx,indexo,options_MC,dataset_, prior_exist, name_tex,0);
-        if iteration==0,
+        if iteration==0 && info(1)==0,
             MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(size(ideH.siH,1)*nparam)/8));
             stoH = zeros([size(ideH.siH,1),nparam,MAX_tau]);
             stoJJ = zeros([size(ideJ.siJ,1),nparam,MAX_tau]);
@@ -436,14 +443,18 @@ end
 
 if iload,
     disp(['Testing ',parameters])
-    disp_identification(idehess_point.params, idemodel_point, idemoments_point, name);
-    plot_identification(idehess_point.params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName);
+    disp_identification(idehess_point.params, idemodel_point, idemoments_point, name,advanced);
+    if ~options_.nograph,
+        plot_identification(idehess_point.params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName);
+    end
 end
 if SampleSize > 1,
     fprintf('\n')
     disp('Testing MC sample')
     disp_identification(pdraws, idemodel, idemoments, name);
-    plot_identification(pdraws,idemoments,idehess_point,idemodel,idelre,advanced,'MC sample - ',name, IdentifDirectoryName);
+    if ~options_.nograph,
+        plot_identification(pdraws,idemoments,idehess_point,idemodel,idelre,advanced,'MC sample - ',name, IdentifDirectoryName);
+    end
     if advanced,
         jcrit=find(idemoments.ino);
         if length(jcrit)<SampleSize,
@@ -458,9 +469,11 @@ if SampleSize > 1,
                         identification_analysis(pdraws(jmax,:),indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
                     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_max', 'idemoments_max','idemodel_max', 'idelre_max', 'jmax', '-append');
                 end
-                disp_identification(pdraws(jmax,:), idemodel_max, idemoments_max, name);
+                disp_identification(pdraws(jmax,:), idemodel_max, idemoments_max, name,1);
                 close all,
-                plot_identification(pdraws(jmax,:),idemoments_max,idehess_max,idemodel_max,idelre_max,1,tittxt,name,IdentifDirectoryName);
+                if ~options_.nograph,
+                    plot_identification(pdraws(jmax,:),idemoments_max,idehess_max,idemodel_max,idelre_max,1,tittxt,name,IdentifDirectoryName);
+                end
                 [dum,jmin]=min(idemoments.cond);
                 fprintf('\n')
                 tittxt = 'Draw with SMALLEST condition number';
@@ -471,9 +484,11 @@ if SampleSize > 1,
                         identification_analysis(pdraws(jmin,:),indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
                     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_min', 'idemoments_min','idemodel_min', 'idelre_min', 'jmin', '-append');
                 end
-                disp_identification(pdraws(jmin,:), idemodel_min, idemoments_min, name);
+                disp_identification(pdraws(jmin,:), idemodel_min, idemoments_min, name,1);
                 close all,
-                plot_identification(pdraws(jmin,:),idemoments_min,idehess_min,idemodel_min,idelre_min,1,tittxt,name,IdentifDirectoryName);
+                if ~options_.nograph,
+                    plot_identification(pdraws(jmin,:),idemoments_min,idehess_min,idemodel_min,idelre_min,1,tittxt,name,IdentifDirectoryName);
+                end
             else
                 for j=1:length(jcrit),
                     tittxt = ['Rank deficient draw n. ',int2str(j)];
@@ -483,9 +498,11 @@ if SampleSize > 1,
                         [idehess_(j), idemoments_(j), idemodel_(j), idelre_(j), derivatives_info_(j)] = ...
                             identification_analysis(pdraws(jcrit(j),:),indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
                     end
-                    disp_identification(pdraws(jcrit(j),:), idemodel_(j), idemoments_(j), name);
+                    disp_identification(pdraws(jcrit(j),:), idemodel_(j), idemoments_(j), name,1);
                     close all,
-                    plot_identification(pdraws(jcrit(j),:),idemoments_(j),idehess_(j),idemodel_(j),idelre_(j),1,tittxt,name,IdentifDirectoryName);
+                    if ~options_.nograph,
+                        plot_identification(pdraws(jcrit(j),:),idemoments_(j),idehess_(j),idemodel_(j),idelre_(j),1,tittxt,name,IdentifDirectoryName);
+                    end
                 end
                 if ~iload,
                     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_', 'idemoments_','idemodel_', 'idelre_', 'jcrit', '-append');

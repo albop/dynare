@@ -20,6 +20,10 @@ function [dr,ys,info]=discretionary_policy_1(oo_,Instruments)
 global M_ options_
 persistent Hold
 
+dr = [];
+ys = [];
+info = 0;
+
 options_ = set_default_option(options_,'qz_criterium',1.000001);
 options_ = set_default_option(options_,'solve_maxit',3000);
 
@@ -138,7 +142,7 @@ M_.lead_lag_incidence = LLI';
 % set the state
 dr=oo_.dr;
 dr.ys =zeros(endo_nbr,1);
-dr=set_state_space(dr,M_);
+dr=set_state_space(dr,M_,options_);
 order_var=dr.order_var;
 
 T=H(order_var,order_var);

@@ -183,6 +183,7 @@ string eofbuff;
 <INITIAL>homotopy_setup {BEGIN DYNARE_BLOCK; return token::HOMOTOPY_SETUP;}
 <INITIAL>conditional_forecast_paths {BEGIN DYNARE_BLOCK; return token::CONDITIONAL_FORECAST_PATHS;}
 <INITIAL>svar_identification {BEGIN DYNARE_BLOCK; return token::SVAR_IDENTIFICATION;}
+<INITIAL>extended_path {BEGIN DYNARE_BLOCK; return token::EXTENDED_PATH;}
 
  /* For the semicolon after an "end" keyword */
 <INITIAL>; {return Dynare::parser::token_type (yytext[0]);}
@@ -220,6 +221,11 @@ string eofbuff;
 <DYNARE_STATEMENT>lik_init  		{return token::LIK_INIT;}
 <DYNARE_STATEMENT>graph   		{return token::GRAPH;}
 <DYNARE_STATEMENT>nograph   		{return token::NOGRAPH;}
+<DYNARE_STATEMENT>nodisplay     {return token::NODISPLAY;}
+<DYNARE_STATEMENT>graph_format  {return token::GRAPH_FORMAT;}
+<DYNARE_STATEMENT>eps  {yylval->string_val = new string(yytext); return token::EPS;}
+<DYNARE_STATEMENT>pdf  {yylval->string_val = new string(yytext); return token::PDF;}
+<DYNARE_STATEMENT>fig  {yylval->string_val = new string(yytext); return token::FIG;}
 <DYNARE_STATEMENT>print   		{return token::PRINT;}
 <DYNARE_STATEMENT>noprint   		{return token::NOPRINT;}
 <DYNARE_STATEMENT>conf_sig  		{return token::CONF_SIG;}
@@ -296,6 +302,8 @@ string eofbuff;
 <DYNARE_STATEMENT>fixed_point {return token::FIXED_POINT;}
 <DYNARE_STATEMENT>doubling {return token::DOUBLING;}
 <DYNARE_STATEMENT>square_root_solver {return token::SQUARE_ROOT_SOLVER;}
+<DYNARE_STATEMENT>cycle_reduction {return token::CYCLE_REDUCTION;}
+<DYNARE_STATEMENT>logarithmic_reduction {return token::LOGARITHMIC_REDUCTION;}
 <DYNARE_STATEMENT>default {return token::DEFAULT;}
 <DYNARE_STATEMENT>alpha {
   yylval->string_val = new string(yytext);
@@ -408,6 +416,7 @@ string eofbuff;
 <DYNARE_STATEMENT>max_block_iterations {return token::MAX_BLOCK_ITERATIONS;}
 <DYNARE_STATEMENT>max_repeated_optimization_runs {return token::MAX_REPEATED_OPTIMIZATION_RUNS;}
 <DYNARE_STATEMENT>maxit {return token::MAXIT;}
+<DYNARE_STATEMENT>solve_maxit {return token::SOLVE_MAXIT;}
 <DYNARE_STATEMENT>function_convergence_criterion {return token::FUNCTION_CONVERGENCE_CRITERION;}
 <DYNARE_STATEMENT>parameter_convergence_criterion {return token::PARAMETER_CONVERGENCE_CRITERION;}
 <DYNARE_STATEMENT>number_of_large_perturbations {return token::NUMBER_OF_LARGE_PERTURBATIONS;}
@@ -457,6 +466,8 @@ string eofbuff;
 <DYNARE_STATEMENT>growth_factor {return token::GROWTH_FACTOR;}
 <DYNARE_STATEMENT>cova_compute {return token::COVA_COMPUTE;}
 <DYNARE_STATEMENT>discretionary_tol {return token::DISCRETIONARY_TOL;}
+<DYNARE_STATEMENT>analytic_derivation {return token::ANALYTIC_DERIVATION;}
+<DYNARE_STATEMENT>solver_periods {return token::SOLVER_PERIODS;}
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
   strtok(yytext+1, "$");
@@ -496,9 +507,16 @@ string eofbuff;
 <DYNARE_STATEMENT>order {return token::ORDER;}
 <DYNARE_STATEMENT>sylvester {return token::SYLVESTER;}
 <DYNARE_STATEMENT>lyapunov {return token::LYAPUNOV;}
+<DYNARE_STATEMENT>dr {
+  yylval->string_val = new string(yytext);
+  return token::DR;
+ }
 <DYNARE_STATEMENT>sylvester_fixed_point_tol {return token::SYLVESTER_FIXED_POINT_TOL;}
 <DYNARE_STATEMENT>lyapunov_fixed_point_tol {return token::LYAPUNOV_FIXED_POINT_TOL;}
 <DYNARE_STATEMENT>lyapunov_doubling_tol {return token::LYAPUNOV_DOUBLING_TOL;}
+<DYNARE_STATEMENT>dr_cycle_reduction_tol {return token::DR_CYCLE_REDUCTION_TOL;}
+<DYNARE_STATEMENT>dr_logarithmic_reduction_tol {return token::DR_LOGARITHMIC_REDUCTION_TOL;}
+<DYNARE_STATEMENT>dr_logarithmic_reduction_maxiter {return token::DR_LOGARITHMIC_REDUCTION_MAXITER;}
 <DYNARE_STATEMENT>replic {return token::REPLIC;}
 <DYNARE_STATEMENT>ar {return token::AR;}
 <DYNARE_STATEMENT>nofunctions {return token::NOFUNCTIONS;}
@@ -509,6 +527,7 @@ string eofbuff;
 <DYNARE_STATEMENT>simul_seed {return token::SIMUL_SEED;}
 <DYNARE_STATEMENT>qz_criterium {return token::QZ_CRITERIUM;}
 <DYNARE_STATEMENT>simul {return token::SIMUL;}
+<DYNARE_STATEMENT>simul_replic {return token::SIMUL_REPLIC;}
 <DYNARE_STATEMENT>xls_sheet {return token::XLS_SHEET;}
 <DYNARE_STATEMENT>xls_range {return token::XLS_RANGE;}
 <DYNARE_STATEMENT>mh_recover {return token::MH_RECOVER;}
@@ -761,9 +780,3 @@ DynareFlexLexer::yylex()
   cerr << "DynareFlexLexer::yylex() has been called, that should never happen!" << endl;
   exit(EXIT_FAILURE);
 }
-
-/*
-  Local variables:
-  mode: C++
-  End:
-*/

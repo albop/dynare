@@ -24,7 +24,7 @@ function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMa
 % SPECIAL REQUIREMENTS.
 %   None.
 
-% Copyright (C) 2005-2011 Dynare Team
+% Copyright (C) 2005-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -149,7 +149,7 @@ for b=fpar:B
             logpo = evaluate_posterior_kernel(deep');
         end
     end
-    set_all_parameters(deep);
+    M_ = set_all_parameters(deep,estim_params_,M_);
     [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
     if run_smoother

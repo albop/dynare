@@ -80,8 +80,12 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 %! The covariance matrix of the measurement errors is not positive definite.
 %! @item info==45
 %! Likelihood is not a number (NaN).
-%! @item info==45
+%! @item info==46
 %! Likelihood is a complex valued number.
+%! @item info==47
+%! Posterior kernel is not a number (logged prior density is NaN)
+%! @item info==48
+%! Posterior kernel is a complex valued number (logged prior density is complex).
 %! @end table
 %! @item Model
 %! Matlab's structure describing the model (initialized by dynare, see @ref{M_}).
@@ -107,7 +111,7 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2004-2011 Dynare Team
+% Copyright (C) 2004-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -133,7 +137,7 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 % set also 'exit_flag' equal to 0 instead of 1.  It is only when
 % dsge_likelihood() is called by an optimizer called by
 % dynare_estimation_1() that 'exit_flag' is ignored and penalized 'fval' is
-% actually used.  
+% actually used.
 % In that case, 'penalty' is properly initialized, at the very end of the
 % present function, by a call to dsge_likelihood() made in
 % initial_estimation_checks(). If a condition triggers exit_flag ==
@@ -168,10 +172,19 @@ end
 
 % Set flag related to analytical derivatives.
 analytic_derivation = DynareOptions.analytic_derivation;
+
+if analytic_derivation && DynareOptions.loglinear
+    error('The analytic_derivation and loglinear options are not compatible')
+end
+
 if nargout==1,
     analytic_derivation=0;
 end
-    
+
+if analytic_derivation,
+    kron_flag=DynareOptions.analytic_derivation_mode;
+end
+
 %------------------------------------------------------------------------------
 % 1. Get the structural parameters & define penalties
 %------------------------------------------------------------------------------
@@ -201,31 +214,13 @@ if ~isequal(DynareOptions.mode_compute,1) && any(xparam1>BayesInfo.ub)
 end
 
 % Get the diagonal elements of the covariance matrices for the structural innovations (Q) and the measurement error (H).
+Model = set_all_parameters(xparam1,EstimatedParameters,Model);
+
 Q = Model.Sigma_e;
 H = Model.H;
-for i=1:EstimatedParameters.nvx
-    k =EstimatedParameters.var_exo(i,1);
-    Q(k,k) = xparam1(i)*xparam1(i);
-end
-offset = EstimatedParameters.nvx;
-if EstimatedParameters.nvn
-    for i=1:EstimatedParameters.nvn
-        k = EstimatedParameters.var_endo(i,1);
-        H(k,k) = xparam1(i+offset)*xparam1(i+offset);
-    end
-    offset = offset+EstimatedParameters.nvn;
-else
-    H = zeros(DynareDataset.info.nvobs);
-end
 
-% Get the off-diagonal elements of the covariance matrix for the structural innovations. Test if Q is positive definite.
+% Test if Q is positive definite.
 if EstimatedParameters.ncx
-    for i=1:EstimatedParameters.ncx
-        k1 =EstimatedParameters.corrx(i,1);
-        k2 =EstimatedParameters.corrx(i,2);
-        Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
-        Q(k2,k1) = Q(k1,k2);
-    end
     % Try to compute the cholesky decomposition of Q (possible iff Q is positive definite)
     [CholQ,testQ] = chol(Q);
     if testQ
@@ -239,17 +234,10 @@ if EstimatedParameters.ncx
             return
         end
     end
-    offset = offset+EstimatedParameters.ncx;
 end
 
-% Get the off-diagonal elements of the covariance matrix for the measurement errors. Test if H is positive definite.
+% Test if H is positive definite.
 if EstimatedParameters.ncn
-    for i=1:EstimatedParameters.ncn
-        k1 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,1));
-        k2 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,2));
-        H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
-        H(k2,k1) = H(k1,k2);
-    end
     % Try to compute the cholesky decomposition of H (possible iff H is positive definite)
     [CholH,testH] = chol(H);
     if testH
@@ -263,17 +251,8 @@ if EstimatedParameters.ncn
             return
         end
     end
-    offset = offset+EstimatedParameters.ncn;
 end
 
-% Update estimated structural parameters in Mode.params.
-if EstimatedParameters.np > 0
-    Model.params(EstimatedParameters.param_vals(:,1)) = xparam1(offset+1:end);
-end
-
-% Update Model.Sigma_e and Model.H.
-Model.Sigma_e = Q;
-Model.H = H;
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
@@ -353,7 +332,7 @@ if (kalman_algo == 2) || (kalman_algo == 4)
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
             H = diag(H);
-            mmm = mm; 
+            mmm = mm;
         else
             Z = [Z, eye(pp)];
             T = blkdiag(T,zeros(pp));
@@ -402,7 +381,7 @@ switch DynareOptions.lik_init
         % Use standard kalman filter except if the univariate filter is explicitely choosen.
     if kalman_algo == 0
         kalman_algo = 3;
-    elseif ~((kalman_algo == 3) || (kalman_algo == 4)) 
+    elseif ~((kalman_algo == 3) || (kalman_algo == 4))
             error(['diffuse filter: options_.kalman_algo can only be equal ' ...
                    'to 0 (default), 3 or 4'])
     end
@@ -438,7 +417,7 @@ switch DynareOptions.lik_init
         else
             if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
                 H1 = diag(H);
-                mmm = mm; 
+                mmm = mm;
             else
                 Z = [Z, eye(pp)];
                 T = blkdiag(T,zeros(pp));
@@ -467,9 +446,9 @@ switch DynareOptions.lik_init
         kalman_algo = 1;
     end
     if isequal(H,0)
-        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,np,length(Z))));
+        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,mm,length(Z))));
     else
-        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,np,length(Z))),H);
+        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,mm,length(Z))),H);
     end
     if err
         disp(['dsge_likelihood:: I am not able to solve the Riccati equation, so I switch to lik_init=1!']);
@@ -477,15 +456,26 @@ switch DynareOptions.lik_init
         Pstar = lyapunov_symm(T,R*Q*R',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
     end
     Pinf  = [];
+    a = zeros(mm,1);
+    Zflag = 0;
   otherwise
     error('dsge_likelihood:: Unknown initialization approach for the Kalman filter!')
 end
 
-if analytic_derivation
+if analytic_derivation,
+    offset = EstimatedParameters.nvx;
+    offset = offset+EstimatedParameters.nvn;
+    offset = offset+EstimatedParameters.ncx;
+    offset = offset+EstimatedParameters.ncn;
+
     no_DLIK = 0;
     full_Hess = analytic_derivation==2;
     asy_Hess = analytic_derivation==-2;
+    outer_product_gradient = analytic_derivation==-1;
     if asy_Hess,
+        analytic_derivation=1;
+    end
+    if outer_product_gradient,
         analytic_derivation=1;
     end
     DLIK = [];
@@ -504,9 +494,9 @@ if analytic_derivation
         end
 
         if full_Hess,
-            [dum, DT, DOm, DYss, dum2, D2T, D2Om, D2Yss] = getH(A, B, Model,DynareResults,0,indparam,indexo);
+            [dum, DT, DOm, DYss, dum2, D2T, D2Om, D2Yss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo);
         else
-            [dum, DT, DOm, DYss] = getH(A, B, Model,DynareResults,0,indparam,indexo);
+            [dum, DT, DOm, DYss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo);
         end
     else
         DT = derivatives_info.DT;
@@ -530,7 +520,7 @@ if analytic_derivation
     DT = DT(iv,iv,:);
     DOm = DOm(iv,iv,:);
     DYss = DYss(iv,:);
-    DH=zeros([size(H),length(xparam1)]);
+    DH=zeros([length(H),length(H),length(xparam1)]);
     DQ=zeros([size(Q),length(xparam1)]);
     DP=zeros([size(T),length(xparam1)]);
     if full_Hess,
@@ -592,7 +582,7 @@ if analytic_derivation
         end
     end
     if analytic_derivation==1,
-        analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP};
+        analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP,asy_Hess};
     else
         analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP,D2T,D2Yss,D2Om,D2H,D2P};
     end
@@ -606,7 +596,7 @@ end
 
 if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     if no_missing_data_flag
-        if DynareOptions.block == 1
+        if DynareOptions.block
             [err, LIK] = block_kalman_filter(T,R,Q,H,Pstar,Y,start,Z,kalman_tol,riccati_tol, Model.nz_state_var, Model.n_diag, Model.nobs_non_statevar);
             mexErrCheck('block_kalman_filter', err);
         else
@@ -615,19 +605,26 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
                                 kalman_tol, riccati_tol, ...
                                 DynareOptions.presample, ...
                                 T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods, ...
-                                analytic_deriv_info{:}); 
-                            
+                                analytic_deriv_info{:});
+
         end
     else
-        [LIK,lik] = missing_observations_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
+        if 0 %DynareOptions.block
+            [err, LIK,lik] = block_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,...
+                                                                 T,R,Q,H,Pstar,Y,start,Z,kalman_tol,riccati_tol, Model.nz_state_var, Model.n_diag, Model.nobs_non_statevar);
+        else
+            [LIK,lik] = missing_observations_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
                                                a, Pstar, ...
                                                kalman_tol, DynareOptions.riccati_tol, ...
                                                DynareOptions.presample, ...
                                                T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods);
+        end;
     end
     if analytic_derivation,
         LIK1=LIK;
         LIK=LIK1{1};
+        lik1=lik;
+        lik=lik1{1};
     end
     if isinf(LIK)
         if kalman_algo == 1
@@ -647,7 +644,7 @@ end
 
 if (kalman_algo==2) || (kalman_algo==4)
     % Univariate Kalman Filter
-    % resetting measurement error covariance matrix when necessary                                                           % 
+    % resetting measurement error covariance matrix when necessary                                                           %
     if ~correlated_errors_have_been_checked
         if isequal(H,0)
             H = zeros(pp,1);
@@ -659,6 +656,7 @@ if (kalman_algo==2) || (kalman_algo==4)
             if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
                 H = diag(H);
                 mmm = mm;
+                clear tmp
                 if analytic_derivation,
                     for j=1:pp,
                         tmp(j,:)=DH(j,j,:);
@@ -690,6 +688,8 @@ if (kalman_algo==2) || (kalman_algo==4)
     if analytic_derivation,
         LIK1=LIK;
         LIK=LIK1{1};
+        lik1=lik;
+        lik=lik1{1};
     end
     if DynareOptions.lik_init==3
         LIK = LIK+dLIK;
@@ -704,27 +704,33 @@ if analytic_derivation
         DLIK = LIK1{2};
         %                 [DLIK] = score(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
     end
-    if full_Hess,
+    if full_Hess ,
         Hess = -LIK1{3};
         %                     [Hess, DLL] = get_Hessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,D2T,D2Yss,D2Om,D2H,D2P,start,Z,kalman_tol,riccati_tol);
         %                     Hess0 = getHessian(Y,T,DT,D2T, R*Q*transpose(R),DOm,D2Om,Z,DYss,D2Yss);
     end
     if asy_Hess,
-        [Hess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
+%         if ~((kalman_algo==2) || (kalman_algo==4)),
+%             [Hess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
+%         else
+        Hess = LIK1{3};
+%         end
     end
 end
-
 
 if isnan(LIK)
     info = 45;
     exit_flag = 0;
     return
 end
+
 if imag(LIK)~=0
-    likelihood = penalty;
-else
-    likelihood = LIK;
+    info = 46;
+    exit_flag = 0;
+    return
 end
+
+likelihood = LIK;
 
 % ------------------------------------------------------------------------------
 % 5. Adds prior if necessary
@@ -739,10 +745,28 @@ if analytic_derivation
     if no_DLIK==0
         DLIK = DLIK - dlnprior';
     end
+    if outer_product_gradient,
+        dlik = lik1{2};
+        dlik=[- dlnprior; dlik(start:end,:)];
+        Hess = dlik'*dlik;
+    end
 else
     lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
 end
+
 fval    = (likelihood-lnprior);
+
+if isnan(fval)
+    info = 47;
+    exit_flag = 0;
+    return
+end
+
+if imag(fval)~=0
+    info = 48;
+    exit_flag = 0;
+    return
+end
 
 % Update DynareOptions.kalman_algo.
 DynareOptions.kalman_algo = kalman_algo;

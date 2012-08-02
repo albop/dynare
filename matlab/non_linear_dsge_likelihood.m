@@ -101,7 +101,7 @@ function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,Dynar
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2010, 2011, 2012 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -151,7 +151,7 @@ nvobs = DynareDataset.info.nvobs;
 %------------------------------------------------------------------------------
 
 % Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
-if (DynareOptions.mode_compute~=1) & any(xparam1<BayesInfo.lb)
+if (DynareOptions.mode_compute~=1) && any(xparam1<BayesInfo.lb)
     k = find(xparam1 < BayesInfo.lb);
     fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
     exit_flag = 0;
@@ -160,7 +160,7 @@ if (DynareOptions.mode_compute~=1) & any(xparam1<BayesInfo.lb)
 end
 
 % Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
-if (DynareOptions.mode_compute~=1) & any(xparam1>BayesInfo.ub)
+if (DynareOptions.mode_compute~=1) && any(xparam1>BayesInfo.ub)
     k = find(xparam1>BayesInfo.ub);
     fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
     exit_flag = 0;
@@ -337,7 +337,7 @@ switch DynareOptions.particle.initialization
     StateVectorMean = ReducedForm.constant(mf0);
     old_DynareOptionsperiods = DynareOptions.periods;
     DynareOptions.periods = 5000;
-    y_ = simult(oo_.steady_state, dr);
+    y_ = simult(oo_.steady_state, dr,Model,DynareOptions,DynareResults);
     y_ = y_(state_variables_idx,2001:5000);
     StateVectorVariance = cov(y_');
     DynareOptions.periods = old_DynareOptionsperiods;

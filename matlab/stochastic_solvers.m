@@ -29,7 +29,7 @@ function [dr,info] = stochastic_solvers(dr,task,M_,options_,oo_)
 %   none.
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,6 +48,10 @@ function [dr,info] = stochastic_solvers(dr,task,M_,options_,oo_)
 
 info = 0;
 
+if options_.linear
+    options_.order = 1;
+end
+
 if (options_.aim_solver == 1) && (options_.order > 1)
         error('Option "aim_solver" is incompatible with order >= 2')
 end
@@ -57,7 +61,7 @@ if options_.k_order_solver;
         [dr,info] = dyn_risky_steadystate_solver(oo_.steady_state,M_,dr, ...
                                              options_,oo_);
     else
-        dr = set_state_space(dr,M_);
+        dr = set_state_space(dr,M_,options_);
         [dr,info] = k_order_pert(dr,M_,options_,oo_);
     end
     return;
@@ -156,12 +160,6 @@ if M_.maximum_endo_lead == 0
         error(['2nd and 3rd order approximation not implemented for purely ' ...
                'backward models'])
     end
-elseif M_.maximum_endo_lag == 0
-    % purely forward model
-    dr.ghx = [];
-    dr.ghu = -b\jacobia_(:,nz+1:end);
-    dr.eigval = [];
-    dr.rank = 0;
 elseif options_.risky_steadystate
     [dr,info] = dyn_risky_steadystate_solver(oo_.steady_state,M_,dr, ...
                                              options_,oo_);

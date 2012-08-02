@@ -1,5 +1,5 @@
 function oo_ = posterior_analysis(type,arg1,arg2,arg3,options_,M_,oo_)  
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,7 +33,7 @@ switch info
   case {4,5}
     oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_);
   case 6
-    [ivar,vartan] = set_stationary_variables_list(options_,M_);
+    [ivar,vartan] = get_variables_list(options_,M_);
     nvar = length(ivar);
     oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_,nvar,vartan);
   otherwise

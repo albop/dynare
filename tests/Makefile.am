@@ -7,6 +7,7 @@ MODFILES = \
 	example1_with_tags.mod \
 	example1_irf_shocks.mod \
 	example1_abs_sign.mod \
+	example1_macroif.mod \
 	t_sgu_ex1.mod \
 	osr_example.mod \
 	optimal_policy/ramsey.mod \
@@ -26,7 +27,6 @@ MODFILES = \
 	histval_sto.mod \
 	histval_det.mod \
 	auxiliary_variables/test1.mod \
-	deterministic_model_purely_forward.mod \
 	expectations/expectation.mod \
 	expectations/expectation_ss.mod \
 	expectations/expectation_ss_old.mod \
@@ -49,6 +49,7 @@ MODFILES = \
 	k_order_perturbation/fs2000k2_m.mod \
 	k_order_perturbation/fs2000k_1_m.mod \
 	k_order_perturbation/fs2000k3_m.mod \
+	k_order_perturbation/fs2000k3_p.mod \
 	partial_information/PItest3aHc0PCLsimModPiYrVarobsAll.mod \
 	partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR.mod \
 	arima/mod1.mod \
@@ -65,6 +66,9 @@ MODFILES = \
 	fs2000/fs2000d.mod \
 	fs2000/fs2000_cmaes.mod \
 	fs2000/fs2000_calib.mod \
+	fs2000/fs2000_analytic_derivation.mod \
+	fs2000/fs2000_particle.mod \
+	fs2000/fs2000_missing_data.mod \
 	homotopy/homotopy1_test.mod \
 	homotopy/homotopy2_test.mod \
 	homotopy/homotopy3_test.mod \
@@ -126,13 +130,18 @@ MODFILES = \
 	second_order/ds1.mod \
 	second_order/ds2.mod \
 	ep/rbc.mod \
+	ep/rbc2.mod \
+	ep/rbcii.mod \
 	ep/linear.mod \
 	deterministic_simulations/deterministic_model_purely_forward.mod \
+	deterministic_simulations/deterministic_model_purely_backward.mod \
 	deterministic_simulations/rbc_det1.mod \
 	deterministic_simulations/rbc_det2.mod \
 	deterministic_simulations/rbc_det3.mod \
 	deterministic_simulations/rbc_det4.mod \
-	deterministic_simulations/rbc_det5.mod
+	deterministic_simulations/rbc_det5.mod \
+	fs2000/fs2000_sd.mod \
+	walsh.mod
 
 EXTRA_DIST = \
 	$(MODFILES) \
@@ -185,8 +194,7 @@ EXTRA_DIST = \
 	kalman_filter_smoother/fsdat_simul.m \
 	kalman_filter_smoother/fs2000a_steadystate.m \
 	identification/kim/kim2_steadystate.m \
-	ep/mean_preserving_spread.m \
-	ep/rbc_steadystate.m
+	ep/mean_preserving_spread.m
 
 TARGETS =
 

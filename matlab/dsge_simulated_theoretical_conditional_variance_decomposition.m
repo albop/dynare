@@ -16,7 +16,7 @@ function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
 %   vartan                           [char]     array of characters (with nvar rows).
 %   NumberOfConditionalDecompFiles   [integer]  scalar, number of prior or posterior data files (for covariance).
 
-% Copyright (C) 2009-2011 Dynare Team
+% Copyright (C) 2009-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -54,7 +54,7 @@ if ~posterior
     end
     options_.varlist = options_.prior_analysis_endo_var_list;
 end
-[ivar,vartan ] = set_stationary_variables_list(options_, M_);
+[ivar,vartan ] = get_variables_list(options_, M_);
 if ~posterior
     if exist('temp','var')
         options_.varlist = temp;

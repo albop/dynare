@@ -28,8 +28,7 @@ function global_initialization()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_ ...
-    ex_det0_
+global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_  ex_det0_
 
 estim_params_ = [];
 bayestopt_ = [];
@@ -238,6 +237,7 @@ options_.pruning = 0;
 options_.solve_algo = 2;
 options_.linear = 0;
 options_.replic = 50;
+options_.simul_replic = 1;
 options_.drop = 100;
 % if mjdgges.dll (or .mexw32 or ....) doesn't exist, matlab/qz is added to the path.
 % There exists now qz/mjdgges.m that contains the calls to the old Sims code
@@ -314,6 +314,7 @@ options_.MaxNumberOfBytes = 1e6;
 options_.MaximumNumberOfMegaBytes = 111;
 options_.PosteriorSampleSize = 1000;
 options_.analytic_derivation = 0;
+options_.analytic_derivation_mode = 0;
 options_.bayesian_irf = 0;
 options_.bayesian_th_moments = 0;
 options_.diffuse_filter = 0;
@@ -392,6 +393,7 @@ oo_.exo_det_simul = [];
 
 M_.params = [];
 M_.endo_histval = [];
+M_.Correlation_matrix = [];
 
 % homotopy
 options_.homotopy_mode = 0;
@@ -434,12 +436,27 @@ options_.sylvester_fixed_point_tol = 1e-12;
 options_.lyapunov_fp = 0;
 % if 1 use a doubling algorithm to solve Lyapunov equation (for large scale models)
 options_.lyapunov_db = 0;
-% if 1 use a squre root solver to solve Lyapunov equation (for large scale models)
+% if 1 use a square root solver to solve Lyapunov equation (for large scale models)
 options_.lyapunov_srs = 0;
 
 % convergence criterion for iteratives methods to solve lyapunov equations
 options_.lyapunov_fixed_point_tol = 1e-10;
 options_.lyapunov_doubling_tol = 1e-16;
+
+% if equal to 1 use a cycle reduction method to compute the decision rule (for large scale models)
+options_.dr_cycle_reduction = 0;
+
+% convergence criterion for iteratives methods to solve the decision rule
+options_.dr_cycle_reduction_tol = 1e-7;
+
+% if equal to 1 use a logarithmic reduction method to compute the decision rule (for large scale models)
+options_.dr_logarithmic_reduction = 0;
+
+% convergence criterion for iteratives methods to solve the decision rule
+options_.dr_logarithmic_reduction_tol = 1e-12;
+
+% convergence criterion for iteratives methods to solve the decision rule
+options_.dr_logarithmic_reduction_maxiter = 100;
 
 % dates for historical time series
 options_.initial_date.freq = 1;
@@ -504,10 +521,16 @@ options_.graph_save_formats.eps = 1;
 options_.graph_save_formats.pdf = 0;
 options_.graph_save_formats.fig = 0;
 
+% risky steady state
 options_.risky_steadystate = 0;
+
+% use GPU
+options_.gpu = 0;
 
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
+% initialize persistent variables in dyn_first_order_solver()
+dyn_first_order_solver();
 
 % Set dynare random generator and seed.
 set_dynare_seed('default');
@@ -517,11 +540,7 @@ set_dynare_seed('default');
 [junk,junk]=mkdir([M_.fname '/Output']);
 
 % Load user configuration file.
-if isunix
-    origin = pwd;
-    cd('~/')
-    if exist('dynare_configuration.m')
-        dynare_configuration;
-    end
-    cd(origin)
+if isfield(options_, 'global_init_file')
+    run(options_.global_init_file);
 end
+

@@ -62,7 +62,7 @@ function [dr,info] = dyn_risky_steadystate_solver(ys0,M, ...
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -208,7 +208,7 @@ function [resid,dr] = risky_residuals(ys,M,dr,options,oo)
         d2a = d2(eq,ih1);
         
         M.endo_nbr = M.endo_nbr-n_tags;
-        dr = set_state_space(dr,M);
+        dr = set_state_space(dr,M,options);
     
         [junk,dr.i_fwrd_g] = find(lead_lag_incidence(3,dr.order_var));
         i_fwrd_f = nonzeros(lead_incidence(dr.order_var));
@@ -434,7 +434,7 @@ function [dr] = first_step_ds(x,M,dr,options,oo)
         d2a = d2(eq,ih1);
         
         M.endo_nbr = M.endo_nbr-n_tags;
-        dr = set_state_space(dr,M);
+        dr = set_state_space(dr,M,options);
     
         dr.i_fwrd_g = find(lead_lag_incidence(3,dr.order_var)');
     else

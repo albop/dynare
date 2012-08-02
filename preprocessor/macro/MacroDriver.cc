@@ -170,15 +170,25 @@ MacroDriver::begin_ifdef(const string &name)
   try
     {
       get_variable(name);
-      const MacroValue *one = new IntMV(*this, 1);
-      begin_if(one);
-      delete one;
+      begin_if(new IntMV(*this, 1));
     }
   catch (UnknownVariable &)
     {
-      const MacroValue *zero = new IntMV(*this, 0);
-      begin_if(zero);
-      delete zero;
+      begin_if(new IntMV(*this, 0));
+    }
+}
+
+void
+MacroDriver::begin_ifndef(const string &name)
+{
+  try
+    {
+      get_variable(name);
+      begin_if(new IntMV(*this, 0));
+    }
+  catch (UnknownVariable &)
+    {
+      begin_if(new IntMV(*this, 1));
     }
 }
 

@@ -78,7 +78,7 @@ dynareParallelMkDir(RemoteTmpFolder,DataInput);
 % Currently when errors are detected execution simply stops and users can
 % fix configuration errors according to the error type.
 
-% Copyright (C) 2009-2011 Dynare Team
+% Copyright (C) 2009-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -581,13 +581,13 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     
     RealCPUnbr='';
 %    keyboard;
-    RealCPUnbr=GiveCPUnumber(de0,OStargetUnix);
+    RealCPUnbr=GiveCPUnumber(de0);
     
     % Questo controllo penso che si possa MIGLIORARE!!!!!
     if  isempty (RealCPUnbr) && Environment==0,
         [si0 de0]=system(['psinfo \\',DataInput(Node).ComputerName]);
     end        
-    RealCPUnbr=GiveCPUnumber(de0,OStargetUnix);
+    RealCPUnbr=GiveCPUnumber(de0);
 
     if  isempty (RealCPUnbr)
         % An error occurred when we try to know the Cpu/Cores

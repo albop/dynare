@@ -1,6 +1,6 @@
 function info=stoch_simul(var_list)
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -60,9 +60,9 @@ if M_.exo_nbr > 0
     oo_.exo_simul= ones(iter_ + M_.maximum_lag + M_.maximum_lead,1) * oo_.exo_steady_state';
 end
 
-check_model;
+check_model(M_);
 
-oo_.dr=set_state_space(dr,M_);
+oo_.dr=set_state_space(dr,M_,options_);
 
 if PI_PCL_solver
     [oo_.dr, info] = PCL_resol(oo_.steady_state,0);
@@ -138,7 +138,8 @@ if options_.periods > 0 && ~PI_PCL_solver
     else
         y0 = M_.endo_histval;
     end
-    oo_.endo_simul = simult(y0,oo_.dr);
+    [ys, oo_] = simult(y0,oo_.dr,M_,options_,oo_);
+    oo_.endo_simul = ys;
     dyn2vec;
 end
 

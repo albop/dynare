@@ -1,4 +1,4 @@
-function make_y_
+function make_y_()
 % function make_y_
 % forms oo_.endo_simul as guess values for deterministic simulations
 %  
@@ -12,7 +12,7 @@ function make_y_
 %   none
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

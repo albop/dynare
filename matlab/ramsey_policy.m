@@ -1,6 +1,6 @@
 function info = ramsey_policy(var_list)
 
-% Copyright (C) 2007-2011 Dynare Team
+% Copyright (C) 2007-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -37,6 +37,6 @@ if options_.noprint == 0
 end
 
 
-oo_.planner_objective_value = evaluate_planner_objective(M_,oo_,options_);
+oo_.planner_objective_value = evaluate_planner_objective(M_,options_,oo_);
 
 options_ = oldoptions;

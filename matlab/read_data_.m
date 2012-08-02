@@ -1,4 +1,4 @@
-function read_data_
+function read_data_()
 % function read_data_
 % reads endogenous and exogenous variables from a text file 
 % Used by datafile option in simulate
@@ -12,7 +12,7 @@ function read_data_
 % SPECIAL REQUIREMENT
 %   none
 
-% Copyright (C) 2007-2010 Dynare Team
+% Copyright (C) 2007-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

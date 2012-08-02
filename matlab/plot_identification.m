@@ -18,7 +18,7 @@ function plot_identification(params,idemoments,idehess,idemodel, idelre, advance
 % SPECIAL REQUIREMENTS
 %    None
 
-% Copyright (C) 2008-2011 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -87,8 +87,10 @@ if SampleSize == 1,
     dyn_saveas(hh,[IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1],options_);
     
     if advanced,
-        disp(' ')
-        disp('Press ENTER to display advanced diagnostics'), pause(5),
+        if ~options_.nodisplay,
+            disp(' ')
+            disp('Press ENTER to plot advanced diagnostics'), pause(5),
+        end
         hh = dyn_figure(options_,'Name',[tittxt, ' - Sensitivity plot']);
         subplot(211)
         mmm = (siJnorm)'./max(siJnorm);
@@ -112,9 +114,9 @@ if SampleSize == 1,
         % identificaton patterns
         for  j=1:size(idemoments.cosnJ,2),
             pax=NaN(nparam,nparam);
-            fprintf('\n')
-            disp(['Collinearity patterns with ', int2str(j) ,' parameter(s)'])
-            fprintf('%-15s [%-*s] %10s\n','Parameter',(15+1)*j,' Expl. params ','cosn')
+%             fprintf('\n')
+%             disp(['Collinearity patterns with ', int2str(j) ,' parameter(s)'])
+%             fprintf('%-15s [%-*s] %10s\n','Parameter',(15+1)*j,' Expl. params ','cosn')
             for i=1:nparam,
                 namx='';
                 for in=1:j,
@@ -126,7 +128,7 @@ if SampleSize == 1,
                         pax(i,dumpindx)=idemoments.cosnJ(i,j);
                     end
                 end
-                fprintf('%-15s [%s] %10.3f\n',name{i},namx,idemoments.cosnJ(i,j))
+%                 fprintf('%-15s [%s] %10.3f\n',name{i},namx,idemoments.cosnJ(i,j))
             end
             hh = dyn_figure(options_,'Name',[tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)']);
             imagesc(pax,[0 1]);
@@ -171,10 +173,10 @@ if SampleSize == 1,
         end
         for j=1:min(nparam,8),
             if j<5,
-                figure(f1),
+                set(0,'CurrentFigure',f1),
                 jj=j;
             else
-                figure(f2),
+                set(0,'CurrentFigure',f2),
                 jj=j-4;
             end
             subplot(4,1,jj),
@@ -228,8 +230,10 @@ else
     title('MC mean of sensitivity measures')
     dyn_saveas(hh,[ IdentifDirectoryName '/' M_.fname '_MC_sensitivity' ],options_);
     if advanced,
-        disp(' ')
-        disp('Press ENTER to display advanced diagnostics'), pause(5),
+        if ~options_.nodisplay,
+            disp(' ')
+            disp('Press ENTER to display advanced diagnostics'), pause(5),
+        end
 %         options_.nograph=1;
         hh = dyn_figure(options_,'Name','MC Condition Number');
         subplot(221)
@@ -261,7 +265,7 @@ else
 %         end
 
         if nparam<5,
-            f1 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV'])
+            f1 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV']);
         else
             f1 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): SMALLEST SV']);
             f2 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV']);
@@ -274,12 +278,12 @@ else
         end
         for j=1:nplots,
             if (nparam>4 && j<=ceil(nplots/2)) || nparam<5,
-                figure(f1),
+                set(0,'CurrentFigure',f1),
                 jj=j;
                 VVV=squeeze(abs(idemoments.V(:,:,end-j+1)));
                 SSS = idemoments.S(:,end-j+1);
             else
-                figure(f2),
+                set(0,'CurrentFigure',f2),
                 jj=j-ceil(nplots/2);
                 VVV=squeeze(abs(idemoments.V(:,:,jj)));
                 SSS = idemoments.S(:,jj);

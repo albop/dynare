@@ -32,7 +32,7 @@ function  [LIK, lik, a, P] = missing_observations_kalman_filter(data_index,numbe
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.   
 
-% Copyright (C) 2004-2011 Dynare Team
+% Copyright (C) 2004-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -67,6 +67,10 @@ if isempty(diffuse_periods)
     diffuse_periods = 0;
 end
 
+if isequal(H,0)
+    H = zeros(pp,pp);
+end
+
 % Get sample size.
 smpl = last-start+1;
 
@@ -79,7 +83,8 @@ LIK  = Inf;                % Default value of the log likelihood.
 oldK = Inf;
 notsteady   = 1;
 F_singular  = 1;
-    
+s = 0;
+
 while notsteady & t<=last
     s  = t-start+1;
     d_index = data_index{t};

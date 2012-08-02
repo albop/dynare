@@ -1,7 +1,7 @@
-function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
-    
+function [dr,info] = dyn_first_order_solver(jacobia,DynareModel,dr,DynareOptions,task)
+
 %@info:
-%! @deftypefn {Function File} {[@var{dr},@var{info}] =} dyn_first_order_solver (@var{jacobia},@var{M_},@var{dr},@var{options},@var{task})
+%! @deftypefn {Function File} {[@var{dr},@var{info}] =} dyn_first_order_solver (@var{jacobia},@var{DynareModel},@var{dr},@var{DynareOptions},@var{task})
 %! @anchor{dyn_first_order_solver}
 %! @sp 1
 %! Computes the first order reduced form of the DSGE model
@@ -11,7 +11,7 @@ function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
 %! @table @ @var
 %! @item jacobia
 %! Matrix containing the Jacobian of the model
-%! @item M_
+%! @item DynareModel
 %! Matlab's structure describing the model (initialized by @code{dynare}).
 %! @item dr
 %! Matlab's structure describing the reduced form solution of the model.
@@ -41,13 +41,13 @@ function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
 %! @item info==5
 %! Blanchard & Kahn conditions are not satisfied: indeterminacy due to rank failure.
 %! @item info==7
-%! One of the generalized eigenvalues is close to 0/0     
+%! One of the generalized eigenvalues is close to 0/0
 %! @end table
 %! @end table
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -63,75 +63,159 @@ function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+persistent reorder_jacobian_columns innovations_idx index_s index_m index_c
+persistent index_p row_indx index_0m index_0p k1 k2 state_var
+persistent ndynamic nstatic nfwrd npred nboth nd nyf n_current index_d 
+persistent index_e index_d1 index_d2 index_e1 index_e2 row_indx_de_1 
+persistent row_indx_de_2 cols_b
+
+
+if ~nargin
+    if nargout
+        error('dyn_first_order_solver:: Initialization mode returns zero argument!')
+    end
+    reorder_jacobian_columns = [];
+    return
+end
+
+exo_nbr = DynareModel.exo_nbr;
+
+if isempty(reorder_jacobian_columns)
     
-    info = 0;
-    
-    dr.ghx = [];
-    dr.ghu = [];
-    
-    klen = M_.maximum_endo_lag+M_.maximum_endo_lead+1;
-    kstate = dr.kstate;
-    kad = dr.kad;
-    kae = dr.kae;
-    nstatic = dr.nstatic;
-    nfwrd = dr.nfwrd;
-    npred = dr.npred;
-    nboth = dr.nboth;
+    maximum_lag = DynareModel.maximum_endo_lag;
+    kstate   = dr.kstate;
+    nfwrd    = dr.nfwrd;
+    nboth    = dr.nboth;
+    npred    = dr.npred-nboth;
+    nstatic  = dr.nstatic;
+    ndynamic = npred+nfwrd+nboth;
+    nyf      = nfwrd + nboth;
+    n        = DynareModel.endo_nbr;
+
+    k1 = 1:(npred+nboth);
+    k2 = 1:(nfwrd+nboth);
+
     order_var = dr.order_var;
     nd = size(kstate,1);
-    lead_lag_incidence = M_.lead_lag_incidence;
+    lead_lag_incidence = DynareModel.lead_lag_incidence;
     nz = nnz(lead_lag_incidence);
 
-    sdyn = M_.endo_nbr - nstatic;
-
-    [junk,cols_b,cols_j] = find(lead_lag_incidence(M_.maximum_endo_lag+1,...
-                                                   order_var));
-    
-    if nstatic > 0
-        [Q,R] = qr(jacobia(:,cols_j(1:nstatic)));
-        aa = Q'*jacobia;
+    lead_id = find(lead_lag_incidence(maximum_lag+2,:));
+    lead_idx = lead_lag_incidence(maximum_lag+2,lead_id);
+    if maximum_lag
+        lag_id = find(lead_lag_incidence(1,:));
+        lag_idx = lead_lag_incidence(1,lag_id);
+        static_id = find((lead_lag_incidence(1,:) == 0) & ...
+                         (lead_lag_incidence(3,:) == 0));
     else
-        aa = jacobia;
+        lag_id = [];
+        lag_idx = [];
+        static_id = find(lead_lag_incidence(2,:)==0);
     end
-    k1 = find([1:klen] ~= M_.maximum_endo_lag+1);
-    a = aa(:,nonzeros(lead_lag_incidence(k1,:)'));
-    b(:,cols_b) = aa(:,cols_j);
-    b10 = b(1:nstatic,1:nstatic);
-    b11 = b(1:nstatic,nstatic+1:end);
-    b2 = b(nstatic+1:end,nstatic+1:end);
-    if any(isinf(a(:)))
-        info = 1;
+
+    both_id = intersect(lead_id,lag_id);
+    if maximum_lag
+        no_both_lag_id = setdiff(lag_id,both_id);
+    else
+        no_both_lag_id = [];
+    end
+    innovations_idx = nz+(1:exo_nbr);
+    state_var  = [lag_id, both_id];
+
+    index_c  = nonzeros(lead_lag_incidence(maximum_lag+1,:));             % Index of all endogenous variables present at time=t
+    n_current = length(index_c);
+
+    index_s  = npred+nboth+(1:nstatic);     % Index of all static
+                                            % endogenous variables
+                                            % present at time=t
+    indexi_0 = npred+nboth;
+
+    npred0 = nnz(lead_lag_incidence(maximum_lag+1,no_both_lag_id));
+    index_0m = indexi_0+nstatic+(1:npred0);
+    nfwrd0 = nnz(lead_lag_incidence(2,lead_id));
+    index_0p = indexi_0+nstatic+npred0+(1:nfwrd0);
+    index_m  = 1:(npred+nboth);
+    index_p  = npred+nboth+n_current+(1:nfwrd+nboth);
+    row_indx_de_1 = 1:ndynamic;
+    row_indx_de_2 = ndynamic+(1:nboth);
+    row_indx = nstatic+row_indx_de_1;
+    index_d = [index_0m index_p];
+    llx = lead_lag_incidence(:,order_var);
+    index_d1 = [find(llx(maximum_lag+1,nstatic+(1:npred))), npred+nboth+(1:nyf) ];
+    index_d2 = npred+(1:nboth);
+
+    index_e = [index_m index_0p];
+    index_e1 = [1:npred+nboth, npred+nboth+find(llx(maximum_lag+1,nstatic+npred+(1: ...
+                                                      nyf)))];
+    index_e2 = npred+nboth+nfwrd+(1:nboth);
+    
+    [junk,cols_b] = find(lead_lag_incidence(maximum_lag+1, order_var));
+
+    reorder_jacobian_columns = [nonzeros(lead_lag_incidence(:,order_var)'); ...
+                        nz+(1:exo_nbr)'];
+end
+
+dr.ghx = [];
+dr.ghu = [];
+
+dr.state_var = state_var;
+
+jacobia = jacobia(:,reorder_jacobian_columns);
+
+if nstatic > 0
+    [Q, junk] = qr(jacobia(:,index_s));
+    aa = Q'*jacobia;
+else
+    aa = jacobia;
+end
+
+A = aa(:,index_m);  % Jacobain matrix for lagged endogeneous variables
+B(:,cols_b) = aa(:,index_c);  % Jacobian matrix for contemporaneous endogeneous variables
+C = aa(:,index_p);  % Jacobain matrix for led endogeneous variables
+
+info = 0;
+if task ~= 1 && (DynareOptions.dr_cycle_reduction || DynareOptions.dr_logarithmic_reduction)
+    if n_current < DynareModel.endo_nbr
+        if DynareOptions.dr_cycle_reduction
+            error(['The cycle reduction algorithme can''t be used when the ' ...
+               'coefficient matrix for current variables isn''t invertible'])
+        elseif DynareOptions.dr_logarithmic_reduction
+            error(['The logarithmic reduction algorithme can''t be used when the ' ...
+                   'coefficient matrix for current variables isn''t invertible'])
+        end
+    end  
+    if DynareOptions.gpu
+        gpuArray(A1);
+        gpuArray(B1);
+        gpuArray(C1);
+    end
+    A1 = [aa(row_indx,index_m ) zeros(ndynamic,nfwrd)];
+    B1 = [aa(row_indx,index_0m) aa(row_indx,index_0p) ];
+    C1 = [zeros(ndynamic,npred) aa(row_indx,index_p)];
+    if DynareOptions.dr_cycle_reduction == 1
+        [ghx, info] = cycle_reduction(A1, B1, C1, DynareOptions.dr_cycle_reduction_tol);
+    else
+        [ghx, info] = logarithmic_reduction(C1, B1, A1, DynareOptions.dr_logarithmic_reduction_tol, DynareOptions.dr_logarithmic_reduction_maxiter);
+    end
+    if info
+        % cycle_reduction or logarithmic redution failed and set info
         return
     end
-
-    % buildind D and E
-    d = zeros(nd,nd) ;
-    e = d ;
-
-    k = find(kstate(:,2) >= M_.maximum_endo_lag+2 & kstate(:,3));
-    d(1:sdyn,k) = a(nstatic+1:end,kstate(k,3)) ;
-    k1 = find(kstate(:,2) == M_.maximum_endo_lag+2);
-    e(1:sdyn,k1) =  -b2(:,kstate(k1,1)-nstatic);
-    k = find(kstate(:,2) <= M_.maximum_endo_lag+1 & kstate(:,4));
-    e(1:sdyn,k) = -a(nstatic+1:end,kstate(k,4)) ;
-    k2 = find(kstate(:,2) == M_.maximum_endo_lag+1);
-    k2 = k2(~ismember(kstate(k2,1),kstate(k1,1)));
-    d(1:sdyn,k2) = b2(:,kstate(k2,1)-nstatic);
-
-    if ~isempty(kad)
-        for j = 1:size(kad,1)
-            d(sdyn+j,kad(j)) = 1 ;
-            e(sdyn+j,kae(j)) = 1 ;
-        end
-    end
-
-    % 1) if mjdgges.dll (or .mexw32 or ....) doesn't exit, 
-    % matlab/qz is added to the path. There exists now qz/mjdgges.m that 
-    % contains the calls to the old Sims code 
-    % 2) In  global_initialization.m, if mjdgges.m is visible exist(...)==2, 
-    % this means that the DLL isn't avaiable and use_qzdiv is set to 1
+    ghx = ghx(:,index_m);
+    hx = ghx(1:npred+nboth,:);
+    gx = ghx(1+npred:end,:);
+else
+    D = zeros(ndynamic+nboth);
+    E = zeros(ndynamic+nboth);
+    D(row_indx_de_1,index_d1) = aa(row_indx,index_d);
+    D(row_indx_de_2,index_d2) = eye(nboth);
+    E(row_indx_de_1,index_e1) = -aa(row_indx,index_e);
+    E(row_indx_de_2,index_e2) = eye(nboth);
     
-    [err,ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options.qz_criterium);
+    E = [-aa(row_indx,[index_m index_0p])  ; [zeros(nboth,nboth+npred) eye(nboth,nboth+nfwrd) ] ];
+
+    [err, ss, tt, w, sdim, dr.eigval, info1] = mjdgges(E,D,DynareOptions.qz_criterium);
     mexErrCheck('mjdgges', err);
 
     if info1
@@ -141,21 +225,19 @@ function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
         else
             info(1) = 2;
             info(2) = info1;
-            info(3) = size(e,2);
+            info(3) = size(E,2);
         end
         return
     end
 
     nba = nd-sdim;
 
-    nyf = sum(kstate(:,2) > M_.maximum_endo_lag+1);
-
     if task == 1
-        dr.rank = rank(w(1:nyf,nd-nyf+1:end));
+        dr.rank = rank(w(npred+nboth+1:end,npred+nboth+1:end));
         % Under Octave, eig(A,B) doesn't exist, and
         % lambda = qz(A,B) won't return infinite eigenvalues
         if ~exist('OCTAVE_VERSION')
-            dr.eigval = eig(e,d);
+            dr.eigval = eig(E,D);
         end
         return
     end
@@ -163,74 +245,89 @@ function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
     if nba ~= nyf
         temp = sort(abs(dr.eigval));
         if nba > nyf
-            temp = temp(nd-nba+1:nd-nyf)-1-options.qz_criterium;
+            temp = temp(nd-nba+1:nd-nyf)-1-DynareOptions.qz_criterium;
             info(1) = 3;
         elseif nba < nyf;
-            temp = temp(nd-nyf+1:nd-nba)-1-options.qz_criterium;
+            temp = temp(nd-nyf+1:nd-nba)-1-DynareOptions.qz_criterium;
             info(1) = 4;
         end
         info(2) = temp'*temp;
         return
     end
 
-    np = nd - nyf;
-    n2 = np + 1;
-    n3 = nyf;
-    n4 = n3 + 1;
-    % derivatives with respect to dynamic state variables
-    % forward variables
-    w1 =w(1:n3,n2:nd);
-    if ~isscalar(w1) && (condest(w1) > 1e9);
-        % condest() fails on a scalar under Octave
+    %First order approximation
+    indx_stable_root = 1: (nd - nyf);     %=> index of stable roots
+    indx_explosive_root = npred + nboth + 1:nd;  %=> index of explosive roots
+                                                 % derivatives with respect to dynamic state variables
+                                                 % forward variables
+    Z = w';
+    Z11 = Z(indx_stable_root,    indx_stable_root);
+    Z21  = Z(indx_explosive_root, indx_stable_root);
+    Z22  = Z(indx_explosive_root, indx_explosive_root);
+    [minus_gx,rc] = linsolve(Z22,Z21);
+    if rc < 1e-9
+        % Z22 is near singular
         info(1) = 5;
-        info(2) = condest(w1);
+        info(2) = -log(rc);
         return;
-    else
-        gx = -w1'\w(n4:nd,n2:nd)';
-    end  
-
+    end
+    gx  = -minus_gx;
     % predetermined variables
-    hx = w(1:n3,1:np)'*gx+w(n4:nd,1:np)';
-    hx = (tt(1:np,1:np)*hx)\(ss(1:np,1:np)*hx);
+    opts.UT = true;
+    opts.TRANSA = true;
+    hx1 = linsolve(tt(indx_stable_root, indx_stable_root),Z11,opts)';
+    hx2 = linsolve(Z11,ss(indx_stable_root, indx_stable_root)')';
+    hx =  hx1*hx2;
+    ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
+end
 
-    k1 = find(kstate(n4:nd,2) == M_.maximum_endo_lag+1);
-    k2 = find(kstate(1:n3,2) == M_.maximum_endo_lag+2);
-    dr.gx = gx;
-    dr.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
+dr.gx = gx;
 
-    %lead variables actually present in the model
-    j3 = nonzeros(kstate(:,3));
-    j4  = find(kstate(:,3));
-    % derivatives with respect to exogenous variables
-    if M_.exo_nbr
-        fu = aa(:,nz+(1:M_.exo_nbr));
-        a1 = b;
-        aa1 = [];
-        if nstatic > 0
-            aa1 = a1(:,1:nstatic);
-        end
-        dr.ghu = -[aa1 a(:,j3)*gx(j4,1:npred)+a1(:,nstatic+1:nstatic+ ...
-                                                 npred) a1(:,nstatic+npred+1:end)]\fu;
-    else
-        dr.ghu = [];
-    end
+if nstatic > 0
+    B_static = B(:,1:nstatic);  % submatrix containing the derivatives w.r. to static variables
+else
+    B_static = [];
+end;
+%static variables, backward variable, mixed variables and forward variables
+B_pred = B(:,nstatic+1:nstatic+npred+nboth);
+B_fyd = B(:,nstatic+npred+nboth+1:end);
 
-    % static variables
+% static variables
+if nstatic > 0
+    temp = - C(1:nstatic,:)*gx*hx;
+    b(:,cols_b) = aa(:,index_c);
+    b10 = b(1:nstatic, 1:nstatic);
+    b11 = b(1:nstatic, nstatic+1:end);
+    temp(:,index_m) = temp(:,index_m)-A(1:nstatic,:);
+    temp = b10\(temp-b11*ghx);
+    ghx = [temp; ghx];
+    temp = [];
+end
+
+A_ = real([B_static C*gx+B_pred B_fyd]); % The state_variable of the block are located at [B_pred B_both]
+
+if exo_nbr
     if nstatic > 0
-        temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
-        j5 = find(kstate(n4:nd,4));
-        temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
-        temp = b10\(temp-b11*dr.ghx);
-        dr.ghx = [temp; dr.ghx];
-        temp = [];
-    end
+        fu = Q' * jacobia(:,innovations_idx);
+    else
+        fu = jacobia(:,innovations_idx);
+    end;
 
-    if options.use_qzdiv
-        %% Necessary when using Sims' routines for QZ
-        gx = real(gx);
-        hx = real(hx);
-        dr.ghx = real(dr.ghx);
-        dr.ghu = real(dr.ghu);
-    end
+    ghu = - A_ \ fu;
+else
+    ghu = [];
+end;
 
-    dr.Gy = hx;
+
+
+dr.ghx = ghx;
+dr.ghu = ghu;
+
+if DynareOptions.aim_solver ~= 1 && DynareOptions.use_qzdiv
+    % Necessary when using Sims' routines for QZ
+    dr.ghx = real(ghx);
+    dr.ghu = real(ghu);
+    hx = real(hx);
+end
+
+dr.Gy = hx;

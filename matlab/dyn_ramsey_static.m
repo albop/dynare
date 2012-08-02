@@ -14,7 +14,7 @@ function [steady_state,params,check] = dyn_ramsey_static(x,M,options_,oo)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2010 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -131,9 +131,14 @@ Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 
 % set multipliers and auxiliary variables that
 % depends on multipliers to 0 to compute residuals
-[res,fJ] = feval([fname '_static'],xx,[oo.exo_simul oo.exo_det_simul], ...
+if (options_.bytecode)
+   [chck, res, junk] = bytecode('static',xx,[oo.exo_simul oo.exo_det_simul], ...
+               M.params, 'evaluate'); 
+   fJ = junk.g1;
+else
+   [res,fJ] = feval([fname '_static'],xx,[oo.exo_simul oo.exo_det_simul], ...
                M.params);
-
+end
 % index of multipliers and corresponding equations
 % the auxiliary variables before the Lagrange multipliers are treated
 % as ordinary endogenous variables

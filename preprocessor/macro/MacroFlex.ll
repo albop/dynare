@@ -165,10 +165,11 @@ CONT \\\\
 <STMT>endfor                { driver.error(*yylloc, "@#endfor is not matched by a @#for statement"); }
 
 <STMT>ifdef                 { reading_if_statement = true; return token::IFDEF; }
+<STMT>ifndef                { reading_if_statement = true; return token::IFNDEF; }
 
 <STMT>if                    { reading_if_statement = true; return token::IF; }
-<STMT>else                  { driver.error(*yylloc, "@#else is not matched by an @#if statement"); }
-<STMT>endif                 { driver.error(*yylloc, "@#endif is not matched by an @#if statement"); }
+<STMT>else                  { driver.error(*yylloc, "@#else is not matched by an @#if/@#ifdef/@#ifndef statement"); }
+<STMT>endif                 { driver.error(*yylloc, "@#endif is not matched by an @#if/@#ifdef/@#ifndef statement"); }
 
 <STMT>echo                  { return token::ECHO_DIR; }
 <STMT>error                 { return token::ERROR; }
@@ -225,7 +226,7 @@ CONT \\\\
                               yylloc->step();
                             }
 <THEN_BODY>.                { then_body_tmp.append(yytext); yylloc->step(); }
-<THEN_BODY><<EOF>>          { driver.error(if_stmt_loc_tmp, "@#if not matched by an @#endif (unexpected end of file)"); }
+<THEN_BODY><<EOF>>          { driver.error(if_stmt_loc_tmp, "@#if/@#ifdef/@#ifndef not matched by an @#endif (unexpected end of file)"); }
 <THEN_BODY>^{SPC}*@#{SPC}*else{SPC}*(\/\/.*)?{EOL} {
                               yylloc->lines(1);
                               yylloc->step();
@@ -267,7 +268,7 @@ CONT \\\\
                               yylloc->step();
                             }
 <ELSE_BODY>.                { else_body_tmp.append(yytext); yylloc->step(); }
-<ELSE_BODY><<EOF>>          { driver.error(if_stmt_loc_tmp, "@#if not matched by an @#endif (unexpected end of file)"); }
+<ELSE_BODY><<EOF>>          { driver.error(if_stmt_loc_tmp, "@#if/@#ifdef/@#ifndef not matched by an @#endif (unexpected end of file)"); }
 
 <ELSE_BODY>^{SPC}*@#{SPC}*endif{SPC}*(\/\/.*)?{EOL} {
                               yylloc->lines(1);
@@ -427,9 +428,3 @@ MacroFlexLexer::yylex()
   cerr << "MacroFlexLexer::yylex() has been called, that should never happen!" << endl;
   exit(EXIT_FAILURE);
 }
-
-/*
-  Local variables:
-  mode: C++
-  End:
-*/

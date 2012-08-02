@@ -95,6 +95,9 @@ void
 SimulStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.simul_present = true;
+
+  // The following is necessary to allow shocks+endval+simul in a loop
+  mod_file_struct.shocks_present_but_simul_not_yet = false;
 }
 
 void
@@ -132,14 +135,6 @@ StochSimulStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsoli
       || mod_file_struct.order_option >= 3)
     mod_file_struct.k_order_solver = true;
 
-  // Check that option "pruning" is not used with k-order
-  it = options_list.num_options.find("pruning");
-  if ((it != options_list.num_options.end() && it->second == "1")
-      && mod_file_struct.k_order_solver)
-    {
-      cerr << "ERROR: in 'stoch_simul', you cannot use option 'pruning' with 'k_order_solver' option or with 3rd order approximation" << endl;
-      exit(EXIT_FAILURE);
-    }
 }
 
 void
@@ -224,6 +219,12 @@ DiscretionaryPolicyStatement::checkPass(ModFileStructure &mod_file_struct, Warni
 {
   mod_file_struct.discretionary_policy_present = true;
 
+  if (options_list.symbol_list_options.find("instruments") == options_list.symbol_list_options.end())
+    {
+      cerr << "ERROR: discretionary_policy: the instruments option is required." << endl;
+      exit(EXIT_FAILURE);
+    }
+
   /* Fill in option_order of mod_file_struct
      Since discretionary policy needs one further order of derivation (for example, for 1st order
      approximation, it needs 2nd derivatives), we add 1 to the order declared by user */
@@ -276,12 +277,27 @@ EstimationStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsoli
   // Fill in option_order of mod_file_struct
   OptionsList::num_options_t::const_iterator it = options_list.num_options.find("order");
   if (it != options_list.num_options.end())
-    mod_file_struct.order_option = max(mod_file_struct.order_option, atoi(it->second.c_str()));
-
+    {
+      int order = atoi(it->second.c_str());
+          
+      if (order > 2)
+        {
+          cerr << "ERROR: order > 2 is not supported in estimation" << endl;
+          exit(EXIT_FAILURE);
+        }
+      
+      mod_file_struct.order_option = max(mod_file_struct.order_option, order);
+    }
+  
   // Fill in mod_file_struct.partial_information
   it = options_list.num_options.find("partial_information");
   if (it != options_list.num_options.end() && it->second == "1")
     mod_file_struct.partial_information = true;
+
+  // Fill in mod_file_struct.estimation_analytic_derivation
+  it = options_list.num_options.find("analytic_derivation");
+  if (it != options_list.num_options.end() && it->second == "1")
+    mod_file_struct.estimation_analytic_derivation = true;
 
   it = options_list.num_options.find("dsge_var");
   if (it != options_list.num_options.end())
@@ -334,6 +350,14 @@ void
 EstimationStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
+
+  // Special treatment for order option and particle filter
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("order");
+  if (it == options_list.num_options.end())
+    output << "options_.order = 1;" << endl;
+  else if (atoi(it->second.c_str()) == 2)
+    output << "options_.particle.status = 1;" << endl;
+
   symbol_list.writeOutput("var_list_", output);
   output << "dynare_estimation(var_list_);\n";
 }
@@ -356,6 +380,21 @@ void
 DynareSensitivityStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output, "options_gsa");
+
+  /* Ensure that nograph, nodisplay and graph_format are also set in top-level
+     options_.
+     \todo factorize this code between identification and dynare_sensitivity,
+     and provide a generic mechanism for this situation (maybe using regexps) */
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("nodisplay");
+  if (it != options_list.num_options.end())
+    output << "options_.nodisplay = " << it->second << ";" << endl;
+  it = options_list.num_options.find("nograph");
+  if (it != options_list.num_options.end())
+    output << "options_.nograph = " << it->second << ";" << endl;
+  OptionsList::string_options_t::const_iterator it2 = options_list.string_options.find("graph_format");
+  if (it2 != options_list.string_options.end())
+    output << "options_.graph_format = '" << it2->second << "';" << endl;
+  
   output << "dynare_sensitivity(options_gsa);" << endl;
 }
 
@@ -1162,6 +1201,21 @@ void
 IdentificationStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output, "options_ident");
+
+  /* Ensure that nograph, nodisplay and graph_format are also set in top-level
+     options_.
+     \todo factorize this code between identification and dynare_sensitivity,
+     and provide a generic mechanism for this situation (maybe using regexps) */
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("nodisplay");
+  if (it != options_list.num_options.end())
+    output << "options_.nodisplay = " << it->second << ";" << endl;
+  it = options_list.num_options.find("nograph");
+  if (it != options_list.num_options.end())
+    output << "options_.nograph = " << it->second << ";" << endl;
+  OptionsList::string_options_t::const_iterator it2 = options_list.string_options.find("graph_format");
+  if (it2 != options_list.string_options.end())
+    output << "options_.graph_format = '" << it2->second << "';" << endl;
+
   output << "dynare_identification(options_ident);" << endl;
 }
 
@@ -2314,5 +2368,35 @@ CalibSmootherStatement::writeOutput(ostream &output, const string &basename) con
   symbol_list.writeOutput("var_list_", output);
   output << "options_.mode_compute = 0;" << endl
          << "options_.smoother = 1;" << endl
+         << "options_.order = 1;" << endl
          << "dynare_estimation(var_list_);" << endl;
+}
+
+ExtendedPathStatement::ExtendedPathStatement(const OptionsList &options_list_arg)
+  : options_list(options_list_arg)
+{
+}
+
+void
+ExtendedPathStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
+{
+  if (options_list.num_options.find("periods") == options_list.num_options.end())
+    {
+      cerr << "ERROR: the 'periods' option of 'extended_path' is mandatory" << endl;
+      exit(EXIT_FAILURE);
+    }
+}
+
+void
+ExtendedPathStatement::writeOutput(ostream &output, const string &basename) const
+{
+  // Beware: options do not have the same name in the interface and in the M code...
+
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("solver_periods");
+  if (it != options_list.num_options.end())
+    output << "options_.ep.periods = " << it->second << ";" << endl;
+
+  output << "oo_.endo_simul = [ oo_.steady_state, extended_path([], " << options_list.num_options.find("periods")->second
+         << ") ];" << endl
+         << "oo_.exo_simul = oo_.ep.shocks;" << endl;
 }

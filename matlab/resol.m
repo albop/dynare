@@ -76,7 +76,7 @@ function [dr,info,M,options,oo] = resol(check_flag,M,options,oo)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -113,6 +113,7 @@ end
 
 if options.block
     [dr,info,M,options,oo] = dr_block(dr,check_flag,M,options,oo);
+    oo.dr = dr;
 else
     [dr,info] = stochastic_solvers(dr,check_flag,M,options,oo);
     oo.dr = dr;

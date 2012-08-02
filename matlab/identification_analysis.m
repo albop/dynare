@@ -7,7 +7,7 @@ function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = i
 %    o indx               [array] index of estimated parameters
 %    o indexo             [array] index of estimated shocks
 %    o options_ident      [structure] identification options
-%    o data_info          [structure] data info for Kalmna Filter
+%    o data_info          [structure] data info for Kalman Filter
 %    o prior_exist        [integer] 
 %                           =1 when prior exists and indentification is checked only for estimated params and shocks
 %                           =0 when prior is not defined and indentification is checked for all params and shocks
@@ -25,7 +25,7 @@ function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = i
 % SPECIAL REQUIREMENTS
 %    None
 
-% Copyright (C) 2008-2011 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,7 +48,7 @@ persistent indH indJJ indLRE
 nparam=length(params);
 np=length(indx);
 offset=nparam-np;
-set_all_parameters(params);
+M_ = set_all_parameters(params,estim_params_,M_);
 
 nlags = options_ident.ar;
 useautocorr = options_ident.useautocorr;
@@ -57,6 +57,8 @@ replic = options_ident.replic;
 periods = options_ident.periods;
 max_dim_cova_group = options_ident.max_dim_cova_group;
 normalize_jacobians = options_ident.normalize_jacobians;
+kron_flag = options_ident.analytic_derivation_mode;
+    
 [I,J]=find(M_.lead_lag_incidence');
 
 ide_hess = struct();
@@ -75,7 +77,7 @@ if info(1)==0,
         oo_.dr.ys, 1);
     vg1 = [oo_.dr.ys(oo_.dr.order_var); vec(g1)];
 
-    [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+    [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,kron_flag,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
     derivatives_info.DT=dA;
     derivatives_info.DOm=dOm;
     derivatives_info.DYss=dYss;
@@ -85,7 +87,7 @@ if info(1)==0,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
             disp(['Try increasing ar = ', int2str(nlags+1)])           
             nlags=nlags+1;
-            [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+            [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,kron_flag,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
             derivatives_info.DT=dA;
             derivatives_info.DOm=dOm;
             derivatives_info.DYss=dYss;
@@ -130,7 +132,10 @@ if info(1)==0,
             options_.noprint = 1;
             options_.order = 1;
             options_.periods = data_info.info.ntobs+100;
-            options_.kalman_algo = 1;
+            if options_.kalman_algo > 2,
+                options_.kalman_algo = 1;
+            end
+            analytic_derivation = options_.analytic_derivation;
             options_.analytic_derivation = -2;
             info = stoch_simul(options_.varobs);
             data_info.data=oo_.endo_simul(options_.varobs_id,100+1:end);
@@ -138,6 +143,7 @@ if info(1)==0,
             derivatives_info.no_DLIK=1;
             [fval,DLIK,AHess,cost_flag,ys,trend_coeff,info,M_,options_,bayestopt_,oo_] = dsge_likelihood(params',data_info,options_,M_,estim_params_,bayestopt_,oo_,derivatives_info);
 %                 fval = DsgeLikelihood(xparam1,data_info,options_,M_,estim_params_,bayestopt_,oo_);
+            options_.analytic_derivation = analytic_derivation;
             AHess=-AHess;
             if min(eig(AHess))<0,
                 error('Analytic Hessian is not positive semi-definite!')
@@ -282,6 +288,7 @@ if info(1)==0,
     normJ=1;
     [U, S, V]=svd(JJ(indJJ,:)./normJ,0);
     S=diag(S);
+    S=[S;zeros(size(JJ,2)-length(indJJ),1)];
     if nparam>8
         ide_moments.S = S([1:4, end-3:end]);
         ide_moments.V = V(:,[1:4, end-3:end]);

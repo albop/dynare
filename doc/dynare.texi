@@ -76,6 +76,7 @@ A copy of the license can be found at @uref{http://www.gnu.org/licenses/fdl.txt}
 @subtitle Reference Manual, version @value{VERSION}
 @author Stéphane Adjemian
 @author Houtan Bastani
+@author Frédéric Karamé
 @author Michel Juillard
 @author Junior Maih
 @author Ferhat Mihoubi
@@ -216,6 +217,7 @@ Typical usages
 
 The Configuration File
 
+* Dynare Configuration::        
 * Parallel Configuration::      
 
 @end detailmenu
@@ -461,7 +463,7 @@ Dynare will be installed under @file{/usr/share/dynare} and
 @subsection On Mac OS X
 
 Execute the automated installer called
-@file{dynare-4.@var{x}.@var{y}-macosx-10.5+10.6.pkg} (where
+@file{dynare-4.@var{x}.@var{y}.pkg} (where
 4.@var{x}.@var{y} is the version number), and follow the
 instructions. The default installation directory is
 @file{/Applications/Dynare/4.@var{x}.@var{y}}.
@@ -1465,8 +1467,9 @@ used outside. A model local variable declaration looks like:
 
 @item linear
 Declares the model as being linear. It spares oneself from having to
-declare initial values for computing the steady state, and it sets
-automatically @code{order=1} in @code{stoch_simul}.
+declare initial values for computing the steady state of a stationary
+linear model. This options can't be used with non-linear models, it will
+NOT trigger linearization of the model.
 
 @item use_dll
 @anchor{use_dll}
@@ -1483,9 +1486,10 @@ in those cases.}
 @item block
 @anchor{block}
 Perform the block decomposition of the model, and exploit it in
-computations. See
+computations (steady-state, deterministic simulation, 
+stochastic simulation with first order approximation and estimation). See
 @uref{http://www.dynare.org/DynareWiki/FastDeterministicSimulationAndSteadyStateComputation,Dynare
-wiki} for details on the algorithm.
+wiki} for details on the algorithms used in deterministic simulation and steady-state computation.
 
 @item bytecode
 @anchor{bytecode}
@@ -1776,7 +1780,7 @@ implemented in @code{simul}.
 For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{initval} block (even though,
 theoretically, initial conditions are only necessary for lagged
-variables). If some exogenous variables are not mentionned in the
+variables). If some variables, endogenous or exogenous, are not mentionned in the
 @code{initval} block, a zero value is assumed.
 
 Note that if the @code{initval} block is immediately followed by a
@@ -1851,7 +1855,7 @@ for the non-linear solver implemented in @code{simul}.
 For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{endval} block (even though,
 theoretically, initial conditions are only necessary for forward
-variables). If some exogenous variables are not mentionned in the
+variables). If some variables, endogenous or exogenous, are not mentionned in the
 @code{endval} block, a zero value is assumed.
 
 Note that if the @code{endval} block is immediately followed by a
@@ -1921,7 +1925,8 @@ Variables not initialized in the @code{histval} block are assumed to
 have a value of zero at period 0 and before. Note that this behavior
 differs from the case where there is no @code{histval} block, where all
 variables are initialized at their steady state value at period 0 and
-before.
+before (except when a @code{steady} command doesn't follow an
+@code{initval} block).
 
 @examplehead
 
@@ -2566,8 +2571,9 @@ function returning several arguments:
 [ @var{VARIABLE_NAME}, @var{VARIABLE_NAME}@dots{} ] = @var{EXPRESSION};
 @end example
 
-Dynare will automatically generate a steady state file using the
-information provided in this block.
+Dynare will automatically generate a steady state file (of the form
+@file{@var{FILENAME}_steadystate2.m}) using the information provided in
+this block.
 
 @customhead{Steady state file for deterministic models}
 
@@ -2666,6 +2672,7 @@ command.
 @end defvr
 
 @deffn Command model_info ;
+@deffnx Command model_info (@var{OPTIONS}@dots{});
 
 @descriptionhead
 
@@ -2729,6 +2736,22 @@ variables. The block looks like: @math{g_j(y_{j,t}, y_t, y_{t-1},
 to @samp{SIMPLE} if the block has only one equation. If several
 equation appears in the block, @var{x} is equal to @samp{COMPLETE}.
 @end table
+
+@optionshead
+
+@table @code
+
+@item 'static'
+Prints out the block decomposition of the static model. 
+Without 'static' option model_info displays the block decomposition 
+of the dynamic model.
+
+@item 'incidence'
+Displays the gross incidence matrix and the reordered incidence matrix 
+of the block decomposed model.
+
+@end table
+
 
 @end deffn
 
@@ -2795,7 +2818,7 @@ Algorithm used for computing the solution. Possible values are:
 
 @item 0
 Newton method to solve simultaneously all the equations for every
-period, see @cite{Juillard (1996)} (Default).
+period, using sparse matrices (Default).
 
 @item 1
 Use a Newton algorithm with a sparse LU solver at each iteration
@@ -2821,6 +2844,13 @@ declaration}).
 Use a Newton algorithm with a sparse Gaussian elimination (SPE) solver
 at each iteration (requires @code{bytecode} option, @pxref{Model
 declaration}).
+
+@item 6
+Use the historical algorithm proposed in @cite{Juillard (1996)}: it is
+slower than @code{stack_solve_algo=0}, but may be less memory consuming
+on big models (not available with @code{bytecode} and/or @code{block}
+options).
+
 @end table
 
 @item markowitz = @var{DOUBLE}
@@ -2849,7 +2879,8 @@ The simulated endogenous variables are available in global matrix
 @defvr {MATLAB/Octave variable} oo_.endo_simul
 This variable stores the result of a deterministic simulation
 (computed by @code{simul}) or of a stochastic simulation (computed by
-@code{stoch_simul} with the @code{periods} option).
+@code{stoch_simul} with the @code{periods} option or by
+@code{extended_path}).
 
 The variables are arranged row by row, in order of declaration (as in
 @code{M_.endo_names}). Note that this variable also contains initial
@@ -2857,16 +2888,38 @@ and terminal conditions, so it has more columns than the value of
 @code{periods} option.
 @end defvr
 
+@anchor{oo_.exo_simul}
+@defvr {MATLAB/Octave variable} oo_.exo_simul
+This variable stores the path of exogenous variables during a
+simulation (computed by @code{simul}, @code{stoch_simul} or
+@code{extended_path}).
+
+The variables are arranged in columns, in order of declaration (as in
+@code{M_.endo_names}). Periods are in rows. Note that this convention
+regarding columns and rows is the opposite of the convention for
+@code{oo_.endo_simul}!
+
+@end defvr
+
 @node Stochastic solution and simulation
 @section Stochastic solution and simulation
 
 In a stochastic context, Dynare computes one or several simulations
-corresponding to a random draw of the shocks. Dynare uses a Taylor
+corresponding to a random draw of the shocks.
+
+The main algorithm for solving stochastic models relies on a Taylor
 approximation, up to third order, of the expectation functions (see
 @cite{Judd (1996)}, @cite{Collard and Juillard (2001a)}, @cite{Collard
 and Juillard (2001b)}, and @cite{Schmitt-Grohé and Uríbe (2004)}). The
 details of the Dynare implementation of the first order solution are
-given in @cite{Villemot (2011)}.
+given in @cite{Villemot (2011)}. Such a solution is computed using
+the @code{stoch_simul} command.
+
+As an alternative, it is possible to compute a simulation to a
+stochastic model using the @emph{extended path} method presented by
+@cite{Fair and Taylor (1983)}. This method is especially useful when
+there are strong nonlinearities or binding constraints. Such a
+solution is computed using the @code{extended_path} command.
 
 @menu
 * Computing the stochastic solution::  
@@ -2928,6 +2981,8 @@ The covariance matrix of the shocks is specified with the
 When a list of @var{VARIABLE_NAME} is specified, results are displayed
 only for these variables.
 
+The @code{stoch_simul} command with a first order approximation can benefit from the block decomposition of the model (@pxref{block}).
+
 @optionshead
 
 @table @code
@@ -2962,10 +3017,6 @@ The exogenous variables for which to compute IRFs. Default: all.
 Requests the computation of normalized IRFs in percentage of the
 standard error of each shock.
 
-@item linear
-Indicates that the original model is linear (put it rather in the
-@code{model} command).
-
 @item nocorr
 Don't print the correlation matrix (printing them is the default).
 
@@ -2977,8 +3028,22 @@ them is the default).
 Don't print moments of the endogenous variables (printing them is the
 default).
 
-@item nograph.
-Doesn't do the graphs. Useful for loops.
+@item nograph
+@anchor{nograph} Do not create graphs (which implies that they are not
+saved to the disk nor displayed). If this option is not used, graphs
+will be saved to disk (to the format specified by @code{graph_format}
+option) and displayed to screen (unless @code{nodisplay} option is
+used).
+
+@item nodisplay
+@anchor{nodisplay} Do not display the graphs, but still save them to disk
+(unless @code{nograph} is used).
+
+@item graph_format = @var{FORMAT}
+@anchor{graph_format}
+Specify the file format for graphs saved to disk. Possible values are
+@code{eps} (the default), @code{pdf} and @code{fig} (the latter is not
+available under Octave).
 
 @item noprint
 Don't print anything. Useful for loops.
@@ -2992,7 +3057,8 @@ Order of Taylor approximation. Acceptable values are @code{1},
 @code{2} and @code{3}. Note that for third order,
 @code{k_order_solver} option is implied and only empirical moments are
 available (you must provide a value for @code{periods}
-option). Default: @code{2}.
+option). Default: @code{2} (except after an @code{estimation} command,
+in which case the default is the value used for the estimation).
 
 @item k_order_solver
 @anchor{k_order_solver}
@@ -3009,7 +3075,9 @@ periods to use in the simulations. Values of the @code{initval} block,
 possibly recomputed by @code{steady}, will be used as starting point
 for the simulation. The simulated endogenous variables are made
 available to the user in a vector for each variable and in the global
-matrix @code{oo_.endo_simul} (@pxref{oo_.endo_simul}). Default: @code{0}.
+matrix @code{oo_.endo_simul} (@pxref{oo_.endo_simul}). The simulated
+exogenous variables are made available in @code{oo_.exo_simul}
+(@pxref{oo_.exo_simul}). Default: @code{0}.
 
 @item qz_criterium = @var{DOUBLE}
 Value used to split stable from unstable eigenvalues in reordering the
@@ -3021,6 +3089,13 @@ problems. Default: @code{1.000001} (except when estimating with
 @item replic = @var{INTEGER}
 Number of simulated series used to compute the IRFs. Default: @code{1}
 if @code{order}=@code{1}, and @code{50} otherwise.
+
+@item simul_replic = @var{INTEGER}
+Number of series to simulate when empirical moments are requested
+(@i{i.e.} @code{periods} > 0). Note that if this option is greater
+than @code{1}, the additional series will not be used for computing
+the empirical moments but will simply be saved in binary form to the
+file @file{@var{FILENAME}_simul}. Default: @code{1}.
 
 @item solve_algo = @var{INTEGER}
 @xref{solve_algo}, for the possible values and their meaning.
@@ -3090,6 +3165,42 @@ Default value is @code{default}
 @anchor{sylvester_fixed_point_tol}
 It is the convergence criterion used in the fixed point sylvester solver. Its default value is 1e-12.
 
+@item dr = @var{OPTION}
+@anchor{dr}
+Determines the method used to compute the decision rule. Possible values for @code{@var{OPTION}} are:
+
+@table @code
+
+@item default
+Uses the default method to compute the decision rule based on the generalized Schur decomposition
+(see @cite{Villemot (2011)} for more information).
+
+@item cycle_reduction
+Uses the cycle reduction algorithm to solve the polynomial equation for retrieving the coefficients
+associated to the endogenous variables in the decision rule. This method is faster than the @code{default} one for large scale models.
+
+@item logarithmic_reduction
+Uses the logarithmic reduction algorithm to solve the polynomial equation for retrieving the coefficients
+associated to the endogenous variables in the decision rule. This method is in general slower than the @code{cycle_reduction}.
+
+@end table
+
+@noindent
+Default value is @code{default}
+
+@item dr_cycle_reduction_tol = @var{DOUBLE}
+@anchor{dr_cycle_reduction_tol}
+The convergence criterion used in the cycle reduction algorithm. Its default value is 1e-7.
+
+@item dr_logarithmic_reduction_tol = @var{DOUBLE}
+@anchor{dr_logarithmic_reduction_tol}
+The convergence criterion used in the logarithmic reduction algorithm. Its default value is 1e-12.
+
+@item dr_logarithmic_reduction_maxiter = @var{INTEGER}
+@anchor{dr_logarithmic_reduction_maxiter}
+The maximum number of iterations used in the logarithmic reduction algorithm. Its default value is 100.
+
+
 @end table
 
 @outputhead
@@ -3126,10 +3237,10 @@ with a single stochastic shock @code{e}, with a standard error of
 @customhead{Example 2}
 
 @example
-stoch_simul(linear,irf=60) y k;
+stoch_simul(irf=60) y k;
 @end example
 
-Performs the simulation of a linear model and displays impulse
+Performs the simulation of a model and displays impulse
 response functions on 60 periods for variables @code{y} and @code{k}.
 @end deffn
 
@@ -3206,6 +3317,37 @@ rules or transition equations expressing the current value of the endogenous
 variables of the model as function of the previous state of the model and
 shocks oberved at the beginning of the period. The decision rules are stored
 in the structure @code{oo_.dr} which is described below.
+
+@deffn Command extended_path ;
+@deffnx Command extended_path (@var{OPTIONS}@dots{}) ;
+
+@descriptionhead
+
+@code{extended_path} solves a stochastic (@i{i.e.} rational
+expectations) model, using the @emph{extended path} method presented
+by @cite{Fair and Taylor (1983)}.
+
+This function first computes a random path for the exogenous variables
+(stored in @code{oo_.exo_simul}, @pxref{oo_.exo_simul}) and then
+computes the corresponding path for endogenous variables, taking the
+steady state as starting point. The result of the simulation is stored
+in @code{oo_.endo_simul} (@pxref{oo_.endo_simul}).
+
+@optionshead
+
+@table @code
+
+@item periods = @var{INTEGER}
+The number of periods for which the simulation is to be computed. No
+default value, mandatory option.
+
+@item solver_periods = @var{INTEGER}
+The number of periods used to compute the approximate solution
+at every iteration of the algorithm. Default: @code{200}.
+
+@end table
+
+@end deffn
 
 @node Typology and ordering of variables
 @subsection Typology and ordering of variables
@@ -3461,6 +3603,10 @@ DSGE-VAR.
 Note that in order to avoid stochastic singularity, you must have at
 least as many shocks or measurement errors in your model as you have
 observed variables.
+
+The estimation using a first order approximation can benefit from the block 
+decomposition of the model (@pxref{block}).
+
 
 @deffn Command varobs @var{VARIABLE_NAME}@dots{};
 
@@ -3815,8 +3961,13 @@ result in absurd prior densities.
 Default value is @code{1}.
 
 @item nograph
-@anchor{nograph}
-No graphs should be plotted
+@xref{nograph}.
+
+@item nodisplay
+@xref{nodisplay}.
+
+@item graph_format = @var{FORMAT}
+@xref{graph_format}.
 
 @item lik_init = @var{INTEGER}
 @anchor{lik_init}
@@ -4061,8 +4212,13 @@ variables.
 @vindex oo_.forecast
 @anchor{forecast} Computes the posterior distribution of a forecast on
 @var{INTEGER} periods after the end of the sample used in
-estimation. The result is stored in variable @code{oo_.forecast}
-(@pxref{Forecasting})
+estimation. If no Metropolis-Hastings is computed, the result is
+stored in variable @code{oo_.forecast} and corresponds to the forecast
+at the posterior mode. If a Metropolis-Hastings is computed, the
+distribution of forecasts is stored in variables
+@code{oo_.PointForecast} and
+@code{oo_.MeanForecast}. @xref{Forecasting}) for a description of
+these variables.
 
 @item tex
 @anchor{tex} Requests the printing of results and graphs in TeX tables
@@ -4134,7 +4290,12 @@ this covariance matrix. Default is @code{1}.
 @xref{solve_algo}.
 
 @item order = @var{INTEGER}
-@xref{order}.
+Order of approximation, either @code{1} or @code{2}. When equal to
+@code{2}, the likelihood is evaluated with a particle filter based on
+a second order approximation of the model (see
+@cite{Fernandez-Villaverde and Rubio-Ramirez (2005)}).  Default is
+@code{1}, ie the lilkelihood of the linearized model is evaluated
+using a standard Kalman filter.
 
 @item irf = @var{INTEGER}
 @xref{irf}. Only used if @ref{bayesian_irf} is passed.
@@ -4189,6 +4350,10 @@ This is the convergence criterion used in the fixed point lyapunov solver. Its d
 @anchor{lyapunov_doubling_tol}
 This is the convergence criterion used in the doubling algorithm to solve the lyapunov equation. Its default value is 1e-16.
 
+@item analytic_derivation
+Triggers estimation with analytic gradient. The final hessian is also
+computed analytically. Only works for stationary models without
+missing observations.
 
 @end table
 
@@ -4529,7 +4694,8 @@ This command computes the smoothed variables (and possible the filtered
 variables) on a @code{calibrated} model.
 
 A datafile must be provided, and the observable variables declared with
-@code{varobs}.
+@code{varobs}. The smoother is based on a first-order approximation of
+the model.
 
 @vindex oo_.SmoothedVariables
 @vindex oo_.SmoothedShocks
@@ -4561,7 +4727,7 @@ more details.
 @section Forecasting
 
 On a calibrated model, forecasting is done using the @code{forecast}
-command. On an estimated command, use the @code{forecast} option of
+command. On an estimated model, use the @code{forecast} option of
 @code{estimation} command.
 
 It is also possible to compute forecasts on a calibrated or estimated
@@ -4607,7 +4773,14 @@ Number of periods of the forecast. Default: @code{40}
 interval. Default: @code{0.90}
 
 @item nograph
-Don't display graphics.
+@xref{nograph}.
+
+@item nodisplay
+@xref{nodisplay}.
+
+@item graph_format = @var{FORMAT}
+@xref{graph_format}.
+
 @end table
 
 @customhead{Initial Values}
@@ -4642,8 +4815,9 @@ forecast;
 
 @defvr {MATLAB/Octave variable} oo_.forecast
 Variable set by the @code{forecast} command, or by the
-@code{estimation} command if used with the @code{forecast}
-option. Fields are of the form:
+@code{estimation} command if used with the @code{forecast} option and
+if no Metropolis-Hastings has been computed (in that case, the
+forecast is computed for the posterior mode). Fields are of the form:
 @example
 @code{oo_.forecast.@var{FORECAST_MOMENT}.@var{VARIABLE_NAME}}
 @end example
@@ -4678,6 +4852,37 @@ Standard deviation of the posterior distribution of forecasts
 @end table
 
 @end defvr
+
+
+@defvr {MATLAB/Octave variable} oo_.PointForecast
+Set by the @code{estimation} command, if it is used with the
+@code{forecast} option and if either @code{mh_replic > 0} or
+@code{load_mh_file} option is used.
+
+Contains the distribution of forecasts taking into account the
+uncertainty about both parameters and shocks.
+
+Fields are of the form:
+@example
+@code{oo_.PointForecast.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.MeanForecast
+Set by the @code{estimation} command, if it is used with the
+@code{forecast} option and if either @code{mh_replic > 0} or
+@code{load_mh_file} option is used.
+
+Contains the distribution of forecasts where the uncertainty about
+shocks is averaged out. The distribution of forecasts therefore only
+represents the uncertainty about parameters.
+
+Fields are of the form:
+@example
+@code{oo_.MeanForecast.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
 
 @deffn Command conditional_forecast (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
 
@@ -4861,7 +5066,7 @@ This block specifies quadratic objectives for optimal policy problems
 More precisely, this block specifies the nonzero elements of the
 quadratic weight matrices for the objectives in @code{osr}.
 
-A element of the diagonal of the weight matrix is given by a line of
+An element of the diagonal of the weight matrix is given by a line of
 the form:
 @example
 @var{VARIABLE_NAME} @var{EXPRESSION};
@@ -4922,7 +5127,7 @@ This command generates all the output variables of @code{stoch_simul}.
 In addition, it stores the value of planner objective function under
 Ramsey policy in @code{oo_.planner_objective_value}.
 
-@customhead{Steay state}
+@customhead{Steady state}
 
 Dynare takes advantage of the fact that the Lagrange multipliers appear
 linearly in the equations of the steady state of the model under optimal
@@ -4933,13 +5138,14 @@ endogenous variables.
 It greatly facilitates the computation, if the user provides an
 analytical solution for the steady state (in @code{steady_state_model}
 block or in a @code{@dots{}_steadystate.m} file). In this case, it is
-necessary to provide a steady state solution CONDITIONAL on the value of
-the instruments in the optimal policy problem and declared with option
-@code{instruments}. Note that choosing the instruments is partly a
-matter of interpretation and you can choose instruments that are handy
-from a mathematical point of view but different from the instruments you
-would refer to in the analysis of the paper. Typical example is choosing
-inflation or nominal interest rate as an instrument.
+necessary to provide a steady state solution CONDITIONAL on the value
+of the instruments in the optimal policy problem and declared with
+option @code{instruments}. Note that choosing the instruments is
+partly a matter of interpretation and you can choose instruments that
+are handy from a mathematical point of view but different from the
+instruments you would refer to in the analysis of the paper. A typical
+example is choosing inflation or nominal interest rate as an
+instrument.
 
 
 @end deffn
@@ -4951,7 +5157,8 @@ inflation or nominal interest rate as an instrument.
 @descriptionhead
 
 This command computes an approximation of the optimal policy under
-discretion
+discretion. The algorithm implemented is essentially an LQ solver, and
+is described by @cite{Dennis (2007)}.
 
 @optionshead
 
@@ -4962,6 +5169,9 @@ This command accepts the same options than @code{ramsey_policy}, plus:
 @item discretionary_tol = @var{NON-NEGATIVE DOUBLE}
 Sets the tolerance level used to assess convergence of the solution
 algorithm. Default: @code{1e-7}.
+
+@item solve_maxit = @var{INTEGER}
+Maximum number of iterations. Default: @code{3000}.
 
 @end table
 
@@ -5178,6 +5388,8 @@ command. These are:
 @item @code{prefilter}
 @item @code{presample}
 @item @code{nograph}
+@item @code{nodisplay}
+@item @code{graph_format}
 @item @code{conf_sig}
 @item @code{loglinear}
 @item @code{mode_file}
@@ -5493,6 +5705,12 @@ Critical value for correlation @math{\rho}: plot couples of parmaters with
 @item nograph
 @xref{nograph}.
 
+@item nodisplay
+@xref{nodisplay}.
+
+@item graph_format = @var{FORMAT}
+@xref{graph_format}.
+
 @item conf_sig = @var{DOUBLE}
 @xref{conf_sig}.
 
@@ -5604,6 +5822,15 @@ Specify the parameter set to use. Default: @code{prior_mean}
 
 @item kalman_algo = @var{INTEGER}
 @xref{kalman_algo}.
+
+@item nograph
+@xref{nograph}.
+
+@item nodisplay
+@xref{nodisplay}.
+
+@item graph_format = @var{FORMAT}
+@xref{graph_format}.
 
 @end table
 
@@ -6351,8 +6578,8 @@ line. The main directives are:
 @item
 @code{@@#define}, for defining a macro-processor variable,
 @item
-@code{@@#if}, @code{@@#ifdef}, @code{@@#else}, @code{@@#endif} for
-conditional statements,
+@code{@@#if}, @code{@@#ifdef}, @code{@@#ifndef}, @code{@@#else},
+@code{@@#endif} for conditional statements,
 @item
 @code{@@#for}, @code{@@#endfor} for constructing loops.
 @end itemize
@@ -6495,10 +6722,11 @@ end;
 
 @deffn {Macro directive} @@#if @var{MACRO_EXPRESSION}
 @deffnx {Macro directive} @@#ifdef @var{MACRO_VARIABLE}
+@deffnx {Macro directive} @@#ifndef @var{MACRO_VARIABLE}
 @deffnx {Macro directive} @@#else
 @deffnx {Macro directive} @@#endif
 Conditional inclusion of some part of the @file{.mod} file.
-The lines between @code{@@#if} or @code{@@#ifdef} and the next
+The lines between @code{@@#if}, @code{@@#ifdef} or @code{@@#ifndef} and the next
 @code{@@#else} or @code{@@#endif} is executed only if the condition
 evaluates to a non-null integer. The @code{@@#else} branch is optional
 and, if present, is only evaluated if the condition evaluates to
@@ -6529,6 +6757,21 @@ this example, the second equation will be chosen:
 @example
 model;
 @@#ifdef linear_mon_pol
+  i = w*i(-1) + (1-w)*i_ss + w2*(pie-piestar);
+@@#else
+  i = i(-1)^w * i_ss^(1-w) * (pie/piestar)^w2;
+@@#endif
+...
+end;
+@end example
+
+Choose between two alternative monetary policy rules using a
+macro-variable. As @code{linear_mon_pol} was not previously defined in
+this example, the first equation will be chosen:
+
+@example
+model;
+@@#ifndef linear_mon_pol
   i = w*i(-1) + (1-w)*i_ss + w2*(pie-piestar);
 @@#else
   i = i(-1)^w * i_ss^(1-w) * (pie/piestar)^w2;
@@ -6876,6 +7119,15 @@ function for more information.
 
 @end deffn
 
+@anchor{dynare_version}
+@deffn {MATLAB/Octave command} dynare_version ;
+
+Output the version of Dynare that is currently being used (@i{i.e.}
+the one that is highest on the MATLAB/Octave path).
+
+@end deffn
+
+
 @node The Configuration File
 @chapter The Configuration File
 
@@ -6932,8 +7184,42 @@ Is @code{true} or @code{false}.
 @end table
 
 @menu
+* Dynare Configuration::        
 * Parallel Configuration::      
 @end menu
+
+@node Dynare Configuration
+@section Dynare Configuration
+
+This section explains how to configure Dynare for general
+processing. Currently, there is only one option available.
+
+@deffn {Configuration block} [hooks]
+
+@descriptionhead
+
+The @code{[hooks]} block can be used to specify configuration options
+that will be used when running dynare.
+
+@optionshead
+
+@table @code
+
+@item GlobalInitFile = @var{PATH_AND_FILE}
+The location of the global initialization file to be run at the end of
+@code{global_initialization.m}
+
+@end table
+
+@examplehead
+
+@example
+[hooks]
+GlobalInitFile = /home/usern/dynare/myInitFile.m
+
+@end example
+
+@end deffn
 
 @node Parallel Configuration
 @section Parallel Configuration
@@ -7247,89 +7533,99 @@ Cycles: The Cycle is the Trend,'' @i{NBER Working Paper}, 10734
 @item
 Backus, David K., Patrick J. Kehoe, and Finn E. Kydland (1992):
 ``International Real Business Cycles,'' @i{Journal of Political
-Economy}, 100(4), 745--775.
+Economy}, 100(4), 745--775
 
 @item
 Boucekkine, Raouf (1995): ``An alternative methodology for solving
 nonlinear forward-looking models,'' @i{Journal of Economic Dynamics
-and Control}, 19, 711--734.
+and Control}, 19, 711--734
 
 @item
-Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''.
+Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''
 
 @item
 Collard, Fabrice and Michel Juillard (2001a): ``Accuracy of stochastic
 perturbation methods: The case of asset pricing models,'' @i{Journal
-of Economic Dynamics and Control}, 25, 979--999.
+of Economic Dynamics and Control}, 25, 979--999
 
 @item
 Collard, Fabrice and Michel Juillard (2001b): ``A Higher-Order Taylor
 Expansion Approach to Simulation of Stochastic Forward-Looking Models
 with an Application to a Non-Linear Phillips Curve,'' @i{Computational
-Economics}, 17, 125--139.
+Economics}, 17, 125--139
+
+@item
+Dennis, Richard (2007): ``Optimal Policy In Rational Expectations
+Models: New Solution Algorithms,'' @i{Macroeconomic Dynamics}, 11(1),
+31--55
 
 @item
 Durbin, J. and S. J. Koopman (2001), @i{Time Series Analysis by State
-Space Methods}, Oxford University Press.
+Space Methods}, Oxford University Press
 
 @item
 Fair, Ray and John Taylor (1983): ``Solution and Maximum Likelihood
 Estimation of Dynamic Nonlinear Rational Expectation Models,''
-@i{Econometrica}, 51, 1169--1185.
+@i{Econometrica}, 51, 1169--1185
 
 @item
-Fernandez-Villaverde, Jesus and Juan Rubio-Ramirez (2004): ``Comparing
+Fernández-Villaverde, Jesús and Juan Rubio-Ramírez (2004): ``Comparing
 Dynamic Equilibrium Economies to Data: A Bayesian Approach,''
-@i{Journal of Econometrics}, 123, 153--187.
+@i{Journal of Econometrics}, 123, 153--187
+
+@item
+Fernández-Villaverde, Jesús and Juan Rubio-Ramírez (2005): ``Estimating
+Dynamic Equilibrium Economies: Linear versus Nonlinear Likelihood,''
+@i{Journal of Applied Econometrics}, 20, 891--910
 
 @item
 Ireland, Peter (2004): ``A Method for Taking Models to the Data,''
-@i{Journal of Economic Dynamics and Control}, 28, 1205--26.
+@i{Journal of Economic Dynamics and Control}, 28, 1205--26
 
 @item
-Iskrev, Nikolay (2010). ``Local identification in DSGE models,''
-@i{Journal of Monetary Economics}, 57(2), 189--202.
+Iskrev, Nikolay (2010): ``Local identification in DSGE models,''
+@i{Journal of Monetary Economics}, 57(2), 189--202
 
 @item
 Judd, Kenneth (1996): ``Approximation, Perturbation, and Projection
 Methods in Economic Analysis'', in @i{Handbook of Computational
 Economics}, ed. by Hans Amman, David Kendrick, and John Rust, North
-Holland Press, 511--585.
+Holland Press, 511--585
 
 @item
 Juillard, Michel (1996): ``Dynare: A program for the resolution and
 simulation of dynamic models with forward variables through the use of
-a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602.
+a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602
 
 @item
 Kim, Jinill, Sunghyun Kim, Ernst Schaumburg, and Christopher A. Sims
 (2008): ``Calculating and using second-order accurate solutions of
 discrete time dynamic equilibrium models,'' @i{Journal of Economic
-Dynamics and Control}, 32(11), 3397--3414.
+Dynamics and Control}, 32(11), 3397--3414
 
 @item
 Koopman, S. J. and J. Durbin (2003): ``Filtering and Smoothing of
 State Vector for Diffuse State Space Models,'' @i{Journal of Time
-Series Analysis}, 24(1), 85--98.
+Series Analysis}, 24(1), 85--98
 
 @item
 Laffargue, Jean-Pierre (1990): ``Résolution d'un modèle
 macroéconomique avec anticipations rationnelles'', @i{Annales
-d'Économie et Statistique}, 17, 97--119.
+d'Économie et Statistique}, 17, 97--119
 
 @item
 Lubik, Thomas and Frank Schorfheide (2007): ``Do Central Banks Respond
 to Exchange Rate Movements? A Structural Investigation,'' @i{Journal
-of Monetary Economics}, 54(4), 1069--1087.
+of Monetary Economics}, 54(4), 1069--1087
 
 @item
 Mancini-Griffoli, Tommaso (2007): ``Dynare User Guide: An introduction
-to the solution and estimation of DSGE models''.
+to the solution and estimation of DSGE models''
 
 @item
 Pearlman, Joseph, David Currie, and Paul Levine (1986): ``Rational
 expectations models with partial information,'' @i{Economic
-Modelling}, 3(2), 90--105.
+Modelling}, 3(2), 90--105
 
 @item
 Rabanal, Pau and Juan Rubio-Ramirez (2003): ``Comparing New Keynesian
@@ -7337,28 +7633,28 @@ Models of the Business Cycle: A Bayesian Approach,'' Federal Reserve
 of Atlanta, @i{Working Paper Series}, 2003-30.
 
 @item
-Ratto, Marco (2008): ``Analysing dsge models with global sensitivity
-analysis''. @i{Computational Economics}, 31, 115--139.
+Ratto, Marco (2008): ``Analysing DSGE models with global sensitivity
+analysis'', @i{Computational Economics}, 31, 115--139
 
 @item
 Schorfheide, Frank (2000): ``Loss Function-based evaluation of DSGE
-models,'' @i{Journal of Applied Econometrics}, 15(6), 645--670.
+models,'' @i{Journal of Applied Econometrics}, 15(6), 645--670
 
 @item
 Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
 General Equilibrium Models Using a Second-Order Approximation to the
 Policy Function,'' @i{Journal of Economic Dynamics and Control},
-28(4), 755--775.
+28(4), 755--775
 
 @item
 Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): ``Methods for
 inference in large multiple-equation Markov-switching models,''
-@i{Journal of Econometrics}, 146, 255--274.
+@i{Journal of Econometrics}, 146, 255--274
 
 @item
 Smets, Frank and Rafael Wouters (2003): ``An Estimated Dynamic
 Stochastic General Equilibrium Model of the Euro Area,'' @i{Journal of
-the European Economic Association}, 1(5), 1123--1175.
+the European Economic Association}, 1(5), 1123--1175
 
 @item
 Villemot, Sébastien (2011): ``Solving rational expectations models at

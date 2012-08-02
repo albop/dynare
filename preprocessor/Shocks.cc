@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -196,7 +196,7 @@ void
 ShocksStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   // Workaround for trac ticket #35
-  mod_file_struct.shocks_present = true;
+  mod_file_struct.shocks_present_but_simul_not_yet = true;
 
   // Determine if there is a calibrated measurement error
   for (var_and_std_shocks_t::const_iterator it = var_shocks.begin();
@@ -245,7 +245,7 @@ void
 MShocksStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   // Workaround for trac ticket #35
-  mod_file_struct.shocks_present = true;
+  mod_file_struct.shocks_present_but_simul_not_yet = true;
 }
 
 ConditionalForecastPathsStatement::ConditionalForecastPathsStatement(const AbstractShocksStatement::det_shocks_t &paths_arg, const SymbolTable &symbol_table_arg) :
@@ -289,9 +289,9 @@ ConditionalForecastPathsStatement::writeOutput(ostream &output, const string &ba
        it != paths.end(); it++)
     {
       if (it == paths.begin())
-        output << "constrained_vars_ = " << it->first << ";" << endl;
+        output << "constrained_vars_ = " << it->first +1 << ";" << endl;
       else
-        output << "constrained_vars_ = [constrained_vars_; " << it->first << "];" << endl;
+        output << "constrained_vars_ = [constrained_vars_; " << it->first +1 << "];" << endl;
 
       const vector<AbstractShocksStatement::DetShockElement> &elems = it->second;
       for (int i = 0; i < (int) elems.size(); i++)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2011 Dynare Team
+ * Copyright (C) 2007-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -2179,7 +2179,7 @@ SparseMatrix::Singular_display(int block, int Size, bool steady_state, it_code_t
   mexCallMATLAB(3, lhs, 1, rhs, "svd");
   mxArray* SVD_u = lhs[0];
   mxArray* SVD_s = lhs[1];
-  mxArray* SVD_v = lhs[2];
+  //mxArray* SVD_v = lhs[2];
   double *SVD_ps = mxGetPr(SVD_s);
   double *SVD_pu = mxGetPr(SVD_u);
   for (int i = 0; i < Size; i++)
@@ -3001,11 +3001,15 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
         {
           for (j = 0; j < y_size; j++)
             {
+#ifdef DEBUG
               bool select = false;
+#endif
               for (int i = 0; i < Size; i++)
                 if (j == index_vara[i])
                   {
+#ifdef DEBUG
                     select = true;
+#endif
                     break;
                   }
 #ifdef DEBUG

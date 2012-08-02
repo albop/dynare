@@ -15,7 +15,7 @@ function [nvar,vartan,CovarFileNumber] = dsge_simulated_theoretical_covariance(S
 %   vartan            [char]     array of characters (with nvar rows).
 %   CovarFileNumber   [integer]  scalar, number of prior or posterior data files (for covariance).
 
-% Copyright (C) 2007-2009 Dynare Team
+% Copyright (C) 2007-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,7 +55,7 @@ if ~posterior
     end
     options_.varlist = options_.prior_analysis_endo_var_list;
 end
-[ivar,vartan] = set_stationary_variables_list(options_,M_);
+[ivar,vartan] = get_variables_list(options_,M_);
 if ~posterior
     if exist('temp','var')
         options_.varlist = temp;
