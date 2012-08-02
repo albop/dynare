@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -20,28 +20,29 @@
 #include <cstdlib>
 #include <vector>
 
-#include "Vector.hh"
-#include "Matrix.hh"
+#include <Eigen/Core>
+#include <Eigen/QR>
+
 #include "QRDecomposition.hh"
 #include "GeneralizedSchurDecomposition.hh"
-#include "LUSolver.hh"
+
+using namespace Eigen;
 
 class DecisionRules
 {
 private:
-  const size_t n, p;
-  const std::vector<size_t> zeta_fwrd, zeta_back, zeta_mixed, zeta_static;
-  const size_t n_fwrd, n_back, n_mixed, n_static, n_back_mixed, n_fwrd_mixed, n_dynamic;
-  std::vector<size_t> zeta_fwrd_mixed, zeta_back_mixed, zeta_dynamic,
+  const ptrdiff_t n, p;
+  const std::vector<ptrdiff_t> zeta_fwrd, zeta_back, zeta_mixed, zeta_static;
+  const ptrdiff_t n_fwrd, n_back, n_mixed, n_static, n_back_mixed, n_fwrd_mixed, n_dynamic;
+  std::vector<ptrdiff_t> zeta_fwrd_mixed, zeta_back_mixed, zeta_dynamic,
     beta_back, beta_fwrd, pi_back, pi_fwrd;
-  Matrix S, A, D, E, Z_prime;
+  MatrixXd S, A, D, E, Z_prime;
   QRDecomposition QR;
   GeneralizedSchurDecomposition GSD;
-  LUSolver LU1, LU2, LU3;
-  Matrix Z21, g_y_back, g_y_back_tmp;
-  Matrix g_y_static, A0s, A0d, g_y_dynamic, g_y_static_tmp;
-  Matrix g_u_tmp1, g_u_tmp2;
-  LUSolver LU4;
+  ColPivHouseholderQR<MatrixXd> Solver1, Solver2, Solver3, Solver4;
+  MatrixXd Z21, g_y_back, g_y_fwrd;
+  MatrixXd g_y_static, A0s, A0d, g_y_dynamic;
+  MatrixXd g_u_tmp1, g_u_tmp2;
 public:
   class BlanchardKahnException
   {
@@ -54,24 +55,25 @@ public:
   /*!
     The zetas are supposed to follow C convention (first vector index is zero).
   */
-  DecisionRules(size_t n_arg, size_t p_arg, const std::vector<size_t> &zeta_fwrd_arg,
-                const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
-                const std::vector<size_t> &zeta_static_arg, double qz_criterium);
+  DecisionRules(ptrdiff_t n_arg, ptrdiff_t p_arg, const std::vector<ptrdiff_t> &zeta_fwrd_arg,
+                const std::vector<ptrdiff_t> &zeta_back_arg, const std::vector<ptrdiff_t> &zeta_mixed_arg,
+                const std::vector<ptrdiff_t> &zeta_static_arg, double qz_criterium);
   virtual ~DecisionRules(){};
 
   /*!
     \param jacobian First columns are backetermined vars at t-1 (in the order of zeta_back_mixed), then all vars at t (in the orig order), then forward vars at t+1 (in the order of zeta_fwrd_mixed), then exogenous vars.
   */
-  void compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
-  template<class Vec1, class Vec2>
-  void getGeneralizedEigenvalues(Vec1 &eig_real, Vec2 &eig_cmplx);
+  void compute(const MatrixXd &jacobian, MatrixXd &g_y, MatrixXd &g_u) throw (BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
+  template<typename Vec1, typename Vec2>
+  void getGeneralizedEigenvalues(PlainObjectBase<Vec1> &eig_real, PlainObjectBase<Vec2> &eig_cmplx);
 };
 
 std::ostream &operator<<(std::ostream &out, const DecisionRules::BlanchardKahnException &e);
 
 template<class Vec1, class Vec2>
 void
-DecisionRules::getGeneralizedEigenvalues(Vec1 &eig_real, Vec2 &eig_cmplx)
+DecisionRules::getGeneralizedEigenvalues(PlainObjectBase<Vec1> &eig_real,
+                                         PlainObjectBase<Vec2> &eig_cmplx)
 {
   GSD.getGeneralizedEigenvalues(eig_real, eig_cmplx);
 }
