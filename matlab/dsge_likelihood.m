@@ -195,7 +195,7 @@ if ~isequal(DynareOptions.mode_compute,1) && any(xparam1<BayesInfo.lb)
     fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
     xtemp=xparam1;
     xtemp(k)=BayesInfo.lb(k);
-    if DynareOptions.prior_trunc,
+    if DynareOptions.prior_trunc || all(BayesInfo.pshape(k)==5),
         prior1 = priordens(xtemp,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
     else
         prior1 = length(k)*log(1.e-20);
@@ -216,7 +216,7 @@ if ~isequal(DynareOptions.mode_compute,1) && any(xparam1>BayesInfo.ub)
     fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
     xtemp=xparam1;
     xtemp(k)=BayesInfo.ub(k);
-    if DynareOptions.prior_trunc,
+    if DynareOptions.prior_trunc || all(BayesInfo.pshape(k)==5),
         prior1 = priordens(xtemp,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
     else
         prior1 = length(k)*log(1.e-20);
