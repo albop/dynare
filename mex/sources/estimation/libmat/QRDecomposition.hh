@@ -23,9 +23,12 @@
 
 using namespace Eigen;
 
-
 #include <dynlapack.h>
 
+/* Note that Eigen provides built-in QR decomposers (classes *HouseHolderQR).
+   However, we need to have our own because we need the ability to
+   left-multiply arbitrary matrices by Q, and this is not offered in a
+   convenient way by the Eigen classes. */
 class QRDecomposition
 {
 private:
