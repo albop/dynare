@@ -130,22 +130,7 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT FR
 
-% Declaration of the penalty as a persistent variable.
-
-% Persistent variable 'penalty' is used to compute an endogenous penalty to
-% the value 'fval' when various conditions are encountered. These conditions
-% set also 'exit_flag' equal to 0 instead of 1.  It is only when
-% dsge_likelihood() is called by an optimizer called by
-% dynare_estimation_1() that 'exit_flag' is ignored and penalized 'fval' is
-% actually used.
-% In that case, 'penalty' is properly initialized, at the very end of the
-% present function, by a call to dsge_likelihood() made in
-% initial_estimation_checks(). If a condition triggers exit_flag ==
-% 0, initial_estimation_checks() triggers an error.
-% In summary, an initial call to the present function, without triggering
-% any condition, guarantees that 'penalty' is properly initialized when needed.
-
-persistent penalty
+penalty = BayesInfo.penalty;
 
 % Initialization of the returned variables and others...
 fval        = [];
@@ -262,7 +247,8 @@ end
 [T,R,SteadyState,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
 
 % Return, with endogenous penalty when possible, if dynare_resolve issues an error code (defined in resol).
-if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) == 22 || info(1) == 24
+if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) ...
+            == 8 || info(1) == 22 || info(1) == 24
     fval = penalty+1;
     info = info(1);
     exit_flag = 0;
@@ -568,16 +554,16 @@ if analytic_derivation,
         if full_Hess
         DTj = DT(:,:,j+offset);
         DPj = dum;
-        for i=1:j,
-            DTi = DT(:,:,i+offset);
-            DPi = DP(:,:,i+offset);
-            D2Tij = D2T(:,:,i,j);
-            D2Omij = D2Om(:,:,i,j);
+        for i=1:j+offset,
+            DTi = DT(:,:,i);
+            DPi = DP(:,:,i);
+            D2Tij = D2T(:,:,i,j+offset);
+            D2Omij = D2Om(:,:,i,j+offset);
             tmp = D2Tij*Pstar*T' + T*Pstar*D2Tij' + DTi*DPj*T' + DTj*DPi*T' + T*DPj*DTi' + T*DPi*DTj' + DTi*Pstar*DTj' + DTj*Pstar*DTi' + D2Omij;
             dum = lyapunov_symm(T,tmp,DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
             dum(abs(dum)<1.e-12) = 0;
-            D2P(:,:,i+offset,j+offset) = dum;
-            D2P(:,:,j+offset,i+offset) = dum;
+            D2P(:,:,i,j+offset) = dum;
+            D2P(:,:,j+offset,i) = dum;
         end
         end
     end
@@ -770,9 +756,6 @@ end
 
 % Update DynareOptions.kalman_algo.
 DynareOptions.kalman_algo = kalman_algo;
-
-% Update the penalty.
-penalty = fval;
 
 if analytic_derivation==0 && nargout==2,
     lik=lik(start:end,:);

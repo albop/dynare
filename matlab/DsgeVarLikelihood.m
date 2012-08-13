@@ -35,7 +35,9 @@ function [fval,grad,hess,exit_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihoo
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Declaration of the persistent variables.
-persistent penalty dsge_prior_weight_idx
+persistent dsge_prior_weight_idx
+
+penalty = BayesInfo.penalty;
 
 grad=[];
 hess=[];
@@ -45,16 +47,6 @@ PHI = [];
 SIGMAu = [];
 iXX = [];
 prior = [];
-
-% Initialization of the penalty
-if ~nargin || isempty(penalty)
-    penalty = 1e8;
-    if ~nargin, return, end
-end
-if nargin==1
-    penalty = xparam1;
-    return
-end
 
 % Initialization of of the index for parameter dsge_prior_weight in Model.params.
 if isempty(dsge_prior_weight_idx)
@@ -154,7 +146,8 @@ end
 [T,R,SteadyState,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
 
 % Return, with endogenous penalty when possible, if dynare_resolve issues an error code (defined in resol).
-if info(1) == 1 || info(1) == 2 || info(1) == 5
+if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) ...
+            == 8 || info(1) == 22 || info(1) == 24
     fval = penalty+1;
     info = info(1);
     exit_flag = 0;

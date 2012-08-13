@@ -1,7 +1,33 @@
-function [x,c] = linsolve(A,B,opts)
-% (very imperfect) Clone of Matlab's linsolve.
+function i = issquare(A)
 
-% Copyright (C) 2010-2011 Dynare Team
+%@info:
+%! @deftypefn {Function File} {@var{i} =} issquare (@var{A})
+%! @anchor{issquare}
+%! @sp 1
+%! If @var{A} is a square matrix, returns its dimension; otherwise return 0.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item A
+%! Matrix.
+%! @end table
+%! @sp 1
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item i
+%! Integer scalar.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 2
+%! @end deftypefn
+%@eod:
+
+% Copyright (C) 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -18,16 +44,9 @@ function [x,c] = linsolve(A,B,opts)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    c = [];
-    x = [];
-    if nargin == 3
-        if isfield(opts,'TRANSA')
-            A = A';
-        end
-    end
-    if nargout == 2
-        c = rcond(A);
-    end
-    
-    x = A\B;
-    
+d = size(A);
+if (length(d)==2) && (d(1)==d(2))
+  i = d(1);
+else
+  i = 0;
+end

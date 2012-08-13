@@ -4044,7 +4044,7 @@ simulation that crashed prematurely. Shouldn't be used together with
 @anchor{mode_file}
 Name of the file containing previous value for the mode. When
 computing the mode, Dynare stores the mode (@code{xparam1}) and the
-hessian (@code{hh}) in a file called
+hessian (@code{hh}, only if @code{cova_compute=1}) in a file called
 @file{@var{MODEL_FILENAME}_mode.mat}
 
 @item mode_compute = @var{INTEGER} | @var{FUNCTION_NAME}
@@ -4284,7 +4284,9 @@ computed after the computation of posterior mode (or maximum
 likelihood). This increases speed of computation in large models
 during development, when this information is not always necessary. Of
 course, it will break all successive computations that would require
-this covariance matrix. Default is @code{1}.
+this covariance matrix. Otherwise, if this option is equal to
+@code{1}, the covariance matrix is computed and stored in variable
+@code{hh} of @file{@var{MODEL_FILENAME}_mode.mat}. Default is @code{1}.
 
 @item solve_algo = @var{INTEGER}
 @xref{solve_algo}.
@@ -4685,6 +4687,8 @@ See @file{bvar-a-la-sims.pdf}, which comes with Dynare distribution,
 for more information on this command.
 @end deffn
 
+Dynare can also run the smoother on a calibrated model:
+
 @deffn Command calib_smoother [@var{VARIABLE_NAME}]@dots{};
 @deffnx Command calib_smoother (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}]@dots{};
 
@@ -4985,8 +4989,8 @@ declared in @code{conditional_forecast}.
 @end deffn
 
 @deffn Command bvar_forecast ;
-This command computes in-sample or out-sample forecasts for an
-estimated BVAR model, using Minnesota priors.
+This command computes (out-of-sample) forecasts for an estimated BVAR
+model, using Minnesota priors.
 
 See @file{bvar-a-la-sims.pdf}, which comes with Dynare distribution,
 for more information on this command.
@@ -5160,6 +5164,10 @@ This command computes an approximation of the optimal policy under
 discretion. The algorithm implemented is essentially an LQ solver, and
 is described by @cite{Dennis (2007)}.
 
+You should ensure that your model is linear and your objective is
+quadratic. Also, you should set the @code{linear} option of the
+@code{model} block.
+
 @optionshead
 
 This command accepts the same options than @code{ramsey_policy}, plus:
@@ -5188,8 +5196,10 @@ You need to give the one-period objective, not the discounted lifetime
 objective. The discount factor is given by the @code{planner_discount}
 option of @code{ramsey_policy} and @code{discretionary_policy}.
 
-Note that with this command you are not limited to quadratic
+With @code{ramsey_policy}, you are not limited to quadratic
 objectives: you can give any arbitrary nonlinear expression.
+
+With @code{discretionary_policy}, the objective function must be quadratic.
 @end deffn
 
 @node Sensitivity and identification analysis
