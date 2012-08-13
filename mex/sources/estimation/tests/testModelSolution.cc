@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -17,8 +17,9 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Test  for ModelSolution
-// Uses fs2000k2.mod and its ..._dynamic.mexw32
+// Test for ModelSolution; to be used with model1.mod
+
+#include <iostream>
 
 #include "ModelSolution.hh"
 
@@ -27,56 +28,50 @@ main(int argc, char **argv)
 {
   if (argc < 2)
     {
-      std::cerr << argv[0] << ": please provide as argument the name of the dynamic DLL generated from fs2000k2.mod (typically fs2000k2_dynamic.mex*)" << std::endl;
+      std::cerr << argv[0] << ": please provide as argument the name of the dynamic DLL generated from model1.mod (typically model1_dynamic.mex*)" << std::endl;
       exit(EXIT_FAILURE);
     }
 
   std::string modName = argv[1];
   const int npar = 7;
-  const size_t n_endo = 15, n_exo = 2;
-  std::vector<size_t> zeta_fwrd_arg;
-  std::vector<size_t> zeta_back_arg;
-  std::vector<size_t> zeta_mixed_arg;
-  std::vector<size_t> zeta_static_arg;
+  const ptrdiff_t n_endo = 15, n_exo = 2;
+  std::vector<ptrdiff_t> zeta_fwrd_arg;
+  std::vector<ptrdiff_t> zeta_back_arg;
+  std::vector<ptrdiff_t> zeta_mixed_arg;
+  std::vector<ptrdiff_t> zeta_static_arg;
   double qz_criterium = 1.0+1.0e-9;
-  Vector deepParams(npar);
 
-  double dYSparams [] = {
+  Matrix2d vCov;
+  vCov <<
+    0.1960e-3, 0.0,
+    0.0, 0.0250e-3;
+  
+  VectorXd deepParams(npar);
+  deepParams << 0.3300,
+    0.9900,
+    0.0030,
+    1.0110,
+    0.7000,
+    0.7870,
+    0.0200;
+
+  VectorXd steadyState(n_endo);
+  steadyState <<
     1.0110,  2.2582,  0.4477,  1.0000,
     4.5959,  1.0212,  5.8012,  0.8494,
     0.1872,  0.8604,  1.0030,  1.0080,
-    0.5808,  1.0030,  2.2093
-  };
-  double vcov[] = {
-    0.1960e-3, 0.0,
-    0.0, 0.0250e-3
-  };
-  int nVCVpar = 2;
-  MatrixView vCovVW(vcov, nVCVpar, nVCVpar, nVCVpar);
-  Matrix vCov(nVCVpar, nVCVpar);
-  vCov = vCovVW;
+    0.5808,  1.0030,  2.2093;
 
-  double dparams[] = { 0.3300,
-                       0.9900,
-                       0.0030,
-                       1.0110,
-                       0.7000,
-                       0.7870,
-                       0.0200};
-
-  VectorView modParamsVW(dparams, npar, 1);
-  deepParams = modParamsVW;
-  VectorView steadyState(dYSparams, n_endo, 1);
   std::cout << "Vector deepParams: " << std::endl << deepParams << std::endl;
   std::cout << "Matrix vCov: " << std::endl << vCov << std::endl;
   std::cout << "Vector steadyState: " << std::endl << steadyState << std::endl;
 
   // Set zeta vectors [0:(n-1)] from Matlab indices [1:n]
   //order_var = [ stat_var(:); pred_var(:); both_var(:); fwrd_var(:)];
-  size_t statc[] = { 4, 5, 6, 8, 9, 10, 11, 12, 14};
-  size_t back[] = {1, 7, 13};
-  size_t both[] = {2};
-  size_t fwd[] = { 3, 15};
+  ptrdiff_t statc[] = { 4, 5, 6, 8, 9, 10, 11, 12, 14};
+  ptrdiff_t back[] = {1, 7, 13};
+  ptrdiff_t both[] = {2};
+  ptrdiff_t fwd[] = { 3, 15};
   for (int i = 0; i < 9; ++i)
     zeta_static_arg.push_back(statc[i]-1);
   for (int i = 0; i < 3; ++i)
@@ -86,8 +81,8 @@ main(int argc, char **argv)
   for (int i = 0; i < 2; ++i)
     zeta_fwrd_arg.push_back(fwd[i]-1);
 
-  Matrix ghx(n_endo, zeta_back_arg.size() + zeta_mixed_arg.size());
-  Matrix ghu(n_endo, n_exo);
+  MatrixXd ghx(n_endo, zeta_back_arg.size() + zeta_mixed_arg.size());
+  MatrixXd ghu(n_endo, n_exo);
 
   ModelSolution modelSolution(modName, n_endo, n_exo,
                               zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium);

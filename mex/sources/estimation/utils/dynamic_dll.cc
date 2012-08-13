@@ -19,12 +19,12 @@
 
 #include "dynamic_dll.hh"
 
+#include <iostream>
 #include <sstream>
 
 using namespace std;
 
-DynamicModelDLL::DynamicModelDLL(const std::string &dynamicDllFile, size_t n_exog_arg) throw (TSException) :
-  n_exog(n_exog_arg)
+DynamicModelDLL::DynamicModelDLL(const std::string &dynamicDllFile) throw (TSException)
 {
   std::string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)

@@ -27,7 +27,9 @@
 #endif
 
 #include <string>
-#include "Matrix.hh"
+#include <Eigen/Core>
+
+using namespace Eigen;
 
 #include "ts_exception.h"
 
@@ -44,7 +46,6 @@ class DynamicModelDLL
 {
 private:
   DynamicFn Dynamic; // pointer to the Dynamic function in DLL
-  const size_t n_exog; // no of exogenous
 #if defined(_WIN32) || defined(__CYGWIN32__)
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else
@@ -53,17 +54,16 @@ private:
 
 public:
   // construct and load Dynamic model DLL
-  DynamicModelDLL(const std::string &dynamicDllFile, size_t n_exog_arg) throw (TSException);
+  DynamicModelDLL(const std::string &dynamicDllFile) throw (TSException);
   virtual ~DynamicModelDLL();
 
   //! evaluate Dynamic model DLL
-  void eval(const Vector &y, const Matrix &x, const Vector &params, VectorView &ySteady,
-            Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException);
-  template<class VEC>
-  void eval(const Vector &y, const Matrix &x, const VectorView &modParams, VEC &ySteady,
-                      Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
+  template<class Derived1, class Derived2>
+  void eval(const VectorXd &y, const MatrixXd &x, const PlainObjectBase<Derived1> &modParams,
+            PlainObjectBase<Derived2> &ySteady, VectorXd &residual, MatrixXd *g1, MatrixXd *g2,
+            MatrixXd *g3) throw (TSException)
   {
-    Dynamic(y.getData(), x.getData(), 1, modParams.getData(), ySteady.getData(), 0, residual.getData(),
-	    g1 == NULL ? NULL : g1->getData(), g2 == NULL ? NULL : g2->getData(), g3 == NULL ? NULL : g3->getData());
+    Dynamic(y.data(), x.data(), 1, modParams.data(), ySteady.data(), 0, residual.data(),
+	    g1 == NULL ? NULL : g1->data(), g2 == NULL ? NULL : g2->data(), g3 == NULL ? NULL : g3->data());
   };
 };

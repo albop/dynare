@@ -26,6 +26,10 @@
 #if !defined(ModelSolution_5ADFF920_9C74_46f5_9FE9_88AD4D4BBF19__INCLUDED_)
 #define ModelSolution_5ADFF920_9C74_46f5_9FE9_88AD4D4BBF19__INCLUDED_
 
+#include <Eigen/Core>
+
+using namespace Eigen;
+
 #include "DecisionRules.hh"
 #include "dynamic_dll.hh"
 
@@ -38,12 +42,14 @@ class ModelSolution
 {
 
 public:
-  ModelSolution(const std::string &dynamicDllFile,  size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
-                const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
-                const std::vector<size_t> &zeta_static_arg, double qz_criterium);
+  ModelSolution(const std::string &dynamicDllFile, ptrdiff_t n_endo, ptrdiff_t n_exo, const std::vector<ptrdiff_t> &zeta_fwrd_arg,
+                const std::vector<ptrdiff_t> &zeta_back_arg, const std::vector<ptrdiff_t> &zeta_mixed_arg,
+                const std::vector<ptrdiff_t> &zeta_static_arg, double qz_criterium);
   virtual ~ModelSolution() {};
-  template <class VEC>
-  void compute(VEC &steadyState, const VectorView &deepParams,      Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
+  template <class Derived1, class Derived2>
+  void compute(PlainObjectBase<Derived1> &steadyState, const PlainObjectBase<Derived2> &deepParams,
+               MatrixXd &ghx, MatrixXd &ghu) throw (DecisionRules::BlanchardKahnException,
+                                                    GeneralizedSchurDecomposition::GSDException)
   {
     // compute Steady State
     ComputeSteadyState(steadyState, deepParams);
@@ -55,31 +61,31 @@ public:
   }
 
 private:
-  const size_t n_endo;
-  const size_t n_exo;
-  const size_t n_jcols; // Num of Jacobian columns
-  std::vector<size_t> zeta_fwrd_mixed, zeta_back_mixed;
-  Matrix jacobian;
-  Vector residual;
-  Matrix Mx;
+  const ptrdiff_t n_endo;
+  const ptrdiff_t n_exo;
+  const ptrdiff_t n_jcols; // Num of Jacobian columns
+  std::vector<ptrdiff_t> zeta_fwrd_mixed, zeta_back_mixed;
+  MatrixXd jacobian;
+  VectorXd residual;
+  MatrixXd Mx;
   DecisionRules decisionRules;
   DynamicModelDLL dynamicDLLp;
-  Vector llXsteadyState;
+  VectorXd llXsteadyState;
   //Matrix jacobian;
-  template <class VEC>
-  void ComputeModelSolution(VEC &steadyState, const VectorView &deepParams,         
-			    Matrix &ghx, Matrix &ghu) 
+  template <class Derived1, class Derived2>
+  void ComputeModelSolution(PlainObjectBase<Derived1> &steadyState, const PlainObjectBase<Derived2> &deepParams,         
+			    MatrixXd &ghx, MatrixXd &ghu) 
     throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
   {
     // set extended Steady State
 
-    for (size_t i = 0; i < zeta_back_mixed.size(); i++)
+    for (ptrdiff_t i = 0; i < (ptrdiff_t) zeta_back_mixed.size(); i++)
       llXsteadyState(i) = steadyState(zeta_back_mixed[i]);
 
-    for (size_t i = 0; i < n_endo; i++)
+    for (ptrdiff_t i = 0; i < n_endo; i++)
       llXsteadyState(zeta_back_mixed.size() + i) = steadyState(i);
 
-    for (size_t i = 0; i < zeta_fwrd_mixed.size(); i++)
+    for (ptrdiff_t i = 0; i < (ptrdiff_t) zeta_fwrd_mixed.size(); i++)
       llXsteadyState(zeta_back_mixed.size() + n_endo + i) = steadyState(zeta_fwrd_mixed[i]);
 
     //get jacobian
@@ -88,8 +94,8 @@ private:
     //compute rules
     decisionRules.compute(jacobian, ghx, ghu);
   }
-  template <class VEC>
-  void ComputeSteadyState(VEC &steadyState, const VectorView &deepParams)
+  template <class Derived1, class Derived2>
+  void ComputeSteadyState(PlainObjectBase<Derived1> &steadyState, const PlainObjectBase<Derived2> &deepParams)
   {
     // does nothig for time being.
   }
