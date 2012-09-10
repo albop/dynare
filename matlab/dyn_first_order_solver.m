@@ -151,7 +151,11 @@ function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
     nyf = sum(kstate(:,2) > M_.maximum_endo_lag+1);
 
     if task == 1
-        dr.rank = rank(w(1:nyf,nd-nyf+1:end));
+        if rcond(w(npred+nboth+1:end,npred+nboth+1:end)) < 1e-9
+            dr.full_rank = 0;
+        else
+            dr.full_rank = 1;
+        end            
         % Under Octave, eig(A,B) doesn't exist, and
         % lambda = qz(A,B) won't return infinite eigenvalues
         if ~exist('OCTAVE_VERSION')
