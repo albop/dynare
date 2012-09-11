@@ -437,7 +437,6 @@ for i = 1:Size;
 
         [err, ss, tt, w, sdim, data(i).eigval, info1] = mjdgges(E,D,options_.qz_criterium);
 
-<<<<<<< HEAD
         if (verbose)
             disp('eigval');
             disp(data(i).eigval);
@@ -450,7 +449,6 @@ for i = 1:Size;
         nba = nd-sdim;
         if task == 1
             data(i).rank = rank(w(nd-nyf+1:end,nd-nyf+1:end));
-            dr.rank = dr.rank + data(i).rank;
             dr.full_rank = dr.full_rank && (rcond(w(nd-nyf+1:end,nd- ...
                                                     nyf+1:end)) > 1e-9);
             if ~exist('OCTAVE_VERSION','builtin')
