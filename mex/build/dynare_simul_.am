@@ -1,8 +1,8 @@
 noinst_PROGRAMS = dynare_simul_
 
-dynare_simul__CPPFLAGS = -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../sources
+dynare_simul__CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../sources
 
-dynare_simul__CXXFLAGS = $(PTHREAD_CFLAGS)
+dynare_simul__CXXFLAGS = $(AM_CXXFLAGS) $(PTHREAD_CFLAGS)
 
 # libdynare++ must come before pthread
 dynare_simul__LDADD = ../libdynare++/libdynare++.a $(PTHREAD_LIBS)
