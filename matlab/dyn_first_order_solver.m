@@ -95,6 +95,7 @@ function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
     end
     k1 = find([1:klen] ~= M_.maximum_endo_lag+1);
     a = aa(:,nonzeros(lead_lag_incidence(k1,:)'));
+    b = zeros(M_.endo_nbr,M_.endo_nbr);
     b(:,cols_b) = aa(:,cols_j);
     b10 = b(1:nstatic,1:nstatic);
     b11 = b(1:nstatic,nstatic+1:end);
