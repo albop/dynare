@@ -52,9 +52,6 @@ function [dr,info,M_,options_,oo_] = dr_block(dr,task,M_,options_,oo_)
 
 info = 0;
 verbose = 0;
-if options_.order > 1
-    error('2nd and 3rd order approximation not implemented with block option')
-end
 
 z = repmat(dr.ys,1,M_.maximum_lead + M_.maximum_lag + 1);
 zx = repmat([oo_.exo_simul oo_.exo_det_simul],M_.maximum_lead + M_.maximum_lag + 1, 1);

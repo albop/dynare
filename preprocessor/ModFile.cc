@@ -161,6 +161,13 @@ ModFile::checkPass()
       exit(EXIT_FAILURE);
     }
 
+  if ((block || byte_code) && stochastic_statement_present
+      && mod_file_struct.order_option >= 2)
+    {
+      cerr << "ERROR: In 'model' block, 'block' and/or 'bytecode' options are not yet compatible with a stochastic model at order >= 2" << endl;
+      exit(EXIT_FAILURE);
+    }
+
   if (use_dll && (block || byte_code))
     {
       cerr << "ERROR: In 'model' block, 'use_dll' option is not compatible with 'block' or 'bytecode'" << endl;
