@@ -89,7 +89,7 @@ if ~options_.noprint
     disp(['  Number of variables:         ' int2str(M_.endo_nbr)])
     disp(['  Number of stochastic shocks: ' int2str(M_.exo_nbr)])
     if (options_.block)
-        disp(['  Number of state variables:   ' int2str(oo_.dr.npred+oo_.dr.nboth)])
+        disp(['  Number of state variables:   ' int2str(oo_.dr.npred)])
         disp(['  Number of jumpers:           ' int2str(oo_.dr.nfwrd+oo_.dr.nboth)])
     else
         disp(['  Number of state variables:   ' ...
