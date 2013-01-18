@@ -65,7 +65,7 @@ if options_.periods == 0
 end
 
 if ~ options_.initval_file
-    if ~isfield(options_,'datafile')
+    if isempty(options_.datafile)
         make_ex_;
         make_y_;
     else
@@ -82,6 +82,11 @@ options_.scalv= 1 ;
 if(options_.block)
     if(options_.bytecode)
         [info, oo_.endo_simul] = bytecode('dynamic');
+        if info == 1
+            oo_.deterministic_simulation.status = 0;
+        else
+            oo_.deterministic_simulation.status = 1;
+        end;
         mexErrCheck('bytecode', info);
     else
         eval([M_.fname '_dynamic']);
