@@ -19,10 +19,16 @@ function sim1_purely_backward()
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     global M_ options_ oo_
-
-    ny0 = nnz(M_.lead_lag_incidence(2,:)); % Number of variables at current period
-    nyb = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at previous period
-    iyb = find(M_.lead_lag_incidence(1,:)>0); % Indices of variables at previous period
+    if size(M_.lead_lag_incidence,1) > 1
+        ny0 = nnz(M_.lead_lag_incidence(2,:)); % Number of variables at current period
+        nyb = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at previous period
+        iyb = find(M_.lead_lag_incidence(1,:)>0); % Indices of variables at previous period
+    else
+        ny0 = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at current period
+        nyb = 0;
+        iyb = [];
+    end
+        
 
     if ny0 ~= M_.endo_nbr
         error('SIMUL: all endogenous variables must appear at the current period')
@@ -34,7 +40,11 @@ function sim1_purely_backward()
         yb = oo_.endo_simul(:,it-1); % Values at previous period, also used as guess value for current period
         yb1 = yb(iyb);
        
-        tmp = solve1(model_dynamic, [yb1; yb], 1:M_.endo_nbr, nyb+1:nyb+M_.endo_nbr, 1, 1, oo_.exo_simul, M_.params, oo_.steady_state, it);
+        tmp = solve1(model_dynamic, [yb1; yb], 1:M_.endo_nbr, nyb+1:nyb+ ...
+                     M_.endo_nbr, 1, 1, options_.gstep, ...
+                     options_.solve_tolf,options_.solve_tolx, ...
+                     options_.solve_maxit,options_.debug,oo_.exo_simul, ...
+                     M_.params, oo_.steady_state, it);
         oo_.endo_simul(:,it) = tmp(nyb+1:nyb+M_.endo_nbr);
     end
     
