@@ -37,7 +37,7 @@ bayestopt_ = [];
 options_.console_mode = 0;
 
 options_.verbosity = 1;
-
+options_.datafile = '';
 options_.terminal_condition = 0;
 options_.rplottype = 0;
 options_.smpl = 0;
