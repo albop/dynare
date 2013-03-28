@@ -319,12 +319,10 @@ if options_.analytic_derivation,
     end
 end
 
-% Test if the data file is declared.
-if isempty(options_.datafile)
+% Test if the dataset is declared.
+if isempty(options_.datafile) && isempty(options_.dataset) 
     if gsa_flag
         dataset_ = [];
-%         rawdata = [];
-%         data_info = [];
         return
     else
         error('datafile option is missing')
