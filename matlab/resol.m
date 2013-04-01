@@ -109,6 +109,9 @@ end
 
 if options.block
     [dr,info,M,options,oo] = dr_block(dr,check_flag,M,options,oo);
+elseif isfield(options,'portfolios')
+    [M,oo,options] = solve_for_portfolios(M,oo,options);
+    dr = convert_portfolio_solution(M,oo,options);
 else
     [dr,info] = stochastic_solvers(dr,check_flag,M,options,oo);
 end
