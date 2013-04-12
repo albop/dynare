@@ -343,11 +343,12 @@ end
 k = find(isnan(bayestopt_.jscale));
 bayestopt_.jscale(k) = options_.mh_jscale;
 
-% Load and transform data.
-transformation = [];
+% Take data in logs?
+logged_data_flag = 0;
 if options_.loglinear && ~options_.logdata
-    transformation = @log;
+    logged_data_flag = 1;
 end
+
 xls.sheet = options_.xls_sheet;
 xls.range = options_.xls_range;
 
