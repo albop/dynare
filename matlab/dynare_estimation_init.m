@@ -329,6 +329,10 @@ if options_.analytic_derivation,
     end
 end
 
+% If jscale isn't specified for an estimated parameter, use global option options_.jscale, set to 0.2, by default.
+k = find(isnan(bayestopt_.jscale));
+bayestopt_.jscale(k) = options_.mh_jscale;
+
 % Test if the dataset is declared.
 if isempty(options_.datafile) && isempty(options_.dataset) 
     if gsa_flag
@@ -338,10 +342,6 @@ if isempty(options_.datafile) && isempty(options_.dataset)
         error('datafile option is missing')
     end
 end
-
-% If jscale isn't specified for an estimated parameter, use global option options_.jscale, set to 0.2, by default.
-k = find(isnan(bayestopt_.jscale));
-bayestopt_.jscale(k) = options_.mh_jscale;
 
 % Take data in logs?
 logged_data_flag = 0;
