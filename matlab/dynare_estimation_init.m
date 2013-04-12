@@ -356,7 +356,7 @@ if options_.diffuse_filter
 else
     steadystate_check_flag = 1;
 end
-
+% If the steady state of the observed variables is non zero, set noconstant equal 0 ()
 M = M_;
 nvx = estim_params_.nvx;
 ncx = estim_params_.ncx;
