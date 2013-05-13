@@ -1,7 +1,7 @@
-function [dr,info] = k_order_pert(dr,M,options,oo)
+function [dr,info] = k_order_pert(dr,M,options)
 % Compute decision rules using the k-order DLL from Dynare++
 
-% Copyright (C) 2009-2012 Dynare Team
+% Copyright (C) 2009-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,18 +30,28 @@ nspred = M.nspred;
 switch(order)
   case 1
     [err, g_1] = k_order_perturbation(dr,M,options);
-    mexErrCheck('k_order_perturbation', err);
+    if err
+      info(1)=9;
+      return;
+    end
     dr.g_1 = g_1;
   case 2
     [err, g_0, g_1, g_2] = k_order_perturbation(dr,M,options);
-    mexErrCheck('k_order_perturbation', err);
+    if err
+      info(1)=9;
+      return;
+    end
     dr.g_0 = g_0;
     dr.g_1 = g_1;
     dr.g_2 = g_2;
   case 3
-    if options.pruning
+    if options.pruning 
         [err, g_0, g_1, g_2, g_3, derivs] = k_order_perturbation(dr, ...
                                                           M,options);
+        if err
+          info(1)=9;
+          return;
+        end
         dr.ghx = derivs.gy;
         dr.ghu = derivs.gu;
         dr.ghxx = unfold2(derivs.gyy,nspred);
@@ -57,8 +67,11 @@ switch(order)
     else
         [err, g_0, g_1, g_2, g_3] = k_order_perturbation(dr, ...
                                                          M,options);
+        if err
+          info(1)=9;
+          return;
+        end
     end
-    mexErrCheck('k_order_perturbation', err);
     dr.g_0 = g_0;
     dr.g_1 = g_1;
     dr.g_2 = g_2;
@@ -67,7 +80,7 @@ switch(order)
     error('order > 3 isn''t implemented')
 end
 
-if options.pruning
+if options.pruning 
     return
 end
 
@@ -143,9 +156,10 @@ for i=1:n
             y(:,(i-1)*n*n+(j-1)*n+k) = xx;
             y(:,(i-1)*n*n+(k-1)*n+j) = xx;
             y(:,(j-1)*n*n+(k-1)*n+i) = xx;
-            y(:,(i-1)*n*n+(k-1)*n+j) = xx;
+            y(:,(j-1)*n*n+(i-1)*n+k) = xx;
             y(:,(k-1)*n*n+(i-1)*n+j) = xx;
             y(:,(k-1)*n*n+(j-1)*n+i) = xx;
+            m = m + 1;
         end
     end
 end
@@ -161,9 +175,10 @@ for i=1:n1
             if j ~= i
                 y(:,(j-1)*n1*n2+(i-1)*n2+k) = xx;
             end
+            m = m + 1;
         end
     end
-end
+end 
 
 function y = unfold12(x,n1,n2)
 y = zeros(size(x,1),n1*n2*n2);
@@ -176,6 +191,7 @@ for i=1:n1
             if k ~= j
                 y(:,(i-1)*n2*n2+(k-1)*n2+j) = xx;
             end
+            m = m + 1;
         end
     end
 end

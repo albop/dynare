@@ -52,7 +52,7 @@ if ~noprint
         error(['One of the eigenvalues is close to 0/0 (the absolute ' ...
                'value of numerator and denominator is smaller than 1e-6)'])
       case 8
-        if ~isempty(info(2))
+        if size(info,2)>=2
           global M_;
             disp_string=deblank(M_.param_names(info(2),:));
           for ii=1:length(info)-2
@@ -63,7 +63,8 @@ if ~noprint
         else
           error(['The Jacobian contains NaNs'])
         end
-
+      case 9
+        error(['k_order_pert was unable to compute the solution'])           
       case 19
         error('The steadystate file did not compute the steady state')
       case 20

@@ -19,9 +19,10 @@
 
 #include "SteadyStateSolver.hh"
 
-SteadyStateSolver::SteadyStateSolver(const std::string &basename, size_t n_endo)
-  : static_dll(basename), residual(n_endo), g1(n_endo)
+SteadyStateSolver::SteadyStateSolver(const std::string &basename, size_t n_endo_arg)
+  : static_dll(basename), n_endo(n_endo_arg), residual(n_endo), g1(n_endo)
 {
+  g1.setAll(0.0); // The static file does not initialize zero elements
 }
 
 int

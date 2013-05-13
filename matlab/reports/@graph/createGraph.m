@@ -87,23 +87,34 @@ if ~isempty(o.shade)
     % From ShadePlotForEmpahsis (Matlab Exchange)
     % use patch bc area doesn't work with matlab2tikz
     sh = patch([repmat(x1, 1, 2) repmat(x2, 1, 2)], ...
-               [yrange fliplr(yrange)], [0 1 0], ...
-               'FaceAlpha', .2);
-    children =get(gca(), 'children');
+               [yrange fliplr(yrange)], o.shade_color, ...
+               'facealpha', o.shade_opacity);
+    children = get(gca, 'children');
     children = [children(2:end); sh];
-    set(gca(), 'children', children);
+    set(gca, 'children', children);
 end
 
-set(gca,'XTick', x);
-set(gca,'XTickLabel', xlabels);
+xticks = get(gca, 'XTick');
+xTickLabels = cell(1, length(xticks));
+for i=1:length(xticks)
+    if xticks(i) >= x(1) && ...
+            xticks(i) <= x(end)
+        xTickLabels{i} = xlabels{xticks(i)};
+    else
+        xTickLabels{i} = '';
+    end
+end
+set(gca, 'XTickLabel', xTickLabels);
 
 if o.legend
-    lh = legend(line_handles, o.seriesElements.getTexNames());
-    set(lh, 'orientation', o.legend_orientation);
-    set(lh, 'Location', o.legend_location);
+    lh = legend(line_handles, o.seriesElements.getTexNames(), ...
+                'orientation', o.legend_orientation, ...
+                'location', o.legend_location);
     set(lh, 'FontSize', o.legend_font_size);
     set(lh, 'interpreter', 'latex');
-    legend('boxoff');
+    if o.legend_boxoff
+        legend('boxoff');
+    end
 end
 
 if ~isempty(o.xlabel)
@@ -113,18 +124,18 @@ end
 if ~isempty(o.ylabel)
     ylabel(['$\textbf{\footnotesize ' o.ylabel '}$'], 'Interpreter', 'LaTex');
 end
-
-if ~isempty(o.title)
-    title( o.title, 'Interpreter', 'LaTex');
-end
 drawnow;
 
 o.figname = [tempname '.tex'];
 disp('  converting to tex....');
-matlab2tikz('filename', o.figname, ...
-            'showInfo', false, ...
-            'showWarnings', false, ...
-            'checkForUpdates', false);
+if exist('OCTAVE_VERSION')
+    print(o.figname, '-dtikz');
+else
+    matlab2tikz('filename', o.figname, ...
+                'showInfo', false, ...
+                'showWarnings', false, ...
+                'checkForUpdates', false);
+end
 
 grid off;
 box off;

@@ -38,6 +38,7 @@ ModFile::ModFile(WarningConsolidation &warnings_arg)
     static_model(symbol_table, num_constants, external_functions_table),
     steady_state_model(symbol_table, num_constants, external_functions_table, static_model),
     linear(false), block(false), byte_code(false), use_dll(false), no_static(false), 
+    differentiate_forward_vars(false),
     nonstationary_variables(false), ramsey_policy_orig_eqn_nbr(0),
     warnings(warnings_arg)
 {
@@ -306,6 +307,9 @@ ModFile::transformPass()
       dynamic_model.substituteEndoLeadGreaterThanTwo(true);
       dynamic_model.substituteEndoLagGreaterThanTwo(true);
     }
+
+  if (differentiate_forward_vars)
+    dynamic_model.differentiateForwardVars();
 
   if (mod_file_struct.dsge_var_estimated || !mod_file_struct.dsge_var_calibrated.empty())
     try
@@ -619,13 +623,19 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all, bool no_log, b
     {
       (*it)->writeOutput(mOutputFile, basename);
 
-      // Special treatment for initval block: insert initial values for the auxiliary variables
+      /* Special treatment for initval block: insert initial values for the
+         auxiliary variables and initialize exo det */
       InitValStatement *ivs = dynamic_cast<InitValStatement *>(*it);
       if (ivs != NULL)
         {
           static_model.writeAuxVarInitval(mOutputFile, oMatlabOutsideModel);
           ivs->writeOutputPostInit(mOutputFile);
         }
+
+      // Special treatment for endval block: insert initial values for the auxiliary variables
+      EndValStatement *evs = dynamic_cast<EndValStatement *>(*it);
+      if (evs != NULL)
+        static_model.writeAuxVarInitval(mOutputFile, oMatlabOutsideModel);
 
       // Special treatment for load params and steady state statement: insert initial values for the auxiliary variables
       LoadParamsAndSteadyStateStatement *lpass = dynamic_cast<LoadParamsAndSteadyStateStatement *>(*it);

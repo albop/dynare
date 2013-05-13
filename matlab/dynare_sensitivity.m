@@ -31,6 +31,7 @@ lgy_ = M_.endo_names;
 x0=[];
 
 options_gsa = set_default_option(options_gsa,'datafile',[]);
+options_gsa = set_default_option(options_gsa,'rmse',0);
 if isfield(options_gsa,'nograph'),
     options_.nograph=options_gsa.nograph;
 end
@@ -46,7 +47,14 @@ end
 
 options_.order = 1;
 
-if ~isempty(options_gsa.datafile) || isempty(bayestopt_),
+if ~isempty(options_gsa.datafile) || isempty(bayestopt_) || options_gsa.rmse,
+    if isempty(options_gsa.datafile) && options_gsa.rmse,
+        disp('The data file and all relevant estimation options ')
+        disp('[first_obs, nobs, presample, prefilter, loglinear, lik_init, kalman_algo, ...]')
+        disp('must be specified for RMSE analysis!');
+        error('Sensitivity anaysis error!');
+    end
+    
     options_.datafile = options_gsa.datafile;
     if isfield(options_gsa,'first_obs'),
         options_.first_obs=options_gsa.first_obs;
@@ -142,7 +150,6 @@ options_gsa = set_default_option(options_gsa,'namendo',[]);
 options_gsa = set_default_option(options_gsa,'namlagendo',[]);
 options_gsa = set_default_option(options_gsa,'namexo',[]);
 % RMSE mapping
-options_gsa = set_default_option(options_gsa,'rmse',0);
 options_gsa = set_default_option(options_gsa,'lik_only',0);
 options_gsa = set_default_option(options_gsa,'var_rmse',options_.varobs);
 options_gsa = set_default_option(options_gsa,'pfilt_rmse',0.1);
@@ -260,13 +267,13 @@ if options_gsa.redform && ~isempty(options_gsa.namendo),% ...
         x0 = stab_map_(OutputDirectoryName,options_gsa);
     end
     if strmatch(':',options_gsa.namendo,'exact'),
-        options_gsa.namendo=M_.endo_names;
+        options_gsa.namendo=M_.endo_names(1:M_.orig_endo_nbr,:);
     end
     if strmatch(':',options_gsa.namexo,'exact'),
         options_gsa.namexo=M_.exo_names;
     end
     if strmatch(':',options_gsa.namlagendo,'exact'),
-        options_gsa.namlagendo=M_.endo_names;
+        options_gsa.namlagendo=M_.endo_names(1:M_.orig_endo_nbr,:);
     end
 %     options_.opt_gsa = options_gsa;
     if options_gsa.morris==1,
@@ -354,7 +361,7 @@ if options_gsa.rmse,
     end
     clear a;
 %     filt_mc_(OutputDirectoryName,data_info);
-    filt_mc_(OutputDirectoryName,options_gsa);
+    filt_mc_(OutputDirectoryName,options_gsa,dataset_);
 end
 options_.opt_gsa = options_gsa;
 

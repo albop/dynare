@@ -45,13 +45,17 @@ o.footnote = '';
 o.figname = '';
 o.data = '';
 o.seriestouse = '';
-o.shade = '';
 o.xrange = '';
 o.yrange = '';
+
+o.shade = '';
+o.shade_color = [0 1 0];
+o.shade_opacity = .2;
 
 o.grid = true;
 
 o.legend = false;
+o.legend_boxoff = false;
 o.legend_location = 'SouthEast';
 o.legend_orientation = 'horizontal';
 o.legend_font_size = 8;
@@ -91,8 +95,12 @@ assert(ischar(o.ylabel), '@graph.graph: ylabel file must be a string');
 assert(ischar(o.figname), '@graph.graph: figname must be a string');
 assert(islogical(o.grid), '@graph.graph: grid must be either true or false');
 assert(islogical(o.legend), '@graph.graph: legend must be either true or false');
+assert(islogical(o.legend_boxoff), '@graph.graph: legend_boxoff must be either true or false');
 assert(isint(o.legend_font_size), '@graph.graph: legend_font_size must be an integer');
 assert(islogical(o.zeroline), '@graph.graph: zeroline must be either true or false');
+assert(isfloat(o.shade_opacity) && length(o.shade_opacity)==1 && ...
+       o.shade_opacity >= 0 && o.shade_opacity <= 1, ...
+       '@graph.graph: o.shade_opacity must be a real in [0 1]');
 valid_legend_locations = ...
     {'North', 'South', 'East', 'West', ...
      'NorthEast', 'SouthEast', 'NorthWest', 'SouthWest', ...

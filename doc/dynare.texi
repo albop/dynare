@@ -1555,6 +1555,22 @@ belong to the set of feedback variables.
 @item no_static
 Don't create the static model file. This can be useful for models which
 don't have a steady state.
+
+@item differentiate_forward_vars
+Tells Dynare to create a new auxiliary variable for each endogenous
+variable that appears with a lead, such that the new variable is the
+time differentiate of the original one. More precisely, if the model
+contains @code{x(+1)}, then a variable @code{AUX_DIFF_VAR} will be
+created such that @code{AUX_DIFF_VAR=x-x(-1)}, and @code{x(+1)} will
+be replaced with @code{x+AUX_DIFF_VAR(+1)}.
+
+This option can useful for some deterministic simulations where
+convergence is hard to obtain. Bad values for terminal conditions in
+the case of very persistent dynamics or permanent shocks can hinder
+correct solutions or any convergence. The new differentiated variables
+have obvious zero terminal conditions (if the terminal condition is a
+steady state) and this in many cases helps convergence of simulations.
+
 @end table
 
 @customhead{Example 1: elementary RBC model}
@@ -1724,6 +1740,11 @@ multipliers when first order conditions of the Ramsey problem are computed.
 The new variables take the form @code{MULT_@var{i}}, where @var{i} represents
 the constraint with which the multiplier is associated (counted from the
 order of declaration in the model block).
+
+The last type of auxiliary variables is introduced by the
+@code{differentiate_forward_vars} option of the @code{model} block.
+The new variables take the form @code{AUX_DIFF_FWRD_@var{i}}, and are
+equal to @code{x-x(-1)} for some endogenous variable @code{x}.
 
 Once created, all auxiliary variables are included in the set of
 endogenous variables. The output of decision rules (see below) is such
@@ -3234,11 +3255,11 @@ period(s). The periods must be strictly positive. Conditional variances are give
 decomposition provides the decomposition of the effects of shocks upon
 impact. The results are stored in
 @code{oo_.conditional_variance_decomposition}
-(@pxref{oo_.conditional_variance_decomposition}). The variance decomposition is only conducted, if theoretical moments are requested, i.e. using the @code{periods=0}-option. In case of @code{order=2}, Dynare provides a second-order accurate approximation to the true second moments based on the linear terms of the second-order solution (see @cite{Kim, Kim, Schaumburg and Sims (2008)}).  
+(@pxref{oo_.conditional_variance_decomposition}). The variance decomposition is only conducted, if theoretical moments are requested, i.e. using the @code{periods=0}-option. In case of @code{order=2}, Dynare provides a second-order accurate approximation to the true second moments based on the linear terms of the second-order solution (see @cite{Kim, Kim, Schaumburg and Sims (2008)}). 
 
 @item pruning
-Discard higher order terms when iteratively computing simulations of
-the solution, as in @cite{Kim, Kim, Schaumburg and Sims (2008)}.
+Discard higher order terms when iteratively computing simulations of 
+the solution. At second order, Dynare uses the algorithm of @cite{Kim, Kim, Schaumburg and Sims (2008)}, while at third order its generalization by @cite{Andreasen, Fernández-Villaverde and Rubio-Ramírez (2013)} is used.
 
 @item partial_information
 @anchor{partial_information}
@@ -3533,7 +3554,7 @@ declaration order. Conversely, k-th declared variable is numbered
 Finally, the state variables of the model are the purely backward variables
 and the mixed variables. They are orderer in DR-order when they appear in
 decision rules elements. There are @code{M_.nspred = M_.npred + M_.nboth} such
-variables. Similarly, one has @code{M_.nfwrd = M_.nfwrd + M_.nboth},
+variables. Similarly, one has @code{M_.nsfwrd = M_.nfwrd + M_.nboth},
 and @code{M_.ndynamic = M_.nfwrd+M_.nboth+M_.npred}.
 
 @node First order approximation
@@ -7724,6 +7745,9 @@ internals --test particle/local_state_iteration
 @item
 Aguiar, Mark and Gopinath, Gita (2004): ``Emerging Market Business
 Cycles: The Cycle is the Trend,'' @i{NBER Working Paper}, 10734
+
+@item
+Andreasen, Martin M., Fernández-Villaverde, Jesús and Juan Rubio-Ramírez (2013): ``The Pruned State-Space System for Non-Linear DSGE Models: Theory and Empirical Applications,'' @i{NBER Working Paper}, 18983
 
 @item
 Backus, David K., Patrick J. Kehoe, and Finn E. Kydland (1992):

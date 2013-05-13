@@ -233,7 +233,7 @@ mexFunction(int nlhs, mxArray *plhs[],
   const mxArray *bayestopt_ = prhs[5];
   const mxArray *oo_ = prhs[6];
 
-  mxArray *dataset_data = mxGetField(dataset,0,"data");
+  const mxArray *dataset_data = mxGetField(dataset,0,"data");
   MatrixConstView data(mxGetPr(dataset_data), mxGetM(dataset_data), mxGetN(dataset_data), mxGetM(dataset_data));
 
   // Creaete LHS arguments
@@ -279,5 +279,9 @@ mexFunction(int nlhs, mxArray *plhs[],
   catch (LogposteriorMexErrMsgTxtException e)
     {
       DYN_MEX_FUNC_ERR_MSG_TXT(e.getErrMsg());
+    }
+  catch (SteadyStateSolver::SteadyStateException e)
+    {
+      DYN_MEX_FUNC_ERR_MSG_TXT(e.message.c_str());
     }
 }
