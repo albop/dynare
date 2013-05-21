@@ -116,7 +116,7 @@ else
 end
 
 % Set the number of observed variables.
-n_varobs = size(options_.varobs,1);
+n_varobs = length(options_.varobs);
 
 % Set priors over the estimated parameters.
 if ~isempty(estim_params_)
@@ -224,8 +224,8 @@ end
 var_obs_index = [];
 k1 = [];
 for i=1:n_varobs
-    var_obs_index = [var_obs_index; strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
-    k1 = [k1; strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
+    var_obs_index = [var_obs_index; strmatch(options_.varobs{i},M_.endo_names(dr.order_var,:),'exact')];
+    k1 = [k1; strmatch(options_.varobs{i},M_.endo_names, 'exact')];
 end
 
 % Define union of observed and state variables

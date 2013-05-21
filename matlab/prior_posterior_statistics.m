@@ -58,7 +58,7 @@ naK = length(options_.filter_step_ahead);
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
 endo_nbr=M_.endo_nbr;
 exo_nbr=M_.exo_nbr;
-nvobs     = size(options_.varobs,1);
+nvobs     = length(options_.varobs);
 iendo = 1:endo_nbr;
 horizon = options_.forecast;
 % moments_varendo = options_.moments_varendo;
@@ -114,9 +114,9 @@ end
 MAX_nruns = min(B,ceil(MaxNumberOfBytes/(npar+2)/8));
 MAX_nsmoo = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8));
 MAX_ninno = min(B,ceil(MaxNumberOfBytes/(exo_nbr*gend)/8));
-MAX_nerro = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8));
+MAX_nerro = min(B,ceil(MaxNumberOfBytes/(length(options_.varobs)*gend)/8));
 if naK
-    MAX_naK   = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)* ...
+    MAX_naK   = min(B,ceil(MaxNumberOfBytes/(length(options_.varobs)* ...
                                              length(options_.filter_step_ahead)*gend)/8));
 end
 if horizon

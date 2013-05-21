@@ -59,7 +59,7 @@ R             = [];
 P             = [];
 PK            = [];
 decomp        = [];
-nobs            = size(options_.varobs,1);
+nobs            = length(options_.varobs);
 smpl          = size(Y,2);
 
 M_ = set_all_parameters(xparam1,estim_params_,M_);

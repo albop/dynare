@@ -41,7 +41,7 @@ if options_.dsge_var && options_.bayesian_irf
                 msg = 1;
             end
         end
-        if size(varlist,1)~=size(options_.varobs)
+        if size(varlist,1)~=length(options_.varobs)
             msg = 1;
         end
         if msg
@@ -50,7 +50,7 @@ if options_.dsge_var && options_.bayesian_irf
             skipline()
         end
     end
-    varlist = options_.varobs;
+    varlist = char(options_.varobs);
     return
 end
 

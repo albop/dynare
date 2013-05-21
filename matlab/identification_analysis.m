@@ -140,7 +140,7 @@ if info(1)==0,
             end
             analytic_derivation = options_.analytic_derivation;
             options_.analytic_derivation = -2;
-            info = stoch_simul(options_.varobs);
+            info = stoch_simul(char(options_.varobs));
             data_info.data=oo_.endo_simul(options_.varobs_id,100+1:end);
             %                         datax=data;
             derivatives_info.no_DLIK=1;

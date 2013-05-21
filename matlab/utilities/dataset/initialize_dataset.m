@@ -43,7 +43,7 @@ end
 
 % Fill the dataset structure
 dataset_.info.ntobs = nobs;
-dataset_.info.nvobs = rows(varobs);
+dataset_.info.nvobs = length(varobs);
 dataset_.info.varobs = varobs;
 
 % Test the number of variables in the database.

@@ -38,7 +38,7 @@ dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
 DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
 
 bvar.NumberOfLags = options_.varlag;
-bvar.NumberOfVariables = size(options_.varobs,1);
+bvar.NumberOfVariables = length(options_.varobs);
 bvar.Constant = 'no';
 bvar.NumberOfEstimatedParameters = bvar.NumberOfLags*bvar.NumberOfVariables;
 if ~options_.noconstant

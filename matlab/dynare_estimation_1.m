@@ -120,7 +120,7 @@ missing_value = dataset_.missing.state;
 % Set number of observations
 gend = options_.nobs;
 % Set the number of observed variables.
-n_varobs = size(options_.varobs,1);
+n_varobs = length(options_.varobs);
 % Get the number of parameters to be estimated.
 nvx = estim_params_.nvx;  % Variance of the structural innovations (number of parameters).
 nvn = estim_params_.nvn;  % Variance of the measurement innovations (number of parameters).
@@ -560,9 +560,9 @@ if ~options_.cova_compute
 end
 
 if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
-    %% display results table and store parameter estimates and standard errors in results
+    % display results table and store parameter estimates and standard errors in results
     oo_=display_estimation_results_table(xparam1,stdh,M_,options_,estim_params_,bayestopt_,oo_,pnames,'Posterior','posterior');
-    %% Laplace approximation to the marginal log density:
+    % Laplace approximation to the marginal log density:
     if options_.cova_compute
         estim_params_nbr = size(xparam1,1);
         scale_factor = -sum(log10(diag(invhess)));
@@ -783,8 +783,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 number_of_plots_to_draw = number_of_plots_to_draw + 1;
                 index = cat(1,index,i);
             end
-            eval(['oo_.SmoothedMeasurementErrors.' deblank(options_.varobs(i,:)) ...
-                  ' = measurement_error(i,:)'';']);
+            eval(['oo_.SmoothedMeasurementErrors.' options_.varobs{i} ' = measurement_error(i,:)'';']);
         end
         if ~options_.nograph
             [nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
@@ -813,7 +812,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     hold on
                     plot(1:gend,measurement_error(index(k),:),marker_string{2,1},'linewidth',1)
                     hold off
-                    name = deblank(options_.varobs(index(k),:));
+                    name = deblank(options_.varobs{index(k)});
                     if gend>1
                         xlim([1 gend])
                     end
@@ -827,7 +826,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                         set(gca,'XTickLabel',options_.XTickLabel)
                     end
                     if options_.TeX
-                        idx = strmatch(options_.varobs(index(k),:),M_.endo_names,'exact');
+                        idx = strmatch(options_.varobs{index(k)},M_.endo_names,'exact');
                         texname = M_.endo_names_tex(idx,:);
                         if isempty(TeXNAMES)
                             TeXNAMES = ['$ ' deblank(texname) ' $'];
@@ -888,7 +887,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             hold on
             plot(1:gend,rawdata(:,k),marker_string{2,1},'linewidth',1)
             hold off
-            name = deblank(options_.varobs(k,:));
+            name = options_.varobs{k};
             if isempty(NAMES)
                 NAMES = name;
             else
@@ -902,7 +901,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 xlim([1 gend])
             end
             if options_.TeX
-                idx = strmatch(options_.varobs(k,:),M_.endo_names,'exact');
+                idx = strmatch(options_.varobs{k},M_.endo_names,'exact');
                 texname = M_.endo_names_tex(idx,:);
                 if isempty(TeXNAMES)
                     TeXNAMES = ['$ ' deblank(texname) ' $'];
