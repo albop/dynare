@@ -120,7 +120,7 @@ for i = 1:ny
     dynare_graph([ sims_no_shock_median(:, i) ...
                    sims_no_shock_up_conf(:, i) sims_no_shock_down_conf(:, i) ...
                    sims_with_shocks_up_conf(:, i) sims_with_shocks_down_conf(:, i) ], ...
-                 options_.varobs(i, :));
+                 options_.varobs{i});
 end
 
 dynare_graph_close;
@@ -145,8 +145,8 @@ if ~isempty(forecast_data.realized_val)
     
     fprintf('RMSE of BVAR(%d):\n', nlags);
     
-    for i = 1:size(options_.varobs, 1)
-        fprintf('%s: %10.4f\n', options_.varobs(i, :), rmse(i));
+    for i = 1:length(options_.varobs)
+        fprintf('%s: %10.4f\n', options_.varobs{i}, rmse(i));
     end 
 end
 
@@ -161,8 +161,8 @@ if ~isdir(DirectoryName)
 end
 save([ DirectoryName '/simulations.mat'], 'sims_no_shock', 'sims_with_shocks');
 
-for i = 1:size(options_.varobs, 1)
-    name = options_.varobs(i, :);
+for i = 1:length(options_.varobs)
+    name = options_.varobs{i};
 
     sims = squeeze(sims_with_shocks(:,i,:));
     eval(['oo_.bvar.forecast.with_shocks.Mean.' name ' = mean(sims, 2);']);

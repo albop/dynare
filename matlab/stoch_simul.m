@@ -102,7 +102,7 @@ if ~options_.noprint
         disp(' ')
 
         if isfield(options_,'varobs')&& ~isempty(options_.varobs)
-            PCL_varobs=options_.varobs;
+            PCL_varobs=char(options_.varobs);
             disp('OBSERVED VARIABLES')
         else
             PCL_varobs=M_.endo_names;

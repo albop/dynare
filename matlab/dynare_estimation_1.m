@@ -103,7 +103,7 @@ missing_value = dataset_.missing.state;
 % Set number of observations
 gend = options_.nobs;
 % Set the number of observed variables.
-n_varobs = size(options_.varobs,1);
+n_varobs = length(options_.varobs);
 % Get the number of parameters to be estimated.
 nvx = estim_params_.nvx;  % Variance of the structural innovations (number of parameters).
 nvn = estim_params_.nvn;  % Variance of the measurement innovations (number of parameters).
@@ -572,7 +572,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
         disp(tit1)
         ip = nvx+1;
         for i=1:nvn
-            name = deblank(options_.varobs(estim_params_.nvn_observable_correspondence(i,1),:));
+            name = options_.varobs{estim_params_.nvn_observable_correspondence(i,1)};
             disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
                          header_width,name,bayestopt_.p1(ip), ...
                          xparam1(ip),stdh(ip),tstath(ip), ...
@@ -671,7 +671,7 @@ elseif ~any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
         disp(tit1)
         ip = nvx+1;
         for i=1:nvn
-            name = deblank(options_.varobs(estim_params_.nvn_observable_correspondence(i,1),:));
+            name = options_.varobs{estim_params_.nvn_observable_correspondence(i,1)};
             disp(sprintf('%-*s %8.4f %7.4f %7.4f',header_width,name,xparam1(ip),stdh(ip),tstath(ip)))
             eval(['oo_.mle_mode.measurement_errors_std.' name ' = xparam1(ip);']);
             eval(['oo_.mle_std.measurement_errors_std.' name ' = stdh(ip);']);
@@ -817,7 +817,7 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,'\\hline \\hline \\endlastfoot \n');
         ip = nvx+1;
         for i=1:nvn
-            idx = strmatch(options_.varobs(estim_params_.nvn_observable_correspondence(i,1),:),M_.endo_names);
+            idx = strmatch(options_.varobs{estim_params_.nvn_observable_correspondence(i,1)},M_.endo_names);
             fprintf(fidTeX,'$%s$ & %4s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n',...
                     deblank(M_.endo_names_tex(idx,:)), ...
                     deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
@@ -1106,8 +1106,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 number_of_plots_to_draw = number_of_plots_to_draw + 1;
                 index = cat(1,index,i);
             end
-            eval(['oo_.SmoothedMeasurementErrors.' deblank(options_.varobs(i,:)) ...
-                  ' = measurement_error(i,:)'';']);
+            eval(['oo_.SmoothedMeasurementErrors.' options_.varobs{i} ' = measurement_error(i,:)'';']);
         end
         if ~options_.nograph
             [nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
@@ -1129,7 +1128,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     hold on
                     plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
                     hold off
-                    name = deblank(options_.varobs(index(k),:));
+                    name = options_.varobs{index(k)};
                     xlim([1 gend])
                     if isempty(NAMES)
                         NAMES = name;
@@ -1141,7 +1140,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                         set(gca,'XTickLabel',options_.XTickLabel)
                     end
                     if options_.TeX
-                        idx = strmatch(options_.varobs(index(k),:),M_.endo_names,'exact');
+                        idx = strmatch(options_.varobs{index(k)},M_.endo_names,'exact');
                         texname = M_.endo_names_tex(idx,:);
                         if isempty(TeXNAMES)
                             TeXNAMES = ['$ ' deblank(texname) ' $'];
@@ -1195,7 +1194,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             hold on
             plot(1:gend,rawdata(:,k),'--k','linewidth',1)
             hold off
-            name = deblank(options_.varobs(k,:));
+            name = options_.varobs{k};
             if isempty(NAMES)
                 NAMES = name;
             else
@@ -1207,7 +1206,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             end
             xlim([1 gend])
             if options_.TeX
-                idx = strmatch(options_.varobs(k,:),M_.endo_names,'exact');
+                idx = strmatch(options_.varobs{k},M_.endo_names,'exact');
                 texname = M_.endo_names_tex(idx,:);
                 if isempty(TeXNAMES)
                     TeXNAMES = ['$ ' deblank(texname) ' $'];

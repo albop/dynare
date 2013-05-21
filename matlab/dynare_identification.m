@@ -132,7 +132,7 @@ options_.smoother=1;
 options_ident.analytic_derivation_mode = options_.analytic_derivation_mode;
 if isempty(dataset_),
     dataset_.info.ntobs = periods;
-    dataset_.info.nvobs = rows(options_.varobs);
+    dataset_.info.nvobs = length(options_.varobs);
     dataset_.info.varobs = options_.varobs;
     dataset_.rawdata = [];
     dataset_.missing.state = 0;
@@ -145,16 +145,7 @@ if isempty(dataset_),
     dataset_.missing.no_more_missing_observations = 1;
     dataset_.descriptive.mean = [];
     dataset_.data = [];
-
-%     data_info.gend = periods;
-%     data_info.data = [];
-%     data_info.data_index = [];
-%     data_info.number_of_observations = periods*size(options_.varobs,1);
-%     data_info.no_more_missing_observations = 0;
-%     data_info.missing_value = 0;
 end
-
-% results = prior_sampler(0,M_,bayestopt_,options_,oo_);
 
 if prior_exist
     if any(bayestopt_.pshape > 0)

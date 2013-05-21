@@ -93,7 +93,7 @@ if nnobs > 1 && horizon > 0
     end
 
     endo_names = M_.endo_names;
-    n_varobs = size(options_.varobs,1);
+    n_varobs = length(options_.varobs);
 
     if isempty(var_list)
         var_list = endo_names;
@@ -116,7 +116,7 @@ if nnobs > 1 && horizon > 0
     IdObs    = zeros(n_varobs,1);
     for j=1:n_varobs
         for i=1:nvar
-            iobs = strmatch(options_.varobs(j,:),var_list,'exact');
+            iobs = strmatch(options_.varobs{j},var_list,'exact');
         end
         if ~isempty(iobs)
             IdObs(j,1) = iobs;

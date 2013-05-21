@@ -400,9 +400,9 @@ if options_gsa.glue,
     Obs.data = data;
     Obs.time = [1:gend];
     Obs.num  = gend;
-    for j=1:size(options_.varobs,1)
-        Obs.name{j} = deblank(options_.varobs(j,:));
-        vj=deblank(options_.varobs(j,:));
+    for j=1:length(options_.varobs)
+        Obs.name{j} = options_.varobs{j};
+        vj = options_.varobs{j};
         
         jxj = strmatch(vj,lgy_(dr_.order_var,:),'exact');
         js = strmatch(vj,lgy_,'exact');
@@ -440,7 +440,7 @@ if options_gsa.glue,
         ismoo(j)=jxj;
         
     end
-    jsmoo = size(options_.varobs,1);
+    jsmoo = length(options_.varobs);
     for j=1:M_.endo_nbr,
         if ~ismember(j,ismoo),
             jsmoo=jsmoo+1;
@@ -465,10 +465,10 @@ if options_gsa.glue,
         Exo(j).name = deblank(tit(j,:));    
     end
     if ~options_gsa.ppost
-        Lik(size(options_.varobs,1)+1).name = 'logpo';
-        Lik(size(options_.varobs,1)+1).ini  = 'yes';
-        Lik(size(options_.varobs,1)+1).isam = 1;
-        Lik(size(options_.varobs,1)+1).data = -logpo2;
+        Lik(length(options_.varobs)+1).name = 'logpo';
+        Lik(length(options_.varobs)+1).ini  = 'yes';
+        Lik(length(options_.varobs)+1).isam = 1;
+        Lik(length(options_.varobs)+1).data = -logpo2;
     end
     Sam.name = bayestopt_.name;
     Sam.dim  = [size(x) 0];

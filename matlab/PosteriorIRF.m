@@ -42,7 +42,7 @@ end
 % Set varlist if necessary
 varlist = options_.varlist;
 if isempty(varlist)
-    varlist = options_.varobs;
+    varlist = char(options_.varobs);
 end
 options_.varlist = varlist;
 nvar = size(varlist,1);

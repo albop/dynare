@@ -75,7 +75,7 @@ YtX = [];
 XtY = [];
 XtX = [];
 
-data = read_variables(datafile,varobs,[],xls_sheet,xls_range);
+data = read_variables(datafile,char(varobs),[],xls_sheet,xls_range);
 
 if qlag > FirstObservation
     disp('VarSampleMoments :: not enough data to initialize! Try to increase FirstObservation.')
@@ -83,7 +83,7 @@ if qlag > FirstObservation
 end
 
 NumberOfObservations = LastObservation-FirstObservation+1;% This is T.
-NumberOfVariables = size(varobs,1);% This is m.
+NumberOfVariables = length(varobs);% This is m.
 if var_trend_order == -1% No constant no linear trend case.
     X = zeros(NumberOfObservations,NumberOfVariables*qlag);
 elseif var_trend_order == 0% Constant and no linear trend case.

@@ -41,7 +41,7 @@ if options_.dsge_var && options_.bayesian_irf
                 msg = 1;
             end
         end
-        if size(varlist,1)~=size(options_.varobs)
+        if size(varlist,1)~=length(options_.varobs)
             msg = 1;
         end
         if msg
@@ -50,7 +50,7 @@ if options_.dsge_var && options_.bayesian_irf
             disp(' ')
         end
     end
-    varlist = options_.varobs;
+    varlist = char(options_.varobs);
     return
 end
 
@@ -110,7 +110,7 @@ if isempty(varlist)
             if choice==1
                 varlist = M_.endo_names(1:M_.orig_endo_nbr, :);
             elseif choice==2
-                varlist = options_.varobs;
+                varlist = char(options_.varobs);
             elseif choice==3
                 varlist = NaN;
             else
