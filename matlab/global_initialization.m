@@ -58,6 +58,7 @@ options_.solve_tolx = eps^(2/3);
 options_.solve_maxit = 500;
 
 options_.mode_check_neighbourhood_size = 0.5;
+options_.mode_check_symmetric_plots = 1;
 
 % Default number of threads for parallelized mex files.
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
@@ -557,6 +558,7 @@ options_.risky_steadystate = 0;
 
 % endogenous prior
 options_.endogenous_prior = 0;
+options_.endogenous_prior_restrictions.irf={};
 
 % use GPU
 options_.gpu = 0;

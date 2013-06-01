@@ -81,14 +81,19 @@ if estimated_model
         switch options_cond_fcst.parameter_set
           case 'posterior_mode'
             xparam = get_posterior_parameters('mode');
+            graph_title='Posterior Mode';
           case 'posterior_mean'
             xparam = get_posterior_parameters('mean');
+            graph_title='Posterior Mean';
           case 'posterior_median'
             xparam = get_posterior_parameters('median');
+            graph_title='Posterior Median';
           case 'prior_mode'
             xparam = bayestopt_.p5(:);
+            graph_title='Prior Mode';
           case 'prior_mean'
             xparam = bayestopt_.p1;
+            graph_title='Prior Mean';
           otherwise
             disp('imcforecast:: If the input argument is a string, then it has to be equal to:')
             disp('                   ''calibration'', ')
@@ -142,6 +147,7 @@ if estimated_model
 else
     InitState(:,1) = zeros(M_.endo_nbr,1);
     trend = repmat(oo_.steady_state(oo_.dr.order_var),1,options_cond_fcst.periods+1);
+    graph_title='Calibration';
 end
 
 if isempty(options_.qz_criterium)
@@ -232,5 +238,7 @@ for i = 1:EndoSize
     eval(['forecasts.uncond.ci.' deblank(M_.endo_names(oo_.dr.order_var(i),:)) ...
           ' = [tmp(t1,:)'' ,tmp(t2,:)'' ]'';']);
 end
+forecasts.graph.title=graph_title;
+forecasts.graph.fname=M_.fname;
 
 save('conditional_forecasts.mat','forecasts');
