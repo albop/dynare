@@ -1,5 +1,5 @@
 var C_1,C_2,c_11,c_12,c_21,c_22,P_1,P_2,p_1,p_2,y_1,y_2,k_1,k_2,I_1,I_2,i_11,i_12,i_21,i_22,rho_1,rho_2,P_1I,P_2I,w_1,w_2,d_1,d_2,p_1b,p_2b,R_1b,R_2b,theta_1,theta_2,chi_1,chi_2,q,W,Delta,rx;
-var p_1S,p_2S,R_1S,R_2S, b_12,rx_1S,rx_2S,s_11,s_12,x_b12,x_b21,x_s11, x_s12,x_s21,x_s22;
+var p_1S,p_2S,R_1S,R_2S, b_12,rx_1S,rx_2S,s_11,s_12;
 
 varexo epsilon_1_theta,epsilon_2_theta,epsilon_1_chi,epsilon_2_chi,xi;
 
@@ -198,39 +198,27 @@ rx_2S = R_2S - R_1b;
 
 Delta = rho_2 - rho_1;
 
-[portfolio='b_12']
+//[portfolio='b_12']
 //Delta(+1)*rx(+1) = 0;
 b_12 = 0;
 
 [portfolio='s_11']
-//Delta(+1)*rx_1S(+1) = 0;
-s_11 = 0;
+Delta(+1)*rx_1S(+1) = 0;
+//s_11 = 0;
 
 [portfolio='s_12']
-//Delta(+1)*rx_2S(+1) = 0;
-s_12 = 0;
-
-x_s11 = 1 + s_11 / p_1S ;
-x_s12 = s_12 / p_2S;
-x_s21 = 1 - x_s11;
-x_s22 = 1 - x_s12;
-x_b12 = b_12 / p_2b / y_1;
-x_b21 = -x_b12;
+Delta(+1)*rx_2S(+1) = 0;
+//s_12 = 0;
 
 
-end;
 
-shocks;
-var epsilon_1_theta = 0.01 ;
-var epsilon_2_theta = 0.01 ;
-var epsilon_1_chi = 0.01 ;
-var epsilon_2_chi = 0.01 ;
+
 end;
 
 initval;
-    x_s11 = 1;
-    x_s21 = 0;
-    x_s22 = 1;
+    //x_s11 = 1;
+    //x_s21 = 0;
+    //x_s22 = 1;
     
     rho_1=beta;
     rho_2=beta;
@@ -280,15 +268,24 @@ initval;
     
     p_1S= d_1 / (R_1S - 1);
     p_2S= d_2 / (R_1S - 1);
-    p_1b= p_1 /  (R_1b - 1);
+    p_1b= p_1 / (R_1b - 1);
     p_2b= p_2 / (R_2b - 1);
     q= 1;
     W= 0;
 end;
 
-//portfolios_setup('dynamic','true','method','iterative');
+shocks;
+var epsilon_1_theta = 0.001;
+var epsilon_2_theta = 0.001;
+var epsilon_1_chi = 0.001;
+var epsilon_2_chi = 0.001;
 
-stoch_simul(order=2);
-close all;
+end;
+
+portfolios_setup;
+
 stoch_simul(order=1);
+poi;
+stoch_simul(order=2);
 
+//close all;

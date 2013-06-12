@@ -76,8 +76,9 @@ function [M_,oo_,options_] = solve_for_portfolios(M_,oo_,options_)
         %drn.ghu(Delta,EI.xi) * (  drn.ghu( ind2 ,:) * M_.Sigma_e * drn.ghu(ind2,:)' );
         %dd = drn.ghu(ind2,EI.xi) * diag(drn.ghu(Delta,:) * M_.Sigma_e * drn.ghu(ind2,:)') ;
         dd =  R2 * M_.Sigma_e * D2' * R1';
-        lam_u = lam_u - dd;
+        lam_u = lam_u + dd;
         alpha1 = -lam_u\a';
+        disp(alpha1)
 
         ds = struct;
         ds.R1 = R1;
@@ -122,6 +123,16 @@ function [M_,oo_,options_] = solve_for_portfolios(M_,oo_,options_)
     oo_.portfolios.alphas = alpha1;
   
 %    if nargout <= 1
+%    if options_.order == 1
+%    	dr = dr_for_given_portfolios(alpha1,dalpha0);
+%            oo_.portfolios.dr = dr; 
+%            oo_.portfolios.dalphas = dalpha0; 
+%        
+%            
+%    
+%        return
+%    end
+    
 %        alphas = alpha1;
 %        return;
 %    end
@@ -159,9 +170,10 @@ function [M_,oo_,options_] = solve_for_portfolios(M_,oo_,options_)
     disp(r)   
     %end
 
-	dr = dr_for_given_portfolios(alphas,dalphas);
+	dr = dr_for_given_portfolios(alphas*0,dalphas*0);
     
     oo_.portfolios.dr = dr; 
+    oo_.portfolios.dalphas = dalphas; 
         
     dr = oo_.portfolios.dr;
     

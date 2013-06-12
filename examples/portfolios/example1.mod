@@ -2,16 +2,16 @@
 // Model basename : DS2009
 
 
-var Y_1,Y_2,W_1,C_1,C_2,r_1,r_2,R_1,R_2,P_1,P_2,M_1,M_2,D,alpha_1_2,rho_1,rho_2,rx,x_1_2;
+var Y_1,Y_2,W_1,C_1,C_2,r_1,r_2,R_1,R_2,P_1,P_2,M_1,M_2,D,alpha_1_2,rho_1,rho_2,rx;
 
 varexo epsY_1,epsY_2,epsM_1,epsM_2,xi;
 
-parameters z_Y,z_M,gam,beta,lam,alpha2_ss,alpha1_ss,Rbar;
+parameters z_Y,z_M,gam,beta;
 gam = 2.0;
 z_Y = 0.9;
 z_M = 0.9;
 beta = 0.96;
-Rbar = 1/beta;
+
 
 model;
 
@@ -65,7 +65,6 @@ log(M_2) = z_M*log(M_2(-1)) + epsM_2;
 [ name = 'Stochastic discount factor' ]
 rho_2 = C_2(-1)^gam*C_2^(-gam)*beta;
 
-
 // eq 11 : Return
 [ name = 'Return' , mblock = 'returns' ]
 r_2 = (P_2(-1)/P_2)*R_2(-1);
@@ -100,23 +99,14 @@ rx = -r_1 + r_2;
 [ name = 'Global stochastic discount factor' ]
 D = -rho_1 + rho_2;
 
-
 // eq 18
 [ portfolio = 'alpha_1_2' ]
 D(+1) * rx(+1) = 0;
 //alpha_1_2 = 0;
 
-// eq 19
-[ eq_type = 'aux_eq' ]
-x_1_2 = alpha_1_2 / P_2;
 
-end;
 
-shocks;
-var epsY_1 = 0.0100000000000000 ;
-var epsY_2 = 0.0100000000000000 ;
-var epsM_1 = 0.0100000000000000 ;
-var epsM_2 = 0.0100000000000000 ;
+
 end;
 
 initval;
@@ -134,13 +124,22 @@ rho_2 = beta;
 rho_1 = beta;
 r_2 = 1/beta;
 R_1 = 1/beta;
+//x_1_2 = alpha_1_2 / P_2;
 end;
 
-portfolios_options;
+shocks;
+var epsY_1 = 0.00100000000000000 ;
+var epsY_2 = 0.00100000000000000 ;
+var epsM_1 = 0.00100000000000000 ;
+var epsM_2 = 0.00100000000000000 ;
+end;
 
-stoch_simul(order=2);
 
-close all;
+portfolios_setup;
 
-stoch_simul(order=1);
+stoch_simul(order=2, irf=40);
+
+//close all;
+
+//stoch_simul(order=1);
 

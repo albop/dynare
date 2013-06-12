@@ -115,4 +115,5 @@ elseif isfield(options,'portfolios')
 else
     [dr,info] = stochastic_solvers(dr,check_flag,M,options,oo);
 end
+
 oo.dr = dr;
