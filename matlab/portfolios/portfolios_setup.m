@@ -1,4 +1,4 @@
-function [] = portfolios_options(varargin)
+function [] = portfolios_setup(varargin)
 
     global M_ options_ oo_
     

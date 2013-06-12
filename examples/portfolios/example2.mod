@@ -158,21 +158,14 @@ d_2(1)/pS_2 = 1/Pf;
 
 // eq 29 : Portolio equation
 [ portfolio = 'alpha_1_1' , name = 'Portolio equation' ]
-//alpha_1_1 = 0;
 D(1)*rx_1(1) = 0;
+//alpha_1_1 = 0;
 
 
 // eq 30 : Portfolio equation
 [ portfolio = 'alpha_1_2' , name = 'Portfolio equation' ]
-//alpha_1_2 = 0;
 D(1)*rx_2(1) = 0;
-end;
-
-shocks;
-var eps_1 = 0.00100000000000000 ;
-var zeta_1 = 0.00100000000000000 ;
-var eps_2 = 0.00100000000000000 ;
-var zeta_2 = 0.00100000000000000 ;
+//alpha_1_2 = 0;
 end;
 
 initval;
@@ -205,8 +198,14 @@ d_1 = -I_1 + theta*Y_1;
 pS_1 = beta*d_1;
 end;
 
-portfolios_setup;
-portfolios_options('dynamic','true');
-portfolios;
+shocks;
+var eps_1 = 0.0100000000000000 ;
+var zeta_1 = 0.0100000000000000 ;
+var eps_2 = 0.0100000000000000 ;
+var zeta_2 = 0.0100000000000000 ;
+end;
 
-//stoch_simul(order=2);
+
+portfolios_setup('method', 'devereux-sutherland');
+
+stoch_simul(order=2);
