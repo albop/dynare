@@ -49,16 +49,35 @@ else
     options_.varlist = var_list_;
 end
 
-% Get the indices of the observed variables in M_.endo_names.
-options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
-for i = 1:size(M_.endo_names,1)
+% Set the number of observed variables.
+options_.number_of_observed_variables = length(options_.varobs);
+
+% Check that each declared observed variable is also an endogenous variable.
+for i = 1:options_.number_of_observed_variables
+    id = strmatch(options_.varobs{i}, M_.endo_names, 'exact');
+    if isempty(id)
+        error(['Unknown variable (' options_.varobs{i} ')!'])
+    end
+end
+
+% Check that a variable is not declared as observed more than once.
+if ~isequal(varobs,unique(varobs))
+    for i = 1:options_.number_of_observed_variables
+        if length(strmatch(varobs{i},varobs))>1
+            error(['A variable cannot be declared as observed more than once (' options_.varobs{i} ')!'])
+        end
+    end
+end
+    
+for i = 1:M_.endo_nbr
     tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
-    if ~isempty(tmp)
+    if isempty(tmp)
+        error(['Multiple declarations of ' deblank(M_.endo_names(i,:)) ' as an observed variable is not allowed!'])
+    else
         if length(tmp)>1
             skipline()
             error(['Multiple declarations of ' deblank(M_.endo_names(i,:)) ' as an observed variable is not allowed!'])
         end
-        options_.lgyidx2varobs(i) = tmp;
     end
 end
 
