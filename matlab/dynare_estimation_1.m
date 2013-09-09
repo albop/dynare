@@ -812,7 +812,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     hold on
                     plot(1:gend,measurement_error(index(k),:),marker_string{2,1},'linewidth',1)
                     hold off
-                    name = deblank(options_.varobs{index(k)});
+                    name = options_.varobs{index(k)};
                     if gend>1
                         xlim([1 gend])
                     end

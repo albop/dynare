@@ -113,7 +113,7 @@ if isempty(varlist)
                 if choice==1
                     varlist = M_.endo_names(1:M_.orig_endo_nbr, :);
                 elseif choice==2
-                    varlist = options_.varobs;
+                    varlist = char(options_.varobs);
                 elseif choice==3
                     varlist = NaN;
                 else
@@ -123,13 +123,12 @@ if isempty(varlist)
                 end
             end
         end
+        if isnan(varlist)
+            edit([M_.fname '.mod'])
+        end
+        skipline()
     end
-    if isnan(varlist)
-        edit([M_.fname '.mod'])
-    end
-    skipline()
 end
-
 
 
 function format_text(remain, max_number_of_words_per_line)
