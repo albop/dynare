@@ -61,9 +61,9 @@ for i = 1:options_.number_of_observed_variables
 end
 
 % Check that a variable is not declared as observed more than once.
-if ~isequal(varobs,unique(varobs))
+if ~isequal(options_.varobs,unique(options_.varobs))
     for i = 1:options_.number_of_observed_variables
-        if length(strmatch(varobs{i},varobs))>1
+        if length(strmatch(options_.varobs{i},varobs))>1
             error(['A variable cannot be declared as observed more than once (' options_.varobs{i} ')!'])
         end
     end
