@@ -52,6 +52,11 @@ end
 % Set the number of observed variables.
 options_.number_of_observed_variables = length(options_.varobs);
 
+% Test if observed variables are declared.
+if ~options_.number_of_observed_variables
+    error('VAROBS is missing!')
+end
+
 % Check that each declared observed variable is also an endogenous variable.
 for i = 1:options_.number_of_observed_variables
     id = strmatch(options_.varobs{i}, M_.endo_names, 'exact');
@@ -220,11 +225,6 @@ oo_.dr = dr;
 nstatic = M_.nstatic;          % Number of static variables.
 npred = M_.nspred;             % Number of predetermined variables.
 nspred = M_.nspred;            % Number of predetermined variables in the state equation.
-
-% Test if observed variables are declared.
-if isempty(options_.varobs)
-    error('VAROBS is missing')
-end
 
 % Setting resticted state space (observed + predetermined variables)
 var_obs_index = [];
