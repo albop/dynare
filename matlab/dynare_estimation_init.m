@@ -74,25 +74,24 @@ if options_.order>2
     error(['I cannot estimate a model with a ' int2str(options_.order) ' order approximation of the model!'])
 end
 
-% Set options_.lik_init equal to 3 if diffuse filter is used or
-% kalman_algo refers to a diffuse filter algorithm.
-if (options_.diffuse_filter==1) || (options_.kalman_algo > 2)
-    if options_.lik_init == 2
-        error(['options diffuse_filter, lik_init and/or kalman_algo have ' ...
-               'contradictory settings'])
+% Set options_.lik_init equal to 3 if diffuse filter is used or kalman_algo refers to a diffuse filter algorithm.
+if isequal(options_.diffuse_filter,1) || (options_.kalman_algo>2)
+    if isequal(options_.lik_init,2)
+        error(['options diffuse_filter, lik_init and/or kalman_algo have contradictory settings'])
     else
         options_.lik_init = 3;
     end
 end
 
 % If options_.lik_init == 1
-%  set by default options_.qz_criterium to 1-1e-6
-%  and check options_.qz_criterium < 1-eps if options_.lik_init == 1
-% Else set by default options_.qz_criterium to 1+1e-6
-if options_.lik_init == 1
+%     set by default options_.qz_criterium to 1-1e-6
+%     and check options_.qz_criterium < 1-eps if options_.lik_init == 1
+% Else
+%     set by default options_.qz_criterium to 1+1e-6
+if isequal(options_.lik_init,1)
     if isempty(options_.qz_criterium)
         options_.qz_criterium = 1-1e-6;
-    elseif options_.qz_criterium > 1-eps
+    elseif options_.qz_criterium>1-eps
         error(['estimation: option qz_criterium is too large for estimating ' ...
                'a stationary model. If your model contains unit roots, use ' ...
                'option diffuse_filter'])
@@ -103,7 +102,7 @@ end
 
 % If the data are prefiltered then there must not be constants in the
 % measurement equation of the DSGE model or in the DSGE-VAR model.
-if options_.prefilter == 1
+if isequal(options_.prefilter,1)
     options_.noconstant = 1;
 end
 
