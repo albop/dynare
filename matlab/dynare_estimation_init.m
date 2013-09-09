@@ -124,9 +124,6 @@ else
     M_.dname = dname;
 end
 
-% Set the number of observed variables.
-n_varobs = length(options_.varobs);
-
 % Set priors over the estimated parameters.
 if ~isempty(estim_params_)
     [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
@@ -205,7 +202,7 @@ else% Yes!
     bayestopt_.trend_coeff = {};
     trend_coeffs = options_.trend_coeffs;
     nt = length(trend_coeffs);
-    for i=1:n_varobs
+    for i=1:options_.number_of_observed_variables
         if i > length(trend_coeffs)
             bayestopt_.trend_coeff{i} = '0';
         else
@@ -232,7 +229,7 @@ end
 % Setting resticted state space (observed + predetermined variables)
 var_obs_index = [];
 k1 = [];
-for i=1:n_varobs
+for i=1:options_.number_of_observed_variables
     var_obs_index = [var_obs_index; strmatch(options_.varobs{i},M_.endo_names(dr.order_var,:),'exact')];
     k1 = [k1; strmatch(options_.varobs{i},M_.endo_names, 'exact')];
 end
