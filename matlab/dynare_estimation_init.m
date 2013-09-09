@@ -69,18 +69,6 @@ if ~isequal(varobs,unique(varobs))
     end
 end
     
-for i = 1:M_.endo_nbr
-    tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
-    if isempty(tmp)
-        error(['Multiple declarations of ' deblank(M_.endo_names(i,:)) ' as an observed variable is not allowed!'])
-    else
-        if length(tmp)>1
-            skipline()
-            error(['Multiple declarations of ' deblank(M_.endo_names(i,:)) ' as an observed variable is not allowed!'])
-        end
-    end
-end
-
 if options_.order>2
     error(['I cannot estimate a model with a ' int2str(options_.order) ' order approximation of the model!'])
 end
