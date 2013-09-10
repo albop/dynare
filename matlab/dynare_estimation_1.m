@@ -78,7 +78,7 @@ else
     objective_function = str2func('DsgeVarLikelihood');
 end
 
-[dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
+[dataset_,xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
 % Set sigma_e_is_diagonal flag (needed if the shocks block is not declared in the mod file).
 M_.sigma_e_is_diagonal = 1;
@@ -135,15 +135,6 @@ lb = bayestopt_.lb;
 ub = bayestopt_.ub;
 
 dr = oo_.dr;
-
-%% load mode file is necessary
-if ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
-    load(options_.mode_file);
-
-    if length(xparam1) ~= nx
-        error([ 'ESTIMATION: the posterior mode file ' options_.mode_file ' has been generated using another specification. Please delete it and recompute the posterior mode.'])
-    end
-end
 
 %% load optimal_mh_scale parameter if previous run was with
 %% mode_compute=6
@@ -702,7 +693,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,' \n');
         end
         for plt = 1:nbplt,
-            hh = dyn_figure(options_,'Name','Smoothed shocks');
+            fh = dyn_figure(options_,'Name','Smoothed shocks');
             NAMES = [];
             if options_.TeX, TeXNAMES = []; end
             nstar0=min(nstar,M_.exo_nbr-(plt-1)*nstar);
@@ -743,7 +734,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 end
                 title(name,'Interpreter','none')
             end
-            dyn_saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt)],options_);
+            dyn_saveas(fh,[M_.fname '_SmoothedShocks' int2str(plt)],options_);
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar0
@@ -794,7 +785,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,' \n');
             end
             for plt = 1:nbplt
-                hh = dyn_figure(options_,'Name','Smoothed observation errors');
+                fh = dyn_figure(options_,'Name','Smoothed observation errors');
                 NAMES = [];
                 if options_.TeX, TeXNAMES = []; end
                 nstar0=min(nstar,number_of_plots_to_draw-(nbplt-1)*nstar);
@@ -836,7 +827,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     end
                     title(name,'Interpreter','none')
                 end
-                dyn_saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(plt)],options_);
+                dyn_saveas(fh,[M_.fname '_SmoothedObservationErrors' int2str(plt)],options_);
                 if options_.TeX
                     fprintf(fidTeX,'\\begin{figure}[H]\n');
                     for jj = 1:nstar0
@@ -869,7 +860,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         fprintf(fidTeX,' \n');
     end
     for plt = 1:nbplt,
-        hh = dyn_figure(options_,'Name','Historical and smoothed variables');
+        fh = dyn_figure(options_,'Name','Historical and smoothed variables');
         NAMES = [];
         if options_.TeX, TeXNAMES = []; end
         nstar0=min(nstar,n_varobs-(plt-1)*nstar);
@@ -911,7 +902,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             end
             title(name,'Interpreter','none')
         end
-        dyn_saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)],options_);
+        dyn_saveas(fh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)],options_);
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:nstar0,
