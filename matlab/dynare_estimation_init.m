@@ -457,7 +457,7 @@ if ~isfield(options_,'nobs')
     options_.nobs = [];
 end
 
-dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
+dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,logged_data_flag,options_.prefilter,xls);
 
 options_.nobs = dataset_.info.ntobs;
 
