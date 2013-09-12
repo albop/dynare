@@ -454,6 +454,32 @@ if ~isfield(options_,'nobs')
     options_.nobs = [];
 end
 
+if isempty(options_.datafile) && ~isempty(options_.dataset)
+    datafile = options_.dataset.file;
+elseif ~isempty(options_.datafile) && isempty(options_.dataset)
+    datafile = options_.datafile;
+elseif isempty(options_.datafile) && ~isempty(options_.dataset)
+    error('You cannot use simultaneously the data command and the datafile option (in the estimation command)!')
+else
+    error('You have to specify the datafile!')
+end
+
+% Load the data in a dynSeries object.
+dataset = dynSeries(datafile);
+
+% Select a subset of the variables.
+dataset = dataset{options_.varobs{:}};
+
+% Apply log function if needed.
+if logged_data_flag
+    dataset = dataset.log();
+end
+
+if options_.initial_period>options_.dataset.first_obs
+    skipline()
+    error(['First observation (' format(options_.dataset.first_obs) ') must be greater than the initial period (' format(options_.initial_period)  ') as set by the set_time command']);
+end
+    
 dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,logged_data_flag,options_.prefilter,xls);
 
 options_.nobs = dataset_.info.ntobs;
