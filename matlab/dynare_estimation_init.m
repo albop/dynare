@@ -292,7 +292,10 @@ end
 
 % storing prior parameters in results
 oo_.prior.mean = bayestopt_.p1;
+oo_.prior.mode = bayestopt_.p5;
 oo_.prior.variance = diag(bayestopt_.p2.^2);
+oo_.prior.hyperparameters.first = bayestopt_.p6;
+oo_.prior.hyperparameters.second = bayestopt_.p7;
 
 % Is there a linear trend in the measurement equation?
 if ~isfield(options_,'trend_coeffs') % No!
