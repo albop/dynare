@@ -72,6 +72,8 @@ varobs gp_obs gy_obs;
 
 options_.solve_tolf = 1e-12;
 
-dataset = dynSeries('fsdat_simul.m');
+set_time(1970Q3);
 
-estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=2000,mh_nblocks=2,mh_jscale=0.8);
+data(file='fsdat_simul.m',first_obs=1950Q1, nobs=30);
+
+estimation(order=1,nobs=192,loglinear,mh_replic=2000,mh_nblocks=2,mh_jscale=0.8);//,datafile='fsdat_simul.m'
