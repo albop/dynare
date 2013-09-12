@@ -352,10 +352,8 @@ k3 = [];
 k3p = [];
 if options_.selected_variables_only
     for i=1:size(var_list_,1)
-        k3 = [k3; strmatch(var_list_(i,:),M_.endo_names(dr.order_var,:), ...
-                           'exact')];
-        k3p = [k3; strmatch(var_list_(i,:),M_.endo_names, ...
-                           'exact')];
+        k3 = [k3; strmatch(var_list_(i,:),M_.endo_names(dr.order_var,:), 'exact')];
+        k3p = [k3; strmatch(var_list_(i,:),M_.endo_names, 'exact')];
     end
 else
     k3 = (1:M_.endo_nbr)';
@@ -376,14 +374,12 @@ if options_.block == 1
     bayestopt_.mf2  = var_obs_index;
     bayestopt_.mfys = k1;
     oo_.dr.restrict_columns = [size(i_posA,1)+(1:size(M_.state_var,2))];
-
     [k2, i_posA, i_posB] = union(k3p, M_.state_var', 'rows');
     bayestopt_.smoother_var_list = [k3p(i_posA); M_.state_var(sort(i_posB))'];
     [junk,junk,bayestopt_.smoother_saved_var_list] = intersect(k3p,bayestopt_.smoother_var_list(:));
     [junk,ic] = intersect(bayestopt_.smoother_var_list,M_.state_var);
     bayestopt_.smoother_restrict_columns = ic;
-    [junk,bayestopt_.smoother_mf] = ismember(k1, ...
-                                             bayestopt_.smoother_var_list);
+    [junk,bayestopt_.smoother_mf] = ismember(k1, bayestopt_.smoother_var_list);
 else
     k2 = union(var_obs_index,[M_.nstatic+1:M_.nstatic+M_.nspred]', 'rows');
     % Set restrict_state to postion of observed + state variables in expanded state vector.
@@ -397,13 +393,11 @@ else
     bayestopt_.mfys = k1;
     [junk,ic] = intersect(k2,nstatic+(1:npred)');
     oo_.dr.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
-
     bayestopt_.smoother_var_list = union(k2,k3);
     [junk,junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list(:));
     [junk,ic] = intersect(bayestopt_.smoother_var_list,nstatic+(1:npred)');
     bayestopt_.smoother_restrict_columns = ic;
-    [junk,bayestopt_.smoother_mf] = ismember(var_obs_index, ...
-                                             bayestopt_.smoother_var_list);
+    [junk,bayestopt_.smoother_mf] = ismember(var_obs_index, bayestopt_.smoother_var_list);
 end;
 
 if options_.analytic_derivation,
