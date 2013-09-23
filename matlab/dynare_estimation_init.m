@@ -444,15 +444,6 @@ if isempty(options_.datafile) && isempty(options_.dataset)
     end
 end
 
-% Take data in logs?
-logged_data_flag = 0;
-if options_.loglinear && ~options_.logdata
-    logged_data_flag = 1;
-end
-
-xls.sheet = options_.xls_sheet;
-xls.range = options_.xls_range;
-
 if ~isfield(options_,'nobs')
     options_.nobs = [];
 end
@@ -474,7 +465,7 @@ dataset = dynSeries(datafile);
 dataset = dataset{options_.varobs{:}};
 
 % Apply log function if needed.
-if logged_data_flag
+if options_.loglinear && ~options_.logdata
     dataset = dataset.log();
 end
 
