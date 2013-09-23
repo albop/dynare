@@ -72,8 +72,8 @@ varobs gp_obs gy_obs;
 
 options_.solve_tolf = 1e-12;
 
-set_time(1970Q3);
+set_time(1970Q3); // Interpreted as the first date available in the sample loaded below.
 
-data(file='fsdat_simul.m',first_obs=1950Q1, nobs=30);
+data(file='fsdat_simul.m',first_obs=1971Q1, nobs=40);
 
-estimation(order=1,nobs=192,loglinear,mh_replic=2000,mh_nblocks=2,mh_jscale=0.8);//,datafile='fsdat_simul.m'
+estimation(order=1,nobs=192,loglinear,mh_replic=2000,mh_nblocks=2,mh_jscale=0.8);
