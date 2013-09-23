@@ -75,15 +75,27 @@ switch S(1).type
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
             S = shiftS(S);
         end
-      case {'lag','lead'}
+      case {'lag','lead','hptrend','hpcycle'}
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
                 B = feval(S(1).subs,A);
                 S = shiftS(S);
             else
                 if length(S(2).subs{1})>1
-                    error(['dynSeries::subsref: ' S(1).subs{1} ' method admits no more than one argument (default value is one)!'])
+                    error(['dynSeries::subsref: ' S(1).subs{1} ' method admits no more than one argument!'])
                 end
+                B = feval(S(1).subs,A,S(2).subs{1})
+                S = shiftS(S);
+            end
+        else
+            B = feval(S(1).subs,A);
+        end
+      case 'baxter_king_filter'
+        if length(S)>1 && isequal(S(2).type,'()')
+            if isempty(S(2).subs)
+                B = feval(S(1).subs,A);
+                S = shiftS(S);
+            else
                 B = feval(S(1).subs,A,S(2).subs{1})
                 S = shiftS(S);
             end

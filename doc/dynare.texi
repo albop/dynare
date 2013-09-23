@@ -324,8 +324,8 @@ researchers who devote part of their time to software development.
 Currently the development team of Dynare is composed of Stéphane
 Adjemian (Université du Maine, Gains and Cepremap), Houtan Bastani
 (Cepremap), Michel Juillard (Banque de France), Frédéric Karamé
-(Université du Maine, Gains and Cepremap), Junior Maih (IMF),
-Ferhat Mihoubi (Université d'Évry, Epee and Cepremap), George
+(Université du Maine, Gains and Cepremap), Junior Maih (Norges Bank),
+Ferhat Mihoubi (Université Paris-Est Créteil, Epee and Cepremap), George
 Perendia, Johannes Pfeifer (Universität Tübingen), Marco Ratto (JRC)
 and Sébastien Villemot (Cepremap).
 Increasingly, the developer base is expanding, as tools developed by
@@ -783,6 +783,13 @@ information about the configuration file.
 @item -D@var{MACRO_VARIABLE}=@var{MACRO_EXPRESSION}
 Defines a macro-variable from the command line (the same effect as using
 the Macro directive @code{@@#define} in a model file, @pxref{Macro-processing language}).
+
+@item nostrict
+Allows Dynare to issue a warning and continue processing when
+@enumerate
+@item there are more endogenous variables than equations
+@item an undeclared symbol is assigned in @code{initval} or @code{endval}
+@end enumerate
 @end table
 
 @outputhead

@@ -187,7 +187,9 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
                 disp('==> Fix mode file (remove unused parameters).')
                 mode_file.parameter_names = mode_file.parameter_names(Id,:);
                 mode_file.xparam1 = mode_file.xparam1(Id);
-                mode_file.hh = mode_file.hh(Id,Id);
+                if isfield(mode_file,'hh')
+                    mode_file.hh = mode_file.hh(Id,Id);
+                end
             end
         end
     else
@@ -219,17 +221,22 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
                     disp('==> Fix mode file (reorder the parameters).')
                     mode_file.parameter_names = mode_file.parameter_names(Id,:);
                     mode_file.xparam1 = mode_file.xparam1(Id);
-                    mode_file.hh = mode_file.hh(Id,Id);
+                    if isfield(mode_file,'hh')
+                        mode_file.hh = mode_file.hh(Id,Id);
+                    end
                 end
             end
         end
     end
     xparam1 = mode_file.xparam1;
-    hh = mode_file.hh;
+    if isfield(mode_file,'hh')
+        hh = mode_file.hh;
+    end
     skipline()
 end
 
-if ~isempty(estim_params_) && any(bayestopt_.pshape > 0)
+if ~isempty(estim_params_) 
+    if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
         % Plot prior densities.
         if ~options_.nograph && options_.plot_priors
             plot_priors(bayestopt_,M_,estim_params_,options_)
@@ -238,17 +245,14 @@ if ~isempty(estim_params_) && any(bayestopt_.pshape > 0)
         bounds = prior_bounds(bayestopt_,options_);
         bounds(:,1)=max(bounds(:,1),lb);
         bounds(:,2)=min(bounds(:,2),ub);
-    else
+    else  % estimated parameters but no declared priors
         % No priors are declared so Dynare will estimate the model by
         % maximum likelihood with inequality constraints for the parameters.
         options_.mh_replic = 0;% No metropolis.
         bounds(:,1) = lb;
         bounds(:,2) = ub;
-end
-
-if ~isempty(estim_params_)
-    % Test if initial values of the estimated parameters are all between
-    % the prior lower and upper bounds.
+    end
+    % Test if initial values of the estimated parameters are all between the prior lower and upper bounds.
     outside_bound_pars=find(xparam1 < bounds(:,1) | xparam1 > bounds(:,2));
     if ~isempty(outside_bound_pars)
         for ii=1:length(outside_bound_pars)
@@ -265,7 +269,6 @@ if ~isempty(estim_params_)
     bayestopt_.lb = lb;
     bayestopt_.ub = ub;
 end
-
 
 if isempty(estim_params_)% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
     if ~options_.smoother
