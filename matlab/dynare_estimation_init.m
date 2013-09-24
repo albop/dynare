@@ -469,6 +469,40 @@ if options_.loglinear && ~options_.logdata
     dataset = dataset.log();
 end
 
+% Test if an initial period (different from its default value) is explicitely defined in the datafile.
+if isequal(dataset.init, dynDate(1))
+    dataset_default_initial_period = 1;
+else
+    dataset_default_initial_period = 0;
+end
+
+%  Test if an initial period (different from its default value) is explicitely defined in the mod file with the set_time command.
+if isequal(options_.initial_period, dynDate(1))
+    set_time_default_initial_period = 1;
+else
+    set_time_default_initial_period = 0;
+end
+
+if ~set_time_default_initial_period && dataset_default_initial_period
+    % Overwrite the initial period in dataset (it was set to default).
+    % Note that the update of freq and time members is auto-magically 
+    % done by dynSeries::subsasgn overload method.
+    dataset.init = options_.initial_period;
+end
+
+if set_time_default_initial_period && ~dataset_default_initial_period
+    % Overwrite the global initial period defined by set_time (it was set to default).
+    options_.initial_period = dataset.init;
+end
+
+if ~set_time_default_initial_period && ~dataset_default_initial_period
+    % Check if dataset.init and options_.initial_period are identical.
+    if  ~isequal(options_.initial_period, dataset.init)
+        error('dynare_estimation_init:: The date as defined by the set_time command is not consistent with the initial period in the database!')
+    end
+end
+
+
 if options_.initial_period>options_.dataset.first_obs
     skipline()
     error(['First observation (' format(options_.dataset.first_obs) ') must be greater than the initial period (' format(options_.initial_period)  ') as set by the set_time command']);
