@@ -1,6 +1,14 @@
-function b = ismonthly(date)
+function b = ismonthly(str)  % --*-- Unitary tests --*--
 
-% Copyright (C) 2012 Dynare Team
+% Tests if the input can be interpreted as a monthly date.
+%
+% INPUTS 
+%  o str     string.
+%
+% OUTPUTS 
+%  o b       integer scalar, equal to 1 if str can be interpreted as a monthly date or 0 otherwise.
+
+% Copyright (C) 2012-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,21 +25,26 @@ function b = ismonthly(date)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+b = ~isempty(regexp(str,'^-?[0-9]*[Mm]([1-9]|1[12])$'));
 
-[year, remain] = strtok(date,'M');
-if ~isint(str2num(year))
-    b = 0;
-    return 
-end
-[month, remain] = strtok(remain,'M');
-if ~isempty(remain)
-    b = 0;
-    return
-end
-month = str2num(month);
-if ~isint(month) || month<1 || month>12
-    b = 0;
-    return
-end
-b = 1;
+%@test:1
+%$
+%$ date_1 = '1950M2';
+%$ date_2 = '1950m2';
+%$ date_3 = '-1950m2';
+%$ date_4 = '1950m12';
+%$ date_5 = '1950 azd ';
+%$ date_6 = '1950Y';
+%$ date_7 = '1950Q3';
+%$ date_8 = '1950m24';
+%$
+%$ t(1) = dyn_assert(ismonthly(date_1),1);
+%$ t(2) = dyn_assert(ismonthly(date_2),1);
+%$ t(3) = dyn_assert(ismonthly(date_3),1);
+%$ t(4) = dyn_assert(ismonthly(date_4),1);
+%$ t(5) = dyn_assert(ismonthly(date_5),0);
+%$ t(6) = dyn_assert(ismonthly(date_6),0);
+%$ t(7) = dyn_assert(ismonthly(date_7),0);
+%$ t(8) = dyn_assert(ismonthly(date_8),0);
+%$ T = all(t);
+%@eof:1

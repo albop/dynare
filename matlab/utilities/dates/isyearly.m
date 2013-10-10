@@ -1,6 +1,14 @@
-function b = isyearly(date)
+function b = isyearly(str)  % --*-- Unitary tests --*--
 
-% Copyright (C) 2012 Dynare Team
+% Tests if the input can be interpreted as a yearly date.
+%
+% INPUTS 
+%  o str     string.
+%
+% OUTPUTS 
+%  o b       integer scalar, equal to 1 if str can be interpreted as a yearly date or 0 otherwise.
+
+% Copyright (C) 2012-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,25 +25,26 @@ function b = isyearly(date)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+b = ~isempty(regexp(str,'^-?[0-9]*[YyAa]$'));
 
-year = str2num(date);
-if ~isempty(year)
-    if isint(year)
-        b = 1;
-    else
-        b = 0;
-    end
-    return
-else
-    [year, remain] = strtok(date,'Y');
-    if ~isequal(remain,'Y')
-        b = 0;
-        return
-    end
-    if ~isint(str2num(year))
-        b = 0;
-        return
-    end
-    b = 2;
-end
+%@test:1
+%$
+%$ date_1 = '1950M2';
+%$ date_2 = '1950m2';
+%$ date_3 = '-1950m2';
+%$ date_4 = '1950m12';
+%$ date_5 = '1950 azd ';
+%$ date_6 = '1950Y';
+%$ date_7 = '-1950a';
+%$ date_8 = '1950m24';
+%$
+%$ t(1) = dyn_assert(isyearly(date_1),0);
+%$ t(2) = dyn_assert(isyearly(date_2),0);
+%$ t(3) = dyn_assert(isyearly(date_3),0);
+%$ t(4) = dyn_assert(isyearly(date_4),0);
+%$ t(5) = dyn_assert(isyearly(date_5),0);
+%$ t(6) = dyn_assert(isyearly(date_6),1);
+%$ t(7) = dyn_assert(isyearly(date_7),1);
+%$ t(8) = dyn_assert(isyearly(date_8),0);
+%$ T = all(t);
+%@eof:1

@@ -1,6 +1,14 @@
-function b = isweekly(date)
+function b = isweekly(str)  % --*-- Unitary tests --*--
 
-% Copyright (C) 2012 Dynare Team
+% Tests if the input can be interpreted as a weekly date.
+%
+% INPUTS 
+%  o str     string.
+%
+% OUTPUTS 
+%  o b       integer scalar, equal to 1 if str can be interpreted as a weekly date or 0 otherwise.
+
+% Copyright (C) 2012-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,21 +25,26 @@ function b = isweekly(date)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+b = ~isempty(regexp(str,'^-?[0-9]*[Ww]([1-9]|[1-4][0-9]|5[0-2])$'));
 
-[year, remain] = strtok(date,'W');
-if ~isint(str2num(year))
-    b = 0;
-    return 
-end
-[week, remain] = strtok(remain,'W');
-if ~isempty(remain)
-    b = 0;
-    return
-end
-week = str2num(week);
-if ~isint(week) || week<1 || week>52
-    b = 0;
-    return
-end
-b = 1;
+%@test:1
+%$
+%$ date_1 = '1950W2';
+%$ date_2 = '1950w2';
+%$ date_3 = '-1950w2';
+%$ date_4 = '1950w22';
+%$ date_5 = '1950 azd ';
+%$ date_6 = '1950Y';
+%$ date_7 = '1950Q3';
+%$ date_8 = '1950m54';
+%$
+%$ t(1) = dyn_assert(isweekly(date_1),1);
+%$ t(2) = dyn_assert(isweekly(date_2),1);
+%$ t(3) = dyn_assert(isweekly(date_3),1);
+%$ t(4) = dyn_assert(isweekly(date_4),1);
+%$ t(5) = dyn_assert(isweekly(date_5),0);
+%$ t(6) = dyn_assert(isweekly(date_6),0);
+%$ t(7) = dyn_assert(isweekly(date_7),0);
+%$ t(8) = dyn_assert(isweekly(date_8),0);
+%$ T = all(t);
+%@eof:1

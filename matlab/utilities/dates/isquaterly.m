@@ -1,6 +1,14 @@
-function b = isquaterly(date)
-    
-% Copyright (C) 2012 Dynare Team
+function b = isquaterly(str)  % --*-- Unitary tests --*--
+
+% Tests if the input can be interpreted as a quaterly date.
+%
+% INPUTS 
+%  o str     string.
+%
+% OUTPUTS 
+%  o b       integer scalar, equal to 1 if str can be interpreted as a quaterly date or 0 otherwise.
+
+% Copyright (C) 2012-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,21 +25,24 @@ function b = isquaterly(date)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+b = ~isempty(regexp(str,'^-?[0-9]*[Qq][1-4]$'));
 
-[year, remain] = strtok(date,'Q');
-if ~isint(str2num(year))
-    b = 0;
-    return 
-end
-[quarter, remain] = strtok(remain,'Q');
-if ~isempty(remain)
-    b = 0;
-    return
-end
-quarter = str2num(quarter);
-if ~isint(quarter) || quarter<1 || quarter>4
-    b = 0;
-    return
-end
-b = 1;
+%@test:1
+%$
+%$ date_1 = '1950Q2';
+%$ date_2 = '1950q2';
+%$ date_3 = '-1950q2';
+%$ date_4 = '1950q12';
+%$ date_5 = '1950 azd ';
+%$ date_6 = '1950Y';
+%$ date_7 = '1950m24';
+%$
+%$ t(1) = dyn_assert(isquaterly(date_1),1);
+%$ t(2) = dyn_assert(isquaterly(date_2),1);
+%$ t(3) = dyn_assert(isquaterly(date_3),1);
+%$ t(4) = dyn_assert(isquaterly(date_4),0);
+%$ t(5) = dyn_assert(isquaterly(date_5),0);
+%$ t(6) = dyn_assert(isquaterly(date_6),0);
+%$ t(7) = dyn_assert(isquaterly(date_7),0);
+%$ T = all(t);
+%@eof:1
