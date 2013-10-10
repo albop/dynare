@@ -62,12 +62,7 @@ function dd = dynDates(varargin) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
  % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-dd = struct;
-
-dd.ndat = 0;
-dd.freq = NaN;
-dd.time = NaN(1,2);
-
+dd = struct('ndat', 0, 'freq', NaN(0), 'time', NaN(0,2));
 dd = class(dd,'dynDates');
 
 switch nargin
@@ -78,26 +73,49 @@ switch nargin
     if isa(varargin{1},'dynDates')
         % Returns a copy of the input argument
         dd = varargin{1};
-    elseif ischar(varargin{1}) || isa(varargin{1},'dynDate')
-        tmp = dynDate(varargin{1});
+    elseif ischar(varargin{1}) && isdate(varargin{1})
+        date = string2date(varargin{1});
         dd.ndat = 1;
-        dd.freq = tmp.freq;
-        dd.time = tmp.time;
+        dd.freq = date.freq;
+        dd.time = date.time;
+    elseif ischar(varargin{1}) && ismember(upper(varargin{1}),{'A','Y','Q','M','W'}) 
+        % Instantiate an empty dynDates object (only set frequency)
+        switch upper(varargin{1})
+          case {'Y','A'}
+            dd.freq = 1;
+          case 'Q'
+            dd.freq = 4;
+          case 'M'
+            dd.freq = 12;
+          case 'W'
+            dd.freq = 52;
+          otherwise
+            error('dynDates::dynDates: This is a bug. Please contact Dynare''s authors!')
+        end
     else
         error('dynDates:: Wrong calling sequence of the constructor!')
     end
   otherwise
-    tmp = dynDate(varargin{1});
     dd.ndat = nargin;
     dd.time = NaN(dd.ndat,2);
-    dd.freq = tmp.freq;
-    dd.time(1,:) = tmp.time;
+    if ischar(varargin{1}) && isdate(varargin{1})
+        date = string2date(varargin{1});
+        dd.freq = date.freq;
+        dd.time(1,:) = date.time;
+    else
+        error(['dynDates::dynDates: Input 1 has to be a string date!'])
+    end
     for i=2:dd.ndat
-        tmp = dynDate(varargin{i});
-        if ~isequal(dd.freq,tmp.freq)
-            error(['dynDates:: The frequency declared in input argument number ' int2str(i) ' is different from the frequency declared in the first input argument!'])
+        if ischar(varargin{i}) && isdate(varargin{i})
+            date = string2date(varargin{i});
+            if isequal(date.freq,dd.freq)
+                dd.time(i,:) = date.time;
+            else
+                 error(['dynDates::dynDates: Check that all the inputs have the same frequency (see input number ' str2num(i) ')!'])
+            end
+        else
+            error(['dynDates::dynDates: Input ' str2num(i) ' has to be a string date!'])
         end
-        dd.time(i,:) = tmp.time;
     end
 end
 
