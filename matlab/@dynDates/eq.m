@@ -1,28 +1,13 @@
 function C = eq(A,B) % --*-- Unitary tests --*--
 
-%@info:
-%! @deftypefn {Function File} {@var{C} =} eq (@var{A},@var{B})
-%! @anchor{@dynDates/eq}
-%! @sp 1
-%! Overloads the eq (equal) operator for the @ref{dynDates} class.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item A
-%! @ref{dynDates} object.
-%! @item B
-%! @ref{dynDates} object.
-%! @end table
-%! @sp 1
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item C
-%! scalar integer equal to one if a==b, 0 otherwise.
-%! @end table
-%! @end deftypefn
-%@eod:
+% Overloads == operator for dynDates objects.
+%
+% INPUTS 
+%  o A    dynDates object with n or 1 elements.
+%  o B    dynDates object with n or 1 elements.
+%
+% OUTPUTS 
+%  o C    column vector of max(n,1) elements (zeros or ones).
 
 % Copyright (C) 2013 Dynare Team
 %
