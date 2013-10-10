@@ -41,7 +41,7 @@ function C = eq(A,B) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin~=2
+if ~isequal(nargin,2)
     error('dynDates::eq: I need exactly two input arguments!')
 end
 
@@ -54,12 +54,15 @@ if ~isequal(A.freq,B.freq)
     return
 end
 
-if ~isequal(A.ndat,B.ndat)
-    C = 0;
-    return
+if isequal(A.ndat, B.ndat)
+    C = isequal(A.time, B.time);
+else
+    if isequal(A.ndat,1) || isequal(B.ndat,1)
+        C = transpose(all(transpose(bsxfun(@eq,A.time,B.time))));
+    else
+        C = 0;
+    end
 end
-
-C = isequal(A.time,B.time);
 
 %@test:1
 %$ % Define some dynDates objects
