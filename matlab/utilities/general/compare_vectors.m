@@ -44,7 +44,7 @@ end
 
 if feval(f, A(1), B(1))
     C = 1;
-elseif isequal(A(1),A(1)) && length(A)>1
+elseif isequal(A(1),B(1)) && length(A)>1
     C = compare_vectors(f, A(2:end), B(2:end));
 elseif isequal(A(1),B(1)) && isequal(length(A),1) && ismember(func2str(f),{'le', 'ge'})
     C = 1;
