@@ -167,7 +167,7 @@ end
 %$ T = all(t);
 %@eof:3
 
-%@test:4
+%% @test:4
 %$ % Define a dynDates object
 %$ B = dynDate('1950Q1'):dynDate('1960Q3');
 %$
@@ -185,4 +185,4 @@ end
 %$     t(3) = dyn_assert(d.time,[1950 2]);
 %$ end
 %$ T = all(t);
-%@eof:4
+%%@eof:4
