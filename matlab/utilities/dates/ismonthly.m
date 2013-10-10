@@ -25,7 +25,7 @@ function b = ismonthly(str)  % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-b = ~isempty(regexp(str,'^-?[0-9]*[Mm]([1-9]|1[12])$'));
+b = ~isempty(regexp(str,'^-?[0-9]*[Mm]([1-9]|1[0-2])$'));
 
 %@test:1
 %$
