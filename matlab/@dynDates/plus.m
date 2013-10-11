@@ -1,29 +1,8 @@
 function C = plus(A,B) % --*-- Unitary tests --*--
 
-%@info:
-%! @deftypefn {Function File} {@var{C} =} plus (@var{A},@var{B})
-%! @anchor{@dynDates/plus}
-%! @sp 1
-%! Overloads the plus (addition) operator for the @ref{dynDates} class. Combines two dynDates objects, A and B, without removing repetitions
-%! if A and B are not disjoints.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item A
-%! @ref{dynDates} object.
-%! @item B
-%! @ref{dynDates} object.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item C
-%! @ref{dynDates} object.
-%! @end table
-%! @end deftypefn
-%@eod:
+% Overloads the plus operator. If A and B are dynDates objects the method combines A and B without removing repetitions. If
+% one of the inputs is an integer or a vector of integers, the method shifts the dynDates object by X (the interger input)
+% periods forward.
 
 % Copyright (C) 2013 Dynare Team
 %
