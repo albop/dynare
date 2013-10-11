@@ -27,7 +27,7 @@ function C = le(A,B)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if ~isequal(nargin,2)
-    error('dynDates::lt: I need exactly two input arguments!')
+    error('dynDates::le: I need exactly two input arguments!')
 end
 
 if ~isa(A,'dynDates') || ~isa(B,'dynDates')
