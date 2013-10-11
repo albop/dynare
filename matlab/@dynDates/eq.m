@@ -51,9 +51,9 @@ end
 
 %@test:1
 %$ % Define some dynDates objects
-%$ d1 = dynDate('1950Q1'):dynDate('1959Q4') ;
-%$ d2 = dynDate('1960Q1'):dynDate('1979Q4') ;
-%$ d3 = dynDate('1970M1'):dynDate('1979M12') ;
+%$ d1 = dynDates('1950Q1','1950Q2','1950Q3','1950Q4') ;
+%$ d2 = dynDates('1960Q1','1960Q2','1960Q3','1960Q4') ;
+%$ d3 = dynDates('1960Q1','1960Q2','1960Q3','1960Q4') ;
 %$
 %$ % Call the tested routine.
 %$ t1 = d1==d1;
@@ -66,3 +66,21 @@ end
 %$ t(2) = dyn_assert(t3,0);
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ % Define some dynDates objects
+%$ d1 = dynDates('1950Q1') ;
+%$ d2 = dynDates('1960Q1') ;
+%$ d3 = dynDates('1960Q1') ;
+%$
+%$ % Call the tested routine.
+%$ t1 = d1==d1;
+%$ t2 = d1==d2;
+%$ t3 = d1==d3;
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(t1,1);
+%$ t(2) = dyn_assert(t2,0);
+%$ t(2) = dyn_assert(t3,0);
+%$ T = all(t);
+%@eof:2
