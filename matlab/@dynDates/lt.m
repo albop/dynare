@@ -64,6 +64,31 @@ end
 
 %@test:1
 %$ % Define some dates
+%$ date_2 = '1950Q2';
+%$ date_3 = '1950Q3';
+%$ date_4 = '1950Q1';
+%$ date_5 = '1949Q2';
+%$
+%$ % Call the tested routine.
+%$ d2 = dynDates(date_2);
+%$ d3 = dynDates(date_3);
+%$ d4 = dynDates(date_4);
+%$ d5 = dynDates(date_5);
+%$ i1 = (d2<d3);
+%$ i2 = (d3<d4);
+%$ i3 = (d4<d2);
+%$ i4 = (d5<d4);
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(i1,1);
+%$ t(2) = dyn_assert(i2,0);
+%$ t(3) = dyn_assert(i3,1);
+%$ t(4) = dyn_assert(i4,1);
+%$ T = all(t);
+%@eof:1
+
+%@test:2
+%$ % Define some dates
 %$ B1 = '1945Q1';
 %$ B2 = '1945Q2';
 %$ B3 = '1945Q3';
@@ -81,4 +106,4 @@ end
 %$ t(5) = dyn_assert(dynDates(B5)<dd,zeros(4,1));
 %$ t(6) = dyn_assert(dynDates(B1)<dd,[0; ones(3,1)]);
 %$ T = all(t);
-%@eof:1
+%@eof:2
