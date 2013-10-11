@@ -93,7 +93,7 @@ end
 
 %@test:1
 %$ % Define a dynDates object
-%$ B = dynDate('1950Q1'):dynDate('1960Q3');
+%$ B = dynDates('1950Q1','1950Q2','1950Q3','1950Q4','1951Q1');
 %$
 %$ % Try to extract a sub-dynDates object.
 %$ d = B(2:3);
@@ -112,7 +112,7 @@ end
 %$ T = all(t);
 %@eof:1
 
-%@test:2
+%# @test:2
 %$ % Define a dynDates object
 %$ B = dynDate('1950Q1'):dynDate('1960Q3');
 %$
@@ -132,9 +132,9 @@ end
 %$     t(4) = dyn_assert(d.ndat,2);
 %$ end
 %$ T = all(t);
-%@eof:2
+%# @eof:2
 
-%@test:3
+%# @test:3
 %$ % Define a dynDates object
 %$ B = dynDate('1950Q1'):dynDate('1960Q3');
 %$
@@ -154,4 +154,26 @@ end
 %$     t(4) = dyn_assert(d.ndat,2);
 %$ end
 %$ T = all(t);
-%@eof:2
+%# @eof:3
+
+%@test:4
+%$ % Define a dynDates object
+%$ B = dynDates('1950Q1','1950Q2','1950Q3','1950Q4','1951Q1');
+%$
+%$ % Try to extract a sub-dynDates object.
+%$ d = B(2);
+%$
+%$ if isa(d,'dynDates')
+%$     t(1) = 1;
+%$ else
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(d.freq,B.freq);
+%$     t(3) = dyn_assert(d.time,[1950 2]);
+%$     t(4) = dyn_assert(d.ndat,1);
+%$ end
+%$ T = all(t);
+%@eof:4
+
