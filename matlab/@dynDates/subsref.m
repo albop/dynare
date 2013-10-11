@@ -73,21 +73,14 @@ switch S(1).type
         error('dynDates::subsref: Unknown public member or method!')
     end
   case '()'
-    if isscalar(S(1).subs{1})
-        if isint(S(1).subs{1}) && S(1).subs{1}>0 && S(1).subs{1}<=A.ndat
-            B = dynDate(A.time(S(1).subs{1},:),A.freq);
-        else
-            error(['dynDates::subsref: the index has to be a positive integer less than or equal to ' int2str(A.ndat) '!'])
-        end
+    % Extract some dates.
+    if isvector(S(1).subs{1}) && all(isint(S(1).subs{1})) && all(S(1).subs{1}>0) && all(S(1).subs{1}<=A.ndat)
+        B = dynDates();
+        B.freq = A.freq;
+        B.time = A.time(S(1).subs{1},:);
+        B.ndat = length(S(1).subs{1});
     else
-        if isvector(S(1).subs{1}) && all(isint(S(1).subs{1})) && all(S(1).subs{1}>0) && all(S(1).subs{1}<=A.ndat)
-            B = dynDates();
-            B.freq = A.freq;
-            B.time = A.time(S(1).subs{1},:);
-            B.ndat = length(S(1).subs{1});
-        else
-            error(['dynDates::subsref: indices has to be a vector of positive integers less than or equal to ' int2str(A.ndat) '!'])
-        end
+        error(['dynDates::subsref: indices has to be a vector of positive integers less than or equal to ' int2str(A.ndat) '!'])
     end
   otherwise
     error('dynDates::subsref: Something is wrong in your syntax!')
