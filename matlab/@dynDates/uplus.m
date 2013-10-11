@@ -59,3 +59,20 @@ B.time(idx,2) = 1;
 %$ t(5) = dyn_assert(i5,1);
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ d1 = dynDates('1950Q1','1950Q2','1950Q3','1950Q4','1951Q1');
+%$ d2 = dynDates('1950Q2','1950Q3','1950Q4','1951Q1','1951Q2');
+%$ try
+%$   d3 = +d1;
+%$   t(1) = 1;
+%$ catch
+%$   t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$   t(2) = dyn_assert(all(d2==d3),1);
+%$ end
+%$
+%$ T = all(t);
+%@eof:2
