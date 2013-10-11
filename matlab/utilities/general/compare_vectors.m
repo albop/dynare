@@ -38,9 +38,13 @@ if ~isequal(length(A),length(B))
     error('compare_vectors_lt:: Input arguments a and b must be of same length!')
 end
 
-if ~ismember(func2str(f),{'lt', 'gt', 'le', 'ge'})
+fstr = func2str(f);
+
+if ~ismember(fstr, {'lt', 'gt', 'le', 'ge'})
     error('compare_vectors:: First input argument must be one of the following function handles: @lt, @gt, @le or @ge!')
 end
+
+strict_inequality = ismember(fstr, {'gt','lt'});
 
 if isequal(length(A),1)
     if feval(f, A, B)
@@ -50,11 +54,25 @@ if isequal(length(A),1)
     end
 else
     if feval(f, A(1), B(1))
-        C = 1;
-    elseif isequal(A(1),B(1))
-        C = compare_vectors(f, A(2:end), B(2:end));
+        if strict_inequality
+            C = 1;
+        else
+            if isequal(A(1),B(1))
+                C = compare_vectors(f, A(2:end), B(2:end));
+            else
+                C = 1;
+            end
+        end
     else
-        C = 0;
+        if strict_inequality
+            if isequal(A(1),B(1))
+                C = compare_vectors(f, A(2:end), B(2:end));
+            else
+                C = 0;
+            end
+        else
+            C = 0;
+        end
     end
 end
 
