@@ -1,4 +1,4 @@
-function C = compare_vectors(f, A, B)
+function C = compare_vectors(f, A, B)  % --*-- Unitary tests --*--
  
 % Performs lexicographical comparison of vectors.
 %

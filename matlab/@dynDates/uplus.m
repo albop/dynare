@@ -1,4 +1,4 @@
-function B = uplus(A)
+function B = uplus(A)  % --*-- Unitary tests --*--
 
 % Overloads the unary plus operator for dynDates objects. Shifts all the elements by one period.
 %

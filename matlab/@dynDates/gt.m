@@ -1,4 +1,4 @@
-function C = gt(A,B)
+function C = gt(A,B)  % --*-- Unitary tests --*--
 
 % Overloads the > operator for dynDates objects.
 %

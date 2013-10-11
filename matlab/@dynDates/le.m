@@ -1,4 +1,4 @@
-function C = le(A,B)
+function C = le(A,B)  % --*-- Unitary tests --*--
 
 % Overloads the <= operator for dynDates objects.
 %

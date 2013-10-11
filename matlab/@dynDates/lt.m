@@ -1,4 +1,4 @@
-function C = lt(A,B)
+function C = lt(A,B)  % --*-- Unitary tests --*--
 
 % Overloads the < operator for dynDates objects.
 %
