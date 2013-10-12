@@ -80,18 +80,7 @@ switch nargin
         dd.time = date.time;
     elseif ischar(varargin{1}) && ismember(upper(varargin{1}),{'A','Y','Q','M','W'}) 
         % Instantiate an empty dynDates object (only set frequency)
-        switch upper(varargin{1})
-          case {'Y','A'}
-            dd.freq = 1;
-          case 'Q'
-            dd.freq = 4;
-          case 'M'
-            dd.freq = 12;
-          case 'W'
-            dd.freq = 52;
-          otherwise
-            error('dynDates::dynDates: This is a bug. Please contact Dynare''s authors!')
-        end
+        dd.freq = string2freq(varargin{1});
     else
         error('dynDates:: Wrong calling sequence of the constructor!')
     end
