@@ -1,6 +1,8 @@
 function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam, ThisMatlab)
+% Generates the Posterior IRFs plot from the IRFs generated in
+% PosteriorIRF_core1
 % PARALLEL CONTEXT
-% Perfome in parallel a portion of  PosteriorIRF.m code.
+% Perform in parallel execution a portion of the PosteriorIRF.m code.
 % See also the comment in random_walk_metropolis_hastings_core.m funtion.
 %
 % INPUTS 
@@ -17,7 +19,7 @@ function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam, ThisMatlab)
 % SPECIAL REQUIREMENTS.
 %   None.
 %
-% Copyright (C) 2006-2012 Dynare Team
+% Copyright (C) 2006-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -87,7 +89,7 @@ for i=fpar:npar,
     figunumber = 0;
     
     for j=1:nvar
-        if max(abs(MeanIRF(:,j,i))) > 10^(-6)
+        if max(abs(MeanIRF(:,j,i))) > options_.impulse_responses.plot_threshold
             subplotnum = subplotnum+1;
             if subplotnum == 1 && options_.relative_irf
                 hh = dyn_figure(options_,'Name',['Relative response to orthogonalized shock to ' tit(i,:)]);
