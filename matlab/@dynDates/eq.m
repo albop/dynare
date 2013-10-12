@@ -40,7 +40,7 @@ if ~isequal(A.freq,B.freq)
 end
 
 if isequal(A.ndat, B.ndat)
-    C = isequal(A.time, B.time);
+    C = transpose(all(transpose(eq(A.time,B.time))));
 else
     if isequal(A.ndat,1) || isequal(B.ndat,1)
         C = transpose(all(transpose(bsxfun(@eq,A.time,B.time))));
@@ -53,7 +53,7 @@ end
 %$ % Define some dynDates objects
 %$ d1 = dynDates('1950Q1','1950Q2','1950Q3','1950Q4') ;
 %$ d2 = dynDates('1960Q1','1960Q2','1960Q3','1960Q4') ;
-%$ d3 = dynDates('1960Q1','1960Q2','1960Q3','1960Q4') ;
+%$ d3 = dynDates('1950Q1','1960Q2','1950Q3','1960Q4') ;
 %$
 %$ % Call the tested routine.
 %$ t1 = d1==d1;
@@ -61,9 +61,9 @@ end
 %$ t3 = d1==d3;
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(t1,1);
-%$ t(2) = dyn_assert(t2,0);
-%$ t(2) = dyn_assert(t3,0);
+%$ t(1) = dyn_assert(t1,ones(4,1));
+%$ t(2) = dyn_assert(t2,zeros(4,1));
+%$ t(2) = dyn_assert(t3,[1; 0; 1; 0]);
 %$ T = all(t);
 %@eof:1
 
@@ -84,3 +84,19 @@ end
 %$ t(2) = dyn_assert(t3,0);
 %$ T = all(t);
 %@eof:2
+
+%@test:3
+%$ % Define some dynDates objects
+%$ d1 = dynDates('1950Q1','1950Q2','1950Q3','1950Q4') ;
+%$ d2 = dynDates('1950Q2') ;
+%$ d3 = dynDates('1970Q1') ;
+%$
+%$ % Call the tested routine.
+%$ t1 = d1==d2;
+%$ t2 = d1==d3;
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(t1,[0; 1; 0; 0]);
+%$ t(2) = dyn_assert(t2,zeros(4,1));
+%$ T = all(t);
+%@eof:3
