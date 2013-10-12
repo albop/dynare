@@ -34,6 +34,6 @@ function B = mtimes(A,n)
 if ~(isscalar(n) && isint(n))
     error('dynDates::m: First and second input arguments have to be a dynDates object and a scalar integer!')
 end
-
-A.time = repmat(A.time,n,1);
-A.ndat = A.ndat*n;
+B = A;
+B.time = repmat(A.time,n,1);
+B.ndat = A.ndat*n;
