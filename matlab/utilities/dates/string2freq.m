@@ -23,8 +23,8 @@ function freq = string2freq(s)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-switch s
-  case 'Y'
+switch upper(s)
+  case {'Y','A'}
     freq = 1;
   case 'Q'
     freq = 4;
