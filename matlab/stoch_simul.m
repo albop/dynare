@@ -209,6 +209,10 @@ if options_.irf
                             mylistTeX = char(mylistTeX,deblank(var_listTeX(j,:)));
                         end
                     end
+                else
+                    if options_.debug
+                        fprintf('STOCH_SIMUL: The IRF of %s to %s is smaller than the irf_plot_threshold of %4.3f and will not be displayed.\n',deblank(M_.endo_names(i_var(j),:)),deblank(M_.exo_names(i,:)),options_.impulse_responses.plot_threshold)
+                    end
                 end
             end
             if options_.nograph == 0

@@ -133,6 +133,10 @@ for i=fpar:npar,
             end
             name = deblank(varlist(j,:));
             title(name,'Interpreter','none')
+        else
+            if options_.debug
+                fprintf('POSTERIOR_IRF: The IRF of %s to %s is smaller than the irf_plot_threshold of %4.3f and will not be displayed.\n',deblank(varlist(j,:)),tit(i,:),options_.impulse_responses.plot_threshold)
+            end                
         end
         
         if subplotnum == MaxNumberOfPlotPerFigure || (j == nvar  && subplotnum> 0)
