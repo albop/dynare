@@ -39,9 +39,15 @@ if isa(A,'dynDates') && isa(B,'dynDates')
     C.time = [A.time; B.time];
     C.ndat = A.ndat+B.ndat;
 elseif isa(A,'dynDates') && ( (isvector(B) && isequal(length(B),A.ndat) && all(isint(B))) || isscalar(B) && isint(B) || isequal(length(A),1) && isvector(B) && all(isint(B)))
+    C = dynDates();
+    C.freq = A.freq;
     C.time = add_periods_to_array_of_dates(A.time, A.freq, B);
+    C.ndat = rows(C.time);
 elseif isa(B,'dynDates') && ( (isvector(A) && isequal(length(A),B.ndat) && all(isint(A))) || isscalar(A) && isint(A) )
+    C = dynDates();
+    C.freq = B.freq;
     C.time = add_periods_to_array_of_dates(B.time, B.freq, A);
+    C.ndat = rows(C.time);
 else
     error('dynDates::plus: I don''t understand what you want to do! Check the manual.')
 end
