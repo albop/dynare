@@ -1,29 +1,7 @@
 function C = minus(A,B) % --*-- Unitary tests --*--
 
-%@info:
-%! @deftypefn {Function File} {@var{C} =} minus (@var{A},@var{B})
-%! @anchor{@dynDates/minus}
-%! @sp 1
-%! Overloads the minus (soustraction) operator for the @ref{dynDates} class. C is the relative complement of B in A.
-%! if A and B are not disjoints.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item A
-%! @ref{dynDates} object.
-%! @item B
-%! @ref{dynDates} object.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item C
-%! @ref{dynDates} object.
-%! @end table
-%! @end deftypefn
-%@eod:
+% Overloads the minus operator (-). If A and B are dynDates objects, the method returns the number of periods between A and B (so that A+C=B). If 
+% one of the inputs is an integer or a vector of integers, the method shifts the dynDates object by X (the interger input) periods backward.
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -42,44 +20,141 @@ function C = minus(A,B) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isempty(B)
-    C = A;
-    return
-end
-
-if isempty(A)
-    C = dynDates();
-    return
-end
-
-if ~isequal(A.freq,B.freq)
-    C = A;
-    return
-end
-
-D = intersect(A,B);
-
-if isempty(D)
-    C = A;
-else
+if isa(A,'dynDates') && isa(B,'dynDates')
+    % Concatenate dynDates objects without removing repetitions if A and B are not disjoint sets of dates.
+    if ~isequal(A.freq,B.freq)
+        error(['dynDates::minus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must have common frequencies!'])
+    end
+    if isempty(A) || isempty(B)
+        error(['dynDates::minus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must not be empty!'])
+    end
+    if ~isequal(length(A),length(B))
+        if length(A)==1
+            A.time = repmat(A.time,B.ndat,1);
+            A.ndat = B.ndat;
+        elseif length(B)==1
+            B.time = repmat(B.time,A.ndat,1);
+            B.ndat = A.ndat;
+        else
+            error(['dynDates::minus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' lengths are not consistent!'])
+        end
+    end
+    C = zeros(length(A),1);
+    id = find(~(A==B));
+    if isempty(id)
+        return
+    end
+    C(id) = A.time(id,2)-B.time(id,2) + (A.time(id,1)-B.time(id,1))*A.freq;        
+elseif isa(A,'dynDates') && ( (isvector(B) && isequal(length(B),A.ndat) && all(isint(B))) || isscalar(B) && isint(B) || isequal(length(A),1) && isvector(B) && all(isint(B)))
     C = dynDates();
     C.freq = A.freq;
-    C.time = setdiff(A.time,D.time,'rows');
+    C.time = add_periods_to_array_of_dates(A.time, A.freq, -B);
     C.ndat = rows(C.time);
+elseif isa(B,'dynDates') && ( (isvector(A) && isequal(length(A),B.ndat) && all(isint(A))) || isscalar(A) && isint(A) )
+    C = dynDates();
+    C.freq = A.freq;
+    C.time = add_periods_to_array_of_dates(B.time, B.freq, -A);
+    C.ndat = rows(C.time);
+else
+    error('dynDates::plus: I don''t understand what you want to do! Check the manual.')
 end
 
 %@test:1
 %$ % Define some dynDates objects
-%$ d1 = dynDate('1950Q1'):dynDate('1959Q4') ;
-%$ d2 = dynDate('1960Q1'):dynDate('1969Q4') ;
-%$ d3 = d1+d2;
-%$
+%$ d1 = dynDates('1950Q1','1950Q2','1960Q1');
+%$ d2 = dynDates('1950Q3','1950Q4','1960Q1');
+%$ d3 = dynDates('2000Q1');
+%$ d4 = dynDates('2002Q2');
 %$ % Call the tested routine.
-%$ e1 = d1-d2;
-%$ e2 = d3-d1;
+%$ try
+%$   e1 = d2-d1;
+%$   e2 = d4-d3;
+%$   t(1) = 1;
+%$ catch
+%$   t(1) = 0;
+%$ end
 %$
-%$ % Check the results.
-%$ t(1) = dyn_assert(e1==d1,1);
-%$ t(2) = dyn_assert(e2==d2,1);
+%$ if t(1)
+%$   t(2) = dyn_assert(e1,[2; 2; 0]);
+%$   t(3) = dyn_assert(e2,9);
+%$ end
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ % Define some dynDates objects
+%$ d1 = dynDates('1950Y','1951Y','1953Y');
+%$ d2 = dynDates('1951Y','1952Y','1953Y');
+%$ d3 = dynDates('2000Y');
+%$ d4 = dynDates('1999Y');
+%$ % Call the tested routine.
+%$ try
+%$   e1 = d2-d1;
+%$   e2 = d4-d3;
+%$   t(1) = 1;
+%$ catch
+%$   t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$   t(2) = dyn_assert(e1,[1; 1; 0]);
+%$   t(3) = dyn_assert(e2,-1);
+%$ end
+%$ T = all(t);
+%@eof:2
+
+%@test:3
+%$ % Define some dynDates objects
+%$ d1 = dynDates('2000Y');
+%$ d2 = dynDates('1999Y');
+%$ % Call the tested routine.
+%$ try
+%$   e1 = d1-1;
+%$   e2 = d2-(-1);
+%$   t(1) = 1;
+%$ catch
+%$   t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$   t(2) = dyn_assert(isequal(e1,d2),1);
+%$   t(3) = dyn_assert(isequal(e2,d1),1);
+%$ end
+%$ T = all(t);
+%@eof:3
+
+%@test:4
+%$ % Define some dynDates objects
+%$ d1 = dynDates('2000Q1');
+%$ e1 = dynDates('1999Q4','1999Q3','1999Q2','1999Q1','1998Q4');
+%$ % Call the tested routine.
+%$ try
+%$   f1 = d1-transpose(1:5);
+%$   t(1) = 1;
+%$ catch
+%$   t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$   t(2) = dyn_assert(isequal(e1,f1),1);
+%$ end
+%$ T = all(t);
+%@eof:4
+
+%@test:5
+%$ % Define some dynDates objects
+%$ d1 = dynDates('1999Q4','1999Q3','1999Q2','1999Q1','1998Q4');
+%$ e1 = dynDates('2000Q1')*5;
+%$ % Call the tested routine.
+%$ try
+%$   f1 = d1-(-transpose(1:5));
+%$   t(1) = 1;
+%$ catch
+%$   t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$   t(2) = dyn_assert(isequal(e1,f1),1);
+%$ end
+%$ T = all(t);
+%@eof:5
