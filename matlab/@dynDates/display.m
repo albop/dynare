@@ -21,15 +21,15 @@ if isempty(dd)
     fprintf('%s is an empty dynDates object.\n', inputname(1));
     return
 end
-    
+
 max_displayed = 5;
 first_displayed = 2;
     
 fprintf('%s = <dynDates: ', inputname(1));
-    
+
 if dd.ndat<=max_displayed
     for i=1:dd.ndat
-        fprintf(format(dynDate(dd.time(i,:),dd.freq)))
+        fprintf(date2string(dd.time(i,:),dd.freq))
         if i<dd.ndat
             fprintf(', ')
         else
@@ -38,12 +38,12 @@ if dd.ndat<=max_displayed
     end
 else
     for i=1:first_displayed
-        fprintf(format(dynDate(dd.time(i,:),dd.freq)))
+        fprintf(date2string(dd.time(i,:),dd.freq))
         fprintf(', ')
     end
     fprintf(' ..., ')
-    fprintf(format(dynDate(dd.time(dd.ndat-1,:),dd.freq)))
+    fprintf(date2string(dd.time(dd.ndat-1,:),dd.freq))
     fprintf(', ')
-    fprintf(format(dynDate(dd.time(dd.ndat,:),dd.freq)))
+    fprintf(date2string(dd.time(dd.ndat,:),dd.freq))
     fprintf('>\n')
 end
