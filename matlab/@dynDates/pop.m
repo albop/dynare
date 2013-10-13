@@ -1,37 +1,19 @@
-function dd = pop(dd,a) % --*-- Unitary tests --*--
+function B = pop(A,a) % --*-- Unitary tests --*--
 
-% pop method for dynDates class (removes a date)).
+% pop method for dynDates class (removes a date).
+%
+% INPUTS 
+%  o A     dynDates object.
+%  o a     dynDates object with one element, string which can be interpreted as a date or integer scalar.
+%
+% OUTPUTS 
+%  o B     dynDates object (with B.ndat==A.ndat-1).
+%
+% REMARKS 
+%  If a is a date appearing more than once in A, then only the last occurence is removed. If one wants to
+%  remove all the occurences of a in A, the setdiff function should be used instead.
 
-%@info:
-%! @deftypefn {Function File} {@var{dd} =} pop (@var{dd}, @var{a})
-%! @anchor{dynDates/pop}
-%! @sp 1
-%! Pop method for the Dynare dates class. Removes a date from a dynDates object, by default the laste date is removed.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item dd
-%! Object instantiated by @ref{dynDates}.
-%! @item a
-%! Object instantiated by @ref{dynDate}, date to be removed.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item dd
-%! Object instantiated by @ref{dynDates}, without date (@var{a}).
-%! @end table
-%! @sp 2
-%! @strong{This function is called by:}
-%! @sp 2
-%! @strong{This function calls:}
-%!
-%! @end deftypefn
-%@eod:
-
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,30 +30,40 @@ function dd = pop(dd,a) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
-if ~isa(dd,'dynDates')
-    error(['dynDates::pop: Input argument ' inputname(1) ' has to be a dynDates object.'])
-end
-
 if nargin<2
     % Remove last date
-    dd.time = dd.time(1:end-1,:);
-    dd.ndat = dd.ndat-1;
+    B = dynDates();
+    B.ndat = A.ndat-1;
+    B.freq = A.freq;
+    B.time = NaN(B.ndat,2);
+    B.time = A.time(1:end-1,:);
     return
 end
 
-if nargin>1 && ~(isa(a,'dynDate') || ischar(a))
-    error(['dynDates::pop: Input argument ' inputname(2) ' has to be a dynDate object or a string (formatted date).'])
+if ~(isa(a,'dynDates') || (ischar(a) && isdate(a)) || (isscalar(a) && isint(a)))
+    error(['dynDates::pop: Input argument ' inputname(2) ' has to be a dynDates object with a single element, a string (which can be interpreted as a date) or an integer.'])
 end
 
-if ~isa(a,'dynDate')
-    a = dynDate(a);
+if ischar(a)
+    a = dynDates(a);
 end
 
-idx = find(~all(transpose(bsxfun(@eq,dd.time,a.time))));    
-dd.time = dd.time(idx,:);
-dd.ndat = size(dd.time,1);
+B = dynDates();
+B.ndat = A.ndat-1;
+B.freq = A.freq;
+B.time = NaN(B.ndat,2);
+
+if isscalar(a) && isint(a)
+    idx = find(transpose(1:A.ndat)~=a);
+    B.time = A.time(idx,:);
+else
+    if ~isequal(A.freq,a.freq)
+        error('dynDates::pop: Inputs must have common frequency!')
+    end
+    idx = find(A==a);
+    jdx = find(transpose(1:A.ndat)~=idx(end));
+    B.time = A.time(jdx,:);
+end
 
 %@test:1
 %$ % Define some dates
@@ -88,7 +80,7 @@ dd.ndat = size(dd.time,1);
 %$
 %$ % Call the tested routine
 %$ d = dynDates(B4,B3,B2,B1);
-%$ d = d.append(dynDate(B5));
+%$ d = d.append(dynDates(B5));
 %$ f = d.pop();
 %$ t(1) = dyn_assert(f.time,e.time(1:end-1,:));
 %$ t(2) = dyn_assert(f.freq,e.freq);
@@ -97,7 +89,7 @@ dd.ndat = size(dd.time,1);
 %$ t(4) = dyn_assert(f.time,[1945 3; 1950 1; 1950 2; 2009 2]);
 %$ t(5) = dyn_assert(f.freq,e.freq);
 %$ t(6) = dyn_assert(f.ndat,e.ndat-1);
-%$ f = d.pop(dynDate(B1));
+%$ f = d.pop(dynDates(B1));
 %$ t(7) = dyn_assert(f.time,[1945 3; 1950 1; 1950 2; 2009 2]);
 %$ t(8) = dyn_assert(f.freq,e.freq);
 %$ t(9) = dyn_assert(f.ndat,e.ndat-1);
@@ -105,3 +97,23 @@ dd.ndat = size(dd.time,1);
 %$ % Check the results.
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ % Define some dates
+%$ B1 = '1950Q1';
+%$ B2 = '1950Q2';
+%$ B3 = '1950Q1';
+%$ B4 = '1945Q3';
+%$ B5 = '2009Q2';
+%$
+%$ % Call the tested routine
+%$ d = dynDates(B1,B2,B3,B4);
+%$ d = d.append(dynDates(B5));
+%$ f = d.pop();
+%$ t(1) = dyn_assert(isequal(f,dynDates(B1,B2,B3,B4)),1);
+%$ f = d.pop(B1);
+%$ t(2) = dyn_assert(isequal(f,dynDates(B1,B2,B4,B5)),1);
+%$ g = f.pop(1);
+%$ t(3) = dyn_assert(isequal(g,dynDates(B2,B4,B5)),1);
+%$ T = all(t);
+%@eof:2

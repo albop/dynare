@@ -1,35 +1,17 @@
-function dd = append(dd,a) % --*-- Unitary tests --*--
+function B = append(A,a) % --*-- Unitary tests --*--
 
 % append method for dynDates class.
-
-%@info:
-%! @deftypefn {Function File} {@var{dd} =} sort (@var{dd}, @var{a})
-%! @anchor{dynDates/append}
-%! @sp 1
-%! Append method for the Dynare dates class.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item dd
-%! Object instantiated by @ref{dynDates}.
-%! @item a
-%! Object instantiated by @ref{dynDate}.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item dd
-%! Object instantiated by @ref{dynDates}, with an additional date (@var{a}).
-%! @end table
-%! @sp 2
-%! @strong{This function is called by:}
-%! @sp 2
-%! @strong{This function calls:}
-%!
-%! @end deftypefn
-%@eod:
+%
+% INPUTS 
+%  o A    dynDates object.
+%  o a    dynDates object with one element or string that can be interpreted as a date.
+%
+% OUTPUTS 
+%  o B    dynDates object containing dates defined in A and a.
+%
+% EXAMPLE 1 
+%  If A is a dynDates object with quarterly frequency, then B = A.append(dynDates('1950Q2')) and 
+%  B = A.append('1950Q2') are equivalent syntaxes.
 
 % Copyright (C) 2012-2013 Dynare Team
 %
@@ -48,32 +30,28 @@ function dd = append(dd,a) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
-if ~isa(dd,'dynDates')
-    error(['dynDates::append: Input argument ' inputname(dd) ' has to be a dynDates object.'])
+if isa(a,'dynDates')
+    if ~isequal(length(a),1)
+        error(['dynDates::append: Input argument ' inputname(a) ' has to be a dynDates object with one element.'])
+    end
+    if isempty(a)
+        B = A;
+        return
+    end
+elseif ischar(a) && isdate(a) 
+    a = dynDates(a);
 end
 
-if ~(isa(a,'dynDate') || isa(a,'dynDates') || ischar(a))
-    error(['dynDates::append: Input argument ' inputname(2) ' has to be ' ...
-                        'a dynDate object or a dynDates object or a string (formatted date).'])
+if ~isequal(A.freq, a.freq)
+    error(['dynDates::append: A and a must have common frequency!'])
 end
 
-if isempty(a)
-    return
-end
-
-if isa(a,'dynDate')
-    dd.time = [dd.time; a.time];
-    dd.ndat = dd.ndat+1;
-elseif isa(a,'dynDates')
-    dd.time = [dd.time; a.time];
-    dd.ndat = dd.ndat+a.ndat;
-else
-    tmp = dynDate();
-    dd.time = [dd.time; tmp(a).time];
-    dd.ndat = dd.ndat+1;
-end
+B = dynDates();
+B.ndat = A.ndat+1;
+B.freq = A.freq;
+B.time = NaN(B.ndat,2);
+B.time(1:A.ndat,:) = A.time;
+B.time(A.ndat+1,:) = a.time; 
 
 %@test:1
 %$ % Define some dates
@@ -90,7 +68,7 @@ end
 %$
 %$ % Call the tested routine.
 %$ d = dynDates(B4,B3,B2,B1);
-%$ d = d.append(dynDate(B5));
+%$ d = d.append(dynDates(B5));
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);
