@@ -78,9 +78,13 @@ switch nargin
         dd.ndat = 1;
         dd.freq = date.freq;
         dd.time = date.time;
-    elseif ischar(varargin{1}) && ismember(upper(varargin{1}),{'A','Y','Q','M','W'}) 
+    elseif isfreq(varargin{1})
         % Instantiate an empty dynDates object (only set frequency)
-        dd.freq = string2freq(varargin{1});
+        if ischar(varargin{1})
+            dd.freq = string2freq(varargin{1});
+        else
+            dd.freq = varargin{1};
+        end
     else
         error('dynDates:: Wrong calling sequence of the constructor!')
     end
