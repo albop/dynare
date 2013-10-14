@@ -25,7 +25,11 @@ function b = isyearly(str)  % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-b = ~isempty(regexp(str,'^-?[0-9]*[YyAa]$'));
+if ischar(str)
+    b = ~isempty(regexp(str,'^-?[0-9]*[YyAa]$'));
+else
+    b = 0;
+end
 
 %@test:1
 %$
