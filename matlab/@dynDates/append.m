@@ -38,7 +38,7 @@ if isa(a,'dynDates')
         B = A;
         return
     end
-elseif ischar(a) && isdate(a) 
+elseif isdate(a)
     a = dynDates(a);
 end
 

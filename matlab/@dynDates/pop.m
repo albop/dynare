@@ -40,7 +40,7 @@ if nargin<2
     return
 end
 
-if ~(isa(a,'dynDates') || (ischar(a) && isdate(a)) || (isscalar(a) && isint(a)))
+if ~(isa(a,'dynDates') || isdate(a) || (isscalar(a) && isint(a)))
     error(['dynDates::pop: Input argument ' inputname(2) ' has to be a dynDates object with a single element, a string (which can be interpreted as a date) or an integer.'])
 end
 

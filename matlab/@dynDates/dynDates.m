@@ -73,7 +73,7 @@ switch nargin
     if isa(varargin{1},'dynDates')
         % Returns a copy of the input argument
         dd = varargin{1};
-    elseif ischar(varargin{1}) && isdate(varargin{1})
+    elseif isdate(varargin{1})
         date = string2date(varargin{1});
         dd.ndat = 1;
         dd.freq = date.freq;
@@ -91,7 +91,7 @@ switch nargin
   otherwise
     dd.ndat = nargin;
     dd.time = NaN(dd.ndat,2);
-    if ischar(varargin{1}) && isdate(varargin{1})
+    if isdate(varargin{1})
         date = string2date(varargin{1});
         dd.freq = date.freq;
         dd.time(1,:) = date.time;
@@ -99,7 +99,7 @@ switch nargin
         error(['dynDates::dynDates: Input 1 has to be a string date!'])
     end
     for i=2:dd.ndat
-        if ischar(varargin{i}) && isdate(varargin{i})
+        if isdate(varargin{i})
             date = string2date(varargin{i});
             if isequal(date.freq,dd.freq)
                 dd.time(i,:) = date.time;
