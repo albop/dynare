@@ -69,16 +69,16 @@ C.ndat = rows(time);
 
 %@test:1
 %$ % Define some dates objects
-%$ d1 = dynDate('1950Q1'):dynDate('1969Q4') ;
-%$ d2 = dynDate('1960Q1'):dynDate('1969Q4') ;
-%$ d3 = dynDate('1970Q1'):dynDate('1979Q4') ;
+%$ d1 = dates('1950Q1'):dates('1969Q4') ;
+%$ d2 = dates('1960Q1'):dates('1969Q4') ;
+%$ d3 = dates('1970Q1'):dates('1979Q4') ;
 %$
 %$ % Call the tested routine.
 %$ c1 = intersect(d1,d2);
 %$ c2 = intersect(d1,d3);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(c1==d2,1);
+%$ t(1) = dyn_assert(isequal(c1,d2),1);
 %$ t(2) = dyn_assert(isempty(c2),1);
 %$ T = all(t);
 %@eof:1
