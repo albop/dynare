@@ -1,4 +1,4 @@
-function display(dd)
+function disp(dd)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,15 +18,15 @@ function display(dd)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if isempty(dd)
-    fprintf('%s is an empty dynDates object.\n', inputname(1));
+    fprintf('Empty dates object.\n');
     return
 end
-
+    
 max_displayed = 5;
 first_displayed = 2;
     
-fprintf('%s = <dynDates: ', inputname(1));
-
+fprintf('<dates: ');
+    
 if dd.ndat<=max_displayed
     for i=1:dd.ndat
         fprintf(date2string(dd.time(i,:),dd.freq))

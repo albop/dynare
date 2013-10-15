@@ -1,18 +1,17 @@
-function B = mtimes(A,n)
-
-% Overloads the times operator (*). Returns dynDates object A replicated n times.
+function lastIndex = end(o, k, n)
+% function lastIndex = end(o, k, n)
+% End keyword
 %
-% INPUTS 
-%  o A    dynDates object with m elements.
+% INPUTS
+%   o              [dates] dates object
+%   k              [integer]  index where end appears
+%   n              [integer]  number of indices
 %
-% OUTPUTS 
-%  o B    dynDates object with m*n elements.
+% OUTPUTS
+%   lastIndex      [integer] last dates index
 %
-% EXAMPLE 1
-%  If A = dynDates('2000Q1'), then B=A*3 is a dynDates object equal to dynDates('2000Q1','2000Q1','2000Q1')  
-%
-% EXAMPLE 2
-%  If A = dynDates('2003Q1','2009Q2'), then B=A*2 is a dynDates object equal to dynDates('2003Q1','2009Q2','2003Q1','2009Q2')
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -31,9 +30,6 @@ function B = mtimes(A,n)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~(isscalar(n) && isint(n))
-    error('dynDates::m: First and second input arguments have to be a dynDates object and a scalar integer!')
+assert(k==1 && n==1, '@dates/end: dates only has one dimension');
+lastIndex = o.ndat;
 end
-B = A;
-B.time = repmat(A.time,n,1);
-B.ndat = A.ndat*n;

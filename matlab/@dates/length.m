@@ -1,6 +1,6 @@
 function n = length(A)
 
-% Returns the number of elements in a dynDates object.
+% Returns the number of elements in a dates object.
 
 % Copyright (C) 2013 Dynare Team
 %

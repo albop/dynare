@@ -20,7 +20,7 @@ function date = string2date(a) % --*-- Unitary tests --*--
 date = struct('freq', NaN, 'time', NaN(1,2));
 
 if ~ischar(a) || ~isdate(a)
-    error('dynDates::string2date: Input must be a string that can be interpreted as a date!');
+    error('dates::string2date: Input must be a string that can be interpreted as a date!');
 end
 
 if isyearly(a)

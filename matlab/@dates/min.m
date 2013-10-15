@@ -1,6 +1,6 @@
 function C = min(varargin)
     
-% Overloads the min function for dynDates objects.
+% Overloads the min function for dates objects.
     
 % Copyright (C) 2013 Dynare Team
 %
@@ -24,34 +24,34 @@ switch nargin
     A = varargin{1};
     switch length(A)
       case 0
-        C= dynDates();
+        C= dates();
       case 1
         C = A;
       otherwise
         tmp = sortrows(A.time);
-        C = dynDates();
+        C = dates();
         C.freq = A.freq;
         C.ndat = 1;
         C.time = tmp(1,:);
     end
   case 2
     A = varargin{1};
-    if ~isa(A,'dynDates')
-        error('dynDates::min: All inputs must be dynDates objects!')
+    if ~isa(A,'dates')
+        error('dates::min: All inputs must be dates objects!')
     end
     B = varargin{2};
-    if ~isa(B,'dynDates')
-        error('dynDates::min: All inputs must be dynDates objects!')
+    if ~isa(B,'dates')
+        error('dates::min: All inputs must be dates objects!')
     end
     C = min(A+B);
   otherwise
-    if ~isa(varargin{1},'dynDates')
-        error('dynDates::min: All inputs must be dynDates objects!')
+    if ~isa(varargin{1},'dates')
+        error('dates::min: All inputs must be dates objects!')
     end
     A = varargin{1};
     for i=2:nargin
-        if ~isa(varargin{i},'dynDates')
-            error('dynDates::min: All inputs must be dynDates objects!')
+        if ~isa(varargin{i},'dates')
+            error('dates::min: All inputs must be dates objects!')
         end
         A = A + varargin{i};
     end
@@ -60,10 +60,10 @@ end
 
 %@test:1
 %$ % Define some dates
-%$ d3 = dynDates('1950q2');
-%$ d4 = dynDates('1950Q3');
-%$ d5 = dynDates('1950m1');
-%$ d6 = dynDates('1948M6');
+%$ d3 = dates('1950q2');
+%$ d4 = dates('1950Q3');
+%$ d5 = dates('1950m1');
+%$ d6 = dates('1948M6');
 %$ m2 = min(d3,d4);
 %$ i2 = (m2==d3);
 %$ m3 = min(d5,d6);
@@ -77,9 +77,9 @@ end
 
 %@test:2
 %$ % Define some dates
-%$ d = dynDates('1950Q2','1951Q3','1949Q1','1950Q4');
+%$ d = dates('1950Q2','1951Q3','1949Q1','1950Q4');
 %$ m = min(d);
-%$ i = (m==dynDates('1949Q1'));
+%$ i = (m==dates('1949Q1'));
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(i,1);
@@ -88,8 +88,8 @@ end
 
 %@test:3
 %$ % Define some dates
-%$ m = min(dynDates('1950Q2','1951Q3'),dynDates('1949Q1'),dynDates('1950Q4'));
-%$ i = (m==dynDates('1949Q1'));
+%$ m = min(dates('1950Q2','1951Q3'),dates('1949Q1'),dates('1950Q4'));
+%$ i = (m==dates('1949Q1'));
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(i,1);
@@ -98,8 +98,8 @@ end
 
 %@test:4
 %$ % Define some dates
-%$ m = min(dynDates('1950Q2'),dynDates('1951Q3'),dynDates('1949Q1'),dynDates('1950Q4'));
-%$ i = (m==dynDates('1949Q1'));
+%$ m = min(dates('1950Q2'),dates('1951Q3'),dates('1949Q1'),dates('1950Q4'));
+%$ i = (m==dates('1949Q1'));
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(i,1);

@@ -1,10 +1,10 @@
 function C = lt(A,B)  % --*-- Unitary tests --*--
 
-% Overloads the < operator for dynDates objects.
+% Overloads the < operator for dates objects.
 %
 % INPUTS 
-%  o A    dynDates object with n or 1 elements.
-%  o B    dynDates object with n or 1 elements.
+%  o A    dates object with n or 1 elements.
+%  o B    dates object with n or 1 elements.
 %
 % OUTPUTS 
 %  o C    column vector of max(n,1) elements (zeros or ones).
@@ -27,11 +27,11 @@ function C = lt(A,B)  % --*-- Unitary tests --*--
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if ~isequal(nargin,2)
-    error('dynDates::lt: I need exactly two input arguments!')
+    error('dates::lt: I need exactly two input arguments!')
 end
 
-if ~isa(A,'dynDates') || ~isa(B,'dynDates')
-    error(['dynDates::lt: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' have to be a dynDates objects!'])
+if ~isa(A,'dates') || ~isa(B,'dates')
+    error(['dates::lt: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' have to be a dates objects!'])
 end
 
 if ~isequal(A.freq,B.freq)
@@ -70,10 +70,10 @@ end
 %$ date_5 = '1949Q2';
 %$
 %$ % Call the tested routine.
-%$ d2 = dynDates(date_2);
-%$ d3 = dynDates(date_3);
-%$ d4 = dynDates(date_4);
-%$ d5 = dynDates(date_5);
+%$ d2 = dates(date_2);
+%$ d3 = dates(date_3);
+%$ d4 = dates(date_4);
+%$ d5 = dates(date_5);
 %$ i1 = (d2<d3);
 %$ i2 = (d3<d4);
 %$ i3 = (d4<d2);
@@ -95,15 +95,15 @@ end
 %$ B4 = '1945Q4';
 %$ B5 = '1950Q1';
 %$
-%$ % Create dynDates objects.
-%$ dd = dynDates(B1,B2,B3,B4);
+%$ % Create dates objects.
+%$ dd = dates(B1,B2,B3,B4);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(dynDates(B1)<dynDates(B2),1);
-%$ t(2) = dyn_assert(dynDates(B2)<dynDates(B1),0);
-%$ t(3) = dyn_assert(dynDates(B2)<dynDates(B1),0);
-%$ t(4) = dyn_assert(dd<dynDates(B5),ones(4,1));
-%$ t(5) = dyn_assert(dynDates(B5)<dd,zeros(4,1));
-%$ t(6) = dyn_assert(dynDates(B1)<dd,[0; ones(3,1)]);
+%$ t(1) = dyn_assert(dates(B1)<dates(B2),1);
+%$ t(2) = dyn_assert(dates(B2)<dates(B1),0);
+%$ t(3) = dyn_assert(dates(B2)<dates(B1),0);
+%$ t(4) = dyn_assert(dd<dates(B5),ones(4,1));
+%$ t(5) = dyn_assert(dates(B5)<dd,zeros(4,1));
+%$ t(6) = dyn_assert(dates(B1)<dd,[0; ones(3,1)]);
 %$ T = all(t);
 %@eof:2

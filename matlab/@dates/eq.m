@@ -1,10 +1,10 @@
 function C = eq(A,B) % --*-- Unitary tests --*--
 
-% Overloads == operator for dynDates objects.
+% Overloads == operator for dates objects.
 %
 % INPUTS 
-%  o A    dynDates object with n or 1 elements.
-%  o B    dynDates object with n or 1 elements.
+%  o A    dates object with n or 1 elements.
+%  o B    dates object with n or 1 elements.
 %
 % OUTPUTS 
 %  o C    column vector of max(n,1) elements (zeros or ones).
@@ -27,11 +27,11 @@ function C = eq(A,B) % --*-- Unitary tests --*--
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if ~isequal(nargin,2)
-    error('dynDates::eq: I need exactly two input arguments!')
+    error('dates::eq: I need exactly two input arguments!')
 end
 
-if ~isa(A,'dynDates') || ~isa(B,'dynDates')
-    error(['dynDates::eq: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' have to be a dynDates objects!'])
+if ~isa(A,'dates') || ~isa(B,'dates')
+    error(['dates::eq: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' have to be a dates objects!'])
 end
 
 if ~isequal(A.freq,B.freq)
@@ -50,10 +50,10 @@ else
 end
 
 %@test:1
-%$ % Define some dynDates objects
-%$ d1 = dynDates('1950Q1','1950Q2','1950Q3','1950Q4') ;
-%$ d2 = dynDates('1960Q1','1960Q2','1960Q3','1960Q4') ;
-%$ d3 = dynDates('1950Q1','1960Q2','1950Q3','1960Q4') ;
+%$ % Define some dates objects
+%$ d1 = dates('1950Q1','1950Q2','1950Q3','1950Q4') ;
+%$ d2 = dates('1960Q1','1960Q2','1960Q3','1960Q4') ;
+%$ d3 = dates('1950Q1','1960Q2','1950Q3','1960Q4') ;
 %$
 %$ % Call the tested routine.
 %$ t1 = d1==d1;
@@ -68,10 +68,10 @@ end
 %@eof:1
 
 %@test:2
-%$ % Define some dynDates objects
-%$ d1 = dynDates('1950Q1') ;
-%$ d2 = dynDates('1960Q1') ;
-%$ d3 = dynDates('1960Q1') ;
+%$ % Define some dates objects
+%$ d1 = dates('1950Q1') ;
+%$ d2 = dates('1960Q1') ;
+%$ d3 = dates('1960Q1') ;
 %$
 %$ % Call the tested routine.
 %$ t1 = d1==d1;
@@ -86,10 +86,10 @@ end
 %@eof:2
 
 %@test:3
-%$ % Define some dynDates objects
-%$ d1 = dynDates('1950Q1','1950Q2','1950Q3','1950Q4') ;
-%$ d2 = dynDates('1950Q2') ;
-%$ d3 = dynDates('1970Q1') ;
+%$ % Define some dates objects
+%$ d1 = dates('1950Q1','1950Q2','1950Q3','1950Q4') ;
+%$ d2 = dates('1950Q2') ;
+%$ d3 = dates('1970Q1') ;
 %$
 %$ % Call the tested routine.
 %$ t1 = d1==d2;

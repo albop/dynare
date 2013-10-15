@@ -1,7 +1,7 @@
 function C = plus(A,B) % --*-- Unitary tests --*--
 
-% Overloads the plus operator. If A and B are dynDates objects the method combines A and B without removing repetitions. If
-% one of the inputs is an integer or a vector of integers, the method shifts the dynDates object by X (the interger input)
+% Overloads the plus operator. If A and B are dates objects the method combines A and B without removing repetitions. If
+% one of the inputs is an integer or a vector of integers, the method shifts the dates object by X (the interger input)
 % periods forward.
 
 % Copyright (C) 2013 Dynare Team
@@ -21,10 +21,10 @@ function C = plus(A,B) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isa(A,'dynDates') && isa(B,'dynDates')
-    % Concatenate dynDates objects without removing repetitions if A and B are not disjoint sets of dates.
+if isa(A,'dates') && isa(B,'dates')
+    % Concatenate dates objects without removing repetitions if A and B are not disjoint sets of dates.
     if ~isequal(A.freq,B.freq)
-        error(['dynDates::plus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must have common frequencies!'])
+        error(['dates::plus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must have common frequencies!'])
     end
     if isempty(B)
         C = A;
@@ -34,29 +34,29 @@ if isa(A,'dynDates') && isa(B,'dynDates')
         C = B;
         return
     end
-    C = dynDates();
+    C = dates();
     C.freq = A.freq;
     C.time = [A.time; B.time];
     C.ndat = A.ndat+B.ndat;
-elseif isa(A,'dynDates') && ( (isvector(B) && isequal(length(B),A.ndat) && all(isint(B))) || isscalar(B) && isint(B) || isequal(length(A),1) && isvector(B) && all(isint(B)))
-    C = dynDates();
+elseif isa(A,'dates') && ( (isvector(B) && isequal(length(B),A.ndat) && all(isint(B))) || isscalar(B) && isint(B) || isequal(length(A),1) && isvector(B) && all(isint(B)))
+    C = dates();
     C.freq = A.freq;
     C.time = add_periods_to_array_of_dates(A.time, A.freq, B);
     C.ndat = rows(C.time);
-elseif isa(B,'dynDates') && ( (isvector(A) && isequal(length(A),B.ndat) && all(isint(A))) || isscalar(A) && isint(A) )
-    C = dynDates();
+elseif isa(B,'dates') && ( (isvector(A) && isequal(length(A),B.ndat) && all(isint(A))) || isscalar(A) && isint(A) )
+    C = dates();
     C.freq = B.freq;
     C.time = add_periods_to_array_of_dates(B.time, B.freq, A);
     C.ndat = rows(C.time);
 else
-    error('dynDates::plus: I don''t understand what you want to do! Check the manual.')
+    error('dates::plus: I don''t understand what you want to do! Check the manual.')
 end
 
 %@test:1
-%$ % Define some dynDates objects
-%$ d1 = dynDates('1950Q1','1950Q2') ;
-%$ d2 = dynDates('1950Q3','1950Q4') ;
-%$ d3 = dynDates('1950Q1','1950Q2','1950Q3','1950Q4') ;
+%$ % Define some dates objects
+%$ d1 = dates('1950Q1','1950Q2') ;
+%$ d2 = dates('1950Q3','1950Q4') ;
+%$ d3 = dates('1950Q1','1950Q2','1950Q3','1950Q4') ;
 %$
 %$ % Call the tested routine.
 %$ try
@@ -69,19 +69,19 @@ end
 %$
 %$ if t(1) 
 %$   t(2) = dyn_assert(e1==d3,1);
-%$   t(3) = dyn_assert(e2==dynDates('1950Q1','1950Q2','1950Q3','1950Q4','1950Q1','1950Q2','1950Q3','1950Q4'),1);
+%$   t(3) = dyn_assert(e2==dates('1950Q1','1950Q2','1950Q3','1950Q4','1950Q1','1950Q2','1950Q3','1950Q4'),1);
 %$ end
 %$ T = all(t);
 %@eof:1
 
 %@test:2
-%$ % Define some dynDates objects
-%$ d1 = dynDates('1950Q1');
-%$ e1 = dynDates('1950Q2');
-%$ e2 = dynDates('1950Q3');
-%$ e3 = dynDates('1950Q4');
-%$ e4 = dynDates('1951Q1');
-%$ e5 = dynDates('1950Q2','1950Q3','1950Q4','1951Q1');
+%$ % Define some dates objects
+%$ d1 = dates('1950Q1');
+%$ e1 = dates('1950Q2');
+%$ e2 = dates('1950Q3');
+%$ e3 = dates('1950Q4');
+%$ e4 = dates('1951Q1');
+%$ e5 = dates('1950Q2','1950Q3','1950Q4','1951Q1');
 %$
 %$ % Call the tested routine.
 %$ try
@@ -106,13 +106,13 @@ end
 %@eof:2
 
 %@test:3
-%$ % Define some dynDates objects
-%$ d1 = dynDates('1950Q1');
-%$ e1 = dynDates('1949Q4');
-%$ e2 = dynDates('1949Q3');
-%$ e3 = dynDates('1949Q2');
-%$ e4 = dynDates('1949Q1');
-%$ e5 = dynDates('1948Q4');
+%$ % Define some dates objects
+%$ d1 = dates('1950Q1');
+%$ e1 = dates('1949Q4');
+%$ e2 = dates('1949Q3');
+%$ e3 = dates('1949Q2');
+%$ e4 = dates('1949Q1');
+%$ e5 = dates('1948Q4');
 %$
 %$ % Call the tested routine.
 %$ try

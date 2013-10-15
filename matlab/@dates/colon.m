@@ -3,12 +3,12 @@ function C = colon(varargin) % --*-- Unitary tests --*--
 % Overloads the colon operator (:). This method can be used to create ranges of dates.
 %
 % INPUTS 
-%  o A    dynDates object with one element.
+%  o A    dates object with one element.
 %  o d    integer scalar, number of periods between each date (default value, if nargin==2, is one)
-%  o B    dynDates object with one element.
+%  o B    dates object with one element.
 %
 % OUTPUTS 
-%  o C    dynDates object with length(B-A) elements (if d==1).
+%  o C    dates object with length(B-A) elements (if d==1).
 %
 % REMARKS 
 %  B must be greater than A if d>0.
@@ -34,39 +34,39 @@ if isequal(nargin,2)
     A = varargin{1};
     B = varargin{2};
     d = 1;
-    if ~(isa(A,'dynDates') && isa(B,'dynDates') && isequal(length(A),1) && isequal(length(B),1))
-        error('dynDates::colon: In an expression like A:B, A and B must be dynDates objects!')
+    if ~(isa(A,'dates') && isa(B,'dates') && isequal(length(A),1) && isequal(length(B),1))
+        error('dates::colon: In an expression like A:B, A and B must be dates objects!')
     end
 elseif isequal(nargin,3)
     A = varargin{1};
     B = varargin{3};
     d = varargin{2};
-    if ~(isa(A,'dynDates') && isa(B,'dynDates') && isequal(length(A),1) && isequal(length(B),1))
-        error('dynDates::colon: In an expression like A:d:B, A and B must be dynDates objects and d a scalar integer (number of periods)!')
+    if ~(isa(A,'dates') && isa(B,'dates') && isequal(length(A),1) && isequal(length(B),1))
+        error('dates::colon: In an expression like A:d:B, A and B must be dates objects and d a scalar integer (number of periods)!')
     end
     if ~(isscalar(d) && isint(d))
-        error('dynDates::colon: In an expression like A:d:B, A and B must be dynDates objects and d a scalar integer (number of periods)!')
+        error('dates::colon: In an expression like A:d:B, A and B must be dates objects and d a scalar integer (number of periods)!')
     end
     if isequal(d,0)
-        error('dynDates::colon: In an expression like A:d:B, d (the incremental number of periods) must nonzero!')
+        error('dates::colon: In an expression like A:d:B, d (the incremental number of periods) must nonzero!')
     end
 else
-    error('dynDates::colon: Wrong calling sequence! See the manual for the colon (:) operator and dynDates objects.')
+    error('dates::colon: Wrong calling sequence! See the manual for the colon (:) operator and dates objects.')
 end
 
 if ~isequal(A.freq,B.freq)
-    error(['dynDates::colon: Input arguments ' inputname(1) 'and ' inputname(2) ' must have common frequency!'])
+    error(['dates::colon: Input arguments ' inputname(1) 'and ' inputname(2) ' must have common frequency!'])
 end
 
 if A>B && d>0
-    error(['dynDates::colon: ' inputname(1) ' must precede ' inputname(2) '!' ])
+    error(['dates::colon: ' inputname(1) ' must precede ' inputname(2) '!' ])
 end
 
 if B>A && d<0
-    error(['dynDates::colon: ' inputname(2) ' must precede ' inputname(1) '!' ])
+    error(['dates::colon: ' inputname(2) ' must precede ' inputname(1) '!' ])
 end
 
-C = dynDates();
+C = dates();
 n = (B-A)+1;
 C.freq = A.freq;
 C.ndat = n;
@@ -95,8 +95,8 @@ C.ndat = rows(C.time);
 %$ e.time = [1950 2; 1950 3; 1950 4; 1951 1; 1951 2; 1951 3; 1951 4];
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1);
-%$ d2 = dynDates(date_2);
+%$ d1 = dates(date_1);
+%$ d2 = dates(date_2);
 %$ d3 = d1:d2;
 %$
 %$ % Check the results.
@@ -111,7 +111,7 @@ C.ndat = rows(C.time);
 %$ e.time = [1950 2; 1950 3; 1950 4; 1951 1; 1951 2; 1951 3; 1951 4];
 %$
 %$ % Call the tested routine.
-%$ d = dynDates('1950Q2'):dynDates('1951Q4');
+%$ d = dates('1950Q2'):dates('1951Q4');
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);
@@ -125,7 +125,7 @@ C.ndat = rows(C.time);
 %$ e.time = [1950 2; 1950 4; 1951 2; 1951 4];
 %$
 %$ % Call the tested routine.
-%$ d = dynDates('1950Q2'):2:dynDates('1951Q4');
+%$ d = dates('1950Q2'):2:dates('1951Q4');
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);

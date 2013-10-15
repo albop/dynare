@@ -3,7 +3,7 @@ function s = date2string(varargin)
 % Returns date as a string.
 %
 % INPUTS 
-%  o varargin{1}     + dynDates object with one element, if nargin==1.
+%  o varargin{1}     + dates object with one element, if nargin==1.
 %                    + 1*2 vector of integers (first element is the year, second element is the subperiod), if nargin==2.
 %  o varargin{2}     integer scalar equal to 1, 4, 12 or 52 (frequency).
 %
@@ -28,8 +28,8 @@ function s = date2string(varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
     
 if isequal(nargin,1) 
-    if ~(isa(varargin{1},'dynDates') && isequal(length(varargin{1}),1))
-        error(['dynDates::format: Input argument ' inputname(1) ' has to be a dynDates object with one element!'])
+    if ~(isa(varargin{1},'dates') && isequal(length(varargin{1}),1))
+        error(['dates::format: Input argument ' inputname(1) ' has to be a dates object with one element!'])
     else
         time = varargin{1}.time;
         freq = varargin{1}.freq;
@@ -38,7 +38,7 @@ end
 
 if isequal(nargin,2)
     if ~(isvector(varargin{1}) && isequal(length(varargin{1}),2) && all(isint(varargin{1})) && isscalar(varargin{2} && ismember(varargin{2},[1 4 12 52])))
-        error(['dynDates::format: First input must be a 1*2 vector of integers and second input must be a scalar integer (1, 4, 12 or 52)!'])
+        error(['dates::format: First input must be a 1*2 vector of integers and second input must be a scalar integer (1, 4, 12 or 52)!'])
     else
         time = varargin{1};
         freq = varargin{2};

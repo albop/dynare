@@ -1,7 +1,5 @@
-function C = isequal(A,B)
+function val = subsasgn(val, idx, rhs)
 
-% Overloads isequal function for dynDates objects.
-    
 % Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
@@ -19,18 +17,4 @@ function C = isequal(A,B)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isa(A,'dynDates') || ~isa(B,'dynDates')
-    error('dynDates::isequal: Both inputs must be dynDates objects!')
-end
-
-if ~isequal(A.freq, B.freq)
-    C = 0;
-    return
-end
-
-if ~isequal(A.ndat, B.ndat)
-    C = 0;
-    return
-end
-
-C = isequal(A.time,B.time);
+error('dates::subsasgn: Members of dates class are private')

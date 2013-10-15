@@ -33,5 +33,5 @@ switch upper(s)
   case 'W'
     freq = 52;
   otherwise
-    error('dynDates::freq2string: Unknown frequency!')
+    error('dates::freq2string: Unknown frequency!')
 end

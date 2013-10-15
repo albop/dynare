@@ -42,7 +42,7 @@ function C = eq(A,B) % --*-- Unitary tests --*--
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if nargin~=2
-    error('dynDates::eq: I need exactly two input arguments!')
+    error('dates::eq: I need exactly two input arguments!')
 end
 
 C = isequal(A,B);

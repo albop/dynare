@@ -1,8 +1,8 @@
-function dd = dynDates(varargin) % --*-- Unitary tests --*--
+function dd = dates(varargin) % --*-- Unitary tests --*--
 
 %@info:
-%! @deftypefn {Function File} {@var{dd} =} dynDates (@var{a},@var{b},...)
-%! @anchor{dynDates}
+%! @deftypefn {Function File} {@var{dd} =} dates (@var{a},@var{b},...)
+%! @anchor{dates}
 %! @sp 1
 %! Constructor for the Dynare dates class (unordered sequence of dates).
 %! @sp 2
@@ -63,14 +63,14 @@ function dd = dynDates(varargin) % --*-- Unitary tests --*--
  % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 dd = struct('ndat', 0, 'freq', NaN(0), 'time', NaN(0,2));
-dd = class(dd,'dynDates');
+dd = class(dd,'dates');
 
 switch nargin
   case 0
     % Returns an empty object
     return
   case 1
-    if isa(varargin{1},'dynDates')
+    if isa(varargin{1},'dates')
         % Returns a copy of the input argument
         dd = varargin{1};
     elseif isdate(varargin{1})
@@ -79,14 +79,14 @@ switch nargin
         dd.freq = date.freq;
         dd.time = date.time;
     elseif isfreq(varargin{1})
-        % Instantiate an empty dynDates object (only set frequency)
+        % Instantiate an empty dates object (only set frequency)
         if ischar(varargin{1})
             dd.freq = string2freq(varargin{1});
         else
             dd.freq = varargin{1};
         end
     else
-        error('dynDates:: Wrong calling sequence of the constructor!')
+        error('dates:: Wrong calling sequence of the constructor!')
     end
   otherwise
     dd.ndat = nargin;
@@ -96,7 +96,7 @@ switch nargin
         dd.freq = date.freq;
         dd.time(1,:) = date.time;
     else
-        error(['dynDates::dynDates: Input 1 has to be a string date!'])
+        error(['dates::dates: Input 1 has to be a string date!'])
     end
     for i=2:dd.ndat
         if isdate(varargin{i})
@@ -104,10 +104,10 @@ switch nargin
             if isequal(date.freq,dd.freq)
                 dd.time(i,:) = date.time;
             else
-                 error(['dynDates::dynDates: Check that all the inputs have the same frequency (see input number ' str2num(i) ')!'])
+                 error(['dates::dates: Check that all the inputs have the same frequency (see input number ' str2num(i) ')!'])
             end
         else
-            error(['dynDates::dynDates: Input ' str2num(i) ' has to be a string date!'])
+            error(['dates::dates: Input ' str2num(i) ' has to be a string date!'])
         end
     end
 end
@@ -125,7 +125,7 @@ end
 %$ e.ndat = 4;
 %$
 %$ % Call the tested routine.
-%$ d = dynDates(B1,B2,B3,B4);
+%$ d = dates(B1,B2,B3,B4);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);
@@ -147,7 +147,7 @@ end
 %$ e.ndat = 4;
 %$
 %$ % Call the tested routine.
-%$ d = dynDates(B1,B2,B3,B4);
+%$ d = dates(B1,B2,B3,B4);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);
@@ -169,7 +169,7 @@ end
 %$ e.ndat = 4;
 %$
 %$ % Call the tested routine.
-%$ d = dynDates(B1,B2,B3,B4);
+%$ d = dates(B1,B2,B3,B4);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);
@@ -179,7 +179,7 @@ end
 %@eof:3
 
 %% @test:4
-%$ % Define a dynDates object
+%$ % Define a dates object
 %$ B = dynDate('1950Q1'):dynDate('1960Q3');
 %$
 %$

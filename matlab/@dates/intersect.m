@@ -2,7 +2,7 @@ function C = intersect(A,B) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{C} =} intersect (@var{A},@var{B})
-%! @anchor{@dynDates/intersect}
+%! @anchor{@dates/intersect}
 %! @sp 1
 %! C of B and A.
 %! if A and B are not disjoints.
@@ -11,16 +11,16 @@ function C = intersect(A,B) % --*-- Unitary tests --*--
 %! @sp 1
 %! @table @ @var
 %! @item A
-%! @ref{dynDates} object.
+%! @ref{dates} object.
 %! @item B
-%! @ref{dynDates} object.
+%! @ref{dates} object.
 %! @end table
 %! @sp 2
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item C
-%! @ref{dynDates} object.
+%! @ref{dates} object.
 %! @end table
 %! @end deftypefn
 %@eod:
@@ -42,8 +42,8 @@ function C = intersect(A,B) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isa(A,'dynDates') || ~isa(B,'dynDates')
-    error(['dynDates::plus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must be dynDates objects!'])
+if ~isa(A,'dates') || ~isa(B,'dates')
+    error(['dates::plus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must be dates objects!'])
 end
 
 if eq(A,B)
@@ -52,13 +52,13 @@ if eq(A,B)
 end
 
 if ~isequal(A.freq,B.freq)
-    C = dynDates();
+    C = dates();
     return
 end
 
 time = intersect(A.time,B.time,'rows');
 
-C = dynDates();
+C = dates();
 if isempty(time)
     return
 end
@@ -68,7 +68,7 @@ C.time = time;
 C.ndat = rows(time); 
 
 %@test:1
-%$ % Define some dynDates objects
+%$ % Define some dates objects
 %$ d1 = dynDate('1950Q1'):dynDate('1969Q4') ;
 %$ d2 = dynDate('1960Q1'):dynDate('1969Q4') ;
 %$ d3 = dynDate('1970Q1'):dynDate('1979Q4') ;

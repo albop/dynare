@@ -1,26 +1,15 @@
-function B = isempty(A) % --*-- Unitary tests --*--
-
-%@info:
-%! @deftypefn {Function File} {@var{B} =} isempty (@var{A})
-%! @anchor{@dynDates/isempty}
-%! @sp 1
-%! Overloads the isempty function for the @ref{dynDates} class.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item A
-%! @ref{dynDates} object.
-%! @end table
-%! @sp 1
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item b
-%! Integer scalar (equal to zero if @var{A} is not empty).
-%! @end table
-%! @end deftypefn
-%@eod:
+function m = getDatesCellStringArray(dd)
+%function m = getDatesCellStringArray(dd)
+% Returns a cell array of strings containing the dates
+%
+% INPUTS
+%   dd - dates object
+%
+% OUTPUTS
+%   m  - cell array of strings
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -38,13 +27,27 @@ function B = isempty(A) % --*-- Unitary tests --*--
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
-B = isequal(A.ndat,0);
 
-%@test:1
-%$ % Instantiate an empty dynDate object
-%$ d = dynDates();
-%$ % Test if this object is empty
-%$ t(1) = isempty(d);
-%$ T = all(t);
-%@eof:1
+dateSep = '';
+switch dd.freq
+    case 1
+    case 4
+        dateSep = 'q';
+    case 12
+        dateSep = 'm';
+    case 52
+        dateSep = 'w';
+    otherwise
+        error('Unknown frequency %d', dd.freq);
+end
+
+m = cell(0);
+for i = 1:dd.ndat
+    if isempty(dateSep)
+        newdate = num2str(dd.time(i,1));
+    else
+        newdate = [num2str(dd.time(i,1)) dateSep num2str(dd.time(i,2))];
+    end
+    m = { m{:} newdate };
+end
+end

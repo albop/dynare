@@ -1,12 +1,12 @@
-function B = uminus(A)  % --*-- Unitary tests --*--
+function B = uplus(A)  % --*-- Unitary tests --*--
 
-% Overloads the unary plus operator for dynDates objects. Shifts all the elements by one period.
+% Overloads the unary plus operator for dates objects. Shifts all the elements by one period.
 %
 % INPUTS 
-%  o A    dynDates object with n elements.
+%  o A    dates object with n elements.
 %
 % OUTPUTS 
-%  o B    dynDates object with n elements.
+%  o B    dates object with n elements.
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -25,31 +25,31 @@ function B = uminus(A)  % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-B = dynDates(A);
-B.time(:,2) = B.time(:,2)-1;
-idx = find(B.time(:,2)==0);
-B.time(idx,1) = B.time(idx,1)-1;
-B.time(idx,2) = B.freq;
+B = dates(A);
+B.time(:,2) = B.time(:,2)+1;
+idx = find(B.time(:,2)>B.freq); % Happy new year!
+B.time(idx,1) = B.time(idx,1)+1;
+B.time(idx,2) = 1;
 
 %@test:1
 %$ % Define some dates
 %$ date_1 = '1950Y';
 %$ date_2 = '1950Q2';
-%$ date_3 = '1950Q1';
+%$ date_3 = '1950Q4';
 %$ date_4 = '1950M2';
-%$ date_5 = '1950M1';
+%$ date_5 = '1950M12';
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1); d1 = -d1;
-%$ d2 = dynDates(date_2); d2 = -d2;
-%$ d3 = dynDates(date_3); d3 = -d3;
-%$ d4 = dynDates(date_4); d4 = -d4;
-%$ d5 = dynDates(date_5); d5 = -d5;
-%$ i1 = (d1==dynDates('1949Y'));
-%$ i2 = (d2==dynDates('1950Q1'));
-%$ i3 = (d3==dynDates('1949Q4'));
-%$ i4 = (d4==dynDates('1950M1'));
-%$ i5 = (d5==dynDates('1949M12'));
+%$ d1 = dates(date_1); d1 = +d1;
+%$ d2 = dates(date_2); d2 = +d2;
+%$ d3 = dates(date_3); d3 = +d3;
+%$ d4 = dates(date_4); d4 = +d4;
+%$ d5 = dates(date_5); d5 = +d5;
+%$ i1 = (d1==dates('1951Y'));
+%$ i2 = (d2==dates('1950Q3'));
+%$ i3 = (d3==dates('1951Q1'));
+%$ i4 = (d4==dates('1950M3'));
+%$ i5 = (d5==dates('1951M1'));
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(i1,1);
@@ -61,10 +61,10 @@ B.time(idx,2) = B.freq;
 %@eof:1
 
 %@test:2
-%$ d1 = dynDates('1950Q1','1950Q2','1950Q3','1950Q4','1951Q1');
-%$ d2 = dynDates('1949Q4','1950Q1','1950Q2','1950Q3','1950Q4');
+%$ d1 = dates('1950Q1','1950Q2','1950Q3','1950Q4','1951Q1');
+%$ d2 = dates('1950Q2','1950Q3','1950Q4','1951Q1','1951Q2');
 %$ try
-%$   d3 = -d1;
+%$   d3 = +d1;
 %$   t(1) = 1;
 %$ catch
 %$   t(1) = 0;

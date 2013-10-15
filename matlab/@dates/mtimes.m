@@ -1,8 +1,19 @@
-function y = dynDates2decimal(dd)
-% function y = dynDates2decimal(dd)
-%     returns a vector of doubles with the fractional part corresponding
-%     to the subperiod. Mostly used for plots.
-    
+function B = mtimes(A,n)
+
+% Overloads the times operator (*). Returns dates object A replicated n times.
+%
+% INPUTS 
+%  o A    dates object with m elements.
+%
+% OUTPUTS 
+%  o B    dates object with m*n elements.
+%
+% EXAMPLE 1
+%  If A = dates('2000Q1'), then B=A*3 is a dates object equal to dates('2000Q1','2000Q1','2000Q1')  
+%
+% EXAMPLE 2
+%  If A = dates('2003Q1','2009Q2'), then B=A*2 is a dates object equal to dates('2003Q1','2009Q2','2003Q1','2009Q2')
+
 % Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
@@ -20,4 +31,9 @@ function y = dynDates2decimal(dd)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    y = dd.time(:,1)+(dd.time(:,2)-1)/dd.freq;
+if ~(isscalar(n) && isint(n))
+    error('dates::m: First and second input arguments have to be a dates object and a scalar integer!')
+end
+B = A;
+B.time = repmat(A.time,n,1);
+B.ndat = A.ndat*n;

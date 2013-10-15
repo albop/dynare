@@ -184,8 +184,8 @@ switch S(1).type
             % Do nothing.
             B = A;
         end
-    elseif isa(S(1).subs{1},'dynDates')
-        % Extract a subsample using a dynDates object
+    elseif isa(S(1).subs{1},'dates')
+        % Extract a subsample using a dates object
         [junk,tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
         B = dynSeries();
         B.data = A.data(tdx,:);
@@ -199,7 +199,7 @@ switch S(1).type
     elseif isvector(S(1).subs{1}) && all(isint(S(1).subs{1}))
         % Extract a subsample using a vector of integers (observation index).
         % Note that this does not work if S(1).subs is an integer scalar... In which case S(1).subs is interpreted as a lead/lag operator (as in the Dynare syntax).
-        % To extract one observation, a dynDates with one element or a dynDate input must be used.
+        % To extract one observation, a dates with one element or a dynDate input must be used.
         if all(S(1).subs{1}>0) && all(S(1).subs{1}<=A.nobs)
             if size(A.data,2)>1
                 S(1).subs = [S(1).subs, ':'];
@@ -216,7 +216,7 @@ switch S(1).type
             error('dynSeries::subsref: Indices are out of bounds!')
         end
     elseif isa(S(1).subs{1},'dynDate')
-        % Extract a subsample using a dynDates object
+        % Extract a subsample using a dates object
         [junk,tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
         B = dynSeries();
         B.data = A.data(tdx,:);

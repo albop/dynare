@@ -105,7 +105,7 @@ switch length(S)
               A.freq = A.init.freq;
               A.time = A.init:A.init+(A.nobs-1);
               return
-          elseif isequal(S(1).subs,'time') && isa(B,'dynDates')
+          elseif isequal(S(1).subs,'time') && isa(B,'dates')
               % Overwrite the time member...
               A.time = B;
               % ... and update the freq and init members.
@@ -131,7 +131,7 @@ switch length(S)
               end
           end
         case '()' % Date(s) selection
-          if isa(S(1).subs{1},'dynDates') || isa(S(1).subs{1},'dynDate')
+          if isa(S(1).subs{1},'dates') || isa(S(1).subs{1},'dynDate')
               [junk, tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
               if isa(B,'dynSeries')
                   [junk, tdy] = intersect(B.time.time,S(1).subs{1}.time,'rows');
@@ -172,7 +172,7 @@ switch length(S)
             sA = extract(A,S(1).subs);
         end
         if (isa(B,'dynSeries') && isequal(sA.vobs,B.vobs)) || (isnumeric(B) && isequal(sA.vobs,columns(B))) || (isnumeric(B) && isequal(columns(B),1)) 
-            if isa(S(2).subs{1},'dynDates') || isa(S(2).subs{1},'dynDate')
+            if isa(S(2).subs{1},'dates') || isa(S(2).subs{1},'dynDate')
                 [junk, tdx] = intersect(sA.time.time,S(2).subs{1}.time,'rows');
                 if isa(B,'dynSeries')
                     [junk, tdy] = intersect(B.time.time,S(2).subs{1}.time,'rows');

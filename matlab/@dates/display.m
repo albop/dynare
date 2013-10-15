@@ -1,17 +1,4 @@
-function lastIndex = end(o, k, n)
-% function lastIndex = end(o, k, n)
-% End keyword
-%
-% INPUTS
-%   o              [dynDates] dynDates object
-%   k              [integer]  index where end appears
-%   n              [integer]  number of indices
-%
-% OUTPUTS
-%   lastIndex      [integer] last dynDates index
-%
-% SPECIAL REQUIREMENTS
-%   none
+function display(dd)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -30,6 +17,33 @@ function lastIndex = end(o, k, n)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(k==1 && n==1, '@dynDates/end: dynDates only has one dimension');
-lastIndex = o.ndat;
+if isempty(dd)
+    fprintf('%s is an empty dates object.\n', inputname(1));
+    return
+end
+
+max_displayed = 5;
+first_displayed = 2;
+    
+fprintf('%s = <dates: ', inputname(1));
+
+if dd.ndat<=max_displayed
+    for i=1:dd.ndat
+        fprintf(date2string(dd.time(i,:),dd.freq))
+        if i<dd.ndat
+            fprintf(', ')
+        else
+            fprintf('>\n')
+        end
+    end
+else
+    for i=1:first_displayed
+        fprintf(date2string(dd.time(i,:),dd.freq))
+        fprintf(', ')
+    end
+    fprintf(' ..., ')
+    fprintf(date2string(dd.time(dd.ndat-1,:),dd.freq))
+    fprintf(', ')
+    fprintf(date2string(dd.time(dd.ndat,:),dd.freq))
+    fprintf('>\n')
 end

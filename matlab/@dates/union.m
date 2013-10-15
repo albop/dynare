@@ -2,7 +2,7 @@ function C = union(A,varargin) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{C} =} union (@var{A},@var{B})
-%! @anchor{dynDates/union}
+%! @anchor{dates/union}
 %! @sp 1
 %! Union method for the Dynare dates class (removes repetitions if any). Dates in C are sorted in increasing order.
 %! @sp 2
@@ -10,16 +10,16 @@ function C = union(A,varargin) % --*-- Unitary tests --*--
 %! @sp 1
 %! @table @ @var
 %! @item A
-%! Object instantiated by @ref{dynDates}.
+%! Object instantiated by @ref{dates}.
 %! @item B
-%! Object instantiated by @ref{dynDates}.
+%! Object instantiated by @ref{dates}.
 %! @end table
 %! @sp 2
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item C
-%! Object instantiated by @ref{dynDates}.
+%! Object instantiated by @ref{dates}.
 %! @end table
 %! @end deftypefn
 %@eod:
@@ -41,8 +41,8 @@ function C = union(A,varargin) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isa(A,'dynDates')  
-    error(['dynDates::union: Input argument ''' inputname(1) '''   has to be a dynDates object!'])
+if ~isa(A,'dates')  
+    error(['dates::union: Input argument ''' inputname(1) '''   has to be a dates object!'])
 end
 
 C = A;
@@ -52,17 +52,17 @@ if ~length(varargin)
 end
 
 for i=1:length(varargin)
-    if isa(varargin{i},'dynDates')
+    if isa(varargin{i},'dates')
         C = C + varargin{i};
     else
-        error(['dynDates::union: Input argument ''' inputname(i) '''   has to be a dynDates object!'])
+        error(['dates::union: Input argument ''' inputname(i) '''   has to be a dates object!'])
     end
 end
 
 C = sort(unique(C));
 
 %@test:1
-%$ % Define some dynDates objects
+%$ % Define some dates objects
 %$ d1 = dynDate('1950Q1'):dynDate('1959Q4') ;
 %$ d2 = dynDate('1960Q1'):dynDate('1969Q4') ;
 %$ d3 = dynDate('1970Q1'):dynDate('1979Q4') ;

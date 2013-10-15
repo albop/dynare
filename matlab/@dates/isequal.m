@@ -1,5 +1,7 @@
-function disp(dd)
+function C = isequal(A,B)
 
+% Overloads isequal function for dates objects.
+    
 % Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
@@ -17,33 +19,18 @@ function disp(dd)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isempty(dd)
-    fprintf('Empty dynDates object.\n');
+if ~isa(A,'dates') || ~isa(B,'dates')
+    error('dates::isequal: Both inputs must be dates objects!')
+end
+
+if ~isequal(A.freq, B.freq)
+    C = 0;
     return
 end
-    
-max_displayed = 5;
-first_displayed = 2;
-    
-fprintf('<dynDates: ');
-    
-if dd.ndat<=max_displayed
-    for i=1:dd.ndat
-        fprintf(date2string(dd.time(i,:),dd.freq))
-        if i<dd.ndat
-            fprintf(', ')
-        else
-            fprintf('>\n')
-        end
-    end
-else
-    for i=1:first_displayed
-        fprintf(date2string(dd.time(i,:),dd.freq))
-        fprintf(', ')
-    end
-    fprintf(' ..., ')
-    fprintf(date2string(dd.time(dd.ndat-1,:),dd.freq))
-    fprintf(', ')
-    fprintf(date2string(dd.time(dd.ndat,:),dd.freq))
-    fprintf('>\n')
+
+if ~isequal(A.ndat, B.ndat)
+    C = 0;
+    return
 end
+
+C = isequal(A.time,B.time);

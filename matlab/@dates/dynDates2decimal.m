@@ -1,16 +1,8 @@
-function m = getDatesCellStringArray(dd)
-%function m = getDatesCellStringArray(dd)
-% Returns a cell array of strings containing the dates
-%
-% INPUTS
-%   dd - dynDates object
-%
-% OUTPUTS
-%   m  - cell array of strings
-%
-% SPECIAL REQUIREMENTS
-%   none
-
+function y = dates2decimal(dd)
+% function y = dates2decimal(dd)
+%     returns a vector of doubles with the fractional part corresponding
+%     to the subperiod. Mostly used for plots.
+    
 % Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
@@ -28,26 +20,4 @@ function m = getDatesCellStringArray(dd)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-dateSep = '';
-switch dd.freq
-    case 1
-    case 4
-        dateSep = 'q';
-    case 12
-        dateSep = 'm';
-    case 52
-        dateSep = 'w';
-    otherwise
-        error('Unknown frequency %d', dd.freq);
-end
-
-m = cell(0);
-for i = 1:dd.ndat
-    if isempty(dateSep)
-        newdate = num2str(dd.time(i,1));
-    else
-        newdate = [num2str(dd.time(i,1)) dateSep num2str(dd.time(i,2))];
-    end
-    m = { m{:} newdate };
-end
-end
+    y = dd.time(:,1)+(dd.time(:,2)-1)/dd.freq;

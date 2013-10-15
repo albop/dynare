@@ -33,5 +33,5 @@ switch freq
   case 52
     s = 'W';
   otherwise
-    error('dynDates::freq2string: Unknown frequency!')
+    error('dates::freq2string: Unknown frequency!')
 end

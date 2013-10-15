@@ -1,16 +1,16 @@
 function B = append(A,a) % --*-- Unitary tests --*--
 
-% append method for dynDates class.
+% append method for dates class.
 %
 % INPUTS 
-%  o A    dynDates object.
-%  o a    dynDates object with one element or string that can be interpreted as a date.
+%  o A    dates object.
+%  o a    dates object with one element or string that can be interpreted as a date.
 %
 % OUTPUTS 
-%  o B    dynDates object containing dates defined in A and a.
+%  o B    dates object containing dates defined in A and a.
 %
 % EXAMPLE 1 
-%  If A is a dynDates object with quarterly frequency, then B = A.append(dynDates('1950Q2')) and 
+%  If A is a dates object with quarterly frequency, then B = A.append(dates('1950Q2')) and 
 %  B = A.append('1950Q2') are equivalent syntaxes.
 
 % Copyright (C) 2012-2013 Dynare Team
@@ -30,23 +30,23 @@ function B = append(A,a) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isa(a,'dynDates')
+if isa(a,'dates')
     if ~isequal(length(a),1)
-        error(['dynDates::append: Input argument ' inputname(a) ' has to be a dynDates object with one element.'])
+        error(['dates::append: Input argument ' inputname(a) ' has to be a dates object with one element.'])
     end
     if isempty(a)
         B = A;
         return
     end
 elseif isdate(a)
-    a = dynDates(a);
+    a = dates(a);
 end
 
 if ~isequal(A.freq, a.freq)
-    error(['dynDates::append: A and a must have common frequency!'])
+    error(['dates::append: A and a must have common frequency!'])
 end
 
-B = dynDates();
+B = dates();
 B.ndat = A.ndat+1;
 B.freq = A.freq;
 B.time = NaN(B.ndat,2);
@@ -67,8 +67,8 @@ B.time(A.ndat+1,:) = a.time;
 %$ e.ndat = 5;
 %$
 %$ % Call the tested routine.
-%$ d = dynDates(B4,B3,B2,B1);
-%$ d = d.append(dynDates(B5));
+%$ d = dates(B4,B3,B2,B1);
+%$ d = d.append(dates(B5));
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);
@@ -91,7 +91,7 @@ B.time(A.ndat+1,:) = a.time;
 %$ e.ndat = 5;
 %$
 %$ % Call the tested routine.
-%$ d = dynDates(B4,B3,B2,B1);
+%$ d = dates(B4,B3,B2,B1);
 %$ d = d.append(B5);
 %$
 %$ % Check the results.

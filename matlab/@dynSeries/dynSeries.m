@@ -85,7 +85,7 @@ ts.name = {};
 ts.tex  = {};
 ts.freq = [];
 ts.init = dynDate();
-ts.time = dynDates();
+ts.time = dates();
 
 ts = class(ts,'dynSeries');
 

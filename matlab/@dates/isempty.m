@@ -1,4 +1,26 @@
-function val = subsasgn(val, idx, rhs)
+function B = isempty(A) % --*-- Unitary tests --*--
+
+%@info:
+%! @deftypefn {Function File} {@var{B} =} isempty (@var{A})
+%! @anchor{@dates/isempty}
+%! @sp 1
+%! Overloads the isempty function for the @ref{dates} class.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item A
+%! @ref{dates} object.
+%! @end table
+%! @sp 1
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item b
+%! Integer scalar (equal to zero if @var{A} is not empty).
+%! @end table
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -16,5 +38,13 @@ function val = subsasgn(val, idx, rhs)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+    
+B = isequal(A.ndat,0);
 
-error('dynDates::subsasgn: Members of dynDates class are private')
+%@test:1
+%$ % Instantiate an empty dynDate object
+%$ d = dates();
+%$ % Test if this object is empty
+%$ t(1) = isempty(d);
+%$ T = all(t);
+%@eof:1
