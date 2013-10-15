@@ -178,14 +178,14 @@ end
 %$ T = all(t);
 %@eof:3
 
-%% @test:4
+%@test:4
 %$ % Define a dates object
-%$ B = dynDate('1950Q1'):dynDate('1960Q3');
+%$ B = dates('1950Q1'):dates('1960Q3');
 %$
 %$
 %$ % Call the tested routine.
 %$ d = B(2);
-%$ if isa(d,'dynDate')
+%$ if isa(d,'dates')
 %$     t(1) = 1;
 %$ else
 %$     t(1) = 0;
@@ -196,4 +196,4 @@ end
 %$     t(3) = dyn_assert(d.time,[1950 2]);
 %$ end
 %$ T = all(t);
-%%@eof:4
+%@eof:4
