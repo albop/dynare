@@ -63,9 +63,9 @@ C = sort(unique(C));
 
 %@test:1
 %$ % Define some dates objects
-%$ d1 = dynDate('1950Q1'):dynDate('1959Q4') ;
-%$ d2 = dynDate('1960Q1'):dynDate('1969Q4') ;
-%$ d3 = dynDate('1970Q1'):dynDate('1979Q4') ;
+%$ d1 = dates('1950Q1'):dates('1959Q4') ;
+%$ d2 = dates('1960Q1'):dates('1969Q4') ;
+%$ d3 = dates('1970Q1'):dates('1979Q4') ;
 %$
 %$ % Call the tested routine.
 %$ e1 = union(d1);
@@ -75,10 +75,10 @@ C = sort(unique(C));
 %$ e5 = union(d1,d2,d3,d2);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(e1==d1,1);
-%$ t(2) = dyn_assert(e2==d1+d2,1);
-%$ t(3) = dyn_assert(e3==d1+d2+d3,1);
-%$ t(4) = dyn_assert(e4==d1+d2+d3,1);
-%$ t(5) = dyn_assert(e5==d1+d2+d3,1);
+%$ t(1) = dyn_assert(isequal(e1,d1),1);
+%$ t(2) = dyn_assert(isequal(e2,d1+d2),1);
+%$ t(3) = dyn_assert(isequal(e3,d1+d2+d3),1);
+%$ t(4) = dyn_assert(isequal(e4,d1+d2+d3),1);
+%$ t(5) = dyn_assert(isequal(e5,d1+d2+d3),1);
 %$ T = all(t);
 %@eof:1
