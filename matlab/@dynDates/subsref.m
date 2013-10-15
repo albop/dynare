@@ -1,36 +1,16 @@
 function B = subsref(A,S) % --*-- Unitary tests --*--
 
-%@info:
-%! @deftypefn {Function File} {@var{us} =} subsref (@var{ts},S)
-%! @anchor{dynDates/subsref}
-%! @sp 1
-%! Overloads the subsref method for the Dynare dates class (@ref{dynDates}).
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item A
-%! Dynare date object instantiated by @ref{dynDate}.
-%! @item S
-%! Matlab's structure array S with two fields, type and subs. The type field is string containing '()', '@{@}', or '.', where '()' specifies
-%! integer subscripts, '@{@}' specifies cell array subscripts, and '.' specifies subscripted structure fields. The subs field is a cell array
-%! or a string containing the actual subscripts (see matlab's documentation).
-%! @end table
-%! @sp 1
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item B
-%! A matlab object (public member of the @ref{dynDates} object).
-%! @end table
-%! @sp 2
-%! @strong{This function is called by:}
-%! @sp 2
-%! @strong{This function calls:}
-%! @sp2
-%!
-%! @end deftypefn
-%@eod:
+% Overload the subsref method for dynDates objects.
+%
+% INPUTS 
+%  o A     dynDates object.
+%  o S     matlab's structure.
+%
+% OUTPUTS 
+%  o B     dynDates object.
+%
+% REMARKS 
+%  See the matlab's documentation about the subsref method.
 
 % Copyright (C) 2011-2013 Dynare Team
 %
@@ -73,14 +53,115 @@ switch S(1).type
         error('dynDates::subsref: Unknown public member or method!')
     end
   case '()'
-    % Extract some dates.
-    if isvector(S(1).subs{1}) && all(isint(S(1).subs{1})) && all(S(1).subs{1}>0) && all(S(1).subs{1}<=A.ndat)
-        B = dynDates();
-        B.freq = A.freq;
-        B.time = A.time(S(1).subs{1},:);
-        B.ndat = length(S(1).subs{1});
+    if isempty(A)
+        if isempty(A.freq)
+            % Populate an empty dynDates object with time member (freq is not specified). Needs two or three inputs. First input is an integer
+            % scalar specifying the frequency. Second input is either the time member (a n*2 array of integers) or a column vector with n
+            % elements (the first column of the time member --> years). If the the second input is a row vector and if A.freq~=1 a third input
+            % is necessary. The third input is n*1 vector of integers between 1 and A.freq (second column of the time member --> subperiods).
+            B = dynDates();
+            % First input is the frequency.
+            if isfreq(S(1).subs{1})
+                if ischar(S(1).subs{1})
+                    B.freq = string2freq(S(1).subs{1});
+                else
+                    B.freq = S(1).subs{1};
+                end
+            else
+                error('dynDates::subsref: First input must be a frequency!')
+            end
+            if isequal(length(S(1).subs),2)
+                % If two inputs are provided, the second input must be a n*2 array except if frequency is annual.
+                [n, m] = size(S(1).subs{2});
+                if m>2
+                    error('dynDates::subsref: Second input argument array cannot have more than two columns!')
+                end
+                if ~isequal(m,2) && ~isequal(B.freq,1)
+                    error('dynDates::subsref: Second argument has to be a n*2 array for non annual frequency!')
+                end
+                if ~all(all(S(1).subs{2}))
+                    error('dynDates::subsref: Second argument has be an array of intergers!')
+                end
+                if m>1 && ~issubperiod(S(1).subs{2}(:,2),B.freq)
+                    error(['dynDates::subsref: Elements in the second column of the first input argument are not legal subperiods (should be integers betwwen 1 and ' num2str(B.freq) ')!'])
+                end
+                if isequal(m,2)
+                    B.time = S(1).subs{2};
+                elseif isequal(m,1)
+                    B.time = [S(1).subs{2}, ones(n,1)];
+                else
+                    error(['dynDates::subsref: This is a bug!'])
+                end
+                B.ndat = rows(B.time);
+            elseif isequal(length(S(1).subs),3)
+                % If three inputs are provided, the second and third inputs are column verctors of integers (years and subperiods).
+                if ~iscolumn(S(1).subs{2}) && ~all(isint(S(1).subs{2}))
+                    error('dynDates::subsref: Second input argument must be a column vector of integers!')
+                end
+                n1 = size(S(1).subs{2},1);
+                if ~iscolumn(S(1).subs{3}) && ~issubperiod(S(1).subs{3}, B.freq)
+                    error(['dynDates::subsref: Third input argument must be a column vector of subperiods (integers between 1 and ' num2str(B.freq) ')!'])
+                end
+                n2 = size(S(1).subs{3},1);
+                if ~isequal(n1,n2)
+                    error('dynDates::subsref: Second and third input arguments must have the same number of elements!')
+                end
+                B.time = [S(1).subs{2}, S(1).subs{3}];
+                B.ndat = rows(B.time);
+            else
+                error('dynDates::subsref: Wrong calling sequence!')
+            end
+        else
+            % Populate an empty dynDates object with time member (freq is already specified).
+            % Needs one (time) or two (first and second columns of time for years and subperiods) inputs.
+            B = A;
+            if isequal(length(S(1).subs),2)
+                if ~iscolumn(S(1).subs{1}) && ~all(isint(S(1).subs{1}))
+                    error('dynDates::subsref: First argument has to be a column vector of integers!')
+                end
+                n1 = size(S(1).subs{1},1);
+                if ~iscolumn(S(1).subs{2}) && ~issubperiod(S(1).subs{2}, B.freq)
+                    error(['dynDates::subsref: Second argument has to be a column vector of subperiods (integers between 1 and ' num2str(B.freq) ')!'])
+                end
+                n2 = size(S(1).subs{2},1);
+                if ~isequal(n2,n1)
+                    error('dynDates::subsref: First and second argument must have the same number of rows!')
+                end
+                B.time = [S(1).subs{1}, S(1).subs{2}];
+                B.ndat = rows(B.time);
+            elseif isequal(length(S(1).subs),1)
+                [n, m] = size(S(1).subs{1});
+                if ~isequal(m,2) && ~isequal(B.freq,1)
+                    error('dynDates::subsref: First argument has to be a n*2 array!')
+                end
+                if ~all(isint(S(1).subs{1}(:,1)))
+                    error('dynDates::subsref: First column of the first argument has to be a column vector of integers!')
+                end
+                if m>1 && issubperiod(S(1).subs{1}(:,1), B.freq)
+                    error(['dynDates::subsref: The second column of the first input argument has to be a column  vector of subperiods (integers between 1 and ' num2str(B.freq) ')!'])
+                end
+                if isequal(m,2)
+                    B.time = S(1).subs{1};
+                elseif isequal(m,1) && isequal(B.freq,1)
+                    B.time = [S(1).subs{1}, ones(n,1)];
+                else
+                    error(['dynDates::subsref: This is a bug!'])
+                end
+                B.ndat = rows(B.time);
+            else
+                error('dynDates::subsref: Wrong number of inputs!')
+            end
+        end
     else
-        error(['dynDates::subsref: indices has to be a vector of positive integers less than or equal to ' int2str(A.ndat) '!'])
+        % dynDates object A is not empty. We extract some dates
+        if isvector(S(1).subs{1}) && all(isint(S(1).subs{1})) && all(S(1).subs{1}>0) && all(S(1).subs{1}<=A.ndat)
+            B = dynDates();
+            B.freq = A.freq;
+            B.time = A.time(S(1).subs{1},:);
+            B.ndat = rows(B.time);
+        else
+            error(['dynDates::subsref: indices has to be a vector of positive integers less than or equal to ' int2str(A.ndat) '!'])
+        end
     end
   otherwise
     error('dynDates::subsref: Something is wrong in your syntax!')
@@ -112,9 +193,9 @@ end
 %$ T = all(t);
 %@eof:1
 
-%# @test:2
+%@test:2
 %$ % Define a dynDates object
-%$ B = dynDate('1950Q1'):dynDate('1960Q3');
+%$ B = dynDates('1950Q1'):dynDates('1960Q3');
 %$
 %$ % Try to extract a sub-dynDates object and apply a method
 %$ 
@@ -132,11 +213,11 @@ end
 %$     t(4) = dyn_assert(d.ndat,2);
 %$ end
 %$ T = all(t);
-%# @eof:2
+%@eof:2
 
-%# @test:3
+%@test:3
 %$ % Define a dynDates object
-%$ B = dynDate('1950Q1'):dynDate('1960Q3');
+%$ B = dynDates('1950Q1'):dynDates('1960Q3');
 %$
 %$ % Try to extract a sub-dynDates object and apply a method
 %$
@@ -154,7 +235,7 @@ end
 %$     t(4) = dyn_assert(d.ndat,2);
 %$ end
 %$ T = all(t);
-%# @eof:3
+%@eof:3
 
 %@test:4
 %$ % Define a dynDates object
@@ -176,4 +257,74 @@ end
 %$ end
 %$ T = all(t);
 %@eof:4
+
+%@test:5
+%$ % Define an empty dynDates object with quaterly frequency.
+%$ qq = dynDates('Q');
+%$
+%$ % Define a ranges of dates using qq.
+%$ try
+%$     r1 = qq(1950,1):qq([1950, 3]);
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$ if t(1)
+%$     try
+%$         r2 = qq([1950, 1; 1950, 2; 1950, 3]);
+%$         t(2) = 1;
+%$     catch
+%$         t(2) = 0;
+%$     end
+%$ end
+%$ if t(1) && t(2)
+%$     try
+%$         r3 = qq(1950*ones(3,1), transpose(1:3));
+%$         t(3) = 1;
+%$     catch
+%$         t(3) = 0;
+%$     end
+%$ end
+%$
+%$ if t(1) && t(2) && t(3)
+%$     t(4) = dyn_assert(isequal(r1,r2),1);
+%$     t(5) = dyn_assert(isequal(r1,r3),1);
+%$ end
+%$ T = all(t);
+%@eof:5
+
+%@test:6
+%$ % Define an empty dynDates object with quaterly frequency.
+%$ date = dynDates();
+%$
+%$ % Define a ranges of dates using qq.
+%$ try
+%$     r1 = date(4,1950,1):date(4,[1950, 3]);
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$ if t(1)
+%$     try
+%$         r2 = date(4,[1950, 1; 1950, 2; 1950, 3]);
+%$         t(2) = 1;
+%$     catch
+%$         t(2) = 0;
+%$     end
+%$ end
+%$ if t(1) && t(2)
+%$     try
+%$         r3 = date(4,1950*ones(3,1), transpose(1:3));
+%$         t(3) = 1;
+%$     catch
+%$         t(3) = 0;
+%$     end
+%$ end
+%$
+%$ if t(1) && t(2) && t(3)
+%$     t(4) = dyn_assert(isequal(r1,r2),1);
+%$     t(5) = dyn_assert(isequal(r1,r3),1);
+%$ end
+%$ T = all(t);
+%@eof:6
 
