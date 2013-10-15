@@ -135,8 +135,8 @@ C.ndat = rows(C.time);
 
 
 %$ @test:3
-%$ % Create an empty dynDate object for quaterly data
-%$ qq = dynDate('Q');
+%$ % Create an empty dates object for quaterly data
+%$ qq = dates('Q');
 %$
 %$ % Define expected results.
 %$ e.freq = 4;
