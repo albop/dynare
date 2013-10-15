@@ -42,7 +42,7 @@ function B = isempty(A) % --*-- Unitary tests --*--
 B = isequal(A.ndat,0);
 
 %@test:1
-%$ % Instantiate an empty dynDate object
+%$ % Instantiate an empty dates object
 %$ d = dates();
 %$ % Test if this object is empty
 %$ t(1) = isempty(d);
