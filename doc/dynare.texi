@@ -5580,6 +5580,48 @@ DSGE model, @code{simulation_type} has to be set equal to @code{deterministic}.
 
 @end table
 
+@outputhead
+
+The results are not stored in the @code{oo_} structure but in a separate structure @code{forecasts} saved to the harddisk into a file called @code{conditional_forecasts.mat}.
+
+@defvr {MATLAB/Octave variable} forecasts.cond
+Variable set by the @code{conditional_forecast} command. It stores the conditional forecasts. Fields are @code{periods+1} by 1 vectors storing the steady state (time 0) and the subsequent @code{periods} forecasts periods. Fields are of the form:
+@example
+@code{forecasts.cond.@var{FORECAST_MOMENT}.@var{VARIABLE_NAME}}
+@end example
+where @var{FORECAST_MOMENT} is one of the following:
+
+@table @code
+
+@item Mean
+Mean of the conditional forecast distribution.
+
+@item ci
+Confidence interval of the conditional forecast distribution. The size corresponds to @code{conf_sig}.
+@end table
+
+@end defvr
+
+@defvr {MATLAB/Octave variable} forecasts.uncond
+Variable set by the @code{conditional_forecast} command. It stores the unconditional forecasts. Fields are of the form:
+@example
+@code{forecasts.uncond.@var{FORECAST_MOMENT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} forecasts.instruments
+Variable set by the @code{conditional_forecast} command. Stores the names of the exogenous instruments.
+@end defvr
+
+@defvr {MATLAB/Octave variable} forecasts.controlled_variables
+Variable set by the @code{conditional_forecast} command. Stores the position of the constrained endogenous variables in declaration order.
+@end defvr
+
+@defvr {MATLAB/Octave variable} forecasts.graphs
+Variable set by the @code{conditional_forecast} command. Stores the information for generating the conditional forecast plots.
+@end defvr
+
+
 @examplehead
 
 @example
