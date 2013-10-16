@@ -36,7 +36,7 @@ switch format
     fprintf(fid,'%% File created on %s.\n',datestr(now));
     fprintf(fid,'\n');
     fprintf(fid,'FREQ__ = %s;\n',num2str(A.freq));
-    fprintf(fid,'INIT__ = '' %s'';\n',A.init.format);
+    fprintf(fid,'INIT__ = '' %s'';\n',date2string(A.init));
     fprintf(fid,'\n');
     fprintf(fid,'NAMES__ = {');
     for i=1:A.vobs
@@ -62,7 +62,7 @@ switch format
     fclose(fid);
   case 'mat'
     FREQ__ = A.freq;
-    INIT__ = A.init.format;
+    INIT__ = date2string(A.init);
     NAMES__ = A.name;
     TEX__ = A.tex;
     str = [];
@@ -84,7 +84,7 @@ switch format
     for t=1:A.nobs
         date = A.init+(t-1);
         str = sprintf(', %15.8g',A.data(t,:));
-        fprintf(fid, '%s%s\n',date.format,str);
+        fprintf(fid, '%s%s\n',date2string(date),str);
     end
     fclose(fid);
 end

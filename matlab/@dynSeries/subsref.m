@@ -199,7 +199,7 @@ switch S(1).type
     elseif isvector(S(1).subs{1}) && all(isint(S(1).subs{1}))
         % Extract a subsample using a vector of integers (observation index).
         % Note that this does not work if S(1).subs is an integer scalar... In which case S(1).subs is interpreted as a lead/lag operator (as in the Dynare syntax).
-        % To extract one observation, a dates with one element or a dynDate input must be used.
+        % To extract one observation, a dates with one element input must be used.
         if all(S(1).subs{1}>0) && all(S(1).subs{1}<=A.nobs)
             if size(A.data,2)>1
                 S(1).subs = [S(1).subs, ':'];
@@ -215,18 +215,6 @@ switch S(1).type
         else
             error('dynSeries::subsref: Indices are out of bounds!')
         end
-    elseif isa(S(1).subs{1},'dynDate')
-        % Extract a subsample using a dates object
-        [junk,tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
-        B = dynSeries();
-        B.data = A.data(tdx,:);
-        B.name = A.name;
-        B.tex  = A.tex;
-        B.nobs = 1;
-        B.vobs = A.vobs;
-        B.freq = A.freq;
-        B.init = A.time(tdx,:);
-        B.time = A.time(tdx,:);
     else
         error('dynSeries::subsref: I have no idea of what you are trying to do!')
     end
@@ -278,14 +266,14 @@ end
 %$ e.vobs = 2;
 %$ e.name = {'A1';'A2'};
 %$ e.freq = 1;
-%$ e.init = dynDate(2);
+%$ e.init = dates(1,2);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(a.data,e.data);
 %$ t(2) = dyn_assert(a.nobs,e.nobs);
 %$ t(3) = dyn_assert(a.vobs,e.vobs);
 %$ t(4) = dyn_assert(a.freq,e.freq);
-%$ t(5) = dyn_assert(a.init,e.init);
+%$ t(5) = dyn_assert(isequal(a.init,e.init),1);
 %$ T = all(t);
 %@eof:1
 
@@ -308,11 +296,11 @@ end
 %$ e.vobs = 1;
 %$ e.name = {'A1'};
 %$ e.freq = 1;
-%$ e.init = dynDate(1);
+%$ e.init = dates(1,1);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(a.data,e.data);
-%$ t(2) = dyn_assert(a.init,e.init);
+%$ t(2) = dyn_assert(isequal(a.init,e.init),1);
 %$ t(3) = dyn_assert(a.nobs,e.nobs);
 %$ t(4) = dyn_assert(a.vobs,e.vobs);
 %$ t(5) = dyn_assert(a.freq,e.freq);
@@ -338,14 +326,14 @@ end
 %$ e.vobs = 2;
 %$ e.name = {'A1';'A2'};
 %$ e.freq = 1;
-%$ e.init = dynDate(1);
+%$ e.init = dates(1,1);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(a.data,e.data);
 %$ t(2) = dyn_assert(a.nobs,e.nobs);
 %$ t(3) = dyn_assert(a.vobs,e.vobs);
 %$ t(4) = dyn_assert(a.freq,e.freq);
-%$ t(5) = dyn_assert(a.init,e.init);
+%$ t(5) = dyn_assert(isequal(a.init,e.init),1);
 %$ T = all(t);
 %@eof:3
 
@@ -367,7 +355,7 @@ end
 %$     t(2) = dyn_assert(A.nobs,4);
 %$     t(3) = dyn_assert(A.vobs,4);
 %$     t(4) = dyn_assert(A.freq,4);
-%$     t(5) = dyn_assert(A.init,dynDate('1990Q1'));
+%$     t(5) = dyn_assert(isequal(A.init,dates('1990Q1')),1);
 %$ end
 %$ T = all(t);
 %@eof:4
@@ -391,13 +379,13 @@ end
 %$ e.vobs = 2;
 %$ e.name = {'A1';'B1'};
 %$ e.freq = 1;
-%$ e.init = dynDate(1);
+%$ e.init = dates(1,1);
 %$
 %$ t(1) = dyn_assert(e.data,a.data);
 %$ t(2) = dyn_assert(e.nobs,a.nobs);
 %$ t(3) = dyn_assert(e.vobs,a.vobs);
 %$ t(4) = dyn_assert(e.name,a.name);
-%$ t(5) = dyn_assert(e.init,a.init);
+%$ t(5) = dyn_assert(isequal(e.init,a.init),1);
 %$ T = all(t);
 %@eof:5
 
@@ -421,25 +409,25 @@ end
 %$ e1.vobs = 12;
 %$ e1.name = {'GDP_1';'GDP_2';'GDP_3'; 'GDP_4'; 'GDP_5'; 'GDP_6'; 'GDP_7'; 'GDP_8'; 'GDP_9'; 'GDP_10'; 'GDP_11'; 'GDP_12'};
 %$ e1.freq = 1;
-%$ e1.init = dynDate(1);
+%$ e1.init = dates(1,1);
 %$ e2.data = A(:,[1, 13]);
 %$ e2.nobs = 10;
 %$ e2.vobs = 2;
 %$ e2.name = {'GDP_1';'HICP_1'};
 %$ e2.freq = 1;
-%$ e2.init = dynDate(1);
+%$ e2.init = dates(1,1);
 %$
 %$ % Check results.
 %$ t(1) = dyn_assert(e1.data,a.data);
 %$ t(2) = dyn_assert(e1.nobs,a.nobs);
 %$ t(3) = dyn_assert(e1.vobs,a.vobs);
 %$ t(4) = dyn_assert(e1.name,a.name);
-%$ t(5) = dyn_assert(e1.init,a.init);
+%$ t(5) = dyn_assert(isequal(e1.init,a.init),1);
 %$ t(6) = dyn_assert(e2.data,b.data);
 %$ t(7) = dyn_assert(e2.nobs,b.nobs);
 %$ t(8) = dyn_assert(e2.vobs,b.vobs);
 %$ t(9) = dyn_assert(e2.name,b.name);
-%$ t(10) = dyn_assert(e2.init,b.init);
+%$ t(10) = dyn_assert(isequal(e2.init,b.init),1);
 %$ T = all(t);
 %@eof:6
 
@@ -492,7 +480,7 @@ end
 %$ ts1 = dynSeries(A,'1971Q1',A_name,[]);
 %$
 %$ % Define the range of a subsample.
-%$ range = dynDate('1971Q2'):dynDate('1971Q4');
+%$ range = dates('1971Q2'):dates('1971Q4');
 %$ % Call the tested method.
 %$ a = ts1(range);
 %$
@@ -502,13 +490,13 @@ end
 %$ e.vobs = 3;
 %$ e.name = {'A1';'A2';'B1'};
 %$ e.freq = 4;
-%$ e.init = dynDate('1971Q2');
+%$ e.init = dates('1971Q2');
 %$
 %$ t(1) = dyn_assert(e.data,a.data);
 %$ t(2) = dyn_assert(e.nobs,a.nobs);
 %$ t(3) = dyn_assert(e.vobs,a.vobs);
 %$ t(4) = dyn_assert(e.name,a.name);
-%$ t(5) = dyn_assert(e.init,a.init);
+%$ t(5) = dyn_assert(isequal(e.init,a.init),1);
 %$ T = all(t);
 %@eof:9
 

@@ -113,7 +113,7 @@ a.time = a.init:a.init+(a.nobs-1);
 %$ 
 %$ if t(1)
 %$   t(2) = dyn_assert(ts1.nobs,ts2.nobs);
-%$   t(3) = dyn_assert(ts1.init==ts2.init,1);
+%$   t(3) = dyn_assert(isequal(ts1.init,ts2.init),1);
 %$   t(4) = dyn_assert(ts1.data,[NaN(3,3); A], 1e-15);
 %$   t(5) = dyn_assert(ts2.data,[B; NaN(4,2)], 1e-15);
 %$ end
@@ -145,7 +145,7 @@ a.time = a.init:a.init+(a.nobs-1);
 %$
 %$ if t(1)
 %$   t(2) = dyn_assert(ts1.nobs,ts2.nobs);
-%$   t(3) = dyn_assert(ts1.init==ts2.init,1);
+%$   t(3) = dyn_assert(isequal(ts1.init,ts2.init),1);
 %$   t(4) = dyn_assert(ts1.data,A, 1e-15);
 %$   t(5) = dyn_assert(ts2.data,[B; NaN(1,2)], 1e-15);
 %$ end
@@ -177,7 +177,7 @@ a.time = a.init:a.init+(a.nobs-1);
 %$
 %$ if t(1)
 %$   t(2) = dyn_assert(ts1.nobs,ts2.nobs);
-%$   t(3) = dyn_assert(ts1.init==ts2.init,1);
+%$   t(3) = dyn_assert(isequal(ts1.init,ts2.init),1);
 %$   t(4) = dyn_assert(ts1.data,A, 1e-15);
 %$   t(5) = dyn_assert(ts2.data,[B; NaN(1,2)], 1e-15);
 %$ end

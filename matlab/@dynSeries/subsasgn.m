@@ -98,7 +98,7 @@ switch length(S)
               end
           end
         case '.'
-          if isequal(S(1).subs,'init') && isa(B,'dynDate')
+          if isequal(S(1).subs,'init') && isa(B,'dates') && isequal(length(B),1)
               % Overwrite the init member...
               A.init = B;
               % ... and update freq and time members.
@@ -131,7 +131,7 @@ switch length(S)
               end
           end
         case '()' % Date(s) selection
-          if isa(S(1).subs{1},'dates') || isa(S(1).subs{1},'dynDate')
+          if isa(S(1).subs{1},'dates')
               [junk, tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
               if isa(B,'dynSeries')
                   [junk, tdy] = intersect(B.time.time,S(1).subs{1}.time,'rows');
@@ -172,7 +172,7 @@ switch length(S)
             sA = extract(A,S(1).subs);
         end
         if (isa(B,'dynSeries') && isequal(sA.vobs,B.vobs)) || (isnumeric(B) && isequal(sA.vobs,columns(B))) || (isnumeric(B) && isequal(columns(B),1)) 
-            if isa(S(2).subs{1},'dates') || isa(S(2).subs{1},'dynDate')
+            if isa(S(2).subs{1},'dates')
                 [junk, tdx] = intersect(sA.time.time,S(2).subs{1}.time,'rows');
                 if isa(B,'dynSeries')
                     [junk, tdy] = intersect(B.time.time,S(2).subs{1}.time,'rows');
@@ -504,8 +504,8 @@ end
 %$
 %$ % modify first object.
 %$ try
-%$     d1 = dynDate('1950Q3');
-%$     d2 = dynDate('1951Q3');
+%$     d1 = dates('1950Q3');
+%$     d2 = dates('1951Q3');
 %$     rg = d1:d2;
 %$     ts1{'A1'}(rg) = ts2{'B1'}(rg);
 %$     t(1) = 1;
@@ -535,8 +535,8 @@ end
 %$
 %$ % modify first object.
 %$ try
-%$     d1 = dynDate('1950Q3');
-%$     d2 = dynDate('1951Q3');
+%$     d1 = dates('1950Q3');
+%$     d2 = dates('1951Q3');
 %$     rg = d1:d2;
 %$     ts1{'A1'}(rg) = B(3:7);
 %$     t(1) = 1;
@@ -566,8 +566,8 @@ end
 %$
 %$ % modify first object.
 %$ try
-%$     d1 = dynDate('1950Q3');
-%$     d2 = dynDate('1951Q3');
+%$     d1 = dates('1950Q3');
+%$     d2 = dates('1951Q3');
 %$     rg = d1:d2;
 %$     ts1.A1(rg) = B(3:7);
 %$     t(1) = 1;
@@ -597,8 +597,8 @@ end
 %$
 %$ % modify first object.
 %$ try
-%$     d1 = dynDate('1950Q3');
-%$     d2 = dynDate('1951Q3');
+%$     d1 = dates('1950Q3');
+%$     d2 = dates('1951Q3');
 %$     rg = d1:d2;
 %$     ts1.A1(rg) = sqrt(pi);
 %$     t(1) = 1;
@@ -628,8 +628,8 @@ end
 %$
 %$ % modify first object.
 %$ try
-%$     d1 = dynDate('1950Q3');
-%$     d2 = dynDate('1951Q3');
+%$     d1 = dates('1950Q3');
+%$     d2 = dates('1951Q3');
 %$     rg = d1:d2;
 %$     ts1{'A1','A2'}(rg) = sqrt(pi);
 %$     t(1) = 1;
@@ -659,8 +659,8 @@ end
 %$
 %$ % modify first object.
 %$ try
-%$     d1 = dynDate('1950Q3');
-%$     d2 = dynDate('1951Q3');
+%$     d1 = dates('1950Q3');
+%$     d2 = dates('1951Q3');
 %$     rg = d1:d2;
 %$     ts1{'A1','A2'}(rg) = [sqrt(pi), pi];
 %$     t(1) = 1;
@@ -690,8 +690,8 @@ end
 %$
 %$ % modify first object.
 %$ try
-%$     d1 = dynDate('1950Q3');
-%$     d2 = dynDate('1951Q3');
+%$     d1 = dates('1950Q3');
+%$     d2 = dates('1951Q3');
 %$     rg = d1:d2;
 %$     ts1{'A1','A2'}(rg) = ones(5,1);
 %$     t(1) = 1;
@@ -718,8 +718,8 @@ end
 %$ % Instantiate two dynSeries object.
 %$ ts1 = dynSeries(A,'1950Q1',{'A1';'A2';'A3'},[]);
 %$
-%$ % Instantiate a dynDate object.
-%$ dd = dynDate('1952Q1');
+%$ % Instantiate a dates object.
+%$ dd = dates('1952Q1');
 %$
 %$ % modify first object.
 %$ try
@@ -750,8 +750,8 @@ end
 %$ % Instantiate two dynSeries object.
 %$ ts1 = dynSeries(A,'1950Q1',{'A1';'A2';'A3'},[]);
 %$
-%$ % Instantiate a dynDate object.
-%$ dd = dynDate('1952Q1');
+%$ % Instantiate a dates object.
+%$ dd = dates('1952Q1');
 %$
 %$ % modify first object.
 %$ try

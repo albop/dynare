@@ -86,7 +86,7 @@ end
 %$ B_name = {'A1';'A2'};
 %$
 %$ % Define expected results.
-%$ e.time = dynDate(1);
+%$ e.time = dates(1,1);
 %$ e.freq = 1;
 %$ e.name = {'A1';'A2'};
 %$ e.data = [A;B];
@@ -100,7 +100,7 @@ end
 %$
 %$ % Check the results.
 %$
-%$ t(1) = dyn_assert(ts3.init,e.time);
+%$ t(1) = dyn_assert(isequal(ts3.init,e.time),1);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -121,7 +121,7 @@ end
 %$ C_name = {'A1';'A2'};
 %$
 %$ % Define expected results.
-%$ e.time = dynDate(1);
+%$ e.time = dates(1,1);
 %$ e.freq = 1;
 %$ e.name = {'A1';'A2'};
 %$ e.data = [A;B;C];
@@ -136,7 +136,7 @@ end
 %$
 %$ % Check the results.
 %$
-%$ t(1) = dyn_assert(ts4.init,e.time);
+%$ t(1) = dyn_assert(isequal(ts4.init,e.time),1);
 %$ t(2) = dyn_assert(ts4.freq,e.freq);
 %$ t(3) = dyn_assert(ts4.data,e.data);
 %$ t(4) = dyn_assert(ts4.name,e.name);
