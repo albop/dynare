@@ -59,8 +59,8 @@ if ~( isequal(withnames,0) || isequal(withnames,1) )
 end
 
 % Output initialization
-freq = 1;
-init = dynDate(1);
+freq = 1;                  % Default frequency is annual.
+init = dates(1,1);         % Default initial date is year one.
 varlist = [];
 if ~exist('OCTAVE_VERSION')
     % Under Matlab, save time by using importdata
@@ -70,11 +70,11 @@ if ~exist('OCTAVE_VERSION')
         if size(A.textdata, 1) == 1
             % year dates confused for data
             varlist = A.textdata(1, 2:end);
-            init = dynDate(A.data(1, 1));
+            init = dates([num2str(A.data(1, 1)) 'Y']);
             data = A.data(:, 2:end);
         else
             varlist = A.textdata(1, 2:end);
-            init = dynDate(strrep(A.textdata{2, 1}, 'Y', ''));
+            init = dates(A.textdata{2, 1});
             data = A.data;
         end
     elseif withnames && ~withtime
@@ -83,10 +83,10 @@ if ~exist('OCTAVE_VERSION')
     elseif ~withnames && withtime
         if ~isstruct(A)
             % year dates confused for data
-            init = dynDate(A(1, 1));
+            init = dates([num2str(A.data(1, 1)) 'Y']);
             data = A(:, 2:end);
         else
-            init = dynDate(strrep(A.textdata{1, 1}, 'Y', ''));
+            init = dates(A.textdata{1, 1});
             data = A.data;
         end
     else
@@ -171,14 +171,13 @@ C = comma_locations(1)-1;
 if withtime
     tmp = linee(B:C);
     % Check the dates formatting
-    if ~(isyearly(tmp) || isquaterly(tmp) || ismonthly(tmp) || isweekly(tmp))
+    if isnumeric(tmp) && isint(tmp)
+        tmp = [num2str(tmp) 'Y'];
+    end
+    if isdate(tmp)
         error('load_csv_file_data:: Formatting error. I can''t read the dates!')
     end
-    if isyearly(tmp)==2
-        % Remove the Y (gpm/iris date format) if necessary
-        tmp = tmp(1:end-1);
-    end
-    init = dynDate(tmp);
+    init = dates(tmp);
     freq = init.freq;
     first = 2;
 else
