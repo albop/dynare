@@ -209,7 +209,7 @@ switch S(1).type
             B.vobs = A.vobs;
             B.freq = A.freq;
             B.time = builtin('subsref', A.time, S(1));
-            B.init = A.init+S(1).subs{1}(1);
+            B.init = B.time(1);
             B.name = A.name;
             B.tex  = A.tex;
         else
