@@ -11,7 +11,7 @@ function B = horzcat(varargin) % --*-- Unitary tests --*--
 %  o B    dates object containing dates defined in A1, A2, ...
 %
 % EXAMPLE 1 
-%  If A, B and C are dates object the following syntax:
+%  If A, B and C are dates objects the following syntax:
 %    
 %    D = [A, B, C] ;
 %
