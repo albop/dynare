@@ -202,3 +202,41 @@ end
 %$ end
 %$ T = all(t);
 %@eof:4
+
+%@test:5
+%$ % Define a dates object
+%$ B = dates(4,1950,1):dates(4,1960,3);
+%$
+%$ % Call the tested routine.
+%$ d = B(2);
+%$ if isa(d,'dates')
+%$     t(1) = 1;
+%$ else
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(d.freq,B.freq);
+%$     t(3) = dyn_assert(d.time,[1950 2]);
+%$ end
+%$ T = all(t);
+%@eof:5
+
+%@test:6
+%$ % Define a dates object
+%$ B = dates(4,[1950 1]):dates(4,[1960 3]);
+%$
+%$ % Call the tested routine.
+%$ d = B(2);
+%$ if isa(d,'dates')
+%$     t(1) = 1;
+%$ else
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(d.freq,B.freq);
+%$     t(3) = dyn_assert(d.time,[1950 2]);
+%$ end
+%$ T = all(t);
+%@eof:6
