@@ -89,14 +89,19 @@ switch nargin
         error('dates:: Wrong calling sequence of the constructor!')
     end
   otherwise
-    dd.ndat = nargin;
-    dd.time = NaN(dd.ndat,2);
     if isdate(varargin{1})
+        dd.ndat = nargin;
+        dd.time = NaN(dd.ndat,2);
         date = string2date(varargin{1});
         dd.freq = date.freq;
         dd.time(1,:) = date.time;
+    elseif isfreq(varargin{1})
+        S.type = '()';
+        S.subs = varargin;
+        dd = subsref(dd,S);
+        return
     else
-        error(['dates::dates: Input 1 has to be a string date!'])
+        error(['dates::dates: Wrong calling sequence!'])
     end
     for i=2:dd.ndat
         if isdate(varargin{i})
