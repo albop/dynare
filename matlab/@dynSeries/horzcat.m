@@ -1,44 +1,25 @@
-function a = horzcat(varargin) % --*-- Unitary tests --*--
+function B = horzcat(varargin) % --*-- Unitary tests --*--
 
-%@info:
-%! @deftypefn {Function file} {@var{a} =} horzcat (@var{b},@var{c}, ...)
-%! @anchor{horzcat}
-%! @sp 1
-%! Method of the dynSeries class.
-%! @sp 1
-%! Merge Dynare time series objects. This method overloads the horizontal concatenation operator, so that
-%! two (or more) time series objects can be merged using the following syntax:
-%!
-%!     a = [b, c, d];
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item b
-%! Dynare time series object, instantiated by @ref{dynSeries}.
-%! @item c
-%! Dynare time series object, instantiated by @ref{dynSeries}.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @var
-%! @item a
-%! Dynare time series object.
-%! @end table
-%! @sp 2
-%! @strong{This function is called by:}
-%! @ref{descriptive_statistics}
-%!
-%! @strong{This function calls:}
-%! @ref{dynSeries}, @ref{private/horzcat2}
-%!
-%! @strong{Remark 1.} It is assumed that the two time series objects have the same frequencies. The two time series objects can cover
-%! different time ranges.
-%!
-%! @end deftypefn
-%@eod:
-
+% Overloads horzcat method for dynSeries objects.
+%
+% INPUTS 
+%  o A1    dynSeries object.
+%  o A2    dynSeries object.
+%  o ...
+%
+% OUTPUTS 
+%  o B     dynSeries object.
+%
+% EXAMPLE 1 
+%  If A, B and C are dynSeries objects the following syntax:
+%    
+%    D = [A, B, C] ;
+%
+%  Defines a dynSeries object D containing the variables appearing in A, B and C.
+%
+% REMARKS 
+%  o A1, A2, ... must not have common variables.
+    
 % Copyright (C) 2011-2013 Dynare Team
 %
 % This file is part of Dynare.
@@ -56,20 +37,68 @@ function a = horzcat(varargin) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
-if nargin==0 
-    a = DynSeries();
-elseif nargin == 1
-    a = varargin{1};
-elseif nargin==2
-    a = horzcat2(varargin{1},varargin{2});
-else
-    a = horzcat2(varargin{1},varargin{2});
-    for i=3:nargin
-        a = horzcat2(a,varargin{i});
+switch nargin
+  case 0
+    B = dynSeries();
+  case 1
+    B = varargin{1};
+  otherwise
+    B = concatenate(varargin{1}, varargin{2});
+    if nargin>2
+        B = horzcat(B, varargin{3:end});
     end
 end
+
+function a = concatenate(b,c)
+    [n,message] = common_strings_in_cell_arrays(b.name,c.name);
+    if n
+        error(['dynSeries::horzcat: I cannot concatenate dynSeries objects with common variable names (' message ')!'])
+    end
+    if ~isequal(b.freq,c.freq)
+        error('dynSeries::horzcat: All time series objects must have common frequency!')
+    else
+        a = dynSeries();
+        a.freq = b.freq;
+    end
+    d_nobs_flag = 0;
+    if ~isequal(b.nobs,c.nobs)
+        d_nobs_flag = 1;
+    else
+        a.nobs = b.nobs;
+    end
+    d_init_flag = 0;
+    if ~isequal(b.init,c.init)
+        d_init_flag = 1;
+    end
+    a.vobs = b.vobs+c.vobs;
+    a.name = vertcat(b.name,c.name);
+    a.tex  = vertcat(b.tex,c.tex);
+    if ~( d_nobs_flag(1) || d_init_flag(1) )
+        a.init = b.init;
+        a.data = [b.data,c.data];
+        a.time = b.time;
+    else
+        if b.init<=c.init
+            a.init = b.init;
+            if b.init<c.init
+                c.data = [NaN(c.init-b.init,c.vobs); c.data];
+            end
+        else
+            a.init = c.init;
+            b_first_lines = b.init-c.init;
+            b.data = [NaN(b.init-c.init,b.vobs); b.data];
+        end
+        b_last_date = b.init+b.nobs;
+        c_last_date = c.init+c.nobs;
+        if b_last_date<c_last_date
+            b.data = [b.data; NaN(c_last_date-b_last_date,b.vobs)];
+        elseif b_last_date>c_last_date
+            c.data = [c.data; NaN(b_last_date-c_last_date,c.vobs)];
+        end
+        a.data = [b.data, c.data];
+        a.time = unique([b.time, c.time]);
+    end
+    a.nobs = size(a.data,1);
 
 %@test:1
 %$ % Define a data set.
@@ -81,7 +110,7 @@ end
 %$ B_name = {'B1';'B2'};
 %$
 %$ % Define expected results.
-%$ e.time = dynDate(1);
+%$ e.time = dates(1,1);
 %$ e.freq = 1;
 %$ e.name = {'A1';'A2';'B1';'B2'};
 %$ e.data = [A,B];
@@ -95,7 +124,7 @@ end
 %$
 %$ % Check the results.
 %$
-%$ t(1) = dyn_assert(ts3.init,e.time);
+%$ t(1) = dyn_assert(isequal(ts3.init,e.time),1);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -117,7 +146,7 @@ end
 %$
 %$ % Define expected results.
 %$ e.time = [transpose(2000+(1:12)), ones(12,1)];
-%$ e.init = dynDate(2001);
+%$ e.init = dates('2001Y');
 %$ e.freq = 1;
 %$ e.name = {'A1';'A2';'B1';'B2'};
 %$ e.data = [ [A; NaN(2,2)], [NaN(4,2); B]];
@@ -130,7 +159,7 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.init,e.init);
+%$ t(1) = dyn_assert(isequal(ts3.init,e.init),1);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -152,7 +181,7 @@ end
 %$
 %$ % Define expected results.
 %$ e.freq = 4;
-%$ e.init = dynDate('1950Q1');
+%$ e.init = dates('1950Q1');
 %$ e.name = {'A1';'A2';'B1';'B2'};
 %$ e.data = [ [A; NaN(2,2)], [NaN(2,2); B]];
 %$
@@ -164,7 +193,7 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.init,e.init);
+%$ t(1) = dyn_assert(isequal(ts3.init,e.init),1);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -185,7 +214,7 @@ end
 %$ B_init = '1950Q3';
 %$
 %$ % Define expected results.
-%$ e.init = dynDate(A_init);
+%$ e.init = dates(A_init);
 %$ e.freq = 4;
 %$ e.name = {'A1';'A2';'B1';'B2'};
 %$ e.data = [ A, [NaN(2,2); B]];
@@ -198,7 +227,7 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.init,e.init);
+%$ t(1) = dyn_assert(isequal(ts3.init,e.init),1);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -217,7 +246,7 @@ end
 %$ C_name = {'C1';'C2'};
 %$
 %$ % Define expected results.
-%$ e.init = dynDate(1);
+%$ e.init = dates(1,1);
 %$ e.freq = 1;
 %$ e.name = {'A1';'A2';'B1';'B2';'C1';'C2'};
 %$ e.data = [A,B,C];
@@ -231,7 +260,7 @@ end
 %$ ts4 = [ts1,ts2,ts3];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts4.init,e.init);
+%$ t(1) = dyn_assert(isequal(ts4.init,e.init),1);
 %$ t(2) = dyn_assert(ts4.freq,e.freq);
 %$ t(3) = dyn_assert(ts4.data,e.data);
 %$ t(4) = dyn_assert(ts4.name,e.name);
