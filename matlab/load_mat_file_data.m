@@ -36,10 +36,14 @@ function [freq,init,data,varlist,tex] = load_mat_file_data(file)
 datafile = load(file);
 
 if isfield(datafile,'INIT__')
-    init = dynDate(datafile.INIT__);
-    datafile = rmfield(datafile, 'INIT__');
+    if isdate(datafile.INIT__)
+        init = dates(datafile.INIT__);
+        datafile = rmfield(datafile, 'INIT__');
+    else
+        error('load_mat_file_data: INIT__ cannot be interpreted as a date.')
+    end
 else
-    init = dynDate(1);
+    init = dates(1,1);
 end
 
 if isfield(datafile,'FREQ__')
@@ -100,7 +104,7 @@ end
 %$
 %$ % Check the results.
 %$ t(2) = dyn_assert(freq,12);
-%$ t(3) = dyn_assert(isa(init,'dynDate'),1);
+%$ t(3) = dyn_assert(isa(init,'dates'),1);
 %$ t(4) = dyn_assert(init.freq,12);
 %$ t(5) = dyn_assert(init.time,[1938 11]);
 %$ t(6) = dyn_assert(varlist,{'hagop';'bedros'});
