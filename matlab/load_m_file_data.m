@@ -54,10 +54,14 @@ function [freq,init,data,varlist,tex] = load_m_file_data(file)
 run(basename);
 
 if exist('INIT__','var')
-    init = dynDate(INIT__);
-    clear('INIT__')
+    if isdate(INIT__)
+        init = dates(INIT__);
+        clear('INIT__')
+    else
+        error('load_m_file_data: INIT__ cannot be interpreted as a date.')
+    end
 else
-    init = dynDate(1);
+    init = dates(1,1); % Default initial date is year one.
 end
 
 if exist('FREQ__','var')
@@ -144,7 +148,7 @@ end
 %$
 %$ % Check the results.
 %$ t(2) = dyn_assert(freq,4);
-%$ t(3) = dyn_assert(isa(init,'dynDate'),1);
+%$ t(3) = dyn_assert(isa(init,'dates'),1);
 %$ t(4) = dyn_assert(init.freq,4);
 %$ t(5) = dyn_assert(init.time,[1938 4]);
 %$ t(6) = dyn_assert(varlist,{'azert';'yuiop'});
