@@ -32,7 +32,7 @@ function B = append(A,a) % --*-- Unitary tests --*--
 
 if isa(a,'dates')
     if ~isequal(length(a),1)
-        error(['dates::append: Input argument ' inputname(a) ' has to be a dates object with one element.'])
+        error(['dates::append: Input argument ' inputname(2) ' has to be a dates object with one element.'])
     end
     if isempty(a)
         B = A;
