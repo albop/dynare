@@ -1,36 +1,20 @@
 function [freq,init,data,varlist,tex] = load_m_file_data(file)
 
-%@info:
-%! @deftypefn {Function File} {@var{freq}, @var{init}, @var{data}, @var{varlist} =} load_m_file_data (@var{file})
-%! @anchor{load_m_file_data}
-%! @sp 1
-%! Loads data in a matlab/octave m-file.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item file
-%! string, name of the m file (matlab/octave script).
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item freq
-%! Scalar integer (1, 4, 12, 52).
-%! @item init
-%! dynDate object, initial date.
-%! @item data
-%! Matrix of doubles, data.
-%! @item varlist
-%! Cell of strings (names of the variables in the database).
-%! @end table
-%! @sp 2
-%! @strong{Remarks}
-%! @sp 1
-%! The frequency and initial date can be specified with variables FREQ__ and INIT__ in the matlab/octave script. FREQ__ must be a scalar integer and INIT__ a string like '1938M11', '1945Q3', '1973W3' or '2009'. If these variables are not specified default values for freq and init are 1 and dynDate(1).
-%! @end deftypefn
-%@eod:
+% Loads data in a matlab/octave script.
+%
+% INPUTS 
+%  o file         string, name of the matlab/octave script (with path)
+%
+% OUTPUTS 
+%  o freq        integer scalar equal to 1, 4, 12 or 52 (for annual, quaterly, monthly or weekly frequencies).
+%  o init        dates object, initial date in the dataset.
+%  o data        matrix of doubles, the data.
+%  o varlist     cell of strings, names of the variables.
+%
+% REMARKS 
+% The frequency and initial date can be specified with variables FREQ__ and INIT__ in the matlab/octave script. FREQ__ must 
+% be a scalar integer and INIT__ a string like '1938M11', '1945Q3', '1973W3' or '2009A'. If these variables are not specified 
+% default values for freq and init are 1 and dates(1,1).
 
 % Copyright (C) 2012-2013 Dynare Team
 %
