@@ -1,42 +1,18 @@
 function [freq, init, data, varlist] = load_csv_file_data(file, withtime, withnames, noemptycell)
 
-%@info:
-%! @deftypefn {Function File} {@var{freq}, @var{init}, @var{data}, @var{varlist} =} load_m_file_data (@var{file}, @var{withtime}, @var{withnames}, @var{noemptycell})
-%! @anchor{load_csv_file_data}
-%! @sp 1
-%! Loads data in a csv file.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item file
-%! string, name of the csv file
-%! @item withtime
-%! Scalar integer, non zero iff the first column is for the dates of the observations.
-%! @item withnames
-%! Scalar integer, non zero iff the first row is for the names of the variables.
-%! @item noemptycell
-%! Scalar integer, non zero iff the csv file does not have empty cells.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item freq
-%! Scalar integer (1, 4, 12, 52).
-%! @item init
-%! dynDate object, initial date.
-%! @item data
-%! Matrix of doubles, data.
-%! @item varlist
-%! Cell of strings (names of the variables in the database).
-%! @end table
-%! @sp 2
-%! @strong{Remarks}
-%! @sp 1
-%! The frequency and initial date can be specified with variables FREQ__ and INIT__ in the matlab/octave script. FREQ__ must be a scalar integer and INIT__ a string like '1938M11', '1945Q3', '1973W3' or '2009'. If these variables are not specified default values for freq and init are 1 and dynDate(1).
-%! @end deftypefn
-%@eod:
+% Loads data in a csv file.
+%
+% INPUTS 
+%  o file        string, name of the csv file (with path).
+%  o withtime    integer scalar, nonzero iff the first column is for the dates of the observations.
+%  o withnames   integer scalar, nonzero iff the first row is for the names of the variables.
+%  o noemptycell integer scalar, nonzero the csv file does not have empty cells.
+%
+% OUTPUTS 
+%  o freq        integer scalar equal to 1, 4, 12 or 52 (for annual, quaterly, monthly or weekly frequencies).
+%  o init        dates object, initial date in the dataset.
+%  o data        matrix of doubles, the data.
+%  o varlist     cell of strings, names of the variables.
 
 % Copyright (C) 2012-2013 Dynare Team
 %
@@ -54,8 +30,6 @@ function [freq, init, data, varlist] = load_csv_file_data(file, withtime, withna
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
 % Set defaults.
 if nargin<4
