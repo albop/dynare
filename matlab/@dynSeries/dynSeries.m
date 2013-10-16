@@ -84,7 +84,7 @@ ts.vobs = 0;
 ts.name = {};
 ts.tex  = {};
 ts.freq = [];
-ts.init = dynDate();
+ts.init = dates();
 ts.time = dates();
 
 ts = class(ts,'dynSeries');
@@ -94,13 +94,16 @@ switch nargin
     %  Create an empty dynSeries object.
     return
   case 1
-    if isa(varargin{1},'dynDate')
-        if isempty(varargin{1})
-            error(['dynSeries:: ' inputname(1) ' (identified as a dynDate object) must be non empty!'])
-        else
+    if isa(varargin{1},'dates') && isequal(length(varargin{1}),1)
+        switch length(varargin{1})
+          case 0
+            error(['dynSeries::dynSeries: ' inputname(1) ' (identified as a dates object) must be non empty!'])
+          case 1
             % Create an empty dynSeries object with an initial date.
             ts.init = varargin{1};
             ts.freq = varargin{1}.freq;
+          otherwise
+            error(['dynSeries::dynSeries: ' inputname(1) ' (identified as a dates object) must have only one element!'])
         end
         return
     elseif ischar(varargin{1})
@@ -145,7 +148,7 @@ switch nargin
         ts.data = varargin{1};
         [ts.nobs, ts.vobs] = size(ts.data);
         ts.freq = 1;
-        ts.init = dynDate(1);
+        ts.init = dates(1,1);
         ts.name = default_name(ts.vobs);
         ts.tex = name2tex(ts.name);
     end
@@ -167,22 +170,22 @@ switch nargin
     ts.nobs = size(a,1);
     ts.vobs = size(a,2);
     % Get the first date and set the frequency.
-    if ~isempty(b)
-        if ischar(b)% Weekly, Monthly or Quaterly data.
-            ts.init = dynDate(b);
+    if isempty(b)
+        ts.freq = 1;
+        ts.init = dates(1,1);
+    else
+        if isdate(b)% Weekly, Monthly, Quaterly or Annual data.
+            ts.init = dates(b);
             ts.freq = ts.init.freq;
-        elseif isa(b,'dynDate') && ~isempty(b)
+        elseif isa(b,'dates') && isequal(length(b),1)
             ts.freq = b.freq;
             ts.init = b;
-        elseif isnumeric(b) && isreal(b) && isint(b)
+        elseif isnumeric(b) && isscalar(b) && isint(b) % Yearly data.
             ts.freq = 1;
-            ts.init = dynDate(b);
+            ts.init = dates([num2str(b) 'Y']);
         else
             error('dynSeries::dynSeries: Wrong calling sequence!');
         end
-    else% If b is empty.
-        ts.freq = 1;
-        ts.init = dynDate(1);
     end
     % Get the names of the variables.
     if ~isempty(c)
@@ -229,7 +232,7 @@ ts.time = ts.init:ts.init+(ts.nobs-1);
 %$ t = zeros(4,1);
 %$
 %$ try
-%$     aa = dynDate('1938M11');
+%$     aa = dates('1938M11');
 %$     ts = dynSeries(aa);
 %$     t(1) = 1;
 %$ catch
