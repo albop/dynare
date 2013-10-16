@@ -161,25 +161,25 @@ function b = isnotempty_cell(CellArray)
 %$ e1.vobs = 5;
 %$ e1.name = {'GDP_1';'GDP_2';'GDP_3'; 'GDP_4'; 'GDP_5'};
 %$ e1.freq = 1;
-%$ e1.init = dynDate(1);
+%$ e1.init = dates(1,1);
 %$ e2.data = A(:,[1, 13]);
 %$ e2.nobs = 10;
 %$ e2.vobs = 2;
 %$ e2.name = {'GDP_1';'HICP_1'};
 %$ e2.freq = 1;
-%$ e2.init = dynDate(1);
+%$ e2.init = dates(1,1);
 %$
 %$ % Check results.
 %$ t(1) = dyn_assert(e1.data,a.data);
 %$ t(2) = dyn_assert(e1.nobs,a.nobs);
 %$ t(3) = dyn_assert(e1.vobs,a.vobs);
 %$ t(4) = dyn_assert(e1.name,a.name);
-%$ t(5) = dyn_assert(e1.init,a.init);
+%$ t(5) = dyn_assert(isequal(e1.init,a.init),1);
 %$ t(6) = dyn_assert(e2.data,b.data);
 %$ t(7) = dyn_assert(e2.nobs,b.nobs);
 %$ t(8) = dyn_assert(e2.vobs,b.vobs);
 %$ t(9) = dyn_assert(e2.name,b.name);
-%$ t(10) = dyn_assert(e2.init,b.init);
+%$ t(10) = dyn_assert(isequal(e2.init,b.init),1);
 %$ T = all(t);
 %@eof:1
 
