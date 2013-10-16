@@ -55,6 +55,10 @@ else
     freq = 1;
 end
 
+if ~isequal(freq,init.freq)
+    error('load_m_file_data: INIT__ and FREQ__ are not consistent!')
+end
+
 if exist('NAMES__','var')
     varlist0 = NAMES__;
     clear('NAMES__');

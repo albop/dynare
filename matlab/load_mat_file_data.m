@@ -53,6 +53,10 @@ else
     freq = 1;
 end
 
+if ~isequal(freq,init.freq)
+    error('load_mat_file_data: INIT__ and FREQ__ are not consistent!')
+end
+
 if isfield(datafile,'NAMES__')
     varlist = datafile.NAMES__;
     datafile = rmfield(datafile, 'NAMES__');
