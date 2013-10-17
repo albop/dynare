@@ -24,7 +24,7 @@ TABLE = ' ';
 if A.nobs<=40
     separator = repmat(' | ',A.nobs+1,1);
     for t=1:A.nobs
-        TABLE = char(TABLE, format(A.time(t)));
+        TABLE = char(TABLE, date2string(A.time(t)));
     end
     for i = 1:A.vobs
         TABLE = horzcat(TABLE,separator);
@@ -38,11 +38,11 @@ else
     n = 10;
     separator = repmat(' | ',2*n+3,1);
     for t=1:n
-        TABLE = char(TABLE, format(A.time(t)));
+        TABLE = char(TABLE, date2string(A.time(t)));
     end
     TABLE = char(TABLE,vspace);
     for t = A.nobs-n:A.nobs
-        TABLE = char(TABLE, format(A.time(t)));
+        TABLE = char(TABLE, date2string(A.time(t)));
     end
     for i=1:A.vobs
         TABLE = horzcat(TABLE,separator);
