@@ -1,28 +1,16 @@
 function C = eq(A,B) % --*-- Unitary tests --*--
 
-%@info:
-%! @deftypefn {Function File} {@var{C} =} eq (@var{A},@var{B})
-%! @anchor{@dynSeries/eq}
-%! @sp 1
-%! Overloads the eq (equal) operator for the @ref{dynSeries} class.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item A
-%! @ref{dynSeries} object.
-%! @item B
-%! @ref{dynSeries} object.
-%! @end table
-%! @sp 1
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item C
-%! scalar integer equal to one if a==b, 0 otherwise.
-%! @end table
-%! @end deftypefn
-%@eod:
+% Overloads eq (==) operator.
+%
+% INPUTS 
+%  o A      dynSeries object (T periods, N variables).
+%  o B      dynSeries object (T periods, N variables).
+%
+% OUTPUTS 
+%  o C      T*N matrix of zeros and ones. Element C(t,n) is nonzero iff observation t of variable n in A and B are equal.  
+%
+% REMARKS 
+%  If the number of variables, the number of observations or the frequencies are different in A and B, the function returns a zero scalar. 
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -42,11 +30,46 @@ function C = eq(A,B) % --*-- Unitary tests --*--
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if nargin~=2
-    error('dates::eq: I need exactly two input arguments!')
+    error('dynSeries::eq: I need exactly two input arguments!')
 end
 
-C = isequal(A,B);
+if ~(isa(A,'dynSeries') && isa(B,'dynSeries'))
+    error('dynSeries::eq: Both input arguments must be dynSeries objects!')
+end
 
+if ~isequal(A.nobs,B.nobs)
+    warning('dynSeries::eq: Both input arguments should have the same number of observations!')
+    C = 0;
+    return
+end
+
+if ~isequal(A.vobs,B.vobs)
+    warning('dynSeries::eq: Both input arguments should have the same number of observations!')
+    C = 0;
+    return
+end
+
+if ~isequal(A.freq,B.freq)
+    warning('dynSeries::eq: Both input arguments should have the same frequencies!')
+    C = 0;
+    return
+end
+
+if ~isequal(A.init,B.init)
+    warning('dynSeries::eq: Both input arguments should have the same initial period!')
+    C = 0;
+    return
+end
+
+if ~isequal(A.name,B.name)
+    warning('dynSeries::eq: Both input arguments do not have the same variables!')
+end
+
+if ~isequal(A.tex,B.tex)
+    warning('dynSeries::eq: Both input arguments do not have the same tex names!')
+end
+
+C = eq(A.data, B.data);
 
 %@test:1
 %$ % Define a datasets.
@@ -61,14 +84,14 @@ C = isequal(A,B);
 %$ try
 %$    ts1 = dynSeries(A,[],A_name,[]);
 %$    ts2 = ts1;
-%$    a = isequal(ts1,ts2);
+%$    a = eq(ts1,ts2);
 %$    t(1) = 1;
 %$ catch
 %$    t = 0;
 %$ end
 %$
 %$ if length(t)>1
-%$    t(2) = dyn_assert(a,1);
+%$    t(2) = dyn_assert(a,ones(10,3));
 %$ end
 %$ T = all(t);
 %@eof:1
