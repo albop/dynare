@@ -200,7 +200,7 @@ end
 %$ T = all(t);
 %@eof:4
 
-%@test:4
+%@test:5
 %$ % Define a data set.
 %$ A = ones(10,1);
 %$
@@ -222,4 +222,4 @@ end
 %$ t(1) = dyn_assert(isequal(ts3,ts4),1);
 %$ warning on
 %$ T = all(t);
-%@eof:4
+%@eof:5
