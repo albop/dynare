@@ -81,7 +81,7 @@ ts.tex(id) = [];
 %$ T = all(t);
 %@eof:1
 
-%@test:1
+%@test:2
 %$ % Define a datasets.
 %$ A = rand(10,3);
 %$
@@ -101,7 +101,7 @@ ts.tex(id) = [];
 %$
 %$ if length(t)>1
 %$    t(2) = dyn_assert(id,0);
-%$    t(2) = dyn_assert(ts1==ts2,1);
+%$    t(2) = dyn_assert(isequal(ts1,ts2),1);
 %$ end
 %$ T = all(t);
-%@eof:1
+%@eof:2
