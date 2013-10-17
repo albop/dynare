@@ -84,7 +84,7 @@ switch S(1).type
                 if length(S(2).subs{1})>1
                     error(['dynSeries::subsref: ' S(1).subs{1} ' method admits no more than one argument!'])
                 end
-                B = feval(S(1).subs,A,S(2).subs{1})
+                B = feval(S(1).subs,A,S(2).subs{1});
                 S = shiftS(S);
             end
         else
