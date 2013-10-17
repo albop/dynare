@@ -27,11 +27,11 @@ function C = isequal(A,B)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if nargin~=2
-    error('dynSeries::eq: I need exactly two input arguments!')
+    error('dynSeries::isequal: I need exactly two input arguments!')
 end
 
 if ~(isa(A,'dynSeries') && isa(B,'dynSeries'))
-    error('dynSeries::eq: Both input arguments must be dynSeries objects!')
+    error('dynSeries::isequal: Both input arguments must be dynSeries objects!')
 end
 
 if ~isequal(A.nobs,B.nobs)
@@ -55,11 +55,11 @@ if ~isequal(A.init,B.init)
 end
 
 if ~isequal(A.name,B.name)
-    warning('dynSeries::eq: Both input arguments do not have the same variables!')
+    warning('dynSeries::isequal: Both input arguments do not have the same variables!')
 end
 
 if ~isequal(A.tex,B.tex)
-    warning('dynSeries::eq: Both input arguments do not have the same tex names!')
+    warning('dynSeries::isequal: Both input arguments do not have the same tex names!')
 end
 
 C = isequal(A.data, B.data);
