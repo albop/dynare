@@ -76,7 +76,7 @@ options_.solve_tolf = 1e-12;
 
 //data(file=fsdat_simul, first_obs=1950Q3, last_obs=1998Q1);
 
-ts = dynSeries('fsdat_simul.m');
+ts = dseries('fsdat_simul.m');
 rr = 1950Q3:(1950Q1+ts.nobs);
 nn = length(rr);
 ds = ts(rr);
@@ -85,4 +85,4 @@ ds.save('fsdat_simul2','m');
 estimation(order=1,datafile=fsdat_simul2,loglinear,mh_replic=0);
 
 disp('First date is $1950Q3')
-disp('Last date is 2000Q1')
+// disp('Last date is 2000Q1') // This line would trigger an error because of the substitution of 2000Q1 by dates('2000Q1')

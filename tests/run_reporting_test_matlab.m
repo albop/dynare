@@ -34,10 +34,10 @@ disp('');
 disp(['***  TESTING: run_reporting_test_matlab.m ***']);
 try
     cd([top_test_dir filesep 'reporting']);
-    db_a = dynSeries('db_a.csv');
-    db_q = dynSeries('db_q.csv');
-    dc_a = dynSeries('dc_a.csv');
-    dc_q = dynSeries('dc_q.csv');
+    db_a = dseries('db_a.csv');
+    db_q = dseries('db_q.csv');
+    dc_a = dseries('dc_a.csv');
+    dc_q = dseries('dc_q.csv');
     runDynareReport(dc_a, dc_q, db_a, db_q);
     testFailed = false;
 catch
