@@ -21,8 +21,8 @@ function C = mpower(A,B) % --*-- Unitary tests --*--
 %  >>
 %
 %  EXAMPLE 2 :
-%  This method can be used to apply the lead and lag methods an arbitrary number of times to a dynSeries object. For instance, if 
-%  ts is a dynSeries object, and if we define
+%  This method can be used to apply the lead and lag methods an arbitrary number of times to a dseries object. For instance, if 
+%  ts is a dseries object, and if we define
 % 
 %  >> B = dynTimeIndex()-1;
 %  >> F = dynTimeIndex()+1;

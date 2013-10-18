@@ -11,8 +11,8 @@ function t = dynTimeIndex() % --*-- Unitary tests --*--
 %  * t, dynTimeIndex object.
 %
 % DESCRIPTION:
-%  The dynTimeIndex object is used to shift backward or forward dynSeries objects. For instance, if ts
-%  is a dynSeries object and t is a dynTimeIndex object then the following expressions are equivalent:
+%  The dynTimeIndex object is used to shift backward or forward dseries objects. For instance, if ts
+%  is a dseries object and t is a dynTimeIndex object then the following expressions are equivalent:
 %
 %      us = ts.lag()
 %      us = ts.lag(1)

@@ -1,7 +1,7 @@
 function M = set_all_parameters(xparam1,estim_params,M)
 
 %@info:
-%! @deftypefn {Function File} {@var{M} =} dynSeries (@var{xparams1},@var{estim_params},@var{M})
+%! @deftypefn {Function File} {@var{M} =} dseries (@var{xparams1},@var{estim_params},@var{M})
 %! @anchor{set_all_parameters}
 %! @sp 1
 %! Update parameter values (deep parameters and covariance matrices).
