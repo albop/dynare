@@ -73,8 +73,8 @@ for i=1:nn
     fprintf(tid,['function [T,t,LOG] = ' FNAME '_test_' int2str(i) '()\n']);
     fprintf(tid,['try\n']);
     for j=b1(i):b2(i)
-        str = file{j};
-        fprintf(tid,[str(4:end) '\n']);
+        str = sprintf('%s \n',file{j}(4:end));
+        fprintf(tid,str);
     end
     fprintf(tid,['LOG = NaN;\n']);
     fprintf(tid,['catch exception\n']);
