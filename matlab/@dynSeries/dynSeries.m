@@ -140,7 +140,7 @@ switch nargin
         ts.vobs = length(varlist);
         ts.nobs = size(data,1);
         if isempty(tex)
-            ts.tex = name2tex(varlist);
+            ts.tex = name2tex(varlist,1);
         else
             ts.tex = tex;
         end
@@ -150,7 +150,7 @@ switch nargin
         ts.freq = 1;
         ts.init = dates(1,1);
         ts.name = default_name(ts.vobs);
-        ts.tex = name2tex(ts.name);
+        ts.tex = name2tex(ts.name,1);
     end
   case {2,3,4}
     a = varargin{1};
@@ -418,7 +418,7 @@ ts.time = ts.init:ts.init+(ts.nobs-1);
 %$     t(5) = dyn_assert(ts.vobs,3);
 %$     t(6) = dyn_assert(ts.nobs,5);
 %$     t(7) = dyn_assert(ts.name,{'Variable_1';'Variable_2';'Variable_3'});
-%$     t(8) = dyn_assert(ts.tex,{'Variable\\_1';'Variable\\_2';'Variable\\_3'});
+%$     t(8) = dyn_assert(ts.tex,{'Variable_{1}';'Variable_{2}';'Variable_{3}'});
 %$ end
 %$
 %$ T = all(t);
@@ -439,7 +439,7 @@ ts.time = ts.init:ts.init+(ts.nobs-1);
 %$     t(5) = dyn_assert(ts.vobs,3);
 %$     t(6) = dyn_assert(ts.nobs,5);
 %$     t(7) = dyn_assert(ts.name,{'Variable_1';'Variable_2';'Variable_3'});
-%$     t(8) = dyn_assert(ts.tex,{'Variable\\_1';'Variable\\_2';'Variable\\_3'});
+%$     t(8) = dyn_assert(ts.tex,{'Variable_{1}';'Variable_{2}';'Variable_{3}'});
 %$ end
 %$
 %$ T = all(t);
