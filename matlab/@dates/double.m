@@ -1,4 +1,4 @@
-function [B, C]  = double(A)
+function [B, C]  = double(A) % --*-- Unitary tests --*--
 
 % Returns a vector of doubles with the fractional part corresponding
 % to the subperiod. Used for plots and to store dates in a matrix.
