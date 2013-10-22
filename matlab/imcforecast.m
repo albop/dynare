@@ -205,7 +205,7 @@ tt = (1-options_cond_fcst.conf_sig)/2;
 t1 = round(options_cond_fcst.replic*tt);
 t2 = round(options_cond_fcst.replic*(1-tt));
 
-forecasts.controled_variables = constrained_vars;
+forecasts.controlled_variables = constrained_vars;
 forecasts.instruments = options_cond_fcst.controlled_varexo;
 
 for i = 1:EndoSize
