@@ -1166,6 +1166,20 @@ are supposed to be decided one period ahead of all other endogenous
 variables. For stock variables, they are supposed to follow a ``stock at
 the beginning of the period'' convention.
 
+Note that Dynare internally always uses the ``stock at the end of the period'' 
+concept, even when the model has been entered using the 
+@code{predetermined_variables}-command. Thus, when plotting, 
+computing or simulating variables, Dynare will follow the convention to
+use variables that are decided in the current period. For example, 
+when generating impulse response functions for capital, Dynare 
+will plot @code{k}, which is the capital stock decided upon by 
+investment today (and which will be used in tomorrow's production function). 
+This is the reason that capital is shown to be moving on impact, because 
+it is @code{k} and not the predetermined @code{k(-1)} that is displayed. 
+It is important to remember that this also affects simulated time 
+series and output from smoother routines for predetermined variables. 
+Compared to non-predetermined variables they might otherwise appear 
+to be falsely shifted to the future by one period.
 @examplehead
 
 The following two program snippets are strictly equivalent.
