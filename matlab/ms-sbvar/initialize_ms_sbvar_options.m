@@ -73,6 +73,7 @@ options_.ms.mh_replic = 10000; % default differs from Dan's code
 options_.ms.thinning_factor = 1;
 options_.ms.drop = 0.1*options_.ms.mh_replic*options_.ms.thinning_factor;
 options_.ms.adaptive_mh_draws = 30000;
+options_.ms.save_draws = 0;
 % mdd
 options_.ms.proposal_draws = 100000;
 options_.ms.use_mean_center = 0;
