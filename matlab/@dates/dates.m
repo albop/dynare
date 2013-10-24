@@ -95,6 +95,9 @@ switch nargin
         date = string2date(varargin{1});
         dd.freq = date.freq;
         dd.time(1,:) = date.time;
+    elseif isdates(varargin{1})
+        dd = horzcat(varargin{:});
+        return
     elseif isfreq(varargin{1})
         S.type = '()';
         S.subs = varargin;
