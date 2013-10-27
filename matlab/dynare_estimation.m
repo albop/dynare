@@ -53,7 +53,8 @@ end
 
 M_.dname = dname;
 
-if options_.mode_compute && options_.analytic_derivation,
+if (isnumeric(options_.mode_compute) && options_.mode_compute && options_.analytic_derivation) ... %no user supplied function
+        || (~isnumeric(options_.mode_compute) && options_.analytic_derivation) % user supplied function
     analytic_derivation0=options_.analytic_derivation;
     options_.analytic_derivation=1;
 end
