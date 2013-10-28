@@ -45,6 +45,10 @@ opt = [opt ' -burnin ' num2str(options_.ms.drop)];
 opt = [opt ' -thin ' num2str(options_.ms.thinning_factor)];
 opt = [opt ' -mh ' num2str(options_.ms.adaptive_mh_draws)];
 
+if options_.ms.save_draws
+    opt = [opt ' -flat '];
+end
+
 % simulation
 [err] = ms_sbvar_command_line(opt);
 mexErrCheck('ms_simulation',err);

@@ -30,4 +30,6 @@ function clean_ms_simulation_files(file_tag)
 
 delete_if_exists(['simulation_' file_tag '.out']);
 delete_if_exists(['simulation_info_' file_tag '.out']);
+delete_if_exists(['draws_test_' file_tag '.out']);
+delete_if_exists(['draws_header_' file_tag '.out']);
 end

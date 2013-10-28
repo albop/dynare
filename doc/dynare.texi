@@ -1166,6 +1166,20 @@ are supposed to be decided one period ahead of all other endogenous
 variables. For stock variables, they are supposed to follow a ``stock at
 the beginning of the period'' convention.
 
+Note that Dynare internally always uses the ``stock at the end of the period'' 
+concept, even when the model has been entered using the 
+@code{predetermined_variables}-command. Thus, when plotting, 
+computing or simulating variables, Dynare will follow the convention to
+use variables that are decided in the current period. For example, 
+when generating impulse response functions for capital, Dynare 
+will plot @code{k}, which is the capital stock decided upon by 
+investment today (and which will be used in tomorrow's production function). 
+This is the reason that capital is shown to be moving on impact, because 
+it is @code{k} and not the predetermined @code{k(-1)} that is displayed. 
+It is important to remember that this also affects simulated time 
+series and output from smoother routines for predetermined variables. 
+Compared to non-predetermined variables they might otherwise appear 
+to be falsely shifted to the future by one period.
 @examplehead
 
 The following two program snippets are strictly equivalent.
@@ -5580,6 +5594,48 @@ DSGE model, @code{simulation_type} has to be set equal to @code{deterministic}.
 
 @end table
 
+@outputhead
+
+The results are not stored in the @code{oo_} structure but in a separate structure @code{forecasts} saved to the harddisk into a file called @code{conditional_forecasts.mat}.
+
+@defvr {MATLAB/Octave variable} forecasts.cond
+Variable set by the @code{conditional_forecast} command. It stores the conditional forecasts. Fields are @code{periods+1} by 1 vectors storing the steady state (time 0) and the subsequent @code{periods} forecasts periods. Fields are of the form:
+@example
+@code{forecasts.cond.@var{FORECAST_MOMENT}.@var{VARIABLE_NAME}}
+@end example
+where @var{FORECAST_MOMENT} is one of the following:
+
+@table @code
+
+@item Mean
+Mean of the conditional forecast distribution.
+
+@item ci
+Confidence interval of the conditional forecast distribution. The size corresponds to @code{conf_sig}.
+@end table
+
+@end defvr
+
+@defvr {MATLAB/Octave variable} forecasts.uncond
+Variable set by the @code{conditional_forecast} command. It stores the unconditional forecasts. Fields are of the form:
+@example
+@code{forecasts.uncond.@var{FORECAST_MOMENT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} forecasts.instruments
+Variable set by the @code{conditional_forecast} command. Stores the names of the exogenous instruments.
+@end defvr
+
+@defvr {MATLAB/Octave variable} forecasts.controlled_variables
+Variable set by the @code{conditional_forecast} command. Stores the position of the constrained endogenous variables in declaration order.
+@end defvr
+
+@defvr {MATLAB/Octave variable} forecasts.graphs
+Variable set by the @code{conditional_forecast} command. Stores the information for generating the conditional forecast plots.
+@end defvr
+
+
 @examplehead
 
 @example
@@ -6947,6 +7003,13 @@ The total number of draws is equal to
 
 @item adaptive_mh_draws = @var{INTEGER}
 Tuning period for Metropolis-Hasting draws. Default: @code{30,000}
+
+@item save_draws
+Save all elements of @math{A^0}, @math{A^+}, @math{\xi}, and the
+transition matrix to a file named @code{draws_<<file_tag>>.out} with
+each draw on a separate line. A file that describes how these matrices
+are laid out is contained in
+@code{draws_header_<<file_tag>>.out}. Default: @code{off}
 
 @end table
 @end deffn
