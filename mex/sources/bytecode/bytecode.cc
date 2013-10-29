@@ -363,7 +363,7 @@ Get_Arguments_and_global_variables(int nrhs,
         }
     }
   *M_ = mexGetVariable("global", "M_");
-  if (M_ == NULL)
+  if (*M_ == NULL)
     {
       ostringstream tmp;
       tmp << " in main, global variable not found: M_\n";
@@ -371,14 +371,14 @@ Get_Arguments_and_global_variables(int nrhs,
     }
   /* Gets variables and parameters from global workspace of Matlab */
   *oo_ = mexGetVariable("global", "oo_");
-  if (oo_ == NULL)
+  if (*oo_ == NULL)
     {
       ostringstream tmp;
       tmp << " in main, global variable not found: oo_\n";
       throw FatalExceptionHandling(tmp.str());
     }
   *options_ = mexGetVariable("global", "options_");
-  if (options_ == NULL)
+  if (*options_ == NULL)
     {
       ostringstream tmp;
       tmp << " in main, global variable not found: options_\n";
