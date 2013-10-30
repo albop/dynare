@@ -113,6 +113,10 @@ if ~noprint
         error(['Discretionary policy: some eigenvalues greater than options_.qz_criterium. Model potentially unstable.']);
       case 63
         error(['Discretionary policy: NaN elements are present in the solution. Procedure failed.']);
+      case 71
+        error(['Calibrated covariance of the structural errors implies correlation larger than  +-1.']);
+      case 72
+        error(['Calibrated covariance of the measurement errors implies correlation larger than  +-1.']);
         % Aim Code Conversions by convertAimCodeToInfo.m
       case 102
         error('Aim: roots not correctly computed by real_schur');

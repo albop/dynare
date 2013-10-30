@@ -75,9 +75,10 @@ if nvx
 end
 if nvn
     estim_params_.nvn_observable_correspondence=NaN(nvn,1); % stores number of corresponding observable
-    if isequal(M_.H,0)
+    if isequal(M_.H,0) %if no previously set measurement error, initialize H
         nvarobs = size(options_.varobs,1);
         M_.H = zeros(nvarobs,nvarobs);
+        M_.Correlation_matrix_ME = eye(nvarobs);
     end
     for i=1:nvn
         obsi_ = strmatch(deblank(M_.endo_names(estim_params_.var_endo(i,1),:)),deblank(options_.varobs),'exact');
@@ -116,6 +117,7 @@ if ncn
     if isequal(M_.H,0)
         nvarobs = size(options_.varobs,1);
         M_.H = zeros(nvarobs,nvarobs);
+        M_.Correlation_matrix_ME = eye(nvarobs);
     end
     xparam1 = [xparam1; estim_params_.corrn(:,3)];
     ub = [ub; max(min(estim_params_.corrn(:,5),1),-1)];
