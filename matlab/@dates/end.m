@@ -1,6 +1,6 @@
 function lastIndex = end(o, k, n)
-% function lastIndex = end(o, k, n)
-% End keyword
+
+% Overloads end keyword.
 %
 % INPUTS
 %   o              [dates] dates object
@@ -30,6 +30,5 @@ function lastIndex = end(o, k, n)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(k==1 && n==1, '@dates/end: dates only has one dimension');
+assert(k==1 && n==1, 'dates::end: dates only has one dimension');
 lastIndex = o.ndat;
-end
