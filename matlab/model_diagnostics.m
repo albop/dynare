@@ -85,6 +85,7 @@ end
 %
 % singular Jacobian of static model
 %
+singularity_problem = 0;
 if ~isfield(M,'block_structure_stat')
     nb = 1;
 else
@@ -107,6 +108,7 @@ for b=1:nb
     end
     rank_jacob = rank(jacob);
     if rank_jacob < size(jacob,1)
+        singularity_problem = 1;
         disp(['model_diagnostic: the Jacobian of the static model is ' ...
               'singular'])
         disp(['there is ' num2str(endo_nbr-rank_jacob) ...
@@ -142,5 +144,10 @@ for b=1:nb
             disp(k')
         end
     end
+end
+if singularity_problem 
+    fprint('The presence of a singularity problem typically indicates that there is one\n')
+    fprint('redundant equation entered in the model block, while another non-redundant equation\n')
+    fprint('is missing. The problem often derives from Walras Law.\n')
 end
 

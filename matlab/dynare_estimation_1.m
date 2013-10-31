@@ -646,7 +646,7 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
         disp('POSTERIOR KERNEL OPTIMIZATION PROBLEM!')
         disp(' (minus) the hessian matrix at the "mode" is not positive definite!')
         disp('=> posterior variance of the estimated parameters are not positive.')
-        disp('You should  try  to change the initial values of the parameters using')
+        disp('You should try to change the initial values of the parameters using')
         disp('the estimated_params_init block, or use another optimization routine.')
         params_at_bound=find(xparam1==ub | xparam1==lb);
         if ~isempty(params_at_bound)
