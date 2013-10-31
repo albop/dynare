@@ -257,7 +257,7 @@ Configure and make:
     - Next to `Command Line Tools`, click on `Install`
 - Download [MacOSX10.6.sdk.zip](http://www.jamesgeorge.org/uploads/MacOSX10.6.sdk.zip) and unzip it in `/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs`. Change the owner to be `root` and the group to be `wheel`
 
-- Install [Homebrew](http://mxcl.github.io/homebrew/)
+- Install [Homebrew](http://mxcl.github.io/homebrew/) and [Homebrew Science](https://github.com/Homebrew/homebrew-science)
 - Install the following brews:
 ```
     brew install automake
