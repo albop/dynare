@@ -767,11 +767,15 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         CutSample(M_, options_, estim_params_);
         %% Estimation of the marginal density from the Mh draws:
         if options_.mh_replic
-            [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
+            [marginal,oo_] = marginal_density(M_, options_, estim_params_, ...
+                                              oo_);
+            % Store posterior statistics by parameter name
             oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_);
             if ~options_.nograph
                 oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
             end
+            % Store posterior mean in a vector and posterior variance in
+            % a matrix
             [oo_.posterior.metropolis.mean,oo_.posterior.metropolis.Variance] ...
                 = GetPosteriorMeanVariance(M_,options_.mh_drop);
         else
