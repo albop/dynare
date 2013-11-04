@@ -39,12 +39,10 @@ if ~all(cellfun(@isdates,varargin))
 end
 
 n = nargin;
-
-if isequal(n,1)
-    B = A;
-end
-
 B = varargin{1};
+
+if isequal(n,1), return, end
+
 for i=2:n
     C = varargin{i};
     if isequal(B.freq,C.freq)
