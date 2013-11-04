@@ -44,7 +44,7 @@ end
 
 if ~whoiam
     
-    if exist('OCTAVE_VERSION') || options_.console_mode,
+    if isoctave || options_.console_mode
                 
         if init,
             diary off;
@@ -55,7 +55,7 @@ if ~whoiam
             running_text =  varargin{2};
         end
         
-        if exist('OCTAVE_VERSION'),
+        if isoctave
             printf([running_text,' %3.f%% done\r'], prctdone*100);
         else
             s0=repmat('\b',1,length(newString));

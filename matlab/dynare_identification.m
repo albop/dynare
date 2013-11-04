@@ -38,7 +38,7 @@ function [pdraws, TAU, GAM, LRE, gp, H, JJ] = dynare_identification(options_iden
 
 global M_ options_ oo_ bayestopt_ estim_params_
 
-if exist('OCTAVE_VERSION')
+if isoctave
     warning('off'),
 else
     warning off,
@@ -442,7 +442,7 @@ if iload <=0,
             end
             
             if SampleSize > 1,
-%                 if exist('OCTAVE_VERSION') || options_.console_mode,
+%                 if isoctave || options_.console_mode,
 %                     console_waitbar(0,iteration/SampleSize);
 %                 else
                     dyn_waitbar(iteration/SampleSize,h,['MC identification checks ',int2str(iteration),'/',int2str(SampleSize)])
@@ -454,7 +454,7 @@ if iload <=0,
     
     
     if SampleSize > 1,
-        if exist('OCTAVE_VERSION') || options_.console_mode,
+        if isoctave || options_.console_mode,
             fprintf('\n');
             diary on;
         else
@@ -581,7 +581,7 @@ if SampleSize > 1,
     end
 end
 
-if exist('OCTAVE_VERSION')
+if isoctave
     warning('on'),
 else
     warning on,

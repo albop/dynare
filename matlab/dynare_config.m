@@ -67,7 +67,7 @@ addpath([dynareroot '/reports/'])
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions
 
-if ~exist('OCTAVE_VERSION')
+if ~isoctave
     % Replacements for rows(), columns() and issquare() (inexistent under MATLAB)
     addpath([dynareroot '/missing/rows_columns'])
     addpath([dynareroot '/missing/issquare'])
@@ -80,34 +80,34 @@ if ~exist('OCTAVE_VERSION')
 end
 
 % ordeig() doesn't exist in Octave
-if exist('OCTAVE_VERSION')
+if isoctave
     addpath([dynareroot '/missing/ordeig'])
 end
 
 % bsxfun is missing in old versions of MATLAB (and exists in Octave)
-if ~exist('OCTAVE_VERSION') && matlab_ver_less_than('7.4')
+if ~isoctave && matlab_ver_less_than('7.4')
     addpath([dynareroot '/missing/bsxfun'])
 end
 
 % ilu is missing in old versions of MATLAB and in Octave
-if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.4')
+if isoctave || matlab_ver_less_than('7.4')
     addpath([dynareroot '/missing/ilu'])
 end
 
 % strjoin is missing in older versions of MATLAB and in Octave
-if exist('OCTAVE_VERSION') || matlab_ver_less_than('8.1')
+if isoctave || matlab_ver_less_than('8.1')
     addpath([dynareroot '/missing/strjoin'])
 end
 
 % nanmean is in Octave Forge Statistics package and in MATLAB Statistics
 % toolbox
-if (exist('OCTAVE_VERSION') && ~user_has_octave_forge_package('statistics')) ...
-    || (~exist('OCTAVE_VERSION') && ~user_has_matlab_license('statistics_toolbox'))
+if (isoctave && ~user_has_octave_forge_package('statistics')) ...
+    || (~isoctave && ~user_has_matlab_license('statistics_toolbox'))
     addpath([dynareroot '/missing/nanmean'])
 end
 
 % Add path to MEX files
-if exist('OCTAVE_VERSION')
+if isoctave
     addpath([dynareroot '../mex/octave/']);
 else
     % Add win32 specific paths for Dynare Windows package

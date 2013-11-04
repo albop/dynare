@@ -73,7 +73,7 @@ if whoiam
     fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
 end
 for j=fpar:npar,
-    if exist('OCTAVE_VERSION'),
+    if isoctave
         if (whoiam==0),
             printf('    Parameter %d...  ',j);
         end
@@ -122,7 +122,7 @@ for j=fpar:npar,
             UDIAG(ligne,6,j-fpar+1) = UDIAG(ligne,6,j-fpar+1) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
         end
     end
-    if exist('OCTAVE_VERSION'),
+    if isoctave
         if (whoiam==0),
             printf('Done! \n');
         end

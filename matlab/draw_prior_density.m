@@ -54,7 +54,7 @@ switch pshape(indx)
         supbound = gaminv(1-truncprior,p6(indx),p7(indx))+p3(indx);
     catch
         % Workaround for ticket #161
-        if exist('OCTAVE_VERSION')
+        if isoctave
             error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt_.name{indx} ', or use another shape'])
         else
             rethrow(lasterror)
@@ -73,7 +73,7 @@ switch pshape(indx)
         supbound = 1/sqrt(gaminv(10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
     catch
         % Workaround for ticket #161
-        if exist('OCTAVE_VERSION')
+        if isoctave
             error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt_.name{indx} ', or use another shape'])
         else
             rethrow(lasterror)
@@ -92,7 +92,7 @@ switch pshape(indx)
         supbound = 1/(gaminv(10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
     catch
         % Workaround for ticket #161
-        if exist('OCTAVE_VERSION')
+        if isoctave
             error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt_.name{indx} ', or use another shape'])
         else
             rethrow(lasterror)

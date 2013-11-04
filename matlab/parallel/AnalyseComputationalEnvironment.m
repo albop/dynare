@@ -366,7 +366,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         StrCommand=([s1,s2,s3,s4,s41,s42,s5,s51,s52,send]);
         
         % Mettere controllo su NbW ...
-        % if exist('OCTAVE_VERSION')
+        % if isoctave
         %     NbW = fprintf(fid,StrCommand, '%s');
         % else
         NbW = fprintf(fid,StrCommand, '%s');

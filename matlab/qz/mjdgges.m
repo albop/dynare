@@ -63,7 +63,7 @@ info = 0;
 %   as an option
 % - under Octave, only real decomposition available, but grouping of
 %   eigenvalues <= 1 is implemented as an option (criterium can't be changed)
-if exist('OCTAVE_VERSION')
+if isoctave
     [ss,tt,w,eigval] = qz(e,d,'S');
     sdim = sum(abs(eigval) <= 1.0);
     if any(abs(eigval) > 1.0 & abs(eigval) <= qz_criterium)

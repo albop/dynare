@@ -118,7 +118,7 @@ localVars.Mean=Mean;
 % Like sequential execution!
 nvar0=nvar;
 
-if ~exist('OCTAVE_VERSION')
+if ~isoctave
     % Commenting for testing!
     if isnumeric(options_.parallel) || ceil(size(varlist,1)/MaxNumberOfPlotsPerFigure)<4,
         fout = pm3_core(localVars,1,nvar,0);

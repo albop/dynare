@@ -62,7 +62,7 @@ end
 freq = 1;                  % Default frequency is annual.
 init = dates(1,1);         % Default initial date is year one.
 varlist = [];
-if ~exist('OCTAVE_VERSION')
+if ~isoctave
     % Under Matlab, save time by using importdata
     assert(exist(file, 'file') == 2, ['load_csv_file_data: I can''t find file ' file '!']);
     A = importdata(file, ',', withnames);

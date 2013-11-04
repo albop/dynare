@@ -50,7 +50,7 @@ if (options_.block || options_.bytecode) && options_.stack_solve_algo == 6
     error('SIMUL: you can''t use stack_solve_algo = 6 with block or bytecode option')
 end
 
-if exist('OCTAVE_VERSION') && options_.stack_solve_algo == 2
+if isoctave && options_.stack_solve_algo == 2
     error('SIMUL: you can''t use stack_solve_algo = 2 under Octave')
 end
 

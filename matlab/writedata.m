@@ -30,7 +30,7 @@ function writedata(fname)
 global M_ oo_
 
 % xlswrite doesn't exist on Octave, and appeared in MATLAB 7.0
-if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0')
+if isoctave || matlab_ver_less_than('7.0')
     error('Function not supported on your version of MATLAB or Octave')
 end
 

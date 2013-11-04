@@ -124,7 +124,7 @@ options_.nograph = 0;
 options_.XTick = [];
 options_.XTickLabel = [];
 options_.console_mode = 0;
-if exist('OCTAVE_VERSION')
+if isoctave
     if sum(get(0,'screensize'))==4
         options_.console_mode = 1;
         options_.nodisplay = 1;

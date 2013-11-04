@@ -218,7 +218,7 @@ end
 if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     switch options_.mode_compute
       case 1
-        if exist('OCTAVE_VERSION')
+        if isoctave
             error('Option mode_compute=1 is not available under Octave')
         elseif ~user_has_matlab_license('optimization_toolbox')
             error('Option mode_compute=1 requires the Optimization Toolbox')
@@ -236,9 +236,9 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
       case 2
         error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
       case 3
-        if exist('OCTAVE_VERSION') && ~user_has_octave_forge_package('optim')
+        if isoctave && ~user_has_octave_forge_package('optim')
             error('Option mode_compute=3 requires the optim package')
-        elseif ~exist('OCTAVE_VERSION') && ~user_has_matlab_license('optimization_toolbox')
+        elseif ~isoctave && ~user_has_matlab_license('optimization_toolbox')
             error('Option mode_compute=3 requires the Optimization Toolbox')
         end
         % Set default optimization options for fminunc.
@@ -249,7 +249,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         if options_.analytic_derivation,
             optim_options = optimset(optim_options,'GradObj','on');
         end
-        if ~exist('OCTAVE_VERSION')
+        if ~isoctave
             [xparam1,fval,exitflag] = fminunc(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         else
             % Under Octave, use a wrapper, since fminunc() does not have a 4th arg
@@ -456,9 +456,9 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
       case 7
         % Matlab's simplex (Optimization toolbox needed).
-        if exist('OCTAVE_VERSION') && ~user_has_octave_forge_package('optim')
+        if isoctave && ~user_has_octave_forge_package('optim')
             error('Option mode_compute=7 requires the optim package')
-        elseif ~exist('OCTAVE_VERSION') && ~user_has_matlab_license('optimization_toolbox')
+        elseif ~isoctave && ~user_has_matlab_license('optimization_toolbox')
             error('Option mode_compute=7 requires the Optimization Toolbox')
         end
         optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);

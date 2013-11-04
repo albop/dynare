@@ -39,7 +39,7 @@ sdl      = options_.SpectralDensity.sdl;
 omega    = (0:sdl:pi)';
 GridSize = length(omega);
 exo_names_orig_ord  = M_.exo_names_orig_ord;
-if exist('OCTAVE_VERSION')
+if isoctave
     warning('off', 'Octave:divide-by-zero')
 else
     warning off MATLAB:dividebyzero
@@ -160,7 +160,7 @@ for i=1:nvar
     f(i,:) = Gamma(i,1)/(2*pi) + Gamma(i,H+1)*cos(H'*omega')/pi;
 end  
 
-if exist('OCTAVE_VERSION')
+if isoctave
     warning('on', 'Octave:divide-by-zero')
 else
     warning on MATLAB:dividebyzero

@@ -565,7 +565,7 @@ else
             title([pnam{nsnam(j)}],'interpreter','none')
         end
         %subplot(3,2,6)
-        if exist('OCTAVE_VERSION'),
+        if isoctave
             legend(char('base',vvarvecm),'location','eastoutside');
         else
             h0=legend(char('base',vvarvecm),0);

@@ -46,7 +46,7 @@ end
 
 warning_config()
 
-if exist('OCTAVE_VERSION')
+if isoctave 
     if octave_ver_less_than('3.6.0')
         warning('This version of Dynare has only been tested on Octave 3.6.0 and above. Since your Octave version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Octave installation.');
     end
@@ -60,7 +60,7 @@ end
 more off
 
 % sets default format for save() command
-if exist('OCTAVE_VERSION')
+if isoctave
     default_save_options('-mat')
 end
 

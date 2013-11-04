@@ -37,7 +37,7 @@ function InitializeComputationalEnvironment()
 % Comment the line 'warning('off');' in order to view the warning message
 % in Octave!
 
-if exist('OCTAVE_VERSION'), 
+if isoctave 
     warning('off');
 end
 
@@ -48,7 +48,7 @@ global options_
 isHybridMatlabOctave = false;
 for j=1:length(options_.parallel),
     if isempty(options_.parallel(j).MatlabOctavePath),
-        if exist('OCTAVE_VERSION')
+        if isoctave
             options_.parallel(j).MatlabOctavePath = 'octave';
         else
             options_.parallel(j).MatlabOctavePath = 'matlab';
@@ -60,7 +60,7 @@ for j=1:length(options_.parallel),
     end
     isHybridMatlabOctave = isHybridMatlabOctave || any(regexpi([options_.parallel(j).MatlabOctavePath], 'octave'));
 end
-isHybridMatlabOctave = isHybridMatlabOctave && ~exist('OCTAVE_VERSION');
+isHybridMatlabOctave = isHybridMatlabOctave && ~isoctave;
 options_.parallel_info.isHybridMatlabOctave = isHybridMatlabOctave;
 if isHybridMatlabOctave,
     % Reset dynare random generator and seed.

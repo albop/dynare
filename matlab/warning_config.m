@@ -32,7 +32,7 @@ warning on;
 % Display a calling stack trace when a warning is issued
 warning('on', 'backtrace');
 
-if exist('OCTAVE_VERSION')
+if isoctave
     warning('off', 'Octave:separator-insert');
     warning('off', 'Octave:matlab-incompatible');
     warning('off', 'Octave:single-quote-string');

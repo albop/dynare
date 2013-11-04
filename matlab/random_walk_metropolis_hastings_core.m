@@ -152,7 +152,7 @@ for b = fblck:nblck,
         logpo2 = zeros(InitSizeArray(b),1);
     end
     if whoiam
-        prc0=(b-fblck)/(nblck-fblck+1)*(exist('OCTAVE_VERSION') || options_.console_mode);
+        prc0=(b-fblck)/(nblck-fblck+1)*(isoctave || options_.console_mode);
         hh = dyn_waitbar({prc0,whoiam,options_.parallel(ThisMatlab)},['MH (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
     else
         hh = dyn_waitbar(0,['Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
@@ -185,9 +185,9 @@ for b = fblck:nblck,
             logpo2(irun) = ilogpo2(b);
         end
         prtfrc = j/nruns(b);
-%         if exist('OCTAVE_VERSION') || options_.console_mode
+%         if isoctave || options_.console_mode
 %             if mod(j, 10) == 0
-%                 if exist('OCTAVE_VERSION')
+%                 if isoctave
 %                     if (whoiam==0)
 %                         printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
 %                     end
@@ -263,8 +263,8 @@ for b = fblck:nblck,
         irun = irun + 1;
     end% End of the simulations for one mh-block.
     record.AcceptationRates(b) = isux/j;
-%     if exist('OCTAVE_VERSION') || options_.console_mode || whoiam
-%         if exist('OCTAVE_VERSION')
+%     if isoctave || options_.console_mode || whoiam
+%         if isoctave
 %             printf('\n');
 %         else
 %             fprintf('\n');

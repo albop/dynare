@@ -84,7 +84,7 @@ if max(abs(fvec)) < tolf
 end
 
 if options_.solve_algo == 0
-    if ~exist('OCTAVE_VERSION')
+    if ~isoctave
         if ~user_has_matlab_license('optimization_toolbox')
             error('You can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
         end
@@ -99,7 +99,7 @@ if options_.solve_algo == 0
     else
         options.Jacobian = 'off';
     end
-    if ~exist('OCTAVE_VERSION')
+    if ~isoctave
         [x,fval,exitval,output] = fsolve(func,x,options,varargin{:});
     else
         % Under Octave, use a wrapper, since fsolve() does not have a 4th arg

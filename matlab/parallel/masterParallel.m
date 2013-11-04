@@ -110,13 +110,13 @@ end
 % Comment the line 'warning('off');' in order to view the warning messages
 % in Octave!
 
-if exist('OCTAVE_VERSION'),
+if isoctave
     warning('off');
 end
 
 % check if there are function_handles in the input or global vars when
 % octave is used
-if isHybridMatlabOctave || exist('OCTAVE_VERSION'),
+if isHybridMatlabOctave || isoctave
     fInputNames = fieldnames(fInputVar);
     for j=1:length(fInputNames),
         TargetVar = fInputVar.(fInputNames{j});
@@ -504,7 +504,7 @@ if Strategy==0 || newInstance, % See above.
         pause(1)
     else
         
-        if exist('OCTAVE_VERSION')
+        if isoctave
             % Redirect the standard output to the file 'OctaveStandardOutputMessage.txt'!
             % This file is saved in the Model directory.
             system('ConcurrentCommand1.bat > OctaveStandardOutputMessage.txt');
@@ -523,9 +523,9 @@ global options_
 
 % Create a parallel (local/remote) specialized computational status bars!
 
-if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+if isoctave || options_.console_mode
     diary off;
-    if exist('OCTAVE_VERSION')
+    if isoctave
         printf('\n');
     else
         fprintf('\n');
@@ -575,9 +575,9 @@ idCPU = NaN(1,totCPU);
 
 % Caption for console mode computing ...
 
-if (options_.console_mode == 1) ||  exist('OCTAVE_VERSION')
+if options_.console_mode ||  isoctave
     
-    if ~exist('OCTAVE_VERSION')
+    if ~isoctave
         if strcmpi([Parallel(indPC).MatlabOctavePath], 'octave')
             RjInformation='Hybrid Computing Is Active: Remote jobs are computed by Octave!';
             fprintf([RjInformation,'\n\n']);
@@ -607,7 +607,7 @@ if (options_.console_mode == 1) ||  exist('OCTAVE_VERSION')
     fnameTemp(L)='';
     
     Information=['Parallel ' fnameTemp ' Computing ...'];
-    if exist('OCTAVE_VERSION')
+    if isoctave
         if (~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem)) && (Strategy==0)
             printf('\n');
             pause(2);
@@ -660,7 +660,7 @@ while (ForEver)
             end
             pcerdone(j) = prtfrc;
             idCPU(j) = njob;
-            if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+            if isoctave || options_.console_mode
                 if (~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem))
                     statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 else
@@ -672,7 +672,7 @@ while (ForEver)
             end
         catch % ME
             % To define!
-            if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+            if isoctave || options_.console_mode
                 if (~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem))
                     statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 else
@@ -681,15 +681,14 @@ while (ForEver)
             end
         end
     end
-    if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
-        if exist('OCTAVE_VERSION')
+    if isoctave || options_.console_mode
+        if isoctave
             printf([statusString,'\r'], 100 .* pcerdone);
         else
             if ~isempty(statusString)
                 fprintf([statusString0,statusString], 100 .* pcerdone);
             end
         end
-        
     else
         for j=1:totCPU,
             try
@@ -705,7 +704,7 @@ while (ForEver)
     % 1. The files .log and .txt are not copied.
     % 2. The comp_status_*.mat files are managed separately.
     
-    if exist('OCTAVE_VERSION'), % to avoid synchronism problems
+    if isoctave % to avoid synchronism problems
         try
             PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot);
         catch
@@ -729,8 +728,8 @@ while (ForEver)
         
         if HoTuttiGliOutput==totCPU,
             mydelete(['comp_status_',fname,'*.mat']);
-            if exist('OCTAVE_VERSION')|| (options_.console_mode == 1),
-                if exist('OCTAVE_VERSION')
+            if isoctave || options_.console_mode
+                if isoctave
                     printf('\n');
                     printf(['End Parallel Session ....','\n\n']);
                 else

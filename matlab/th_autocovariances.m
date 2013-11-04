@@ -51,7 +51,7 @@ end
 
 endo_nbr = M_.endo_nbr;
 exo_names_orig_ord  = M_.exo_names_orig_ord;
-if exist('OCTAVE_VERSION')
+if isoctave
     warning('off', 'Octave:divide-by-zero')
 else
     warning off MATLAB:dividebyzero
@@ -260,7 +260,7 @@ else% ==> Theoretical HP filter.
         end
     end
 end
-if exist('OCTAVE_VERSION')
+if isoctave
     warning('on', 'Octave:divide-by-zero')
 else
     warning on MATLAB:dividebyzero

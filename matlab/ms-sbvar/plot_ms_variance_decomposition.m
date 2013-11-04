@@ -150,7 +150,7 @@ end
             plot(x(2:end)',steady(:,k), '--k','LineWidth',2.25);
         end
         if k==K
-            if exist('OCTAVE_VERSION')
+            if isoctave
                 legend(shock_names,'Location','SouthOutside');
             else
                 legend(shock_names,'Location','BestOutside','Orientation','horizontal');

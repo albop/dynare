@@ -444,7 +444,7 @@ end
 
 
 % Comment for testing!
-if ~exist('OCTAVE_VERSION')
+if ~isoctave
     if isnumeric(options_.parallel)  || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,
         [fout] = PosteriorIRF_core2(localVars,1,M_.exo_nbr,0);
     else

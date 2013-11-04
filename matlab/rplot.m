@@ -63,7 +63,7 @@ if rplottype == 0
     title (t,'Interpreter','none') ;
     xlabel('Periods') ;
     if size(s1,1) > 1
-        if exist('OCTAVE_VERSION')
+        if isoctave
             legend(s1, 0);
         else
             h = legend(s1,0);

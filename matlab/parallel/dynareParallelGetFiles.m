@@ -54,7 +54,7 @@ for indPC=1:length(Parallel),
             end
             for jfil=1:size(NamFileInput,1),
 
-                if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of ls under Linux.
+                if isoctave % Patch for peculiar behaviour of ls under Linux.
                     % It is necessary to manage the jolly char '*'!
 
                     FindAst=strfind(NamFileInput{jfil,2},'comp_status_random_walk_metropolis_hastings_core*');

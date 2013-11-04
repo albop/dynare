@@ -64,7 +64,7 @@ for indPC=1:length(Parallel),
             [stat NonServe] = system(['ssh ',ssh_token,' ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -fr ',Parallel(indPC).RemoteDirectory,'/',PRCDir,]);
             break;
         else
-            if exist('OCTAVE_VERSION'), % Patch for peculiar behaviour of rmdir under Windows.
+            if isoctave % Patch for peculiar behaviour of rmdir under Windows.
                                         % It is necessary because the command rmdir always ask at the user to confirm your decision before
                                         % deleting a directory: this stops the computation! The Octave native function 'confirm_recursive_rmdir'
                                         % disable this mechanism.

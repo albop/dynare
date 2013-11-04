@@ -85,7 +85,7 @@ if method == 3
     end;
 elseif method == 4
     % works only with Matlab System Control toolbox or octave the control package,
-    if exist('OCTAVE_VERSION')
+    if isoctave
         if ~user_has_octave_forge_package('control')
             error('lyapunov=square_root_solver not available; you must install the control package from Octave Forge')
         end

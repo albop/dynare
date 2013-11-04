@@ -278,7 +278,7 @@ while fpar<B
         ifil2 = ifil2 + 1;
         irun2 = 0;
     end
-%     if exist('OCTAVE_VERSION'),
+%     if isoctave
 %         if (whoiam==0),
 %             printf(['Posterior IRF  %3.f%% done\r'],(fpar/B*100));
 %         end
@@ -286,7 +286,7 @@ while fpar<B
 %         waitbar(fpar/B,h);
 %     end
 %     if whoiam,
-%         if ~exist('OCTAVE_VERSION')
+%         if ~isoctave
 %             fprintf('Done! \n');
 %         end
 %         waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(B) ' done.'];
