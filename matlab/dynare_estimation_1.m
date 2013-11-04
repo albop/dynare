@@ -602,8 +602,6 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
 
         [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(objective_function,xparam1,maxy,rt_,epsilon,ns,nt ...
                                                               ,neps,maxevl,LB,UB,c,idisp ,t,vm,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-      case 'prior'
-        hh = diag(bayestopt_.p2.^2);
       otherwise
         if ischar(options_.mode_compute)
             [xparam1, fval, retcode ] = feval(options_.mode_compute,objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
@@ -611,7 +609,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             error(['dynare_estimation:: mode_compute = ' int2str(options_.mode_compute) ' option is unknown!'])
         end
     end
-    if ~isequal(options_.mode_compute,6) && ~isequal(options_.mode_compute,'prior')
+    if ~isequal(options_.mode_compute,6)
         if options_.cova_compute == 1
             if options_.analytic_derivation && strcmp(func2str(objective_function),'dsge_likelihood'),
                 ana_deriv = options_.analytic_derivation;
