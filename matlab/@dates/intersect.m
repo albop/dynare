@@ -56,7 +56,11 @@ if ~isequal(A.freq,B.freq)
     return
 end
 
-time = intersect(A.time,B.time,'rows');
+if isoctave || matlab_ver_less_than('8.1.0')
+    time = intersect(A.time,B.time,'rows');
+else
+    time = intersect(A.time,B.time,'rows','legacy');
+end
 
 C = dates();
 if isempty(time)
