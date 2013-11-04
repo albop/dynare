@@ -23,7 +23,7 @@ function C = plus(A,B) % --*-- Unitary tests --*--
 
 if isa(A,'dates') && isa(B,'dates')
     % Concatenate dates objects without removing repetitions if A and B are not disjoint sets of dates.
-    if ~isequal(A.freq,B.freq)
+    if ~isequal(A.freq,B.freq) && A.ndat>0 && B.ndat>0
         error(['dates::plus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must have common frequencies!'])
     end
     if isempty(B)
