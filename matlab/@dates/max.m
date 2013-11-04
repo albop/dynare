@@ -21,41 +21,20 @@ function C = max(varargin)
 
 switch nargin
   case 1
-    A = varargin{1};
-    switch length(A)
+    switch length(varargin{1})
       case 0
         C= dates();
       case 1
-        C = A;
+        C = varargin{1};
       otherwise
-        tmp = sortrows(A.time);
+        tmp = sortrows(varargin{1}.time);
         C = dates();
-        C.freq = A.freq;
+        C.freq = varargin{1}.freq;
         C.ndat = 1;
-        C.time = tmp(A.ndat,:);
+        C.time = tmp(varargin{1}.ndat,:);
     end
-  case 2
-    A = varargin{1};
-    if ~isa(A,'dates')
-        error('dates::max: All inputs must be dates objects!')
-    end
-    B = varargin{2};
-    if ~isa(B,'dates')
-        error('dates::max: All inputs must be dates objects!')
-    end
-    C = max(A+B);
   otherwise
-    if ~isa(varargin{1},'dates')
-        error('dates::max: All inputs must be dates objects!')
-    end
-    A = varargin{1};
-    for i=2:nargin
-        if ~isa(varargin{i},'dates')
-            error('dates::max: All inputs must be dates objects!')
-        end
-        A = A + varargin{i};
-    end
-    C = max(A);
+    C = max(horzcat(varargin{:}));
 end
 
 %@test:1
