@@ -80,36 +80,14 @@ end
 
 [dataset_,xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
+%check for calibrated covariances before updating parameters
+if ~isempty(estim_params_)
+    estim_params_=check_for_calibrated_covariances(xparam1,estim_params_,M_);
+end
 % Set sigma_e_is_diagonal flag (needed if the shocks block is not declared in the mod file).
 M_.sigma_e_is_diagonal = 1;
-if estim_params_.ncx || any(nnz(tril(M_.Sigma_e,-1)))
+if estim_params_.ncx || any(nnz(tril(M_.Correlation_matrix,-1))) || isfield(estim_params_,'calibrated_covariances')
     M_.sigma_e_is_diagonal = 0;
-end
-
-% Set the correlation matrix if necessary.
-if ~isequal(estim_params_.ncx,nnz(tril(M_.Sigma_e,-1)))
-    M_.Correlation_matrix = diag(1./sqrt(diag(M_.Sigma_e)))*M_.Sigma_e*diag(1./sqrt(diag(M_.Sigma_e)));
-    % Remove NaNs appearing because of variances calibrated to zero.
-    if any(isnan(M_.Correlation_matrix))
-        zero_variance_idx = find(~diag(M_.Sigma_e));
-        for i=1:length(zero_variance_idx)
-            M_.Correlation_matrix(zero_variance_idx(i),:) = 0;
-            M_.Correlation_matrix(:,zero_variance_idx(i)) = 0;
-        end
-    end
-end
-
-% Set the correlation matrix of measurement errors if necessary.
-if ~isequal(estim_params_.ncn,nnz(tril(M_.H,-1)))
-    M_.Correlation_matrix_ME = diag(1./sqrt(diag(M_.H)))*M_.H*diag(1./sqrt(diag(M_.H)));
-    % Remove NaNs appearing because of variances calibrated to zero.
-    if any(isnan(M_.Correlation_matrix_ME))
-        zero_variance_idx = find(~diag(M_.H));
-        for i=1:length(zero_variance_idx)
-            M_.Correlation_matrix_ME(zero_variance_idx(i),:) = 0;
-            M_.Correlation_matrix_ME(:,zero_variance_idx(i)) = 0;
-        end
-    end
 end
 
 data = dataset_.data;
@@ -151,7 +129,7 @@ if exist(mh_scale_fname)
 end
 
 if ~isempty(estim_params_)
-    set_parameters(xparam1);
+    M_ = set_all_parameters(xparam1,estim_params_,M_);
 end
 
 % compute sample moments if needed (bvar-dsge)
