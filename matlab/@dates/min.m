@@ -21,41 +21,20 @@ function C = min(varargin)
 
 switch nargin
   case 1
-    A = varargin{1};
-    switch length(A)
+    switch length(varargin{1})
       case 0
         C= dates();
       case 1
-        C = A;
+        C = varargin{1};
       otherwise
-        tmp = sortrows(A.time);
+        tmp = sortrows(varargin{1}.time);
         C = dates();
-        C.freq = A.freq;
+        C.freq = varargin{1}.freq;
         C.ndat = 1;
         C.time = tmp(1,:);
     end
-  case 2
-    A = varargin{1};
-    if ~isa(A,'dates')
-        error('dates::min: All inputs must be dates objects!')
-    end
-    B = varargin{2};
-    if ~isa(B,'dates')
-        error('dates::min: All inputs must be dates objects!')
-    end
-    C = min(A+B);
   otherwise
-    if ~isa(varargin{1},'dates')
-        error('dates::min: All inputs must be dates objects!')
-    end
-    A = varargin{1};
-    for i=2:nargin
-        if ~isa(varargin{i},'dates')
-            error('dates::min: All inputs must be dates objects!')
-        end
-        A = A + varargin{i};
-    end
-    C = min(A);
+    C = min(horzcat(varargin{:}));
 end
 
 %@test:1
