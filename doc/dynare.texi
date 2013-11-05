@@ -741,7 +741,7 @@ Activate console mode. In addition to the behavior of
 computations.
 
 @item nograph
-Activate the @code{nograph} option (@xref{nograph}), so that Dynare will not produce any
+Activate the @code{nograph} option (@pxref{nograph}), so that Dynare will not produce any
 graph
 
 @item nointeractive
