@@ -37,8 +37,6 @@
 # define CHAR_LENGTH 2
 #endif
 
-#define ASCII_POUND_SIGN_CODE 156
-
 #ifdef _MSC_VER
 #include <limits>
 #define M_E 2.71828182845904523536
@@ -332,7 +330,7 @@ public:
     string tmp_n(str.length(), ' ');
     string dollar, pound, tilde;
     dollar = "$";
-    pound = (char)ASCII_POUND_SIGN_CODE;
+    pound = "£";
     tilde = "~";
     for (unsigned int i = 0; i < str.length(); i++)
       {
@@ -1277,7 +1275,7 @@ public:
                       tmp_out << "$";
                     tmp_out << " / ";
                     if (isinf(r))
-                      tmp_out << (char)ASCII_POUND_SIGN_CODE;
+                      tmp_out << "£";
                   }
                 else
                   tmp_out << " / ";
@@ -1440,7 +1438,7 @@ public:
                 if (compute)
                   {
                     if (isnan(r))
-                      tmp_out << "$ ^ " << (char)ASCII_POUND_SIGN_CODE;
+                      tmp_out << "$ ^ " << "£";
                     else
                       tmp_out << " ^ ";
                   }
@@ -1482,7 +1480,7 @@ public:
                   if (compute)
                     {
                       if (isnan(r))
-                        tmp_out << "$ PowerDeriv " << (char)ASCII_POUND_SIGN_CODE;
+                        tmp_out << "$ PowerDeriv " << "£";
                       else
                         tmp_out << "PowerDeriv";
                     }
@@ -1556,7 +1554,7 @@ public:
                 if (compute)
                   {
                     if (isnan(r))
-                      tmp_out << "$log" << (char)ASCII_POUND_SIGN_CODE << "(" << v1 << ")";
+                      tmp_out << "$log" << "£" << "(" << v1 << ")";
                     else
                       tmp_out << "log(" << v1 << ")";
                   }
@@ -1574,7 +1572,7 @@ public:
                 if (compute)
                   {
                     if (isnan(r))
-                      tmp_out << "$log10" << (char)ASCII_POUND_SIGN_CODE << "(" << v1 << ")";
+                      tmp_out << "$log10" << "£" << "(" << v1 << ")";
                     else
                       tmp_out << "log10(" << v1 << ")";
                   }
