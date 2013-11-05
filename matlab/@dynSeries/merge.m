@@ -51,7 +51,11 @@ tex = [B.tex; C.tex];
 A.tex = tex(IBC); 
 A.vobs=length(IBC);
 
-if B.init >= C.init
+if B.nobs == 0
+    A = C;
+elseif C.nobs == 0
+    A = B;
+elseif B.init >= C.init
     diff = B.init - C.init;
     A.nobs = max(B.nobs + diff, C.nobs);
     A.data = NaN(A.nobs, A.vobs);

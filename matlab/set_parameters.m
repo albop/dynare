@@ -14,7 +14,7 @@ function set_parameters(xparam1)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -39,9 +39,11 @@ nvn = estim_params_.nvn;
 ncn = estim_params_.ncn;
 np = estim_params_.np;
 Sigma_e = M_.Sigma_e;
+Correlation_matrix = M_.Correlation_matrix;
 offset = 0;
 
-% stderrs of the exogenous shocks
+% setting shocks variance on the diagonal of Covariance matrix; used later
+% for updating covariances
 if nvx
     var_exo = estim_params_.var_exo;
     for i=1:nvx
@@ -58,10 +60,17 @@ if ncx
     for i=1:ncx
         k1 = corrx(i,1);
         k2 = corrx(i,2);
-        Sigma_e(k1,k2) = xparam1(i+offset)*sqrt(Sigma_e(k1,k1)*Sigma_e(k2,k2));
-        Sigma_e(k2,k1) = Sigma_e(k1,k2);
+        Correlation_matrix(k1,k2) = xparam1(i+offset);
+        Correlation_matrix(k2,k1) = Correlation_matrix(k1,k2);
     end
 end
+%build covariance matrix from correlation matrix and variances already on
+%diagonal
+Sigma_e = diag(sqrt(diag(Sigma_e)))*Correlation_matrix*diag(sqrt(diag(Sigma_e))); 
+if isfield(estim_params,'calibrated_covariances')
+    Sigma_e(estim_params.calibrated_covariances.position)=estim_params.calibrated_covariances.cov_value;
+end
+
 % and update offset
 offset = offset + ncx + ncn;
 
@@ -71,3 +80,4 @@ if np
 end
 
 M_.Sigma_e = Sigma_e;
+M_.Correlation_matrix=Correlation_matrix;
