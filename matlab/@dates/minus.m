@@ -43,16 +43,11 @@ if isa(A,'dates') && isa(B,'dates')
     if isempty(id)
         return
     end
-    C(id) = A.time(id,2)-B.time(id,2) + (A.time(id,1)-B.time(id,1))*A.freq;        
-elseif isa(A,'dates') && ( (isvector(B) && isequal(length(B),A.ndat) && all(isint(B))) || isscalar(B) && isint(B) || isequal(length(A),1) && isvector(B) && all(isint(B)))
+    C(id) = A.time(id,2)-B.time(id,2) + (A.time(id,1)-B.time(id,1))*A.freq;
+elseif (isvector(B) && isequal(length(B),A.ndat) && all(isint(B))) || isscalar(B) && isint(B) || isequal(length(A),1) && isvector(B) && all(isint(B))
     C = dates();
     C.freq = A.freq;
     C.time = add_periods_to_array_of_dates(A.time, A.freq, -B);
-    C.ndat = rows(C.time);
-elseif isa(B,'dates') && ( (isvector(A) && isequal(length(A),B.ndat) && all(isint(A))) || isscalar(A) && isint(A) )
-    C = dates();
-    C.freq = A.freq;
-    C.time = add_periods_to_array_of_dates(B.time, B.freq, -A);
     C.ndat = rows(C.time);
 else
     error('dates::plus: I don''t understand what you want to do! Check the manual.')
