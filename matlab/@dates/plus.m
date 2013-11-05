@@ -21,7 +21,7 @@ function C = plus(A,B) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isa(A,'dates') && isa(B,'dates')
+if isa(B,'dates')
     % Concatenate dates objects without removing repetitions if A and B are not disjoint sets of dates.
     if ~isequal(A.freq,B.freq) && A.ndat>0 && B.ndat>0
         error(['dates::plus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must have common frequencies!'])
@@ -38,15 +38,10 @@ if isa(A,'dates') && isa(B,'dates')
     C.freq = A.freq;
     C.time = [A.time; B.time];
     C.ndat = A.ndat+B.ndat;
-elseif isa(A,'dates') && ( (isvector(B) && isequal(length(B),A.ndat) && all(isint(B))) || isscalar(B) && isint(B) || isequal(length(A),1) && isvector(B) && all(isint(B)))
+elseif (isvector(B) && isequal(length(B),A.ndat) && all(isint(B))) || isscalar(B) && isint(B) || isequal(length(A),1) && isvector(B) && all(isint(B))
     C = dates();
     C.freq = A.freq;
     C.time = add_periods_to_array_of_dates(A.time, A.freq, B);
-    C.ndat = rows(C.time);
-elseif isa(B,'dates') && ( (isvector(A) && isequal(length(A),B.ndat) && all(isint(A))) || isscalar(A) && isint(A) )
-    C = dates();
-    C.freq = B.freq;
-    C.time = add_periods_to_array_of_dates(B.time, B.freq, A);
     C.ndat = rows(C.time);
 else
     error('dates::plus: I don''t understand what you want to do! Check the manual.')
