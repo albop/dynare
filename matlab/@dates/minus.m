@@ -20,7 +20,7 @@ function C = minus(A,B) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isa(A,'dates') && isa(B,'dates')
+if isa(B,'dates')
     if ~isequal(A.freq,B.freq)
         error(['dates::minus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must have common frequencies!'])
     end
