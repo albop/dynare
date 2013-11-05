@@ -21,7 +21,6 @@ function C = minus(A,B) % --*-- Unitary tests --*--
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if isa(A,'dates') && isa(B,'dates')
-    % Concatenate dates objects without removing repetitions if A and B are not disjoint sets of dates.
     if ~isequal(A.freq,B.freq)
         error(['dates::minus: Input arguments ''' inputname(1) ''' and ''' inputname(2) ''' must have common frequencies!'])
     end
