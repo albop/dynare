@@ -4486,8 +4486,8 @@ value of that function as the posterior mode.
 @noindent
 Default value is @code{4}.
 
-@item MCMC_jumping_covariance = hessian|prior_variance|identity_matrix|@var{filename}
-Tells Dynare which covariance to use for the proposal density of the MCMC sampler. @code{MCMC_jumping_covariance} can be one of the following:
+@item mcmc_jumping_covariance = hessian|prior_variance|identity_matrix|@var{FILENAME}
+Tells Dynare which covariance to use for the proposal density of the MCMC sampler. @code{mcmc_jumping_covariance} can be one of the following:
 
 @table @code
 @item hessian 
@@ -4499,12 +4499,12 @@ Uses the prior variances. No infinite prior variances are allowed in this case.
 @item identity_matrix
 Uses an identity matrix.
 
-@item filename
-Loads an arbitrary user-specified covariance matrix from @code{filename.mat}. The covariance matrix must be saved in a variable named @code{jumping_covariance}, must be square, positive definite, and have the same dimension as the number of estimated parameters.
+@item @var{FILENAME}
+Loads an arbitrary user-specified covariance matrix from @code{@var{FILENAME}.mat}. The covariance matrix must be saved in a variable named @code{jumping_covariance}, must be square, positive definite, and have the same dimension as the number of estimated parameters.
 
 @end table
 @noindent
-Note that the covariance matrices are stil scaled with @ref{mh_jscale}. Default value is @code{hessian}.
+Note that the covariance matrices are still scaled with @ref{mh_jscale}. Default value is @code{hessian}.
 
 @item mode_check
 Tells Dynare to plot the posterior density for values around the

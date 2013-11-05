@@ -3,6 +3,7 @@ MODFILES = \
 	estimation/fs2000_mc4_mf.mod \
 	estimation/fs2000_mc6.mod \
 	estimation/fs2000_mc6_mf.mod \
+	estimation/fs2000_MCMC_jumping_covariance.mod \
 	gsa/ls2003.mod \
 	ramst.mod \
 	ramst_a.mod \
@@ -309,7 +310,8 @@ EXTRA_DIST = \
 	third_order/comparison_policy_functions_dynare_mathematica.m \
 	third_order/policyfunctions.mat \
 	shock_decomposition/example1_calib_shock_decomp_data.mat \
-	shock_decomposition/fsdat_simul.m
+	shock_decomposition/fsdat_simul.m \
+	estimation/fs2000_MCMC_jumping_covariance_steadystate.m
 
 TARGETS =
 
@@ -417,3 +419,5 @@ clean-local:
 		ms-sbvar/*.dat \
 		ms-sbvar/tmv_rr_sr \
 		ms-sbvar/tmv_rr_tr
+
+	rm -f estimation/test_matrix.mat
