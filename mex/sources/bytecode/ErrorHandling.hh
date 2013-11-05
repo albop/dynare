@@ -152,7 +152,7 @@ class GeneralExceptionHandling
 {
   string ErrorMsg;
 public:
-#ifdef _MSC_VER_
+#ifdef _MSC_VER
   ~GeneralExceptionHandling()
   {
     FreeLibrary(hinstLib);
