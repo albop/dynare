@@ -527,7 +527,7 @@ main(int nrhs, const char *prhs[])
       for (vector<s_plan>::iterator it = splan.begin(); it != splan.end(); it++)
         {
           mexPrintf("----------------------------------------------------------------------------------------------------\n");
-          mexPrintf("suprise n°%d\n", i+1);
+          mexPrintf("suprise #%d\n", i+1);
           if (it->exo.length())
             mexPrintf(" plan fliping var=%s (%d) exo=%s (%d) for the following periods and with the following values:\n", it->var.c_str(), it->var_num, it->exo.c_str(), it->exo_num);
           else
@@ -605,7 +605,7 @@ main(int nrhs, const char *prhs[])
       for (vector<s_plan>::iterator it = spfplan.begin(); it != spfplan.end(); it++)
         {
           mexPrintf("----------------------------------------------------------------------------------------------------\n");
-          mexPrintf("perfect foresight n°%d\n", i+1);
+          mexPrintf("perfect foresight #%d\n", i+1);
           if (it->exo.length())
             mexPrintf(" plan flipping var=%s (%d) exo=%s (%d) for the following periods and with the following values:\n", it->var.c_str(), it->var_num, it->exo.c_str(), it->exo_num);
           else
