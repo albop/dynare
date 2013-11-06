@@ -40,7 +40,7 @@ function A = merge(B,C) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isa(C,'dseries')
+if ~isdseries(C)
     error('dseries::merge: Both inputs must be dseries objects!')
 end
 

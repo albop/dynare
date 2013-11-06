@@ -41,7 +41,9 @@ function A = plus(B,C) % --*-- Unitary tests --*--
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if isscalar(B)
-    assert(isa(C, 'dseries'));
+    if ~isdseries(C)
+        error('dseries::plus: Second input argument must be a dseries object!')
+    end
     b(1:size(C)) = B;
     BB = dseries(b, C.dates(1));
     BB.freq = C.freq;
@@ -56,7 +58,9 @@ if isscalar(B)
 end
 
 if isscalar(C)
-    assert(isa(B, 'dseries'));
+    if ~isdseries(B)
+        error('dseries::plus: First input argument must be a dseries object!')
+    end
     c(1:size(C)) = C;
     CC = dseries(C, B.dates(1));
     CC.freq = B.freq;
@@ -67,7 +71,7 @@ if isscalar(C)
     CC.tex = cell(CC.vobs,1);
     CC.name(1) = {num2str(C)};
     A = B + CC;
-    return;
+    return
 end
 
 if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))

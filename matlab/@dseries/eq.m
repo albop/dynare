@@ -33,7 +33,7 @@ if nargin~=2
     error('dseries::eq: I need exactly two input arguments!')
 end
 
-if ~(isa(A,'dseries') && isa(B,'dseries'))
+if ~(isdseries(A) && isdseries(B))
     error('dseries::eq: Both input arguments must be dseries objects!')
 end
 

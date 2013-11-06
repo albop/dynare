@@ -40,7 +40,7 @@ function A = minus(B,C) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dseries')
+if isnumeric(B) && isreal(B) && isequal(length(B),1) && isdseries(C)
     A = dseries();
     A.freq = C.freq;
     A.init = C.init;
@@ -57,7 +57,7 @@ if isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dseries')
     return;
 end
 
-if isnumeric(C) && isreal(C) && isequal(length(C),1) && isa(B,'dseries')
+if isnumeric(C) && isreal(C) && isequal(length(C),1) && isdseries(B)
     A = dseries();
     A.freq = B.freq;
     A.init = B.init;

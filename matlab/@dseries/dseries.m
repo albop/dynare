@@ -94,7 +94,7 @@ switch nargin
     %  Create an empty dseries object.
     return
   case 1
-    if isa(varargin{1},'dates')
+    if isdates(varargin{1})
         switch length(varargin{1})
           case 0
             error(['dseries::dseries: Input ' inputname(1) ' (identified as a dates object) must be non empty!'])
@@ -177,7 +177,7 @@ switch nargin
         if isdate(b)% Weekly, Monthly, Quaterly or Annual data.
             ts.init = dates(b);
             ts.freq = ts.init.freq;
-        elseif isa(b,'dates') && isequal(length(b),1)
+        elseif isdates(b) && isequal(length(b),1)
             ts.freq = b.freq;
             ts.init = b;
         elseif isnumeric(b) && isscalar(b) && isint(b) % Yearly data.

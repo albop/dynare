@@ -98,16 +98,16 @@ switch length(S)
               end
           end
         case '.'
-          if isequal(S(1).subs,'init') && isa(B,'dates') && isequal(length(B),1)
+          if isequal(S(1).subs,'init') && isdates(B) && isequal(length(B),1)
               % Overwrite the init member...
               A.init = B;
               % ... and update freq and time members.
               A.freq = A.init.freq;
-              A.time = A.init:A.init+(A.nobs-1);
+              A.dates = A.init:A.init+(A.nobs-1);
               return
-          elseif isequal(S(1).subs,'time') && isa(B,'dates')
+          elseif isequal(S(1).subs,'dates') && isdates(B)
               % Overwrite the time member...
-              A.time = B;
+              A.dates = B;
               % ... and update the freq and init members.
               A.init = B(1);
               A.freq = A.init.freq;
@@ -131,10 +131,10 @@ switch length(S)
               end
           end
         case '()' % Date(s) selection
-          if isa(S(1).subs{1},'dates')
-              [junk, tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
-              if isa(B,'dseries')
-                  [junk, tdy] = intersect(B.time.time,S(1).subs{1}.time,'rows');
+          if isdates(S(1).subs{1})
+              [junk, tdx] = intersect(A.dates.time,S(1).subs{1}.time,'rows');
+              if isdseries(B)
+                  [junk, tdy] = intersect(B.dates.time,S(1).subs{1}.time,'rows');
                   if isempty(tdy)
                       error('dseries::subsasgn: Periods of the dseries objects on the left and right hand sides must intersect!')
                   end
@@ -171,11 +171,11 @@ switch length(S)
         else
             sA = extract(A,S(1).subs);
         end
-        if (isa(B,'dseries') && isequal(sA.vobs,B.vobs)) || (isnumeric(B) && isequal(sA.vobs,columns(B))) || (isnumeric(B) && isequal(columns(B),1)) 
-            if isa(S(2).subs{1},'dates')
-                [junk, tdx] = intersect(sA.time.time,S(2).subs{1}.time,'rows');
-                if isa(B,'dseries')
-                    [junk, tdy] = intersect(B.time.time,S(2).subs{1}.time,'rows');
+        if (isdseries(B) && isequal(sA.vobs,B.vobs)) || (isnumeric(B) && isequal(sA.vobs,columns(B))) || (isnumeric(B) && isequal(columns(B),1)) 
+            if isdates(S(2).subs{1})
+                [junk, tdx] = intersect(sA.dates.time,S(2).subs{1}.time,'rows');
+                if isdseries(B)
+                    [junk, tdy] = intersect(B.dates.time,S(2).subs{1}.time,'rows');
                     if isempty(tdy)
                         error('dseries::subsasgn: Periods of the dseries objects on the left and right hand sides must intersect!')
                     end
@@ -738,7 +738,7 @@ end
 %$    t(6) = dyn_assert(ts1.name{3},'A3');
 %$    t(7) = dyn_assert(ts1.data,A,1e-15);
 %$    t(8) = dyn_assert(isequal(ts1.init,dd),1);
-%$    t(9) = dyn_assert(isequal(ts1.time(1),dd),1);
+%$    t(9) = dyn_assert(isequal(ts1.dates(1),dd),1);
 %$ end
 %$ T = all(t);
 %@eof:19
@@ -755,7 +755,7 @@ end
 %$
 %$ % modify first object.
 %$ try
-%$     ts1.time = dd:(dd+(ts1.nobs-1));
+%$     ts1.dates = dd:(dd+(ts1.nobs-1));
 %$     t(1) = 1;
 %$ catch
 %$     t(1) = 0;
@@ -770,7 +770,7 @@ end
 %$    t(6) = dyn_assert(ts1.name{3},'A3');
 %$    t(7) = dyn_assert(ts1.data,A,1e-15);
 %$    t(8) = dyn_assert(isequal(ts1.init,dd),1);
-%$    t(9) = dyn_assert(isequal(ts1.time(1),dd),1);
+%$    t(9) = dyn_assert(isequal(ts1.dates(1),dd),1);
 %$ end
 %$ T = all(t);
 %@eof:20

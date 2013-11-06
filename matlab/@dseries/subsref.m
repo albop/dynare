@@ -65,7 +65,7 @@ function B = subsref(A, S) % --*-- Unitary tests --*--
 switch S(1).type
   case '.'
     switch S(1).subs
-      case {'data','nobs','vobs','name','tex','freq','time','init'}        % Public members.
+      case {'data','nobs','vobs','name','tex','freq','dates','init'}        % Public members.
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
             error(['dseries::subsref: ' S(1).subs ' is not a method but a member!'])
         end
@@ -165,7 +165,7 @@ switch S(1).type
             B.vobs = 1;
             B.freq = A.freq;
             B.init = A.init;
-            B.time = A.time;
+            B.dates = A.dates;
         else
             error('dseries::subsref: Unknown public method, public member or variable!')
         end
@@ -199,9 +199,9 @@ switch S(1).type
             % Do nothing.
             B = A;
         end
-    elseif isa(S(1).subs{1},'dates')
+    elseif isdates(S(1).subs{1})
         % Extract a subsample using a dates object
-        [junk,tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
+        [junk,tdx] = intersect(A.dates.time,S(1).subs{1}.time,'rows');
         B = dseries();
         B.data = A.data(tdx,:);
         B.name = A.name;
@@ -210,7 +210,7 @@ switch S(1).type
         B.vobs = A.vobs;
         B.freq = A.freq;
         B.init = A.init+(tdx(1)-1);
-        B.time = A.time(tdx,:);
+        B.dates = A.dates(tdx);
     elseif isvector(S(1).subs{1}) && all(isint(S(1).subs{1}))
         % Extract a subsample using a vector of integers (observation index).
         % Note that this does not work if S(1).subs is an integer scalar... In which case S(1).subs is interpreted as a lead/lag operator (as in the Dynare syntax).
@@ -223,8 +223,8 @@ switch S(1).type
             B.nobs = size(B.data,1);
             B.vobs = A.vobs;
             B.freq = A.freq;
-            B.time = builtin('subsref', A.time, S(1));
-            B.init = B.time(1);
+            B.dates = builtin('subsref', A.dates, S(1));
+            B.init = B.dates(1);
             B.name = A.name;
             B.tex  = A.tex;
         else
@@ -249,7 +249,7 @@ switch S(1).type
         B.vobs = length(idx);
         B.freq = A.freq;
         B.init = A.init;
-        B.time = A.time;
+        B.dates = A.dates;
     else
         error('dseries::subsref: What the Hell are you tryin'' to do?!')
     end

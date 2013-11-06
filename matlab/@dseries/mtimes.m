@@ -40,7 +40,7 @@ function A = mtimes(B,C) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isa(B,'dseries') && isa(C,'dseries')
+if isdseries(B) && isdseries(C,'dseries')
     % Element by element multiplication of two dseries object
     if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
         error(['dseries::times: Cannot multiply ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
@@ -75,7 +75,7 @@ if isa(B,'dseries') && isa(C,'dseries')
         A.tex(i) = {['(' B.tex{idB(i)} '*' C.tex{idC(i)} ')']};
     end
     A.data = bsxfun(@times,B.data,C.data);
-elseif isnumeric(C) &&  isreal(C) && isequal(length(C),1) && isa(B,'dseries') 
+elseif isnumeric(C) &&  isreal(C) && isequal(length(C),1) && isdseries(B)
     % Multiplication of a dseries object by a real scalar.
     A = dseries();
     A.freq = B.freq;
@@ -90,7 +90,7 @@ elseif isnumeric(C) &&  isreal(C) && isequal(length(C),1) && isa(B,'dseries')
         A.tex(i) = {['(' B.tex{i} '*' num2str(C) ')']};
     end
     A.data = B.data*C;    
-elseif isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dseries')
+elseif isnumeric(B) && isreal(B) && isequal(length(B),1) && isdseries(C)
     % Multiplication of a dseries object by a real scalar.
     A = dseries();
     A.freq = C.freq;

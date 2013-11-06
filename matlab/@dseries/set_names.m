@@ -44,7 +44,7 @@ function A = set_names(B,varargin) % --*-- Unitary tests --*--
 
 n = nargin-1;
 
-if ~isa(B,'dseries')
+if ~isdseries(B)
     error(['dseries::rename: ' inputname(1) ' must be a dseries object!'])
 end
 

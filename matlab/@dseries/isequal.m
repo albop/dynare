@@ -30,7 +30,7 @@ if nargin~=2
     error('dseries::isequal: I need exactly two input arguments!')
 end
 
-if ~isa(B,'dseries')
+if ~isdseries(B)
     error('dseries::isequal: Both input arguments must be dseries objects!')
 end
 

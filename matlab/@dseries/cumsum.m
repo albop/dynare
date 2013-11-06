@@ -50,7 +50,7 @@ switch nargin
           B.tex(i) = {['\sum_t ' B.tex{i}]};
       end
   case 2
-    if isa(varargin{2},'dseries')
+    if isdseries(varargin{2})
         if ~isequal(varargin{1}.vobs, varargin{2}.vobs)
             error('dseries::cumsum: First and second input arguments must be dseries objects with the same number of variables!')
         end
@@ -80,7 +80,7 @@ switch nargin
     if ~isdates(varargin{2})
         error('dseries::cumsum: Second input argument must be a dates object!')
     end
-    if ~isa(varargin{3},'dseries')
+    if ~isdseries(varargin{3})
         error('dseries::cumsum: Third input argument must be a dseries object!')
     end
     if ~isequal(varargin{1}.vobs, varargin{3}.vobs)
