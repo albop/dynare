@@ -4,6 +4,7 @@ MODFILES = \
 	estimation/fs2000_mc6.mod \
 	estimation/fs2000_mc6_mf.mod \
 	estimation/fs2000_MCMC_jumping_covariance.mod \
+	estimation/fs2000_initialize_from_calib.mod	\
 	gsa/ls2003.mod \
 	ramst.mod \
 	ramst_a.mod \
@@ -311,7 +312,8 @@ EXTRA_DIST = \
 	third_order/policyfunctions.mat \
 	shock_decomposition/example1_calib_shock_decomp_data.mat \
 	shock_decomposition/fsdat_simul.m \
-	estimation/fs2000_MCMC_jumping_covariance_steadystate.m
+	estimation/fs2000_MCMC_jumping_covariance_steadystate.m \
+	estimation/fs2000_initialize_from_calib_steadystate.m
 
 TARGETS =
 
