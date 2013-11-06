@@ -25,7 +25,7 @@ function dd = sort(dd) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if dd.ndat==1
+if isequal(dd.ndat,1)
     return
 end
 
