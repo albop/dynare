@@ -20,7 +20,7 @@ function oo_=display_estimation_results_table(xparam1,stdh,M_,options_,estim_par
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -168,6 +168,9 @@ if ncn
         ip = ip+1;
     end
     skipline()
+end
+if any(xparam1(1:nvx+nvn)<0)
+    warning('Some estimated standard deviations are negative. Dynare internally works with variances so that the sign does not matter. Nevertheless, it is recommended to impose either prior restrictions (Bayesian Estimation) or a lower bound (ML) to assure positive values.')
 end
 
 OutputDirectoryName = CheckPath('Output',M_.dname);
