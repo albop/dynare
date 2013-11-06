@@ -51,6 +51,7 @@ var e_a; stderr 0.014;
 var e_m; stderr 0.005;
 var e_f; stderr 0.005;
 corr gy_obs, gp_obs = 0.1;
+var gy_obs; stderr 0.005;
 end;
 
 steady;
