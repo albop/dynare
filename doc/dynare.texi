@@ -752,7 +752,7 @@ Activate console mode. In addition to the behavior of
 computations.
 
 @item nograph
-Activate the @code{nograph} option (@xref{nograph}), so that Dynare will not produce any
+Activate the @code{nograph} option (@pxref{nograph}), so that Dynare will not produce any
 graph
 
 @item nointeractive
@@ -4400,6 +4400,7 @@ the total number of Metropolis draws available. Default:
 The fraction of initially generated parameter vectors to be dropped as a burnin before using posterior simulations. Default: @code{0.5}
 
 @item mh_jscale = @var{DOUBLE}
+@anchor{mh_jscale}
 The scale to be used for the jumping distribution in
 Metropolis-Hastings algorithm. The default value is rarely
 satisfactory. This option must be tuned to obtain, ideally, an
@@ -4495,6 +4496,26 @@ value of that function as the posterior mode.
 
 @noindent
 Default value is @code{4}.
+
+@item mcmc_jumping_covariance = hessian|prior_variance|identity_matrix|@var{FILENAME}
+Tells Dynare which covariance to use for the proposal density of the MCMC sampler. @code{mcmc_jumping_covariance} can be one of the following:
+
+@table @code
+@item hessian 
+Uses the Hessian matrix computed at the mode.
+
+@item prior_variance
+Uses the prior variances. No infinite prior variances are allowed in this case.
+
+@item identity_matrix
+Uses an identity matrix.
+
+@item @var{FILENAME}
+Loads an arbitrary user-specified covariance matrix from @code{@var{FILENAME}.mat}. The covariance matrix must be saved in a variable named @code{jumping_covariance}, must be square, positive definite, and have the same dimension as the number of estimated parameters.
+
+@end table
+@noindent
+Note that the covariance matrices are still scaled with @ref{mh_jscale}. Default value is @code{hessian}.
 
 @item mode_check
 Tells Dynare to plot the posterior density for values around the

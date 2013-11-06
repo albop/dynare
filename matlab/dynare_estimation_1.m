@@ -80,36 +80,14 @@ end
 
 [dataset_,xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
+%check for calibrated covariances before updating parameters
+if ~isempty(estim_params_)
+    estim_params_=check_for_calibrated_covariances(xparam1,estim_params_,M_);
+end
 % Set sigma_e_is_diagonal flag (needed if the shocks block is not declared in the mod file).
 M_.sigma_e_is_diagonal = 1;
-if estim_params_.ncx || any(nnz(tril(M_.Sigma_e,-1)))
+if estim_params_.ncx || any(nnz(tril(M_.Correlation_matrix,-1))) || isfield(estim_params_,'calibrated_covariances')
     M_.sigma_e_is_diagonal = 0;
-end
-
-% Set the correlation matrix if necessary.
-if ~isequal(estim_params_.ncx,nnz(tril(M_.Sigma_e,-1)))
-    M_.Correlation_matrix = diag(1./sqrt(diag(M_.Sigma_e)))*M_.Sigma_e*diag(1./sqrt(diag(M_.Sigma_e)));
-    % Remove NaNs appearing because of variances calibrated to zero.
-    if any(isnan(M_.Correlation_matrix))
-        zero_variance_idx = find(~diag(M_.Sigma_e));
-        for i=1:length(zero_variance_idx)
-            M_.Correlation_matrix(zero_variance_idx(i),:) = 0;
-            M_.Correlation_matrix(:,zero_variance_idx(i)) = 0;
-        end
-    end
-end
-
-% Set the correlation matrix of measurement errors if necessary.
-if ~isequal(estim_params_.ncn,nnz(tril(M_.H,-1)))
-    M_.Correlation_matrix_ME = diag(1./sqrt(diag(M_.H)))*M_.H*diag(1./sqrt(diag(M_.H)));
-    % Remove NaNs appearing because of variances calibrated to zero.
-    if any(isnan(M_.Correlation_matrix_ME))
-        zero_variance_idx = find(~diag(M_.H));
-        for i=1:length(zero_variance_idx)
-            M_.Correlation_matrix_ME(zero_variance_idx(i),:) = 0;
-            M_.Correlation_matrix_ME(:,zero_variance_idx(i)) = 0;
-        end
-    end
 end
 
 data = dataset_.data;
@@ -151,7 +129,7 @@ if exist(mh_scale_fname)
 end
 
 if ~isempty(estim_params_)
-    set_parameters(xparam1);
+    M_ = set_all_parameters(xparam1,estim_params_,M_);
 end
 
 % compute sample moments if needed (bvar-dsge)
@@ -602,8 +580,6 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
 
         [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(objective_function,xparam1,maxy,rt_,epsilon,ns,nt ...
                                                               ,neps,maxevl,LB,UB,c,idisp ,t,vm,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-      case 'prior'
-        hh = diag(bayestopt_.p2.^2);
       otherwise
         if ischar(options_.mode_compute)
             [xparam1, fval, retcode ] = feval(options_.mode_compute,objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
@@ -611,8 +587,8 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             error(['dynare_estimation:: mode_compute = ' int2str(options_.mode_compute) ' option is unknown!'])
         end
     end
-    if ~isequal(options_.mode_compute,6) && ~isequal(options_.mode_compute,'prior')
-        if options_.cova_compute == 1
+    if ~isequal(options_.mode_compute,6) %always already computes covariance matrix
+        if options_.cova_compute == 1 %user did not request covariance not to be computed
             if options_.analytic_derivation && strcmp(func2str(objective_function),'dsge_likelihood'),
                 ana_deriv = options_.analytic_derivation;
                 options_.analytic_derivation = 2;
@@ -638,6 +614,35 @@ if options_.cova_compute == 0
     hh = [];%NaN(length(xparam1),length(xparam1));
 end
 
+switch options_.MCMC_jumping_covariance
+    case 'hessian' %Baseline
+        %do nothing and use hessian from mode_compute
+    case 'prior_variance' %Use prior variance
+        if any(isinf(bayestopt_.p2))
+            error('Infinite prior variances detected. You cannot use the prior variances as the proposal density, if some variances are Inf.')
+        else            
+            hh = diag(1./(bayestopt_.p2.^2));
+        end
+    case 'identity_matrix' %Use identity
+        hh = eye(nx);   
+    otherwise %user specified matrix in file
+        try 
+            load(options_.MCMC_jumping_covariance,'jumping_covariance')
+            hh=jumping_covariance;
+        catch
+            error(['No matrix named ''jumping_covariance'' could be found in ',options_.MCMC_jumping_covariance,'.mat'])
+        end
+        [nrow, ncol]=size(hh);
+        if ~isequal(nrow,ncol) && ~isequal(nrow,nx) %check if square and right size
+            error(['jumping_covariance matrix must be square and have ',num2str(nx),' rows and columns'])
+        end
+        try %check for positive definiteness
+            chol(hh);
+        catch
+            error(['Specified jumping_covariance is not positive definite'])
+        end
+end
+
 if ~options_.mh_posterior_mode_estimation && options_.cova_compute
     try
         chol(hh);
@@ -646,7 +651,7 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
         disp('POSTERIOR KERNEL OPTIMIZATION PROBLEM!')
         disp(' (minus) the hessian matrix at the "mode" is not positive definite!')
         disp('=> posterior variance of the estimated parameters are not positive.')
-        disp('You should  try  to change the initial values of the parameters using')
+        disp('You should try to change the initial values of the parameters using')
         disp('the estimated_params_init block, or use another optimization routine.')
         params_at_bound=find(xparam1==ub | xparam1==lb);
         if ~isempty(params_at_bound)
@@ -767,11 +772,15 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         CutSample(M_, options_, estim_params_);
         %% Estimation of the marginal density from the Mh draws:
         if options_.mh_replic
-            [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
+            [marginal,oo_] = marginal_density(M_, options_, estim_params_, ...
+                                              oo_);
+            % Store posterior statistics by parameter name
             oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_);
             if ~options_.nograph
                 oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
             end
+            % Store posterior mean in a vector and posterior variance in
+            % a matrix
             [oo_.posterior.metropolis.mean,oo_.posterior.metropolis.Variance] ...
                 = GetPosteriorMeanVariance(M_,options_.mh_drop);
         else

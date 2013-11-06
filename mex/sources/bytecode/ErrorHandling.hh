@@ -150,7 +150,7 @@ class GeneralExceptionHandling
 {
   string ErrorMsg;
 public:
-#ifdef _MSC_VER_
+#ifdef _MSC_VER
   ~GeneralExceptionHandling()
   {
     FreeLibrary(hinstLib);
@@ -328,20 +328,24 @@ public:
     string temp;
     int pos1 = -1, pos2 = -1;
     string tmp_n(str.length(), ' ');
+    string dollar, pound, tilde;
+    dollar = "$";
+    pound = "£";
+    tilde = "~";
     for (unsigned int i = 0; i < str.length(); i++)
       {
-        if (str[i] != '$' && str[i] != '£')
+        if (dollar.compare(&str[i]) != 0 && pound.compare(&str[i]) != 0)
           temp += str[i];
         else
           {
-            if (str[i] == '$')
+            if (dollar.compare(&str[i]) == 0)
               pos1 = int(temp.length());
             else
               pos2 = int(temp.length());
             if (pos1 >= 0 && pos2 >= 0)
               {
                 tmp_n.erase(pos1, pos2-pos1+1);
-                tmp_n.insert(pos1, pos2-pos1, '~');
+                tmp_n.insert(pos1, pos2-pos1, tilde[0]);
                 pos1 = pos2 = -1;
               }
           }
@@ -408,7 +412,7 @@ public:
                 res << P_endo_names[CHAR_LENGTH*(variable_num+i*nb_endo)];
           }
         else
-          mexPrintf("=> Unknown endogenous variable n° %d", variable_num);
+          mexPrintf("=> Unknown endogenous variable # %d", variable_num);
         break;
       case eExogenous:
       case eExogenousDet:
@@ -419,7 +423,7 @@ public:
                 res << P_exo_names[CHAR_LENGTH*(variable_num+i*nb_exo)];
           }
         else
-          mexPrintf("=> Unknown exogenous variable n° %d", variable_num);
+          mexPrintf("=> Unknown exogenous variable # %d", variable_num);
         break;
       case eParameter:
         if (variable_num < nb_param)
@@ -429,7 +433,7 @@ public:
                 res << P_param_names[CHAR_LENGTH*(variable_num+i*nb_param)];
           }
         else
-          mexPrintf("=> Unknown parameter n° %d", variable_num);
+          mexPrintf("=> Unknown parameter # %d", variable_num);
         break;
       default:
         break;
@@ -1434,7 +1438,7 @@ public:
                 if (compute)
                   {
                     if (isnan(r))
-                      tmp_out << "$ ^ £";
+                      tmp_out << "$ ^ " << "£";
                     else
                       tmp_out << " ^ ";
                   }
@@ -1476,7 +1480,7 @@ public:
                   if (compute)
                     {
                       if (isnan(r))
-                        tmp_out << "$ PowerDeriv £";
+                        tmp_out << "$ PowerDeriv " << "£";
                       else
                         tmp_out << "PowerDeriv";
                     }
@@ -1550,7 +1554,7 @@ public:
                 if (compute)
                   {
                     if (isnan(r))
-                      tmp_out << "$log£(" << v1 << ")";
+                      tmp_out << "$log" << "£" << "(" << v1 << ")";
                     else
                       tmp_out << "log(" << v1 << ")";
                   }
@@ -1568,7 +1572,7 @@ public:
                 if (compute)
                   {
                     if (isnan(r))
-                      tmp_out << "$log10£(" << v1 << ")";
+                      tmp_out << "$log10" << "£" << "(" << v1 << ")";
                     else
                       tmp_out << "log10(" << v1 << ")";
                   }
@@ -1774,11 +1778,7 @@ public:
                       }
                     tmp_out.str("");
                     tmp_out << function_name << "(";
-#ifndef _MSC_VER
-                    string ss[nb_input_arguments];
-#else
                     vector<string> ss(nb_input_arguments);
-#endif
                     for (unsigned int i = 0; i < nb_input_arguments; i++)
                       {
                         ss[nb_input_arguments-i-1] = Stack.top();
@@ -1832,11 +1832,7 @@ public:
                     tmp_out.str("");
                     tmp_out << function_name << "(";
                     tmp_out << arg_func_name.c_str() << ", " << fc->get_row() << ", {";
-#ifndef _MSC_VER
-                    string ss[nb_add_input_arguments];
-#else
                     vector<string> ss(nb_input_arguments);
-#endif
                     for (unsigned int i = 0; i < nb_add_input_arguments; i++)
                       {
                         ss[nb_add_input_arguments-i-1] = Stack.top();
@@ -1867,11 +1863,7 @@ public:
                       }
                     tmp_out.str("");
                     tmp_out << function_name << "(";
-#ifndef _MSC_VER
-                    string ss[nb_input_arguments];
-#else
                     vector<string> ss(nb_input_arguments);
-#endif
                     for (unsigned int i = 0; i < nb_input_arguments; i++)
                       {
                         ss[nb_input_arguments-i-1] = Stack.top();
@@ -1924,11 +1916,7 @@ public:
                     tmp_out.str("");
                     tmp_out << function_name << "(";
                     tmp_out << arg_func_name.c_str() << ", " << fc->get_row() << ", " << fc->get_col() << ", {";
-#ifndef _MSC_VER
-                    string ss[nb_add_input_arguments];
-#else
                     vector<string> ss(nb_input_arguments);
-#endif
                     for (unsigned int i = 0; i < nb_add_input_arguments; i++)
                       {
                         ss[nb_add_input_arguments-i-1] = Stack.top();
@@ -1959,11 +1947,7 @@ public:
                       }
                     tmp_out.str("");
                     tmp_out << function_name << "(";
-#ifndef _MSC_VER
-                    string ss[nb_input_arguments];
-#else
                     vector<string> ss(nb_input_arguments);
-#endif
                     for (unsigned int i = 0; i < nb_input_arguments; i++)
                       {
                         ss[nb_input_arguments-i-1] = Stack.top();

@@ -36,7 +36,8 @@ if ~noprint
       case 2
         error(['The generalized Schur (QZ) decomposition failed. ' ...
                'For more information, see the documentation for Lapack function dgges: info=' ...
-               int2str(info(2)) ', n=' int2str(info(3))])
+               int2str(info(2)) ', n=' int2str(info(3)) ...
+               '. You can also run model_diagnostics to get more information on what may cause this problem.'])
       case 3
         error(['Blanchard Kahn conditions are not satisfied: no stable' ...
                ' equilibrium'])
@@ -113,6 +114,10 @@ if ~noprint
         error(['Discretionary policy: some eigenvalues greater than options_.qz_criterium. Model potentially unstable.']);
       case 63
         error(['Discretionary policy: NaN elements are present in the solution. Procedure failed.']);
+      case 71
+        error(['Calibrated covariance of the structural errors implies correlation larger than  +-1.']);
+      case 72
+        error(['Calibrated covariance of the measurement errors implies correlation larger than  +-1.']);
         % Aim Code Conversions by convertAimCodeToInfo.m
       case 102
         error('Aim: roots not correctly computed by real_schur');

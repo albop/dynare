@@ -163,7 +163,7 @@ Model = set_all_parameters(xparam1,EstimatedParameters,Model);
 Q = Model.Sigma_e;
 H = Model.H;
 
-if ~isscalar(Q) &&  EstimatedParameters.ncx
+if ~issquare(Q) || EstimatedParameters.ncx || isfield(EstimatedParameters,'calibrated_covariances')
     [Q_is_positive_definite, penalty] = ispd(Q);
     if ~Q_is_positive_definite
         fval = objective_function_penalty_base+penalty;
@@ -171,9 +171,20 @@ if ~isscalar(Q) &&  EstimatedParameters.ncx
         info = 43;
         return
     end
+    if isfield(EstimatedParameters,'calibrated_covariances')
+        correct_flag=check_consistency_covariances(Q);
+        if ~correct_flag
+            penalty = sum(Q(EstimatedParameters.calibrated_covariances.position).^2);
+            fval = objective_function_penalty_base+penalty;
+            exit_flag = 0;
+            info = 71;
+            return
+        end
+    end
+
 end
 
-if ~isscalar(H) && EstimatedParameters.ncn
+if ~issquare(H) || EstimatedParameters.ncn || isfield(EstimatedParameters,'calibrated_covariances_ME')
     [H_is_positive_definite, penalty] = ispd(H);
     if ~H_is_positive_definite
         fval = objective_function_penalty_base+penalty;
@@ -181,6 +192,17 @@ if ~isscalar(H) && EstimatedParameters.ncn
         info = 44;
         return
     end
+    if isfield(EstimatedParameters,'calibrated_covariances_ME')
+        correct_flag=check_consistency_covariances(H);
+        if ~correct_flag
+            penalty = sum(H(EstimatedParameters.calibrated_covariances_ME.position).^2);
+            fval = objective_function_penalty_base+penalty;
+            exit_flag = 0;
+            info = 72;
+            return
+        end
+    end
+
 end
 
 %------------------------------------------------------------------------------

@@ -31,3 +31,12 @@ if (DynareModel.exo_det_nbr > 0) && (DynareModel.maximum_lag > 1 || DynareModel.
     error(['Exogenous deterministic variables are currently only allowed in' ...
            ' models with leads and lags on only one period'])
 end
+
+if ~check_consistency_covariances(DynareModel.Sigma_e)
+    error('The specified covariances for the structural errors are not consistent with the variances as they imply a correlation larger than +-1')
+end
+if ~isequal(DynareModel.H,0)
+    if ~check_consistency_covariances(DynareModel.H)
+        error('The specified covariances for the measurement errors are not consistent with the variances as they imply a correlation larger than +-1')
+    end
+end
