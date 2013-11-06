@@ -95,7 +95,7 @@ end
 ts.data = tmp(K+1:end-K,:);
 ts.nobs = ts.nobs-2*K;
 ts.init = ts.init+K;
-ts.time = ts.init:ts.init+(ts.nobs-1);
+ts.dates = ts.init:ts.init+(ts.nobs-1);
 
 %@test:1
 %$ plot_flag = 0; 
@@ -131,7 +131,7 @@ ts.time = ts.init:ts.init+(ts.nobs-1);
 %$
 %$ % Show results
 %$ if plot_flag
-%$     plot(xx(ts.time).data,'-k');
+%$     plot(xx(ts.dates).data,'-k');
 %$     hold on
 %$     plot(ts.data,'--r');
 %$     hold off

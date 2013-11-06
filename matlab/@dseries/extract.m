@@ -122,7 +122,7 @@ for i = 1:length(idVariableName)
 end
 
 A.data = B.data(:,idVariableName);
-A.time = B.time;
+A.dates = B.dates;
 A.init = B.init;
 A.freq = B.freq;
 A.nobs = B.nobs;

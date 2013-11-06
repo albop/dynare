@@ -65,7 +65,7 @@ if isa(B,'dseries') && isa(C,'dseries')
     A = dseries();
     A.freq = B.freq;
     A.init = B.init;
-    A.time = B.time;
+    A.dates = B.dates;
     A.nobs = max(B.nobs,C.nobs);
     A.vobs = max(B.vobs,C.vobs);
     A.name = cell(A.vobs,1);
@@ -79,7 +79,7 @@ elseif isnumeric(C) &&  isreal(C) && isequal(length(C),1) && isa(B,'dseries')
     % division of a dseries object by a real scalar.
     A = dseries();
     A.freq = B.freq;
-    A.time = B.time;
+    A.dates = B.dates;
     A.init = B.init;
     A.nobs = B.nobs;
     A.vobs = B.vobs;
@@ -94,7 +94,7 @@ elseif isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dseries')
     % division of a real scalar by a dseries object.
     A = dseries();
     A.freq = C.freq;
-    A.time = C.time;
+    A.dates = C.dates;
     A.init = C.init;
     A.nobs = C.nobs;
     A.vobs = C.vobs;

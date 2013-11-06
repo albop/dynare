@@ -82,9 +82,8 @@ switch format
     fprintf(fid,',%s', A.name{:});
     fprintf(fid,'\n');
     for t=1:A.nobs
-        date = A.init+(t-1);
         str = sprintf(', %15.8g',A.data(t,:));
-        fprintf(fid, '%s%s\n',date2string(date),str);
+        fprintf(fid, '%s%s\n',date2string(A.dates(t)),str);
     end
     fclose(fid);
 end

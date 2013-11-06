@@ -44,7 +44,7 @@ if isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dseries')
     A = dseries();
     A.freq = C.freq;
     A.init = C.init;
-    A.time = C.time;
+    A.dates = C.dates;
     A.nobs = C.nobs;
     A.vobs = C.vobs;
     A.name = cell(A.vobs,1);
@@ -61,7 +61,7 @@ if isnumeric(C) && isreal(C) && isequal(length(C),1) && isa(B,'dseries')
     A = dseries();
     A.freq = B.freq;
     A.init = B.init;
-    A.time = B.time;
+    A.dates = B.dates;
     A.nobs = B.nobs;
     A.vobs = B.vobs;
     A.name = cell(A.vobs,1);
@@ -111,7 +111,7 @@ A = dseries();
 
 A.freq = B.freq;
 A.init = B.init;
-A.time = B.time;
+A.dates = B.dates;
 A.nobs = max(B.nobs,C.nobs);
 A.vobs = max(B.vobs,C.vobs);
 A.name = cell(A.vobs,1);

@@ -64,7 +64,7 @@ switch nargin
         B.data = bsxfun(@plus,B.data,varargin{2}.data);
     elseif isdates(varargin{2})
         B = cumsum(varargin{1});
-        t = find(B.time==varargin{2});
+        t = find(B.dates==varargin{2});
         if isempty(t)
             if varargin{2}==(B.init-1)
                 return
@@ -93,7 +93,7 @@ switch nargin
         error('dseries::cumsum: Third input argument must be a dseries object with only one observation!')
     end
     B = cumsum(varargin{1});
-    t = find(B.time==varargin{2});
+    t = find(B.dates==varargin{2});
     if isempty(t)
         if varargin{2}==(B.init-1)
             B.data = bsxfun(@plus,B.data,varargin{3}.data);

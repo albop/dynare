@@ -69,7 +69,7 @@ if ~isequal(numel(unique(A.name)),numel(A.name));
     return
 end
 
-if ~isequal(numel(unique(A.tex)),numel(A.tex));
+if ~isequa(numel(unique(A.tex)),numel(A.tex));
     error_flag = 1;
     if nargout>1
         message = ['dseries: The variable tex names in dseries object ''' inputname(1) ''' are not unique!']:
@@ -77,7 +77,7 @@ if ~isequal(numel(unique(A.tex)),numel(A.tex));
     return
 end
 
-if ~isequal(A.time,A.init:A.init+A.nobs)
+if ~isequal(A.dates,A.init:A.init+A.nobs)
     error_flag = 1;
     if nargout>1
         message = ['dseries: Wrong definition of the time member in dseries object ''' inputname(1) '''!']:

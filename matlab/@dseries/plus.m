@@ -43,9 +43,9 @@ function A = plus(B,C) % --*-- Unitary tests --*--
 if isscalar(B)
     assert(isa(C, 'dseries'));
     b(1:size(C)) = B;
-    BB = dseries(b, C.time(1));
+    BB = dseries(b, C.dates(1));
     BB.freq = C.freq;
-    BB.time = C.time;
+    BB.dates = C.dates;
     BB.nobs = C.nobs;
     BB.vobs = C.vobs;
     BB.name = cell(BB.vobs,1);
@@ -58,9 +58,9 @@ end
 if isscalar(C)
     assert(isa(B, 'dseries'));
     c(1:size(C)) = C;
-    CC = dseries(C, B.time(1));
+    CC = dseries(C, B.dates(1));
     CC.freq = B.freq;
-    CC.time = B.time;
+    CC.dates = B.dates;
     CC.nobs = B.nobs;
     CC.vobs = B.vobs;
     CC.name = cell(CC.vobs,1);
@@ -116,7 +116,7 @@ for i=1:A.vobs
     A.tex(i) = {['(' B.tex{idB(i)} '+' C.tex{idC(i)} ')']};
 end
 A.data = bsxfun(@plus,B.data,C.data);
-A.time = A.init:A.init+(A.nobs-1);
+A.dates = A.init:A.init+(A.nobs-1);
 
 %@test:1
 %$ % Define a datasets.

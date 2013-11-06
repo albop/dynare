@@ -78,14 +78,14 @@ function ts = dseries(varargin) % --*-- Unitary tests --*--
 
 ts = struct;
 
-ts.data = [];
-ts.nobs = 0;
-ts.vobs = 0;
-ts.name = {};
-ts.tex  = {};
-ts.freq = [];
-ts.init = dates();
-ts.time = dates();
+ts.data  = [];
+ts.nobs  = 0;
+ts.vobs  = 0;
+ts.name  = {};
+ts.tex   = {};
+ts.freq  = [];
+ts.init  = dates();
+ts.dates = dates();
 
 ts = class(ts,'dseries');
 
@@ -94,16 +94,16 @@ switch nargin
     %  Create an empty dseries object.
     return
   case 1
-    if isa(varargin{1},'dates') && isequal(length(varargin{1}),1)
+    if isa(varargin{1},'dates')
         switch length(varargin{1})
           case 0
-            error(['dseries::dseries: ' inputname(1) ' (identified as a dates object) must be non empty!'])
+            error(['dseries::dseries: Input ' inputname(1) ' (identified as a dates object) must be non empty!'])
           case 1
             % Create an empty dseries object with an initial date.
             ts.init = varargin{1};
             ts.freq = varargin{1}.freq;
           otherwise
-            error(['dseries::dseries: ' inputname(1) ' (identified as a dates object) must have only one element!'])
+            error(['dseries::dseries: Input ' inputname(1) ' (identified as a dates object) must have only one element!'])
         end
         return
     elseif ischar(varargin{1})
@@ -214,7 +214,7 @@ switch nargin
     error('dseries::dseries: Can''t instantiate the class, wrong calling sequence!')
 end
 
-ts.time = ts.init:ts.init+(ts.nobs-1);
+ts.dates = ts.init:ts.init+(ts.nobs-1);
 
 %@test:1
 %$ % Test if we can instantiate an empty dseries object.

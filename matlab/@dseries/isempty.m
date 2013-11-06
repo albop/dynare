@@ -36,7 +36,5 @@ function b = isempty(A)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
     
 b = isempty(A.data) && isequal(A.nobs,0) && isequal(A.vobs,0);

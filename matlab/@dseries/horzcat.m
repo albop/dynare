@@ -76,7 +76,7 @@ function a = concatenate(b,c)
     if ~( d_nobs_flag(1) || d_init_flag(1) )
         a.init = b.init;
         a.data = [b.data,c.data];
-        a.time = b.time;
+        a.dates = b.dates;
     else
         if b.init<=c.init
             a.init = b.init;
@@ -96,7 +96,7 @@ function a = concatenate(b,c)
             c.data = [c.data; NaN(b_last_date-c_last_date,c.vobs)];
         end
         a.data = [b.data, c.data];
-        a.time = unique([b.time, c.time]);
+        a.dates = unique([b.dates, c.dates]);
     end
     a.nobs = size(a.data,1);
 
@@ -110,7 +110,7 @@ function a = concatenate(b,c)
 %$ B_name = {'B1';'B2'};
 %$
 %$ % Define expected results.
-%$ e.time = dates(1,1);
+%$ e.init = dates(1,1);
 %$ e.freq = 1;
 %$ e.name = {'A1';'A2';'B1';'B2'};
 %$ e.data = [A,B];
@@ -124,7 +124,7 @@ function a = concatenate(b,c)
 %$
 %$ % Check the results.
 %$
-%$ t(1) = dyn_assert(isequal(ts3.init,e.time),1);
+%$ t(1) = dyn_assert(isequal(ts3.init,e.init),1);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -145,7 +145,6 @@ function a = concatenate(b,c)
 %$ B_init = 2005;
 %$
 %$ % Define expected results.
-%$ e.time = [transpose(2000+(1:12)), ones(12,1)];
 %$ e.init = dates('2001Y');
 %$ e.freq = 1;
 %$ e.name = {'A1';'A2';'B1';'B2'};
