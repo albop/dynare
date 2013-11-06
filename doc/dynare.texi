@@ -9053,8 +9053,8 @@ Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
 @anchor{data}
-@item data, @code{dynSeries}
-The @code{dynSeries} that provides the data for the graph. Default:
+@item data, @code{dseries}
+The @code{dseries} that provides the data for the graph. Default:
 @code{none}
 
 @item figname, @code{STRING}
@@ -9090,11 +9090,11 @@ The font size for legend entries. Default: @code{8}
 
 @anchor{seriesToUse}
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
-The names of the series contained in the @code{dynSeries} provided to
+The names of the series contained in the @code{dseries} provided to
 the @ref{data} option. If empty, use all series provided to
 @ref{data} option. Default: @code{empty}
 
-@item shade, @code{dynDates}
+@item shade, @code{dates}
 The date range showing the portion of the graph that should be
 shaded. Default: @code{none}
 
@@ -9114,12 +9114,12 @@ The x-axis label. Default: @code{none}
 @item ylabel, @code{STRING}
 The y-axis label. Default: @code{none}
 
-@item xrange, @code{dynDates}
+@item xrange, @code{dates}
 The boundary on the x-axis to display in the graph. Default: all
 
 @item xTickLabels, @code{CELL_ARRAY_STRINGS}
 The labels to use for the xticks in the graph. Default: the dates of
-the @code{dynSeries}
+the @code{dseries}
 
 @item yrange, @code{NUMERICAL_VECTOR}
 The boundary on the y-axis to display in the graph, represented as a
@@ -9142,7 +9142,7 @@ Compute the average over every year in the table and display it in a
 column to the right of the data (one column for every year). Only
 works for quarterly data. Default: @code{false}
 
-@item data, @code{dynSeries}
+@item data, @code{dseries}
 @xref{data}.
 
 @item showHlines, @code{BOOLEAN}
@@ -9151,7 +9151,7 @@ Whether or not to show horizontal lines separating the rows. Default: @code{fals
 @item precision, @code{INTEGER}
 The number of decimal places to report in the table data. Default: @code{1}
 
-@item range, @code{dynDates}
+@item range, @code{dates}
 The date range of the data to be displayed. Default: @code{all}
 
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
@@ -9163,7 +9163,7 @@ Title for the table. Default: @code{none}
 @item titleSize, @code{STRING}
 @LaTeX{} string representing the size of the table title. Default: @code{large}
 
-@item vlineAfter, @code{dynDate}
+@item vlineAfter, @code{dates}
 Show a vertical line after the specified date. Default: @code{empty}
 
 @item vlineAfterEndOfPeriod, @code{BOOLEAN}
@@ -9181,7 +9181,7 @@ Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @optionshead
 @table @code
 
-@item data, @code{dynSeries}
+@item data, @code{dseries}
 @xref{data}.
 
 @item graphLineColor, @code{MATLAB_COLOR}
@@ -9285,10 +9285,10 @@ The following code creates a one page report. The first part of the
 page contains two graphs displayed across two columns and one
 row. The bottom of the page displays a centered table.
 @example
-%% Create dynSeries
-dsq = dynSeries(`quarterly.csv');
-dsa = dynSeries(`annual.csv');
-dsca = dynSeries(`annual_control.csv');
+%% Create dseries
+dsq = dseries(`quarterly.csv');
+dsa = dseries(`annual.csv');
+dsca = dseries(`annual_control.csv');
 
 %% Report
 rep = report();
@@ -9299,15 +9299,15 @@ rep = rep.addPage(`title', `My Page Title', `titleFormat', `\large\bfseries');
 % Section 1
 rep = rep.addSection(`cols', 2);
 rep = rep.addGraph(`title', `Graph (1,1)', `showLegend', true, ...
-                   `xrange', dynDate(`2007q1'):dynDate(`2013q4'), ...
-                   `shade', dynDate(`2012q2'):dynDate(`2013q4'));
+                   `xrange', dates(`2007q1'):dates(`2013q4'), ...
+                   `shade', dates(`2012q2'):dates(`2013q4'));
 rep = rep.addSeries(`data', dsq@{`SERIES1'@}, `color', `b', ...
                     `graphLineWidth', 1);
 rep = rep.addSeries(`data', dsq@{`SERIES2'@}, `color', `g', ...
                     `graphLineStyle', '--', `graphLineWidth', 1.5);
 rep = rep.addGraph(`title', `Graph (1,2)', `showLegend', true, ...
-                   `xrange', dynDate(`2007q1'):dynDate(`2013q4'), ...
-                   `shade', dynDate(`2012q2'):dynDate(`2013q4'));
+                   `xrange', dates(`2007q1'):dates(`2013q4'), ...
+                   `shade', dates(`2012q2'):dates(`2013q4'));
 rep = rep.addSeries(`data', dsq@{`SERIES3'@}, `color', `b', ...
                     `graphLineWidth', 1);
 rep = rep.addSeries(`data', dsq@{`SERIES4'@}, `color', `g', ...
@@ -9316,7 +9316,7 @@ rep = rep.addSeries(`data', dsq@{`SERIES4'@}, `color', `g', ...
 % Section 2
 rep = rep.addSection();
 rep = rep.addTable(`title', `Table 1', ...
-                   `range', dynDate(`2012'):dynDate(`2014'));
+                   `range', dates(`2012Y'):dates(`2014Y'));
 shortNames = @{`US', `EU'@};
 longNames  = @{`United States', `Euro Area'@};
 for i=1:length(shortNames)
