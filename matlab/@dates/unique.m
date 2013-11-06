@@ -6,7 +6,7 @@ function B = unique(A) % --*-- Unitary tests --*--
 %  o A    dates object.
 %
 % OUTPUTS 
-%  o B    dates object (a copy of A without repetitions).
+%  o B    dates object (a copy of A without repetitions, only the last occurence of a date is kept).
 
 % Copyright (C) 2012-2013 Dynare Team
 %
@@ -25,17 +25,18 @@ function B = unique(A) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isa(A,'dates')
-    error(['dates::unique: Input argument ' inputname(1) ' has to be a dates object.'])
-end
-
-if A.ndat==1
+if isequal(A.ndat,1)
     return
 end
 
 B = A;
 
-[tmp,id,jd] = unique(A.time,'rows');
+if isoctave || matlab_ver_less_than('8.1.0')
+    [tmp, id, jd] = unique(A.time,'rows');
+else
+    [tmp, id, jd] = unique(A.time,'rows','legacy');
+end
+
 B.time = A.time(sort(id),:);
 B.ndat = size(B.time,1);
 
@@ -48,13 +49,13 @@ B.ndat = size(B.time,1);
 %$ B5 = '1950Q2'; 
 %$
 %$ % Define expected results.
-%$ e.time = [1953 4; 1950 2; 1950 1; 1945 3];
+%$ e.time = [1953 4; 1950 1; 1945 3; 1950 2];
 %$ e.freq = 4;
 %$ e.ndat = 4;
 %$
 %$ % Call the tested routine.
 %$ d = dates(B1,B2,B3,B4,B5);
-%$ d = d.unique;
+%$ d = d.unique(); d, d.time, e.time
 %$ 
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);
