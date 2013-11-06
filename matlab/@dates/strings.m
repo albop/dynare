@@ -1,12 +1,12 @@
-function m = getDatesCellStringArray(dd)
-%function m = getDatesCellStringArray(dd)
+function m = strings(dd)
+
 % Returns a cell array of strings containing the dates
 %
-% INPUTS
-%   dd - dates object
+% INPUTS 
+%   o dd   dates object
 %
 % OUTPUTS
-%   m  - cell array of strings
+%   o m    cell array of strings
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -28,26 +28,8 @@ function m = getDatesCellStringArray(dd)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-dateSep = '';
-switch dd.freq
-    case 1
-    case 4
-        dateSep = 'q';
-    case 12
-        dateSep = 'm';
-    case 52
-        dateSep = 'w';
-    otherwise
-        error('Unknown frequency %d', dd.freq);
-end
+m = cell(1,dd.ndat);
 
-m = cell(0);
 for i = 1:dd.ndat
-    if isempty(dateSep)
-        newdate = num2str(dd.time(i,1));
-    else
-        newdate = [num2str(dd.time(i,1)) dateSep num2str(dd.time(i,2))];
-    end
-    m = { m{:} newdate };
-end
+    m(i) = { date2string(dd.time(i,:), dd.freq) };
 end
