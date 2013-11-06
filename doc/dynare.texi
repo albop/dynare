@@ -4169,6 +4169,7 @@ end;
 @end deffn
 
 @deffn Block estimated_params_init ;
+@deffnx Block estimated_params_init (@var{OPTIONS}@dots{});
 
 This block declares numerical initial values for the optimizer when
 these ones are different from the prior mean.
@@ -4179,6 +4180,14 @@ Each line has the following syntax:
 stderr VARIABLE_NAME | corr VARIABLE_NAME_1, VARIABLE_NAME_2 | PARAMETER_NAME
 , INITIAL_VALUE;
 @end example
+
+@optionshead
+
+@table @code
+
+@item use_calibration
+Use the parameters from calibration as starting values for estimation.
+@end table
 
 @xref{estimated_params}, for the meaning and syntax of the various components.
 
