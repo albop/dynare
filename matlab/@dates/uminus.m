@@ -1,6 +1,6 @@
 function B = uminus(A)  % --*-- Unitary tests --*--
 
-% Overloads the unary plus operator for dates objects. Shifts all the elements by one period.
+% Overloads the unary minus operator for dates objects. Shifts all the elements by one period.
 %
 % INPUTS 
 %  o A    dates object with n elements.
