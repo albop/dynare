@@ -1,33 +1,12 @@
-function dd = unique(dd) % --*-- Unitary tests --*--
+function B = unique(A) % --*-- Unitary tests --*--
 
-% unique method for dates class.
-
-%@info:
-%! @deftypefn {Function File} {@var{a} =} unique (@var{a})
-%! @anchor{dates/unique}
-%! @sp 1
-%! Unique method for the Dynare dates class (removes repetitions).
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item a
-%! Object instantiated by @ref{dates}.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item a
-%! Object instantiated by @ref{dates}.
-%! @end table
-%! @sp 2
-%! @strong{This function is called by:}
-%! @sp 2
-%! @strong{This function calls:}
-%!
-%! @end deftypefn
-%@eod:
+% Overloads the unique function for dates objects.
+%
+% INPUTS 
+%  o A    dates object.
+%
+% OUTPUTS 
+%  o B    dates object (a copy of A without repetitions).
 
 % Copyright (C) 2012-2013 Dynare Team
 %
@@ -46,17 +25,19 @@ function dd = unique(dd) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isa(dd,'dates')
+if ~isa(A,'dates')
     error(['dates::unique: Input argument ' inputname(1) ' has to be a dates object.'])
 end
 
-if dd.ndat==1
+if A.ndat==1
     return
 end
 
-[tmp,id,jd] = unique(dd.time,'rows');
-dd.time = dd.time(sort(id),:);
-dd.ndat = size(dd.time,1);
+B = A;
+
+[tmp,id,jd] = unique(A.time,'rows');
+B.time = A.time(sort(id),:);
+B.ndat = size(B.time,1);
 
 %@test:1
 %$ % Define some dates
