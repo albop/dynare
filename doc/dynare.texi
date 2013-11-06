@@ -42,6 +42,13 @@
 @emph{Example}
 @end macro
 
+@macro exampleshead
+@iftex
+@sp 1
+@end iftex
+@emph{Examples}
+@end macro
+
 @macro outputhead
 @iftex
 @sp 1
@@ -70,6 +77,10 @@
 @sp 1
 @end iftex
 @emph{\title\}
+@end macro
+
+@macro dates
+@code{dates }
 @end macro
 
 @c %**end of header
@@ -8312,92 +8323,594 @@ MatlabOctavePath = matlab
 @node Time Series
 @chapter Time Series
 
-Dynare provides a Matlab class for handling time series data, which is
-based on classes for handling dates. Below, you will first find the
-classes and methods used for creating and dealing with dates and then
-the class used for using time series.
+Dynare provides a  Matlab class for handling time series  data, which is
+based on a class for handling dates. Dynare also provides a new type for
+dates, so  that the  basic user  do not  have to  worry about  class and
+methods for  dates.  Below, you  will first  find the class  and methods
+used for  creating and dealing  with dates and  then the class  used for
+using time series.
 
-@section dynDate
+@node dates
+@section dates
 
-@deftypefn  {dynDate} dynDate (@code{INTEGER})
-@deftypefnx {dynDate} dynDate (@code{STRING})
-@deftypefnx {dynDate} dynDate (@var{NUMERICAL_VECTOR}, @code{INTEGER})
-Returns a @code{dynDate} object that represents a date.
+@node dates in a mod file
+@subsection dates in a mod file
 
-If the value passed is an @code{INTEGER}, return a date of annual
-frequency.
+Dynare  understands dates  in  a  mod file.  Users  can declare  annual,
+quaterly, monthly or weekly dates using the following syntax:
+@example
+1990Y
+1990Q3
+1990M11
+1990W49
+@end example
+@noindent Behind the scene, the dynare's preprocessor translates these expressions
+into instantiations of the  Matlab/Octave's class @dates described
+below. Basic  operations can be performed  on dates:
+@table @strong
 
-If the value passed is a @code{STRING}, it should be passed in one of
-the following formats: @code{`1999'} for an annual date,
-@code{`1999q4'} for a quarterly date, @code{`1999m12'} for a monthly
-date, and @code{`1999w52'} for a weekly date.
+@item plus binary operator (@code{+})
 
-If the value passed is a @code{NUMERICAL_VECTOR} it should be a vector
-of size @code{2}. The format should be: @code{[year period]}. In this
-case, you must pass a second argument to the @code{dynDate} consructor
-indicating the freqency of the date as an @code{INTEGER}. This
-argument can take the following possible values: @code{1} for annual,
-@code{4} for quarterly, @code{12} for monthly and @code{52} for
-weekly.
+An integer scalar, interpreted as a number of periods, can be added to a date. For instance, if @code{a = 1950Q1} then 
+@code{b = 1951Q2} and @code{b = a + 5} are identical.
+
+@item plus unary operator (@code{+})
+
+Increments a date by one period. @code{+1950Q1} is identical to @code{1950Q2}, @code{++++1950Q1} is identical to @code{1951Q1}.
+
+@item minus binary operator (@code{-})
+
+The difference between two dates is a number of periods. For instance if @code{1951Q2-1950Q1} is equal to  @code{5} (quarters). 
+
+@item minus unary operator (@code{-})
+
+Substracts one period to a date. @code{-1950Q1} is identical to @code{1949Q4}. The unary minus operator is the reciprocal of the unary plus operator, @code{+-1950Q1} is identical to @code{1950Q1}.
+
+@item colon operator (@code{:})
+
+Can be used to create a range of dates. For instance, @code{r = 1950Q1:1951Q1} creates a @dates object with five elements: @code{1950Q1}, @code{1950Q2}, @code{1950Q3}, @code{1950Q4} and @code{1951Q1}. By default the increment between each element is one period. This default can be changed using, for instance, the following instruction: @code{1950Q1:2:1951Q1} which will instantiate a @dates object with three elements: @code{1950Q1}, @code{1950Q3} and @code{1951Q1}.
+
+@item horzcat operator (@code{[,]})
+
+Concatenates @dates objects without removing repetitions. For instance @code{[1950Q1, 1950Q2]} is a a @dates object with two elements (@code{1950Q1} and @code{1950Q2}). 
+
+@item vertcat operator (@code{[;]})
+
+Same as @code{horzcat} operator.
+
+@item eq operator (equal, @code{==})
+
+Tests if two @dates objects are equal. @code{+1950Q1==1950Q2} returns @code{1}, @code{1950Q1==1950Q2} returns @code{0}. If the compared objects have both @code{n>1} elements, the @code{eq} operator returns a column vector, @code{n} by @code{1}, of zeros and ones.
+
+@item ne operator (not equal, @code{~=})
+
+Tests if two @dates objects are not equal. @code{+1950Q1==1950Q2} returns @code{0}, @code{1950Q1==1950Q2} returns @code{1}. If the compared objects have both @code{n>1} elements, the @code{ne} operator returns a column vector, @code{n} by @code{1}, of zeros and ones.
+
+@item lt operator (less than, @code{<})
+
+Tests if a @dates object preceeds another @dates object. For instance, @code{1950Q1<1950Q3} returns @code{1}.  If the compared objects have both @code{n>1} elements, the @code{lt} operator returns a column vector, @code{n} by @code{1}, of zeros and ones.
+
+@item gt operator (greater than, @code{>})
+
+Tests if a @dates object follows another @dates object. For instance, @code{1950Q1>1950Q3} returns @code{0}.  If the compared objects have both @code{n>1} elements, the @code{gt} operator returns a column vector, @code{n} by @code{1}, of zeros and ones.
+
+@item le operator (less or equal, @code{<=})
+
+Tests if a @dates object preceeds another @dates object or is equal to this object. For instance, @code{1950Q1<=1950Q3} returns @code{1}.  If the compared objects have both @code{n>1} elements, the @code{le} operator returns a column vector, @code{n} by @code{1}, of zeros and ones.
+
+@item ge operator (greater or equal, @code{>=})
+
+Tests if a @dates object follows another @dates object or is equal to this object. For instance, @code{1950Q1>=1950Q3} returns @code{0}.  If the compared objects have both @code{n>1} elements, the @code{ge} operator returns a column vector, @code{n} by @code{1}, of zeros and ones.
+
+@end table
+
+@noindent One can select an element, or some elements, in a @dates object as he would extract some elements from a vector in Matlab/Octave. Let @code{a = 1950Q1:1951Q1} be a @dates object, then @code{a(1)==1950Q1} returns @code{1}, @code{a(end)==1951Q1} returns @code{1} and @code{a(end-1:end)} selects the two last elements of @code{a} (by instantiating the @dates object @code{[1950Q4, 1951Q1]}).  
+
+@node dates class
+@subsection dates class
+
+The @dates class has three members:
+@table @code
+@anchor{dates class members}
+
+@item freq
+an integer equal to 1, 4, 12  or 52 (resp. for annual, quaterly, monthly
+or weekly dates).
+
+@item ndat
+an integer scalar, the number of declared dates in the object.
+
+@item time
+a @code{ndat}*2  array of integers,  the years  are stored in  the first
+column, the subperiods (1 for annual dates, 1-4 for quaterly dates, 1-12
+for monthly  dates and 1-52 for  weekly dates) are stored  in the second
+column.
+
+@end table
+@noindent Each member is private, one can display the content of a member but cannot change its value:
+@example
+>> d = dates('2009Q2');
+>> d.time
+
+ans =
+
+        2009           2
+
+>>
+@end example
+
+@noindent Note that it is not possible to mix frequencies in a @dates object: all the elements must have common frequency. The @dates class has five constructors:
+
+@sp
+
+@deftypefn  {dates} dates ()
+
+Returns an empty @dates object.
+
+@sp
+
+@deftypefnx {dates} dates (@code{FREQ})
+
+Returns an empty @dates object with  a given frequency.  @code{FREQ} is a character equal to 'Y' or 'A'  for annual dates, 'Q' for quaterly dates, 'M' for monthly dates or 'W'  for weekly dates. Note that @code{FREQ} is not  case sensitive,  so that,  for instance,  'q' is  also allowed  for quaterly dates. The frequency can also be set with an integer scalar equal to 1 (annual), 4 (quaterly), 12 (monthly) or 52 (weekly). The instantiation of empty objects can be used to rename  the @dates class. For  instance, if one  only works  with quaterly dates, he can create @code{qq} as:
+@example
+qq = dates('Q')
+@end example
+and a @dates object holding the date @code{2009Q2}:
+@example
+d0 = dates(2009,2);
+@end example
+@noindent which is much simpler if @dates objects have to be defined programatically.
+
+@sp
+
+@deftypefnx {dates} dates (@code{STRING})
+@deftypefnx {dates} dates (@code{STRING}, @code{STRING}, ...)
+
+Returns a @dates object that represents a date as given by the string @code{STRING}. This string has to be interpretable as a date (only strings of the following forms are admitted: @code{'1990Y'}, @code{'1990A'}, @code{'1990Q1'}, @code{'1990M2'}, @code{'1990W5'}), the routine @code{isdate} can be used to test if a string is interpretable as a date. If more than one argument is provided, they should all be dates represented as strings, the resulting @dates object contains as many elements as arguments to the constructor.
+
+@sp
+
+@deftypefnx {dates} dates (@code{DATES})
+@deftypefnx {dates} dates (@code{DATES}, @code{DATES}, ...)
+
+Returns a copy of the  @dates object @code{DATES} passed as input arguments. If more than one argument is provided, they should all be @dates objects. The number of elements in the instantiated @dates object is equal to the sum of the elements in the @dates passed as arguments to the constructor.
+
+@sp
+
+@deftypefnx {dates} dates (@code{FREQ}, @code{YEAR}, @code{SUBPERIOD})
+
+where @code{FREQ} is a single character ('Y', 'A', 'Q', 'M', 'W') or integer (1, 4, 12 or 52) specifying the frequency, @code{YEAR} and @code{SUBPERIOD} are @code{n*1} vectors of integers. Returns a @dates object with @code{n} elements. If @code{FREQ} is equal to @code{'Y', 'A'} or @code{1}, the third argument is not needed (because @code{SUBPERIOD} is necessarly a vector of ones in this case).
+
+@sp
+
+@exampleshead
+@example
+do1 = dates('1950Q1');
+do2 = dates('1950Q2','1950Q3');
+do3 = dates(do1,do2);
+do4 = dates('Q',1950, 1);
+@end example
+
+@sp
+
+A list of the available methods, by alphabetical order, is given below. Note that the Matlab/Octave classes do not allow in place modifications: when a method is applied to an object a new object is instantiated. For instance, to apply the method @code{multiplybytwo} to an object @code{X} we write:
+@example
+Y = X.multiplybytwo()
+@end example
+or equivalently:
+@example
+Y = multiplybytwo(X)
+@end example
+the object @code{X} is left unchanged, and the object @code{Y} is a modified copy of @code{X}.
+
+@sp
+
+@deftypefnx {dates} {@var{B} = } append (@var{A}, @var{a})
+
+Appends @dates object @var{a}, or a string that can be interpreted as a date, to the @dates object @var{A}. If @code{a} is a @dates object it is assumed that it has no more than one element.
 
 @examplehead
-
-An example of various ways to create a @code{dynDate} object:
-
 @example
-do1 = dynDate(`1999');            % 1999
-do2 = dynDate(`Q');               % NaNqNan
-do3 = dynDate([1999 2], 12);      % 1999m2
+>> D = dates('1950Q1','1950Q2');
+>> d = dates('1950Q3');
+>> E = D.append(d);
+>> F = D.append('1950Q3')
+>> isequal(E,F)
+
+ans =
+
+     1
+>> F
+F = <dates: 1950Q1, 1950Q2, 1950Q3>
 @end example
+
+@sp
+
+@deftypefnx {dates} {@var{C} = } colon (@var{A}, @var{B})
+@deftypefnx {dates} {@var{C} = } colon (@var{A}, @var{i}, @var{B})
+
+Overloads the Matlab/Octave colon (:) operator. @var{A} and @var{B} are @dates objects. The optional increment @var{i} is a scalar integer (default value is @code{i=1}). This method returns a @dates object and can be used to create ranges of dates.
+
+@examplehead
+@example
+>> A = dates('1950Q1');
+>> B = dates('1951Q2');
+>> C = A:B
+C = <dates: 1950Q1, 1950Q2, 1950Q3, 1950Q4, 1951Q1>
+>> D = A:2:B
+D = <dates: 1950Q1, 1950Q3, 1951Q1>
+
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{B} = } double (@var{A})
+
+Overloads the Matlab/Octave @code{double} function. @var{A} is a @dates object. The method returns a floating point representation of a @dates object, the integer and fractional parts respectively corresponding to the year and the subperiod. The fractional part is the subperiod number minus one divided by the frequency (@code{1}, @code{4}, @code{12} or @code{52}).
+
+
+@examplehead
+@example
+>> a = dates('1950Q1'):dates('1950Q4');
+>> a.double()
+
+ans =
+
+   1950.00
+   1950.25
+   1950.50
+   1950.75
+
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} eq (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{eq} (equal, @code{==}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the dates @code{A(i)} and @code{B(i)} are the same.
+
+@examplehead
+@example
+>> A = dates('1950Q1','1951Q2');
+>> B = dates('1950Q1','1950Q2');
+>> A==B
+
+ans =
+
+     1
+     0
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} ge (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{ge} (greater or equal, @code{>=}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the date @code{A(i)} is posterior or equal to the date @code{B(i)}.
+
+@examplehead
+@example
+>> A = dates('1950Q1','1951Q2');
+>> B = dates('1950Q1','1950Q2');
+>> A>=B
+
+ans =
+
+     1
+     1
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} gt (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{gt} (greater than, @code{>=}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the date @code{A(i)} is posterior to the date @code{B(i)}.
+
+@examplehead
+@example
+>> A = dates('1950Q1','1951Q2');
+>> B = dates('1950Q1','1950Q2');
+>> A>B
+
+ans =
+
+     0
+     1
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{D} =} horzcat (@var{A}, @var{B}, @var{C}, ...)
+
+Overloads the Matlab/Octave @code{horzcat} operator. All the input arguments must be @dates objects. The returned argument is a @dates object gathering all the dates given in the input arguments (repetitions are not removed).
+
+@examplehead
+@example
+>> A = dates('1950Q1');
+>> B = dates('1950Q2');
+>> C = [A, B];
+>> C
+C = <dates: 1950Q1, 1950Q2>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} intersect (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{intersect} function. All the input arguments must be @dates objects. The returned argument is a @dates object gathering all the common dates given in the input arguments. If @var{A} and @var{B} are disjoint @dates objects, the function returns an empty @dates object. Returned dates in @dates object @var{C} are sorted by increasing order.
+
+@examplehead
+@example
+>> A = dates('1950Q1'):dates('1951Q4');
+>> B = dates('1951Q1'):dates('1951Q4');
+>> C = intersect(A, B);
+>> C
+C = <dates: 1951Q1, 1951Q2, 1951Q3, 1951Q4>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{B} =} isempty (@var{A})
+
+Overloads the Matlab/Octave isempty function for @dates object.
+
+@examplehead
+@example
+>> A = dates('1950Q1'):dates('1951Q4');
+>> A.isempty()
+
+ans =
+
+     0
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} isequal (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{isequal} function for @dates objects.
+
+@examplehead
+@example
+>> A = dates('1950Q1'):dates('1951Q4');
+>> isequal(A,A)
+
+ans =
+
+     1
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} le (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{le} (less or equal, @code{<=}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the date @code{A(i)} is not posterior to the date @code{B(i)}.
+
+@examplehead
+@example
+>> A = dates('1950Q1','1951Q2');
+>> B = dates('1950Q1','1950Q2');
+>> A<=B
+
+ans =
+
+     1
+     0
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{B} =} length (@var{A})
+
+Overloads the Matlab/Octave @code{length}  function. Returns the number of dates in @dates object @var{A} (@var{B} is a scalar integer).
+
+@examplehead
+@example
+>> A = dates('1950Q1','1951Q2');
+>> A.length()
+
+ans =
+
+     2
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} lt (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{lt} (less than, @code{<=}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the date @code{A(i)} preceeds the date @code{B(i)}.
+
+@examplehead
+@example
+>> A = dates('1950Q1','1951Q2');
+>> B = dates('1950Q1','1950Q2');
+>> A<B
+
+ans =
+
+     0
+     0
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{D} =} max (@var{A}, @var{B}, @var{C}, ...)
+
+Overloads the Matlab/Octave @code{max} function. All input arguments must be @dates objects. The function returns a single element @dates object containing the greatest date.
+
+@examplehead
+@example
+>> A = {dates('1950Q2'), dates('1953Q4','1876Q2'), dates('1794Q3')};
+>> max(A{:})
+ans = <dates: 1953Q4>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{D} =} min (@var{A}, @var{B}, @var{C}, ...)
+
+Overloads the Matlab/Octave @code{min} function. All input arguments must be @dates objects. The function returns a single element @dates object containing the smallest date.
+
+@examplehead
+@example
+>> A = {dates('1950Q2'), dates('1953Q4','1876Q2'), dates('1794Q3')};
+>> min(A{:})
+ans = <dates: 1794Q3>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} minus (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{minus} operator (@code{-}). If both input arguments are @dates objects, then number of periods between @var{A} and @var{B} is returned (so that @code{A+C=B}). If @var{B} is a vector of integers, the @code{minus} operator shifts the @dates object by @var{B} periods backward.
+
+@examplehead
+@example
+>> d1 = dates('1950Q1','1950Q2','1960Q1');
+>> d2 = dates('1950Q3','1950Q4','1960Q1');
+>> ee = d2-d1
+
+ee =
+
+     2
+     2
+     0
+
+>> d1-(-ee)
+ans = <dates: 1950Q3, 1950Q4, 1960Q1>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} plus (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{plus} operator (@code{+}). If both input arguments are @dates objects, then the method combines A and B without removing repetitions. If @var{B} is a vector of integers, the @code{plus} operator shifts the @dates object by @var{B} periods forward.
+
+@examplehead
+@example
+>> d1 = dates('1950Q1','1950Q2')+dates('1960Q1');
+>> d2 = (dates('1950Q1','1950Q2')+2)+dates('1960Q1');
+>> ee = d2-d1;
+
+ee =
+
+     2
+     2
+     0
+
+>> d1+ee
+ans = <dates: 1950Q3, 1950Q4, 1960Q1>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{C} =} pop (@var{A})
+@deftypefnx{dates} {@var{C} =} pop (@var{A},@var{B})
+
+Pop method for @dates class. If only one input is provided, the method removes the last element of a @dates object. If a second input argument is provided, a scalar integer between @code{1} and @code{A.length()}, the method removes element number @var{B} from @dates object @var{A}.
+
+@examplehead
+@example
+>> d1 = dates('1950Q1','1950Q2');
+>> d1.pop()
+ans = <dates: 1950Q1>
+
+>> d1.pop(1)
+ans = <dates: 1950Q2>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{B} =} sort (@var{A})
+
+Sort method for @dates objects. Returns a @dates object with elements sorted by increasing order.
+
+@examplehead
+@example
+>> dd = dates('1945Q3','1938Q4','1789Q3');
+>> dd.sort()
+ans = <dates: 1789Q3, 1938Q4, 1945Q3>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{B} =} uminus (@var{A})
+
+Overloads the Matlab/Octave unary minus operator. Returns a @dates object with elements shifted one period backward.
+
+@examplehead
+@example
+>> dd = dates('1945Q3','1938Q4','1973Q1');
+>> -dd
+ans = <dates: 1945Q2, 1938Q3, 1972Q4>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{D} =} union (@var{A}, @var{B}, @var{C}, ...)
+
+Overloads the Matlab/Octave @code{union} function. Returns a @dates object with elements sorted by increasing order (repetitions are removed, to keep the repetitions use the @code{horzcat} or @code{plus} operators).
+
+@examplehead
+@example
+>> d1 = dates('1945Q3','1973Q1','1938Q4');
+>> d2 = dates('1973Q1','1976Q1');
+>> union(d1,d2)
+ans = <dates: 1938Q4, 1945Q3, 1973Q1, 1976Q1>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{B} =} unique (@var{A})
+
+Overloads the Matlab/Octave @code{unique} function. Returns a @dates object with repetitions removed (only the last occurence of a date is kept).
+
+@examplehead
+@example
+>> d1 = dates('1945Q3','1973Q1','1945Q3');
+>> d1.unique()
+ans = <dates: 1973Q1, 1945Q3>
+@end example
+
+@sp
+
+@deftypefnx{dates} {@var{B} =} uplus (@var{A})
+
+Overloads the Matlab/Octave unary plus operator. Returns a @dates object with elements shifted one period ahead.
+
+@examplehead
+@example
+>> dd = dates('1945Q3','1938Q4','1973Q1');
+>> +dd
+ans = <dates: 1945Q4, 1939Q1, 1973Q2>
+@end example
+
 @end deftypefn
 
 
-@section dynDates
 
-@deftypefn  {dynDates} dynDates (@code{STRING} [, @code{STRING} @dots{}])
-Returns a @code{dynDates} object that represents a list of dates.
+@section dseries
 
-Providing a @code{STRING} argument populates the object with the date
-represented by said @code{STRING}. If more than one argument is
-provided, they should all be dates represented as @code{STRINGS}.
-
-@examplehead
-
-An example of various ways to create a @code{dynDates} object:
-
-@example
-do1 = dynDates(`1999', `2000', `2001', `2002');
-do2 = dynDates(`1999', `2003', `2002');
-do3 = dynDate(`1999Q2'):dynDate(`2000Q3');
-@end example
-Here, @code{do1} and @code{do2} contain the dates specified in the
-order specified. @code{do3} contains a quarterly list of all dates
-between @code{1999q2} and @code{2000q3} inclusive.
-@end deftypefn
-
-@section dynSeries
-
-@deftypefn  {dynSeries} dynSeries (@code{dynDate})
-@deftypefnx {dynSeries} dynSeries (@code{FILENAME})
-@deftypefnx {dynSeries} dynSeries (@code{DOUBLE_MATRIX}, @code{dynDate}, @code{CELLSTR}, @code{CELLSTR})
-@deftypefnx {dynSeries} dynSeries (@code{DOUBLE_MATRIX}, @code{STRING}, @code{CELLSTR}, @code{CELLSTR})
-Returns a @code{dynSeries} object that represents one or more time
+@deftypefn  {dseries} dseries (@code{dates})
+@deftypefnx {dseries} dseries (@code{FILENAME})
+@deftypefnx {dseries} dseries (@code{DOUBLE_MATRIX}, @code{dates}, @code{CELLSTR}, @code{CELLSTR})
+@deftypefnx {dseries} dseries (@code{DOUBLE_MATRIX}, @code{STRING}, @code{CELLSTR}, @code{CELLSTR})
+Returns a @code{dseries} object that represents one or more time
 series.
 
-If a @code{dynDate} argument is provided, instantiate an empty
-@code{dynSeries} with an inital date equal to the input argument.
+If a @code{dates} argument is provided, instantiate an empty
+@code{dseries} with an inital date equal to the input argument.
 
-If a @code{FILENAME} is passed as input, a @code{dynSeries} object
+If a @code{FILENAME} is passed as input, a @code{dseries} object
 will be created from the named file. Valid file types are @file{.m}
 file, @file{.mat} file, and @file{.csv}.
 
 If the data is not read from a file, it can be provided via a
-@math{T}x@math{N} matrix as the first argument to @code{dynSeries}, with
+@math{T}x@math{N} matrix as the first argument to @code{dseries}, with
 @math{T} representing the number of observations on @math{N}
 variables. The second argument in such a calling sequence can be
-either a @code{dynDate} representing the period of the first
+either a @code{dates} representing the period of the first
 observation or a @code{STRING} which would be used to instantiate a
-@code{dynDate}. The third argument is a @code{CELLSTR} of size
+@code{dates}. The third argument is a @code{CELLSTR} of size
 @math{N} with one entry for each variable name. The final argument is
 a @code{CELLSTR} of size @math{N} composed of the @LaTeX{} names
 associated with the variables. Input arguments three and four are
