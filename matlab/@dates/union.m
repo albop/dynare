@@ -1,28 +1,15 @@
-function C = union(A,varargin) % --*-- Unitary tests --*--
+function D = union(varargin) % --*-- Unitary tests --*--
 
-%@info:
-%! @deftypefn {Function File} {@var{C} =} union (@var{A},@var{B})
-%! @anchor{dates/union}
-%! @sp 1
-%! Union method for the Dynare dates class (removes repetitions if any). Dates in C are sorted in increasing order.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item A
-%! Object instantiated by @ref{dates}.
-%! @item B
-%! Object instantiated by @ref{dates}.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item C
-%! Object instantiated by @ref{dates}.
-%! @end table
-%! @end deftypefn
-%@eod:
+% Overloads union function for dates objects (removes repetitions if any).
+%
+% INPUTS 
+%  o A    dates object.
+%  o B    dates object.
+%  o C    dates object.
+%  o ...
+%
+% OUPUTS 
+%  o D    dates object (elements are sorted by increasing order).
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -41,25 +28,12 @@ function C = union(A,varargin) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isa(A,'dates')  
-    error(['dates::union: Input argument ''' inputname(1) '''   has to be a dates object!'])
-end
-
-C = A;
-
-if ~length(varargin)
+if isequal(nargin,1)
+    D = sort(unique(varargin{1}));
     return;
 end
 
-for i=1:length(varargin)
-    if isa(varargin{i},'dates')
-        C = C + varargin{i};
-    else
-        error(['dates::union: Input argument ''' inputname(i) '''   has to be a dates object!'])
-    end
-end
-
-C = sort(unique(C));
+D = sort(unique(horzcat(varargin{:})));
 
 %@test:1
 %$ % Define some dates objects
