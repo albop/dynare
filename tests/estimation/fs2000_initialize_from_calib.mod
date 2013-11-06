@@ -74,7 +74,7 @@ end;
 
 varobs gp_obs gy_obs;
 
-estimated_params_init;
+estimated_params_init(use_calibration);
 //stderr e_a, 0.014000;
 //stderr e_m, 0.005000;
 //stderr gp_obs, 0.1;
@@ -89,6 +89,5 @@ psi, 0.787000;
 del, 0.020000;
 end;
 
-options_.use_calibration_initialization=1;
 options_.plot_priors=0;
 estimation(order=1, datafile=fsdat_simul, nobs=192, loglinear, mh_replic=2000, mh_nblocks=1, mh_jscale=0.8,prior_trunc=0);
