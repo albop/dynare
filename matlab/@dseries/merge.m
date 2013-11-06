@@ -40,6 +40,10 @@ function A = merge(B,C) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if ~isa(C,'dseries')
+    error('dseries::merge: Both inputs must be dseries objects!')
+end
+
 if ~isequal(B.freq,C.freq)
     error(['dseries::merge: Cannot merge ' inputname(1) ' and ' inputname(2) ' (frequencies are different)!'])
 end
@@ -87,7 +91,7 @@ else
     A.init = B.init;
 end
 
-A.time = A.init:A.init+(A.nobs-1);
+A.dates = A.init:A.init+(A.nobs-1);
 
 %@test:1
 %$ % Define a datasets.
