@@ -1,33 +1,12 @@
 function dd = sort(dd) % --*-- Unitary tests --*--
 
-% sort method for dates class.
-
-%@info:
-%! @deftypefn {Function File} {@var{a} =} sort (@var{a})
-%! @anchor{dates/sort}
-%! @sp 1
-%! Sort method for the Dynare dates class.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item a
-%! Object instantiated by @ref{dates}.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item a
-%! Object instantiated by @ref{dates}, with dates sorted by increasing order.
-%! @end table
-%! @sp 2
-%! @strong{This function is called by:}
-%! @sp 2
-%! @strong{This function calls:}
-%!
-%! @end deftypefn
-%@eod:
+% Sort method for dates class.
+%
+% INPUTS 
+%  o dd    dates object.
+%
+% OUTPUTS 
+%  o dd    dates object (with dates sorted by increasing order).
 
 % Copyright (C) 2011-2013 Dynare Team
 %
@@ -45,10 +24,6 @@ function dd = sort(dd) % --*-- Unitary tests --*--
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-if ~isa(dd,'dates')
-    error(['dates::sort: Input argument ' inputname(1) ' has to be a dates object.'])
-end
 
 if dd.ndat==1
     return
