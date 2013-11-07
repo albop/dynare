@@ -4172,7 +4172,7 @@ end;
 @deffnx Block estimated_params_init (@var{OPTIONS}@dots{});
 
 This block declares numerical initial values for the optimizer when
-these ones are different from the prior mean.
+these ones are different from the prior mean. It should be specified after the @code{estimated_params}-block as otherwise the specified starting values are overwritten by the latter.
 
 Each line has the following syntax:
 
@@ -4186,7 +4186,7 @@ stderr VARIABLE_NAME | corr VARIABLE_NAME_1, VARIABLE_NAME_2 | PARAMETER_NAME
 @table @code
 
 @item use_calibration
-Use the parameters from calibration as starting values for estimation.
+For not specifically intialized parameters, use the deep parameters and the elements of the covariance matrix specified in the @code{shocks}-block from calibration as starting values for estimation. For components of the @code{shocks}-block that were not explicitly specified during calibration or which violate the prior, the prior mean is used.
 @end table
 
 @xref{estimated_params}, for the meaning and syntax of the various components.
