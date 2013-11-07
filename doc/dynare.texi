@@ -9028,7 +9028,18 @@ Instantiates an empty @dseries object, with, if defined, an initial date given b
 
 @deftypefn {dseries} dseries (@var{FILENAME})
 
-Instantiates and populates a @dseries object with a data file specified by @var{FILENAME}, a string passed as input. Valid file types are @file{.m} file, @file{.mat} file, and @file{.csv}.
+Instantiates and populates a @dseries object with a data file specified by @var{FILENAME}, a string passed as input. Valid file types are @file{.m} file, @file{.mat} file, @file{.csv} file, and @file{.xls} file. A typical @file{.m} file will have the following form:
+
+@example
+INIT__ = '1994Q3';
+NAMES__ = @{'azert';'yuiop'@};
+TEX__ = @{'azert';'yuiop'@};
+
+azert = randn(100,1);
+yuiop = randn(100,1);
+@end example
+
+If a @file{.mat} file is used instead, it should provide the same informations. Note that the @code{INIT__} variable can be either a @dates object or a string which could be used to instantiate the same @dates object.
 
 @end deftypefn
 
