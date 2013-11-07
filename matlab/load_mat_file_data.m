@@ -50,7 +50,7 @@ if isfield(datafile,'FREQ__')
     freq = datafile.FREQ__;
     datafile = rmfield(datafile, 'FREQ__');
 else
-    freq = 1;
+    freq = init.freq;
 end
 
 if ~isequal(freq,init.freq)

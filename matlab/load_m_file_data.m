@@ -52,7 +52,7 @@ if exist('FREQ__','var')
     freq = FREQ__;
     clear('FREQ__');
 else
-    freq = 1;
+    freq = init.freq;
 end
 
 if ~isequal(freq,init.freq)
