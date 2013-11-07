@@ -5,6 +5,7 @@ MODFILES = \
 	estimation/fs2000_mc6_mf.mod \
 	estimation/fs2000_MCMC_jumping_covariance.mod \
 	estimation/fs2000_initialize_from_calib.mod	\
+	estimation/fs2000_calibrated_covariance.mod \
 	gsa/ls2003.mod \
 	ramst.mod \
 	ramst_a.mod \
