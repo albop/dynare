@@ -127,137 +127,147 @@ This is Dynare Reference Manual, version @value{VERSION}.
 @end ifnottex
 
 @menu
-* Introduction::                
-* Installation and configuration::  
-* Running Dynare::              
-* The Model file::              
-* The Configuration File::      
-* Time Series::                 
-* Reporting::                   
-* Examples::                    
-* Dynare internal documentation and unitary tests::  
-* Bibliography::                
-* Command and Function Index::  
-* Variable Index::              
+* Introduction::
+* Installation and configuration::
+* Running Dynare::
+* The Model file::
+* The Configuration File::
+* Time Series::
+* Reporting::
+* Examples::
+* Dynare internal documentation and unitary tests::
+* Bibliography::
+* Command and Function Index::
+* Variable Index::
 
 @detailmenu
  --- The Detailed Node Listing ---
 
 Introduction
 
-* What is Dynare ?::            
-* Documentation sources::       
-* Citing Dynare in your research::  
+* What is Dynare ?::
+* Documentation sources::
+* Citing Dynare in your research::
 
 Installation and configuration
 
-* Software requirements::       
-* Installation of Dynare::      
-* Configuration::               
+* Software requirements::
+* Installation of Dynare::
+* Configuration::
 
 Installation of Dynare
 
-* On Windows::                  
-* On Debian GNU/Linux and Ubuntu::  
-* On Mac OS X::                 
-* For other systems::           
+* On Windows::
+* On Debian GNU/Linux and Ubuntu::
+* On Mac OS X::
+* For other systems::
 
 Configuration
 
-* For MATLAB::                  
-* For GNU Octave::              
-* Some words of warning::       
+* For MATLAB::
+* For GNU Octave::
+* Some words of warning::
 
 Running Dynare
 
-* Dynare invocation::           
-* Dynare hooks::                
-* Understanding Preprocessor Error Messages::  
+* Dynare invocation::
+* Dynare hooks::
+* Understanding Preprocessor Error Messages::
 
 The Model file
 
-* Conventions::                 
-* Variable declarations::       
-* Expressions::                 
-* Parameter initialization::    
-* Model declaration::           
-* Auxiliary variables::         
-* Initial and terminal conditions::  
-* Shocks on exogenous variables::  
-* Other general declarations::  
-* Steady state::                
-* Getting information about the model::  
-* Deterministic simulation::    
-* Stochastic solution and simulation::  
-* Estimation::                  
-* Forecasting::                 
-* Optimal policy::              
-* Sensitivity and identification analysis::  
-* Markov-switching SBVAR::      
-* Displaying and saving results::  
-* Macro-processing language::   
-* Verbatim inclusion::          
-* Misc commands::               
+* Conventions::
+* Variable declarations::
+* Expressions::
+* Parameter initialization::
+* Model declaration::
+* Auxiliary variables::
+* Initial and terminal conditions::
+* Shocks on exogenous variables::
+* Other general declarations::
+* Steady state::
+* Getting information about the model::
+* Deterministic simulation::
+* Stochastic solution and simulation::
+* Estimation::
+* Forecasting::
+* Optimal policy::
+* Sensitivity and identification analysis::
+* Markov-switching SBVAR::
+* Displaying and saving results::
+* Macro-processing language::
+* Verbatim   inclusion::
+* Misc commands::
 
 Expressions
 
-* Parameters and variables::    
-* Operators::                   
-* Functions::                   
-* A few words of warning in stochastic context::  
+* Parameters and variables::
+* Operators::
+* Functions::
+* A few words of warning in stochastic context::
 
 Parameters and variables
 
-* Inside the model::            
-* Outside the model::           
+* Inside the model::
+* Outside the model::
 
 Functions
 
-* Built-in Functions::          
-* External Functions::          
+* Built-in Functions::
+* External Functions::
 
 Steady state
 
-* Finding the steady state with Dynare nonlinear solver::  
-* Using a steady state file::   
-* Replace some equations during steady state computations::  
+* Finding the steady state with Dynare nonlinear solver::
+* Using a steady state file::
+* Replace some equations during steady state computations::
 
 Stochastic solution and simulation
 
-* Computing the stochastic solution::  
-* Typology and ordering of variables::  
-* First order approximation::   
-* Second order approximation::  
-* Third order approximation::   
+* Computing the stochastic solution::
+* Typology and ordering of variables::
+* First order approximation::
+* Second order approximation::
+* Third order approximation::
 
 Sensitivity and identification analysis
 
-* Sampling::                    
-* Stability Mapping::           
-* Reduced Form Mapping::        
-* RMSE::                        
-* Screening Analysis::          
-* Identification Analysis::     
-* Performing Sensitivity and Identification Analysis::  
+* Sampling::
+* Stability Mapping::
+* Reduced Form Mapping::
+* RMSE::
+* Screening Analysis::
+* Identification Analysis::
+* Performing Sensitivity and Identification Analysis::
 
 Macro-processing language
 
-* Macro expressions::           
-* Macro directives::            
-* Typical usages::              
-* MATLAB/Octave loops versus macro-processor loops::  
+* Macro expressions::
+* Macro directives::
+* Typical usages::
+* MATLAB/Octave loops versus macro-processor loops::
 
 Typical usages
 
-* Modularization::              
-* Indexed sums or products::    
-* Multi-country models::        
-* Endogeneizing parameters::    
+* Modularization::
+* Indexed sums or products::
+* Multi-country models::
+* Endogeneizing parameters::
 
 The Configuration File
 
-* Dynare Configuration::        
-* Parallel Configuration::      
+* Dynare Configuration::
+* Parallel Configuration::
+
+Time Series
+
+* Dates::
+* dseries class::
+
+Dates
+
+* dates in a mod file::
+* dates class::
 
 @end detailmenu
 @end menu
@@ -266,9 +276,9 @@ The Configuration File
 @chapter Introduction
 
 @menu
-* What is Dynare ?::            
-* Documentation sources::       
-* Citing Dynare in your research::  
+* What is Dynare ?::
+* Documentation sources::
+* Citing Dynare in your research::
 @end menu
 
 @node What is Dynare ?
@@ -394,9 +404,9 @@ If you want to give a URL, use the address of the Dynare website:
 @chapter Installation and configuration
 
 @menu
-* Software requirements::       
-* Installation of Dynare::      
-* Configuration::               
+* Software requirements::
+* Installation of Dynare::
+* Configuration::
 @end menu
 
 @node Software requirements
@@ -466,10 +476,10 @@ upgrade Dynare and discard the previous version without having to worry
 about your own files.
 
 @menu
-* On Windows::                  
-* On Debian GNU/Linux and Ubuntu::  
-* On Mac OS X::                 
-* For other systems::           
+* On Windows::
+* On Debian GNU/Linux and Ubuntu::
+* On Mac OS X::
+* For other systems::
 @end menu
 
 @node On Windows
@@ -534,9 +544,9 @@ loadable libraries. Please refer to
 @section Configuration
 
 @menu
-* For MATLAB::                  
-* For GNU Octave::              
-* Some words of warning::       
+* For MATLAB::
+* For GNU Octave::
+* Some words of warning::
 @end menu
 
 @node For MATLAB
@@ -645,9 +655,9 @@ file contains the description of the model and the computing tasks
 required by the user. Its contents is described in @ref{The Model file}.
 
 @menu
-* Dynare invocation::           
-* Dynare hooks::                
-* Understanding Preprocessor Error Messages::  
+* Dynare invocation::
+* Dynare hooks::
+* Understanding Preprocessor Error Messages::
 @end menu
 
 @node Dynare invocation
@@ -894,28 +904,28 @@ end of line one and the parser would continue processing.
 @chapter The Model file
 
 @menu
-* Conventions::                 
-* Variable declarations::       
-* Expressions::                 
-* Parameter initialization::    
-* Model declaration::           
-* Auxiliary variables::         
-* Initial and terminal conditions::  
-* Shocks on exogenous variables::  
-* Other general declarations::  
-* Steady state::                
-* Getting information about the model::  
-* Deterministic simulation::    
-* Stochastic solution and simulation::  
-* Estimation::                  
-* Forecasting::                 
-* Optimal policy::              
-* Sensitivity and identification analysis::  
-* Markov-switching SBVAR::      
-* Displaying and saving results::  
-* Macro-processing language::   
-* Verbatim inclusion::          
-* Misc commands::               
+* Conventions::
+* Variable declarations::
+* Expressions::
+* Parameter initialization::
+* Model declaration::
+* Auxiliary variables::
+* Initial and terminal conditions::
+* Shocks on exogenous variables::
+* Other general declarations::
+* Steady state::
+* Getting information about the model::
+* Deterministic simulation::
+* Stochastic solution and simulation::
+* Estimation::
+* Forecasting::
+* Optimal policy::
+* Sensitivity and identification analysis::
+* Markov-switching SBVAR::
+* Displaying and saving results::
+* Macro-processing language::
+* Verbatim   inclusion::
+* Misc commands::
 @end menu
 
 @node Conventions
@@ -1303,10 +1313,10 @@ Represents infinity.
 @end deffn
 
 @menu
-* Parameters and variables::    
-* Operators::                   
-* Functions::                   
-* A few words of warning in stochastic context::  
+* Parameters and variables::
+* Operators::
+* Functions::
+* A few words of warning in stochastic context::
 @end menu
 
 @node Parameters and variables
@@ -1317,8 +1327,8 @@ typing their names. The semantics of parameters and variables is quite
 different whether they are used inside or outside the model block.
 
 @menu
-* Inside the model::            
-* Outside the model::           
+* Inside the model::
+* Outside the model::
 @end menu
 
 @node Inside the model
@@ -1412,8 +1422,8 @@ internally and how this affects the output.
 @subsection Functions
 
 @menu
-* Built-in Functions::          
-* External Functions::          
+* Built-in Functions::
+* External Functions::
 @end menu
 
 @node Built-in Functions
@@ -2537,9 +2547,9 @@ give more guidance to Dynare, using your knowledge of the model, by
 providing it with a ``steady state file''.
 
 @menu
-* Finding the steady state with Dynare nonlinear solver::  
-* Using a steady state file::   
-* Replace some equations during steady state computations::  
+* Finding the steady state with Dynare nonlinear solver::
+* Using a steady state file::
+* Replace some equations during steady state computations::
 @end menu
 
 @node Finding the steady state with Dynare nonlinear solver
@@ -3247,11 +3257,11 @@ there are strong nonlinearities or binding constraints. Such a
 solution is computed using the @code{extended_path} command.
 
 @menu
-* Computing the stochastic solution::  
-* Typology and ordering of variables::  
-* First order approximation::   
-* Second order approximation::  
-* Third order approximation::   
+* Computing the stochastic solution::
+* Typology and ordering of variables::
+* First order approximation::
+* Second order approximation::
+* Third order approximation::
 @end menu
 
 @node Computing the stochastic solution
@@ -6016,13 +6026,13 @@ Sensitivity analysis results are saved locally in @code{<mod_file>/GSA},
 where @code{<mod_file>.mod} is the name of the DYNARE model file.
 
 @menu
-* Sampling::                    
-* Stability Mapping::           
-* Reduced Form Mapping::        
-* RMSE::                        
-* Screening Analysis::          
-* Identification Analysis::     
-* Performing Sensitivity and Identification Analysis::  
+* Sampling::
+* Stability Mapping::
+* Reduced Form Mapping::
+* RMSE::
+* Screening Analysis::
+* Identification Analysis::
+* Performing Sensitivity and Identification Analysis::
 @end menu
 
 @node Sampling
@@ -7453,10 +7463,10 @@ types: integer, character string, array of integers, array of
 strings.
 
 @menu
-* Macro expressions::           
-* Macro directives::            
-* Typical usages::              
-* MATLAB/Octave loops versus macro-processor loops::  
+* Macro expressions::
+* Macro directives::
+* Typical usages::
+* MATLAB/Octave loops versus macro-processor loops::
 @end menu
 
 @node Macro expressions
@@ -7687,10 +7697,10 @@ and to abort. The argument must evaluate to a string.
 @subsection Typical usages
 
 @menu
-* Modularization::              
-* Indexed sums or products::    
-* Multi-country models::        
-* Endogeneizing parameters::    
+* Modularization::
+* Indexed sums or products::
+* Multi-country models::
+* Endogeneizing parameters::
 @end menu
 
 @node Modularization
@@ -8085,8 +8095,8 @@ Is @code{true} or @code{false}.
 @end table
 
 @menu
-* Dynare Configuration::        
-* Parallel Configuration::      
+* Dynare Configuration::
+* Parallel Configuration::
 @end menu
 
 @node Dynare Configuration
@@ -8344,15 +8354,26 @@ MatlabOctavePath = matlab
 @node Time Series
 @chapter Time Series
 
-Dynare provides a  Matlab class for handling time series  data, which is
+@menu
+* Dates::
+* dseries class::
+@end menu
+
+
+Dynare provides a  Matlab/Octave class for handling time series  data, which is
 based on a class for handling dates. Dynare also provides a new type for
 dates, so  that the  basic user  do not  have to  worry about  class and
 methods for  dates.  Below, you  will first  find the class  and methods
 used for  creating and dealing  with dates and  then the class  used for
 using time series.
 
-@node dates
-@section dates
+@node Dates
+@section Dates
+
+@menu
+* dates in a mod file::
+* dates class::
+@end menu
 
 @node dates in a mod file
 @subsection dates in a mod file
@@ -8462,17 +8483,12 @@ ans =
 
 @noindent Note that it is not possible to mix frequencies in a @dates object: all the elements must have common frequency. The @dates class has five constructors:
 
-@sp
+@sp 1
 
 @deftypefn  {dates} dates ()
-
-Returns an empty @dates object.
-
-@sp
-
 @deftypefnx {dates} dates (@code{FREQ})
 
-Returns an empty @dates object with  a given frequency.  @code{FREQ} is a character equal to 'Y' or 'A'  for annual dates, 'Q' for quaterly dates, 'M' for monthly dates or 'W'  for weekly dates. Note that @code{FREQ} is not  case sensitive,  so that,  for instance,  'q' is  also allowed  for quaterly dates. The frequency can also be set with an integer scalar equal to 1 (annual), 4 (quaterly), 12 (monthly) or 52 (weekly). The instantiation of empty objects can be used to rename  the @dates class. For  instance, if one  only works  with quaterly dates, he can create @code{qq} as:
+Returns an empty @dates object with  a given frequency (if the constructor is called with one input argument).  @code{FREQ} is a character equal to 'Y' or 'A'  for annual dates, 'Q' for quaterly dates, 'M' for monthly dates or 'W'  for weekly dates. Note that @code{FREQ} is not  case sensitive,  so that,  for instance,  'q' is  also allowed  for quaterly dates. The frequency can also be set with an integer scalar equal to 1 (annual), 4 (quaterly), 12 (monthly) or 52 (weekly). The instantiation of empty objects can be used to rename  the @dates class. For  instance, if one  only works  with quaterly dates, he can create @code{qq} as:
 @example
 qq = dates('Q')
 @end example
@@ -8482,27 +8498,36 @@ d0 = dates(2009,2);
 @end example
 @noindent which is much simpler if @dates objects have to be defined programatically.
 
-@sp
+@end deftypefn
 
-@deftypefnx {dates} dates (@code{STRING})
+@sp 1
+
+@deftypefn {dates} dates (@code{STRING})
 @deftypefnx {dates} dates (@code{STRING}, @code{STRING}, ...)
 
 Returns a @dates object that represents a date as given by the string @code{STRING}. This string has to be interpretable as a date (only strings of the following forms are admitted: @code{'1990Y'}, @code{'1990A'}, @code{'1990Q1'}, @code{'1990M2'}, @code{'1990W5'}), the routine @code{isdate} can be used to test if a string is interpretable as a date. If more than one argument is provided, they should all be dates represented as strings, the resulting @dates object contains as many elements as arguments to the constructor.
 
-@sp
+@end deftypefn
 
-@deftypefnx {dates} dates (@code{DATES})
+
+@sp 1
+
+@deftypefn {dates} dates (@code{DATES})
 @deftypefnx {dates} dates (@code{DATES}, @code{DATES}, ...)
 
 Returns a copy of the  @dates object @code{DATES} passed as input arguments. If more than one argument is provided, they should all be @dates objects. The number of elements in the instantiated @dates object is equal to the sum of the elements in the @dates passed as arguments to the constructor.
 
-@sp
+@end deftypefn
 
-@deftypefnx {dates} dates (@code{FREQ}, @code{YEAR}, @code{SUBPERIOD})
+@sp 1
+
+@deftypefn {dates} dates (@code{FREQ}, @code{YEAR}, @code{SUBPERIOD})
 
 where @code{FREQ} is a single character ('Y', 'A', 'Q', 'M', 'W') or integer (1, 4, 12 or 52) specifying the frequency, @code{YEAR} and @code{SUBPERIOD} are @code{n*1} vectors of integers. Returns a @dates object with @code{n} elements. If @code{FREQ} is equal to @code{'Y', 'A'} or @code{1}, the third argument is not needed (because @code{SUBPERIOD} is necessarly a vector of ones in this case).
 
-@sp
+@end deftypefn
+
+@sp 1
 
 @exampleshead
 @example
@@ -8512,7 +8537,7 @@ do3 = dates(do1,do2);
 do4 = dates('Q',1950, 1);
 @end example
 
-@sp
+@sp 1
 
 A list of the available methods, by alphabetical order, is given below. Note that the Matlab/Octave classes do not allow in place modifications: when a method is applied to an object a new object is instantiated. For instance, to apply the method @code{multiplybytwo} to an object @code{X} we write:
 @example
@@ -8524,9 +8549,9 @@ Y = multiplybytwo(X)
 @end example
 the object @code{X} is left unchanged, and the object @code{Y} is a modified copy of @code{X}.
 
-@sp
+@sp 1
 
-@deftypefnx {dates} {@var{B} = } append (@var{A}, @var{a})
+@deftypefn {dates} {@var{B} = } append (@var{A}, @var{a})
 
 Appends @dates object @var{a}, or a string that can be interpreted as a date, to the @dates object @var{A}. If @code{a} is a @dates object it is assumed that it has no more than one element.
 
@@ -8545,9 +8570,11 @@ ans =
 F = <dates: 1950Q1, 1950Q2, 1950Q3>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx {dates} {@var{C} = } colon (@var{A}, @var{B})
+@sp 1
+
+@deftypefn {dates} {@var{C} = } colon (@var{A}, @var{B})
 @deftypefnx {dates} {@var{C} = } colon (@var{A}, @var{i}, @var{B})
 
 Overloads the Matlab/Octave colon (:) operator. @var{A} and @var{B} are @dates objects. The optional increment @var{i} is a scalar integer (default value is @code{i=1}). This method returns a @dates object and can be used to create ranges of dates.
@@ -8563,9 +8590,11 @@ D = <dates: 1950Q1, 1950Q3, 1951Q1>
 
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{B} = } double (@var{A})
+@sp 1
+
+@deftypefn{dates} {@var{B} = } double (@var{A})
 
 Overloads the Matlab/Octave @code{double} function. @var{A} is a @dates object. The method returns a floating point representation of a @dates object, the integer and fractional parts respectively corresponding to the year and the subperiod. The fractional part is the subperiod number minus one divided by the frequency (@code{1}, @code{4}, @code{12} or @code{52}).
 
@@ -8584,9 +8613,11 @@ ans =
 
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} eq (@var{A}, @var{B})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} eq (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{eq} (equal, @code{==}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the dates @code{A(i)} and @code{B(i)} are the same.
 
@@ -8602,9 +8633,11 @@ ans =
      0
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} ge (@var{A}, @var{B})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} ge (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{ge} (greater or equal, @code{>=}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the date @code{A(i)} is posterior or equal to the date @code{B(i)}.
 
@@ -8620,9 +8653,11 @@ ans =
      1
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} gt (@var{A}, @var{B})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} gt (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{gt} (greater than, @code{>=}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the date @code{A(i)} is posterior to the date @code{B(i)}.
 
@@ -8638,9 +8673,11 @@ ans =
      1
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{D} =} horzcat (@var{A}, @var{B}, @var{C}, ...)
+@sp 1
+
+@deftypefn{dates} {@var{D} =} horzcat (@var{A}, @var{B}, @var{C}, ...)
 
 Overloads the Matlab/Octave @code{horzcat} operator. All the input arguments must be @dates objects. The returned argument is a @dates object gathering all the dates given in the input arguments (repetitions are not removed).
 
@@ -8653,9 +8690,11 @@ Overloads the Matlab/Octave @code{horzcat} operator. All the input arguments mus
 C = <dates: 1950Q1, 1950Q2>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} intersect (@var{A}, @var{B})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} intersect (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{intersect} function. All the input arguments must be @dates objects. The returned argument is a @dates object gathering all the common dates given in the input arguments. If @var{A} and @var{B} are disjoint @dates objects, the function returns an empty @dates object. Returned dates in @dates object @var{C} are sorted by increasing order.
 
@@ -8668,9 +8707,11 @@ Overloads the Matlab/Octave @code{intersect} function. All the input arguments m
 C = <dates: 1951Q1, 1951Q2, 1951Q3, 1951Q4>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{B} =} isempty (@var{A})
+@sp 1
+
+@deftypefn{dates} {@var{B} =} isempty (@var{A})
 
 Overloads the Matlab/Octave isempty function for @dates object.
 
@@ -8684,9 +8725,11 @@ ans =
      0
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} isequal (@var{A}, @var{B})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} isequal (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{isequal} function for @dates objects.
 
@@ -8700,9 +8743,11 @@ ans =
      1
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} le (@var{A}, @var{B})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} le (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{le} (less or equal, @code{<=}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the date @code{A(i)} is not posterior to the date @code{B(i)}.
 
@@ -8718,9 +8763,11 @@ ans =
      0
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{B} =} length (@var{A})
+@sp 1
+
+@deftypefn{dates} {@var{B} =} length (@var{A})
 
 Overloads the Matlab/Octave @code{length}  function. Returns the number of dates in @dates object @var{A} (@var{B} is a scalar integer).
 
@@ -8734,9 +8781,11 @@ ans =
      2
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} lt (@var{A}, @var{B})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} lt (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{lt} (less than, @code{<=}) operator. @dates objects @var{A} and @var{B} must have the  same number of elements (say, @code{n}). The returned argument is a @code{n} by @code{1} vector of zeros and ones. The i-th element of @var{C} is equal to @code{1} if and only if the date @code{A(i)} preceeds the date @code{B(i)}.
 
@@ -8752,35 +8801,41 @@ ans =
      0
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{D} =} max (@var{A}, @var{B}, @var{C}, ...)
+@sp 1
+
+@deftypefn{dates} {@var{D} =} max (@var{A}, @var{B}, @var{C}, ...)
 
 Overloads the Matlab/Octave @code{max} function. All input arguments must be @dates objects. The function returns a single element @dates object containing the greatest date.
 
 @examplehead
 @example
->> A = {dates('1950Q2'), dates('1953Q4','1876Q2'), dates('1794Q3')};
->> max(A{:})
+>> A = @{dates('1950Q2'), dates('1953Q4','1876Q2'), dates('1794Q3')@};
+>> max(A@{:@})
 ans = <dates: 1953Q4>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{D} =} min (@var{A}, @var{B}, @var{C}, ...)
+@sp 1
+
+@deftypefn{dates} {@var{D} =} min (@var{A}, @var{B}, @var{C}, ...)
 
 Overloads the Matlab/Octave @code{min} function. All input arguments must be @dates objects. The function returns a single element @dates object containing the smallest date.
 
 @examplehead
 @example
->> A = {dates('1950Q2'), dates('1953Q4','1876Q2'), dates('1794Q3')};
->> min(A{:})
+>> A = @{dates('1950Q2'), dates('1953Q4','1876Q2'), dates('1794Q3')@};
+>> min(A@{:@})
 ans = <dates: 1794Q3>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} minus (@var{A}, @var{B})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} minus (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{minus} operator (@code{-}). If both input arguments are @dates objects, then number of periods between @var{A} and @var{B} is returned (so that @code{A+C=B}). If @var{B} is a vector of integers, the @code{minus} operator shifts the @dates object by @var{B} periods backward.
 
@@ -8800,9 +8855,11 @@ ee =
 ans = <dates: 1950Q3, 1950Q4, 1960Q1>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} plus (@var{A}, @var{B})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} plus (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{plus} operator (@code{+}). If both input arguments are @dates objects, then the method combines A and B without removing repetitions. If @var{B} is a vector of integers, the @code{plus} operator shifts the @dates object by @var{B} periods forward.
 
@@ -8822,9 +8879,11 @@ ee =
 ans = <dates: 1950Q3, 1950Q4, 1960Q1>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{C} =} pop (@var{A})
+@sp 1
+
+@deftypefn{dates} {@var{C} =} pop (@var{A})
 @deftypefnx{dates} {@var{C} =} pop (@var{A},@var{B})
 
 Pop method for @dates class. If only one input is provided, the method removes the last element of a @dates object. If a second input argument is provided, a scalar integer between @code{1} and @code{A.length()}, the method removes element number @var{B} from @dates object @var{A}.
@@ -8839,9 +8898,11 @@ ans = <dates: 1950Q1>
 ans = <dates: 1950Q2>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{B} =} sort (@var{A})
+@sp 1
+
+@deftypefn{dates} {@var{B} =} sort (@var{A})
 
 Sort method for @dates objects. Returns a @dates object with elements sorted by increasing order.
 
@@ -8852,9 +8913,11 @@ Sort method for @dates objects. Returns a @dates object with elements sorted by 
 ans = <dates: 1789Q3, 1938Q4, 1945Q3>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{B} =} uminus (@var{A})
+@sp 1
+
+@deftypefn{dates} {@var{B} =} uminus (@var{A})
 
 Overloads the Matlab/Octave unary minus operator. Returns a @dates object with elements shifted one period backward.
 
@@ -8865,9 +8928,11 @@ Overloads the Matlab/Octave unary minus operator. Returns a @dates object with e
 ans = <dates: 1945Q2, 1938Q3, 1972Q4>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{D} =} union (@var{A}, @var{B}, @var{C}, ...)
+@sp 1
+
+@deftypefn{dates} {@var{D} =} union (@var{A}, @var{B}, @var{C}, ...)
 
 Overloads the Matlab/Octave @code{union} function. Returns a @dates object with elements sorted by increasing order (repetitions are removed, to keep the repetitions use the @code{horzcat} or @code{plus} operators).
 
@@ -8879,9 +8944,11 @@ Overloads the Matlab/Octave @code{union} function. Returns a @dates object with 
 ans = <dates: 1938Q4, 1945Q3, 1973Q1, 1976Q1>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{B} =} unique (@var{A})
+@sp 1
+
+@deftypefn{dates} {@var{B} =} unique (@var{A})
 
 Overloads the Matlab/Octave @code{unique} function. Returns a @dates object with repetitions removed (only the last occurence of a date is kept).
 
@@ -8892,9 +8959,11 @@ Overloads the Matlab/Octave @code{unique} function. Returns a @dates object with
 ans = <dates: 1973Q1, 1945Q3>
 @end example
 
-@sp
+@end deftypefn
 
-@deftypefnx{dates} {@var{B} =} uplus (@var{A})
+@sp 1
+
+@deftypefn{dates} {@var{B} =} uplus (@var{A})
 
 Overloads the Matlab/Octave unary plus operator. Returns a @dates object with elements shifted one period ahead.
 
