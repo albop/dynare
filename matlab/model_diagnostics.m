@@ -146,8 +146,8 @@ for b=1:nb
     end
 end
 if singularity_problem 
-    fprint('The presence of a singularity problem typically indicates that there is one\n')
-    fprint('redundant equation entered in the model block, while another non-redundant equation\n')
-    fprint('is missing. The problem often derives from Walras Law.\n')
+    fprintf('The presence of a singularity problem typically indicates that there is one\n')
+    fprintf('redundant equation entered in the model block, while another non-redundant equation\n')
+    fprintf('is missing. The problem often derives from Walras Law.\n')
 end
 
