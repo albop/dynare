@@ -173,7 +173,8 @@ end
 %% perform initial estimation checks;
 try
     oo_ = initial_estimation_checks(objective_function,xparam1,dataset_,M_,estim_params_,options_,bayestopt_,oo_);
-catch initial_estimation_checks_fail % if check fails, provide info on using calibration if present
+catch % if check fails, provide info on using calibration if present
+    e = lasterror();
     if full_calibration_detected %calibrated model present and no explicit starting values
         skipline(1);
         fprintf('ESTIMATION_CHECKS: There was an error in computing the likelihood for initial parameter values.\n')
@@ -184,7 +185,7 @@ catch initial_estimation_checks_fail % if check fails, provide info on using cal
         generate_estimated_params_init_block(xparam1_calib,estim_params_,M_,options_)
         skipline(2);
     end
-    rethrow(initial_estimation_checks_fail);
+    rethrow(e);
 end
 
 if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.mh_posterior_mode_estimation==0
