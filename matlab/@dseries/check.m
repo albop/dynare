@@ -80,7 +80,7 @@ end
 if ~isequal(A.dates,A.init:A.init+A.nobs)
     error_flag = 1;
     if nargout>1
-        message = ['dseries: Wrong definition of the time member in dseries object ''' inputname(1) '''!']:
+        message = ['dseries: Wrong definition of the dates member in dseries object ''' inputname(1) '''!']:
     end
     return
 end
