@@ -179,10 +179,8 @@ catch % if check fails, provide info on using calibration if present
         skipline(1);
         fprintf('ESTIMATION_CHECKS: There was an error in computing the likelihood for initial parameter values.\n')
         fprintf('ESTIMATION_CHECKS: You should try using the calibrated version of the model as starting values. To do\n')
-        fprintf('ESTIMATION_CHECKS: this, add the following estimated_params_init-block immediately before the estimation\n')    
+        fprintf('ESTIMATION_CHECKS: this, add an empty estimated_params_init-block with use_calibration option immediately before the estimation\n')    
         fprintf('ESTIMATION_CHECKS: command (and after the estimated_params-block so that it does not get overwritten):\n');
-        skipline(1);
-        generate_estimated_params_init_block(xparam1_calib,estim_params_,M_,options_)
         skipline(2);
     end
     rethrow(e);
