@@ -263,7 +263,8 @@ if fload==0,
                 if prepSA,
                     try
                         T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam);
-                    catch ME
+                    catch
+                        ME = lasterror();
                         if strcmp('MATLAB:nomem',ME.identifier),
                             prepSA=0;
                             disp('The model is too large for storing state space matrices ...')

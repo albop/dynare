@@ -96,9 +96,10 @@ if options_.use_calibration_initialization %set calibration as starting values
     [xparam1,estim_params_]=do_parameter_initialization(estim_params_,xparam1_calib,xparam1); %get explicitly initialized parameters that have precedence to calibrated values
     try
         check_prior_bounds(xparam1,[bayestopt_.lb bayestopt_.ub],M_,estim_params_,options_,bayestopt_); %check whether calibration satisfies prior bounds
-    catch prior_bound_check_error
+    catch
+        e = lasterror();
         fprintf('Cannot use parameter values from calibration as they violate the prior bounds.')
-        rethrow(prior_bound_check_error);
+        rethrow(e);
     end
 end
 
