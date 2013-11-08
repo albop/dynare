@@ -98,7 +98,7 @@ ts.init = ts.init+K;
 ts.dates = ts.init:ts.init+(ts.nobs-1);
 
 %@test:1
-%$ plot_flag = 0; 
+%$ plot_flag = 0;
 %$
 %$ % Create a dataset.
 %$ e = .2*randn(200,1);
@@ -136,6 +136,13 @@ ts.dates = ts.init:ts.init+(ts.nobs-1);
 %$     plot(ts.data,'--r');
 %$     hold off
 %$     axis tight
+%$     id = get(gca,'XTick');
+%$     set(gca,'XTickLabel',strings(ts.dates(id)));
+%$     legend({'Stationary component of y', 'Filtered y'})
+%$     print('-depsc2','../doc/dynare.plots/BaxterKingFilter.eps')
+%$     system('convert -density 1200 ../doc/dynare.plots/BaxterKingFilter.eps ../doc/dynare.plots/BaxterKingFilter.png');
+%$     system('convert -density 1200 ../doc/dynare.plots/BaxterKingFilter.eps ../doc/dynare.plots/BaxterKingFilter.pdf');
+%$     system('convert -density 1200 ../doc/dynare.plots/BaxterKingFilter.eps ../doc/dynare.plots/BaxterKingFilter.jpg');
 %$ end
 %$
 %$ T = all(t);
