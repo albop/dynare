@@ -45,7 +45,7 @@ function [a,b] = align(a, b) % --*-- Unitary tests --*--
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if ~isequal(a.freq,b.freq)
-    error(['dseries::merge_dates: ''' inputname(1) ''' and ''' inputname(2) ''' dseries objects must have common frequencies!'])
+    error(['dseries::align: ''' inputname(1) ''' and ''' inputname(2) ''' dseries objects must have common frequencies!'])
 end
 
 init = min(a.init,b.init);
@@ -59,7 +59,7 @@ last_b = time_range_of_b(b.nobs);
 common_time_range = intersect(time_range_of_a,time_range_of_b);
 
 if isempty(common_time_range)
-    error(['dseries::merge_dates: ''' inputname(1) ''' and ''' inputname(2) ''' dseries object must have at least one common date!'])
+    error(['dseries::align: ''' inputname(1) ''' and ''' inputname(2) ''' dseries object must have at least one common date!'])
 end
 
 if a.init<b.init
