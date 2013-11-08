@@ -61,14 +61,6 @@ if ~isequal(A.init,B.init)
     return
 end
 
-if ~isequal(A.name,B.name)
-    warning('dseries::eq: Both input arguments do not have the same variables!')
-end
-
-if ~isequal(A.tex,B.tex)
-    warning('dseries::eq: Both input arguments do not have the same tex names!')
-end
-
 C = eq(A.data, B.data);
 
 %@test:1
