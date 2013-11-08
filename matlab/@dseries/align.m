@@ -87,6 +87,7 @@ elseif last_a<last_b
 end
 
 a.dates = a.init:a.init+(a.nobs-1);
+b.dates = b.init:b.init+(b.nobs-1);
 
 %@test:1
 %$ % Define a datasets.
