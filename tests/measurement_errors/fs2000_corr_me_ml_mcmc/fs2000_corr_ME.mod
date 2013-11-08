@@ -104,7 +104,7 @@ corr gp_obs, gy_obs,0;
 end;
 
 options_.TeX=1;
-estimation(mode_compute=9,order=1,datafile=fsdat_simul,mode_check,smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
+estimation(order=1,datafile=fsdat_simul,mode_check,smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
 
 
 
