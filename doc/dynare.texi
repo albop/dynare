@@ -7035,11 +7035,14 @@ The total number of draws is equal to
 Tuning period for Metropolis-Hasting draws. Default: @code{30,000}
 
 @item save_draws
-Save all elements of @math{A^0}, @math{A^+}, @math{\xi}, and the
-transition matrix to a file named @code{draws_<<file_tag>>.out} with
-each draw on a separate line. A file that describes how these matrices
-are laid out is contained in
-@code{draws_header_<<file_tag>>.out}. Default: @code{off}
+Save all elements of @math{A^0}, @math{A^+}, @math{Q}, and
+@math{\zeta}, to a file named @code{draws_<<file_tag>>.out} with each
+draw on a separate line. A file that describes how these matrices are
+laid out is contained in @code{draws_header_<<file_tag>>.out}. A file
+called @code{load_flat_file.m} is provided to simplify loading the
+saved files into the corresponding variables @code{A0}, @code{Aplus},
+@code{Q}, and @code{Zeta} in your MATLAB/Octave workspace. Default:
+@code{off}
 
 @end table
 @end deffn
