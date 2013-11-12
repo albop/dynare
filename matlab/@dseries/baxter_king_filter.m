@@ -140,9 +140,9 @@ ts.dates = ts.init:ts.init+(ts.nobs-1);
 %$     set(gca,'XTickLabel',strings(ts.dates(id)));
 %$     legend({'Stationary component of y', 'Filtered y'})
 %$     print('-depsc2','../doc/dynare.plots/BaxterKingFilter.eps')
-%$     system('convert -density 1200 ../doc/dynare.plots/BaxterKingFilter.eps ../doc/dynare.plots/BaxterKingFilter.png');
-%$     system('convert -density 1200 ../doc/dynare.plots/BaxterKingFilter.eps ../doc/dynare.plots/BaxterKingFilter.pdf');
-%$     system('convert -density 1200 ../doc/dynare.plots/BaxterKingFilter.eps ../doc/dynare.plots/BaxterKingFilter.jpg');
+%$     system('convert -density 300 ../doc/dynare.plots/BaxterKingFilter.eps ../doc/dynare.plots/BaxterKingFilter.png');
+%$     system('convert -density 300 ../doc/dynare.plots/BaxterKingFilter.eps ../doc/dynare.plots/BaxterKingFilter.pdf');
+%$     system('convert -density 300 ../doc/dynare.plots/BaxterKingFilter.eps ../doc/dynare.plots/BaxterKingFilter.jpg');
 %$ end
 %$
 %$ T = all(t);
