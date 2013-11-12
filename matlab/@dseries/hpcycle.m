@@ -2,7 +2,7 @@ function ts = hpcycle(ts, lambda) % --*-- Unitary tests --*--
 
 % ts = hpcycle(ts, lambda)
 %
-% Extracts the cycle component form a dseries object using Hodrick Prescott filter.
+% Extracts the cycle component from a dseries object using Hodrick Prescott filter.
 %
 % INPUTS 
 %  o ts         dseries object.

@@ -2,7 +2,7 @@ function ts = hptrend(ts, lambda) % --*-- Unitary tests --*--
 
 % ts = hptrend(ts, lambda)
 %
-% Extracts the trend component form a dseries object using Hodrick Prescott filter.
+% Extracts the trend component from a dseries object using Hodrick Prescott filter.
 %
 % INPUTS 
 %  o ts         dseries object.
