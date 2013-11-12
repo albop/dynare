@@ -59,28 +59,36 @@ ts.data = sample_hp_filter(ts.data,lambda);
 %$
 %$ % Test the routine.
 %$ try
-%$     ts = dseries(y,'1950Q1');
-%$     ts = ts.hptrend(1600);
+%$     ts0 = dseries(y,'1950Q1');
+%$     ts1 = dseries(stochastic_trend+deterministic_trend,'1950Q1');
+%$     ts2 = ts0.hptrend(1600);
 %$     t(1) = 1;
 %$ catch
 %$     t(1) = 0;
 %$ end
 %$
 %$ if t(1)
-%$     t(2) = dyn_assert(ts.freq,4);
-%$     t(3) = dyn_assert(ts.init.freq,4);
-%$     t(4) = dyn_assert(ts.init.time,[1950, 1]);
-%$     t(5) = dyn_assert(ts.vobs,1);
-%$     t(6) = dyn_assert(ts.nobs,200);
+%$     t(2) = dyn_assert(ts2.freq,4);
+%$     t(3) = dyn_assert(ts2.init.freq,4);
+%$     t(4) = dyn_assert(ts2.init.time,[1950, 1]);
+%$     t(5) = dyn_assert(ts2.vobs,1);
+%$     t(6) = dyn_assert(ts2.nobs,200);
 %$ end
 %$
 %$ % Show results
 %$ if plot_flag
-%$     plot(stochastic_trend+deterministic_trend,'-k');
+%$     plot(ts1.data,'-k'); % Plot of the stationary component.
 %$     hold on
-%$     plot(ts.data,'--r');
+%$     plot(ts2.data,'--r');          % Plot of the filtered y.
 %$     hold off
 %$     axis tight
+%$     id = get(gca,'XTick');
+%$     set(gca,'XTickLabel',strings(ts1.dates(id)));
+%$     legend({'Nonstationary component of y', 'Estimated trend of y'})
+%$     print('-depsc2','../doc/dynare.plots/HPTrend.eps')
+%$     system('convert -density 300 ../doc/dynare.plots/HPTrend.eps ../doc/dynare.plots/HPTrend.png');
+%$     system('convert -density 300 ../doc/dynare.plots/HPTrend.eps ../doc/dynare.plots/HPTrend.pdf');
+%$     system('convert -density 300 ../doc/dynare.plots/HPTrend.eps ../doc/dynare.plots/HPTrend.jpg');
 %$ end
 %$ T = all(t);
 %@eof:1

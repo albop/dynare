@@ -60,28 +60,36 @@ ts.data = data;
 %$
 %$ % Test the routine.
 %$ try
-%$     ts = dseries(y,'1950Q1');
-%$     ts = ts.hpcycle();
+%$     ts0 = dseries(y,'1950Q1');
+%$     ts1 = dseries(x,'1950Q1');
+%$     ts2 = ts0.hpcycle();
 %$     t(1) = 1;
 %$ catch
 %$     t(1) = 0;
 %$ end
 %$
 %$ if t(1)
-%$     t(2) = dyn_assert(ts.freq,4);
-%$     t(3) = dyn_assert(ts.init.freq,4);
-%$     t(4) = dyn_assert(ts.init.time,[1950, 1]);
-%$     t(5) = dyn_assert(ts.vobs,1);
-%$     t(6) = dyn_assert(ts.nobs,200);
+%$     t(2) = dyn_assert(ts2.freq,4);
+%$     t(3) = dyn_assert(ts2.init.freq,4);
+%$     t(4) = dyn_assert(ts2.init.time,[1950, 1]);
+%$     t(5) = dyn_assert(ts2.vobs,1);
+%$     t(6) = dyn_assert(ts2.nobs,200);
 %$ end
 %$
 %$ % Show results
 %$ if plot_flag
-%$     plot(x,'-k');
+%$     plot(ts1.data,'-k'); % Plot of the stationary component.
 %$     hold on
-%$     plot(ts.data,'--r');
+%$     plot(ts2.data,'--r');          % Plot of the filtered y.
 %$     hold off
 %$     axis tight
+%$     id = get(gca,'XTick');
+%$     set(gca,'XTickLabel',strings(ts1.dates(id)));
+%$     legend({'Stationary component of y', 'Filtered y'})
+%$     print('-depsc2','../doc/dynare.plots/HPCycle.eps')
+%$     system('convert -density 300 ../doc/dynare.plots/HPCycle.eps ../doc/dynare.plots/HPCycle.png');
+%$     system('convert -density 300 ../doc/dynare.plots/HPCycle.eps ../doc/dynare.plots/HPCycle.pdf');
+%$     system('convert -density 300 ../doc/dynare.plots/HPCycle.eps ../doc/dynare.plots/HPCycle.jpg');
 %$ end
 %$
 %$ T = all(t);
