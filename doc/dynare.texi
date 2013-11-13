@@ -795,12 +795,14 @@ Allows Dynare to issue a warning and continue processing when
 @outputhead
 
 Depending on the computing tasks requested in the @file{.mod} file,
-executing command @code{dynare} will leave in the workspace variables
-containing results available for further processing. More details are
-given under the relevant computing tasks.
+executing the @code{dynare} command will leave variables containing
+results in the workspace available for further processing. More
+details are given under the relevant computing tasks.
 
-The @code{M_}, @code{oo_} and @code{options_} structures are also saved
-in a file called @file{@var{FILENAME}_results.mat}.
+The @code{M_}, @code{oo_}, and @code{options_} structures are saved in
+a file called @file{@var{FILENAME}_results.mat}. If they exist,
+@code{estim_params_}, @code{bayestopt_}, @code{dataset_}, and
+@code{estimation_info} are saved in the same file.
 
 @examplehead
 
