@@ -1,6 +1,6 @@
 function C = isequal(A,B)
 
-% Overloads ne (~=) operator.
+% Overloads the isequal Matlab/Octave's function.
 %
 % INPUTS 
 %  o A      dseries object (T periods, N variables).
