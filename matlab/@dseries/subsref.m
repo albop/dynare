@@ -90,13 +90,13 @@ switch S(1).type
         else
             B = feval(S(1).subs,A);
         end
-      case {'cumsum','insert'} % Methods with less than three argument.
+      case {'cumsum','insert','pop'} % Methods with less than three argument.
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
                 B = feval(S(1).subs,A);
                 S = shiftS(S);
             else
-                if length(S(2).subs{1})>2
+                if length(S(2).subs)>2
                     error(['dseries::subsref: ' S(1).subs{1} ' method admits no more than two arguments!'])
                 end
                 B = feval(S(1).subs,A,S(2).subs{:});
