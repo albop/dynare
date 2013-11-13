@@ -60,6 +60,13 @@ end
 
 n = length(id);
 
+if n>1
+   [id, jd] = sort(id);
+   us.data = us.data(:,jd);
+   us.name = us.name(jd);
+   us.tex = us.tex(jd);
+end
+
 for i=1:n
     ts.data = insert_column_vector_in_a_matrix(ts.data,us.data(:,i),id(i));
     ts.name = insert_object_in_a_one_dimensional_cell_array(ts.name,us.name{i},id(i));
