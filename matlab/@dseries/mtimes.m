@@ -116,19 +116,18 @@ end
 %$ % Define names
 %$ A_name = {'A1';'A2'}; B_name = {'B1'};
 %$
-%$ t = zeros(4,1);
 %$
 %$ % Instantiate a time series object.
 %$ try
 %$    ts1 = dseries(A,[],A_name,[]);
 %$    ts2 = dseries(B,[],B_name,[]);
 %$    ts3 = ts1*ts2;
-%$    t(1) = 1;
+%$    t = 1;
 %$ catch
 %$    t = 0;
 %$ end
 %$
-%$ if length(t)>1
+%$ if t(1)
 %$    t(2) = dyn_assert(ts3.vobs,2);
 %$    t(3) = dyn_assert(ts3.nobs,10);
 %$    t(4) = dyn_assert(ts3.data,[A(:,1).*B, A(:,2).*B],1e-15);
@@ -144,18 +143,17 @@ end
 %$ % Define names
 %$ A_name = {'A1';'A2'};
 %$
-%$ t = zeros(5,1);
 %$
 %$ % Instantiate a time series object.
 %$ try
 %$    ts1 = dseries(A,[],A_name,[]);
 %$    ts2 = ts1*B;
-%$    t(1) = 1;
+%$    t = 1;
 %$ catch
 %$    t = 0;
 %$ end
 %$
-%$ if length(t)>1
+%$ if t(1)
 %$    t(2) = dyn_assert(ts2.vobs,2);
 %$    t(3) = dyn_assert(ts2.nobs,10);
 %$    t(4) = dyn_assert(ts2.data,A*B,1e-15);
@@ -171,18 +169,17 @@ end
 %$ % Define names
 %$ A_name = {'A1';'A2'};
 %$
-%$ t = zeros(4,1);
 %$
 %$ % Instantiate a time series object.
 %$ try
 %$    ts1 = dseries(A,[],A_name,[]);
 %$    ts2 = B*ts1;
-%$    t(1) = 1;
+%$    t = 1;
 %$ catch
 %$    t = 0;
 %$ end
 %$
-%$ if length(t)>1
+%$ if t(1)
 %$    t(2) = dyn_assert(ts2.vobs,2);
 %$    t(3) = dyn_assert(ts2.nobs,10);
 %$    t(4) = dyn_assert(ts2.data,A*B,1e-15);
