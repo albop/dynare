@@ -40,7 +40,7 @@ function A = mtimes(B,C) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isdseries(B) && isdseries(C,'dseries')
+if isdseries(B) && isdseries(C)
     % Element by element multiplication of two dseries object
     if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
         error(['dseries::times: Cannot multiply ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
