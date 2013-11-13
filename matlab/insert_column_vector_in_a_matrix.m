@@ -1,4 +1,4 @@
-function matrix = insert_column_vector_in_a_matrix(matrix, vector, i)
+function matrix = insert_column_vector_in_a_matrix(matrix, vector, i)  % --*-- Unitary tests --*--
 
 % Copyright (C) 2013 Dynare Team
 %

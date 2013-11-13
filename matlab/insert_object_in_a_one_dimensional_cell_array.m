@@ -1,4 +1,4 @@
-function one_dimensional_cell_array = insert_object_in_a_one_dimensional_cell_array(one_dimensional_cell_array, object, i)
+function one_dimensional_cell_array = insert_object_in_a_one_dimensional_cell_array(one_dimensional_cell_array, object, i) % --*-- Unitary tests --*--
 
 % Copyright (C) 2013 Dynare Team
 %
