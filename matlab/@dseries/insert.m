@@ -67,6 +67,11 @@ for i=1:n
     id = id+1;
 end
 
+% Update vobs member.
+ts.vobs = columns(ts.data);
+
+
+
 %@test:1
 %$ % Define a datasets.
 %$ A = rand(10,3); B = rand(5,2);
