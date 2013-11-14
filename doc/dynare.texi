@@ -9428,8 +9428,8 @@ Inserts variables contained in @dseries object @var{B} in @dseries object @var{A
 
 @examplehead
 @example
->> ts0 = dseries(ones(2,4),'1950Q1',{'Sly'; 'Gobbo'; 'Sneaky'; 'Stealthy'});
->> ts1 = dseries(pi*ones(2,1),'1950Q1',{'Noddy'});
+>> ts0 = dseries(ones(2,4),'1950Q1',@{'Sly'; 'Gobbo'; 'Sneaky'; 'Stealthy'@});
+>> ts1 = dseries(pi*ones(2,1),'1950Q1',@{'Noddy'@});
 >> ts2 = ts0.insert(ts1,3)
 
 ts2 is a dseries object:
@@ -9438,7 +9438,7 @@ ts2 is a dseries object:
 1950Q1 | 1   | 1     | 3.1416 | 1      | 1       
 1950Q2 | 1   | 1     | 3.1416 | 1      | 1       
 
->> ts3 = dseries([pi*ones(2,1) sqrt(pi)*ones(2,1)],'1950Q1',{'Noddy';'Tessie Bear'});
+>> ts3 = dseries([pi*ones(2,1) sqrt(pi)*ones(2,1)],'1950Q1',@{'Noddy';'Tessie Bear'@});
 >> ts4 = ts0.insert(ts1,[3, 4])
 
 ts4 is a dseries object:
@@ -9606,7 +9606,7 @@ Merges two @dseries objects @var{A} and @var{B} in @dseries object @var{C}. Obje
 
 @examplehead
 @example
->> ts0 = dseries(rand(3,2),'1950Q1',{'A1';'A2'})
+>> ts0 = dseries(rand(3,2),'1950Q1',@{'A1';'A2'@})
  
 ts0 is a dseries object:
  
@@ -9615,7 +9615,7 @@ ts0 is a dseries object:
 1950Q2 | 0.60726  | 0.64208
 1950Q3 | 0.070764 | 0.1045 
  
->> ts1 = dseries(rand(3,1),'1950Q2',{'A1'})
+>> ts1 = dseries(rand(3,1),'1950Q2',@{'A1'@})
  
 ts1 is a dseries object:
  
@@ -9868,8 +9868,8 @@ will produce a file @code{ts0.m} with the following content:
 FREQ__ = 1;
 INIT__ = ' 1Y';
 
-NAMES__ = {'Variable_1'; 'Variable_2'};
-TEX__ = {'Variable_{1}'; 'Variable_{2}'};
+NAMES__ = @{'Variable_1'; 'Variable_2'@};
+TEX__ = @{'Variable_@{1@}'; 'Variable_@{2@}'@};
 
 Variable_1 = [
               1
@@ -9984,10 +9984,6 @@ Computes yearly differences or growth rates.
 @end deftypefn
 
 @sp 1
-
-
-
-
 
 @node Reporting
 @chapter Reporting
