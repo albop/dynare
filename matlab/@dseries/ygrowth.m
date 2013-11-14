@@ -46,28 +46,28 @@ switch ts.freq
     us.data(2:end,:) = ts.data(2:end,:)./ts.data(1:end-1,:) - 1;
     us.data(1,:) = NaN;
     for i = 1:ts.vobs
-        us.name(i) = {['YGROWTH_' us.name{i}]};
+        us.name(i) = {['ygrowth(' us.name{i} ')']};
         us.tex(i) = {['\delta ' us.tex{i}]};
     end
   case 4
     us.data(5:end,:) = ts.data(5:end,:)./ts.data(1:end-4,:) - 1;
     us.data(1:4,:) = NaN;
     for i = 1:ts.vobs
-        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.name(i) = {['ygrowth(' us.name{i} ')']};
         us.tex(i) = {['\delta_4 ' us.tex{i}]};
     end  
   case 12
     us.data(13:end,:) = ts.data(13:end,:)./ts.data(1:end-12,:) - 1;
     us.data(1:12,:) = NaN;
     for i = 1:ts.vobs
-        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.name(i) = {['ygrowth(' us.name{i} ')']};
         us.tex(i) = {['\delta_{12} ' us.tex{i}]};
     end
   case 52
     us.data(53:end,:) = ts.data(53:end,:)./ts.data(1:end-52,:) - 1;
     us.data(1:52,:) = NaN;
     for i = 1:ts.vobs
-        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.name(i) = {['ygrowth(' us.name{i} ')']};
         us.tex(i) = {['\delta_{52} ' us.tex{i}]};
     end
   otherwise
