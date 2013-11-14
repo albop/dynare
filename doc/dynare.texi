@@ -49,6 +49,13 @@
 @emph{Examples}
 @end macro
 
+@macro remarkhead
+@iftex
+@sp 1
+@end iftex
+@noindent @emph{Remark}
+@end macro
+
 @macro outputhead
 @iftex
 @sp 1
@@ -9065,13 +9072,921 @@ do2 = dseries(`filename.csv');
 do3 = dseries([1; 2; 3], 1999Q3, @{`var123'@}, @{`var_@{123@}'@});
 @end example
 
-@sp1
+@sp 1
 
 @example In a Matlab/Octave script:
-do1 = dseries(dates('1999Q3'));
-do2 = dseries(`filename.csv');
-do3 = dseries([1; 2; 3], dates('1999Q3'), @{`var123'@}, @{`var_@{123@}'@});
+>> do1 = dseries(dates('1999Q3'));
+>> do2 = dseries(`filename.csv');
+>> do3 = dseries([1; 2; 3], dates('1999Q3'), @{`var123'@}, @{`var_@{123@}'@});
 @end example
+
+@sp 1
+
+A list of the available methods, by alphabetical order, is given below.
+
+@deftypefn {dseries} {[@var{A}, @var{B}] = } align (@var{A}, @var{B})
+
+If @dseries objects @var{A} and @var{B} are defined on different time ranges, this function extends @var{A} and/or @var{B} with NaNs so that they are defined on the same time range. Note that both @dseries objects must have the same frequency.
+
+@examplehead
+@example
+>> ts0 = dseries(rand(5,1),dates('2000Q1')); % 2000Q1 -> 2001Q1
+>> ts1 = dseries(rand(3,1),dates('2000Q4')); % 2000Q4 -> 2001Q2
+>> [ts0, ts1] = align(ts0, ts1);             % 2000Q1 -> 2001Q2
+>> ts0
+ 
+ts0 is a dseries object:
+ 
+       | Variable_1
+2000Q1 | 0.81472   
+2000Q2 | 0.90579   
+2000Q3 | 0.12699   
+2000Q4 | 0.91338   
+2001Q1 | 0.63236   
+2001Q2 | NaN       
+ 
+>> ts1
+ 
+ts1 is a dseries object:
+ 
+       | Variable_1
+2000Q1 | NaN       
+2000Q2 | NaN       
+2000Q3 | NaN       
+2000Q4 | 0.66653   
+2001Q1 | 0.17813   
+2001Q2 | 0.12801
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {@var{B} = } baxter_king_filter (@var{A}, @var{hf}, @var{lf}, @var{K})
+
+Implementation of Baxter and King (1999) band pass filter for @dseries objects. This filter isolates business cycle fluctuations with a period of length ranging between @var{hf} (high frequency) to @var{lf} (low frequency) using a symetric moving average smoother with @math{2K+1} points, so that K observations at the beginning and at the end of the  sample are lost in the computation of the filter.
+
+@examplehead
+@example
+% Simulate a component model (stochastic trend, deterministic trend, and a 
+% stationary autoregressive process).
+e = .2*randn(200,1);
+u = randn(200,1);
+stochastic_trend = cumsum(e); 
+deterministic_trend = .1*transpose(1:200);
+x = zeros(200,1);
+for i=2:200
+    x(i) = .75*x(i-1) + e(i);
+end
+y = x + stochastic_trend + deterministic_trend;
+
+% Instantiates time series objects.
+ts0 = dseries(y,'1950Q1');
+ts1 = dseries(x,'1950Q1'); % stationary component.
+
+% Apply the Baxter-King filter.
+ts2 = ts0.baxter_king_filter();
+
+% Plot the filtered time series.
+plot(ts1(ts2.dates).data,'-k'); % Plot of the stationary component.
+hold on
+plot(ts2.data,'--r');           % Plot of the filtered y.
+hold off
+axis tight
+id = get(gca,'XTick');
+set(gca,'XTickLabel',strings(ts.dates(id)));
+@end example
+
+@iftex
+@sp 1
+The previous code should produce something like:
+@center
+@image{dynare.plots/BaxterKingFilter,11.32cm,7cm}
+@end iftex
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {[@var{error_flag}, @var{message} ] = } check (@var{A})
+
+Sanity check of @dseries object @var{A}. Returns @math{1} if there is an error, @math{0} otherwise. The second output argument is a string giving brief informations about the error.
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {@var{B} = } cumsum (@var{A}[, @var{d}[, @var{v}]])
+
+Overloads the Matlab/Octave @code{cumsum} function for @dseries objects. The cumulated sum cannot be computed if the variables in @dseries object @var{A} have @code{NaN}s. If a @dates object @var{d} is provided as a second argument, then the method computes the cumulated sum with the additional constraint that the variables in the @dseries object @var{B} are zero in period @var{d}. If a single observation @dseries object @var{v} is provided as a third argument, the cumulated sum in @var{B} is such that @code{B(d)} matches @var{v}.
+
+@examplehead
+@example
+>> ts1 = dseries(ones(10,1));
+>> ts2 = ts1.cumsum();
+>> ts2
+ 
+ts2 is a dseries object:
+ 
+    | cumsum(Variable_1)
+1Y  | 1                 
+2Y  | 2                 
+3Y  | 3                 
+4Y  | 4                 
+5Y  | 5                 
+6Y  | 6                 
+7Y  | 7                 
+8Y  | 8                 
+9Y  | 9                 
+10Y | 10                
+ 
+>> ts3 = cumsum(dates('3Y'));
+>> ts3
+ 
+ts3 is a dseries object:
+ 
+    | cumsum(Variable_1)
+1Y  | -2                
+2Y  | -1                
+3Y  | 0                 
+4Y  | 1                 
+5Y  | 2                 
+6Y  | 3                 
+7Y  | 4                 
+8Y  | 5                 
+9Y  | 6                 
+10Y | 7                 
+ 
+>> ts4 = ts1.cumsum(dates('3Y'),dseries(pi));
+>> ts4
+ 
+ts4 is a dseries object:
+ 
+    | cumsum(Variable_1)
+1Y  | 1.1416            
+2Y  | 2.1416            
+3Y  | 3.1416            
+4Y  | 4.1416            
+5Y  | 5.1416            
+6Y  | 6.1416            
+7Y  | 7.1416            
+8Y  | 8.1416            
+9Y  | 9.1416            
+10Y | 10.1416
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{C} =} eq (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{eq} (equal, @code{==}) operator. @dseries objects @var{A} and @var{B} must have the  same number of observations (say, @math{T}) and variables (@math{N}). The returned argument is a @math{T} by @math{N} matrix of zeros and ones. Element @math{(i,j)} of @var{C} is equal to @code{1} if and only if observation @math{i} for variable @math{j} in @var{A} and @var{B} are the same.
+
+@examplehead
+@example
+>> ts0 = dseries(2*ones(3,1));
+>> ts1 = dseries([2; 0; 2]);
+>> ts0==ts1
+
+ans =
+
+     1
+     0
+     1
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} exp (@var{A})
+
+Overloads the Matlab/Octave @code{exp} function for @dseries objects.
+@examplehead
+@example
+>> ts0 = dseries(rand(10,1));
+>> ts1 = ts0.exp();
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{C} =} extract (@var{A}, @var{B}[, ]...)
+
+Extracts some variables from a @dseries object @var{A} and returns a @dseries object @var{C}. The input arguments following @var{A} are strings representing the variables to be selected in the new @dseries object @var{C}. To simplify the creation of sub-objects, the @dseries class overloads the curly braces (@code{D = extract (A, B, C)} is equivalent to @code{D = A@{B,C@}}) and allows implicit loops (defined between a pair of @@ symbol, see examples below) or Matlab/Octave's regular expressions (introduced by square brackets).
+
+@exampleshead
+
+@noindent The following selections are equivalent: 
+@example
+>> ts0 = dseries(ones(100,10));
+>> ts1 = ts0@{'Variable_1','Variable_2','Variable_3'@};
+>> ts2 = ts0@{'Variable_@@1,2,3@@'@}
+>> ts3 = ts0@{'Variable_[1-3]$'@}
+>> isequal(ts1,ts2) && isequal(ts1,ts3) 
+
+ans =
+
+     1
+@end example
+
+@noindent It is possible to use up to two implicit loops to select variables:
+@example
+names = @{'GDP_1';'GDP_2';'GDP_3'; 'GDP_4'; 'GDP_5'; 'GDP_6'; 'GDP_7'; 'GDP_8'; ... 
+      'GDP_9'; 'GDP_10'; 'GDP_11'; 'GDP_12'; ...
+      'HICP_1';'HICP_2';'HICP_3'; 'HICP_4'; 'HICP_5'; 'HICP_6'; 'HICP_7'; 'HICP_8'; ...
+      'HICP_9'; 'HICP_10'; 'HICP_11'; 'HICP_12'@};
+
+ts0 = dseries(randn(4,24),dates('1973Q1'),names);
+ts0@{'@@GDP,HICP@@_@@1,3,5@@'@}
+ 
+ans is a dseries object:
+ 
+       | GDP_1    | GDP_3     | GDP_5     | HICP_1   | HICP_3   | HICP_5
+1973Q1 | 1.7906   | -1.6606   | -0.57716  | 0.60963  | -0.52335 | 0.26172
+1973Q2 | 2.1624   | 3.0125    | 0.52563   | 0.70912  | -1.7158  | 1.7792
+1973Q3 | -0.81928 | 1.5008    | 1.152     | 0.2798   | 0.88568  | 1.8927
+1973Q4 | -0.03705 | -0.35899  | 0.85838   | -1.4675  | -2.1666  | -0.62032
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{D} =} horzcat (@var{A}, @var{B}[, ]...)
+
+Overloads the @code{horzcat} Matlab/Octave's method for @dseries objects. Returns a @dseries object @var{D} containing the variables in @dseries objects passed as inputs: @var{A}, @var{B}, ... If the inputs are not defined on the same time ranges, the method add @code{NaN}s to the variables so that the variables are redefined on the smallest common time range. Note that the names in the @dseries objects passed as inputs must be different and these objects must have common frequency.
+
+@examplehead
+@example
+>> ts0 = dseries(rand(5,2),'1950Q1',@{'nifnif';'noufnouf'@});
+>> ts1 = dseries(rand(7,1),'1950Q3',@{'nafnaf'@});
+>> ts2 = [ts0, ts1];
+>> ts2
+ 
+ts2 is a dseries object:
+ 
+       | nifnif  | noufnouf | nafnaf  
+1950Q1 | 0.17404 | 0.71431  | NaN     
+1950Q2 | 0.62741 | 0.90704  | NaN     
+1950Q3 | 0.84189 | 0.21854  | 0.83666 
+1950Q4 | 0.51008 | 0.87096  | 0.8593  
+1951Q1 | 0.16576 | 0.21184  | 0.52338 
+1951Q2 | NaN     | NaN      | 0.47736 
+1951Q3 | NaN     | NaN      | 0.88988 
+1951Q4 | NaN     | NaN      | 0.065076
+1952Q1 | NaN     | NaN      | 0.50946
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {@var{B} = } hpcycle (@var{A}[, @var{lambda}])
+
+Extracts the cycle component from a @dseries @var{A} object using Hodrick Prescott filter and returns a @dseries object, @var{B}. Default value for @var{lambda}, the smoothing parameter, is  @math{1600}.
+
+@examplehead
+@example
+% Simulate a component model (stochastic trend, deterministic trend, and a 
+% stationary autoregressive process).
+e = .2*randn(200,1);
+u = randn(200,1);
+stochastic_trend = cumsum(e); 
+deterministic_trend = .1*transpose(1:200);
+x = zeros(200,1);
+for i=2:200
+    x(i) = .75*x(i-1) + e(i);
+end
+y = x + stochastic_trend + deterministic_trend;
+
+% Instantiates time series objects.
+ts0 = dseries(y,'1950Q1');
+ts1 = dseries(x,'1950Q1'); % stationary component.
+
+% Apply the HP filter.
+ts2 = ts0.hpcycle();
+
+% Plot the filtered time series.
+plot(ts1(ts2.dates).data,'-k'); % Plot of the stationary component.
+hold on
+plot(ts2.data,'--r');           % Plot of the filtered y.
+hold off
+axis tight
+id = get(gca,'XTick');
+set(gca,'XTickLabel',strings(ts.dates(id)));
+@end example
+
+@iftex
+@sp 1
+The previous code should produce something like:
+@center
+@image{dynare.plots/HPCycle,11.32cm,7cm}
+@end iftex
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {@var{B} = } hptrend (@var{A}[, @var{lambda}])
+
+Extracts the trend component from a @dseries @var{A} object using Hodrick Prescott filter and returns a @dseries object, @var{B}. Default value for @var{lambda}, the smoothing parameter, is  @math{1600}.
+
+@examplehead
+Using the same generating data process as in the previous example:
+@example
+ts1 = dseries(stochastic_trend + deterministic_trend,'1950Q1');
+% Apply the HP filter.
+ts2 = ts0.hptrend();
+
+% Plot the filtered time series.
+plot(ts1.data,'-k'); % Plot of the nonstationary components.
+hold on
+plot(ts2.data,'--r');           % Plot of the estimated trend.
+hold off
+axis tight
+id = get(gca,'XTick');
+set(gca,'XTickLabel',strings(ts0.dates(id)));
+@end example
+
+@iftex
+@sp 1
+The previous code should produce something like:
+@center
+@image{dynare.plots/HPTrend,11.32cm,7cm}
+@end iftex
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {@var{C} = } insert (@var{A}, @var{B}, @var{I})
+
+Inserts variables contained in @dseries object @var{B} in @dseries object @var{A} at positions specified by integer scalars in vector @var{I}, returns augmented @dseries object @var{C}. The integer scalars in @var{I} must take values between @code{1} and @code{A.length()+1} and refers to @var{A}'s column numbers. The @dseries objects @var{A} and @var{B} need not to be defined over the same time ranges, but it is assumled that they have common frequency.
+
+@examplehead
+@example
+>> ts0 = dseries(ones(2,4),'1950Q1',{'Sly'; 'Gobbo'; 'Sneaky'; 'Stealthy'});
+>> ts1 = dseries(pi*ones(2,1),'1950Q1',{'Noddy'});
+>> ts2 = ts0.insert(ts1,3)
+
+ts2 is a dseries object:
+ 
+       | Sly | Gobbo | Noddy  | Sneaky | Stealthy
+1950Q1 | 1   | 1     | 3.1416 | 1      | 1       
+1950Q2 | 1   | 1     | 3.1416 | 1      | 1       
+
+>> ts3 = dseries([pi*ones(2,1) sqrt(pi)*ones(2,1)],'1950Q1',{'Noddy';'Tessie Bear'});
+>> ts4 = ts0.insert(ts1,[3, 4])
+
+ts4 is a dseries object:
+ 
+       | Sly | Gobbo | Noddy  | Sneaky | Tessie Bear | Stealthy
+1950Q1 | 1   | 1     | 3.1416 | 1      | 1.7725      | 1       
+1950Q2 | 1   | 1     | 3.1416 | 1      | 1.7725      | 1       
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {@var{B} = } isempty (@var{A})
+
+Overloads the Matlab/octave's @code{isempty} function. Returns @code{1} if @dseries object @var{A} is empty, @code{0} otherwise.
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {@var{C} = } isequal (@var{A},@var{B})
+
+Overloads the Matlab/octave's @code{isequal} function. Returns @code{1} if @dseries objects @var{A} and @code{B} are identical, @code{0} otherwise.
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {@var{B} = } lag (@var{A}[, @var{p}])
+
+Returns lagged time series. Default value of @var{p}, the number of lags, is @code{1}.
+
+@exampleshead
+
+@example
+>> ts0 = dseries(transpose(1:4),'1950Q1')
+ 
+ts0 is a dseries object:
+ 
+       | Variable_1
+1950Q1 | 1         
+1950Q2 | 2         
+1950Q3 | 3         
+1950Q4 | 4
+
+>> ts1 = ts0.lag()
+ 
+ts1 is a dseries object:
+ 
+       | lag(Variable_1,1)
+1950Q1 | NaN              
+1950Q2 | 1                
+1950Q3 | 2                
+1950Q4 | 3
+
+>> ts2 = ts0.lag(2)
+ 
+ts2 is a dseries object:
+ 
+       | lag(Variable_1,2)
+1950Q1 | NaN              
+1950Q2 | NaN              
+1950Q3 | 1            
+1950Q4 | 2
+@end example
+
+@noindent @dseries class overloads the parenthesis so that @code{ts.lag(p)} can be written more compactly as @code{ts(-p)}. For instance:
+
+@example
+>> ts0.lag(1)
+ 
+ans is a dseries object:
+ 
+       | lag(Variable_1,1)
+1950Q1 | NaN              
+1950Q2 | 1                
+1950Q3 | 2                
+1950Q4 | 3
+@end example
+
+@noindent or alternatively:
+
+@example
+>> ts0(-1)
+ 
+ans is a dseries object:
+ 
+       | lag(Variable_1,1)
+1950Q1 | NaN              
+1950Q2 | 1                
+1950Q3 | 2                
+1950Q4 | 3
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn {dseries} {@var{B} = } lead (@var{A}[, @var{p}])
+
+Returns leaded time series. Default value of @var{p}, the number of leads, is @code{1}. As for the @code{lag} method, the @dseries class overloads the parenthesis so that @code{ts.lead(p)} is equivalent to @code{ts(p)}.
+
+@examplehead
+
+@example
+>> ts0 = dseries(transpose(1:4),'1950Q1');
+>> ts1 = ts0.lead()
+ 
+ts1 is a dseries object:
+ 
+       | lead(Variable_1,1)
+1950Q1 | 2                 
+1950Q2 | 3                 
+1950Q3 | 4                 
+1950Q4 | NaN               
+
+>> ts2 = ts0(2)
+ 
+ts2 is a dseries object:
+ 
+       | lead(Variable_1,2)
+1950Q1 | 3                 
+1950Q2 | 4                 
+1950Q3 | NaN               
+1950Q4 | NaN
+@end example
+
+@end deftypefn
+
+@noindent @remarkhead
+
+@noindent The overloading of the parenthesis for @dseries objects, allows to easily create new @dseries objects by copying/pasting equations declared in the @code{model} block. For instance, if an Euler equation is defined in the @code{model} block:
+@example
+model;
+    ...
+    1/C - beta/C(1)*(exp(A(1))*K^(alpha-1)+1-delta) ;
+    ...
+end;
+@end example
+@noindent and if variables @var{C}, @var{A} and @var{K} are defined as @dseries objects, then by writting:
+@example
+Residuals = 1/C - beta/C(1)*(exp(A(1))*K^(alpha-1)+1-delta) ;
+@end example 
+@noindent outside of the @code{model} block, we create a new @dseries object, called @var{Residuals}, for the residuals of the Euler equation (the conditional expectation of the equation defined in the @code{model} block is zero, but the residuals are non zero).
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} log (@var{A})
+
+Overloads the Matlab/Octave @code{log} function for @dseries objects.
+@examplehead
+@example
+>> ts0 = dseries(rand(10,1));
+>> ts1 = ts0.log();
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{C} =} merge (@var{A}, @var{B})
+
+Merges two @dseries objects @var{A} and @var{B} in @dseries object @var{C}. Objects @var{A} and @var{B} need to have common frequency but can be defined on different time ranges. If a variable, say @code{x}, is defined both in @dseries objects @var{A} and @var{B}, then the merge will select the variable @code{x} as defined in the second input argument, @var{B}. 
+
+@examplehead
+@example
+>> ts0 = dseries(rand(3,2),'1950Q1',{'A1';'A2'})
+ 
+ts0 is a dseries object:
+ 
+       | A1       | A2     
+1950Q1 | 0.42448  | 0.92477
+1950Q2 | 0.60726  | 0.64208
+1950Q3 | 0.070764 | 0.1045 
+ 
+>> ts1 = dseries(rand(3,1),'1950Q2',{'A1'})
+ 
+ts1 is a dseries object:
+ 
+       | A1      
+1950Q2 | 0.70023 
+1950Q3 | 0.3958  
+1950Q4 | 0.084905
+ 
+>> merge(ts0,ts1)
+ 
+ans is a dseries object:
+ 
+       | A1       | A2     
+1950Q1 | NaN      | 0.92477
+1950Q2 | 0.70023  | 0.64208
+1950Q3 | 0.3958   | 0.1045 
+1950Q4 | 0.084905 | NaN 
+
+>> merge(ts1,ts0)
+ 
+ans is a dseries object:
+ 
+       | A1       | A2     
+1950Q1 | 0.42448  | 0.92477
+1950Q2 | 0.60726  | 0.64208
+1950Q3 | 0.070764 | 0.1045 
+1950Q4 | NaN      | NaN
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{C} =} minus (@var{A}, @var{B})
+
+Overloads the @code{minus} (@code{-}) operator for @dseries objects, element by element substraction. If both @var{A} and @var{B} are @dseries objects, they do not need to be defined over the same time ranges. If @var{A} and @var{B} are @dseries object with @math{T_A} and @math{T_B} observations and @math{N_A} and @math{N_B} variables, then  @math{N_A} must be equal to @math{N_B} or @math{1} and  @math{N_B} must be equal to @math{N_A} or @math{1}. If @math{T_A=T_B}, @code{isequal(A.init,B.init)} returns 1 and @math{N_A=N_B}, then the @code{minus} operator will compute for each couple  @math{(t,n)}, with @math{1<=t<=T_A} and @math{1<=n<=N_A}, @code{C.data(t,n)=A.data(t,n)-B.data(t,n)}. If @math{N_B} is equal to @math{1} and @math{N_A>1}, the smaller @dseries object (@var{B}) is ``broadcast'' across the larger @dseries (@var{A}) so that they have compatible shapes, the @code{minus} operator will substract the variable defined in @var{B} to each variable in @var{A}. If @var{B} is a double scalar, then the method @code{minus} will substract @var{B} to all the observations/variables in @var{A}.
+
+@examplehead
+@example
+>> ts0 = dseries(rand(3,2));
+>> ts1 = ts0@{'Variable_2'@};
+>> ts0-ts1
+ 
+ans is a dseries object:
+ 
+   | minus(Variable_1,Variable_2) | minus(Variable_2,Variable_2)
+1Y | -0.48853                     | 0                           
+2Y | -0.50535                     | 0                           
+3Y | -0.32063                     | 0
+
+>> ts1
+ 
+ts1 is a dseries object:
+ 
+   | Variable_2
+1Y | 0.703     
+2Y | 0.75415   
+3Y | 0.54729
+
+>> ts1-ts1.data(1)
+ 
+ans is a dseries object:
+ 
+   | minus(Variable_2,0.703)
+1Y | 0                      
+2Y | 0.051148               
+3Y | -0.15572
+
+>> ts1.data(1)-ts1
+ 
+ans is a dseries object:
+ 
+   | minus(0.703,Variable_2)
+1Y | 0                      
+2Y | -0.051148              
+3Y | 0.15572
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{C} =} mrdivide (@var{A}, @var{B})
+
+Overloads the @code{mrdivide} (@code{/}) operator for @dseries objects, element by element division (like the @code{./} Matlab/Octave operator). If both @var{A} and @var{B} are @dseries objects, they do not need to be defined over the same time ranges. If @var{A} and @var{B} are @dseries object with @math{T_A} and @math{T_B} observations and @math{N_A} and @math{N_B} variables, then  @math{N_A} must be equal to @math{N_B} or @math{1} and  @math{N_B} must be equal to @math{N_A} or @math{1}. If @math{T_A=T_B}, @code{isequal(A.init,B.init)} returns 1 and @math{N_A=N_B}, then the @code{mrdivide} operator will compute for each couple  @math{(t,n)}, with @math{1<=t<=T_A} and @math{1<=n<=N_A}, @code{C.data(t,n)=A.data(t,n)/B.data(t,n)}. If @math{N_B} is equal to @math{1} and @math{N_A>1}, the smaller @dseries object (@var{B}) is ``broadcast'' across the larger @dseries (@var{A}) so that they have compatible shapes, @code{mrdivides} operator will divide each variable defined in @var{A} by the variable in @var{B}, observation per observation. If @var{B} is a double scalar, then the method @code{mrdivide} will divide all the observations/variables in @var{A} by @var{B}.
+
+@examplehead
+@example
+>> ts0 = dseries(rand(3,2))
+
+ts0 is a dseries object:
+ 
+   | Variable_1 | Variable_2
+1Y | 0.72918    | 0.90307   
+2Y | 0.93756    | 0.21819   
+3Y | 0.51725    | 0.87322   
+ 
+>> ts1 = ts0@{'Variable_2'@};
+>> ts0/ts1
+ 
+ans is a dseries object:
+ 
+   | divide(Variable_1,Variable_2) | divide(Variable_2,Variable_2)
+1Y | 0.80745                       | 1                            
+2Y | 4.2969                        | 1                            
+3Y | 0.59235                       | 1
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{C} =} mtimes (@var{A}, @var{B})
+
+Overloads the @code{mtimes} (@code{*}) operator for @dseries objects, Hadammard product (the @code{.*} Matlab/Octave operator). If both @var{A} and @var{B} are @dseries objects, they do not need to be defined over the same time ranges. If @var{A} and @var{B} are @dseries object with @math{T_A} and @math{T_B} observations and @math{N_A} and @math{N_B} variables, then  @math{N_A} must be equal to @math{N_B} or @math{1} and  @math{N_B} must be equal to @math{N_A} or @math{1}. If @math{T_A=T_B}, @code{isequal(A.init,B.init)} returns 1 and @math{N_A=N_B}, then the @code{mtimes} operator will compute for each couple  @math{(t,n)}, with @math{1<=t<=T_A} and @math{1<=n<=N_A}, @code{C.data(t,n)=A.data(t,n)*B.data(t,n)}. If @math{N_B} is equal to @math{1} and @math{N_A>1}, the smaller @dseries object (@var{B}) is ``broadcast'' across the larger @dseries (@var{A}) so that they have compatible shapes, @code{mtimes} operator will multiply each variable defined in @var{A} by the variable in @var{B}, observation per observation. If @var{B} is a double scalar, then the method @code{mtimes} will multiply all the observations/variables in @var{A} by @var{B}.
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{C} =} ne (@var{A}, @var{B})
+
+Overloads the Matlab/Octave @code{ne} (equal, @code{~=}) operator. @dseries objects @var{A} and @var{B} must have the  same number of observations (say, @math{T}) and variables (@math{N}). The returned argument is a @math{T} by @math{N} matrix of zeros and ones. Element @math{(i,j)} of @var{C} is equal to @code{1} if and only if observation @math{i} for variable @math{j} in @var{A} and @var{B} are not equal.
+
+@examplehead
+@example
+>> ts0 = dseries(2*ones(3,1));
+>> ts1 = dseries([2; 0; 2]);
+>> ts0~=ts1
+
+ans =
+
+     0
+     1
+     0
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{C} =} plus (@var{A}, @var{B})
+
+Overloads the @code{plus} (@code{+}) operator for @dseries objects, element by element addition. If both @var{A} and @var{B} are @dseries objects, they do not need to be defined over the same time ranges. If @var{A} and @var{B} are @dseries object with @math{T_A} and @math{T_B} observations and @math{N_A} and @math{N_B} variables, then  @math{N_A} must be equal to @math{N_B} or @math{1} and  @math{N_B} must be equal to @math{N_A} or @math{1}. If @math{T_A=T_B}, @code{isequal(A.init,B.init)} returns 1 and @math{N_A=N_B}, then the @code{minus} operator will compute for each couple  @math{(t,n)}, with @math{1<=t<=T_A} and @math{1<=n<=N_A}, @code{C.data(t,n)=A.data(t,n)+B.data(t,n)}. If @math{N_B} is equal to @math{1} and @math{N_A>1}, the smaller @dseries object (@var{B}) is ``broadcast'' across the larger @dseries (@var{A}) so that they have compatible shapes, the @code{plus} operator will add the variable defined in @var{B} to each variable in @var{A}. If @var{B} is a double scalar, then the method @code{add} will add @var{B} to all the observations/variables in @var{A}.
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} pop (@var{A}[, @var{a}])
+
+Removes variable @var{a} from @dseries object @var{A}. By default, if the second argument is not provided, the last variable is removed.
+
+@examplehead
+@example
+>> ts0 = dseries(ones(3,3));
+>> ts1 = ts0.pop('Variable_2');
+ 
+ts1 is a dseries object:
+ 
+   | Variable_1 | Variable_3
+1Y | 1          | 1         
+2Y | 1          | 1         
+3Y | 1          | 1
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} qdiff (@var{A})
+@deftypefnx{dseries} {@var{B} =} qgrowth (@var{A})
+
+Computes quaterly differences or growth rates.
+
+@examplehead
+@example
+>> ts0 = dseries(transpose(1:4),'1950Q1');
+>> ts1 = ts0.qdiff()
+ 
+ts1 is a dseries object:
+ 
+       | qdiff(Variable_1)
+1950Q1 | NaN             
+1950Q2 | 1               
+1950Q3 | 1               
+1950Q4 | 1               
+ 
+>> ts0 = dseries(transpose(1:6),'1950M1');
+>> ts1 = ts0.qdiff()
+ 
+ts1 is a dseries object:
+ 
+        | qdiff(Variable_1)
+1950M1  | NaN              
+1950M2  | NaN              
+1950M3  | NaN              
+1950M4  | 3                
+1950M5  | 3                
+1950M6  | 3                
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} rename (@var{A},@var{oldname},@var{newname})
+
+Rename variable @var{oldname} to @var{newname} in @dseries object @var{A}, returns a @dseries object.
+
+@examplehead
+@example
+>> ts0 = dseries(ones(2,2));
+>> ts1 = ts0.rename('Variable_1','Stinkly')
+ 
+ts1 is a dseries object:
+ 
+   | Stinkly | Variable_2
+1Y | 1       | 1         
+2Y | 1       | 1
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} save (@var{A}[, @var{basename}[, @var{format}]])
+
+Overloads the Matlab/Octave @code{save} function, saves @dseries object @var{A} to disk. Possible formats are @code{csv} (this is the default), @code{m} (Matlab/Octave script), and @code{mat} (Matlab binary data file). The name of the file without extension is specified by @var{basename}, by default @var{basename} is the name of the first input (namely, the @dseries object @var{A}).
+
+@examplehead
+@example
+>> ts0 = dseries(ones(2,2));
+>> ts0.save();
+@end example
+@noindent The last command will create a file @code{ts0.csv} with the following content:
+@example
+,Variable_1,Variable_2
+1Y,               1,               1
+2Y,               1,               1
+@end example
+To create a Matlab/octave script, the following command:
+@example
+>> ts0.save([],'m');
+@end example
+will produce a file @code{ts0.m} with the following content:
+@example
+% File created on 14-Nov-2013 12:08:52.
+
+FREQ__ = 1;
+INIT__ = ' 1Y';
+
+NAMES__ = {'Variable_1'; 'Variable_2'};
+TEX__ = {'Variable_{1}'; 'Variable_{2}'};
+
+Variable_1 = [
+              1
+              1];
+
+Variable_2 = [
+              1
+              1];
+@end example
+@noindent The generated (@code{csv}, @code{m}, or @code{mat}) files can be loaded when instantiating a @dseries object as explained above.
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} set_names (@var{A}, @var{s1}, @var{s2}, ...)
+
+Renames variables in @dseries object @var{A}, returns a @dseries object @var{B} with new names @var{s1}, @var{s2}, @var{s3}, ... The number of input arguments after the first one (@dseries object @var{A}) must be equal to @code{A.vobs} (the number of variables in @var{A}). @var{s1} will be the name of the first variable in @var{B}, @var{s2} the name of the second variable in @var{B}, and so on.
+
+@examplehead
+@example
+>> ts0 = dseries(ones(1,3));
+>> ts1 = ts0.set_names('Barbibul',[],'Barbouille')
+ 
+ts1 is a dseries object:
+ 
+   | Barbibul | Variable_2 | Barbouille
+1Y | 1        | 1          | 1 
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {[@var{T}, @var{N} ] = } size (@var{A}[, @var{dim}])
+
+Overloads the Matlab/Octave's @code{size} function. Returns the number of observations in @dseries object @var{A} (@emph{ie} @code{A.nobs}) and the number of variables (@emph{ie} @code{A.vobs}). If a second input argument is passed, the @code{size} function returns the number of observations if @code{dim=1} or the number of variables if @code{dim=2} (for all other values of @var{dim} an error is issued).
+
+@examplehead
+@example
+>> ts0 = dseries(ones(1,3));
+>> ts0.size()
+
+ans =
+
+     1     3 
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} tex_rename (@var{A},@var{name},@var{newtexname})
+
+Redefines the tex name of variable @var{name} to @var{newtexname} in @dseries object @var{A}, returns a @dseries object.
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} uminus (@var{A})
+
+Overloads @code{uminus} (@code{-}, unary minus) for @dseries object.
+
+@examplehead
+@example
+>> ts0 = dseries(1)
+ 
+ts0 is a dseries object:
+ 
+   | Variable_1
+1Y | 1
+
+>> ts1 = -ts0
+ 
+ts1 is a dseries object:
+ 
+   | -Variable_1
+1Y | -1
+@end example
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{D} =} vertcat (@var{A}, @var{B}[, ]...)
+
+Overloads the @code{vertcat} Matlab/Octave's method for @dseries objects. This method is used to append more observations to a @dseries object. Returns a @dseries object @var{D} containing the variables in @dseries objects passed as inputs. All the input arguments must be @dseries objects with the same variables defined on @emph{different time ranges}.
+
+@examplehead
+@example
+>> ts0 = dseries(rand(2,2),'1950Q1',@{'nifnif';'noufnouf'@});
+>> ts1 = dseries(rand(2,2),'1950Q3',@{'nifnif';'noufnouf'@});
+>> ts2 = [ts0; ts1]
+ 
+ts2 is a dseries object:
+ 
+       | nifnif   | noufnouf
+1950Q1 | 0.82558  | 0.31852 
+1950Q2 | 0.78996  | 0.53406 
+1950Q3 | 0.089951 | 0.13629 
+1950Q4 | 0.11171  | 0.67865 
+@end example
+
+@end deftypefn
+
+@deftypefn{dseries} {@var{B} =} ydiff (@var{A})
+@deftypefnx{dseries} {@var{B} =} ygrowth (@var{A})
+
+Computes yearly differences or growth rates.
+
+@end deftypefn
+
+@sp 1
+
+
+
 
 
 @node Reporting
