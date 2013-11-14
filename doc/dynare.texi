@@ -827,12 +827,14 @@ Allows Dynare to issue a warning and continue processing when
 @outputhead
 
 Depending on the computing tasks requested in the @file{.mod} file,
-executing command @code{dynare} will leave in the workspace variables
-containing results available for further processing. More details are
-given under the relevant computing tasks.
+executing the @code{dynare} command will leave variables containing
+results in the workspace available for further processing. More
+details are given under the relevant computing tasks.
 
-The @code{M_}, @code{oo_} and @code{options_} structures are also saved
-in a file called @file{@var{FILENAME}_results.mat}.
+The @code{M_}, @code{oo_}, and @code{options_} structures are saved in
+a file called @file{@var{FILENAME}_results.mat}. If they exist,
+@code{estim_params_}, @code{bayestopt_}, @code{dataset_}, and
+@code{estimation_info} are saved in the same file.
 
 @examplehead
 
@@ -3358,6 +3360,10 @@ The exogenous variables for which to compute IRFs. Default: all.
 Requests the computation of normalized IRFs in percentage of the
 standard error of each shock.
 
+@item irf_plot_threshold = @var{DOUBLE}
+@anchor{irf_plot_threshold}
+Threshold size for plotting IRFs. All IRFs for a particular variable with a maximum absolute deviation from the steady state smaller than this value are not displayed. Default: @code{1e-10}.
+
 @item nocorr
 Don't print the correlation matrix (printing them is the default).
 
@@ -4201,9 +4207,10 @@ end;
 @end deffn
 
 @deffn Block estimated_params_init ;
+@deffnx Block estimated_params_init (@var{OPTIONS}@dots{});
 
 This block declares numerical initial values for the optimizer when
-these ones are different from the prior mean.
+these ones are different from the prior mean. It should be specified after the @code{estimated_params}-block as otherwise the specified starting values are overwritten by the latter.
 
 Each line has the following syntax:
 
@@ -4211,6 +4218,14 @@ Each line has the following syntax:
 stderr VARIABLE_NAME | corr VARIABLE_NAME_1, VARIABLE_NAME_2 | PARAMETER_NAME
 , INITIAL_VALUE;
 @end example
+
+@optionshead
+
+@table @code
+
+@item use_calibration
+For not specifically intialized parameters, use the deep parameters and the elements of the covariance matrix specified in the @code{shocks}-block from calibration as starting values for estimation. For components of the @code{shocks}-block that were not explicitly specified during calibration or which violate the prior, the prior mean is used.
+@end table
 
 @xref{estimated_params}, for the meaning and syntax of the various components.
 
@@ -4895,6 +4910,9 @@ using a standard Kalman filter.
 @item irf_shocks = ( @var{VARIABLE_NAME} [[,] @var{VARIABLE_NAME} @dots{}] )
 @xref{irf_shocks}. Only used if @ref{bayesian_irf} is passed. Cannot be used
 with @ref{dsge_var}.
+
+@item irf_plot_threshold = @var{DOUBLE}
+@xref{irf_plot_threshold}. Only used if @ref{bayesian_irf} is passed.
 
 @item aim_solver
 @xref{aim_solver}.
@@ -7058,11 +7076,14 @@ The total number of draws is equal to
 Tuning period for Metropolis-Hasting draws. Default: @code{30,000}
 
 @item save_draws
-Save all elements of @math{A^0}, @math{A^+}, @math{\xi}, and the
-transition matrix to a file named @code{draws_<<file_tag>>.out} with
-each draw on a separate line. A file that describes how these matrices
-are laid out is contained in
-@code{draws_header_<<file_tag>>.out}. Default: @code{off}
+Save all elements of @math{A^0}, @math{A^+}, @math{Q}, and
+@math{\zeta}, to a file named @code{draws_<<file_tag>>.out} with each
+draw on a separate line. A file that describes how these matrices are
+laid out is contained in @code{draws_header_<<file_tag>>.out}. A file
+called @code{load_flat_file.m} is provided to simplify loading the
+saved files into the corresponding variables @code{A0}, @code{Aplus},
+@code{Q}, and @code{Zeta} in your MATLAB/Octave workspace. Default:
+@code{off}
 
 @end table
 @end deffn

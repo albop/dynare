@@ -67,8 +67,8 @@ end
 %build covariance matrix from correlation matrix and variances already on
 %diagonal
 Sigma_e = diag(sqrt(diag(Sigma_e)))*Correlation_matrix*diag(sqrt(diag(Sigma_e))); 
-if isfield(estim_params,'calibrated_covariances')
-    Sigma_e(estim_params.calibrated_covariances.position)=estim_params.calibrated_covariances.cov_value;
+if isfield(estim_params_,'calibrated_covariances')
+    Sigma_e(estim_params_.calibrated_covariances.position)=estim_params_.calibrated_covariances.cov_value;
 end
 
 % and update offset

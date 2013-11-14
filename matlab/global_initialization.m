@@ -140,6 +140,7 @@ end
 
 % IRFs & other stoch_simul output
 options_.irf = 40;
+options_.impulse_responses.plot_threshold=1e-10;
 options_.relative_irf = 0;
 options_.ar = 5;
 options_.hp_filter = 0;
@@ -382,6 +383,7 @@ options_.mh_recover = 0;
 options_.mh_replic = 20000;
 options_.recursive_estimation_restart = 0;
 options_.MCMC_jumping_covariance='hessian';
+options_.use_calibration_initialization = 0;
 
 options_.mode_compute = 4;
 options_.mode_file = '';

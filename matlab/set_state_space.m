@@ -34,7 +34,7 @@ function dr=set_state_space(dr,DynareModel,DynareOptions)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 1996-2012 Dynare Team
+% Copyright (C) 1996-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -84,6 +84,9 @@ if max_lag > 0
     end
     kmask = [kmask; lead_lag_incidence(1,order_var)] ;
 else
+    if max_lead==0 %%in this case lead_lag_incidence has no entry max_lag+2
+        error('Dynare currently does not allow to solve purely static models in a stochastic context.')
+    end
     kmask = lead_lag_incidence(max_lag+2,order_var) ;
 end
 
