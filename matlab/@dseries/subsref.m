@@ -419,8 +419,8 @@ end
 %$ ts1 = dseries(A,[],A_name,[]);
 %$
 %$ % Call the tested method.
-%$ a = ts1{'GDP_@0-9@'};
-%$ b = ts1{'@A-Z@_1'};
+%$ a = ts1{'GDP_[0-9]'};
+%$ b = ts1{'[A-Z]_1$'};
 %$
 %$ % Expected results.
 %$ e1.data = A(:,1:12);
@@ -429,7 +429,7 @@ end
 %$ e1.name = {'GDP_1';'GDP_2';'GDP_3'; 'GDP_4'; 'GDP_5'; 'GDP_6'; 'GDP_7'; 'GDP_8'; 'GDP_9'; 'GDP_10'; 'GDP_11'; 'GDP_12'};
 %$ e1.freq = 1;
 %$ e1.init = dates(1,1);
-%$ e2.data = A(:,[1, 13]);
+%$ e2.data = A(:,[1 13]);
 %$ e2.nobs = 10;
 %$ e2.vobs = 2;
 %$ e2.name = {'GDP_1';'HICP_1'};
