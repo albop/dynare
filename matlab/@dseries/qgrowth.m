@@ -48,14 +48,14 @@ switch ts.freq
     us.data(2:end,:) = ts.data(2:end,:)./ts.data(1:end-1,:) - 1;
     us.data(1,:) = NaN;
     for i = 1:ts.vobs
-        us.name(i) = {['QGROWTH_' us.name{i}]};
+        us.name(i) = {['qgrowth(' us.name{i} ')']};
         us.tex(i) = {['\delta ' us.tex{i}]};
     end
   case 12
     us.data(4:end,:) = ts.data(4:end,:)./ts.data(1:end-3,:) - 1;
     us.data(1:3,:) = NaN;
     for i = 1:ts.vobs
-        us.name(i) = {['QGROWTH_' us.name{i}]};
+        us.name(i) = {['qgrowth(' us.name{i} ')']};
         us.tex(i) = {['\delta_3 ' us.tex{i}]};
     end
   case 52
