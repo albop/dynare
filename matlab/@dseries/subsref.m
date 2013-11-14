@@ -124,7 +124,11 @@ switch S(1).type
                 if isempty(S(2).subs)
                     save(A,inputname(1));
                 else
-                    save(A,S(2).subs{:});
+                    if isempty(S(2).subs{1})
+                        save(A,inputname(1),S(2).subs{2});
+                    else
+                        save(A,S(2).subs{:});
+                    end
                 end
                 S = shiftS(S);
             else
