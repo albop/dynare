@@ -17,17 +17,18 @@ function ts = tex_rename(ts, varargin) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(nargin <= 3, 'dseries::tex_rename: accepts at most two args');
+assert(nargin <= 3, 'dseries::tex_rename: accepts at most three args');
+
 if nargin == 2
-    newtex = varargin{1};
-    assert(ts.vobs == 1, ['dseries::tex_rename: with one argument, the ' ...
-                        'dseries contain only one variable.']);
+    newtexname = varargin{1};
+    assert(ts.vobs == 1, ['dseries::tex_rename: with one argument, the dseries contain only one variable.']);
 else
-    newtex = varargin{2};
+    newtexname = varargin{2};
     name = varargin{1};
-    assert(ischar(name), 'dseries::tex_rename: name must be a string');
+    assert(ischar(name), 'dseries::tex_rename: second input argument (name) must be a string');
 end
-assert(ischar(newtex), 'dseries::tex_rename: the newtex name must be a string');
+
+assert(ischar(newtexname), 'dseries::tex_rename: third input argument (newtexname) name must be a string');
 
 if nargin == 2
     idname = 1;
@@ -37,7 +38,8 @@ else
         error(['dseries::tex_rename: Variable ' name ' is unknown in dseries object ' inputname(1)  '!'])
     end
 end
-ts.tex(idname) = {newtex};
+
+ts.tex(idname) = {newtexname};
 
 %@test:1
 %$ t = zeros(8,1);
