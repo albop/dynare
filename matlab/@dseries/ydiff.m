@@ -91,7 +91,7 @@ end
 %$     DATA = NaN(4,ts.vobs);
 %$     DATA = [DATA; 4*ones(ts.nobs-4,ts.vobs)];
 %$     t(2) = dyn_assert(ts.data,DATA);
-%$     t(3) = dyn_assert(ts.name{1},['YDIFF_A1']);
+%$     t(3) = dyn_assert(ts.name{1},['ydiff(A1)']);
 %$     t(4) = dyn_assert(ts.tex{1},['\\Delta_4 A_1']);
 %$ end
 %$
@@ -115,7 +115,7 @@ end
 %$     DATA = NaN(12,ts.vobs);
 %$     DATA = [DATA; 12*ones(ts.nobs-12,ts.vobs)];
 %$     t(2) = dyn_assert(ts.data,DATA);
-%$     t(3) = dyn_assert(ts.name{1},['YDIFF_A1']);
+%$     t(3) = dyn_assert(ts.name{1},['ydiff(A1)']);
 %$     t(4) = dyn_assert(ts.tex{1},['\\Delta_{12} A_1']);
 %$ end
 %$
@@ -139,7 +139,7 @@ end
 %$     DATA = NaN(52,ts.vobs);
 %$     DATA = [DATA; 52*ones(ts.nobs-52,ts.vobs)];
 %$     t(2) = dyn_assert(ts.data,DATA);
-%$     t(3) = dyn_assert(ts.name{1},['YDIFF_A1']);
+%$     t(3) = dyn_assert(ts.name{1},['ydiff(A1)']);
 %$     t(4) = dyn_assert(ts.tex{1},['\\Delta_{52} A_1']);
 %$ end
 %$
@@ -163,7 +163,7 @@ end
 %$     DATA = NaN(1,ts.vobs);
 %$     DATA = [DATA; ones(ts.nobs-1,ts.vobs)];
 %$     t(2) = dyn_assert(ts.data,DATA);
-%$     t(3) = dyn_assert(ts.name{1},['YDIFF_A1']);
+%$     t(3) = dyn_assert(ts.name{1},['ydiff(A1)']);
 %$     t(4) = dyn_assert(ts.tex{1},['\\Delta A_1']);
 %$ end
 %$
