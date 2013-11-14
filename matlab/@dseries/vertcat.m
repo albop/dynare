@@ -47,17 +47,15 @@ function a = vertcat(varargin) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    if nargin==0 
-        a = DynSeries();
-    elseif nargin == 1
-        a = varargin{1};
-    elseif nargin>1
-        a = varargin{1};
-        for i=2:nargin
-            a = vertcat_(a,varargin{i});
-        end
+if nargin==0
+    a = DynSeries();
+elseif nargin == 1
+    a = varargin{1};
+elseif nargin>1
+    a = varargin{1};
+    for i=2:nargin
+        a = vertcat_(a,varargin{i});
     end
-
 end
 
 function d = vertcat_(b, c)
@@ -73,8 +71,8 @@ function d = vertcat_(b, c)
     end
     d = b;
     d.data = [b.data; c.data];
+    d.dates = [b.dates; c.dates];
     d.nobs = b.nobs+c.nobs;
-end
 
 %@test:1
 %$ % Define a data set.
