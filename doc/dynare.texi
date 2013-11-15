@@ -1108,7 +1108,7 @@ varexo_det tau;
 
 @end deffn
 
-@deffn Command parameters @var{PARAMETER_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffn Command parameters @var{PARAMETER_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
 
 @descriptionhead
 
@@ -1122,6 +1122,12 @@ initialization}).
 
 @code{parameters} commands can appear several times in the file and
 Dynare will concatenate them.
+
+@optionshead
+@table @code
+@item long_name = @var{QUOTED_STRING}
+Like @ref{long_name} but value stored in @code{M_.param_names_long}.
+@end table
 
 @examplehead
 
