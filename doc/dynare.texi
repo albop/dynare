@@ -1043,7 +1043,7 @@ var c $C$ [long_name=`Consumption'];
 
 @end deffn
 
-@deffn Command varexo @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffn Command varexo @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
 
 @descriptionhead
 
@@ -1057,6 +1057,12 @@ shocks to her model.
 @code{varexo} commands can appear several times in the file and Dynare
 will concatenate them.
 
+@optionshead
+@table @code
+@item long_name = @var{QUOTED_STRING}
+Like @ref{long_name} but value stored in @code{M_.exo_names_long}.
+@end table
+
 @examplehead
 
 @example
@@ -1065,7 +1071,7 @@ varexo m gov;
 
 @end deffn
 
-@deffn Command varexo_det @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffn Command varexo_det @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
 
 @descriptionhead
 
@@ -1084,6 +1090,12 @@ conditions and future information.
 
 @code{varexo_det} commands can appear several times in the file and
 Dynare will concatenate them.
+
+@optionshead
+@table @code
+@item long_name = @var{QUOTED_STRING}
+Like @ref{long_name} but value stored in @code{M_.exo_det_names_long}.
+@end table
 
 @examplehead
 
