@@ -32,7 +32,7 @@ end
 rawdata = read_variables(datafile,varobs,[],xls.sheet,xls.range);
 
 % Get the (default) number of observations.
-if isempty(nobs)
+if isempty(nobs) || rows(rawdata)<nobs+first-1 %case 2: dataset has changed
     nobs = rows(rawdata)-first+1;
 end
 
