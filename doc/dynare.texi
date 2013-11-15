@@ -988,9 +988,9 @@ extension or if the filename contains a non-alphanumeric character;
 
 Declarations of variables and parameters are made with the following commands:
 
-@deffn Command var @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
-@deffnx Command var (deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
-@deffnx Command var (log_deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffn Command var @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
+@deffnx Command var (deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
+@deffnx Command var (log_deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
 
 @descriptionhead
 
@@ -1026,6 +1026,11 @@ Same as @code{deflator}, except that the deflator is assumed to be
 additive instead of multiplicative (or, to put it otherwise, the
 declared variable is equal to the log of a variable with a
 multiplicative trend).
+
+@anchor{long_name}
+@item long_name = @var{QUOTED_STRING}
+This is the long version of the variable name. Its value is stored in
+@code{M_.endo_names_long}. Default: @var{VARIABLE_NAME}
 @end table
 
 @examplehead
@@ -1033,6 +1038,7 @@ multiplicative trend).
 @example
 var c gnp q1 q2;
 var(deflator=A) i b;
+var c $C$ [long_name=`Consumption'];
 @end example
 
 @end deffn
