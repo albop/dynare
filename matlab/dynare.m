@@ -44,6 +44,9 @@ if strcmpi(fname,'help')
     return
 end
 
+% detect if MEX files are present; if not, use alternative M-files
+dynareroot = dynare_config;
+
 warning_config()
 
 if isoctave 
@@ -63,9 +66,6 @@ more off
 if isoctave
     default_save_options('-mat')
 end
-
-% detect if MEX files are present; if not, use alternative M-files
-dynareroot = dynare_config;
 
 if nargin < 1
     error('DYNARE: you must provide the name of the MOD file in argument')
