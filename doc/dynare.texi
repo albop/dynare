@@ -1020,9 +1020,9 @@ extension or if the filename contains a non-alphanumeric character;
 
 Declarations of variables and parameters are made with the following commands:
 
-@deffn Command var @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
-@deffnx Command var (deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
-@deffnx Command var (log_deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffn Command var @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
+@deffnx Command var (deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
+@deffnx Command var (log_deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
 
 @descriptionhead
 
@@ -1058,6 +1058,11 @@ Same as @code{deflator}, except that the deflator is assumed to be
 additive instead of multiplicative (or, to put it otherwise, the
 declared variable is equal to the log of a variable with a
 multiplicative trend).
+
+@anchor{long_name}
+@item long_name = @var{QUOTED_STRING}
+This is the long version of the variable name. Its value is stored in
+@code{M_.endo_names_long}. Default: @var{VARIABLE_NAME}
 @end table
 
 @examplehead
@@ -1065,11 +1070,12 @@ multiplicative trend).
 @example
 var c gnp q1 q2;
 var(deflator=A) i b;
+var c $C$ [long_name=`Consumption'];
 @end example
 
 @end deffn
 
-@deffn Command varexo @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffn Command varexo @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
 
 @descriptionhead
 
@@ -1083,6 +1089,12 @@ shocks to her model.
 @code{varexo} commands can appear several times in the file and Dynare
 will concatenate them.
 
+@optionshead
+@table @code
+@item long_name = @var{QUOTED_STRING}
+Like @ref{long_name} but value stored in @code{M_.exo_names_long}.
+@end table
+
 @examplehead
 
 @example
@@ -1091,7 +1103,7 @@ varexo m gov;
 
 @end deffn
 
-@deffn Command varexo_det @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffn Command varexo_det @var{VARIABLE_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
 
 @descriptionhead
 
@@ -1111,6 +1123,12 @@ conditions and future information.
 @code{varexo_det} commands can appear several times in the file and
 Dynare will concatenate them.
 
+@optionshead
+@table @code
+@item long_name = @var{QUOTED_STRING}
+Like @ref{long_name} but value stored in @code{M_.exo_det_names_long}.
+@end table
+
 @examplehead
 
 @example
@@ -1122,7 +1140,7 @@ varexo_det tau;
 
 @end deffn
 
-@deffn Command parameters @var{PARAMETER_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffn Command parameters @var{PARAMETER_NAME} [$@var{LATEX_NAME}$ [(long_name=@var{QUOTED_STRING})]]@dots{};
 
 @descriptionhead
 
@@ -1136,6 +1154,12 @@ initialization}).
 
 @code{parameters} commands can appear several times in the file and
 Dynare will concatenate them.
+
+@optionshead
+@table @code
+@item long_name = @var{QUOTED_STRING}
+Like @ref{long_name} but value stored in @code{M_.param_names_long}.
+@end table
 
 @examplehead
 
