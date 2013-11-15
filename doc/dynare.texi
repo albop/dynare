@@ -9778,6 +9778,58 @@ ans =
 
 @sp 1
 
+@deftypefn{dseries} {@var{h} =} plot (@var{A})
+@deftypefnx{dseries} {@var{h} =} plot (@var{A}, @var{B})
+@deftypefnx{dseries} {@var{h} =} plot (@var{A}[, ...])
+@deftypefnx{dseries} {@var{h} =} plot (@var{A}, @var{B}[, ...])
+
+Overloads Matlab/Octave's @code{plot} function for @dseries objects. Returns a Matlab/Octave plot handle, that can be used to modify the properties of the plotted time series. If only one @dseries object, @var{A}, is passed as argument, then the @code{plot} function will put the associated dates on the x-abscissa. If this @dseries object contains only one variable, additional arguments can be passed to modify the properties of the plot (as one would do with the Matlab/Octave's version of the @code{plot} function). If @dseries object @var{A} contains more than one variable, it is not possible to pass these additional arguments and the properties of the plotted time series must be modify using the returned plot handle and the Matlab/Octave @code{set} function (see example below). If two @dseries objects, @var{A} and @var{B}, are passed as input arguments, the @code{plot} function will plot the variables in @var{A} against the variables in @var{B} (the number of variables in each object must be the same otherwise an error is issued). Again, if each object contains only one variable additional arguments can be passed to modify the properties of the plotted time series, otherwise the Matlab/Octave @code{set} command has to be used.
+
+@exampleshead
+
+@noindent Define a @dseries object with two variables (named by default @code{Variable_1} and @code{Variable_2}):
+
+@example
+>> ts = dseries(randn(100,2),'1950Q1');
+@end example
+
+@noindent The following command will plot the first variable in @code{ts}
+
+@example
+>> plot(ts@{'Variable_1'@},'-k','linewidth',2);
+@end example
+
+@noindent The next command will draw all the variables in @code{ts} on the same figure:
+
+@example
+>> h = plot(ts);
+@end example
+
+@noindent If one wants to modify the properties of the plotted time series (line style, colours, ...), the @code{set} function can be used (see Matlab's documentation):
+
+@example
+>> set(h(1),'-k','linewidth',2);
+>> set(h(2),'--r');
+@end example
+
+@noindent The follwing command will plot @code{Variable_1} against @code{exp(Variable_1)}:
+
+@example
+>> plot(ts@{'Variable_1'@},ts@{'Variable_1'@}.exp(),'ok');
+@end example
+
+@noindent Again, the properties can also be modified using the returned plot handle and the @code{set} function:
+
+@example
+>> h = plot(ts, ts.exp());
+>> set(h(1),'ok');
+>> set(h(2),'+r');
+@end example
+
+@end deftypefn
+
+@sp 1
+
 @deftypefn{dseries} {@var{C} =} plus (@var{A}, @var{B})
 
 Overloads the @code{plus} (@code{+}) operator for @dseries objects, element by element addition. If both @var{A} and @var{B} are @dseries objects, they do not need to be defined over the same time ranges. If @var{A} and @var{B} are @dseries object with @math{T_A} and @math{T_B} observations and @math{N_A} and @math{N_B} variables, then  @math{N_A} must be equal to @math{N_B} or @math{1} and  @math{N_B} must be equal to @math{N_A} or @math{1}. If @math{T_A=T_B}, @code{isequal(A.init,B.init)} returns 1 and @math{N_A=N_B}, then the @code{minus} operator will compute for each couple  @math{(t,n)}, with @math{1<=t<=T_A} and @math{1<=n<=N_A}, @code{C.data(t,n)=A.data(t,n)+B.data(t,n)}. If @math{N_B} is equal to @math{1} and @math{N_A>1}, the smaller @dseries object (@var{B}) is ``broadcast'' across the larger @dseries (@var{A}) so that they have compatible shapes, the @code{plus} operator will add the variable defined in @var{B} to each variable in @var{A}. If @var{B} is a double scalar, then the method @code{add} will add @var{B} to all the observations/variables in @var{A}.
