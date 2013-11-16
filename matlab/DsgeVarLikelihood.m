@@ -35,7 +35,6 @@ function [fval,grad,hess,exit_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihoo
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global objective_function_penalty_base
-% Declaration of the persistent variables.
 persistent dsge_prior_weight_idx
 
 grad=[];
@@ -53,11 +52,7 @@ if isempty(dsge_prior_weight_idx)
 end
 
 % Get the number of estimated (dsge) parameters.
-ns = EstimatedParameters.nvx + ...
-     EstimatedParameters.nvn + ...
-     EstimatedParameters.ncx + ...
-     EstimatedParameters.ncn;
-nx = ns + EstimatedParameters.np;
+nx = EstimatedParameters.nvx + EstimatedParameters.np;
 
 % Get the number of observed variables in the VAR model.
 NumberOfObservedVariables = DynareDataset.info.nvobs;
@@ -107,20 +102,6 @@ for i=1:EstimatedParameters.nvx
 end
 offset = EstimatedParameters.nvx;
 
-% Check that the user does not estimate measurment errors.
-% TODO Check that the user does not declare non estimated measurement errors...
-if EstimatedParameters.nvn
-    disp('DsgeVarLikelihood :: Measurement errors are not implemented!')
-    return
-end
-
-% Check that the user does not estimate off diagonal elements in the covariance matrix of the structural innovation.
-% TODO Check that Q is a diagonal matrix...
-if EstimatedParameters.ncx
-    disp('DsgeVarLikelihood :: Correlated structural innovations are not implemented!')
-    return
-end
-
 % Update Model.params and Model.Sigma_e.
 Model.params(EstimatedParameters.param_vals(:,1)) = xparam1(offset+1:end);
 Model.Sigma_e = Q;
@@ -169,10 +150,6 @@ else
     constant = zeros(1,NumberOfObservedVariables);
 end
 
-% Dsge-VAR with deterministic trends is not implemented
-if BayesInfo.with_trend == 1
-    error('DsgeVarLikelihood :: Linear trend is not yet implemented!')
-end
 
 %------------------------------------------------------------------------------
 % 3. theoretical moments (second order)
@@ -224,7 +201,7 @@ if ~isinf(dsge_prior_weight)% Evaluation of the likelihood of the dsge-var model
     tmp1 = dsge_prior_weight*DynareDataset.info.ntobs*GYX + mYX;
     tmp2 = inv(dsge_prior_weight*DynareDataset.info.ntobs*GXX+mXX);
     SIGMAu = tmp0 - tmp1*tmp2*tmp1'; clear('tmp0');
-    [SIGMAu_is_positive_definite, penalty] = ispd(SIGMAu)
+    [SIGMAu_is_positive_definite, penalty] = ispd(SIGMAu);
     if ~SIGMAu_is_positive_definite
         fval = objective_function_penalty_base + penalty;
         info = 52;

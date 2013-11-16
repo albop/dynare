@@ -80,6 +80,10 @@ end
 
 [dataset_,xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
+if options_.dsge_var
+    check_dsge_var_model(M_, estim_params_, bayestopt_);
+end
+
 %check for calibrated covariances before updating parameters
 if ~isempty(estim_params_)
     estim_params_=check_for_calibrated_covariances(xparam1,estim_params_,M_);
