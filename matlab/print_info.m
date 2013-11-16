@@ -107,7 +107,7 @@ if ~noprint
       case 51
         error('You are estimating a DSGE-VAR model, but the value of the dsge prior weight is too low!')
       case 52 %dsge_var_likelihood
-        error('');
+        error('You are estimating a DSGE-VAR model, but the implied covariance matrix of the VAR''s innovations is not positive definite!');
       case 61 %Discretionary policy
         error(['Discretionary policy: maximum number of iterations has been reached. Procedure failed. ']);
       case 62
