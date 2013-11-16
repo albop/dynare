@@ -44,8 +44,8 @@ verbose = 2;
 number_of_variables = length(x);
 
 % get options.
-if isempty(simplex.maxfcall)
-    max_func_calls = simplex.maxfcallfactor*number_of_variables
+if isempty(options.maxfcall)
+    max_func_calls = options.maxfcallfactor*number_of_variables
 end
 
 % Set tolerance parameter.
