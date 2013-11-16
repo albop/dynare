@@ -1,4 +1,4 @@
-function [fval,grad,hess,exit_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+function [fval,grad,hess,exit_flag,info,PHI,SIGMAu,iXX,prior] = dsge_var_likelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
 % Evaluates the posterior kernel of the bvar-dsge model.
 %
 % INPUTS
