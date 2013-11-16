@@ -73,6 +73,7 @@ varobs pie r rw y;
 
 options_.gradient_method = 3;
 
+//$ The option dsge_var=.8 triggers the estimation of a DSGE-VAR model, with a calibrated dsge prior weight equal to .8.
 //$ The option bayesian_irf triggers the computation of the DSGE-VAR and DSGE posterior distribution of the IRFs.
 //$ The Dashed lines are the first, fifth (ie the median) and ninth posterior deciles of the DSGE-VAR's IRFs, the bold dark curve is the
 //$ posterior median of the DSGE's IRfs and the shaded surface covers the space between the first and ninth posterior deciles of the DSGE's IRFs.

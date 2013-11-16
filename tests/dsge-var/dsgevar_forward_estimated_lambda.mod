@@ -4,7 +4,7 @@ var a g mc mrs n winf pie r rw y;
 //$ Declaration of the exogenous variables of the DSGE model.
 varexo e_a e_g e_lam e_ms;
 
-//$ Declaration of the deep parameters and of dsge_prior_weight
+//$ Declaration of the deep parameters
 parameters invsig delta gam rho gampie gamy rhoa rhog bet
 	   thetabig omega eps ;
 
@@ -46,6 +46,8 @@ end;
 
 
 //$ Declaration of the prior beliefs about the deep parameters and the weight of the DSGE prior.
+//$ The declaration of the estimated parameters dsge_prior_weight triggers the estimation of a DSGE-VAR model.
+//$ Note that dsge_prior_weight is not declared as a parameter at the top of the mod file.
 estimated_params;
     stderr e_a, uniform_pdf,,,0,2;
     stderr e_g, uniform_pdf,,,0,2;
