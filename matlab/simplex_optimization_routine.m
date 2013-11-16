@@ -1,21 +1,24 @@
 function [x,fval,exitflag] = simplex_optimization_routine(objective_function,x,options,varargin)
-% Nelder-Mead like optimization routine.
-% By default, we use standard values for the reflection, the expansion, the contraction and the shrink coefficients (alpha = 1, chi = 2, psi = 1 / 2 and σ = 1 / 2).
-% See http://en.wikipedia.org/wiki/Nelder-Mead_method
+
+% Nelder-Mead like optimization routine (see http://en.wikipedia.org/wiki/Nelder-Mead_method)
 %
-% This routine uses the Nelder-Mead simplex (direct search) method.
-% As chaining could reveal interesting to reach the solution neighborhood,
-% the function automatically restarts from the current solution while
-% amelioration is possible.
+% By default the standard values for the reflection, the expansion, the contraction
+% and the shrink coefficients are used (alpha = 1, chi = 2, psi = 1 / 2 and σ = 1 / 2).
 %
-% INPUTS
-% objective_function     [string]       Name of the objective function to be minimized.
-% x                      [double]       n*1 vector, starting guess of the optimization routine.
-% options                [structure]
+% The routine automatically restarts from the current solution while amelioration is possible.
 %
-% OUTPUTS
+% INPUTS 
+%  o objective_function     [string]                  Name of the objective function to be minimized.
+%  o x                      [double]                  n*1 vector, starting guess of the optimization routine.
+%  o options                [structure]               Options of this implementation of the simplex algorithm.
+%  o varargin               [cell of structures]      Structures to be passed to the objective function: dataset_,
+%                                                     options_, M_, estim_params_, bayestopt_, and oo_.
 %
-%
+% OUTPUTS 
+%  o x                      [double]                  n*1 vector, estimate of the optimal inputs.
+%  o fval                   [double]                  scalar, value of the objective at the optimum.
+%  o exitflag               [integer]                 scalar equal to 0 or 1 (0 if the algorithm did not converge to
+%                                                     a minimum).
 
 % Copyright (C) 2010-2013 Dynare Team
 %
