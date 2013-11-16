@@ -33,7 +33,6 @@ function [x,fval,exitflag] = simplex_optimization_routine(objective_function,x,o
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-global bayestopt_
 
 % Set verbose mode
 verbose = 2;
@@ -185,7 +184,7 @@ else
         disp(['Current parameter values: '])
         fprintf(1,'%s: \t\t\t %s \t\t\t %s \t\t\t %s \t\t\t %s \t\t\t %s \n','Names','Best point', 'Worst point', 'Mean values', 'Min values', 'Max values');
         for i=1:number_of_variables
-            fprintf(1,'%s: \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \n',bayestopt_.name{i},v(i,1), v(i,end), mean(v(i,:),2), min(v(i,:),[],2), max(v(i,:),[],2));
+            fprintf(1,'%s: \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \n',varargin{5}.name{i},v(i,1), v(i,end), mean(v(i,:),2), min(v(i,:),[],2), max(v(i,:),[],2));
         end
         skipline()
     end
@@ -397,7 +396,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
         disp(['Current parameter values: '])
         fprintf(1,'%s: \t\t\t %s \t\t\t %s \t\t\t %s \t\t\t %s \t\t\t %s \n','Names','Best point', 'Worst point', 'Mean values', 'Min values', 'Max values');
         for i=1:number_of_variables
-            fprintf(1,'%s: \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \n',bayestopt_.name{i}, v(i,1), v(i,end), mean(v(i,:),2), min(v(i,:),[],2), max(v(i,:),[],2));
+            fprintf(1,'%s: \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \n',varargin{5}.name{i}, v(i,1), v(i,end), mean(v(i,:),2), min(v(i,:),[],2), max(v(i,:),[],2));
         end
         skipline()
     end
@@ -423,7 +422,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
                 disp(['values for the control variables. '])
                 disp(['New value of delta (size of the new simplex) is: '])
                 for i=1:number_of_variables
-                    fprintf(1,'%s: \t\t\t %+8.6f \n',bayestopt_.name{i}, delta(i));
+                    fprintf(1,'%s: \t\t\t %+8.6f \n',varargin{5}.name{i}, delta(i));
                 end
             end
             % Reset counters
@@ -470,7 +469,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
                 disp(['values for the control variables. '])
                 disp(['New value of delta (size of the new simplex) is: '])
                 for i=1:number_of_variables
-                    fprintf(1,'%s: \t\t\t %+8.6f \n',bayestopt_.name{i}, delta(i));
+                    fprintf(1,'%s: \t\t\t %+8.6f \n',varargin{5}.name{i}, delta(i));
                 end
             end
             % Reset counters
