@@ -187,9 +187,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
     record.MhDraws(1,2) = AnticipatedNumberOfFiles;
     record.MhDraws(1,3) = AnticipatedNumberOfLinesInTheLastFile;
     record.AcceptationRates = zeros(1,nblck);
-    % separate initializaton for each chain
-    JSUM = 0;
-    for j=1:nblck,
+    for j=1:nblck
         % we set a different seed for the random generator for each block
         % then we record the corresponding random generator state (vector)
         set_dynare_seed(options_.DynareRandomStreams.seed+j);
