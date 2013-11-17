@@ -4752,22 +4752,22 @@ distribution of IRFs. The length of the IRFs are controlled by the
 @code{irf} option. Results are stored in @code{oo_.PosteriorIRF.dsge}
 (see below for a description of this variable)
 
-@item dsge_var
-Triggers the estimation of a DSGE-VAR model, where the weight of the
-DSGE prior of the VAR model will be estimated.  The prior on the
-weight of the DSGE prior, @code{dsge_prior_weight}, must be defined in
-the @code{estimated_params} section.  NB: The previous method of
-declaring @code{dsge_prior_weight} as a parameter and then placing it
-in @code{estimated_params} is now deprecated and will be removed in a
-future release of Dynare.
-
 @item dsge_var = @var{DOUBLE}
-@anchor{dsge_var}
-Triggers the estimation of a DSGE-VAR model, where the weight of the
-DSGE prior of the VAR model is calibrated to the value passed. NB: The
-previous method of declaring @code{dsge_prior_weight} as a parameter
-and then calibrating it is now deprecated and will be removed in a
-future release of Dynare.
+@anchor{dsge_var} Triggers the estimation of a DSGE-VAR model, where the
+weight of  the DSGE prior  of the VAR model  is calibrated to  the value
+passed (see @cite{Del  Negro and Schorfheide (2004)}). NB:  The previous method
+of   declaring  @code{dsge_prior_weight}   as  a   parameter  and   then
+calibrating it is now deprecated and will be removed in a future release
+of Dynare.
+
+@item dsge_var
+Triggers the  estimation of a  DSGE-VAR model,  where the weight  of the
+DSGE prior of  the VAR model will  be estimated (as in  @cite{Adjemian et alii
+(2008)}).    The   prior    on   the   weight   of    the   DSGE   prior,
+@code{dsge_prior_weight}, must be defined in the @code{estimated_params}
+section.  NB: The previous  method of declaring @code{dsge_prior_weight}
+as a  parameter and  then placing it  in @code{estimated_params}  is now
+deprecated and will be removed in a future release of Dynare.
 
 @item dsge_varlag = @var{INTEGER}
 @anchor{dsge_varlag} The number of lags used to estimate a DSGE-VAR
@@ -10576,7 +10576,11 @@ internals --test particle/local_state_iteration
 @itemize
 
 @item
-Milton Abramowitz, Irene A. Stegun (1964): ``Handbook of Mathematical Functions'', Courier Dover Publications
+Abramowitz, Milton and Irene A. Stegun (1964): ``Handbook of Mathematical Functions'', Courier Dover Publications
+
+@item 
+Adjemian, Stéphane, Matthieu Darracq Parriès and Stéphane Moyen (2008): ``Towards a monetary policy evaluation framework'',
+@i{European Central Bank Working Paper}, 942
 
 @item
 Aguiar, Mark and Gopinath, Gita (2004): ``Emerging Market Business
@@ -10623,6 +10627,10 @@ Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
 ``Introducing financial frictions and unemployment into a small open
 economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
 1999--2041
+
+@item
+Del Negro, Marco and Franck Schorfheide (2004): ``Priors from General Equilibrium Models for VARS'',
+@i{International Economic Review}, 45(2), 643--673
 
 @item
 Dennis, Richard (2007): ``Optimal Policy In Rational Expectations
