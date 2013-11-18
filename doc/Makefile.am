@@ -24,7 +24,7 @@ endif
 
 pdf-local: $(PDF_TARGETS)
 
-EXTRA_DIST = guide.tex guide.bbl bibmad.sty bvar-a-la-sims.tex dr.tex dr.bib
+EXTRA_DIST = guide.tex guide.bbl bibmad.sty bvar-a-la-sims.tex dr.tex dr.bib dynare.plots
 
 guide.pdf: guide.tex guide.bbl bibmad.sty
 	$(PDFLATEX) guide
