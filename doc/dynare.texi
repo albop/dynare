@@ -1070,7 +1070,7 @@ This is the long version of the variable name. Its value is stored in
 @example
 var c gnp q1 q2;
 var(deflator=A) i b;
-var c $C$ [long_name=`Consumption'];
+var c $C$ (long_name=`Consumption');
 @end example
 
 @end deffn
