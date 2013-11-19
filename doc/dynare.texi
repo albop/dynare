@@ -4286,16 +4286,16 @@ The following information will be displayed by the command:
 results from posterior optimization (also for maximum likelihood)
 
 @item
-marginal log density
+marginal log data density
 
 @item
-mean and shortest confidence interval from posterior simulation
+posterior mean and highest posterior density interval (shortest credible set) from posterior simulation
 
 @item
 Metropolis-Hastings convergence graphs that still need to be documented
 
 @item
-graphs with prior, posterior and mode
+graphs with prior, posterior, and mode
 
 @item
 graphs of smoothed shocks, smoothed observation errors, smoothed and historical variables
