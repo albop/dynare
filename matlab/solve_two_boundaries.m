@@ -32,6 +32,8 @@ function y = solve_two_boundaries(fname, y, x, params, steady_state, y_index, nz
 %                                            - 2 GMRES
 %                                            - 3 BicGStab
 %                                            - 4 Optimal path length
+%   M                   [structure]     Model description
+%   oo                  [structure]     Results
 %
 % OUTPUTS
 %   y                   [matrix]        All endogenous variables of the model      
