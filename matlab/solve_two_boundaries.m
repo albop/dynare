@@ -37,7 +37,8 @@ function [y, oo]= solve_two_boundaries(fname, y, x, params, steady_state, y_inde
 %
 % OUTPUTS
 %   y                   [matrix]        All endogenous variables of the model      
-%  
+%   oo                  [structure]     Results
+%
 % ALGORITHM
 %   Newton with LU or GMRES or BicGstab
 %    
