@@ -33,17 +33,22 @@ function CutSample(M_, options_, estim_params_)
 
 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
 
-DirectoryName = CheckPath('metropolis',M_.dname);
-file = dir([ DirectoryName ,filesep,  M_.fname '_mh_history.mat']);
-files = dir([ DirectoryName ,filesep, M_.fname '_mh*.mat' ]);
-if ~length(files)
-    error('MH:: FAILURE! there is no MH file to load here!')
+% Get the path to the metropolis files.
+MetropolisFolder = CheckPath('metropolis',M_.dname);
+
+% Get the (base) name of the mod file.
+ModelName = M_.fname;
+
+% Load the last mh-history file.
+load_last_mh_history_file(MetropolisFolder, M_.fname);
+
+% Get the list of files where the mcmc draw are saved.
+mh_files = dir([ MetropolisFolder ,filesep, M_.fname '_mh*.mat' ]);
+
+if ~length(mh_files)
+    error('Estimation::mcmc: I can''t find MH file to load here!')
 end
-if ~length(file)
-    error('MH:: FAILURE! there is no MH-history file!')
-else
-    load([ DirectoryName '/'  M_.fname '_mh_history.mat'])
-end
+
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
@@ -61,10 +66,13 @@ elseif TotalNumberOfMhFiles == 1
 elseif TotalNumberOfMhFiles == 2 && FirstMhFile > 1
     record.KeepedDraws.Distribution = [MAX_nruns-FirstLine+1 ; record.MhDraws(end,3)];  
 end
-save([DirectoryName '/' M_.fname '_mh_history.mat'],'record');
-fprintf('MH: Total number of MH draws: %d.\n',TotalNumberOfMhDraws);
-fprintf('MH: Total number of generated MH files: %d.\n',TotalNumberOfMhFiles);
-fprintf('MH: I''ll use mh-files %d to %d.\n',FirstMhFile,TotalNumberOfMhFiles);
-fprintf('MH: In MH-file number %d I''ll start at line %d.\n',FirstMhFile,FirstLine);
-fprintf('MH: Finally I keep %d draws.\n',TotalNumberOfMhDraws-FirstDraw);
+
+% Save updated mh-history file.
+update_last_mh_history_file(MetropolisFolder, ModelName, record);
+
+fprintf('Estimation::mcmc: Total number of MH draws: %d.\n',TotalNumberOfMhDraws);
+fprintf('Estimation::mcmc: Total number of generated MH files: %d.\n',TotalNumberOfMhFiles);
+fprintf('Estimation::mcmc: I''ll use mh-files %d to %d.\n',FirstMhFile,TotalNumberOfMhFiles);
+fprintf('Estimation::mcmc: In MH-file number %d I''ll start at line %d.\n',FirstMhFile,FirstLine);
+fprintf('Estimation::mcmc: Finally I keep %d draws.\n',TotalNumberOfMhDraws-FirstDraw);
 skipline()

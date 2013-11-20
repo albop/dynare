@@ -54,23 +54,22 @@ np   = estim_params_.np ;
 npar = nvx+nvn+ncx+ncn+np;
 offset = npar-np;
 naK = length(options_.filter_step_ahead);
-%%
+
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
 endo_nbr=M_.endo_nbr;
 exo_nbr=M_.exo_nbr;
 nvobs     = size(options_.varobs,1);
 iendo = 1:endo_nbr;
 horizon = options_.forecast;
-% moments_varendo = options_.moments_varendo;
 filtered_vars = options_.filtered_vars;
 if horizon
     i_last_obs = gend+(1-M_.maximum_endo_lag:0);
 end
 maxlag = M_.maximum_endo_lag;
-%%
+
 if strcmpi(type,'posterior')
     DirectoryName = CheckPath('metropolis',M_.dname);
-    load([ DirectoryName '/'  M_.fname '_mh_history'])
+    load_last_mh_history_file(DirectoryName, M_.fname);
     FirstMhFile = record.KeepedDraws.FirstMhFile;
     FirstLine = record.KeepedDraws.FirstLine;
     TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles;
@@ -110,15 +109,17 @@ elseif strcmpi(type,'prior')
         B = 1200;
     end
 end
-%%
+
 MAX_nruns = min(B,ceil(MaxNumberOfBytes/(npar+2)/8));
 MAX_nsmoo = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8));
 MAX_ninno = min(B,ceil(MaxNumberOfBytes/(exo_nbr*gend)/8));
 MAX_nerro = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8));
+
 if naK
     MAX_naK   = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)* ...
                                              length(options_.filter_step_ahead)*gend)/8));
 end
+
 if horizon
     MAX_nforc1 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/8));
     MAX_nforc2 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/ ...
@@ -127,7 +128,7 @@ if horizon
     
 end
 MAX_momentsno = min(B,ceil(MaxNumberOfBytes/(get_moments_size(options_)*8)));
-%%
+
 varlist = options_.varlist;
 if isempty(varlist)
     varlist = M_.endo_names(1:M_.orig_endo_nbr, :);
@@ -166,9 +167,6 @@ if options_.forecast
     stock_forcst_point = zeros(endo_nbr,horizon+maxlag,MAX_nforc2);
     run_smoother = 1;
 end
-%if moments_varendo
-%    stock_moments = cell(MAX_momentsno,1);
-%end
 
 
 
@@ -247,16 +245,13 @@ else
             nfiles = ceil(nBlockPerCPU(j)/MAX_nforc2);
             ifil(7,j+1) =ifil(7,j)+nfiles;
         end
-        %       nfiles = ceil(nBlockPerCPU(j)/MAX_momentsno);
-        %       ifil(8,j+1) =ifil(8,j)+nfiles;
     end
     localVars.ifil = ifil;
     globalVars = struct('M_',M_, ...
                         'options_', options_, ...
                         'bayestopt_', bayestopt_, ...
                         'estim_params_', estim_params_, ...
-                        'oo_', oo_);
-    
+                        'oo_', oo_);    
     % which files have to be copied to run remotely
     NamFileInput(1,:) = {'',[M_.fname '_static.m']};
     NamFileInput(2,:) = {'',[M_.fname '_dynamic.m']};
@@ -268,7 +263,7 @@ else
 end
 ifil = fout(end).ifil;
 
-
+% ??????????
 stock_gend=gend;
 stock_data=Y;
 save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');

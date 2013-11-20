@@ -95,7 +95,7 @@ end
 delete([MhDirectoryName filesep M_.fname '_IRF_DSGEs*.mat']);
 delete([MhDirectoryName filesep M_.fname '_IRF_BVARDSGEs*.mat']);
 if strcmpi(type,'posterior')
-    load([ MhDirectoryName filesep  M_.fname '_mh_history.mat'])
+    load_last_mh_history_file(MhDirectoryName, M_.fname);
     TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
     NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 elseif strcmpi(type,'gsa')
@@ -288,7 +288,7 @@ if options_.TeX
     end
 end
 
-fprintf('MH: Posterior (dsge) IRFs...\n');
+fprintf('Estimation::mcmc: Posterior (dsge) IRFs...\n');
 tit(M_.exo_names_orig_ord,:) = M_.exo_names;
 kdx = 0;
 
@@ -328,7 +328,7 @@ if MAX_nirfs_dsgevar
     VarIRFdsgevar = zeros(options_.irf,nvar,M_.exo_nbr);
     DistribIRFdsgevar = zeros(options_.irf,9,nvar,M_.exo_nbr);
     HPDIRFdsgevar = zeros(options_.irf,2,nvar,M_.exo_nbr);    
-    fprintf('MH: Posterior (bvar-dsge) IRFs...\n');
+    fprintf('Estimation::mcmc: Posterior (bvar-dsge) IRFs...\n');
     tit(M_.exo_names_orig_ord,:) = M_.exo_names;
     kdx = 0;
     for file = 1:NumberOfIRFfiles_dsgevar
@@ -358,9 +358,9 @@ if MAX_nirfs_dsgevar
         end
     end
 end
-%%
-%%      Finally I build the plots.
-%%
+%
+%      Finally I build the plots.
+%
 
 
 % Second block of code executed in parallel, with the exception of file
@@ -390,7 +390,7 @@ if options_.dsge_var
     localVars.MeanIRFdsgevar = MeanIRFdsgevar;
 end    
 
-%%% The files .TeX are genereted in sequential way always!
+% The files .TeX are genereted in sequential way always!
 
 if options_.TeX
     fidTeX = fopen([DirectoryName filesep M_.fname '_BayesianIRF.TeX'],'w');
@@ -467,4 +467,4 @@ end
 % END parallel code!
 
 
-fprintf('MH: Posterior IRFs, done!\n');
+fprintf('Estimation::mcmc: Posterior IRFs, done!\n');

@@ -59,7 +59,7 @@ Median = zeros(n2,nvar);
 Std = zeros(n2,nvar);
 Distrib = zeros(9,n2,nvar);
 HPD = zeros(2,n2,nvar);
-fprintf(['MH: ' tit1 '\n']);
+fprintf(['Estimation::mcmc: ' tit1 '\n']);
 stock1 = zeros(n1,n2,B);
 k = 0;
 for file = 1:ifil
@@ -194,7 +194,7 @@ if options_.TeX,
     fclose(fidTeX);
 end
 
-fprintf(['MH: ' tit1 ', done!\n']);
+fprintf(['Estimation::mcmc: ' tit1 ', done!\n']);
 
 
 

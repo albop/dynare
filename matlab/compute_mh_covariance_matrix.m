@@ -40,10 +40,14 @@ n = estim_params_.np + ...
     estim_params_.ncx+ ...
     estim_params_.ncn+ ...
     estim_params_.nvx;
+
 nblck = options_.mh_nblck;
 
-MhDirectoryName = CheckPath('metropolis',M_.dname);
-load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
+MetropolisFolder = CheckPath('metropolis',M_.dname);
+ModelName = M_.fname;
+BaseName = [MetropolisFolder filesep ModelName];
+
+load_last_mh_history_file(MetropolisFolder, ModelName);
 
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine   = record.KeepedDraws.FirstLine;
@@ -58,8 +62,7 @@ offset = 0;
 for b=1:nblck
     first_line = FirstLine;
     for n = FirstMhFile:TotalNumberOfMhFiles
-        %for b = 1:nblck
-        load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2'); 
+        load([ BaseName '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2'); 
         [tmp,idx] = max(logpo2);
         if tmp>posterior_kernel_at_the_mode
             posterior_kernel_at_the_mode = tmp;

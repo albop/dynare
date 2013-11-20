@@ -30,7 +30,7 @@ function [xparams, logpost]=metropolis_draw(init)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global options_ estim_params_ M_
-persistent mh_nblck NumberOfDraws fname FirstLine FirstMhFile MAX_nruns
+persistent mh_nblck NumberOfDraws BaseName FirstLine FirstMhFile MAX_nruns
 
 if init
     nvx  = estim_params_.nvx;
@@ -39,9 +39,11 @@ if init
     ncn  = estim_params_.ncn;
     np   = estim_params_.np ;
     npar = nvx+nvn+ncx+ncn+np;
-    MhDirectoryName = CheckPath('metropolis',M_.dname);
-    fname = [ MhDirectoryName '/' M_.fname];
-    load([ fname '_mh_history']);
+    
+    MetropolisFolder = CheckPath('metropolis',M_.dname);
+    FileName = M_.fname;
+    BaseName = [MetropolisFolder filesep FileName];
+    load_last_mh_history_file(MetropolisFolder, FileName);
     FirstMhFile = record.KeepedDraws.FirstMhFile;
     FirstLine = record.KeepedDraws.FirstLine; 
     TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); 
@@ -65,6 +67,6 @@ else
     MhLine = DrawNumber-(MhFilNumber-FirstMhFile-1)*MAX_nruns;
 end
 
-load( [ fname '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2','logpo2');
+load( [ BaseName '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2','logpo2');
 xparams = x2(MhLine,:);
 logpost= logpo2(MhLine);

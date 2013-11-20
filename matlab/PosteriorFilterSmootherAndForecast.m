@@ -43,7 +43,7 @@ np   = estim_params_.np ;
 npar = nvx+nvn+ncx+ncn+np;
 offset = npar-np;
 naK = length(options_.filter_step_ahead);
-%%
+
 MaxNumberOfPlotPerFigure = 4;% The square root must be an integer!
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
 endo_nbr=M_.endo_nbr;
@@ -54,19 +54,23 @@ iendo = 1:endo_nbr;
 i_last_obs = gend+(1-M_.maximum_endo_lag:0);
 horizon = options_.forecast;
 maxlag = M_.maximum_endo_lag;
-%%
+
 CheckPath('Plots/',M_.dname);
-DirectoryName = CheckPath('metropolis',M_.dname);
-load([ DirectoryName '/'  M_.fname '_mh_history.mat'])
+MetropolisFolder = CheckPath('metropolis',M_.dname);
+ModelName = M_.fname;
+BaseName = [MetropolisFolder filesep Model_name];
+
+load_last_mh_history_file(MetropolisFolder,ModelName);
+
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine;
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles;
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
-clear record;
+
 B = min(1200, round(0.25*NumberOfDraws));
 B = 200;
-%%
+
 MAX_nruns = min(B,ceil(options_.MaxNumberOfBytes/(npar+2)/8));
 MAX_nsmoo = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8));
 MAX_ninno = min(B,ceil(MaxNumberOfBytes/(exo_nbr*gend)/8));
@@ -83,7 +87,6 @@ if horizon
 
 end
 
-%%
 varlist = options_.varlist;
 if isempty(varlist)
     varlist = M_.endo_names;
@@ -133,7 +136,6 @@ if options_.forecast
 end
 
 for b=1:B
-    %deep = GetOneDraw(NumberOfDraws,FirstMhFile,LastMhFile,FirstLine,MAX_nruns,DirectoryName);
     [deep, logpo] = GetOneDraw(type);
     M_ = set_all_parameters(deep,estim_params_,M_);
     [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
@@ -170,7 +172,6 @@ for b=1:B
         yf(:,IdObs) = yf(:,IdObs)+(gend+[1-maxlag:horizon]')*trend_coeff';
         if options_.loglinear == 1
             yf = yf+repmat(log(SteadyState'),horizon+maxlag,1);
-            %      yf = exp(yf);
         else
             yf = yf+repmat(SteadyState',horizon+maxlag,1);
         end
@@ -183,7 +184,6 @@ for b=1:B
                                                trend_coeff',[1,1,1]);
         if options_.loglinear == 1
             yf1 = yf1 + repmat(log(SteadyState'),[horizon+maxlag,1,1]);
-            %      yf1 = exp(yf1);
         else
             yf1 = yf1 + repmat(SteadyState',[horizon+maxlag,1,1]);
         end
@@ -203,71 +203,73 @@ for b=1:B
     if irun1 > MAX_nsmoo || b == B
         stock = stock_smooth(:,:,1:irun1-1);
         ifil1 = ifil1 + 1;
-        save([DirectoryName '/' M_.fname '_smooth' int2str(ifil1) '.mat'],'stock');
+        save([BaseName '_smooth' int2str(ifil1) '.mat'],'stock');
         irun1 = 1;
     end
 
     if nvx && (irun2 > MAX_ninno || b == B)
         stock = stock_innov(:,:,1:irun2-1);
         ifil2 = ifil2 + 1;
-        save([DirectoryName '/' M_.fname '_inno' int2str(ifil2) '.mat'],'stock');
+        save([BaseName '_inno' int2str(ifil2) '.mat'],'stock');
         irun2 = 1;
     end
 
     if nvn && (irun3 > MAX_error || b == B)
         stock = stock_error(:,:,1:irun3-1);
         ifil3 = ifil3 + 1;
-        save([DirectoryName '/' M_.fname '_error' int2str(ifil3) '.mat'],'stock');
+        save([BaseName '_error' int2str(ifil3) '.mat'],'stock');
         irun3 = 1;
     end
 
     if naK && (irun4 > MAX_naK || b == B)
         stock = stock_filter(:,:,:,1:irun4-1);
         ifil4 = ifil4 + 1;
-        save([DirectoryName '/' M_.fname '_filter' int2str(ifil4) '.mat'],'stock');
+        save([BaseName '_filter' int2str(ifil4) '.mat'],'stock');
         irun4 = 1;
     end
 
     if irun5 > MAX_nruns || b == B
         stock = stock_param(1:irun5-1,:);
         ifil5 = ifil5 + 1;
-        save([DirectoryName '/' M_.fname '_param' int2str(ifil5) '.mat'],'stock','stock_logpo','stock_ys');
+        save([BaseName '_param' int2str(ifil5) '.mat'],'stock','stock_logpo','stock_ys');
         irun5 = 1;
     end
 
     if horizon && (irun6 > MAX_nforc1 || b == B)
         stock = stock_forcst_mean(:,:,1:irun6-1);
         ifil6 = ifil6 + 1;
-        save([DirectoryName '/' M_.fname '_forc_mean' int2str(ifil6) '.mat'],'stock');
+        save([BaseName '_forc_mean' int2str(ifil6) '.mat'],'stock');
         irun6 = 1;
     end
 
     if horizon && (irun7 > MAX_nforc2 ||  b == B)
         stock = stock_forcst_total(:,:,1:irun7-1);
         ifil7 = ifil7 + 1;
-        save([DirectoryName '/' M_.fname '_forc_total' int2str(ifil7) '.mat'],'stock');
+        save([BaseName '_forc_total' int2str(ifil7) '.mat'],'stock');
         irun7 = 1;
     end
 
     waitbar(b/B,h);
+
 end
 close(h)
 
+% ??????
 stock_gend=gend;
 stock_data=Y;
-save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
+save([BaseName '_data.mat'],'stock_gend','stock_data');
 
 if options_.smoother
     pm3(endo_nbr,gend,ifil1,B,'Smoothed variables',...
         M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
-        'names2','smooth',[M_.fname '/metropolis'],'_smooth')
+        'names2','smooth',MetropolisFolder,'_smooth')
 end
 
 if options_.forecast
     pm3(endo_nbr,horizon+maxlag,ifil6,B,'Forecasted variables (mean)',...
         M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
-        'names2','smooth',[M_.fname '/metropolis'],'_forc_mean')
+        'names2','smooth',MetropolisFolder,'_forc_mean')
     pm3(endo_nbr,horizon+maxlag,ifil6,B,'Forecasted variables (total)',...
         M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
-        'names2','smooth',[M_.fname '/metropolis'],'_forc_total')
+        'names2','smooth',MetropolisFolder,'_forc_total')
 end

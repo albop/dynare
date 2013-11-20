@@ -62,10 +62,12 @@ switch nargin
     error(['selec_posterior_draws:: Unexpected number of input arguments!'])
 end
 
+MetropolisFolder = CheckPath('metropolis',M_.dname);
+ModelName = M_.fname;
+BaseName = [MetropolisFolder filesep ModelName];
+
 % Get informations about the mcmc:
-MhDirectoryName = CheckPath('metropolis',M_.dname);
-fname = [ MhDirectoryName '/' M_.fname];
-load([ fname '_mh_history.mat']);
+load_last_mh_history_file(MetropolisFolder, ModelName);
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine;
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
@@ -106,7 +108,7 @@ if info
             mhfile = SampleAddress(i,3);
             mhblck = SampleAddress(i,2);
             if (mhfile ~= old_mhfile) || (mhblck ~= old_mhblck)
-                load([fname '_mh' num2str(mhfile) '_blck' num2str(mhblck) '.mat'],'x2')
+                load([BaseName '_mh' num2str(mhfile) '_blck' num2str(mhblck) '.mat'],'x2')
             end
             pdraws(i,1) = {x2(SampleAddress(i,4),:)};
             if info-1
@@ -118,7 +120,7 @@ if info
             old_mhblck = mhblck;
         end
         clear('x2')
-        save([fname '_posterior_draws1.mat'],'pdraws')
+        save([BaseName '_posterior_draws1.mat'],'pdraws')
     else% The posterior draws are saved in xx files.
         NumberOfDrawsPerFile = fix(MAX_mega_bytes/drawsize);
         NumberOfFiles = ceil(SampleSize*drawsize/MAX_mega_bytes);
@@ -133,7 +135,7 @@ if info
             mhfile = SampleAddress(i,3);
             mhblck = SampleAddress(i,2);
             if (mhfile ~= old_mhfile) || (mhblck ~= old_mhblck)
-                load([fname '_mh' num2str(mhfile) '_blck' num2str(mhblck) '.mat'],'x2')
+                load([BaseName '_mh' num2str(mhfile) '_blck' num2str(mhblck) '.mat'],'x2')
             end
             pdraws(linee,1) = {x2(SampleAddress(i,4),:)};
             if info-1
@@ -145,7 +147,7 @@ if info
             old_mhblck = mhblck;
             if fnum < NumberOfFiles && linee == NumberOfDrawsPerFile
                 linee = 0;
-                save([fname '_posterior_draws' num2str(fnum) '.mat'],'pdraws')
+                save([BaseName '_posterior_draws' num2str(fnum) '.mat'],'pdraws')
                 fnum = fnum+1;
                 if fnum < NumberOfFiles
                     pdraws = cell(NumberOfDrawsPerFile,info);
@@ -154,6 +156,6 @@ if info
                 end
             end
         end
-        save([fname '_posterior_draws' num2str(fnum) '.mat'],'pdraws')
+        save([BaseName '_posterior_draws' num2str(fnum) '.mat'],'pdraws')
     end
 end

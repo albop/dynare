@@ -169,5 +169,5 @@ end
 error('AMH scale tuning: tuning didn''t converge')
 
 function y = total_draws(M_)
-load([M_.fname '/metropolis/' M_.fname '_mh_history'])
+load_last_mh_history_file([M_.dname filesep 'metropolis'],M_.fname);
 y = sum(record.MhDraws(:,1));
