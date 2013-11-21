@@ -39,6 +39,20 @@ BaseName = [BaseName '_mh_history_'];
 % ... And read the last one.
 mh_history_info = load([BaseName num2str(length(mh_history_files)-1) '.mat']);
 
+% Solve version issues.
+if mh_history_info.version<2
+    mh_history_info.record.LastLogPost = mh_history_info.record.LastLogLiK;
+    mh_history_info.record.LastSeeds = mh_history_info.record.Seeds;
+    mh_history_info.record.InitialSeeds = NaN; % This information is forever lost...
+    mh_history_info.record = rmfield(mh_history_info.record,'LastLogLiK');
+    mh_history_info.record = rmfield(mh_history_info.record,'Seeds');
+    mh_history_info.version = 2;
+    record = mh_history_info.record;
+    version = mh_history_info.record;
+    save([BaseName '_mh_history_0.mat'],'record'); clear record;
+    save([BaseName '_mh_history_0.mat'],'version','-append'); clear version;
+end
+
 if isequal(nargout,0)
     assignin('caller', 'record', mh_history_info.record);
 else
