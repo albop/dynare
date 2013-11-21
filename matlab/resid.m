@@ -52,7 +52,7 @@ M_.Sigma_e = zeros(size(Sigma_e));
 
 info = 0;
 if options_.steadystate_flag
-    [oo_.steady_state,M.params,info] = ...
+    [oo_.steady_state,M_.params,info] = ...
         evaluate_steady_state(oo_.steady_state,M_,options_,oo_,0);
 end
 
