@@ -25,12 +25,9 @@ end
 
 if iscell(name)
     nn = length(name);
+    tex = cell(nn,1);
 else
     nn = 1;
-end
-
-if iscell(name)
-    tex = cell(nn,1);
 end
 
 for i=1:nn
