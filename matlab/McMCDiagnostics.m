@@ -47,13 +47,30 @@ npar = npar + estim_params_.np ;
 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 
 load_last_mh_history_file(MetropolisFolder, ModelName);
+NumberOfMcFilesPerBlock = record.LastFileNumber;
 
-NumberOfMcFilesPerBlock = size(dir([MetropolisFolder ,filesep, ModelName '_mh*_blck1.mat']),1);
+% Check that the declared number of blocks is consistent with informations saved in mh-history files.
+if ~isequal(nblck,record.Nblck)
+    disp(['Estimation::mcmc::diagnostics: The number of MCMC chains you declared (' num2str(nblck) ') is inconsistent with the information available in the mh-history files (' num2str(record.Nblck) ' chains)!'])
+    disp(['                               I reset the number of MCMC chains to ' num2str(record.Nblck) '.'])
+    nblck = record.Nblck;
+end
 
-% check if all previous files are there for block 1
-check_presence_consecutive_MC_files(MetropolisFolder,ModelName,1)
+% check if all the mh files are available.
+issue_an_error_message = 0;
+for b = 1:nblck
+    nfiles = length(dir([MetropolisFolder ,filesep, ModelName '_mh*_blck' num2str(b) '.mat']));
+    if ~isequal(NumberOfMcFilesPerBlock,nfiles)
+        issue_an_error_message = 1;
+        disp(['Estimation::mcmc::diagnostics: The number of MCMC files in chain ' num2str(b) ' is ' num2str(nfiles) ' while the mh-history files indicate that we should have ' num2str(NumberOfMcFilesPerBlock) ' MCMC files per chain!'])
+    end
+end
+if issue_an_error_message
+    error('Estimation::mcmc::diagnostics: I cannot proceed because some MCMC files are missing. Check your MCMC files...')
+end
 
-if nblck == 1 % Brooks and Gelman tests need more than one block 
+
+if nblck == 1 % Brooks and Gelman tests need more than one block
     convergence_diagnostics_geweke=zeros(npar,4+2*length(options_.convergence.geweke.taper_steps));
     if any(options_.convergence.geweke.geweke_interval<0) || any(options_.convergence.geweke.geweke_interval>1) || length(any(options_.convergence.geweke.geweke_interval<0))~=2 ...
         || (options_.convergence.geweke.geweke_interval(2)-options_.convergence.geweke.geweke_interval(1)<0)
@@ -104,17 +121,6 @@ if nblck == 1 % Brooks and Gelman tests need more than one block
     return;
 end
 
-for blck = 2:nblck
-    tmp = size(dir([MetropolisFolder ,filesep, ModelName '_mh*_blck' int2str(blck) '.mat']),1);
-    if tmp~=NumberOfMcFilesPerBlock
-        disp(['McMCDiagnostics:: The number of mh files in chain ' int2str(blck) ' is ' int2str(tmp) ' while'])
-        disp(['                  the number of mh files in chain 1 is ' int2str(mcfiles) '!'])
-        error('The number of mh files has to be constant across chains!')
-    end
-    % check if all previous files are there for block blck
-    check_presence_consecutive_MC_files(MetropolisFolder,ModelName,blck)
-end
-
 PastDraws = sum(record.MhDraws,1);
 LastFileNumber = PastDraws(2);
 LastLineNumber = record.MhDraws(end,3);
@@ -130,7 +136,7 @@ tmp = zeros(NumberOfDraws*nblck,3);
 UDIAG = zeros(NumberOfLines,6,npar);
 
 if NumberOfDraws < Origin
-    disp('MCMC Diagnostics :: The number of simulations is to small to compute the MCMC convergence diagnostics.')
+    disp('Estimation::mcmc::diagnostics: The number of simulations is too small to compute the MCMC convergence diagnostics.')
     return
 end
 
@@ -141,7 +147,7 @@ if TeX
     fprintf(fidTeX,' \n');
 end
 
-disp('MCMC Diagnostics: Univariate convergence diagnostic, Brooks and Gelman (1998):')
+disp('Estimation::mcmc::diagnostics: Univariate convergence diagnostic, Brooks and Gelman (1998):')
 
 % The mandatory variables for local/remote parallel
 % computing are stored in localVars struct.
@@ -324,7 +330,6 @@ MDIAG = zeros(NumberOfLines,6);
 for b = 1:nblck
     startline = 0;
     for n = 1:NumberOfMcFilesPerBlock
-        %load([MetropolisFolder '/' mcfiles(n,1,b).name],'logpo2');
         load([MetropolisFolder '/' ModelName '_mh',int2str(n),'_blck' int2str(b) '.mat'],'logpo2');
         nlogpo2 = size(logpo2,1);
         tmp((b-1)*NumberOfDraws+startline+(1:nlogpo2),1) = logpo2;
@@ -410,16 +415,3 @@ if TeX
     fprintf(fidTeX,'% End Of TeX file.');
     fclose(fidTeX);
 end
-
-function check_presence_consecutive_MC_files(MetropolisFolder,fname,blck)
-% check if all previous files are there
-files=ls([MetropolisFolder ,filesep, fname '_mh*_blck' int2str(blck) '.mat']); %list files
-right_string=files(:,length([fname '_mh'])+1:end); %cut off left part of filename
-k = cell2mat(strfind(cellstr(right_string),['_blck' int2str(blck) '.mat'])); %find index of position after number
-file_numbers=str2num(right_string(:,1:k-1)); %get file number
-if ~isempty(file_numbers) && ...
-        sum(sort(file_numbers)-(min(file_numbers):max(file_numbers))')~=0
-    error(['There are MH draw files missing within chain ', int2str(blck)]) 
-end
-
-
