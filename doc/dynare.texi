@@ -5300,10 +5300,10 @@ where @var{FORECAST_OBJECT} is one of the following@footnote{See @ref{forecast} 
 Mean of the posterior forecast distribution
 
 @item HPDinf/HPDsup
-Upper/lower bound of the 90\% HPD interval taking into account only parameter uncertainty
+Upper/lower bound of the 90% HPD interval taking into account only parameter uncertainty
 
 @item HPDTotalinf/HPDTotalsup
-Upper/lower bound of the 90\% HPD interval taking into account both parameter and future shock uncertainty
+Upper/lower bound of the 90% HPD interval taking into account both parameter and future shock uncertainty
 
 @end table
 
