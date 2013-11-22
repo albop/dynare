@@ -140,7 +140,7 @@ switch nargin
         ts.vobs = length(varlist);
         ts.nobs = size(data,1);
         if isempty(tex)
-            ts.tex = name2tex(varlist,1);
+            ts.tex = name2tex(varlist);
         else
             ts.tex = tex;
         end
@@ -150,7 +150,7 @@ switch nargin
         ts.freq = 1;
         ts.init = dates(1,1);
         ts.name = default_name(ts.vobs);
-        ts.tex = name2tex(ts.name,1);
+        ts.tex = name2tex(ts.name);
     end
   case {2,3,4}
     a = varargin{1};
