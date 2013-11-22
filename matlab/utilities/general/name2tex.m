@@ -179,3 +179,15 @@ end
 %$
 %$ T = all(t);
 %@eof:3
+
+%@test:4
+%$ pwd
+%$ try
+%$     db = dseries('csv/dd.csv');
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:4
