@@ -37,7 +37,7 @@ function [mean,variance] = GetPosteriorMeanVariance(M,drop)
                 n = n + m;
                 continue
             elseif n < drop*NbrDraws
-                k = drop*NbrDraws - n + 1;
+                k = ceil(drop*NbrDraws - n + 1);
                 x2 = o.x2(k:end,:);
             else
                 x2 = o.x2;
