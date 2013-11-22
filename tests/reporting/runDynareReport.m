@@ -17,11 +17,11 @@ function runDynareReport(dc_a, dc_q, db_a, db_q)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-larange= dynDate('2007'):dynDate('2014');
-arange = dynDate('2012'):dynDate('2014');
-trange = dynDate('2012q2'):dynDate('2014q4');
-prange = dynDate('2007q1'):dynDate('2013q4');
-forecast_date = dynDate('2012q2');
+larange= dates('2007a'):dates('2014a');
+arange = dates('2012a'):dates('2014a');
+trange = dates('2012q2'):dates('2014q4');
+prange = dates('2007q1'):dates('2013q4');
+forecast_date = dates('2012q2');
 srange = forecast_date:prange(end);
 
 shortNames = {'US', 'EU', 'JA', 'EA6', 'LA6', 'RC6'};
@@ -40,13 +40,13 @@ rep = rep.addVspace();
 
 % Table 1
 rep = rep.addTable('title', 'Real GDP Growth', 'range', larange, ...
-                   'vlineAfter', dynDate('2011'));
+                   'vlineAfter', dates('2011y'));
 rep = AnnualTable(rep, db_a, dc_a, 'PCH_GROWTH4_', larange);
 rep = rep.addVspace('number', 2);
 
 % Table 2
 rep = rep.addTable('title', 'Potential GDP Growth', 'range', larange, ...
-                   'vlineAfter', dynDate('2011'));
+                   'vlineAfter', dates('2011y'));
 rep = AnnualTable(rep, db_a, dc_a, 'PCH_GROWTH4_BAR_', larange);
 
 
@@ -58,13 +58,13 @@ rep = rep.addVspace();
 
 % Table 1
 rep = rep.addTable('title', 'Headline CPI Inflation', 'range', larange, ...
-                   'vlineAfter', dynDate('2011'));
+                   'vlineAfter', dates('2011y'));
 rep = AnnualTable(rep, db_a, dc_a, 'PCH_PIE4_', larange);
 rep = rep.addVspace('number', 2);
 
 % Table 2
 rep = rep.addTable('title', 'Core CPI Inflation', 'range', larange, ...
-                   'vlineAfter', dynDate('2011'));
+                   'vlineAfter', dates('2011y'));
 rep = AnnualTable(rep, db_a, dc_a, 'PCH_PIEX4_', larange);
 
 
@@ -76,13 +76,13 @@ rep = rep.addVspace();
 
 % Table 1
 rep = rep.addTable('title', 'Gas Inflation', 'range', larange, ...
-                   'vlineAfter', dynDate('2011'));
+                   'vlineAfter', dates('2011y'));
 rep = AnnualTable(rep, db_a, dc_a, 'PCH_PIE4_GAS_', larange);
 rep = rep.addVspace('number', 2);
 
 % Table 2
 rep = rep.addTable('title', 'Food Inflation', 'range', larange, ...
-                   'vlineAfter', dynDate('2011'));
+                   'vlineAfter', dates('2011y'));
 rep = AnnualTable(rep, db_a, dc_a, 'PCH_PIE4_CONSFOOD_', larange);
 
 
@@ -94,13 +94,13 @@ rep = rep.addVspace();
 
 % Table 1
 rep = rep.addTable('title', 'Nominal Interest Rate', 'range', larange, ...
-                   'vlineAfter', dynDate('2011'));
+                   'vlineAfter', dates('2011y'));
 rep = AnnualTable(rep, db_a, dc_a, 'RS_', larange);
 rep = rep.addVspace('number', 2);
 
 % Table 2
 rep = rep.addTable('title', 'Output Gap', 'range', larange, ...
-                   'vlineAfter', dynDate('2011'));
+                   'vlineAfter', dates('2011y'));
 db_a = db_a.tex_rename('Y_WORLD', 'World');
 rep = rep.addSeries('data', db_a{'Y_WORLD'});
 delta = db_a{'Y_WORLD'}-dc_a{'Y_WORLD'};
@@ -120,7 +120,7 @@ for i=1:length(shortNames)
     rep = rep.addPage('title', 'Jan1 vs Jan2', ...
                       'titleFormat', '\large\bfseries');
     rep = rep.addSection();
-    rep = CountryTablePage(rep, shortNames{i}, longNames{i}, db_q, dc_q, trange, dynDate('2012q2'));
+    rep = CountryTablePage(rep, shortNames{i}, longNames{i}, db_q, dc_q, trange, dates('2012q2'));
 end
 
 %% Residual Reports
@@ -129,14 +129,14 @@ for i=1:length(shortNames)
     rep = rep.addPage('title', 'Residual Report Jan1 vs Jan2', ...
                       'titleFormat', '\large\bfseries');
     rep = rep.addSection();
-    rep = ResidTablePage(rep, shortNames{i}, longNames{i}, db_q, dc_q, trange, dynDate('2012q2'));
+    rep = ResidTablePage(rep, shortNames{i}, longNames{i}, db_q, dc_q, trange, dates('2012q2'));
 end
 
 % Commodities
 rep = rep.addPage('title', 'Residual Report Jan1 vs Jan2', ...
                   'titleFormat', '\large\bfseries');
 rep = rep.addSection();
-rep = CommResidTablePage(rep, db_q, dc_q, trange, dynDate('2012q2'));
+rep = CommResidTablePage(rep, db_q, dc_q, trange, dates('2012q2'));
 
 %% Commodities Graphs
 %Page 1
