@@ -1,4 +1,4 @@
-function write_mh_history_file(MetropolisFolder, ModelName, record)
+function i = write_mh_history_file(MetropolisFolder, ModelName, record)
 
 % Copyright (C) 2013 Dynare Team
 %
