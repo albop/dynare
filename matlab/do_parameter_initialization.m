@@ -65,7 +65,7 @@ if nvx
     estim_params_.var_exo(calibrated_par_index,2)=xparam1_calib(offset+calibrated_par_index,1);
     %find parameters that are calibrated and do not violate inverse gamma prior
     xparam1_properly_calibrated(offset+calibrated_par_index,1) = xparam1_calib(offset+calibrated_par_index,1);
-    inv_gamma_violation=find(estim_params_.var_exo(calibrated_par_index,2)==0 & estim_params_.var_exo(calibrated_par_index,4)==0);
+    inv_gamma_violation=find(estim_params_.var_exo(calibrated_par_index,2)==0 & estim_params_.var_exo(calibrated_par_index,5)==4);
     if inv_gamma_violation
         estim_params_.var_exo(calibrated_par_index(inv_gamma_violation),2)=NaN;        
         xparam1_properly_calibrated(offset+calibrated_par_index(inv_gamma_violation),1)=NaN;        

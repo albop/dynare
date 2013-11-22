@@ -23,85 +23,52 @@ if nargin<2
     info = 0;
 end
 
-if iscell(name)
-    nn = length(name);
-else
-    nn = 1;
-end
-
-if iscell(name)
-    tex = cell(nn,1);
-end
-
-for i=1:nn
-    if info
-        if iscell(name)
-            tex(i) = {name{i}};
-            id = findstr(name{i},'_');
-            len = length(tex{i});
-        else
-            tex = name;
-            id = findstr(name,'_');
-            len = length(tex);
-        end
-        if isempty(id)
-            continue
-        end
-        n = length(id);
-        if id(1)==1
-            if iscell(name)
-                tex(i) = {['\_', tex{i}(2:end)]};
-            else
-                tex = ['\_', tex(2:end)];
-            end
-            if n>1
-                id = id(2:end)+1;
-                n = n-1;
-                len = len+1;
-            else
-                continue
-            end
-        end
-        if id(end)==len
-            if iscell(name)
-                tex(i) = {[tex{i}(1:end-1) '\_']};
-            else
-                tex = [tex(1:end-1) '\_'];
-            end
-            if n>1
-                id = id(1:end-1);
-                n = n-1;
-            else
-                continue
-            end
-        end
-        if n==1
-            if iscell(name)
-                tex(i) = {[ tex{i}(1:(id-1)) '_{'  tex{i}((id+1):end) '}' ]};
-            else
-                tex = [ tex(1:(id-1)) '_{'  tex((id+1):end) '}' ];
-            end
-            continue
-        else
-            for j=1:n-1
-                if iscell(name)
-                    tex(i) = {[tex{i}(1:id(j)-1) '\_' tex{i}((id(j)+1):end)]};
-                else
-                    tex = [tex(1:id(j)-1) '\_' tex((id(j)+1):end)];
-                end
-                id = id(2:end)+1;
-            end
-            if iscell(name)
-                tex(i) = {[tex{i}(1:(id-1)) '_{'  tex{i}((id+1):end) '}']};
-            else
-                tex = [tex(1:(id-1)) '_{'  tex((id+1):end) '}'];
-            end
-        end
+if info
+    if iscell(name)
+        nn = length(name);
     else
+        nn = 1;
+    end
+end
+
+tex = regexprep(name, '_', '\\_');
+
+if info
+    for i=1:nn
         if iscell(name)
-            tex(i) = {strrep(name{i}, '_', '\_')};
+            texname = tex{i};
         else
-            tex = strrep(name, '_', '\_');
+            texname = tex;
+        end
+        idx = strfind(texname,'_');
+        ndx = length(idx);
+        ntx = length(texname);
+        if ndx
+            gotonextcondition = 1;
+            if isequal(ndx,1) && ~isequal(idx,2) && ~isequal(idx,ntx)
+                texname = [ texname(1:idx-2) '_{' texname(idx+1:end) '}'];
+                gotonextcondition = 0;
+            end
+            if gotonextcondition && isequal(ndx,2) && ~isequal(idx(1),2) && isequal(idx(2),ntx)
+                texname = [ texname(1:idx(1)-2) '_{' texname(idx(1)+1:end) '}' ];
+                gotonextcondition = 0;
+            end
+            if gotonextcondition && isequal(ndx,2) && idx(2)<ntx
+                texname = [ texname(1:idx(2)-2) '_{' texname(idx(2)+1:end) '}' ];
+                gotonextcondition = 0;
+            end
+            if gotonextcondition && ndx>2
+                if idx(end)<ntx
+                    texname = [ texname(1:idx(end)-2) '_{' texname(idx(end)+1:end) '}' ];
+                else 
+                    texname = [ texname(1:idx(end-1)-2) '_{' texname(idx(end-1)+1:end) '}' ];
+                end
+            end
+            if iscell(name)
+                tex(i) = { texname };
+            else
+                tex = texname;
+            end
         end
     end
 end
@@ -212,3 +179,15 @@ end
 %$
 %$ T = all(t);
 %@eof:3
+
+%@test:4
+%$ pwd
+%$ try
+%$     db = dseries('csv/dd.csv');
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:4
