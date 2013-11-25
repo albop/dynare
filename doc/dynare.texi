@@ -2635,17 +2635,19 @@ Use @code{fsolve} (under MATLAB, only available if you have the
 Optimization Toolbox; always available under Octave)
 
 @item 1
-Use Dynare's own nonlinear equation solver
+Use Dynare's own nonlinear equation solver (a Newton-like algorithm with
+line-search)
 
 @item 2
 Splits the model into recursive blocks and solves each block in turn
+using the same solver as value @code{1}
 
 @item 3
 Use Chris Sims' solver
 
 @item 4
-Similar to value @code{2}, except that it deals differently with
-nearly singular Jacobian
+Same as value @code{2}, except that it does not try to adapt the
+search direction when the Jacobian is nearly singular
 
 @item 5
 Newton algorithm with a sparse Gaussian elimination (SPE) (requires
