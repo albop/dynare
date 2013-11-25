@@ -31,7 +31,11 @@ if info
     end
 end
 
-tex = regexprep(name, '_', '\\_');
+if isoctave
+    tex = regexprep(name, '_', '\_');
+else
+    tex = regexprep(name, '_', '\\_');
+end
 
 if info
     for i=1:nn
