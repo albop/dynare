@@ -174,7 +174,7 @@ if withtime
     if isnumeric(tmp) && isint(tmp)
         tmp = [num2str(tmp) 'Y'];
     end
-    if isdate(tmp)
+    if ~isdate(tmp)
         error('load_csv_file_data:: Formatting error. I can''t read the dates!')
     end
     init = dates(tmp);
