@@ -78,7 +78,8 @@ for i=1:nn
         fprintf(tid,str);
     end
     fprintf(tid,['LOG = NaN;\n']);
-    fprintf(tid,['catch exception\n']);
+    fprintf(tid,'catch\n');
+    fprintf(tid,'exception = lasterror;\n');
     fprintf(tid,['LOG = getReport(exception,''extended'');\n']);
     fprintf(tid,['T = NaN;\n']);
     fprintf(tid,['t = NaN;\n']);
