@@ -74,9 +74,7 @@ for i=1:nn
     fprintf(tid,['try\n']);
     for j=b1(i):b2(i)
         str = sprintf('%s \n',file{j}(4:end));
-        if isoctave
-            str = regexprep(str, '%', '%%');
-        end
+        str = regexprep(str, '%', '%%');
         fprintf(tid,str);
     end
     fprintf(tid,['LOG = NaN;\n']);
