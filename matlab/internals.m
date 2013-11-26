@@ -90,6 +90,87 @@ if strcmpi(flag,'--test')
     return
 end
 
+if strcmpi(flag,'--load-mh-history') || strcmpi(flag,'--display-mh-history')
+    switch length(varargin)
+      case 3
+        fname = varargin{1};
+        if ~isequal(varargin{2},'in')
+            error('internals:: Calling sequence must be of the form: internals --load-mh-history fname in dname')
+        end
+        dname = varargin{3};
+      case 1
+        fname = varargin{1};
+        dname = varargin{1};
+      otherwise
+        error('internals:: Wrong calling sequence! You should read the manual...')
+    end
+    o = load_last_mh_history_file([dname filesep 'metropolis'],fname);
+    if strcmpi(flag,'--load-mh-history')
+        assignin('caller','mcmc_informations',o.record);
+    else
+        oo = load_first_mh_history_file([dname filesep 'metropolis'],fname);
+        local = load([fname '_results'],'bayestopt_');
+        names = local.bayestopt_.name; %evalin('base','bayestopt_.name');
+        str = ['MCMC set-up for ' fname ' mod file'];
+        ltr = length(str);
+        skipline()
+        disp(repmat('=',1,ltr))
+        disp(str)
+        disp(repmat('=',1,ltr))
+        skipline(2)
+        for b=1:o.Nblck
+            str = ['MCMC chain number ' num2str(b) ':'];
+            ltr = length(str);
+            disp(str);
+            disp(repmat('-',1,ltr));
+            skipline()
+            disp([' o Number of MCMC files is ' num2str(sum(o.MhDraws(:,2)))]);
+            disp([' o Number of draws is ' num2str(sum(o.MhDraws(:,1)))]);
+            disp([' o Acceptance ratio is ' num2str(o.AcceptationRates(b)*100,'%6.2f') '%']);
+            disp([' o Last value of the posterior kernel is: ' num2str(o.LastLogPost(b),'%10.5f')])
+            disp([' o State of the chain:'])
+            skipline()
+            d1 = num2str(transpose(oo.InitialParameters(b,:)),'%10.5f\n');
+            d2 = num2str(transpose(o.LastParameters(b,:)),'%10.5f\n');
+            d1s = size(d1,2);
+            d2s = size(d2,2);
+            c0 = repmat('   ',length(names)+2,1);
+            c1 = char(' ', repmat('+',1,size(cell2mat(names),2)), cell2mat(names));
+            s1 = char(' || ','++++',repmat(' || ', length(names),1));
+            t1 = repmat(' ',1,d1s);
+            if d1s<=7
+                t1 = 'Initial';
+            else
+                diff = d1s-7;
+                if isequal(mod(diff,2),0)
+                    start = diff/2+1;
+                else
+                    start = (diff-1)/2+1;
+                end
+                t1(start:start+6) = 'Initial';
+            end
+            c2 = char(t1,repmat('+',1,size(d1,2)),d1);
+            s2 = char(' | ','+++',repmat(' | ', length(names),1));
+            t2 = repmat(' ',1,d2s);
+            if d2s<=7
+                t2 = 'Current';
+            else
+                diff = d2s-7;
+                if isequal(mod(diff,2),0)
+                    start = diff/2+1;
+                else
+                    start = (diff-1)/2+1;
+                end
+                t2(start:start+6) = 'Current';
+            end
+            c3 = char(t2,repmat('+',1,size(d2,2)), d2);
+            disp([c0, c1, s1, c2, s2, c3]);
+            skipline()
+        end
+    end
+    return
+end
+
 if strcmpi(flag,'--info')
     if nargin==2
         dynare_config([],0);
