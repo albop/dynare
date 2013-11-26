@@ -106,7 +106,7 @@ if strcmpi(flag,'--load-mh-history') || strcmpi(flag,'--display-mh-history')
     end
     o = load_last_mh_history_file([dname filesep 'metropolis'],fname);
     if strcmpi(flag,'--load-mh-history')
-        assignin('caller','mcmc_informations',o.record);
+        assignin('caller','mcmc_informations',o);
     else
         oo = load_first_mh_history_file([dname filesep 'metropolis'],fname);
         local = load([fname '_results'],'bayestopt_');
