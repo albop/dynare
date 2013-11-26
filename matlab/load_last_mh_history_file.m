@@ -38,9 +38,11 @@ end
 if format_mh_history_file
     load([BaseName '_mh_history.mat']);
     record.LastLogPost = record.LastLogLiK;
+    record.InitialLogPost = record.InitialLogLiK;
     record.LastSeeds = record.Seeds;
     record.InitialSeeds = NaN; % This information is forever lost...
     record = rmfield(record,'LastLogLiK');
+    record = rmfield(record,'InitialLogLiK');
     record = rmfield(record,'Seeds');
     save([BaseName '_mh_history_0.mat'],'record');
 else

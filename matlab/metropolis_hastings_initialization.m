@@ -190,7 +190,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
         [record.InitialSeeds(j).Unifor,record.InitialSeeds(j).Normal] = get_dynare_random_generator_state();
     end
     record.InitialParameters = ix2;
-    record.InitialLogLiK = ilogpo2;
+    record.InitialLogPost = ilogpo2;
     record.LastParameters = zeros(nblck,npar);
     record.LastLogPost = zeros(nblck,1);
     record.LastFileNumber = AnticipatedNumberOfFiles ;
@@ -284,7 +284,7 @@ elseif options_.mh_recover
         ilogpo2 = record.LastLogPost;
         ix2 = record.LastParameters;
     else
-        ilogpo2 = record.InitialLogLiK;
+        ilogpo2 = record.InitialLogPost;
         ix2 = record.InitialParameters;
     end
     % Set NewFile, a nblck*1 vector of integers, and fline (first line), a nblck*1 vector of integers.
