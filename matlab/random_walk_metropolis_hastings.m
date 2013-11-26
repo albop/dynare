@@ -1,4 +1,4 @@
-function record = random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_)
+function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_)
 %function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_)
 % Random walk Metropolis-Hastings algorithm. 
 % 
@@ -14,9 +14,6 @@ function record = random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,
 %   o estim_params_         estimated parameters structure
 %   o bayestopt_            estimation options structure
 %   o oo_                   outputs structure
-%  
-% OUTPUTS 
-%   o record     [struct]   structure describing the iterations
 %
 % ALGORITHM 
 %   Metropolis-Hastings.       

@@ -1,4 +1,4 @@
-function record=independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
+function independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
 
 % Independent Metropolis-Hastings algorithm. 
 % 
@@ -10,9 +10,6 @@ function record=independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv
 %   o mh_bounds  [double]   (p*2) matrix defining lower and upper bounds for the parameters. 
 %   o varargin              list of argument following mh_bounds
 %  
-% OUTPUTS 
-%   o record     [struct]   structure describing the iterations
-%
 % ALGORITHM 
 %   Metropolis-Hastings.       
 %
