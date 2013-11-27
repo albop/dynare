@@ -782,7 +782,11 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         for ii=2:size(outside_bound_par_names,1)
             disp_string=[disp_string,', ',outside_bound_par_names{ii,:}];
         end
-        error(['Mode value(s) of ', disp_string ,' are outside parameter bounds. Potentially, you should set prior_trunc=0.'])
+        if options_.prior_trunc>0
+            error(['Estimation:: Mode value(s) of ', disp_string ,' are outside parameter bounds. Potentially, you should set prior_trunc=0.'])
+        else
+            error(['Estimation:: Mode value(s) of ', disp_string ,' are outside parameter bounds.'])
+        end
     end
     % runs MCMC
     if options_.mh_replic
