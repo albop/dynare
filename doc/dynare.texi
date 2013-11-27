@@ -4164,7 +4164,7 @@ A fourth parameter of the prior used for generalized beta distribution
 and for the uniform distribution. Default: @code{1}
 
 @item @var{SCALE_PARAMETER}
-The scale parameter to be used for the jump distribution of the
+A parameter specific scale parameter for the jumping distribution's covariance matrix of the
 Metropolis-Hasting algorithm
 @end table
 
@@ -4302,6 +4302,16 @@ graphs with prior, posterior, and mode
 @item
 graphs of smoothed shocks, smoothed observation errors, smoothed and historical variables
 @end itemize
+
+Also, during  the MCMC  (Bayesian estimation with  @code{mh_replic}>0) a
+(graphical or text) waiting bar is displayed showing the progress of the
+Monte-Carlo and the @i{current} value of the acceptance ratio. Note that
+if  the @code{load_mh_file}  option  is used  (see  below) the  reported
+acceptance ratio does not take into  account the draws from the previous
+MCMC. In the literature there is a general agreement for saying that the
+acceptance ratio  should be close to  one third or one  quarter. If this
+not the case, you can stop the MCMC (@code{Ctrl-C}) and change the value
+of option @code{mh_jscale} (see below).
 
 @algorithmshead
 
@@ -4462,11 +4472,15 @@ the total number of Metropolis draws available. Default:
 The fraction of initially generated parameter vectors to be dropped as a burnin before using posterior simulations. Default: @code{0.5}
 
 @item mh_jscale = @var{DOUBLE}
-@anchor{mh_jscale}
-The scale to be used for the jumping distribution in
-Metropolis-Hastings algorithm. The default value is rarely
-satisfactory. This option must be tuned to obtain, ideally, an
-acceptation rate of 25% in the Metropolis-Hastings algorithm. Default:
+@anchor{mh_jscale}  The scale  parameter of  the jumping  distribution's
+covariance matrix (Metropolis-Hastings algorithm).  The default value is
+rarely satisfactory.  This  option must be tuned to  obtain, ideally, an
+acceptance  ratio  of  25%-33%  in  the  Metropolis-Hastings  algorithm.
+Basically,  the  idea  is  to  increase  the  variance  of  the  jumping
+distribution if the acceptance ratio is  too high, and decrease the same
+variance if the  acceptance ratio is too low. In  some situations in may
+help to  consider parameter  specific values  for this  scale parameter,
+this  can  be  done  in  the  @xref{estimated_params}  block. Default:
 @code{0.2}
 
 @item mh_init_scale = @var{DOUBLE}
@@ -10585,8 +10599,8 @@ A @code{Nblck*1} array of doubles. Current value of the posterior kernel.
 A @code{1*Nblck} structure array. Initial state of the random number generator.
 @item LastSeeds
 A @code{1*Nblck} structure array. Current  state of the random number generator.
-@item AcceptationRates
-A @code{1*Nblck} array of doubles. Acceptance ratios.
+@item AcceptanceRatio
+A @code{1*Nblck} array of doubles. Current acceptance ratios.
 @end table 
 
 @end table
