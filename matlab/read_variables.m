@@ -89,20 +89,20 @@ switch (extension)
             dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
         end
     case { '.xls', '.xlsx' }
-        [num,txt,raw] = xlsread(fullname,xls_sheet,xls_range); % Octave needs the extension explicitly
-        for i=1:size(raw,2)
-            if isnan(raw{1,i})
-                raw{1,i} = ' ';
-            end
-        end
+        [freq,init,data,varlist] = load_xls_file_data(fullname,xls_sheet,xls_range);
         for dyn_i_01=1:var_size_01
-            iv = strmatch(var_names_01(dyn_i_01,:),raw(1,:),'exact');
-            dyn_tmp_01 = [raw{2:end,iv}]';
-            if length(dyn_tmp_01) > dyn_size_01 && dyn_size_01 > 0
+            iv = strmatch(strtrim(var_names_01(dyn_i_01,:)),varlist,'exact');
+            if ~isempty(iv)
+                dyn_tmp_01 = [data(2:end,iv)]';
+                if length(dyn_tmp_01) > dyn_size_01 && dyn_size_01 > 0
+                    cd(old_pwd)
+                    error('data size is too large')
+                end
+                dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
+            else
                 cd(old_pwd)
-                error('data size is too large')
+                error([strtrim(var_names_01(dyn_i_01,:)) ' not found in ' fullname])
             end
-            dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
         end
     case '.csv'
         [freq,init,data,varlist] = load_csv_file_data(fullname);

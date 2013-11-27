@@ -137,7 +137,8 @@ function m = ee(n,i,j)
 %$ try
 %$     [nodes,weights] = cubature_with_gaussian_weight(d,3);
 %$     t(1) = 1;
-%$ catch exception
+%$ catch
+%$     exception = lasterror;
 %$     t = t(1);
 %$     T = all(t);
 %$     LOG = getReport(exception,'extended');
@@ -177,7 +178,8 @@ function m = ee(n,i,j)
 %$ try
 %$     [nodes,weights] = cubature_with_gaussian_weight(d,3);
 %$     t(1) = 1;
-%$ catch exception
+%$ catch
+%$     exception = lasterror;
 %$     t = t(1);
 %$     T = all(t);
 %$     LOG = getReport(exception,'extended');
@@ -218,7 +220,8 @@ function m = ee(n,i,j)
 %$ try
 %$     [nodes,weights] = cubature_with_gaussian_weight(d,3);
 %$     t(1) = 1;
-%$ catch exception
+%$ catch
+%$     exception = lasterror;
 %$     t = t(1);
 %$     T = all(t);
 %$     LOG = getReport(exception,'extended');
@@ -253,7 +256,8 @@ function m = ee(n,i,j)
 %$ try
 %$     [nodes,weights] = cubature_with_gaussian_weight(d,3);
 %$     t(1) = 1;
-%$ catch exception
+%$ catch
+%$     exception = lasterror;
 %$     t = t(1);
 %$     T = all(t);
 %$     LOG = getReport(exception,'extended');
@@ -292,7 +296,8 @@ function m = ee(n,i,j)
 %$ try
 %$     [nodes,weights] = cubature_with_gaussian_weight(d,5);
 %$     t(1) = 1;
-%$ catch exception
+%$ catch
+%$     exception = lasterror;
 %$     t = t(1);
 %$     T = all(t);
 %$     LOG = getReport(exception,'extended');
@@ -337,7 +342,8 @@ function m = ee(n,i,j)
 %$     nodes
 %$     weights
 %$     t(1) = 1;
-%$ catch exception
+%$ catch
+%$     exception = lasterror;
 %$     t = t(1);
 %$     T = all(t);
 %$     LOG = getReport(exception,'extended');

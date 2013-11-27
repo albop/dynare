@@ -4344,12 +4344,14 @@ univariate convergence diagnostic.
 
 @item datafile = @var{FILENAME}
 @anchor{datafile}
-The datafile: a @file{.m} file, a @file{.mat} file, a @file{.csv} file, or a
-@file{.xls}/@file{.xlsx} file (the latter format is supported under Octave
-if the @uref{http://octave.sourceforge.net/io/,io} and
-@uref{http://octave.sourceforge.net/java/,java} packages from
-Octave-Forge are installed, along with a
-@uref{http://www.java.com/download,Java Runtime Environment})
+The datafile: a @file{.m} file, a @file{.mat} file, a @file{.csv}
+file, or a @file{.xls}/@file{.xlsx} file (under Octave, the
+@uref{http://octave.sourceforge.net/io/,io} from Octave-Forge is
+required for the @file{.csv}, @file{.xls} and @file{.xlsx} formats; in
+addition, for the @file{.xls} and @file{.xlsx} formats, the
+@uref{http://octave.sourceforge.net/java/,java} package is required,
+along with a @uref{http://www.java.com/download,Java Runtime
+Environment})
 
 @item xls_sheet = @var{NAME}
 @anchor{xls_sheet}
