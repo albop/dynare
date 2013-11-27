@@ -155,7 +155,7 @@ skipline()
 disp(['Estimation::mcmc: Number of mh files: ' int2str(NewFile(1)) ' per block.'])
 disp(['Estimation::mcmc: Total number of generated files: ' int2str(NewFile(1)*nblck) '.'])
 disp(['Estimation::mcmc: Total number of iterations: ' int2str((NewFile(1)-1)*MAX_nruns+irun-1) '.'])
-disp(['Estimation::mcmc: Average acceptance ratio per chain: '])
+disp(['Estimation::mcmc: Current acceptance ratio per chain: '])
 for i=1:nblck
     if i<10
         disp(['                                                       Chain  ' num2str(i) ': ' num2str(100*record.AcceptanceRatio(i)) '%'])

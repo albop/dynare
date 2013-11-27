@@ -118,6 +118,7 @@ if strcmpi(flag,'--load-mh-history') || strcmpi(flag,'--display-mh-history')
         disp(str)
         disp(repmat('=',1,ltr))
         skipline(2)
+        oar = compute_overall_acceptance_ratio([dname filesep 'metropolis'],fname);
         for b=1:o.Nblck
             str = ['MCMC chain number ' num2str(b) ':'];
             ltr = length(str);
@@ -126,7 +127,7 @@ if strcmpi(flag,'--load-mh-history') || strcmpi(flag,'--display-mh-history')
             skipline()
             disp([' o Number of MCMC files is ' num2str(sum(o.MhDraws(:,2)))]);
             disp([' o Number of draws is ' num2str(sum(o.MhDraws(:,1)))]);
-            disp([' o Acceptance ratio is ' num2str(o.AcceptanceRatio(b)*100,'%6.2f') '%']);
+            disp([' o Overall acceptance ratio is ' num2str(oar(b)*100,'%5.2f') '%']);
             disp([' o Initial value of the posterior kernel is: ' num2str(oo.InitialLogPost(b),'%10.5f')])
             disp([' o Last value of the posterior kernel is: ' num2str(o.LastLogPost(b),'%10.5f')])
             disp([' o State of the chain:'])

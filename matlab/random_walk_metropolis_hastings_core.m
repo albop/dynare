@@ -184,7 +184,7 @@ for b = fblck:nblck,
         end
         prtfrc = j/nruns(b);
         if (mod(j, 3)==0 && ~whoiam) || (mod(j,50)==0 && whoiam)
-            dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('acceptance ratio %4.3f', isux/j)]);
+            dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('Current acceptance ratio %4.3f', isux/j)]);
         end
         if (irun == InitSizeArray(b)) || (j == nruns(b)) % Now I save the simulations
             save([BaseName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');

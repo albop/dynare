@@ -178,10 +178,10 @@ for b = fblck:nblck,
             if mod(j, 10) == 0
                 if isoctave
                     if (whoiam==0),
-                        printf('Estimation::mcmc: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acceptance ratio: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                        printf('Estimation::mcmc: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, Current acceptance ratio: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
                     end
                 else
-                    fprintf('Estimation::mcmc: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, acceptance ratio: %3.f \b%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                    fprintf('Estimation::mcmc: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, Current acceptance ratio: %3.f \b%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
                 end
             end
             if mod(j,50)==0 && whoiam,
@@ -191,10 +191,10 @@ for b = fblck:nblck,
             end
         else
             if mod(j, 3)==0 && ~whoiam
-                waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptance ratio %f',prtfrc,isux/j)]);
+                waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, Current acceptance ratio %f',prtfrc,isux/j)]);
             elseif mod(j,50)==0 && whoiam,
                 %             keyboard;
-                waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptance ratio %f',prtfrc,isux/j)];
+                waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, Current acceptance ratio %f',prtfrc,isux/j)];
                 fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab))
             end
         end
