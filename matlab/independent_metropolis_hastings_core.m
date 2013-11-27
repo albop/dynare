@@ -206,7 +206,7 @@ for b = fblck:nblck,
             fprintf(fidlog,['%% Mh' int2str(NewFile(b)) 'Blck' int2str(b) ' (' datestr(now,0) ')\n']);
             fprintf(fidlog,' \n');
             fprintf(fidlog,['  Number of simulations.: ' int2str(length(logpo2)) '\n']);
-            fprintf(fidlog,['  Acceptation rate......: ' num2str(jsux/length(logpo2)) '\n']);
+            fprintf(fidlog,['  Acceptance ratio......: ' num2str(jsux/length(logpo2)) '\n']);
             fprintf(fidlog,['  Posterior mean........:\n']);
             for i=1:length(x2(1,:))
                 fprintf(fidlog,['    params:' int2str(i) ': ' num2str(mean(x2(:,i))) '\n']);
@@ -242,7 +242,7 @@ for b = fblck:nblck,
         j=j+1;
         irun = irun + 1;
     end% End of the simulations for one mh-block.
-    record.AcceptationRates(b) = isux/j;
+    record.AcceptanceRatio(b) = isux/j;
     if isoctave || options_.console_mode
         printf('\n');
         diary on

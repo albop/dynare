@@ -100,7 +100,7 @@ else
         offset = sum(nBlockPerCPU(1:j-1))+fblck-1;
         record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)));
         record.LastParameters(offset+1:sum(nBlockPerCPU(1:j)),:)=fout(j).record.LastParameters(offset+1:sum(nBlockPerCPU(1:j)),:);
-        record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)));
+        record.AcceptanceRatio(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)));
         record.LastSeeds(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastSeeds(offset+1:sum(nBlockPerCPU(1:j)));
     end
 end
@@ -114,6 +114,6 @@ skipline()
 disp(['Estimation::mcmc: Number of mh files                   : ' int2str(NewFile(1)) ' per block.'])
 disp(['Estimation::mcmc: Total number of generated files      : ' int2str(NewFile(1)*nblck) '.'])
 disp(['Estimation::mcmc: Total number of iterations           : ' int2str((NewFile(1)-1)*MAX_nruns+irun-1) '.'])
-disp('Estimation::mcmc: average acceptation rate per chain   : ')
-disp(record.AcceptationRates);
+disp('Estimation::mcmc: average acceptance ratio per chain   : ')
+disp(record.AcceptanceRatio);
 skipline()

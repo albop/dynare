@@ -40,10 +40,12 @@ if format_mh_history_file
     record.LastLogPost = record.LastLogLiK;
     record.InitialLogPost = record.InitialLogLiK;
     record.LastSeeds = record.Seeds;
+    record.AcceptanceRatio = record.AcceptationRates;
     record.InitialSeeds = NaN; % This information is forever lost...
     record = rmfield(record,'LastLogLiK');
     record = rmfield(record,'InitialLogLiK');
     record = rmfield(record,'Seeds');
+    record = rmfield(record,'AcceptationRates');
     save([BaseName '_mh_history_0.mat'],'record');
 else
     load([BaseName '_mh_history_' num2str(length(mh_history_files)-1) '.mat']);

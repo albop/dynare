@@ -140,7 +140,7 @@ else
         offset = sum(nBlockPerCPU(1:j-1))+fblck-1;
         record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)));
         record.LastParameters(offset+1:sum(nBlockPerCPU(1:j)),:)=fout(j).record.LastParameters(offset+1:sum(nBlockPerCPU(1:j)),:);
-        record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)));
+        record.AcceptanceRatio(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.AcceptanceRatio(offset+1:sum(nBlockPerCPU(1:j)));
         record.LastSeeds(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastSeeds(offset+1:sum(nBlockPerCPU(1:j)));
     end
 
@@ -158,8 +158,8 @@ disp(['Estimation::mcmc: Total number of iterations: ' int2str((NewFile(1)-1)*MA
 disp(['Estimation::mcmc: Average acceptance ratio per chain: '])
 for i=1:nblck
     if i<10
-        disp(['                                                       Chain  ' num2str(i) ': ' num2str(100*record.AcceptationRates(i)) '%'])
+        disp(['                                                       Chain  ' num2str(i) ': ' num2str(100*record.AcceptanceRatio(i)) '%'])
     else
-        disp(['                                                       Chain ' num2str(i) ': ' num2str(100*record.AcceptationRates(i)) '%'])
+        disp(['                                                       Chain ' num2str(i) ': ' num2str(100*record.AcceptanceRatio(i)) '%'])
     end
 end

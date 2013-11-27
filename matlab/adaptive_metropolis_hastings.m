@@ -125,7 +125,7 @@ for i=1:maxit
     record = random_walk_metropolis_hastings(TargetFun,ProposalFun, ...
                                              xparam1,vv, ...
                                              mh_bounds,varargin{:});
-    AvRates(i) = mean(record.AcceptationRates);    
+    AvRates(i) = mean(record.AcceptanceRatio);
 
     if i < test_runs
         i_kept_runs = 1:i;

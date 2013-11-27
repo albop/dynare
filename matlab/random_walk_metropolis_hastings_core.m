@@ -184,7 +184,7 @@ for b = fblck:nblck,
         end
         prtfrc = j/nruns(b);
         if (mod(j, 3)==0 && ~whoiam) || (mod(j,50)==0 && whoiam)
-            dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('acceptation rate %4.3f', isux/j)]);
+            dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('acceptance ratio %4.3f', isux/j)]);
         end
         if (irun == InitSizeArray(b)) || (j == nruns(b)) % Now I save the simulations
             save([BaseName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
@@ -193,7 +193,7 @@ for b = fblck:nblck,
             fprintf(fidlog,['%% Mh' int2str(NewFile(b)) 'Blck' int2str(b) ' (' datestr(now,0) ')\n']);
             fprintf(fidlog,' \n');
             fprintf(fidlog,['  Number of simulations.: ' int2str(length(logpo2)) '\n']);
-            fprintf(fidlog,['  Acceptation rate......: ' num2str(jsux/length(logpo2)) '\n']);
+            fprintf(fidlog,['  Acceptance ratio......: ' num2str(jsux/length(logpo2)) '\n']);
             fprintf(fidlog,['  Posterior mean........:\n']);
             for i=1:length(x2(1,:))
                 fprintf(fidlog,['    params:' int2str(i) ': ' num2str(mean(x2(:,i))) '\n']);
@@ -229,7 +229,7 @@ for b = fblck:nblck,
         j=j+1;
         irun = irun + 1;
     end% End of the simulations for one mh-block.
-    record.AcceptationRates(b) = isux/j;
+    record.AcceptanceRatio(b) = isux/j;
     dyn_waitbar_close(hh);
     [record.LastSeeds(b).Unifor, record.LastSeeds(b).Normal] = get_dynare_random_generator_state();
     OutputFileName(jloop,:) = {[MetropolisFolder,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
