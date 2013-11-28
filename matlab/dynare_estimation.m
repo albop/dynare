@@ -30,6 +30,10 @@ function dynare_estimation(var_list,dname)
 
 global options_ oo_ M_ oo_recursive_
 
+if isequal(options_.order,0)
+    error('Estimation:: The order of the Taylor approximation cannot be 0!')
+end
+
 %% Decide if a DSGE or DSGE-VAR has to be estimated.
 if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
     options_.dsge_var = 1;
