@@ -91,17 +91,30 @@ else
         error('DYNARE: argument must be a filename with .mod or .dyn extension')
     end;
 end;
-d = dir(fname);
-if isequal(length(d),0)
+
+if ~isempty(strfind(fname,filesep))
+    fprintf('\nIt seems you are trying to call a mod-file not located in the "Current Folder". This is not possible (the %s symbol is not allowed in the name of the mod file).\n', filesep)
+    [pathtomodfile,basename,ext] = fileparts(fname);
+    if exist(pathtomodfile,'dir')
+        filesindirectory = dir(pathtomodfile);
+        filesindirectory = struct2cell(filesindirectory);
+        filesindirectory = filesindirectory(1,:);
+        if ~isempty(strmatch([basename '.mod'],filesindirectory)) || ~isempty(strmatch([basename '.dyn'],filesindirectory))
+            fprintf('Please set your "Current Folder" to the folder where the mod-file is located using the following command:\n')
+            fprintf('\n  >> cd %s\n\n',pathtomodfile)
+        else
+            fprintf('The file %s[.mod,.dyn] could not be located!\n\n',basename)
+        end
+    end
+    error(['dynare:: can''t open ' fname, '.'])
+end
+
+if ~exist(fname,'file') || isequal(fname,'dir')
     fprintf('\nThe file %s could not be located in the "Current Folder". Check whether you typed in the correct filename\n',fname)
     fprintf('and whether the file is really located in the "Current Folder".\n')
     fprintf('\nCurrent folder is %s, and contains the following mod files:\n\n',pwd)
     ls *.mod;
     error(['dynare:: can''t open ' fname])
-elseif ~isempty(strfind(fname,'\')) || ~isempty(strfind(fname,'/'))
-    fprintf('\nIt seems you are trying to call a mod-file not located in the "Current Folder". This is not possible.\n')
-    fprintf('Please set your "Current Folder" to the folder where the mod-file is located.\n')
-    error(['DYNARE: can''t open ' fname, '. It seems to be located in a different folder (or has an invalid filename).'])        
 end
 
 % pre-dynare-preprocessor-hook
