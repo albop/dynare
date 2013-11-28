@@ -118,8 +118,8 @@ if ~exist(fname,'file') || isequal(fname,'dir')
 end
 
 % pre-dynare-preprocessor-hook
-if exist([fname(1:end-4) '_pre_dynare_preprocessor_hook.m'],'file')
-    eval([fname(1:end-4) '_pre_dynare_preprocessor_hook'])
+if exist(fname(1:end-4),'dir') && exist([fname(1:end-4) filesep 'hooks'],'dir') && exist([fname(1:end-4) filesep 'hooks/priorprocessing.m'],'file')
+    run([fname(1:end-4) filesep 'hooks/priorprocessing'])
 end
 
 command = ['"' dynareroot 'dynare_m" ' fname] ;
@@ -135,8 +135,8 @@ if ismember('onlymacro', varargin)
 end
 
 % post-dynare-prerocessor-hook
-if exist([fname(1:end-4) '_post_dynare_preprocessor_hook.m'],'file')
-    eval([fname(1:end-4) '_post_dynare_preprocessor_hook'])
+if exist(fname(1:end-4),'dir') && exist([fname(1:end-4) filesep 'hooks'],'dir') && exist([fname(1:end-4) filesep 'hooks/postprocessing.m'],'file')
+    run([fname(1:end-4) filesep 'hooks/postprocessing'])
 end
 
 % Save preprocessor result in logfile (if `no_log' option not present)
