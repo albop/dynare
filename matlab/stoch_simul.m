@@ -19,6 +19,10 @@ function info=stoch_simul(var_list)
 
 global M_ options_ oo_ it_
 
+if isequal(options_.order,0)
+    error('stoch_simul:: The order of the Taylor approximation cannot be 0!')
+end
+
 test_for_deep_parameters_calibration(M_);
 
 dr = oo_.dr;
