@@ -4482,7 +4482,7 @@ Basically,  the  idea  is  to  increase  the  variance  of  the  jumping
 distribution if the acceptance ratio is  too high, and decrease the same
 variance if the  acceptance ratio is too low. In  some situations in may
 help to  consider parameter  specific values  for this  scale parameter,
-this  can  be  done  in  the  @xref{estimated_params}  block. Default:
+this  can  be  done  in  the  @ref{estimated_params}  block. Default:
 @code{0.2}
 
 @item mh_init_scale = @var{DOUBLE}
