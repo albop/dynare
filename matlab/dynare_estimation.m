@@ -30,11 +30,12 @@ function dynare_estimation(var_list,dname)
 
 global options_ oo_ M_ oo_recursive_
 
+% Test if the order of approximation is nonzero (the preprocessor tests if order is non negative).
 if isequal(options_.order,0)
     error('Estimation:: The order of the Taylor approximation cannot be 0!')
 end
 
-%% Decide if a DSGE or DSGE-VAR has to be estimated.
+% Decide if a DSGE or DSGE-VAR has to be estimated.
 if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
     options_.dsge_var = 1;
 end
@@ -110,11 +111,9 @@ if nnobs > 1 && horizon > 0
         SelecVariables = [];
         for i=1:nvar
             if ~isempty(strmatch(var_list(i,:),endo_names,'exact'))
-                SelecVariables = [SelecVariables;strmatch(var_list(i,:),endo_names, ...
-                                                          'exact')];
+                SelecVariables = [SelecVariables;strmatch(var_list(i,:),endo_names, 'exact')];
             else
-                error(['Estimation: ' var_list(i,:) ' isn''t an endogenous' ...
-                       'variable'])
+                error(['Estimation:: ' var_list(i,:) ' isn''t an endogenous variable'])
             end
         end
     end

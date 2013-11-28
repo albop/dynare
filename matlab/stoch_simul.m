@@ -19,6 +19,7 @@ function info=stoch_simul(var_list)
 
 global M_ options_ oo_ it_
 
+% Test if the order of approximation is nonzero (the preprocessor tests if order is non negative).
 if isequal(options_.order,0)
     error('stoch_simul:: The order of the Taylor approximation cannot be 0!')
 end
@@ -44,7 +45,7 @@ end
 if options_.partial_information == 1 || options_.ACES_solver == 1
     PI_PCL_solver = 1;
     if options_.order ~= 1
-        warning('STOCH_SIMUL: forcing order=1 since you are using partial_information or ACES solver')
+        warning('stoch_simul:: forcing order=1 since you are using partial_information or ACES solver')
         options_.order = 1;
     end
 else
@@ -72,8 +73,7 @@ if PI_PCL_solver
     [oo_.dr, info] = PCL_resol(oo_.steady_state,0);
 elseif options_.discretionary_policy
     if ~options_.linear
-        error(['discretionary_policy solves only linear_quadratic ' ...
-               'problems']);
+        error(['stoch_simul:: discretionary_policy solves only linear_quadratic problems']);
     end
     [oo_.dr,ys,info] = discretionary_policy_1(oo_,options_.instruments);
 else
@@ -127,8 +127,7 @@ end
 
 if options_.periods > 0 && ~PI_PCL_solver
     if options_.periods <= options_.drop
-        disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
-              ' than the number of observations to be dropped'])
+        disp(['STOCH_SIMUL error: The horizon of simulation is shorter than the number of observations to be dropped'])
         options_ =options_old;
         return
     end
@@ -181,9 +180,9 @@ if options_.irf
                       options_.replic, options_.order);
             end
             if ~options_.noprint && any(any(isnan(y))) && ~options_.pruning && ~(options_.order==1)
-                fprintf('\nSTOCH_SIMUL: The simulations conducted for generating IRFs to %s were explosive.\n',M_.exo_names(i,:))
-                fprintf('STOCH_SIMUL: No IRFs will be displayed. Either reduce the shock size, \n')
-                fprintf('STOCH_SIMUL: use pruning, or set the approximation order to 1.');
+                fprintf('\nstoch_simul:: The simulations conducted for generating IRFs to %s were explosive.\n',M_.exo_names(i,:))
+                fprintf('stoch_simul:: No IRFs will be displayed. Either reduce the shock size, \n')
+                fprintf('stoch_simul:: use pruning, or set the approximation order to 1.');
                 skipline(2);
             end
             if options_.relative_irf
@@ -215,7 +214,7 @@ if options_.irf
                     end
                 else
                     if options_.debug
-                        fprintf('STOCH_SIMUL: The IRF of %s to %s is smaller than the irf_plot_threshold of %4.3f and will not be displayed.\n',deblank(M_.endo_names(i_var(j),:)),deblank(M_.exo_names(i,:)),options_.impulse_responses.plot_threshold)
+                        fprintf('stoch_simul:: The IRF of %s to %s is smaller than the irf_plot_threshold of %4.3f and will not be displayed.\n',deblank(M_.endo_names(i_var(j),:)),deblank(M_.exo_names(i,:)),options_.impulse_responses.plot_threshold)
                     end
                 end
             end
