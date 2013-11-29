@@ -59,7 +59,7 @@ if nargout>1
     % Third column   status of the unitary test (0 if the test fails, 1 otherwise)
     % Fourth column  details about the failure (vector of integers)
     % Fifth column   elapsed time in seconds (cpu time).
-    info = cell(nn,4);
+    info = cell(nn,5);
 end
 
 % Perform the tests.
