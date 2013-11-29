@@ -30,7 +30,7 @@ end
 switch format
   case 'm'
     if exist([basename, '.m'],'file')
-        copyfile([basename, '.m'],[basename, '.old.m'])
+        copyfile([basename, '.m'],[basename, '.old.m']);
     end
     fid = fopen([basename, '.m'],'w');
     fprintf(fid,'%% File created on %s.\n',datestr(now));
@@ -71,12 +71,12 @@ switch format
     end
     eval(str);
     if exist([basename, '.mat'],'file')
-        copyfile([basename, '.mat'],[basename, '.old.mat'])
+        copyfile([basename, '.mat'],[basename, '.old.mat']);
     end
     save([basename '.mat'],'INIT__','FREQ__','NAMES__','TEX__',A.name{:});
   case 'csv'
     if exist([basename, '.csv'],'file')
-        copyfile([basename, '.csv'],[basename, '.old.csv'])
+        copyfile([basename, '.csv'],[basename, '.old.csv']);
     end
     fid = fopen([basename, '.csv'],'w');
     fprintf(fid,',%s', A.name{:});
@@ -155,7 +155,11 @@ end
 %$ % Instantiate a time series object.
 %$ try
 %$    ts1 = dseries(A,[],A_name,[]);
-%$    ts1.save;
+%$    if isoctave
+%$        ts1.save('A');
+%$    else
+%$        ts1.save;
+%$    end
 %$    t = 1;
 %$ catch
 %$    t = 0;
