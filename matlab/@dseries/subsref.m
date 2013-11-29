@@ -460,7 +460,7 @@ end
 %$ % Instantiate a time series object.
 %$ try
 %$    ts1 = dseries(A,[],A_name,[]);
-%$    ts1.save;
+%$    ts1.save('ts1');
 %$    t = 1;
 %$ catch
 %$    t = 0;
@@ -578,7 +578,11 @@ end
 %$ % Instantiate a time series object.
 %$ try
 %$    ts1 = dseries(A,[],A_name,[]);
-%$    ts1.save();
+%$    if isoctave
+%$        ts1.save('ts1');
+%$    else
+%$        ts1.save();
+%$    end
 %$    t = 1;
 %$ catch
 %$    t = 0;
