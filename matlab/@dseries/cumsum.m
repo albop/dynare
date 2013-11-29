@@ -126,7 +126,7 @@ end
 %$ % Check the results.
 %$ warning off, % Because the names of the variables are not the same...
 %$ t(1) = dyn_assert(isequal(ts1,ts2),1);
-%$ warning on
+%$ warning_config
 %$ T = all(t);
 %@eof:1
 
@@ -149,7 +149,7 @@ end
 %$ % Check the results.
 %$ warning off, % Because the names of the variables are not the same...
 %$ t(1) = dyn_assert(isequal(ts1,ts2),1);
-%$ warning on
+%$ warning_config
 %$ T = all(t);
 %@eof:2
 
@@ -172,7 +172,7 @@ end
 %$ % Check the results.
 %$ warning off, % Because the names of the variables are not the same...
 %$ t(1) = dyn_assert(isequal(ts1,ts2),1);
-%$ warning on
+%$ warning_config
 %$ T = all(t);
 %@eof:3
 
@@ -196,7 +196,7 @@ end
 %$ % Check the results.
 %$ warning off, % Because the names of the variables are not the same...
 %$ t(1) = dyn_assert(isequal(ts3,ts4),1);
-%$ warning on
+%$ warning_config
 %$ T = all(t);
 %@eof:4
 
@@ -220,6 +220,6 @@ end
 %$ % Check the results.
 %$ warning off, % Because the names of the variables are not the same...
 %$ t(1) = dyn_assert(isequal(ts3,ts4),1);
-%$ warning on
+%$ warning_config
 %$ T = all(t);
 %@eof:5
