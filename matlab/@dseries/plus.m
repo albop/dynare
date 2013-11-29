@@ -40,7 +40,7 @@ function A = plus(B,C) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isscalar(B)
+if isnumeric(B) && isscalar(B)
     if ~isdseries(C)
         error('dseries::plus: Second input argument must be a dseries object!')
     end
@@ -57,7 +57,7 @@ if isscalar(B)
     return;
 end
 
-if isscalar(C)
+if isnumeric(C) && isscalar(C)
     if ~isdseries(B)
         error('dseries::plus: First input argument must be a dseries object!')
     end
