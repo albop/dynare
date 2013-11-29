@@ -118,7 +118,7 @@ switch nargin
             [freq,init,data,varlist] = load_csv_file_data(varargin{1});
             tex = [];
         elseif check_file_extension(varargin{1},'xls') || check_file_extension(varargin{1},'xlsx')
-            if ~isempty(who('global','options_'));
+            if isglobalinbase('options_')
                 % Check that the object is instantiated within a dynare session so that options_ global structure exists.
                 % Should provide latter a mechanism to pass range and sheet to dseries constructor...
                 range = evalin('base','options_.xls_range');
