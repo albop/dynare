@@ -73,7 +73,7 @@ if PI_PCL_solver
     [oo_.dr, info] = PCL_resol(oo_.steady_state,0);
 elseif options_.discretionary_policy
     if ~options_.linear
-        error(['stoch_simul:: discretionary_policy solves only linear_quadratic problems']);
+        error('discretionary_policy: only linear-quadratic problems can be solved');
     end
     [oo_.dr,ys,info] = discretionary_policy_1(oo_,options_.instruments);
 else
