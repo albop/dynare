@@ -40,7 +40,7 @@ if nargin<2
     return
 end
 
-if ~(isa(a,'dates') || isdate(a) || (isscalar(a) && isint(a)))
+if ~( isdates(a) || isdate(a) || (isscalar(a) && isint(a)) )
     error(['dates::pop: Input argument ' inputname(2) ' has to be a dates object with a single element, a string (which can be interpreted as a date) or an integer.'])
 end
 
