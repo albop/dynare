@@ -166,7 +166,8 @@ MODFILES = \
 	gradient/fs2000_numgrad_3.mod \
 	gradient/fs2000_numgrad_5.mod
 
-XFAIL_MODFILES = ramst_xfail.mod
+XFAIL_MODFILES = ramst_xfail.mod \
+	estim_param_in_shock_value.mod
 
 # Dependencies
 example1_use_dll.m.trs: example1.m.trs
