@@ -81,7 +81,7 @@ for i=1:nn
     fprintf(tid,'catch\n');
     fprintf(tid,'exception = lasterror;\n');
     if isoctave
-        fprintf(fid, 'LOG = ''%s'';\n','The Log output is not available with Octave!');
+        fprintf(tid, 'LOG = ''%s'';\n','The Log output is not available with Octave!');
         %fprintf(fid,['LOG = sprintf(''LOG = Error in %%s (line %%d)\\n'', strvcat(exception.stack.name), strvcat(exception.stack.line));\n']);
     else
         fprintf(tid,['LOG = getReport(exception,''extended'');\n']);
