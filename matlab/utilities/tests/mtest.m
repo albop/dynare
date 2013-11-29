@@ -80,7 +80,12 @@ for i=1:nn
     fprintf(tid,['LOG = NaN;\n']);
     fprintf(tid,'catch\n');
     fprintf(tid,'exception = lasterror;\n');
-    fprintf(tid,['LOG = getReport(exception,''extended'');\n']);
+    if isoctave
+        fprintf(fid, 'LOG = ''%s'';\n','The Log output is not available with Octave!');
+        %fprintf(fid,['LOG = sprintf(''LOG = Error in %%s (line %%d)\\n'', strvcat(exception.stack.name), strvcat(exception.stack.line));\n']);
+    else
+        fprintf(tid,['LOG = getReport(exception,''extended'');\n']);
+    end
     fprintf(tid,['T = NaN;\n']);
     fprintf(tid,['t = NaN;\n']);
     fprintf(tid,['end\n']);
@@ -93,7 +98,9 @@ for i=1:nn
         fprintf(['\n'])
         fprintf(['Call to ' FNAME ' test routine n°' int2str(i) ' failed (' datestr(now) ')!\n'])
         fprintf(['\n'])
-        disp(LOG)
+        if ~isoctave
+            disp(LOG)
+        end
         check = 0;
         if nargout>1
             info(i,3) = {0};
