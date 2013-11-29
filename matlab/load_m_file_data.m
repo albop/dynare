@@ -33,9 +33,12 @@ function [freq,init,data,varlist,tex] = load_m_file_data(file)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-[basename, ext] = strtok(file,'.');
-    
-run(basename);
+if isoctave
+    run(file);
+else
+    [basename, ext] = strtok(file,'.');
+    run(basename);
+end
 
 if exist('INIT__','var')
     if isdate(INIT__)
