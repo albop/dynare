@@ -227,7 +227,7 @@ switch S(1).type
             B.nobs = size(B.data,1);
             B.vobs = A.vobs;
             B.freq = A.freq;
-            B.dates = builtin('subsref', A.dates, S(1));
+            B.dates = A.dates(S(1).subs{1});
             B.init = B.dates(1);
             B.name = A.name;
             B.tex  = A.tex;
