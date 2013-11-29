@@ -418,7 +418,7 @@ ts.dates = ts.init:ts.init+(ts.nobs-1);
 %$     t(5) = dyn_assert(ts.vobs,3);
 %$     t(6) = dyn_assert(ts.nobs,5);
 %$     t(7) = dyn_assert(ts.name,{'Variable_1';'Variable_2';'Variable_3'});
-%$     t(8) = dyn_assert(ts.tex,{'Variable_{1}';'Variable_{2}';'Variable_{3}'});
+%$     t(8) = dyn_assert(ts.tex,{'Variable\\_1';'Variable\\_2';'Variable\\_3'});
 %$ end
 %$
 %$ T = all(t);
@@ -439,7 +439,7 @@ ts.dates = ts.init:ts.init+(ts.nobs-1);
 %$     t(5) = dyn_assert(ts.vobs,3);
 %$     t(6) = dyn_assert(ts.nobs,5);
 %$     t(7) = dyn_assert(ts.name,{'Variable_1';'Variable_2';'Variable_3'});
-%$     t(8) = dyn_assert(ts.tex,{'Variable_{1}';'Variable_{2}';'Variable_{3}'});
+%$     t(8) = dyn_assert(ts.tex,{'Variable\\_1';'Variable\\_2';'Variable\\_3'});
 %$ end
 %$
 %$ T = all(t);
