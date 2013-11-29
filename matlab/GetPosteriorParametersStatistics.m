@@ -78,7 +78,7 @@ end
 if np
     type = 'parameters';
     if TeX
-        fid = TeXBegin(OutputDirectoryName,M_.fname,1,type);
+        fid = TeXBegin(OutputFolder,M_.fname,1,type);
     end
     skipline()
     disp(type)
