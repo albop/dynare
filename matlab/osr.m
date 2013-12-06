@@ -1,4 +1,4 @@
-function osr(var_list,params,i_var,W)
+function osr_res = osr(var_list,params,i_var,W)
 
 % Copyright (C) 2001-2012 Dynare Team
 %
@@ -37,6 +37,6 @@ end
 skipline()
 disp('OPTIMAL SIMPLE RULE')
 skipline()
-osr1(i_params,i_var,W);
+osr_res = osr1(i_params,i_var,W);
 
 stoch_simul(var_list);

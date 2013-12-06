@@ -1,4 +1,4 @@
-function osr1(i_params,i_var,weights)
+function osr_res = osr1(i_params,i_var,weights)
 % Compute the Optimal Simple Rules
 % INPUTS
 %   i_params                  vector           index of optimizing parameters in M_.params
@@ -68,7 +68,10 @@ end
 %%do actual optimization
 [f,p]=csminwel1('osr_obj',t0,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,i_params,...
                 inv_order_var(i_var),weights(i_var,i_var));
-oo_.osr.objective_function = f;
+osr_res.objective_function = f;
+for i=1:length(i_params)
+    osr_res.optim_params.(deblank(M_.param_names(i_params(i),:))) = p(i);
+end
 
 %  options = optimset('fminunc');
 %  options = optimset('display','iter');
