@@ -127,3 +127,6 @@ else
 end
 
 dyn2vec;
+
+ts = dseries(transpose(oo_.endo_simul),options_.initial_period,cellstr(M_.endo_names));
+assignin('base', 'Simulated_time_series', ts);
