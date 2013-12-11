@@ -46,7 +46,11 @@ dynatol = options_.dynatol;
 
 % Set default initial conditions.
 if isempty(initial_conditions)
-    initial_conditions = oo_.steady_state;
+    if isempty(M_.endo_histval)
+        initial_conditions = oo_.steady_state;
+    else
+        initial_conditions = M_.endo_histval;
+    end
 end
 
 % Set maximum number of iterations for the deterministic solver.
