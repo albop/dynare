@@ -5946,7 +5946,9 @@ cease when it proves impossible to improve the function value by more than tolf.
 @end table
 
 The value of the objective is stored in the variable
-@code{oo_.osr.objective_function}, which is described below.
+@code{oo_.osr.objective_function} and the value of parameters at the
+optimum is stored in @code{oo_.osr.optim_params}. See below for more
+details.
 
 @end deffn
 
@@ -5980,6 +5982,12 @@ the form:
 @defvr {MATLAB/Octave variable} oo_.osr.objective_function
 After an execution of the @code{osr} command, this variable contains
 the value of the objective under optimal policy.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.osr.optim_params
+After an execution of the @code{osr} command, this variable contains
+the value of parameters at the optimum, stored in fields of the form
+@code{oo_.osr.optim_params.@var{PARAMETER_NAME}}.
 @end defvr
 
 @deffn Command ramsey_policy [@var{VARIABLE_NAME}@dots{}];
