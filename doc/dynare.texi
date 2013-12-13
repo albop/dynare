@@ -9237,6 +9237,44 @@ do3 = dseries([1; 2; 3], 1999Q3, @{`var123'@}, @{`var_@{123@}'@});
 
 @noindent A list of the available methods, by alphabetical order, is given below.
 
+@deftypefn {dseries} {@var{A} =} abs (@var{B})
+
+Overloads the @code{abs()} function for @dseries objects. Returns the absolute value of the variables in @dseries object @var{B}.
+
+@examplehead
+@example
+>> ts0 = dseries(randn(3,2),'1973Q1',@{'A1'; 'A2'@},@{'A_1'; 'A_2'@});
+>> ts1 = ts0.abs();
+>> ts0
+ 
+ts0 is a dseries object:
+ 
+       | A1       | A2     
+1973Q1 | -0.67284 | 1.4367 
+1973Q2 | -0.51222 | -0.4948
+1973Q3 | 0.99791  | 0.22677
+ 
+>> ts1
+ 
+ts1 is a dseries object:
+ 
+       | abs(A1) | abs(A2)
+1973Q1 | 0.67284 | 1.4367 
+1973Q2 | 0.51222 | 0.4948 
+1973Q3 | 0.99791 | 0.22677
+ 
+>> ts1.tex
+
+ans = 
+
+    '|A_1|'
+    '|A_2|'
+@end example
+
+@end deftypefn
+
+@sp 1
+
 @deftypefn {dseries} {[@var{A}, @var{B}] = } align (@var{A}, @var{B})
 
 If @dseries objects @var{A} and @var{B} are defined on different time ranges, this function extends @var{A} and/or @var{B} with NaNs so that they are defined on the same time range. Note that both @dseries objects must have the same frequency.
