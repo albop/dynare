@@ -142,7 +142,7 @@ MODFILES = \
 	ep/rbc.mod \
 	ep/rbc2.mod \
 	ep/rbcii.mod \
-	ep/linear.mod \
+	ep/linearmodel.mod \
 	deterministic_simulations/deterministic_model_purely_forward.mod \
 	deterministic_simulations/deterministic_model_purely_backward.mod \
 	deterministic_simulations/rbc_det1.mod \
