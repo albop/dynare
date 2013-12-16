@@ -40,6 +40,6 @@ options_.ep.order = 1;
 options_.ep.nnodes = 3;
 sts = extended_path([],100);
 
-if max(max(abs(ts-sts))) > 1e-12
-   error('extended path algorithm fails in ./tests/ep/linear.mod')
+if max(max(abs(ts.data-sts.data))) > 1e-12
+   error('extended path algorithm fails in ./tests/ep/linearmodel.mod')
 end
