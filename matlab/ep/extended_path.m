@@ -115,7 +115,7 @@ bytecode_flag = options_.ep.use_bytecode;
 % Simulate shocks.
 switch options_.ep.innovation_distribution
   case 'gaussian'
-      oo_.ep.shocks = randn(sample_size,effective_number_of_shocks)*covariance_matrix_upper_cholesky;
+      oo_.ep.shocks = transpose(transpose(covariance_matrix_upper_cholesky)*randn(effective_number_of_shocks,sample_size));
   otherwise
     error(['extended_path:: ' options_.ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
