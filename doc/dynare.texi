@@ -4507,7 +4507,7 @@ draws)}
 @anchor{posterior_max_subsample_draws} maximum number  of draws from the
 MCMC used to compute posterior distribution of various objects (smoothed
 variable, smoothed shocks, forecast, moments,  IRF), if not overriden by
-option @ref{sub_draws}.
+option @ref{sub_draws}. Default: @code{1200}
 
 @item mh_nblocks = @var{INTEGER}
 @anchor{mh_nblocks} Number of parallel chains for Metropolis-Hastings algorithm. Default:
