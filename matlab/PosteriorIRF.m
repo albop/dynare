@@ -110,7 +110,7 @@ elseif strcmpi(type,'gsa')
     NumberOfDraws=size(x,1);
     B=NumberOfDraws; options_.B = B;
 else% type = 'prior'
-    NumberOfDraws = 500;
+    NumberOfDraws = options_.prior_draws;
 end
 if ~strcmpi(type,'gsa')
     B = min([round(.5*NumberOfDraws),500]); options_.B = B;
