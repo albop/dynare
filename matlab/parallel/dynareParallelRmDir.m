@@ -49,6 +49,10 @@ if sum(ok)<7,
     error('The name of the remote tmp folder does not comply the security standards!'),
 end
 
+if isoctave
+    confirm_recursive_rmdir(false, 'local');
+end
+
 for indPC=1:length(Parallel),
     ok(1)=isempty(strfind(Parallel(indPC).RemoteDirectory,'..'));
     if sum(ok)<7,
@@ -64,17 +68,8 @@ for indPC=1:length(Parallel),
             [stat NonServe] = system(['ssh ',ssh_token,' ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -fr ',Parallel(indPC).RemoteDirectory,'/',PRCDir,]);
             break;
         else
-            if isoctave % Patch for peculiar behaviour of rmdir under Windows.
-                                        % It is necessary because the command rmdir always ask at the user to confirm your decision before
-                                        % deleting a directory: this stops the computation! The Octave native function 'confirm_recursive_rmdir'
-                                        % disable this mechanism.
-                val = confirm_recursive_rmdir (false, 'local');
-                [stat, mess, id] = rmdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir],'s');
-                
-            else
-                [stat, mess, id] = rmdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir],'s');
-            end
-            
+            [stat, mess, id] = rmdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir],'s');
+
             if stat==1,
                 break,
             else
