@@ -4494,12 +4494,20 @@ algorithm. For the time being, @code{mh_replic} should be larger than
 @code{1200}. Default: @code{20000}
 
 @item sub_draws = @var{INTEGER}
-@anchor{sub_draws} number of draws from the Metropolis iterations that
-are used to compute posterior distribution of various objects (smoothed
-variable, smoothed shocks, forecast, moments, IRF). @code{sub_draws} should be smaller than
-the total number of Metropolis draws available. Default:
-@code{min(1200,0.25*Total number of draws)}
+@anchor{sub_draws}  number of  draws  from  the MCMC  that  are used  to
+compute posterior  distribution of  various objects  (smoothed variable,
+smoothed shocks,  forecast, moments,  IRF).  The  draws used  to compute
+these posterior moments are sampled uniformly in the estimated empirical
+posterior  distribution (@i{ie}  draws of  the MCMC).   @code{sub_draws}
+should  be  smaller than  the  total  number  of MCMC  draws  available.
+Default:  @code{min(posterior_max_subsample_draws,0.25*Total  number  of
+draws)}
 
+@item posterior_max_subsample_draws = @var{INTEGER}
+@anchor{posterior_max_subsample_draws} maximum number  of draws from the
+MCMC used to compute posterior distribution of various objects (smoothed
+variable, smoothed shocks, forecast, moments,  IRF), if not overriden by
+option @ref{sub_draws}.
 
 @item mh_nblocks = @var{INTEGER}
 @anchor{mh_nblocks} Number of parallel chains for Metropolis-Hastings algorithm. Default:

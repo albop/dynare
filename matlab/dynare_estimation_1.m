@@ -827,14 +827,23 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         else
             load([M_.fname '_results'],'oo_');
         end
-        metropolis_draw(1);
+        error_flag = metropolis_draw(1);
         if options_.bayesian_irf
+            if error_flag
+                error('Estimation::mcmc: I cannot compute the posterior IRFs!')
+            end
             PosteriorIRF('posterior');
         end
         if options_.moments_varendo
+            if error_flag
+                error('Estimation::mcmc: I cannot compute the posterior moments for the endogenous variables!')
+            end
             oo_ = compute_moments_varendo('posterior',options_,M_,oo_,var_list_);
         end
         if options_.smoother || ~isempty(options_.filter_step_ahead) || options_.forecast
+            if error_flag
+                error('Estimation::mcmc: I cannot compute the posterior statistics!')
+            end
             prior_posterior_statistics('posterior',dataset_);
         end
         xparam = get_posterior_parameters('mean');

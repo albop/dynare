@@ -95,9 +95,8 @@ end
 delete([MhDirectoryName filesep M_.fname '_IRF_DSGEs*.mat']);
 delete([MhDirectoryName filesep M_.fname '_IRF_BVARDSGEs*.mat']);
 if strcmpi(type,'posterior')
-    load_last_mh_history_file(MhDirectoryName, M_.fname);
-    TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+    B = options_.sub_draws;
+    options_.B = B;
 elseif strcmpi(type,'gsa')
     RootDirectoryName = CheckPath('gsa',M_.dname);
     if options_.opt_gsa.pprior
@@ -107,13 +106,10 @@ elseif strcmpi(type,'gsa')
     end
     x=[lpmat0(istable,:) lpmat(istable,:)];
     clear lpmat istable
-    NumberOfDraws=size(x,1);
-    B=NumberOfDraws; options_.B = B;
+    B=size(x,1); options_.B = B;
 else% type = 'prior'
-    NumberOfDraws = options_.prior_draws;
-end
-if ~strcmpi(type,'gsa')
-    B = min([round(.5*NumberOfDraws),500]); options_.B = B;
+    B = options_.prior_draws;
+    options_.B = B;
 end
 try 
     delete([MhDirectoryName filesep M_.fname '_irf_dsge*.mat'])

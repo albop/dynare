@@ -32,6 +32,9 @@ function [xparams, logpost]=metropolis_draw(init)
 global options_ estim_params_ M_
 persistent mh_nblck NumberOfDraws BaseName FirstLine FirstMhFile MAX_nruns
 
+xparams = 0;
+logpost = 0;
+
 if init
     nvx  = estim_params_.nvx;
     nvn  = estim_params_.nvn;
@@ -39,7 +42,6 @@ if init
     ncn  = estim_params_.ncn;
     np   = estim_params_.np ;
     npar = nvx+nvn+ncx+ncn+np;
-    
     MetropolisFolder = CheckPath('metropolis',M_.dname);
     FileName = M_.fname;
     BaseName = [MetropolisFolder filesep FileName];
@@ -52,6 +54,18 @@ if init
     NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
     MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
     mh_nblck = options_.mh_nblck;
+    % set sub_draws option if empty
+    if isempty(options_.sub_draws)
+        options_.sub_draws = min(options_.posterior_max_subsample_draws, round(.25*NumberOfDraws));
+    else
+        if options_.sub_draws>NumberOfDraws
+            skipline()
+            disp(['Estimation::mcmc: The value of option sub_draws (' num2str(options_.sub_draws) ') is greater than the number of available draws in the MCMC (' num2str(NumberOfDraws) ')!'])
+            disp('Estimation::mcmc: You can either change the value of sub_draws, reduce the value of mh_drop, or run another mcmc (with the load_mh_file option).')
+            skipline()
+            xparams = 1; % xparams is interpreted as an error flag
+        end
+    end
     return
 end
 

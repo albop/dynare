@@ -69,21 +69,7 @@ maxlag = M_.maximum_endo_lag;
 
 if strcmpi(type,'posterior')
     DirectoryName = CheckPath('metropolis',M_.dname);
-    load_last_mh_history_file(DirectoryName, M_.fname);
-    FirstMhFile = record.KeepedDraws.FirstMhFile;
-    FirstLine = record.KeepedDraws.FirstLine;
-    TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles;
-    TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
-    clear record;
-    if ~isempty(options_.sub_draws)
-        B = options_.sub_draws;
-        if B > NumberOfDraws
-            B = NumberOfDraws;
-        end
-    else
-        B = min(1200, round(0.25*NumberOfDraws));
-    end
+    B = options_.sub_draws;
 elseif strcmpi(type,'gsa')
     RootDirectoryName = CheckPath('gsa',M_.dname);
     if options_.opt_gsa.pprior
@@ -99,8 +85,7 @@ elseif strcmpi(type,'gsa')
         x=lpmat(istable,:);
     end
     clear lpmat lpmat0 istable
-    NumberOfDraws=size(x,1);
-    B=NumberOfDraws; 
+    B = size(x,1);
 elseif strcmpi(type,'prior')
     DirectoryName = CheckPath('prior',M_.dname);
     B = options_.prior_draws;
