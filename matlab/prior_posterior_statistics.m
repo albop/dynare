@@ -103,11 +103,7 @@ elseif strcmpi(type,'gsa')
     B=NumberOfDraws; 
 elseif strcmpi(type,'prior')
     DirectoryName = CheckPath('prior',M_.dname);
-    if ~isempty(options_.subdraws)
-        B = options_.subdraws;
-    else
-        B = 1200;
-    end
+    B = options_.prior_draws;
 end
 
 MAX_nruns = min(B,ceil(MaxNumberOfBytes/(npar+2)/8));

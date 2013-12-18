@@ -262,6 +262,8 @@ options_.xls_sheet = 1; % Octave does not support the empty string, rather use f
 options_.xls_range = '';
 
 % Prior draws
+options_.prior_draws = 10000;
+
 options_.forecast = 0;
 
 % Model
