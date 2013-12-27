@@ -32,6 +32,9 @@ function sim1()
 
 global M_ options_ oo_
 
+endogenous_terminal_period = options_.endogenous_terminal_period;
+vperiods = options_.periods*ones(1,options_.simul.maxit);
+
 lead_lag_incidence = M_.lead_lag_incidence;
 
 ny = M_.endo_nbr;
@@ -79,7 +82,6 @@ z = Y(find(lead_lag_incidence'));
 
 A = sparse([],[],[],periods*ny,periods*ny,periods*nnz(jacobian));
 res = zeros(periods*ny,1);
-
     
 h1 = clock ;
 for iter = 1:options_.simul.maxit
@@ -88,11 +90,10 @@ for iter = 1:options_.simul.maxit
     i_rows = 1:ny;
     i_cols = find(lead_lag_incidence');
     i_cols_A = i_cols;
-    
+
     for it = (M_.maximum_lag+1):(M_.maximum_lag+periods)
 
-        [d1,jacobian] = model_dynamic(Y(i_cols),exo_simul, params, ...
-                                      steady_state,it);
+        [d1,jacobian] = model_dynamic(Y(i_cols), exo_simul, params, steady_state,it);
         if it == M_.maximum_lag+periods && it == M_.maximum_lag+1
             A(i_rows,i_cols_A0) = jacobian(:,i_cols_0);
         elseif it == M_.maximum_lag+periods
@@ -105,8 +106,17 @@ for iter = 1:options_.simul.maxit
 
         res(i_rows) = d1;
         
+        if endogenous_terminal_period && iter>1
+            dr = max(abs(d1));
+            if 10000*dr<options_.dynatol.f && 100*max(abs(res(i_rows(end)+1:end)))<options_.dynatol.f
+                vperiods(iter) = it;
+                break
+            end
+        end
+    
         i_rows = i_rows + ny;
         i_cols = i_cols + ny;
+        
         if it > M_.maximum_lag+1
             i_cols_A = i_cols_A + ny;
         end
@@ -125,7 +135,12 @@ for iter = 1:options_.simul.maxit
         break
     end
 
-    dy = -A\res;
+    if endogenous_terminal_period && iter>1
+        dy = zeros(length(i_upd),1);
+        dy(1:i_rows(end)) = -A(1:i_rows(end),1:i_rows(end))\res(1:i_rows(end));
+    else
+        dy = -A\res;
+    end
     
     Y(i_upd) =   Y(i_upd) + dy;
 
@@ -137,6 +152,7 @@ if stop
         oo_.deterministic_simulation.status = 0;% NaN or Inf occurred
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
+        oo_.deterministic_simulation.periods = vperiods(1:iter);
         oo_.endo_simul = reshape(Y,ny,periods+2);
         skipline();
         fprintf('\nSimulation terminated after %d iterations.\n',iter);
@@ -150,6 +166,7 @@ if stop
         oo_.deterministic_simulation.status = 1;% Convergency obtained.
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
+        oo_.deterministic_simulation.periods = vperiods(1:iter);
         oo_.endo_simul = reshape(Y,ny,periods+2);
     end
 elseif ~stop
@@ -159,9 +176,9 @@ elseif ~stop
     fprintf('WARNING : maximum number of iterations is reached (modify options_.simul.maxit).\n') ;
     oo_.deterministic_simulation.status = 0;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
+    oo_.deterministic_simulation.periods = vperiods(1:iter);
     %oo_.deterministic_simulation.errors = c/abs(err)    
     oo_.deterministic_simulation.iterations = options_.simul.maxit;
 end
 disp (['-----------------------------------------------------']) ;
 skipline();
-

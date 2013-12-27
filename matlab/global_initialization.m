@@ -273,6 +273,7 @@ options_.linear = 0;
 options_.stack_solve_algo = 0;
 options_.markowitz = 0.5;
 options_.minimal_solving_periods = 1;
+options_.endogenous_terminal_period = 0;
 
 % Solution
 options_.order = 2;
