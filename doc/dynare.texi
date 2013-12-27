@@ -3194,6 +3194,13 @@ for the number of periods set in the option @code{periods}.
 @item periods = @var{INTEGER}
 Number of periods of the simulation
 
+@item endogenous_terminal_period
+The  number of  periods is  not constant  across Newton  iterations when
+solving the perfect foresight model. The size of the nonlinear system of
+equations  by  removing  the  portions  of  the  paths  (and  associated
+equations) for which the solution has already been identified (up to the
+tolerance parameter).
+
 @item maxit = @var{INTEGER}
 Determines the maximum number of iterations used in the non-linear solver.
 The default value of @code{maxit} is 10. The @code{maxit} option is shared with the
