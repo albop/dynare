@@ -72,6 +72,7 @@ i_upd = ny+(1:periods*ny);
 
 Y = endo_simul(:);
 
+skipline()
 disp (['-----------------------------------------------------']) ;
 fprintf('MODEL SIMULATION:\n');
 
@@ -146,6 +147,10 @@ for iter = 1:options_.simul.maxit
 
 end
 
+if endogenous_terminal_period
+    err = evaluate_max_dynamic_residual(model_dynamic, Y, oo_.exo_simul, params, steady_state, periods, ny, max_lag, lead_lag_incidence);
+end
+
 
 if stop
     if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
@@ -156,13 +161,14 @@ if stop
         oo_.endo_simul = reshape(Y,ny,periods+2);
         skipline();
         fprintf('\nSimulation terminated after %d iterations.\n',iter);
-        fprintf('Total time of simulation        : %10.3f\n',etime(clock,h1));
+        fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
         error('Simulation terminated with NaN or Inf in the residuals or endogenous variables. There is most likely something wrong with your model.');
     else
         skipline();
         fprintf('\nSimulation concluded successfully after %d iterations.\n',iter);
-        fprintf('Total time of simulation        : %10.3f\n',etime(clock,h1));
-        fprintf('Convergency obtained.\n');
+        fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
+        fprintf('Max. Abs. Error         : %16.13f\n',err);
+        fprintf('Convergency obtained!\n');
         oo_.deterministic_simulation.status = 1;% Convergency obtained.
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
@@ -172,12 +178,12 @@ if stop
 elseif ~stop
     skipline();
     fprintf('\nSimulation terminated after %d iterations.\n',iter);
-    fprintf('Total time of simulation        : %10.3f\n',etime(clock,h1));
+    fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
+    fprintf('Max. Abs. Error         : %16.13f\n',err);
     fprintf('WARNING : maximum number of iterations is reached (modify options_.simul.maxit).\n') ;
     oo_.deterministic_simulation.status = 0;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
     oo_.deterministic_simulation.periods = vperiods(1:iter);
-    %oo_.deterministic_simulation.errors = c/abs(err)    
     oo_.deterministic_simulation.iterations = options_.simul.maxit;
 end
 disp (['-----------------------------------------------------']) ;
