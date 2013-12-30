@@ -52,7 +52,7 @@ A number of tools and libraries are needed in order to recompile everything. You
 - [MATLAB](http://www.dynare.org/DynareWiki/BuildingDynareFromSource?action=AttachFile&do=view&target=dynare-mingw64-libs.zip) (if you want to compile MEX for MATLAB)
 - [GNU Octave](http://www.octave.org), with the development headers (if you want to compile MEX for Octave)
 - [Boost libraries](http://www.boost.org), version 1.36 or later
-- [Bison](http://www.gnu.org/software/bison/), version 2.3 or later (only if you get the source through Git)
+- [Bison](http://www.gnu.org/software/bison/), version 2.4 or later (only if you get the source through Git)
 - [Flex](http://flex.sourceforge.net/), version 2.5.4 or later (only if you get the source through Git)
 - [Autoconf](http://www.gnu.org/software/autoconf/), version 2.62 or later (only if you get the source through Git) (see [Installing an updated version of Autoconf in your own directory, in GNU/Linux](http://www.dynare.org/DynareWiki/AutoMake))
 - [Automake](http://www.gnu.org/software/automake/), version 1.11.2 or later (only if you get the source through Git) (see [Installing an updated version of AutoMake in your own directory, in GNU/Linux](http://www.dynare.org/DynareWiki/AutoMake))
@@ -257,24 +257,21 @@ Configure and make:
 
 - Install [Homebrew](http://mxcl.github.io/homebrew/) and [Homebrew Science](https://github.com/Homebrew/homebrew-science)
 - Install the following brews:
-```
-    brew install automake
-    brew install gsl
-    brew install boost
-    brew install gfortran
-    brew install matlab2tikz --HEAD
-    brew install libmatio --with-hdf5
-    brew install slicot --with-default-integer-8
-```
+    - ```brew install automake```
+    - ```brew install gsl```
+    - ```brew install bison```
+    - ```brew install boost```
+    - ```brew install gfortran```
+    - ```brew install matlab2tikz --HEAD```
+    - ```brew install libmatio --with-hdf5```
+    - ```brew install slicot --with-default-integer-8```
 - **(Optional)** To compile Dynare mex files for use on Octave, first install Octave following the [Simple Installation Instructions](http://wiki.octave.org/Octave_for_MacOS_X#Simple_Installation_Instructions_3). Then, you will probably also want to install graphicsmagick via Homebrew with `brew install graphicsmagick`.
 - **(Optional)** To compile Dynare's documentation, first install the latest version of [MacTeX](http://www.tug.org/mactex/). Then install `doxygen`, `latex2html` and `texi2html` via Homebrew with the following commands:
-```
-    brew install doxygen
-    brew install latex2html
-    brew install texi2html
-```
+    - ```brew install doxygen```
+    - ```brew install latex2html```
+    - ```brew install texi2html```
 - **(On OS X 10.7 Only)** Copy [FlexLexer.h](http://www.dynare.org/DynareWiki/BuildingDynareFromSource?action=AttachFile&do=view&target=FlexLexer.h) into the `preprocessor` directory (there was an error in the `FlexLexer.h` file distributed with 10.7)
 - Finally, switch to the root dynare directory. Ensure your path contains `/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/X11/bin:/usr/texbin:/usr/local/sbin`. Run:
     - `autoconf -si`
-    - `./configure --with-matlab=/Applications/MATLAB_R2013a.app MATLAB_VERSION=8.1` for builds with Matlab or `./configure` for builds just using Octave
+    - `./configure --with-matlab=/Applications/MATLAB_R2013a.app MATLAB_VERSION=8.1 YACC=/usr/local/Cellar/bison/<<BISON VERSION>>/bin/bison`
     - `make`
