@@ -69,17 +69,15 @@ histval;
 Capital(0) = CapitalSS/2;
 end;
 
-//options_.endogenous_terminal_period = 0;
 simul(periods=500);
 fff = oo_.endo_simul;
 
-oo_.deterministic_simulation
-
-//options_.endogenous_terminal_period = 1;
 simul(periods=500, endogenous_terminal_period);
 ggg = oo_.endo_simul;
 
-oo_.deterministic_simulation
-
-t1 = fff-ggg;
+t1 = abs(fff-ggg);
 t2 = max(max(t1));
+
+if t2>1e-5
+    error('sim1::endogenous_terminal_period: round off error is greater than 1e-5!')
+end
