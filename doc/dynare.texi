@@ -3197,9 +3197,12 @@ Number of periods of the simulation
 @item endogenous_terminal_period
 The  number of  periods is  not constant  across Newton  iterations when
 solving the perfect foresight model. The size of the nonlinear system of
-equations  by  removing  the  portions  of  the  paths  (and  associated
-equations) for which the solution has already been identified (up to the
-tolerance parameter).
+equations  is  reduced  by  removing  the  portion  of  the  paths  (and
+associated equations) for which the solution has already been identified
+(up to the  tolerance parameter). This strategy can be  interpreted as a
+mix  of the  shooting and  relaxation  approaches. Note  that round  off
+errors are  more important with  this mixed strategy (user  should check
+the reported value of the maximum absolute error).
 
 @item maxit = @var{INTEGER}
 Determines the maximum number of iterations used in the non-linear solver.
