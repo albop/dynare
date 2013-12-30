@@ -3202,7 +3202,8 @@ associated equations) for which the solution has already been identified
 (up to the  tolerance parameter). This strategy can be  interpreted as a
 mix  of the  shooting and  relaxation  approaches. Note  that round  off
 errors are  more important with  this mixed strategy (user  should check
-the reported value of the maximum absolute error).
+the reported value  of the maximum absolute error).  Only available with
+option @code{stack_solve_algo==0}.
 
 @item maxit = @var{INTEGER}
 Determines the maximum number of iterations used in the non-linear solver.
