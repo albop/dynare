@@ -259,6 +259,7 @@ Configure and make:
 - Install the following brews:
     - ```brew install automake```
     - ```brew install gsl```
+    - ```brew install bison```
     - ```brew install boost```
     - ```brew install gfortran```
     - ```brew install matlab2tikz --HEAD```
@@ -272,5 +273,5 @@ Configure and make:
 - **(On OS X 10.7 Only)** Copy [FlexLexer.h](http://www.dynare.org/DynareWiki/BuildingDynareFromSource?action=AttachFile&do=view&target=FlexLexer.h) into the `preprocessor` directory (there was an error in the `FlexLexer.h` file distributed with 10.7)
 - Finally, switch to the root dynare directory. Ensure your path contains `/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/X11/bin:/usr/texbin:/usr/local/sbin`. Run:
     - `autoconf -si`
-    - `./configure --with-matlab=/Applications/MATLAB_R2013a.app MATLAB_VERSION=8.1` for builds with Matlab or `./configure` for builds just using Octave
+    - `./configure --with-matlab=/Applications/MATLAB_R2013a.app MATLAB_VERSION=8.1 YACC=/usr/local/Cellar/bison/<<BISON VERSION>>/bin/bison`
     - `make`
