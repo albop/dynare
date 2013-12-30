@@ -34,6 +34,7 @@ global M_ options_ oo_
 
 endogenous_terminal_period = options_.endogenous_terminal_period;
 vperiods = options_.periods*ones(1,options_.simul.maxit);
+azero = options_.dynatol.f/1e7;
 
 lead_lag_incidence = M_.lead_lag_incidence;
 
@@ -83,7 +84,11 @@ z = Y(find(lead_lag_incidence'));
 
 A = sparse([],[],[],periods*ny,periods*ny,periods*nnz(jacobian));
 res = zeros(periods*ny,1);
-    
+
+o_periods = periods;
+
+ZERO = zeros(length(i_upd),1);
+
 h1 = clock ;
 for iter = 1:options_.simul.maxit
     h2 = clock ;
@@ -109,8 +114,9 @@ for iter = 1:options_.simul.maxit
         
         if endogenous_terminal_period && iter>1
             dr = max(abs(d1));
-            if 10000*dr<options_.dynatol.f && 100*max(abs(res(i_rows(end)+1:end)))<options_.dynatol.f
+            if dr<azero
                 vperiods(iter) = it;
+                periods = it-M_.maximum_lag;
                 break
             end
         end
@@ -124,6 +130,7 @@ for iter = 1:options_.simul.maxit
     end
         
     err = max(abs(res));
+    
     if options_.debug
         fprintf('\nLargest absolute residual at iteration %d: %10.3f\n',iter,err);    
         if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
@@ -131,13 +138,14 @@ for iter = 1:options_.simul.maxit
         end
         skipline()
     end
+    
     if err < options_.dynatol.f
         stop = 1 ;
         break
     end
 
     if endogenous_terminal_period && iter>1
-        dy = zeros(length(i_upd),1);
+        dy = ZERO;
         dy(1:i_rows(end)) = -A(1:i_rows(end),1:i_rows(end))\res(1:i_rows(end));
     else
         dy = -A\res;
@@ -148,7 +156,8 @@ for iter = 1:options_.simul.maxit
 end
 
 if endogenous_terminal_period
-    err = evaluate_max_dynamic_residual(model_dynamic, Y, oo_.exo_simul, params, steady_state, periods, ny, max_lag, lead_lag_incidence);
+    err = evaluate_max_dynamic_residual(model_dynamic, Y, oo_.exo_simul, params, steady_state, o_periods, ny, max_lag, lead_lag_incidence);
+    periods = o_periods;
 end
 
 
