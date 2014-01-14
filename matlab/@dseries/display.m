@@ -61,5 +61,7 @@ end
 disp(vspace)
 disp([inputname(1) ' is a dseries object:'])
 disp(vspace);
-disp(TABLE);
-disp(vspace);
+if ~isempty(strtrim(TABLE))
+    disp(TABLE);
+    disp(vspace);
+end
