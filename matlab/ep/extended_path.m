@@ -35,8 +35,11 @@ global M_ options_ oo_
 options_.verbosity = options_.ep.verbosity;
 verbosity = options_.ep.verbosity+options_.ep.debug;
 
+% Set maximum number of iterations for the deterministic solver.
+options_.simul.maxit = options_.ep.maxit;
+
 % Prepare a structure needed by the matlab implementation of the perfect foresight model solver
-pfm = setup_stochastic_perfect_foresight_model_solver(M_,options_,oo_,'Tensor-Gaussian-Quadrature');
+pfm = setup_stochastic_perfect_foresight_model_solver(M_,options_,oo_);
 
 exo_nbr = M_.exo_nbr;
 periods = options_.periods;
@@ -53,8 +56,6 @@ if isempty(initial_conditions)
     end
 end
 
-% Set maximum number of iterations for the deterministic solver.
-options_.simul.maxit = options_.ep.maxit;
 
 % Set the number of periods for the perfect foresight model
 periods = options_.ep.periods;
@@ -185,7 +186,7 @@ while (t<sample_size)
                             solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
                         case 1
                           [flag,tmp] = ...
-                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
+                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_.ep,pfm1,options_.ep.stochastic.order);
                     end
                 end
             end
@@ -263,7 +264,14 @@ while (t<sample_size)
                 if options_.ep.stochastic.order == 0
                     [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
                 else
-                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.nodes,options_.ep.stochastic.order);
+                    switch(options_.ep.stochastic.algo)
+                        case 0
+                        [flag,tmp] = ...
+                            solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
+                        case 1
+                          [flag,tmp] = ...
+                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_.ep,pfm1,options_.ep.stochastic.order);
+                    end
                 end
             end
             info_convergence = ~flag;

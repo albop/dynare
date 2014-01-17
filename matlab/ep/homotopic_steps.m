@@ -33,12 +33,13 @@ exxo_simul = exo_simul0;
 initial_step_length = step_length;
 max_iter = 1000/step_length;
 weight   = initial_weight;
-verbose  = options_.ep.debug;
+verbose  = options_.ep.verbosity;
 
 reduce_step_flag = 0;
 
 if verbose
     format long
+    disp('Entering homotopic_steps')
 end
 
 % (re)Set iter.
@@ -82,9 +83,7 @@ while weight<1
         end
     end
     if info.convergence
-        %if d<stochastic_extended_path_depth
-            endo_simul0 = tmp;
-            %end
+        endo_simul0 = tmp;
         jter = jter + 1;
         if jter>3
             if verbose

@@ -1,4 +1,4 @@
-function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,pfm,nnodes,order)
+function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,EpOptions,pfm,order)
 
 % Copyright (C) 2012-2013 Dynare Team
 %
@@ -35,6 +35,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
     i_cols_T = nonzeros(lead_lag_incidence(1:2,:)');
     hybrid_order = pfm.hybrid_order;
     dr = pfm.dr;
+    [nodes,weights,nnodes] = setup_integration_nodes(EpOptions,pfm);
     
     maxit = pfm.maxit_;
     tolerance = pfm.tolerance;
@@ -42,32 +43,16 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
 
     number_of_shocks = size(exo_simul,2);
 
-    [nodes,weights] = gauss_hermite_weights_and_nodes(nnodes);
-    
     % make sure that there is a node equal to zero
     % and permute nodes and weights to have zero first
-    k = find(abs(nodes) < 1e-12);
+    k = find(sum(abs(nodes),2) < 1e-12);
     if ~isempty(k)
-        nodes = [nodes(k); nodes(1:k-1); nodes(k+1:end)];
+        nodes = [nodes(k,:); nodes(1:k-1,:); nodes(k+1:end,:)];
         weights = [weights(k); weights(1:k-1); weights(k+1:end)];
     else
         error('there is no nodes equal to zero')
     end
    
-    if number_of_shocks>1
-        nodes = repmat(nodes,1,number_of_shocks)*chol(pfm.Sigma);
-        % to be fixed for Sigma ~= I
-        for i=1:number_of_shocks
-            rr(i) = {nodes(:,i)};
-            ww(i) = {weights};
-        end
-        nodes = cartesian_product_of_sets(rr{:});
-        weights = prod(cartesian_product_of_sets(ww{:}),2);
-        nnodes = nnodes^number_of_shocks;
-    else
-        nodes = nodes*sqrt(pfm.Sigma);
-    end
-    
     if hybrid_order > 0
         if hybrid_order == 2
             h_correction = 0.5*dr.ghs2(dr.inv_order_var);
@@ -90,7 +75,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
     % The third row block is ny x nnodes^2
     % and so on until size ny x nnodes^order
     world_nbr = 1+(nnodes-1)*order;
-    Y = repmat(endo_simul(:),1,world_nbr);
+    Y = repmat(endo_simul(:),1,world_nbr); 
 
     % The columns of A map the elements of Y such that
     % each block of Y with ny rows are unfolded column wise
@@ -110,8 +95,8 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
         for i=2:periods
             k = n1:n2;
             for j=1:(1+(nnodes-1)*min(i-1,order))
-                i_upd_r(i1:i2) = (n1:n2)+(j-1)*ny*periods;
-                i_upd_y(i1:i2) = (n1:n2)+ny+(j-1)*ny*(periods+2);
+                i_upd_r(i1:i2) = k+(j-1)*ny*periods;
+                i_upd_y(i1:i2) = k+ny+(j-1)*ny*(periods+2);
                 i1 = i2+1;
                 i2 = i2+ny;
             end
@@ -174,7 +159,8 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
                                  Y(i_cols_s,1);
                                  Y(i_cols_f,k1)];
                         end
-                        [d1,jacobian] = dynamic_model(y,innovation,params,steady_state,i+1);
+                        [d1,jacobian] = dynamic_model(y,innovation, ...
+                                                      params,steady_state,i+1);
                         if i == 1
                             % in first period we don't keep track of
                             % predetermined variables
@@ -248,6 +234,12 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
             end
         end
         err = max(abs(res(i_upd_r)));
+        if verbose
+            [err1, k1] = max(abs(res));
+            [err2, k2] = max(abs(err1));
+            [err3, k3] = max(abs(err2));
+            disp([iter err k1(:,k2(:,:,k3),k3) k2(:,:,k3) k3])
+        end
         if err < tolerance
             stop = 1;
             if verbose
@@ -264,7 +256,18 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
             break
         end
         A2 = [nzA{:}]';
+        if any(isnan(A2(:,3))) || any(any(any(isnan(res))))
+            if verbose
+                disp(['solve_stochastic_foresight_model_1 encountered ' ...
+                      'NaN'])
+            end
+            flag = 1;
+            return
+        end
         A = [A1; sparse(A2(:,1),A2(:,2),A2(:,3),ny*(periods-order-1)*world_nbr,dimension)];
+        if verbose
+            disp(sprintf('condest %g',condest(A)))
+        end
         dy = -A\res(i_upd_r);
         Y(i_upd_y) =   Y(i_upd_y) + dy;
     end
@@ -276,6 +279,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
             fprintf('\n') ;
             disp(['WARNING : maximum number of iterations is reached (modify options_.simul.maxit).']) ;
             fprintf('\n') ;
+            disp(sprintf('err: %f',err));
         end
         flag = 1;% more iterations are needed.
         endo_simul = 1;
