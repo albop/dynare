@@ -18,7 +18,6 @@ function runDynareReport(dc_a, dc_q, db_a, db_q)
 
 
 larange= dates('2007a'):dates('2014a');
-arange = dates('2012a'):dates('2014a');
 trange = dates('2012q2'):dates('2014q4');
 prange = dates('2007q1'):dates('2013q4');
 forecast_date = dates('2012q2');
