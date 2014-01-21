@@ -10861,11 +10861,11 @@ Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @item data, @code{dseries}
 @xref{data}.
 
-@item graphLineColor, @code{MATLAB_COLOR}
-Color to use for the series in a graph. Default: @code{`k'}
+@item graphLineColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
+Color to use for the series in a graph. Default: @code{`black'}
 
-@item graphLineStyle, @code{`none'} | @code{`-'} | @code{`--'} | @code{`:'} | @code{`-.'}
-Line style for this series in a graph. Default: @code{'-'}
+@item graphLineStyle, @code{`none'} | @code{`solid'} | @code{`dotted'} | @code{`densely dotted'} | @code{`loosely dotted'} | @code{`dashed'} | @code{`densely dashed'} | @code{`loosely dashed'} | @code{`dashdotted'} | @code{`densely dashdotted'} | @code{`loosely dashdotted'} | @code{`dashdotdotted'} | @code{`densely dashdotdotted'} | @code{`loosely dashdotdotted'}
+Line style for this series in a graph. Default: @code{`solid'}
 
 @item graphLineWidth @code{DOUBLE}
 Line width for this series in a graph. Default: @code{0.5}
