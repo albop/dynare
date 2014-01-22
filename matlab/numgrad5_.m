@@ -1,11 +1,11 @@
-function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,f0,x,epsilon,varargin)
+function [g, badg] = numgrad5(fcn,f0,x,epsilon,varargin)
 % Computes the gradient of the objective function fcn using a five points
 % formula if possible.
 %
 % Adapted from Sims' numgrad.m routine.
 %
 % See section 25.3.6 Abramovitz and Stegun (1972, Tenth Printing, December) Handbook of Mathematical Functions.
-% http://www.math.sfu.ca/~cbm/aands/ 
+% http://www.math.sfu.ca/~cbm/aands/
 %
 % TODO Try Four points formula when cost_flag3=0 or cost_flag4=0.
 
@@ -13,7 +13,7 @@ function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,f0,x,epsilon,varargin)
 % http://sims.princeton.edu/yftp/optimize/mfiles/numgrad.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2008-2012 Dynare Team
+% Copyright (C) 2008-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
