@@ -10722,7 +10722,7 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableDataRhs, tableRowColor, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zerotol
+@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zerotol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @optionshead
 @table @code
@@ -10761,6 +10761,10 @@ followed by annual data. Default: @code{empty}
 @item tableRowColor, @code{STRING}
 The color that you want the row to be. Predefined values include
 @code{LightCyan} and @code{Gray}. Default: @code{white}.
+
+@item tableRowIndent, @code{INTEGER}
+The number of times to indent the name of the series in the
+table. Used to create subgroups of series. Default: @code{0}
 
 @item tableShowMarkers, @code{BOOLEAN}
 In a Table, if @code{true}, surround each cell with brackets and color
