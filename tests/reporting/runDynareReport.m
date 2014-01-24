@@ -16,7 +16,7 @@ function runDynareReport(dc_a, dc_q, db_a, db_q)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-
+tic
 larange= dates('2007a'):dates('2014a');
 trange = dates('2012q2'):dates('2014q4');
 prange = dates('2007q1'):dates('2013q4');
@@ -230,4 +230,5 @@ rep = rep.addSeries('data', dc_q{'LRPFOOD_BAR_WORLD'}, ...
 %% Write & Compile Report
 rep.write();
 rep.compile();
+toc
 end
