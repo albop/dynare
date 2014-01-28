@@ -713,6 +713,15 @@ These files may be looked at to understand errors reported at the simulation sta
 
 @code{dynare} will then run the computing tasks by executing @file{@var{FILENAME}.m}.
 
+A few words of warning is warranted here: the filename of the
+@file{.mod} file should be chosen in such a way that the generated
+@file{.m} files described above do not conflict with @file{.m} files
+provided by MATLAB/Octave or by Dynare. Not respecting this rule could
+cause crashes or unexpected behaviour. In particular, it means that
+the @file{.mod} file cannot be given the name of a MATLAB/Octave or
+Dynare command. Under Octave, it also means that the @file{.mod} file
+cannot be named @file{test.mod}.
+
 @optionshead
 
 @table @code
@@ -8920,7 +8929,7 @@ C = <dates: 1951Q1, 1951Q2, 1951Q3, 1951Q4>
 
 @sp 1
 
-@deftypefn{dates} {@var{C} =} setdiff(@var{A}, @var{B})
+@deftypefn{dates} {@var{C} =} setdiff (@var{A}, @var{B})
 
 Overloads the Matlab/Octave @code{setdiff} function. All the input arguments must be @dates objects. The returned argument is a @dates object all dates present in @var{A} but not in @var{B}. If @var{A} and @var{B} are disjoint @dates objects, the function returns @var{A}. Returned dates in @dates object @var{C} are sorted by increasing order.
 
