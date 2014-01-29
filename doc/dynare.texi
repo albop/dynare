@@ -9464,6 +9464,60 @@ Sanity check of @dseries object @var{A}. Returns @math{1} if there is an error, 
 
 @sp 1
 
+@deftypefn {dseries} {@var{B} = } cumprod (@var{A}[, @var{d}[, @var{v}]])
+
+Overloads the Matlab/Octave @code{cumprod} function for @dseries objects. The cumulated product cannot be computed if the variables in @dseries object @var{A} has @code{NaN}s. If a @dates object @var{d} is provided as a second argument, then the method computes the cumulated product with the additional constraint that the variables in the @dseries object @var{B} are equal to one in period @var{d}. If a single observation @dseries object @var{v} is provided as a third argument, the cumulated product in @var{B} is normalized such that @code{B(@var{d})} matches @var{v} (@dseries objects @var{A} and @var{v} must have the same number of variables).
+
+@examplehead
+@example
+>> ts1 = dseries(2*ones(7,1));
+>> ts2 = ts1.cumprod();
+>> ts2
+
+ts2 is a dseries object:
+
+   | cumprod(Variable_1)
+1Y | 2
+2Y | 4
+3Y | 8
+4Y | 16
+5Y | 32
+6Y | 64
+7Y | 128
+
+>> ts3 = ts1.cumsum(dates('3Y'));
+>> ts3
+
+ts3 is a dseries object:
+
+   | cumprod(Variable_1)
+1Y | 0.25
+2Y | 0.5
+3Y | 1
+4Y | 2
+5Y | 4
+6Y | 8
+7Y | 16
+
+>> ts4 = ts1.cumsum(dates('3Y'),dseries(pi));
+>> ts4
+
+ts4 is a dseries object:
+
+   | cumprod(Variable_1)
+1Y | 0.7854
+2Y | 1.5708
+3Y | 3.1416
+4Y | 6.2832
+5Y | 12.5664
+6Y | 25.1327
+7Y | 50.2655
+@end example
+
+@end deftypefn
+
+@sp 1
+
 @deftypefn {dseries} {@var{B} = } cumsum (@var{A}[, @var{d}[, @var{v}]])
 
 Overloads the Matlab/Octave @code{cumsum} function for @dseries objects. The cumulated sum cannot be computed if the variables in @dseries object @var{A} has @code{NaN}s. If a @dates object @var{d} is provided as a second argument, then the method computes the cumulated sum with the additional constraint that the variables in the @dseries object @var{B} are zero in period @var{d}. If a single observation @dseries object @var{v} is provided as a third argument, the cumulated sum in @var{B} is such that @code{B(@var{d})} matches @var{v} (@dseries objects @var{A} and @var{v} must have the same number of variables).
