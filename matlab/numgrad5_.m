@@ -30,12 +30,19 @@ function [g, badg] = numgrad5(fcn,f0,x,epsilon,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+rescale_step_length = 0;
+
 delta = epsilon;
 n = length(x);
 g = zeros(n,1);
 
 badg = 0;
-scale = []; % ones(n,1);
+
+if rescale_step_length
+    scale = [];
+else
+    scale = ones(n,1);
+end
 
 for i=1:n
     xiold = x(i);
