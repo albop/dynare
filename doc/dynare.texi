@@ -9542,7 +9542,7 @@ ts2 is a dseries object:
 9Y  | 9
 10Y | 10
 
->> ts3 = cumsum(dates('3Y'));
+>> ts3 = ts1.cumsum(dates('3Y'));
 >> ts3
 
 ts3 is a dseries object:
