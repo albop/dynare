@@ -21,11 +21,11 @@ function dataset_ = initialize_dataset(datafile,varobs,first,nobs,transformation
 % Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
 if isempty(datafile)
-    error('Estimation:: You have to declare a dataset file!')
+    error('Estimation::initialize_dataset: You have to declare a dataset file!')
 end
 
 if isempty(varobs)
-    error('Estimation:: You have to declare a set of observed variables')
+    error('Estimation::initialize_dataset: You have to declare a set of observed variables')
 end
 
 % Get raw data.
@@ -36,7 +36,7 @@ if isempty(nobs) || rows(rawdata)<nobs+first-1 %case 2: dataset has changed
     nobs = rows(rawdata)-first+1;
 end
 
-% Get the (default) prefilter option.
+% Set the (default) prefilter option.
 if isempty(prefilter)
     prefilter = 0;
 end
@@ -65,12 +65,17 @@ rawdata = rawdata(first:(first+dataset_.info.ntobs-1),:);
 if isempty(transformation)
     dataset_.rawdata = rawdata;
 else
+    if isequal(transformation,@log)
+        if ~isreal(rawdata)
+            error(['Estimation::initialize_dataset: Some of the variables have non positive observations, I cannot take the log of the data!'])
+        end
+    end
     dataset_.rawdata = arrayfun(transformation,rawdata);
 end
 
 % Test if the observations are real numbers.
 if ~isreal(dataset_.rawdata)
-    error('Estimation:: There are complex values in the data! Probably  a wrong (log) transformation...')
+    error('Estimation::initialize_dataset: There are complex values in the data!')
 end
 
 % Test for missing observations.
