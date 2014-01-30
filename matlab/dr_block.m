@@ -628,7 +628,7 @@ for i = 1:Size;
 
 
             
-            if options_.loglinear == 1
+            if options_.loglinear
                 error('log linear option is for the moment not supported in first order approximation for a block decomposed mode');
 %                 k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
 %                 klag = dr.kstate(k,[1 2]);
