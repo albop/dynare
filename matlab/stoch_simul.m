@@ -38,10 +38,6 @@ elseif options_.order == 3
     options_.k_order_solver = 1;
 end
 
-% if options_.loglinear == 1 && options_.periods>0
-%    error('The loglinear option does not work with periods>0.')
-% end
-
 if isempty(options_.qz_criterium)
     options_.qz_criterium = 1+1e-6;
 end
@@ -81,14 +77,14 @@ elseif options_.discretionary_policy
     end
     [oo_.dr,ys,info] = discretionary_policy_1(oo_,options_.instruments);
 else
-    if options_.logged_steady_state
+    if options_.logged_steady_state %if steady state was previously logged, undo this
         oo_.dr.ys=exp(oo_.dr.ys);
         oo_.steady_state=exp(oo_.steady_state);
     end
     [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 end
 
-if options_.loglinear
+if options_.loglinear %log steady state for correct display of decision rules and simulations
     oo_.dr.ys=log(oo_.dr.ys);
     oo_.steady_state=log(oo_.steady_state);
     options_old.logged_steady_state = 1;
