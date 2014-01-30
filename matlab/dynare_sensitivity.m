@@ -388,7 +388,7 @@ if options_gsa.glue,
     gend = options_.nobs;
     rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
     rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-    if options_.loglinear == 1
+    if options_.loglinear
         rawdata = log(rawdata);
     end
     if options_.prefilter == 1

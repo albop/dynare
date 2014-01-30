@@ -170,19 +170,19 @@ for b=1:B
                                              horizon+maxlag,1);
         end
         yf(:,IdObs) = yf(:,IdObs)+(gend+[1-maxlag:horizon]')*trend_coeff';
-        if options_.loglinear == 1
+        if options_.loglinear
             yf = yf+repmat(log(SteadyState'),horizon+maxlag,1);
         else
             yf = yf+repmat(SteadyState',horizon+maxlag,1);
         end
         yf1 = forcst2(yyyy,horizon,dr,1);
-        if options_.prefilter == 1
+        if options_.prefilter
             yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
                 repmat(bayestopt_.mean_varobs',[horizon+maxlag,1,1]);
         end
         yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-maxlag:horizon]')* ...
                                                trend_coeff',[1,1,1]);
-        if options_.loglinear == 1
+        if options_.loglinear
             yf1 = yf1 + repmat(log(SteadyState'),[horizon+maxlag,1,1]);
         else
             yf1 = yf1 + repmat(SteadyState',[horizon+maxlag,1,1]);

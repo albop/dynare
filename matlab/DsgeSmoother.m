@@ -74,7 +74,7 @@ bayestopt_.mf = bayestopt_.smoother_mf;
 if options_.noconstant
     constant = zeros(nobs,1);
 else
-    if options_.loglinear == 1
+    if options_.loglinear
         constant = log(SteadyState(bayestopt_.mfys));
     else
         constant = SteadyState(bayestopt_.mfys);
