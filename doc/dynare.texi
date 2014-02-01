@@ -9458,6 +9458,50 @@ The previous code should produce something like:
 
 @sp 1
 
+@deftypefn {dseries} {@var{C} = } chain (@var{A}, @var{B})
+
+Merge two @dseries objects along the time dimension. The two objects must have the same number of observed variables, and the initial date in @var{B} must not be posterior to the last date in @var{A}. The returned @dseries object, @var{C}, is built by extending @var{A} with the cumulated growth factors of @var{B}.
+
+@examplehead
+@example
+>> ts = dseries([1; 2; 3; 4],dates('1950Q1'))
+
+ts is a dseries object:
+
+       | Variable_1
+1950Q1 | 1
+1950Q2 | 2
+1950Q3 | 3
+1950Q4 | 4
+
+>> us = dseries([3; 4; 5; 6],dates('1950Q3'))
+
+us is a dseries object:
+
+       | Variable_1
+1950Q3 | 3.1
+1950Q4 | 4.1
+1951Q1 | 8.2
+1951Q2 | 16.4
+
+>> chain(ts, us)
+
+ans is a dseries object:
+
+       | Variable_1
+1950Q1 | 1
+1950Q2 | 2
+1950Q3 | 3
+1950Q4 | 4
+1951Q1 | 8
+1951Q2 | 16
+
+@end example
+
+@end deftypefn
+
+@sp 1
+
 @deftypefn {dseries} {[@var{error_flag}, @var{message} ] = } check (@var{A})
 
 Sanity check of @dseries object @var{A}. Returns @math{1} if there is an error, @math{0} otherwise. The second output argument is a string giving brief informations about the error.
