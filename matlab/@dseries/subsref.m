@@ -75,7 +75,7 @@ switch S(1).type
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
             S = shiftS(S);
         end
-      case {'lag','lead','hptrend','hpcycle'} % Methods with less than two arguments.
+      case {'lag','lead','hptrend','hpcycle','chain'} % Methods with less than two arguments.
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
                 B = feval(S(1).subs,A);
