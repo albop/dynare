@@ -31,6 +31,11 @@ function varlist = check_list_of_variables(options_, M_, varlist)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+%get uniques
+
+[junk1,junk2,index_uniqes] = varlist_indices(varlist,M_.endo_names);
+varlist=varlist(index_uniqes,:);
+
 msg = 0;
 if options_.dsge_var && options_.bayesian_irf
     if ~isempty(varlist)

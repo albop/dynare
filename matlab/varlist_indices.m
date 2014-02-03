@@ -1,4 +1,4 @@
-function [i_var,nvar] = varlist_indices(sublist,list)
+function [i_var,nvar,index_uniqes] = varlist_indices(sublist,list)
 % function [i_var,nvar] = varlist_indices(sublist,list)
 % returns the indices of a list of endogenous variables
 %
@@ -9,6 +9,7 @@ function [i_var,nvar] = varlist_indices(sublist,list)
 % OUTPUT
 %   i_var:      variable indices in M_.endo_names
 %   nvar:       number of variables in varlist
+%   index_uniqes: indices of unique elements in varlist
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -69,7 +70,7 @@ if length(i_var_unique)~=nvar
     for ii = 1:length(k)
         tempstring = [ tempstring, deblank(sublist(k(ii),:)), ' ' ];
     end
-    warning('stoch_simul:: %s\n',tempstring)
+    warning('%s\n',tempstring)
     i_var=i_var_unique;
     nvar = length(i_var);
 end
