@@ -1,4 +1,4 @@
-function [i_var,nvar,index_uniqes] = varlist_indices(sublist,list)
+function [i_var,nvar,index_uniques] = varlist_indices(sublist,list)
 % function [i_var,nvar] = varlist_indices(sublist,list)
 % returns the indices of a list of endogenous variables
 %
@@ -63,9 +63,12 @@ if ~all(check)
 end
 
 nvar = length(i_var);
-[i_var_unique,index_uniqes,junk] = unique(i_var,'stable');
+[i_var_unique,index_uniques,junk] = unique(i_var,'first');
+index_uniques =sort(index_uniques);
+i_var_unique =i_var(index_uniques);
+
 if length(i_var_unique)~=nvar
-    k = find(~ismember(1:nvar,index_uniqes));
+    k = find(~ismember(1:nvar,index_uniques));
     tempstring = 'The following symbols are specified twice in the variable list and are considered only once: ';
     for ii = 1:length(k)
         tempstring = [ tempstring, deblank(sublist(k(ii),:)), ' ' ];
