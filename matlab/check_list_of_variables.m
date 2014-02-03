@@ -59,7 +59,15 @@ if options_.dsge_var && options_.bayesian_irf
     return
 end
 
-if isempty(varlist)
+if isempty(varlist) && ~isempty(options_.endo_vars_for_moment_computations_in_estimation)
+    if strcmp(options_.endo_vars_for_moment_computations_in_estimation,'all_endogenous_variables')
+        varlist = M_.endo_names(1:M_.orig_endo_nbr, :);    
+    elseif strcmp(options_.endo_vars_for_moment_computations_in_estimation,'only_observed_variables')
+        varlist = options_.varobs;
+    else
+        error('Unknown option')
+    end
+elseif isempty(varlist) && isempty(options_.endo_vars_for_moment_computations_in_estimation)
     skipline()
     disp(['You did not declare endogenous variables after the estimation/calib_smoother command.'])
     cas = [];
