@@ -16,7 +16,7 @@ function dynare(fname, varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2013 Dynare Team
+% Copyright (C) 2001-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -54,8 +54,8 @@ if isoctave
         warning('This version of Dynare has only been tested on Octave 3.6.0 and above. Since your Octave version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Octave installation.');
     end
 else
-    if matlab_ver_less_than('7.3')
-        warning('This version of Dynare has only been tested on MATLAB 7.3 (R2006b) and above. Since your MATLAB version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your MATLAB installation, or switch to Octave.');
+    if matlab_ver_less_than('7.5')
+        warning('This version of Dynare has only been tested on MATLAB 7.5 (R2007b) and above. Since your MATLAB version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your MATLAB installation, or switch to Octave.');
     end
 end
 

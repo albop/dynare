@@ -29,7 +29,7 @@ function dirlist = dynareParallelDir(filename,PRCDir,Parallel)
 
 dirlist=[];
 for indPC=1:length(Parallel),
-    if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), %isunix || (~matlab_ver_less_than('7.4') && ismac),
+    if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem),
         if Parallel(indPC).Local==0,
             if ~isempty(Parallel(indPC).Port),
                 ssh_token = ['-p ',Parallel(indPC).Port];

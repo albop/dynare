@@ -15,7 +15,7 @@ function dynareroot = dynare_config(path_to_dynare,verbose)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2013 Dynare Team
+% Copyright (C) 2001-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -84,13 +84,8 @@ if isoctave
     addpath([dynareroot '/missing/ordeig'])
 end
 
-% bsxfun is missing in old versions of MATLAB (and exists in Octave)
-if ~isoctave && matlab_ver_less_than('7.4')
-    addpath([dynareroot '/missing/bsxfun'])
-end
-
-% ilu is missing in old versions of MATLAB and in Octave
-if isoctave || matlab_ver_less_than('7.4')
+% ilu is missing in Octave
+if isoctave
     addpath([dynareroot '/missing/ilu'])
 end
 
@@ -113,27 +108,15 @@ if isoctave
 else
     % Add win32 specific paths for Dynare Windows package
     if strcmp(computer, 'PCWIN')
-        if matlab_ver_less_than('7.5')
-            mexpath = [dynareroot '../mex/matlab/win32-7.3-7.4'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        else
-            mexpath = [dynareroot '../mex/matlab/win32-7.5-8.2'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
+        mexpath = [dynareroot '../mex/matlab/win32-7.5-8.2'];
+        if exist(mexpath, 'dir')
+            addpath(mexpath)
         end
     end
 
     % Add win64 specific paths for Dynare Windows package
     if strcmp(computer, 'PCWIN64')
-        if matlab_ver_less_than('7.5')
-            mexpath = [dynareroot '../mex/matlab/win64-7.3-7.4'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        elseif matlab_ver_less_than('7.8')
+        if matlab_ver_less_than('7.8')
             mexpath = [dynareroot '../mex/matlab/win64-7.5-7.7'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
@@ -147,16 +130,9 @@ else
     end
 
     if strcmp(computer, 'MACI')
-        if matlab_ver_less_than('7.5')
-            mexpath = [dynareroot '../mex/matlab/osx32-7.4'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        else
-            mexpath = [dynareroot '../mex/matlab/osx32-7.5-7.11'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
+        mexpath = [dynareroot '../mex/matlab/osx32-7.5-7.11'];
+        if exist(mexpath, 'dir')
+            addpath(mexpath)
         end
     end
 

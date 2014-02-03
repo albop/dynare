@@ -35,7 +35,7 @@ NamFileInput0=NamFileInput;
 
 for indPC=1:length(Parallel),
     if Parallel(indPC).Local==0,
-        if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), %isunix || (~matlab_ver_less_than('7.4') && ismac),
+        if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem),
             if ~isempty(Parallel(indPC).Port),
                 ssh_token = ['-p ',Parallel(indPC).Port];
             else

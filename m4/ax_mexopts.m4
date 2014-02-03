@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009-2012 Dynare Team
+dnl Copyright (C) 2009-2014 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -22,7 +22,7 @@ AC_REQUIRE([AX_MATLAB_ARCH])
 AC_REQUIRE([AX_MATLAB_VERSION])
 AC_REQUIRE([AC_PROG_SED])
 
-AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [7.3], [AC_MSG_ERROR([Your MATLAB is too old, please upgrade to 7.3 (R2006b) at least.])])
+AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [7.5], [AC_MSG_ERROR([Your MATLAB is too old, please upgrade to 7.5 (R2007b) at least.])])
 
 AC_MSG_CHECKING([for options to compile MEX for MATLAB])
 
@@ -36,9 +36,7 @@ case ${MATLAB_ARCH} in
     MATLAB_FFLAGS="-fPIC -g -O2 -fexceptions"
     MATLAB_LDFLAGS_NOMAP="-shared -Wl,--no-undefined -Wl,-rpath-link,$MATLAB/bin/${MATLAB_ARCH} -L$MATLAB/bin/${MATLAB_ARCH}"
     MATLAB_LDFLAGS="$MATLAB_LDFLAGS_NOMAP -Wl,--version-script,$MATLAB/extern/lib/${MATLAB_ARCH}/mexFunction.map"
-    MATLAB_LIBS="-lmx -lmex -lmat -lm -lstdc++ -lmwlapack"
-    # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
-    AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
+    MATLAB_LIBS="-lmx -lmex -lmat -lm -lstdc++ -lmwlapack -lmwblas"
     if test "${MATLAB_ARCH}" = "glnx86"; then
       MATLAB_DEFS="$MATLAB_DEFS -D_FILE_OFFSET_BITS=64"
       MATLAB_CFLAGS="$MATLAB_CFLAGS -m32"
@@ -57,9 +55,7 @@ case ${MATLAB_ARCH} in
     # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
     MATLAB_LDFLAGS_NOMAP="-static-libgcc -static-libstdc++ -shared -L$MATLAB/bin/${MATLAB_ARCH}"
     MATLAB_LDFLAGS="$MATLAB_LDFLAGS_NOMAP $(pwd)/$srcdir/mex.def"
-    MATLAB_LIBS="-lmex -lmx -lmat -lmwlapack"
-    # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
-    AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
+    MATLAB_LIBS="-lmex -lmx -lmat -lmwlapack -lmwblas"
     ax_mexopts_ok="yes"
     ;;
   maci | maci64)
@@ -75,9 +71,7 @@ case ${MATLAB_ARCH} in
     MATLAB_FFLAGS="-fexceptions -fbackslash -arch $ARCHS"
     MATLAB_LDFLAGS_NOMAP="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle"
     MATLAB_LDFLAGS="$MATLAB_LDFLAGS_NOMAP -Wl,-exported_symbols_list,$(pwd)/$srcdir/mexFunction-MacOSX.map"
-    MATLAB_LIBS="-lmx -lmex -lmat -lstdc++ -lmwlapack"
-    # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
-    AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
+    MATLAB_LIBS="-lmx -lmex -lmat -lstdc++ -lmwlapack -lmwblas"
     ax_mexopts_ok="yes"
     ;;
   *)

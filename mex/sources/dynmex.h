@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2011 Dynare Team
+ * Copyright (C) 2009-2014 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -25,12 +25,6 @@
 #endif
 
 #include <mex.h>
-
-/* mwSize, mwIndex and mwSignedIndex appeared in MATLAB 7.3 */
-#if defined(MATLAB_MEX_FILE) && MATLAB_VERSION < 0x0703
-typedef int mwIndex;
-typedef int mwSize;
-#endif
 
 /*
  * Fix for trac ticket Ticket #137

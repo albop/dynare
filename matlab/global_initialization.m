@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2013 Dynare Team
+% Copyright (C) 2003-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -130,9 +130,7 @@ if isoctave
         options_.nodisplay = 1;
     end
 else
-    if isunix && (~usejava('jvm') || ...
-            ((matlab_ver_less_than('7.5') && sum(get(0,'ScreenSize'))==4) || ...
-            (~matlab_ver_less_than('7.5') && ~feature('ShowFigureWindows'))))
+    if isunix && (~usejava('jvm') || ~feature('ShowFigureWindows'))
         options_.console_mode = 1;
         options_.nodisplay = 1;
     end

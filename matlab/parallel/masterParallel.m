@@ -147,7 +147,7 @@ end
 
 DyMo=pwd;
 % fInputVar.DyMo=DyMo;
-if ispc, % ~(isunix || (~matlab_ver_less_than('7.4') && ismac)) ,
+if ispc,
     [tempo, MasterName]=system('hostname');
     MasterName=deblank(MasterName);
 end
@@ -499,7 +499,7 @@ if Strategy==0 || newInstance, % See above.
     PRCDirSnapshotInit = PRCDirSnapshot;
     
     % Run the slaves.
-    if  ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
+    if  ~ispc,
         system('sh ConcurrentCommand1.bat &');
         pause(1)
     else
