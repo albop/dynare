@@ -45,6 +45,7 @@ MODFILES = \
 	steady_state/walsh1_ssm.mod \
 	steady_state/walsh1_ssm_block.mod \
 	steady_state/multi_leads.mod \
+	steady_state/example1_trust_region.mod \
 	steady_state_operator/standard.mod \
 	steady_state_operator/use_dll.mod \
 	steady_state_operator/block.mod \

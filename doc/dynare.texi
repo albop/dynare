@@ -2649,8 +2649,7 @@ using the same solver as value @code{1}
 Use Chris Sims' solver
 
 @item 4
-Same as value @code{2}, except that it does not try to adapt the
-search direction when the Jacobian is nearly singular
+Trust-region solver with autoscaling.
 
 @item 5
 Newton algorithm with a sparse Gaussian elimination (SPE) (requires

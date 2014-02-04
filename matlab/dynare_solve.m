@@ -124,6 +124,13 @@ elseif options_.solve_algo == 1
                     tolf,options_.solve_tolx, ...
                     options_.steady.maxit,options_.debug,varargin{:});
 elseif options_.solve_algo == 2 || options_.solve_algo == 4
+
+    if options_.solve_algo == 2
+        solver = @solve1;
+    else
+        solver = @trust_region;
+    end
+
     if ~jacobian_flag
         fjac = zeros(nn,nn) ;
         dh = max(abs(x),options_.gstep(1)*ones(nn,1))*eps^(1/3);
@@ -144,7 +151,7 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
         if options_.debug
             disp(['DYNARE_SOLVE (solve_algo=2|4): solving block ' num2str(i) ', of size ' num2str(r(i+1)-r(i)) ]);
         end
-        [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, ...
+        [x,info]=solver(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, ...
                         options_.gstep, ...
                         tolf,options_.solve_tolx, ...
                         options_.steady.maxit,options_.debug,varargin{:});
@@ -154,7 +161,7 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
     end
     fvec = feval(func,x,varargin{:});
     if max(abs(fvec)) > tolf
-        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag, ...
+        [x,info]=solver(func,x,1:nn,1:nn,jacobian_flag, ...
                         options_.gstep, tolf,options_.solve_tolx, ...
                         options_.steady.maxit,options_.debug,varargin{:});
     end
