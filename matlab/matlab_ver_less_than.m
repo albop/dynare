@@ -32,4 +32,4 @@ function r = matlab_ver_less_than(verstr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-r = verLessThan('matlab', verstr)
+r = verLessThan('matlab', verstr);
