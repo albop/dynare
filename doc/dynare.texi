@@ -4337,6 +4337,15 @@ graphs with prior, posterior, and mode
 graphs of smoothed shocks, smoothed observation errors, smoothed and historical variables
 @end itemize
 
+Note that the posterior moments, smoothed variables, k-step ahead
+filtered variables and forecasts (when requested) will only be
+computed on the variables listed after the @code{estimation} command.
+Alternatively, one can choose to compute these quantities on all
+endogenous or on all observed variables (see
+@code{consider_all_endogenous} and @code{consider_only_observed}
+options below). If no variable is listed after the @code{estimation}
+command, then Dynare will interactively ask which variable set to use.
+
 Also, during  the MCMC  (Bayesian estimation with  @code{mh_replic}>0) a
 (graphical or text) waiting bar is displayed showing the progress of the
 Monte-Carlo and the @i{current} value of the acceptance ratio. Note that
@@ -5101,6 +5110,18 @@ take the serial correlation of the posterior draws into account. Default: @code{
 Percentage of MCMC draws at the beginning and end of the MCMC chain taken
 to compute the @cite{Geweke (1992,1999)} convergence diagnostics (requires @ref{mh_nblocks}=1)
 after discarding the first @ref{mh_drop} percent of draws as a burnin. Default: @code{[0.2 0.5]}.
+
+@item consider_all_endogenous
+Compute the posterior moments, smoothed variables, k-step ahead
+filtered variables and forecasts (when requested) will be computed on
+all the endogenous variables. This is equivalent to manually listing
+all the endogenous variables after the @code{estimation} command.
+
+@item consider_only_observed
+Compute the posterior moments, smoothed variables, k-step ahead
+filtered variables and forecasts (when requested) will be computed on
+all the observed variables. This is equivalent to manually listing
+all the observed variables after the @code{estimation} command.
 
 @end table
 

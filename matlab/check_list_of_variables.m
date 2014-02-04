@@ -59,7 +59,9 @@ if options_.dsge_var && options_.bayesian_irf
     return
 end
 
-if isempty(varlist) && ~isempty(options_.endo_vars_for_moment_computations_in_estimation)
+if ~isempty(varlist) && ~isempty(options_.endo_vars_for_moment_computations_in_estimation)
+    error('You cannot use the consider_all_endogenous or consider_all_observed options when listing variables after the estimation command')
+elseif isempty(varlist) && ~isempty(options_.endo_vars_for_moment_computations_in_estimation)
     if strcmp(options_.endo_vars_for_moment_computations_in_estimation,'all_endogenous_variables')
         varlist = M_.endo_names(1:M_.orig_endo_nbr, :);    
     elseif strcmp(options_.endo_vars_for_moment_computations_in_estimation,'only_observed_variables')
