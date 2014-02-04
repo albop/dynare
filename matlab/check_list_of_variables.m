@@ -31,6 +31,11 @@ function varlist = check_list_of_variables(options_, M_, varlist)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+%get uniques
+
+[junk1,junk2,index_uniqes] = varlist_indices(varlist,M_.endo_names);
+varlist=varlist(index_uniqes,:);
+
 msg = 0;
 if options_.dsge_var && options_.bayesian_irf
     if ~isempty(varlist)
@@ -54,7 +59,15 @@ if options_.dsge_var && options_.bayesian_irf
     return
 end
 
-if isempty(varlist)
+if isempty(varlist) && ~isempty(options_.endo_vars_for_moment_computations_in_estimation)
+    if strcmp(options_.endo_vars_for_moment_computations_in_estimation,'all_endogenous_variables')
+        varlist = M_.endo_names(1:M_.orig_endo_nbr, :);    
+    elseif strcmp(options_.endo_vars_for_moment_computations_in_estimation,'only_observed_variables')
+        varlist = options_.varobs;
+    else
+        error('Unknown option')
+    end
+elseif isempty(varlist) && isempty(options_.endo_vars_for_moment_computations_in_estimation)
     skipline()
     disp(['You did not declare endogenous variables after the estimation/calib_smoother command.'])
     cas = [];

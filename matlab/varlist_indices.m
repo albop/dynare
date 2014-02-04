@@ -1,4 +1,4 @@
-function [i_var,nvar] = varlist_indices(sublist,list)
+function [i_var,nvar,index_uniques] = varlist_indices(sublist,list)
 % function [i_var,nvar] = varlist_indices(sublist,list)
 % returns the indices of a list of endogenous variables
 %
@@ -9,11 +9,12 @@ function [i_var,nvar] = varlist_indices(sublist,list)
 % OUTPUT
 %   i_var:      variable indices in M_.endo_names
 %   nvar:       number of variables in varlist
+%   index_uniqes: indices of unique elements in varlist
 %
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2010-2013 Dynare Team
+% Copyright (C) 2010-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -52,8 +53,6 @@ else
     end
 end
 
-nvar = length(i_var);
-
 if ~all(check)
     k = find(~check);
     tempstring = 'The following symbols are not endogenous variables: ';
@@ -61,4 +60,20 @@ if ~all(check)
         tempstring = [ tempstring, deblank(sublist(k(ii),:)), ' ' ];
     end
     error(tempstring)
+end
+
+nvar = length(i_var);
+[i_var_unique,index_uniques,junk] = unique(i_var,'first');
+index_uniques =sort(index_uniques);
+i_var_unique =i_var(index_uniques);
+
+if length(i_var_unique)~=nvar
+    k = find(~ismember(1:nvar,index_uniques));
+    tempstring = 'The following symbols are specified twice in the variable list and are considered only once: ';
+    for ii = 1:length(k)
+        tempstring = [ tempstring, deblank(sublist(k(ii),:)), ' ' ];
+    end
+    warning('%s\n',tempstring)
+    i_var=i_var_unique;
+    nvar = length(i_var);
 end

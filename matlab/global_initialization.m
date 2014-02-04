@@ -385,6 +385,7 @@ options_.mh_replic = 20000;
 options_.recursive_estimation_restart = 0;
 options_.MCMC_jumping_covariance='hessian';
 options_.use_calibration_initialization = 0;
+options_.endo_vars_for_moment_computations_in_estimation=[];
 
 options_.mode_compute = 4;
 options_.mode_file = '';
