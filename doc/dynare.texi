@@ -5113,15 +5113,15 @@ after discarding the first @ref{mh_drop} percent of draws as a burnin. Default: 
 
 @item consider_all_endogenous
 Compute the posterior moments, smoothed variables, k-step ahead
-filtered variables and forecasts (when requested) will be computed on
-all the endogenous variables. This is equivalent to manually listing
-all the endogenous variables after the @code{estimation} command.
+filtered variables and forecasts (when requested) on all the
+endogenous variables. This is equivalent to manually listing all the
+endogenous variables after the @code{estimation} command.
 
 @item consider_only_observed
 Compute the posterior moments, smoothed variables, k-step ahead
-filtered variables and forecasts (when requested) will be computed on
-all the observed variables. This is equivalent to manually listing
-all the observed variables after the @code{estimation} command.
+filtered variables and forecasts (when requested) on all the observed
+variables. This is equivalent to manually listing all the observed
+variables after the @code{estimation} command.
 
 @end table
 
