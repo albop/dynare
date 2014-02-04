@@ -1,5 +1,4 @@
-function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,gstep,tolf,tolx,maxit,debug,varargin)
-% function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
+function [x,check] = solve1(func,x,j1,j2,jacobian_flag,gstep,tolf,tolx,maxit,debug,varargin)
 % Solves systems of non linear equations of several variables
 %
 % INPUTS
@@ -9,15 +8,13 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,gstep,tolf,
 %    j2:              unknown variables index
 %    jacobian_flag=1: jacobian given by the 'func' function
 %    jacobian_flag=0: jacobian obtained numerically
-%    bad_cond_flag=1: when Jacobian is badly conditionned, use an
-%                     alternative formula to Newton step
 %    gstep            increment multiplier in numercial derivative
 %                     computation
 %    tolf             tolerance for residuals
 %    tolx             tolerance for solution variation
 %    maxit            maximum number of iterations
 %    debug            debug flag
-%    varargin:        list of arguments following bad_cond_flag
+%    varargin:        list of extra arguments to the function
 %    
 % OUTPUTS
 %    x:               results
@@ -26,7 +23,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,gstep,tolf,
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2012 Dynare Team
+% Copyright (C) 2001-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -95,7 +92,7 @@ for its = 1:maxit
     if debug
         disp(['cond(fjac) ' num2str(cond(fjac))])
     end
-    if bad_cond_flag && rcond(fjac) < sqrt(eps)
+    if rcond(fjac) < sqrt(eps)
         fjac2=fjac'*fjac;
         p=-(fjac2+1e6*sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
     else

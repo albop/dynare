@@ -120,7 +120,7 @@ if options_.solve_algo == 0
         info = 1;
     end
 elseif options_.solve_algo == 1
-    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,1,options_.gstep, ...
+    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,options_.gstep, ...
                     tolf,options_.solve_tolx, ...
                     options_.steady.maxit,options_.debug,varargin{:});
 elseif options_.solve_algo == 2 || options_.solve_algo == 4
@@ -140,15 +140,12 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
         disp(['DYNARE_SOLVE (solve_algo=2|4): number of blocks = ' num2str(length(r))]);
     end
 
-    % Activate bad conditioning flag for solve_algo = 2, but not for solve_algo = 4
-    bad_cond_flag = (options_.solve_algo == 2);
-    
     for i=length(r)-1:-1:1
         if options_.debug
             disp(['DYNARE_SOLVE (solve_algo=2|4): solving block ' num2str(i) ', of size ' num2str(r(i+1)-r(i)) ]);
         end
         [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, ...
-                        bad_cond_flag, options_.gstep, ...
+                        options_.gstep, ...
                         tolf,options_.solve_tolx, ...
                         options_.steady.maxit,options_.debug,varargin{:});
         if info
@@ -157,7 +154,7 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
     end
     fvec = feval(func,x,varargin{:});
     if max(abs(fvec)) > tolf
-        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag, bad_cond_flag, ...
+        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag, ...
                         options_.gstep, tolf,options_.solve_tolx, ...
                         options_.steady.maxit,options_.debug,varargin{:});
     end
