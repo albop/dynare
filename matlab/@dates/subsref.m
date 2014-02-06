@@ -12,7 +12,7 @@ function B = subsref(A,S) % --*-- Unitary tests --*--
 % REMARKS 
 %  See the matlab's documentation about the subsref method.
 
-% Copyright (C) 2011-2013 Dynare Team
+% Copyright (C) 2011-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,12 +40,12 @@ switch S(1).type
       case {'sort','unique','double','isempty','length'}% Public methods (without arguments)
         B = feval(S(1).subs,A);
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
-           S = shiftS(S);
+           S = shiftS(S,1);
         end
       case {'append','pop'}% Public methods (with arguments).
         if isequal(S(2).type,'()')
             B = feval(S(1).subs,A,S(2).subs{:});
-            S = shiftS(S);
+            S = shiftS(S,1);
         else
             error('dates::subsref: Something is wrong in your syntax!')
         end
@@ -167,7 +167,7 @@ switch S(1).type
     error('dates::subsref: Something is wrong in your syntax!')
 end
 
-S = shiftS(S);
+S = shiftS(S,1);
 if ~isempty(S)
     B = subsref(B, S);
 end

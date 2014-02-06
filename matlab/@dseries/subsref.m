@@ -45,7 +45,7 @@ function B = subsref(A, S) % --*-- Unitary tests --*--
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011-2013 Dynare Team
+% Copyright (C) 2011-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -73,19 +73,19 @@ switch S(1).type
       case {'log','exp','ygrowth','qgrowth','ydiff','qdiff','abs'}         % Give "dot access" to public methods without args.
         B = feval(S(1).subs,A);
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
-            S = shiftS(S);
+            S = shiftS(S,1);
         end
       case {'lag','lead','hptrend','hpcycle','chain'} % Methods with less than two arguments.
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
                 B = feval(S(1).subs,A);
-                S = shiftS(S);
+                S = shiftS(S,1);
             else
                 if length(S(2).subs{1})>1
                     error(['dseries::subsref: ' S(1).subs{1} ' method admits no more than one argument!'])
                 end
                 B = feval(S(1).subs,A,S(2).subs{1});
-                S = shiftS(S);
+                S = shiftS(S,1);
             end
         else
             B = feval(S(1).subs,A);
@@ -94,13 +94,13 @@ switch S(1).type
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
                 B = feval(S(1).subs,A);
-                S = shiftS(S);
+                S = shiftS(S,1);
             else
                 if length(S(2).subs)>2
                     error(['dseries::subsref: ' S(1).subs{1} ' method admits no more than two arguments!'])
                 end
                 B = feval(S(1).subs,A,S(2).subs{:});
-                S = shiftS(S);
+                S = shiftS(S,1);
             end
         else
             B = feval(S(1).subs,A);
@@ -109,10 +109,10 @@ switch S(1).type
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
                 B = feval(S(1).subs,A);
-                S = shiftS(S);
+                S = shiftS(S,1);
             else
                 B = feval(S(1).subs,A,S(2).subs{1})
-                S = shiftS(S);
+                S = shiftS(S,1);
             end
         else
             B = feval(S(1).subs,A);
@@ -130,7 +130,7 @@ switch S(1).type
                         save(A,S(2).subs{:});
                     end
                 end
-                S = shiftS(S);
+                S = shiftS(S,1);
             else
                 error('dseries::subsref: Wrong syntax.')
             end
@@ -147,7 +147,7 @@ switch S(1).type
             else
                 B = size(A,S(2).subs{1});
             end
-            S = shiftS(S);
+            S = shiftS(S,1);
         elseif isequal(length(S),1)
             [x,y] = size(A);
             B = [x, y];
@@ -156,7 +156,7 @@ switch S(1).type
         end
       case {'set_names','rename','tex_rename'}
         B = feval(S(1).subs,A,S(2).subs{:});
-        S = shiftS(S);
+        S = shiftS(S,1);
       otherwise                                                            % Extract a sub-object by selecting one variable.
         ndx = find(strcmp(S(1).subs,A.name));
         if ~isempty(ndx)
@@ -274,7 +274,7 @@ switch S(1).type
     error('dseries::subsref: What the Hell are you doin'' here?!')
 end
 
-S = shiftS(S);
+S = shiftS(S,1);
 if ~isempty(S)
     B = subsref(B, S);
 end
