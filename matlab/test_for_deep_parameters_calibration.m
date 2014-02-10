@@ -44,4 +44,7 @@ if ~isempty(plist)
     message = [message, 'If these parameters are not initialized in a steadystate file, Dynare may not be able to solve the model...'];
     message_id  = 'Dynare:ParameterCalibration:NaNValues';
     warning(message_id,message);
+    if strmatch('optimal_policy_discount_factor',plist,'exact')
+        warning('Either you have not correctly initialized planner_discount or you are calling a command like steady or stoch_simul that is not allowed in the context of ramsey_policy')
+    end
 end
