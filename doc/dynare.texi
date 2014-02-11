@@ -10718,7 +10718,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, figname, figDirName, graphSize, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, xlabel, ylabel, xrange, xTicks, xTickLabels, yrange, showZeroline
+@defmethod Report addGraph data, figname, figDirName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xrange, xTicks, xTickLabels, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -10740,6 +10740,9 @@ The width and height to be passed to the third and fourth elements of
 the array passed to the @code{`Position'} option of Matlab's
 @code{figure} command, passed as a vector of size @math{2}. Default:
 Matlab sets width and height
+
+@item height, @code{DOUBLE}
+The height of the graph, in inches. Default: @code{4.5}
 
 @item showGrid, @code{BOOLEAN}
 Whether or not to display the minor grid on the graph. Default:
@@ -10781,6 +10784,9 @@ The opacity of the shaded area, must be in @math{[0,1]}. Default: @code{.2}
 
 @item title, @code{STRING}
 Title for the graph. Default: @code{none}
+
+@item width, @code{DOUBLE}
+The width of the graph, in inches. Default: @code{6.0}
 
 @item xlabel, @code{STRING}
 The x-axis label. Default: @code{none}
