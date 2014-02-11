@@ -10741,15 +10741,14 @@ Whether or not to display the legend. Default: @code{false}
 Whether or not to display a box around the legend. Default:
 @code{false}
 
-@item legendLocation, `North' | `South' | `East' | `West' | `NorthEast' | `SouthEast' | `NorthWest' | `SouthWest' | `NorthOutside' | `SouthOutside' | `EastOutside' | `WestOutside' | `NorthEastOutside' | `SouthEastOutside' | `NorthWestOutside' | `SouthWestOutside' | `Best' | `BestOutside'
-Where to place the legend in the graph. NB: some of these are not
-available under Octave. Default: @code{`SouthEast'}
+@item legendLocation, @code{`south west'} | @code{`south east'} | @code{`north west'} | @code{`north east'} | @code{`outer north east'}
+Where to place the legend in the graph. Default: @code{`south east'}
 
 @item legendOrientation, `vertical' | `horizontal'
 Orientation of the legend. Default: @code{`horizontal'}
 
-@item legendFontSize, @code{DOUBLE}
-The font size for legend entries. Default: @code{8}
+@item legendFontSize, @code{`tiny'} | @code{`scriptsize'} | @code{`footnotesize'} | @code{`small'} | @code{`normalsize'} | @code{`large'} | @code{`Large'} | @code{`LARGE'} | @code{`huge'} | @code{`Huge'}
+The font size for legend entries. Default: @code{tiny}
 
 @anchor{seriesToUse}
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
