@@ -10704,7 +10704,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, figname, figDirName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xrange, xTicks, xTickLabels, xTickLabelRotation, yrange, showZeroline
+@defmethod Report addGraph data, figname, figDirName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -10793,6 +10793,9 @@ begin at @math{1}. Default: set by Matlab/Octave.
 @item xTickLabels, @code{CELL_ARRAY_STRINGS}
 The labels to be mapped to the ticks provided by
 @ref{xTicks}. Default: the dates of the @code{dseries}
+
+@item xTickLabelAnchor, @code{STRING}
+Where to anchor the x tick label. Default: @code{`south'}
 
 @item xTickLabelRotation, @code{DOUBLE}
 The amount to rotate the x tick labels by. Default: @code{45}
