@@ -10868,17 +10868,17 @@ Line style for this series in a graph. Default: @code{`solid'}
 @item graphLineWidth @code{DOUBLE}
 Line width for this series in a graph. Default: @code{0.5}
 
-@item graphMarker, @code{`+'} | @code{`o'} | @code{`*'} | @code{`.'} | @code{`x'} | @code{`s'} | @code{`square'} | @code{`d'} | @code{`diamond'} | @code{`^'} | @code{`v'} | @code{`>'} | @code{`<'} | @code{`p'} | @code{`pentagram'} | @code{`h'} | @code{`hexagram'} | @code{`none'}
+@item graphMarker, @code{`x'} | @code{`+'} | @code{`-'} | @code{`|'} | @code{`o'} | @code{`asterisk'} | @code{`star'} | @code{`10-pointed star'} | @code{`oplus'} | @code{`oplus*'} | @code{`otimes'} | @code{`otimes*'} | @code{`square'} | @code{`square*'} | @code{`triangle'} | @code{`triangle*'} | @code{`diamond'} | @code{`diamond*'} | @code{`halfdiamond*'} | @code{`halfsquare*'} | @code{`halfsquare right*'} | @code{`halfsquare left*'} | @code{`Mercedes star'} | @code{`Mercedes star flipped'} | @code{`halfcircle'} | @code{`halfcircle*'} | @code{`pentagon'} | @code{`pentagon star'}
 The Marker to use on this series in a graph. Default: @code{none}
 
-@item graphMarkerEdgeColor, @code{MATLAB_COLOR}
-The edge color of the graph marker. Default: @code{`auto'}
+@item graphMarkerEdgeColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
+The edge color of the graph marker. Default: @code{graphLineColor}
 
-@item graphMarkerFaceColor, @code{MATLAB_COLOR}
-The face color of the graph marker. Default: @code{`auto'}
+@item graphMarkerFaceColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
+The face color of the graph marker. Default: @code{graphLineColor}
 
 @item graphMarkerSize, @code{DOUBLE}
-The size of the graph marker. Default: @code{6}
+The size of the graph marker. Default: @code{1}
 
 @item tableDataRhs, @code{dseries}
 A series to be added to the right of the current series. Usefull for
