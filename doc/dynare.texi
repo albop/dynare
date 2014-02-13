@@ -10765,7 +10765,7 @@ The color to use in the shaded portion of the graph. Default:
 @code{`green'}
 
 @item shadeOpacity, @code{DOUBLE}
-The opacity of the shaded area, must be in @math{[0,1]}. Default: @code{.2}
+The opacity of the shaded area, must be in @math{[0,100]}. Default: @code{20}
 
 @item title, @code{STRING}
 Title for the graph. Default: @code{none}
