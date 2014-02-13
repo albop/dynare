@@ -262,7 +262,6 @@ Configure and make:
     - ```brew install bison```
     - ```brew install boost```
     - ```brew install gfortran```
-    - ```brew install matlab2tikz --HEAD```
     - ```brew install libmatio --with-hdf5```
     - ```brew install slicot --with-default-integer-8```
 - **(Optional)** To compile Dynare mex files for use on Octave, first install Octave following the [Simple Installation Instructions](http://wiki.octave.org/Octave_for_MacOS_X#Simple_Installation_Instructions_3). Then, you will probably also want to install graphicsmagick via Homebrew with `brew install graphicsmagick`.
