@@ -10731,7 +10731,7 @@ Matlab sets width and height
 The height of the graph, in inches. Default: @code{4.5}
 
 @item showGrid, @code{BOOLEAN}
-Whether or not to display the minor grid on the graph. Default:
+Whether or not to display the major grid on the graph. Default:
 @code{true}
 
 @item showLegend, @code{BOOLEAN}
