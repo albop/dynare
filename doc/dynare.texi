@@ -10760,7 +10760,7 @@ the @ref{data} option. If empty, use all series provided to
 The date range showing the portion of the graph that should be
 shaded. Default: @code{none}
 
-@item shadeColor, @code{MATLAB_COLOR_NAME}
+@item shadeColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
 The color to use in the shaded portion of the graph. Default:
 @code{`green'}
 
