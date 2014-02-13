@@ -10704,7 +10704,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, figname, figDirName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yrange, showZeroline
+@defmethod Report addGraph data, figname, figDirName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -10779,6 +10779,10 @@ The x-axis label. Default: @code{none}
 @item ylabel, @code{STRING}
 The y-axis label. Default: @code{none}
 
+@item xAxisTight, @code{BOOLEAN}
+Use a tight x axis. If false, uses pgfplots @code{enlarge x limits} to
+choose appropriate axis size. Default: @code{true}
+
 @item xrange, @code{dates}
 The boundary on the x-axis to display in the graph. Default: all
 
@@ -10798,6 +10802,10 @@ Where to anchor the x tick label. Default: @code{`south'}
 
 @item xTickLabelRotation, @code{DOUBLE}
 The amount to rotate the x tick labels by. Default: @code{45}
+
+@item yAxisTight, @code{BOOLEAN}
+Use a tight y axis. If false, uses pgfplots @code{enlarge y limits} to
+choose appropriate axis size. Default: @code{false}
 
 @item yrange, @code{NUMERICAL_VECTOR}
 The boundary on the y-axis to display in the graph, represented as a
