@@ -10611,8 +10611,8 @@ with the example at the end of the section.
 Options to the methods are passed differently than those to Dynare
 commands. They take the form of named options to Matlab functions
 where the arguments come in pairs (@i{e.g.}
-@code{function_name('option_1_name', `option_1_value',
-'option_2_name', 'option_2_value', ...)}, where @code{option_X_name}
+@code{function_name(`option_1_name', `option_1_value',
+`option_2_name', `option_2_value', ...)}, where @code{option_X_name}
 is the name of the option while @code{option_X_value} is the value
 assigned to that option). The ordering of the option pairs matters
 only in the unusual case when an option is provided twice (probably
