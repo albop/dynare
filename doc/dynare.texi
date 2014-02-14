@@ -10587,9 +10587,12 @@ Computes yearly differences or growth rates.
 @chapter Reporting
 
 Dynare provides a simple interface for creating @LaTeX{} reports,
-comprised of @LaTeX{} tables and TikZ graphs. You can use the report as
-created through Dynare or pick out the pieces you want for inclusion
-in your own paper.
+comprised of @LaTeX{} tables and @code{PGFPLOTS/TikZ/PGF} graphs. You
+can use the report as created through Dynare or pick out the pieces
+you want for inclusion in your own paper. Though Dynare provides a
+subset of options available through @code{PGFPLOTS}, you can easily
+modify the graphs created by Dynare using the options available in the
+@code{PGFPLOTS} manual.
 
 Reports are created and modified by calling methods on class
 objects. The objects are hierarchichal, with the following order (from
