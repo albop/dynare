@@ -10717,8 +10717,7 @@ The @code{dseries} that provides the data for the graph. Default:
 @code{none}
 
 @item figname, @code{STRING}
-The name to use when saving this figure. Default: @code{[tempname
-`.tex']}
+The name to use when saving this figure. Default: something of the form @code{pg1_sec2_row1_col3.tex}
 
 @item figDirName, @code{STRING}
 The name of the folder in which to store this figure. Default:
