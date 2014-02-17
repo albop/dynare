@@ -10769,8 +10769,14 @@ The color to use in the shaded portion of the graph. Default:
 @item shadeOpacity, @code{DOUBLE}
 The opacity of the shaded area, must be in @math{[0,100]}. Default: @code{20}
 
-@item title, @code{STRING}
-Title for the graph. Default: @code{none}
+@anchor{graph.title}
+@item title, @code{STRING} | @code{CELL_ARRAY_STRINGS}
+Same as @ref{title}, just for graphs.
+
+@item titleFormat, @code{STRING}
+The format to use for @ref{graph.title,,the graph title}. Unlike
+@ref{titleFormat}, due to a constraint of TikZ, this format applies to
+the title and subtitles. Default: @code{TikZ default}
 
 @item width, @code{DOUBLE}
 The width of the graph, in inches. Default: @code{6.0}
