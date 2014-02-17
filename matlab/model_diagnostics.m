@@ -40,11 +40,13 @@ endo_names = M.endo_names;
 lead_lag_incidence = M.lead_lag_incidence;
 maximum_endo_lag = M.maximum_endo_lag;
 
+problem_dummy=0;
 %
 % missing variables at the current period
 %
 k = find(lead_lag_incidence(maximum_endo_lag+1,:)==0);
 if ~isempty(k)
+    problem_dummy=1;
     disp(['The following endogenous variables aren''t present at ' ...
           'the current period in the model:'])
     for i=1:length(k)
@@ -66,6 +68,7 @@ end
 
 % testing for problem
 if check1(1)
+    problem_dummy=1;
     disp('model diagnostic can''t obtain the steady state')
     if any(isnan(dr.ys))
         disp(['model diagnostic obtains a steady state with NaNs'])
@@ -77,6 +80,7 @@ if check1(1)
 end
 
 if ~isreal(dr.ys)
+    problem_dummy=1;
     disp(['model diagnostic obtains a steady state with complex ' ...
           'numbers'])
     return
@@ -108,6 +112,7 @@ for b=1:nb
     end
     rank_jacob = rank(jacob);
     if rank_jacob < size(jacob,1)
+        problem_dummy=1;
         singularity_problem = 1;
         disp(['model_diagnostic: the Jacobian of the static model is ' ...
               'singular'])
@@ -149,5 +154,9 @@ if singularity_problem
     fprintf('The presence of a singularity problem typically indicates that there is one\n')
     fprintf('redundant equation entered in the model block, while another non-redundant equation\n')
     fprintf('is missing. The problem often derives from Walras Law.\n')
+end
+
+if problem_dummy==0
+    fprintf('model_diagnostics was not able to detect any obvious problems with this mod-file.\n')
 end
 
