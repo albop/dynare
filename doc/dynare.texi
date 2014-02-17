@@ -10820,7 +10820,7 @@ Display a solid black line at @math{y = 0}. Default: @code{false}
 @end table
 @end defmethod
 
-@defmethod Report addTable data, showHlines, precision, range, seriesToUse, title, titleSize, vlineAfter, vlineAfterEndOfPeriod, showVlines
+@defmethod Report addTable data, showHlines, precision, range, seriesToUse, title, titleFormat, vlineAfter, vlineAfterEndOfPeriod, showVlines
 Adds a @code{Table} to a @code{Section}.
 @optionshead
 @table @code
@@ -10841,10 +10841,10 @@ The date range of the data to be displayed. Default: @code{all}
 @xref{seriesToUse}.
 
 @item title, @code{STRING}
-Title for the table. Default: @code{none}
+Same as @ref{title}, just for tables.
 
-@item titleSize, @code{STRING}
-@LaTeX{} string representing the size of the table title. Default: @code{large}
+@item titleFormat, @code{STRING}
+Same as @ref{titleFormat}, just for tables. Default: @code{\large}.
 
 @item vlineAfter, @code{dates} | @code{CELL_ARRAY_DATES}
 Show a vertical line after the specified date (or dates if a cell
