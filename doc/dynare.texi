@@ -10689,7 +10689,7 @@ of the page. Default: @code{none}
 @item titleFormat, @code{STRING} | @code{CELL_ARRAY_STRINGS}
 A string representing the @LaTeX{} markup to use on the
 @ref{title}. The number of cell array entries must be equal to that of
-the @ref{title} option. Default: @code{none}
+the @ref{title} option. Default: @code{\large\bfseries}
 
 @end table
 @end defmethod
