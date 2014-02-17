@@ -11072,8 +11072,8 @@ dsca = dseries(`annual_control.csv');
 rep = report();
 
 %% Page 1
-rep = rep.addPage(`title', {`My Page Title', `My Page Subtitle'}, ...
-                  `titleFormat', {`\large\bfseries', `\large'});
+rep = rep.addPage(`title', @{`My Page Title', `My Page Subtitle'@}, ...
+                  `titleFormat', @{`\large\bfseries', `\large'@});
 
 % Section 1
 rep = rep.addSection(`cols', 2);
