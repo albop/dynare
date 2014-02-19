@@ -10665,10 +10665,10 @@ Computes yearly differences or growth rates.
 Dynare provides a simple interface for creating @LaTeX{} reports,
 comprised of @LaTeX{} tables and @code{PGFPLOTS/TikZ/PGF} graphs. You
 can use the report as created through Dynare or pick out the pieces
-you want for inclusion in your own paper. Though Dynare provides a
-subset of options available through @code{PGFPLOTS}, you can easily
-modify the graphs created by Dynare using the options available in the
-@code{PGFPLOTS} manual.
+(tables and graphs) you want for inclusion in your own paper. Though
+Dynare provides a subset of options available through @code{PGFPLOTS},
+you can easily modify the graphs created by Dynare using the options
+available in the @code{PGFPLOTS} manual.
 
 Reports are created and modified by calling methods on class
 objects. The objects are hierarchical, with the following order (from
@@ -10794,11 +10794,12 @@ The @code{dseries} that provides the data for the graph. Default:
 @code{none}
 
 @item figname, @code{STRING}
-The name to use when saving this figure. Default: something of the form @code{pg1_sec2_row1_col3.tex}
+The name to use when saving this figure. Default: something of the
+form @code{graph_pg1_sec2_row1_col3.tex}
 
 @item figDirName, @code{STRING}
 The name of the folder in which to store this figure. Default:
-@code{tmpFigDir}
+@code{tmpRepDir}
 
 @item graphSize, @code{NUMERICAL_VECTOR}
 The width and height to be passed to the third and fourth elements of
@@ -10903,7 +10904,7 @@ Display a solid black line at @math{y = 0}. Default: @code{false}
 @end table
 @end defmethod
 
-@defmethod Report addTable data, showHlines, precision, range, seriesToUse, title, titleFormat, vlineAfter, vlineAfterEndOfPeriod, showVlines
+@defmethod Report addTable data, showHlines, precision, range, seriesToUse, tablename, tableDirName, title, titleFormat, vlineAfter, vlineAfterEndOfPeriod, showVlines
 Adds a @code{Table} to a @code{Section}.
 @optionshead
 @table @code
@@ -10922,6 +10923,14 @@ The date range of the data to be displayed. Default: @code{all}
 
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
 @xref{seriesToUse}.
+
+@item tablename, @code{STRING}
+The name to use when saving this table. Default: something of the
+form @code{table_pg1_sec2_row1_col3.tex}
+
+@item figDirName, @code{STRING}
+The name of the folder in which to store this table. Default:
+@code{tmpRepDir}
 
 @item title, @code{STRING}
 Same as @ref{title}, just for tables.
