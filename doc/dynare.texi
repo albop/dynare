@@ -10701,7 +10701,7 @@ used.
 Below, you will see a list of methods available for the Report class and
 a clarifying example.
 
-@defmethod Report report compiler, showDate, filename, margin, marginUnit, orientation, paper, title
+@defmethod Report report compiler, showDate, fileName, margin, marginUnit, orientation, paper, title
 Instantiates a @code{Report} object.
 @optionshead
 @table @code
@@ -10718,8 +10718,8 @@ Display the date and time when the report was compiled. Default:
 @code{true}
 
 @anchor{filename}
-@item filename, @var{FILENAME}
-The filename to use when saving this report. Default:
+@item fileName, @var{FILENAME}
+The file name to use when saving this report. Default:
 @code{report.tex}
 
 @item margin, @var{DOUBLE}
@@ -10784,7 +10784,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, figname, figDirName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
+@defmethod Report addGraph data, figName, figDirName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -10793,7 +10793,7 @@ Adds a @code{Graph} to a @code{Section}.
 The @code{dseries} that provides the data for the graph. Default:
 @code{none}
 
-@item figname, @code{STRING}
+@item figName, @code{STRING}
 The name to use when saving this figure. Default: something of the
 form @code{graph_pg1_sec2_row1_col3.tex}
 
@@ -10904,7 +10904,7 @@ Display a solid black line at @math{y = 0}. Default: @code{false}
 @end table
 @end defmethod
 
-@defmethod Report addTable data, showHlines, precision, range, seriesToUse, tablename, tableDirName, title, titleFormat, vlineAfter, vlineAfterEndOfPeriod, showVlines
+@defmethod Report addTable data, showHlines, precision, range, seriesToUse, tableName, tableDirName, title, titleFormat, vlineAfter, vlineAfterEndOfPeriod, showVlines
 Adds a @code{Table} to a @code{Section}.
 @optionshead
 @table @code
@@ -10924,7 +10924,7 @@ The date range of the data to be displayed. Default: @code{all}
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
 @xref{seriesToUse}.
 
-@item tablename, @code{STRING}
+@item tableName, @code{STRING}
 The name to use when saving this table. Default: something of the
 form @code{table_pg1_sec2_row1_col3.tex}
 
@@ -10952,7 +10952,7 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zerotol
+@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @optionshead
 @table @code
@@ -11026,9 +11026,9 @@ A header for a subsection of the table. No data will be associated
 with it. It is equivalent to adding an empty series with a
 name. Default: @code{''}
 
-@item zerotol, @code{DOUBLE}
-The zero tolerance. Anything smaller than @code{zerotol} and larger
-than @code{-zerotol} will be set to zero before being
+@item zeroTol, @code{DOUBLE}
+The zero tolerance. Anything smaller than @code{zeroTol} and larger
+than @code{-zeroTol} will be set to zero before being
 graphed. Default: @math{1e-6}
 
 @end table
