@@ -10784,7 +10784,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, figName, figDirName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
+@defmethod Report addGraph data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -10793,13 +10793,13 @@ Adds a @code{Graph} to a @code{Section}.
 The @code{dseries} that provides the data for the graph. Default:
 @code{none}
 
-@item figName, @code{STRING}
-The name to use when saving this figure. Default: something of the
-form @code{graph_pg1_sec2_row1_col3.tex}
-
-@item figDirName, @code{STRING}
+@item graphDirName, @code{STRING}
 The name of the folder in which to store this figure. Default:
 @code{tmpRepDir}
+
+@item graphName, @code{STRING}
+The name to use when saving this figure. Default: something of the
+form @code{graph_pg1_sec2_row1_col3.tex}
 
 @item graphSize, @code{NUMERICAL_VECTOR}
 The width and height to be passed to the third and fourth elements of
