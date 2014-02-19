@@ -10904,7 +10904,7 @@ Display a solid black line at @math{y = 0}. Default: @code{false}
 @end table
 @end defmethod
 
-@defmethod Report addTable data, showHlines, precision, range, seriesToUse, tableName, tableDirName, title, titleFormat, vlineAfter, vlineAfterEndOfPeriod, showVlines
+@defmethod Report addTable data, showHlines, precision, range, seriesToUse, tableDirName, tableName, title, titleFormat, vlineAfter, vlineAfterEndOfPeriod, showVlines
 Adds a @code{Table} to a @code{Section}.
 @optionshead
 @table @code
@@ -10924,13 +10924,13 @@ The date range of the data to be displayed. Default: @code{all}
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
 @xref{seriesToUse}.
 
+@item tableDirName, @code{STRING}
+The name of the folder in which to store this table. Default:
+@code{tmpRepDir}
+
 @item tableName, @code{STRING}
 The name to use when saving this table. Default: something of the
 form @code{table_pg1_sec2_row1_col3.tex}
-
-@item figDirName, @code{STRING}
-The name of the folder in which to store this table. Default:
-@code{tmpRepDir}
 
 @item title, @code{STRING}
 Same as @ref{title}, just for tables.
