@@ -10836,6 +10836,7 @@ The names of the series contained in the @code{dseries} provided to
 the @ref{data} option. If empty, use all series provided to
 @ref{data} option. Default: @code{empty}
 
+@anchor{shade}
 @item shade, @code{dates}
 The date range showing the portion of the graph that should be
 shaded. Default: @code{none}
@@ -10876,18 +10877,21 @@ The boundary on the x-axis to display in the graph. Default: all
 @item xTicks, @code{NUMERICAL_VECTOR}
 Used only in conjunction with @ref{xTickLabels}, this option denotes
 the numerical position of the label along the x-axis. The positions
-begin at @math{1}. Default: set by Matlab/Octave.
+begin at @math{1}. Default: the indices associated with the first and
+last dates of the @code{dseries} and, if passed, the index associated
+with the first date of the @ref{shade} option.
 
 @anchor{xTickLabels}
 @item xTickLabels, @code{CELL_ARRAY_STRINGS}
 The labels to be mapped to the ticks provided by
-@ref{xTicks}. Default: the dates of the @code{dseries}
+@ref{xTicks}. Default: the first and last dates of the @code{dseries}
+and, if passed, the date first date of the @ref{shade} option.
 
 @item xTickLabelAnchor, @code{STRING}
 Where to anchor the x tick label. Default: @code{`south'}
 
 @item xTickLabelRotation, @code{DOUBLE}
-The amount to rotate the x tick labels by. Default: @code{45}
+The amount to rotate the x tick labels by. Default: @code{0}
 
 @item yAxisTight, @code{BOOLEAN}
 Use a tight y axis. If false, uses pgfplots @code{enlarge y limits} to
