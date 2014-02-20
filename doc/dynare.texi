@@ -10882,7 +10882,7 @@ last dates of the @code{dseries} and, if passed, the index associated
 with the first date of the @ref{shade} option.
 
 @anchor{xTickLabels}
-@item xTickLabels, @code{CELL_ARRAY_STRINGS}
+@item xTickLabels, @code{CELL_ARRAY_STRINGS} | `ALL'
 The labels to be mapped to the ticks provided by
 @ref{xTicks}. Default: the first and last dates of the @code{dseries}
 and, if passed, the date first date of the @ref{shade} option.
