@@ -76,9 +76,9 @@ while (niter < maxiter && ~info)
         fvec = fvec(j1);
         fjac = fjac(j1,j2);
     else
-        dh = max(abs(x(j2)),gstep(1)*ones(nn,1))*eps^(1/3);
+        dh = max(abs(x(j2)),gstep(1)*ones(n,1))*eps^(1/3);
 
-        for j = 1:nn
+        for j = 1:n
             xdh = x ;
             xdh(j2(j)) = xdh(j2(j))+dh(j) ;
             t = fcn(xdh,varargin{:});
