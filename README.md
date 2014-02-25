@@ -267,6 +267,7 @@ Configure and make:
 - **(Optional)** To compile Dynare mex files for use on Octave, first install Octave following the [Simple Installation Instructions](http://wiki.octave.org/Octave_for_MacOS_X#Simple_Installation_Instructions_3). Then, you will probably also want to install graphicsmagick via Homebrew with `brew install graphicsmagick`.
 - **(Optional)** To compile Dynare's documentation, first install the latest version of [MacTeX](http://www.tug.org/mactex/). Then install `doxygen`, `latex2html` and `texi2html` via Homebrew with the following commands:
     - ```brew install doxygen```
+    - ```brew install texinfo```
     - ```brew install latex2html```
     - ```brew install texi2html```
 - **(On OS X 10.7 Only)** Copy [FlexLexer.h](http://www.dynare.org/DynareWiki/BuildingDynareFromSource?action=AttachFile&do=view&target=FlexLexer.h) into the `preprocessor` directory (there was an error in the `FlexLexer.h` file distributed with 10.7)
@@ -274,3 +275,4 @@ Configure and make:
     - `autoconf -si`
     - `./configure --with-matlab=/Applications/MATLAB_R2013a.app MATLAB_VERSION=8.1 YACC=/usr/local/Cellar/bison/<<BISON VERSION>>/bin/bison`
     - `make`
+    - `make pdf TEXI2DVI=/usr/local/Cellar/texinfo/5.2/bin/texi2dvi`, where you replace everything after the equal sign with the path to the `texi2dvi` installed by homebrew when you installed `texinfo`.
