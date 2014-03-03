@@ -118,7 +118,7 @@ License: GPL-3+ with Autoconf exception
 
 Files: m4/ax_pthread.m4
 Copyright: 2008 Steven G. Johnson <stevenj@alum.mit.edu>
-           2010 Dynare Team
+           2011 Daniel Richard G. <skunk@iSKUNK.ORG>
 License: GPL-3+ with Autoconf exception
 
 Files: m4/ax_boost_base.m4
@@ -135,7 +135,8 @@ Copyright: 2008 Tim Toolan <toolan@ele.uri.edu>
 License: other
  Copying and distribution of this file, with or without modification, are
  permitted in any medium without royalty provided the copyright notice
- and this notice are preserved.
+ and this notice are preserved. This file is offered as-is, without any
+ warranty.
 
 Files: m4/ax_latex_bibtex_test.m4 m4/ax_latex_class.m4 m4/ax_tex_test.m4
 Copyright: 2008 Boretti Mathieu <boretti@eig.unige.ch>
