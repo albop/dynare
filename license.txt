@@ -123,11 +123,12 @@ License: GPL-3+ with Autoconf exception
 
 Files: m4/ax_boost_base.m4
 Copyright: 2008 Thomas Porschberg <thomas@randspringer.de>
-           2009 Dynare Team
+           2009 Peter Adolphs
 License: other
  Copying and distribution of this file, with or without modification, are
  permitted in any medium without royalty provided the copyright notice
- and this notice are preserved.
+ and this notice are preserved. This file is offered as-is, without any
+ warranty.
 
 Files: m4/ax_compare_version.m4
 Copyright: 2008 Tim Toolan <toolan@ele.uri.edu>

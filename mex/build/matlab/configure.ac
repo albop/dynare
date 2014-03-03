@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2012 Dynare Team
+dnl Copyright (C) 2009-2014 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -63,7 +63,7 @@ AM_PROG_AR
 AX_PTHREAD
 # Check for boost libraries used in estimation DLL
 AC_LANG_PUSH([C++])
-AX_BOOST_BASE([1.36])
+AX_BOOST_BASE([1.36], [], [AC_MSG_ERROR([Can't find Boost >= 1.36])])
 CPPFLAGS_SAVED="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 AC_CHECK_HEADER([boost/random/linear_congruential.hpp], [], [AC_MSG_ERROR([Can't find Boost Random Library])])
