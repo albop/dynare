@@ -21,6 +21,8 @@ MODFILES = \
 	optimal_policy/osr_example.mod \
 	optimal_policy/ramsey.mod \
 	optimal_policy/nk_ramsey.mod \
+	optimal_policy/nk_ramsey_model.mod \
+	optimal_policy/nk_ramsey_det.mod \
 	optimal_policy/nk_ramsey_expectation.mod \
 	optimal_policy/nk_ramsey_expectation_a.mod \
 	optimal_policy/mult_elimination_test.mod \
