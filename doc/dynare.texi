@@ -1684,7 +1684,7 @@ The equations of the model are written in a block delimited by
 
 There must be as many equations as there are endogenous variables in the
 model, except when computing the unconstrained optimal policy with
-@code{ramsey_policy} or @code{discretionary_policy}.
+@code{ramsey_model}, @code{ramsey_policy} or @code{discretionary_policy}.
 
 The syntax of equations must follow the conventions for
 @var{MODEL_EXPRESSION} as described in @ref{Expressions}. Each equation
@@ -1976,7 +1976,7 @@ example, the expression @code{EXPECTATION(-1)(x(+1))} is replaced by
 declared as @code{AUX_EXPECT_LAG_1 = x(+2)}.
 
 Auxiliary variables are also introduced by the preprocessor for the
-@code{ramsey_policy} command. In this case, they are used to represent the Lagrange
+@code{ramsey_model} and @code{ramsey_policy} commands. In this case, they are used to represent the Lagrange
 multipliers when first order conditions of the Ramsey problem are computed.
 The new variables take the form @code{MULT_@var{i}}, where @var{i} represents
 the constraint with which the multiplier is associated (counted from the
@@ -6035,7 +6035,12 @@ plot(dset_forecast.@{'r','e'@});
 @section Optimal policy
 
 Dynare has tools to compute optimal policies for various types of
-objectives. You can either solve for optimal policy under commitment
+objectives. @code{ramsey_model} computes automatically the First Order
+Conditions (FOC) of a model, given the @code{planner_objective}. You can
+then use other standard commands to solve, estimate or simulate this
+new, expanded model.
+
+Alternatively, you can either solve for optimal policy under commitment
 with @code{ramsey_policy}, for optimal policy under discretion with
 @code{discretionary_policy} or for optimal simple rule with
 @code{osr}.
@@ -6140,6 +6145,65 @@ After an execution of the @code{osr} command, this variable contains
 the value of parameters at the optimum, stored in fields of the form
 @code{oo_.osr.optim_params.@var{PARAMETER_NAME}}.
 @end defvr
+
+@anchor{Ramsey}
+
+@deffn Command ramsey_model (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+This command computes the First Order Conditions for maximizing the policy maker objective function subject to the
+constraints provided by the equilibrium path of the economy.
+
+The planner objective must be declared with the @code{planner_objective} command.
+
+This command only creates the expanded model, it doesn't perform any
+computations. It needs to be followed by other instructions to actually
+perfrom desired computations. Note that it is the only way to perform
+perfect foresight simulation of the Ramsey policy problem.
+
+@xref{Auxiliary
+variables}, for an explanation of how Lagrange multipliers are
+automatically created.
+
+@optionshead
+
+This command accepts the following options:
+
+@table @code
+
+@item planner_discount = @var{EXPRESSION}
+Declares the discount factor of the central planner. Default: @code{1.0}
+
+@item instruments = (@var{VARIABLE_NAME},@dots{})
+Declares instrument variables for the computation of the steady state
+under optimal policy. Requires a @code{steady_state_model} block or a
+@code{@dots{}_steadystate.m} file. See below.
+
+@end table
+
+@customhead{Steady state}
+
+Dynare takes advantage of the fact that the Lagrange multipliers appear
+linearly in the equations of the steady state of the model under optimal
+policy. Nevertheless, it is in general very difficult to compute the
+steady state with simply a numerical guess in @code{initval} for the
+endogenous variables.
+
+It greatly facilitates the computation, if the user provides an
+analytical solution for the steady state (in @code{steady_state_model}
+block or in a @code{@dots{}_steadystate.m} file). In this case, it is
+necessary to provide a steady state solution CONDITIONAL on the value
+of the instruments in the optimal policy problem and declared with
+option @code{instruments}. Note that choosing the instruments is
+partly a matter of interpretation and you can choose instruments that
+are handy from a mathematical point of view but different from the
+instruments you would refer to in the analysis of the paper. A typical
+example is choosing inflation or nominal interest rate as an
+instrument.
+
+
+@end deffn
 
 @deffn Command ramsey_policy [@var{VARIABLE_NAME}@dots{}];
 @deffnx Command ramsey_policy (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
