@@ -60,7 +60,15 @@ AC_PROG_RANLIB
 AX_PROG_LN_S
 AC_PROG_MKDIR_P
 AM_PROG_AR
+
+case ${host_os} in
+  *mingw32*)
+    # Ensure that -lpthread is statically linked under MinGW
+    PTHREAD_LIBS="-Wl,-Bstatic -lpthread -Wl,-Bdynamic"
+    ;;
+esac
 AX_PTHREAD
+
 # Check for boost libraries used in estimation DLL
 AC_LANG_PUSH([C++])
 AX_BOOST_BASE([1.36], [], [AC_MSG_ERROR([Can't find Boost >= 1.36])])
