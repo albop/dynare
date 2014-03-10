@@ -276,7 +276,7 @@ options_.endogenous_terminal_period = 0;
 % Solution
 options_.order = 2;
 options_.pruning = 0;
-options_.solve_algo = 2;
+options_.solve_algo = 4;
 options_.linear = 0;
 options_.replic = 50;
 options_.simul_replic = 1;

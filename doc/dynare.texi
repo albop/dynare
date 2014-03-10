@@ -2747,7 +2747,7 @@ option, @pxref{Model declaration})
 @end table
 
 @noindent
-Default value is @code{2}.
+Default value is @code{4}.
 
 @item homotopy_mode = @var{INTEGER}
 Use a homotopy (or divide-and-conquer) technique to solve for the
