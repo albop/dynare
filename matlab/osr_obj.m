@@ -78,11 +78,11 @@ switch info(1)
   case 20
     loss = 1e8*min(1e3,info(2));
     return
-    otherwise
-  if info(1)~=0
-    loss = 1e8;
-    return;
-  end  
+  otherwise
+    if info(1)~=0
+      loss = 1e8;
+      return;
+    end  
 end
 
 vx = get_variance_of_endogenous_variables(dr,i_var);
