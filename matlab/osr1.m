@@ -2,10 +2,21 @@ function osr_res = osr1(i_params,i_var,weights)
 % Compute the Optimal Simple Rules
 % INPUTS
 %   i_params                  vector           index of optimizing parameters in M_.params
-%   i_var                     vector           variables indices
+%   i_var                     vector           variables indices in declaration order
 %   weights                   vector           weights in the OSRs
 %
-% Copyright (C) 2005-2013 Dynare Team
+% OUTPUTS
+%   osr_res:    [structure] results structure containing:
+%    - objective_function [scalar double]   value of the objective
+%                                               function at the optimum
+%    - optim_params       [structure]       parameter values at the optimum 
+% 
+% Algorithm:
+% 
+%   Uses Newton-type optimizer csminwel to directly solve quadratic
+%   osr-problem
+% 
+% Copyright (C) 2005-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -78,8 +89,6 @@ end
 %  [p,f]=fminunc(@osr_obj,t0,options,i_params,...
 %               inv_order_var(i_var),weights(i_var,i_var));
 
-
-
 skipline()
 disp('OPTIMAL VALUE OF THE PARAMETERS:')
 skipline()
@@ -89,5 +98,3 @@ end
 disp(sprintf('Objective function : %16.6g\n',f));
 skipline()
 [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
-
-% 05/10/03 MJ modified to work with osr.m and give full report
