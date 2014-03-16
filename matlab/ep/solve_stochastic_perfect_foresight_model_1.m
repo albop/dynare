@@ -1,4 +1,4 @@
-function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,EpOptions,pfm,order)
+function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,EpOptions,pfm,order,varargin)
 
 % Copyright (C) 2012-2013 Dynare Team
 %
@@ -17,6 +17,11 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+    if nargin < 6
+        homotopy_parameter = 1;
+    else
+        homotopy_parameter = varargin{1};
+    end
     flag = 0;
     err = 0;
     stop = 0;
@@ -159,7 +164,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
                                  Y(i_cols_s,1);
                                  Y(i_cols_f,k1)];
                         end
-                        [d1,jacobian] = dynamic_model(y,innovation, ...
+                        [d1,jacobian] = dynamic_model(y,homotopy_parameter*innovation, ...
                                                       params,steady_state,i+1);
                         if i == 1
                             % in first period we don't keep track of
@@ -182,7 +187,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
                     y = [Y(i_cols_p,1);
                          Y(i_cols_s,j);
                          Y(i_cols_f,j)];
-                    [d1,jacobian] = dynamic_model(y,innovation,params,steady_state,i+1);
+                    [d1,jacobian] = dynamic_model(y,homotopy_parameter*innovation,params,steady_state,i+1);
                     i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
                     A1(i_rows,i_cols_A) = jacobian(:,i_cols_j);
                     res(:,i,j) = d1;
@@ -194,7 +199,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
                     y = [Y(i_cols_p,j);
                          Y(i_cols_s,j);
                          Y(i_cols_f,j)];
-                    [d1,jacobian] = dynamic_model(y,innovation,params,steady_state,i+1);
+                    [d1,jacobian] = dynamic_model(y,homotopy_parameter*innovation,params,steady_state,i+1);
                     i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
                     A1(i_rows,i_cols_A) = jacobian(:,i_cols_j);
                     res(:,i,j) = d1;
@@ -242,17 +247,16 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
         end
         if err < tolerance
             stop = 1;
+            flag = 0;% Convergency obtained.
+            endo_simul = reshape(Y(:,1),ny,periods+2);%Y(ny+(1:ny),1);
             if verbose
+                save ep_test_s1 exo_simul endo_simul Y
                 fprintf('\n') ;
                 disp([' Total time of simulation        :' num2str(etime(clock,h1))]) ;
                 fprintf('\n') ;
                 disp([' Convergency obtained.']) ;
                 fprintf('\n') ;
             end
-            flag = 0;% Convergency obtained.
-            endo_simul = reshape(Y(:,1),ny,periods+2);%Y(ny+(1:ny),1);
-                                                      %            figure;plot(Y(16:ny:(periods+2)*ny,:))
-                                                      %            pause
             break
         end
         A2 = [nzA{:}]';
@@ -260,6 +264,8 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
             if verbose
                 disp(['solve_stochastic_foresight_model_1 encountered ' ...
                       'NaN'])
+                save ep_test_s2 exo_simul endo_simul
+                pause
             end
             flag = 1;
             return
@@ -280,6 +286,8 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo
             disp(['WARNING : maximum number of iterations is reached (modify options_.simul.maxit).']) ;
             fprintf('\n') ;
             disp(sprintf('err: %f',err));
+            save ep_test_s2 exo_simul endo_simul
+            pause
         end
         flag = 1;% more iterations are needed.
         endo_simul = 1;

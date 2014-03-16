@@ -169,6 +169,9 @@ while (t<sample_size)
     increase_periods = 0;
     % Keep a copy of endo_simul_1
     endo_simul = endo_simul_1;
+    if verbosity
+        save ep_test_1 endo_simul_1 exo_simul_1
+    end
     while 1
         if ~increase_periods
             if bytecode_flag && ~options_.ep.stochastic.order

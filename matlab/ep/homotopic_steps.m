@@ -60,6 +60,9 @@ while weight<1
     else
         flag = 1;
     end
+    if options_.debug
+        save ep-test3 weight exo_simul0 endo_simul0
+    end
     if flag
         if ~options_.ep.stochastic.order
             [flag,tmp,err] = solve_perfect_foresight_model(endo_simul0,exo_simul0,pfm);
@@ -70,7 +73,8 @@ while weight<1
                     solve_stochastic_perfect_foresight_model(endo_simul0,exo_simul0,pfm,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
               case 1
                 [flag,tmp] = ...
-                    solve_stochastic_perfect_foresight_model_1(endo_simul0,exo_simul0,options_.ep,pfm,options_.ep.stochastic.order);
+                    solve_stochastic_perfect_foresight_model_1(endo_simul0,exxo_simul,options_.ep,pfm,options_.ep.stochastic.order,weight);
+                %                    solve_stochastic_perfect_foresight_model_1(endo_simul0,exo_simul0,options_.ep,pfm,options_.ep.stochastic.order);
             end
         end
     end
@@ -83,6 +87,9 @@ while weight<1
         end
     end
     if info.convergence
+        if options_.debug
+            save ep-test2 weight exo_simul0 endo_simul0
+        end
         endo_simul0 = tmp;
         jter = jter + 1;
         if jter>3
@@ -152,7 +159,8 @@ if weight<1
                     solve_stochastic_perfect_foresight_model(endo_simul0,exo_simul0,pfm,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
               case 1
                 [flag,tmp] = ...
-                    solve_stochastic_perfect_foresight_model_1(endo_simul0,exo_simul0,options_.ep,pfm,options_.ep.stochastic.order);
+                    solve_stochastic_perfect_foresight_model_1(endo_simul0,exxo_simul,options_.ep,pfm,options_.ep.stochastic.order,weight);
+                %                    solve_stochastic_perfect_foresight_model_1(endo_simul0,exo_simul0,options_.ep,pfm,options_.ep.stochastic.order);
             end
         end
     end
