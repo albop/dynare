@@ -259,7 +259,6 @@ if options_.initialize_estimated_parameters_with_the_prior_mode
     if ~isempty(k)
         xparam1(k) = bayestopt_.p1(k);
     end
-    xparam1 = xparam1;
 end
 
 % I create subfolder M_.dname/prior if needed.
