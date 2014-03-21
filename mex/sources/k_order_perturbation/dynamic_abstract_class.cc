@@ -17,11 +17,16 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
+
 #include "dynamic_abstract_class.hh"
 
 void
 DynamicModelAC::copyDoubleIntoTwoDMatData(double *dm, TwoDMatrix *tdm, int rows, int cols)
 {
+  assert(rows == tdm->nrows());
+  assert(cols == tdm->ncols());
+
   int dmIdx = 0;
   for (int j = 0; j < cols; j++)
     for (int i = 0; i < rows; i++)

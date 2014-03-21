@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2014 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -25,8 +25,8 @@
 class DynamicModelAC
 {
 public:
-  double *unpackSparseMatrix(mxArray *sparseMatrix);
-  void copyDoubleIntoTwoDMatData(double *dm, TwoDMatrix *tdm, int rows, int cols);
+  static double *unpackSparseMatrix(mxArray *sparseMatrix);
+  static void copyDoubleIntoTwoDMatData(double *dm, TwoDMatrix *tdm, int rows, int cols);
   virtual void eval(const Vector &y, const Vector &x, const Vector &params, const Vector &ySteady,
                     Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException) = 0;
 };
