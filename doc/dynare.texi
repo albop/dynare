@@ -9552,8 +9552,9 @@ A @code{nobs} by @code{vobs} array of doubles, the data.
 
 @deftypefn  {dseries} dseries ()
 @deftypefnx {dseries} dseries (@var{INITIAL_DATE})
+@deftypefnx {dseries} dseries (@var{RANGE_OF_DATES})
 
-Instantiates an empty @dseries object, with, if defined, an initial date given by the single element @dates object @var{INITIAL_DATE} (the frequency is then set accordingly).
+Instantiates an empty @dseries object, with, if defined, an initial date given by the single element @dates object @var{INITIAL_DATE} or the first element of the @dates object @var{RANGE_OF_DATES} (the frequency is then set accordingly).
 
 @end deftypefn
 
@@ -9579,8 +9580,9 @@ If a @file{.mat} file is used instead, it should provide the same informations. 
 @sp 1
 
 @deftypefn {dseries} dseries (@var{DATA_MATRIX}[, @var{INITIAL_DATE}[, @var{LIST_OF_NAMES}[, @var{LIST_OF_TEX_NAMES}]]])
+@deftypefn {dseries} dseries (@var{DATA_MATRIX}[, @var{RANGE_OF_DATES}[, @var{LIST_OF_NAMES}[, @var{LIST_OF_TEX_NAMES}]]])
 
-If the data is not read from a file, it can be provided via a @math{T}x@math{N} matrix as the first argument to @code{dseries}' constructor, with @math{T} representing the number of observations on @math{N} variables. The optional second argument, @var{INITIAL_DATE}, can be either a @dates object representing the period of the first observation or a string which would be used to instantiate a @dates object. Its default value is @code{dates('1Y')}. The optional third argument, @var{LIST_OF_NAMES}, is a @math{N} by @math{1} cell of strings  with one entry for each variable name. The default name associated with column @code{i} of @var{DATA_MATRIX} is @code{Variable_i}. The final argument, @var{LIST_OF_TEX_NAMES}, is a @math{N} by @math{1} cell of strings composed of the @LaTeX{} names associated with the variables. The default @LaTeX{} name associated with column @code{i} of @var{DATA_MATRIX} is @code{Variable\_i}.
+If the data is not read from a file, it can be provided via a @math{T}x@math{N} matrix as the first argument to @code{dseries}' constructor, with @math{T} representing the number of observations on @math{N} variables. The optional second argument, @var{INITIAL_DATE}, can be either a @dates object representing the period of the first observation or a string which would be used to instantiate a @dates object. Its default value is @code{dates('1Y')}. The optional third argument, @var{LIST_OF_NAMES}, is a @math{N} by @math{1} cell of strings  with one entry for each variable name. The default name associated with column @code{i} of @var{DATA_MATRIX} is @code{Variable_i}. The final argument, @var{LIST_OF_TEX_NAMES}, is a @math{N} by @math{1} cell of strings composed of the @LaTeX{} names associated with the variables. The default @LaTeX{} name associated with column @code{i} of @var{DATA_MATRIX} is @code{Variable\_i}. If the optional second input argument is a range of dates, @dates object @var{RANGE_OF_DATES}, the number of rows in the first argument must match the number of elements @var{RANGE_OF_DATES} or be equal to one (in which case the single observation is replicated).
 
 @end deftypefn
 

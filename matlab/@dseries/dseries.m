@@ -103,7 +103,10 @@ switch nargin
             ts.init = varargin{1};
             ts.freq = varargin{1}.freq;
           otherwise
-            error(['dseries::dseries: Input ' inputname(1) ' (identified as a dates object) must have only one element!'])
+            % A range of dates is passed to the constructor
+            ts.dates = varargin{1};
+            ts.init = varargin{1}(1);
+            ts.freq = varargin{1}.freq;
         end
         return
     elseif ischar(varargin{1})
@@ -173,19 +176,37 @@ switch nargin
     if isempty(b)
         ts.freq = 1;
         ts.init = dates(1,1);
-    else
-        if isdate(b)% Weekly, Monthly, Quaterly or Annual data.
-            ts.init = dates(b);
-            ts.freq = ts.init.freq;
-        elseif isdates(b) && isequal(length(b),1)
-            ts.freq = b.freq;
-            ts.init = b;
-        elseif isnumeric(b) && isscalar(b) && isint(b) % Yearly data.
-            ts.freq = 1;
-            ts.init = dates([num2str(b) 'Y']);
-        else
-            error('dseries::dseries: Wrong calling sequence!');
+    elseif (isdates(b) && isequal(length(b),1))
+        ts.freq = b.freq;
+        ts.init = b;
+    elseif isdate(b)% Weekly, Monthly, Quaterly or Annual data (string).
+        ts.init = dates(b);
+        ts.freq = ts.init.freq;
+    elseif (isnumeric(b) && isscalar(b) && isint(b)) % Yearly data.
+        ts.freq = 1;
+        ts.init = dates([num2str(b) 'Y']);
+    elseif isdates(b) % Range of dates
+        ts.freq = b.freq;
+        ts.init = b(1);
+        if ts.nobs>1 && ~isequal(b.ndat,ts.nobs)
+            message =   'dseries::dseries: If second input is a range, its number of elements must match ';
+            message = char(message, '                  the number of rows in the first input, unless the first input');
+            message = char(message, '                  has only one row.');
+            skipline()
+            disp(message);
+            error(' ');
+        elseif isequal(ts.nobs, 1)
+            ts.data = repmat(ts.data,b.ndat,1);
+            ts.nobs = b.ndat;
         end
+        ts.dates = b;
+    elseif (isnumeric(b) && isint(b)) % Range of yearly dates.
+        message = 'dseries::dseries: Not implemented! If you need to define a range of years';
+        message = char(message, '                  you have to pass a dates object as the second input argument.');
+        disp(message)
+        error(' ')
+    else
+        error('dseries::dseries: Wrong calling sequence!');
     end
     % Get the names of the variables.
     if ~isempty(c)
@@ -214,7 +235,9 @@ switch nargin
     error('dseries::dseries: Can''t instantiate the class, wrong calling sequence!')
 end
 
-ts.dates = ts.init:ts.init+(ts.nobs-1);
+if isempty(ts.dates)
+    ts.dates = ts.init:ts.init+(ts.nobs-1);
+end
 
 %@test:1
 %$ % Test if we can instantiate an empty dseries object.
@@ -465,3 +488,57 @@ ts.dates = ts.init:ts.init+(ts.nobs-1);
 %$
 %$ T = all(t);
 %@eof:12
+
+%@test:13
+%$ t = zeros(6,1);
+%$
+%$ try
+%$     ts = dseries(transpose(1:4),dates('1990Q1'):dates('1990Q4'));
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(ts.init.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1990, 1]);
+%$     t(5) = dyn_assert(ts.vobs,1);
+%$     t(6) = dyn_assert(ts.nobs,4);
+%$ end
+%$
+%$ T = all(t);
+%@eof:13
+
+%@test:14
+%$ t = zeros(7,1);
+%$
+%$ try
+%$     ts = dseries([1, 2],dates('1990Q1'):dates('1990Q4'));
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(ts.init.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1990, 1]);
+%$     t(5) = dyn_assert(ts.vobs,2);
+%$     t(6) = dyn_assert(ts.nobs,4);
+%$     t(7) = dyn_assert(ts.data, [ones(4,1), 2*ones(4,1)]);
+%$ end
+%$
+%$ T = all(t);
+%@eof:14
+
+%@test:15
+%$ try
+%$     ts = dseries([1; 2],dates('1990Q1'):dates('1990Q4'));
+%$     t = 0;
+%$ catch
+%$     t = 1;
+%$ end
+%$
+%$ T = all(t);
+%@eof:15
