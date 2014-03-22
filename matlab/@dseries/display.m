@@ -21,43 +21,104 @@ function display(A)
 vspace = ' ';
 TABLE = ' ';
 
-if A.nobs<=40
-    separator = repmat(' | ',A.nobs+1,1);
-    for t=1:A.nobs
-        TABLE = char(TABLE, date2string(A.dates(t)));
-    end
-    for i = 1:A.vobs
-        TABLE = horzcat(TABLE,separator);
-        tmp = A.name{i};
+if A.vobs<=10
+    if A.nobs<=40
+        separator = repmat(' | ',A.nobs+1,1);
         for t=1:A.nobs
-            tmp = char(tmp,num2str(A.data(t,i)));
+            TABLE = char(TABLE, date2string(A.dates(t)));
         end
-        TABLE = horzcat(TABLE, tmp);
+        for i = 1:A.vobs
+            TABLE = horzcat(TABLE,separator);
+            tmp = A.name{i};
+            for t=1:A.nobs
+                tmp = char(tmp,num2str(A.data(t,i)));
+            end
+            TABLE = horzcat(TABLE, tmp);
+        end
+    else
+        n = 10;
+        separator = repmat(' | ',2*n+3,1);
+        for t=1:n
+            TABLE = char(TABLE, date2string(A.dates(t)));
+        end
+        TABLE = char(TABLE,vspace);
+        for t = A.nobs-n:A.nobs
+            TABLE = char(TABLE, date2string(A.dates(t)));
+        end
+        for i=1:A.vobs
+            TABLE = horzcat(TABLE,separator);
+            tmp = A.name{i};
+            for t=1:10
+                tmp = char(tmp,num2str(A.data(t,i)));
+            end
+            tmp = char(tmp,vspace);
+            for t=A.nobs-10:A.nobs
+                tmp = char(tmp,num2str(A.data(t,i)));
+            end
+            TABLE = horzcat(TABLE, tmp);
+        end
     end
 else
-    n = 10;
-    separator = repmat(' | ',2*n+3,1);
-    for t=1:n
-        TABLE = char(TABLE, date2string(A.dates(t)));
-    end
-    TABLE = char(TABLE,vspace);
-    for t = A.nobs-n:A.nobs
-        TABLE = char(TABLE, date2string(A.dates(t)));
-    end
-    for i=1:A.vobs
-        TABLE = horzcat(TABLE,separator);
-        tmp = A.name{i};
-        for t=1:10
-            tmp = char(tmp,num2str(A.data(t,i)));
+    m = 4;
+    if A.nobs<=40
+        separator = repmat(' | ',A.nobs+1,1);
+        for t=1:A.nobs
+            TABLE = char(TABLE, date2string(A.dates(t)));
         end
-        tmp = char(tmp,vspace);
-        for t=A.nobs-10:A.nobs
-            tmp = char(tmp,num2str(A.data(t,i)));
+        for i = 1:m
+            TABLE = horzcat(TABLE,separator);
+            tmp = A.name{i};
+            for t=1:A.nobs
+                tmp = char(tmp,num2str(A.data(t,i)));
+            end
+            TABLE = horzcat(TABLE, tmp);
         end
-        TABLE = horzcat(TABLE, tmp);
+        TABLE = horzcat(TABLE, separartor, repmat(' ... ', A.nobs+1,1));
+        for i = A.vobs-m+1:A.vobs
+            TABLE = horzcat(TABLE,separator);
+            tmp = A.name{i};
+            for t=1:A.nobs
+                tmp = char(tmp,num2str(A.data(t,i)));
+            end
+            TABLE = horzcat(TABLE, tmp);
+        end
+    else
+        n = 10;
+        separator = repmat(' | ',2*n+3,1);
+        for t=1:n
+            TABLE = char(TABLE, date2string(A.dates(t)));
+        end
+        TABLE = char(TABLE,vspace);
+        for t = A.nobs-n:A.nobs
+            TABLE = char(TABLE, date2string(A.dates(t)));
+        end
+        for i=1:m
+            TABLE = horzcat(TABLE,separator);
+            tmp = A.name{i};
+            for t=1:10
+                tmp = char(tmp,num2str(A.data(t,i)));
+            end
+            tmp = char(tmp,vspace);
+            for t=A.nobs-10:A.nobs
+                tmp = char(tmp,num2str(A.data(t,i)));
+            end
+            TABLE = horzcat(TABLE, tmp);
+        end
+        TABLE = horzcat(TABLE, separator, repmat(' ... ', 2*n+3,1));
+        for i=A.vobs-m+1:A.vobs
+            TABLE = horzcat(TABLE,separator);
+            tmp = A.name{i};
+            for t=1:10
+                tmp = char(tmp,num2str(A.data(t,i)));
+            end
+            tmp = char(tmp,vspace);
+            for t=A.nobs-10:A.nobs
+                tmp = char(tmp,num2str(A.data(t,i)));
+            end
+            TABLE = horzcat(TABLE, tmp);
+        end
     end
 end
-
 disp(vspace)
 disp([inputname(1) ' is a dseries object:'])
 disp(vspace);
