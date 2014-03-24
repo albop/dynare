@@ -73,7 +73,7 @@ else
             end
             TABLE = horzcat(TABLE, tmp);
         end
-        TABLE = horzcat(TABLE, separartor, repmat(' ... ', A.nobs+1,1));
+        TABLE = horzcat(TABLE, separator, repmat(' ... ', A.nobs+1,1));
         for i = A.vobs-m+1:A.vobs
             TABLE = horzcat(TABLE,separator);
             tmp = A.name{i};
