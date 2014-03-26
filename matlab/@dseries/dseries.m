@@ -22,9 +22,9 @@ function ts = dseries(varargin) % --*-- Unitary tests --*--
 %! @item b
 %! Initial date. For Quaterly, Monthly or Weekly data, b must be a string. For yearly data or if the frequence is not defined b must be an integer.
 %! @item c
-%! N*1 cell array of strings. Names of the N time series.
+%! N*1 cell array of strings or N*q array of strings. Names of the N time series.
 %! @item d
-%! N*p array of characters. TeX names of the N time series.
+%! N*1 cell array of strings or N*p array of characters. TeX names of the N time series.
 %! @end table
 %! @sp 2
 %! @strong{Outputs}
@@ -162,11 +162,17 @@ switch nargin
         d = {};
     else
         d = varargin{4};
+        if ~iscell(d)
+            d = cellstr(d);
+        end
     end
     if nargin<3
         c = {};
     else
         c = varargin{3};
+        if ~iscell(c)
+            c = cellstr(c);
+        end
     end
     % Get data, number of observations and number of variables.
     ts.data = a;

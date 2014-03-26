@@ -9561,10 +9561,10 @@ A scalar integer, the number of observations.
 A scalar integer, the number of variables.
 
 @item name
-A cell of strings, the names of the variables.
+A @code{nobs}*1 cell of strings or a @code{nobs}*p character array, the names of the variables.
 
 @item tex
- A cell of strings, the tex names of the variables.
+ A @code{nobs}*1 cell of strings or a @code{nobs}*p character array, the tex names of the variables.
 
 @item freq
 A scalar integer equal to 1, 4, 12 or 52, the frequency of the dataset.
