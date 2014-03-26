@@ -130,8 +130,13 @@ end
 if ~exist(fname,'file') || isequal(fname,'dir')
     fprintf('\nThe file %s could not be located in the "Current Folder". Check whether you typed in the correct filename\n',fname)
     fprintf('and whether the file is really located in the "Current Folder".\n')
-    fprintf('\nCurrent folder is %s, and contains the following mod files:\n\n',pwd)
-    ls *.mod;
+    try
+        list_of_mod_files = ls('*.mod');
+        fprintf('\nCurrent folder is %s, and contains the following mod files:\n\n',pwd)
+        disp(list_of_mod_files)
+    catch
+        fprintf('\nCurrent folder is %s, and does not contain any the mod files.\n\n',pwd)
+    end
     error(['dynare:: can''t open ' fname])
 end
 
