@@ -162,7 +162,7 @@ switch nargin
         d = {};
     else
         d = varargin{4};
-        if ~iscell(d)
+        if ~iscell(d) && ~isempty(d)
             d = cellstr(d);
         end
     end
@@ -170,7 +170,7 @@ switch nargin
         c = {};
     else
         c = varargin{3};
-        if ~iscell(c)
+        if ~iscell(c) && ~isempty(c)
             c = cellstr(c);
         end
     end
