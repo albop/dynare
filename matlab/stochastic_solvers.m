@@ -119,27 +119,10 @@ end
     
 if options_.debug
     if ~isempty(infrow)     
-        for ii=1:length(infrow)
-            [var_row,var_index]=find(M_.lead_lag_incidence==infcol(ii));
-            if var_row==2
-                type_string='';
-            elseif var_row==1
-                type_string='lag of';
-            elseif var_row==3;
-                type_string='lead of';
-            end
-            if var_index<=M_.orig_endo_nbr
-                fprintf('STOCHASTIC_SOLVER:  Derivative of Equation %d with respect to %s Variable %s  (initial value of %s: %g) \n',infrow(ii),type_string,deblank(M_.endo_names(var_index,:)),deblank(M_.endo_names(var_index,:)),dr.ys(var_index))
-            else %auxiliary vars
-                orig_var_index=M.aux_vars(1,var_index-M_.orig_endo_nbr).orig_index;
-                fprintf('STOCHASTIC_SOLVER:  Derivative of Equation %d with respect to %s Variable %s  (initial value of %s: %g) \n',infrow(ii),type_string,deblank(M_.endo_names(orig_var_index,:)),deblank(M_.endo_names(orig_var_index,:)),dr.ys(orig_var_index))            
-            end    
-        end
-        fprintf('\nSTOCHASTIC_SOLVER:  The problem most often occurs, because a variable with\n')
-        fprintf('STOCHASTIC_SOLVER:  exponent smaller than 1 has been initialized to 0. Taking the derivative\n')
-        fprintf('STOCHASTIC_SOLVER:  and evaluating it at the steady state then results in a division by 0.\n')
-    end
+    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains Inf. The problam is associated with:\n\n')    
+    display_problematic_vars_Jacobian(infrow,infcol,M_,dr.ys,'dynamic','STOCHASTIC_SOLVER: ')
     save([M_.fname '_debug.mat'],'jacobia_')
+    end
 end
 
 if ~isempty(infrow)
@@ -157,7 +140,16 @@ if ~isreal(jacobia_)
     end
 end
 
-if any(any(isnan(jacobia_)))
+[nanrow,nancol]=find(isnan(jacobia_));
+if options_.debug
+    if ~isempty(nanrow)     
+    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains NaN. The problam is associated with:\n\n')    
+    display_problematic_vars_Jacobian(nanrow,nancol,M_,dr.ys,'dynamic','STOCHASTIC_SOLVER: ')
+    save([M_.fname '_debug.mat'],'jacobia_')
+    end
+end
+
+if ~isempty(nanrow)
    info(1) = 8;
    NaN_params=find(isnan(M_.params));
    info(2:length(NaN_params)+1) =  NaN_params;
@@ -312,5 +304,6 @@ if options_.loglinear
     if options_.order>1
        error('Loglinear options currently only works at order 1')
     end
+end
 end
 
