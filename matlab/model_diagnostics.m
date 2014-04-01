@@ -209,11 +209,12 @@ if any(any(isinf(jacobia_) | isnan(jacobia_)))
     fprintf('\nMODEL_DIAGNOSTICS: The Jacobian of the dynamic model contains Inf or NaN. The problem arises from: \n\n')
     display_problematic_vars_Jacobian(infrow,infcol,M,dr.ys,'dynamic','MODEL_DIAGNOSTICS: ')
 end
-if any(any(isinf(hessian1) | isnan(hessian1)))
-    problem_dummy=1;
-    fprintf('\nMODEL_DIAGNOSTICS: The Hessian of the dynamic model contains Inf or NaN.\n')
+if exist('hessian1','var')
+    if any(any(isinf(hessian1) | isnan(hessian1)))
+        problem_dummy=1;
+        fprintf('\nMODEL_DIAGNOSTICS: The Hessian of the dynamic model contains Inf or NaN.\n')
+    end
 end
-
 if problem_dummy==0
     fprintf('MODEL_DIAGNOSTICS:  No obvious problems with this mod-file were detected.\n')
 end
