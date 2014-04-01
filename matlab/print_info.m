@@ -62,7 +62,7 @@ if ~noprint
           error(['The Jacobian contains NaNs because the following parameters are NaN: '...
               disp_string])
         else
-          error(['The Jacobian contains NaNs'])
+          error(['The Jacobian contains NaNs. For more information, use options_.debug.'])
         end
       case 9
         error(['k_order_pert was unable to compute the solution']) 
