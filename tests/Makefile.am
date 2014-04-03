@@ -173,7 +173,9 @@ MODFILES = \
 	gradient/fs2000_numgrad_5.mod \
 	filter_step_ahead/fs2000_filter_step_ahead_bayesian.mod \
 	filter_step_ahead/fs2000_filter_step_ahead_ML.mod \
-    loglinear/example4_loglinear.mod
+	loglinear/example4_loglinear.mod \
+	smoother2histval/fs2000_simul.mod \
+	smoother2histval/fs2000_smooth.mod
 
 XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value.mod
@@ -243,6 +245,9 @@ dsge-var/dsgevar_forward_calibrated_lambda.m.trs: dsge-var/simul_hybrid.m.trs
 dsge-var/dsgevar_forward_estimated_lambda.m.trs: dsge-var/simul_hybrid.m.trs
 dsge-var/dsgevar_forward_calibrated_lambda.o.trs: dsge-var/simul_hybrid.o.trs
 dsge-var/dsgevar_forward_estimated_lambda.o.trs: dsge-var/simul_hybrid.o.trs
+
+smoother2histval/fs2000_simul.m.trs: smoother2histval/fs2000_smooth.m.trs
+smoother2histval/fs2000_simul.o.trs: smoother2histval/fs2000_smooth.o.trs
 
 # Matlab TRS Files
 M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
