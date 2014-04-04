@@ -2410,6 +2410,15 @@ type.
 
 @end deffn
 
+@deffn Command histval_file (filename = @var{FILENAME});
+
+This command is equivalent to @code{histval}, except that it reads its input
+from a file.
+
+This command is typically used in conjunction with @code{smoother2histval}.
+
+@end deffn
+
 @node Shocks on exogenous variables
 @section Shocks on exogenous variables
 
@@ -6072,6 +6081,68 @@ dset_forecast = det_cond_forecast(fplan, smoothed);
 plot(dset_forecast.@{'y','u'@});
 plot(dset_forecast.@{'r','e'@});
 @end example
+
+@deffn Command smoother2histval [(@var{OPTIONS}@dots{})]
+
+@descriptionhead
+
+The purpose of this command is to construct initial conditions (for a
+subsequent simulation) that are the smoothed values of a previous estimation.
+
+More precisely, after an estimation run with the @code{smoother} option,
+@code{smoother2histval} will extract the smoothed values (from
+@code{oo_.SmoothedVariables}, and possibly from @code{oo_.SmoothedShocks} if
+there are lagged exogenous), and will use these values to construct initial
+conditions (as if they had been manually entered through @code{histval}).
+
+@optionshead
+
+@table @code
+
+@item period = @var{INTEGER}
+Period number to use as the starting point for the subsequent simulation.
+It should be between @code{1} and the number of observations that were used to produce the
+smoothed values. Default: the last observation.
+
+@item infile = @var{FILENAME}
+Load the smoothed values from a @file{_results.mat} file created by a previous
+Dynare run. Default: use the smoothed values currently in the global workspace.
+
+@item invars = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
+A list of variables to read from the smoothed values. It can contain state
+endogenous variables, and also exogenous variables having a lag. Default: all
+the state endogenous variables, and all the exogenous variables with a lag.
+
+@item outfile = @var{FILENAME}
+Write the initial conditions to a file. Default: write the initial conditions
+in the current workspace, so that a simulation can be performed.
+
+@item outvars = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
+A list of variables which will be given the initial conditions. This list must
+have the same length than the list given to @code{invars}, and there will be a
+one-to-one mapping between the two list. Default: same value as option
+@code{invars}.
+
+@end table
+
+@customhead{Use cases}
+
+There are three possible ways of using this command:
+
+@itemize
+
+@item
+Everything in a single file: run an estimation with a smoother, then run @code{smoother2histval} (without the @code{infile} and @code{outfile} options), then run a stochastic simulation.
+
+@item
+In two files: in the first file, run the smoother and then run @code{smoother2histval} with the @code{outfile} option; in the second file, run @code{histval_file} to load the initial conditions, and run a (deterministic or stochastic) simulation
+
+@item
+In two files: in the first file, run the smoother; in the second file, run @code{smoother2histval} with the @code{infile} option equal to the @file{_results.mat} file created by the first file, and then run a (deterministic or stochastic) simulation
+
+@end itemize
+
+@end deffn
 
 @node Optimal policy
 @section Optimal policy
