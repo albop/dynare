@@ -339,7 +339,8 @@ EXTRA_DIST = \
 	estimation/fs2000_initialize_from_calib_steadystate.m \
 	filter_step_ahead/fs2000_filter_step_ahead_bayesian_steadystate.m \
 	filter_step_ahead/fs2000_filter_step_ahead_ML_steadystate.m \
-    loglinear/results_exp.mat 
+	loglinear/results_exp.mat \
+	smoother2histval/fsdat_simul.m
 
 TARGETS =
 
