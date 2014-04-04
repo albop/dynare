@@ -26,7 +26,7 @@ c+k = exp(-alp*(gam+e_a))*k(-1)^alp*n^(1-alp)+(1-del)*exp(-(gam+e_a))*k(-1);
 P*c = m;
 m-1+d = l;
 e = exp(e_a);
-y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a));
+y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a(-1)));
 gy_obs = dA*y/y(-2);
 gp_obs = (P/P(-1))*m(-1)/dA;
 end;
@@ -73,6 +73,6 @@ varobs gp_obs gy_obs;
 
 options_.solve_tolf = 1e-12;
 
-estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=1500,mh_nblocks=1,mh_jscale=0.8,smoother);
+estimation(order=1,datafile=fsdat_simul,nobs=192,mh_replic=1500,mh_nblocks=1,mh_jscale=0.8,smoother,consider_all_endogenous);
 
 smoother2histval(period = 5, outfile = 'fs2000_histval.mat');

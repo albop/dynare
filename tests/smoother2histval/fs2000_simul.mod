@@ -26,7 +26,7 @@ c+k = exp(-alp*(gam+e_a))*k(-1)^alp*n^(1-alp)+(1-del)*exp(-(gam+e_a))*k(-1);
 P*c = m;
 m-1+d = l;
 e = exp(e_a);
-y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a));
+y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a(-1)));
 gy_obs = dA*y/y(-2);
 gp_obs = (P/P(-1))*m(-1)/dA;
 end;

@@ -25,6 +25,16 @@ end
 
 M_.endo_histval = repmat(oo_.steady_state, 1, M_.maximum_endo_lag);
 
+% Also fill in oo_.exo_simul: necessary if we are in deterministic context,
+% since aux vars for lagged exo are not created in this case
+if isempty(oo_.exo_simul)
+    if isempty(ex0_)
+        oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag,1);
+    else
+        oo_.exo_simul = repmat(ex0_',M_.maximum_lag,1);
+    end
+end
+
 S = load(fname);
 
 outvars = fieldnames(S);
@@ -35,26 +45,43 @@ for i = 1:length(outvars)
         ov = ov_(1:end-1);
         j = strmatch(ov, M_.endo_names, 'exact');
         if isempty(j)
-            error(['smoother2histval: output variable ' ov ' does not exist.'])
+            warning(['smoother2histval: output variable ' ov ' does not exist.'])
         end
     else
-        % Lagged endogenous, search through aux vars
-        z = strsplit(ov_, '_');
-        ov = z{1};
-        lead_lag = str2num(z{2});
+        % Lagged endogenous or exogenous, search through aux vars
+        undidx = find(ov_ == '_', 1, 'last'); % Index of last underscore in name
+        ov = ov_(1:(undidx-1));
+        lead_lag = str2num(ov_((undidx+1):end));
         j = [];
         for i = 1:length(M_.aux_vars)
-            if M_.aux_vars(i).type ~= 1 
+            if M_.aux_vars(i).type ~= 1 && M_.aux_vars(i).type ~= 3
                 continue
             end
-            orig_var = deblank(M_.endo_names(M_.aux_vars(i).orig_index, :));
+            if M_.aux_vars(i).type == 1
+                % Endogenous
+                orig_var = deblank(M_.endo_names(M_.aux_vars(i).orig_index, :));
+            else
+                % Exogenous
+                orig_var = deblank(M_.exo_names(M_.aux_vars(i).orig_index, :));
+            end
             if strcmp(orig_var, ov) && M_.aux_vars(i).orig_lead_lag == lead_lag
                 j = M_.aux_vars(i).endo_index;
             end
         end
         if isempty(j)
+            % There is no aux var corresponding to (orig_var, lead_lag).
+            % If this is an exogenous variable, then it means we should put
+            % the value in oo_.exo_simul (we are probably in deterministic
+            % context).
+            k = strmatch(ov, M_.exo_names);
+            if isempty(k)
+                warning(['smoother2histval: output variable ' ov '(' lead_lag ') does not exist.'])
+            else
+                oo_.exo_simul((M_.maximum_lag-M_.maximum_endo_lag+1):M_.maximum_lag, k) = getfield(S, ov_);
+            end
             continue
         end
     end
     M_.endo_histval(j, :) = getfield(S, ov_);
 end
+
