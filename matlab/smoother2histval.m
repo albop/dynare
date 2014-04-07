@@ -59,7 +59,8 @@ else
 end
 
 % Hack to determine if oo_.SmoothedVariables was computed after a Metropolis
-if isstruct(getfield(smoothedvars, fieldnames(smoothedvars){1}))
+tmp = fieldnames(smoothedvars);
+if isstruct(getfield(smoothedvars, tmp{1}))
     post_metropolis = 1;
 else
     post_metropolis = 0;
@@ -99,7 +100,8 @@ else
 end
 
 % Determine number of periods
-n = size(getfield(smoothedvars, fieldnames(smoothedvars){1}));
+tmp = fieldnames(smoothedvars);
+n = size(getfield(smoothedvars, tmp{1}));
 
 if n < M_.maximum_endo_lag
     error('Not enough observations to create initial conditions')
@@ -196,8 +198,10 @@ for i = 1:length(M_.aux_vars)
             j = M_.aux_vars(i).endo_index;
             M_.endo_histval(j, :) = v;
         else
-            % When saving to a file, x(-2) is in the variable called "x_-2"
-            o = setfield(o, [ orig_var '_' num2str(l) ], v);
+            % When saving to a file, x(-2) is in the variable called "x_l2"
+            lead_lag = num2str(l);
+            lead_lag = regexprep(lead_lag, '-', 'l');
+            o = setfield(o, [ orig_var '_' lead_lag ], v);
         end
     end
 end

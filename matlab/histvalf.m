@@ -51,7 +51,9 @@ for i = 1:length(outvars)
         % Lagged endogenous or exogenous, search through aux vars
         undidx = find(ov_ == '_', 1, 'last'); % Index of last underscore in name
         ov = ov_(1:(undidx-1));
-        lead_lag = str2num(ov_((undidx+1):end));
+        lead_lag = ov_((undidx+1):end);
+        lead_lag = regexprep(lead_lag,'l','-');
+        lead_lag = str2num(lead_lag);
         j = [];
         for i = 1:length(M_.aux_vars)
             if M_.aux_vars(i).type ~= 1 && M_.aux_vars(i).type ~= 3
