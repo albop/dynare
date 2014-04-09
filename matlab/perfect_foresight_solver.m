@@ -1,4 +1,4 @@
-function simul()
+function perfect_foresight_solver()
 % Computes deterministic simulations
 %  
 % INPUTS
@@ -12,7 +12,7 @@ function simul()
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 1996-2013 Dynare Team
+% Copyright (C) 1996-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,47 +31,36 @@ function simul()
 
 global M_ options_ oo_
 
-test_for_deep_parameters_calibration(M_);
-
 if options_.stack_solve_algo < 0 || options_.stack_solve_algo > 6
-    error('SIMUL: stack_solve_algo must be between 0 and 6')
+    error('PERFECT_FORESIGHT_SOLVER: stack_solve_algo must be between 0 and 6')
 end
 
 if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0 ...
         && options_.stack_solve_algo ~= 6
-    error('SIMUL: you must use stack_solve_algo=0 or stack_solve_algo=6 when not using block nor bytecode option')
+    error('PERFECT_FORESIGHT_SOLVER: you must use stack_solve_algo=0 or stack_solve_algo=6 when not using block nor bytecode option')
 end
 
 if options_.block && ~options_.bytecode && options_.stack_solve_algo == 5
-    error('SIMUL: you can''t use stack_solve_algo = 5 without bytecode option')
+    error('PERFECT_FORESIGHT_SOLVER: you can''t use stack_solve_algo = 5 without bytecode option')
 end
 
 if (options_.block || options_.bytecode) && options_.stack_solve_algo == 6
-    error('SIMUL: you can''t use stack_solve_algo = 6 with block or bytecode option')
+    error('PERFECT_FORESIGHT_SOLVER: you can''t use stack_solve_algo = 6 with block or bytecode option')
 end
 
 if isoctave && options_.stack_solve_algo == 2
-    error('SIMUL: you can''t use stack_solve_algo = 2 under Octave')
+    error('PERFECT_FORESIGHT_SOLVER: you can''t use stack_solve_algo = 2 under Octave')
 end
 
-if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)) > 0
-    mess = ['SIMUL: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)];
-    mess = [mess ' doesn''t appear as current variable.'];
-    error(mess)
+
+if isempty(oo_.endo_simul) || any(size(oo_.endo_simul) ~= [ M_.endo_nbr, M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead ])
+    error('PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
 end
 
-if options_.periods == 0
-    error('SIMUL: number of periods for the simulation isn''t specified')
+if isempty(oo_.exo_simul) || any(size(oo_.exo_simul) ~= [ M_.maximum_lag+options_.periods+M_.maximum_lead, M_.exo_nbr ])
+    error('PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
 end
 
-if ~options_.initval_file
-    if isempty(options_.datafile)
-        make_ex_;
-        make_y_;
-    else
-        read_data_;
-    end
-end
 
 if isempty(options_.scalv) || options_.scalv == 0
     options_.scalv = oo_.steady_state;

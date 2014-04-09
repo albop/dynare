@@ -2059,9 +2059,9 @@ period (unless some of these initial values are modified by
 Second, in the absence of an @code{endval} block, it sets the terminal
 conditions for all the periods succeeding the last simulation period.
 
-Third, in the absence of an @code{endval} block, it provides initial
-guess values at all simulation dates for the non-linear solver
-implemented in @code{simul}.
+Third, in the absence of an @code{endval} block, it provides initial guess
+values at all simulation dates for the perfect foresight solver, and is
+therefore used by @code{perfect_foresight_setup} and @code{simul}.
 
 For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{initval} block (even though,
@@ -2147,8 +2147,9 @@ serves two purposes.
 First, it sets the terminal conditions for all the periods succeeding
 the last simulation period.
 
-Second, it provides initial guess values at all the simulation dates
-for the non-linear solver implemented in @code{simul}.
+Second, it provides initial guess values at all the simulation dates for the
+perfect foresight solver, and is therefore used by
+@code{perfect_foresight_setup} and @code{simul}.
 
 For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{endval} block (even though,
@@ -2653,9 +2654,9 @@ Reduces the number of periods considered in subsequent output commands.
 
 @descriptionhead
 
-This command is now deprecated (but will still work for older model
-files). It is not necessary when no simulation is performed and is
-replaced by an option @code{periods} in @code{simul} and
+This command is now deprecated (but will still work for older model files). It
+is not necessary when no simulation is performed and is replaced by an option
+@code{periods} in @code{perfect_foresight_setup}, @code{simul} and
 @code{stoch_simul}.
 
 This command sets the number of periods in the simulation. The periods
@@ -2716,10 +2717,11 @@ add new variables one by one.
 @table @code
 
 @item maxit = @var{INTEGER}
-Determines the maximum number of iterations used in the non-linear solver.
-The default value of @code{maxit} is 10. The @code{maxit} option is shared with the
-@code{simul} command. So a change in @code{maxit} in a @code{steady} command will
-also be considered in the following @code{simul} commands.
+Determines the maximum number of iterations used in the non-linear solver. The
+default value of @code{maxit} is 10. The @code{maxit} option is shared with the
+@code{perfect_foresight_solver} and @code{simul} commands. So a change in
+@code{maxit} in a @code{steady} command will also be considered in the
+following @code{perfect_foresight_solver} and @code{simul} commands.
 
 
 @item solve_algo = @var{INTEGER}
@@ -3292,15 +3294,17 @@ aid the solution process.  These solution algorithms can provide a
 significant speed-up on large models.
 
 
-
-
-@deffn Command simul ;
-@deffnx Command simul (@var{OPTIONS}@dots{});
+@deffn Command perfect_foresight_setup ;
+@deffnx Command perfect_foresight_setup (@var{OPTIONS}@dots{});
 
 @descriptionhead
 
-Triggers the computation of a deterministic simulation of the model
-for the number of periods set in the option @code{periods}.
+Prepares a perfect foresight simulation, by extracting the information in the
+@code{initval}, @code{endval} and @code{shocks} blocks and converting them into
+simulation paths for exogenous and endogenous variables.
+
+This command must always be called before running the simulation with
+@code{perfect_foresight_solver}.
 
 @optionshead
 
@@ -3309,23 +3313,43 @@ for the number of periods set in the option @code{periods}.
 @item periods = @var{INTEGER}
 Number of periods of the simulation
 
-@item endogenous_terminal_period
-The  number of  periods is  not constant  across Newton  iterations when
-solving the perfect foresight model. The size of the nonlinear system of
-equations  is  reduced  by  removing  the  portion  of  the  paths  (and
-associated equations) for which the solution has already been identified
-(up to the  tolerance parameter). This strategy can be  interpreted as a
-mix  of the  shooting and  relaxation  approaches. Note  that round  off
-errors are  more important with  this mixed strategy (user  should check
-the reported value  of the maximum absolute error).  Only available with
-option @code{stack_solve_algo==0}.
+@item datafile = @var{FILENAME}
+If the variables of the model are not constant over time, their
+initial values, stored in a text file, could be loaded, using that
+option, as initial values before a deterministic simulation.
+@end table
+
+@outputhead
+
+The paths for the exogenous variables are stored into @code{oo_.exo_simul}.
+
+The initial and terminal conditions for the endogenous variables and the
+initial guess for the path of endogenous variables are stored into
+@code{oo_.endo_simul}.
+
+@end deffn
+
+
+@deffn Command perfect_foresight_solver ;
+@deffnx Command perfect_foresight_solver (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+Computes the perfect foresight (or deterministic) simulation of the model.
+
+Note that @code{perfect_foresight_setup} must be called before this command, in
+order to setup the environment for the simulation.
+
+@optionshead
+
+@table @code
 
 @item maxit = @var{INTEGER}
-Determines the maximum number of iterations used in the non-linear solver.
-The default value of @code{maxit} is 10. The @code{maxit} option is shared with the
-@code{steady} command. So a change in @code{maxit} in a @code{simul} command will
-also be considered in the following @code{steady} commands.
-
+Determines the maximum number of iterations used in the non-linear solver. The
+default value of @code{maxit} is 10. The @code{maxit} option is shared with the
+@code{steady} command. So a change in @code{maxit} in a
+@code{perfect_foresight_solver} command will also be considered in the
+following @code{steady} commands.
 
 @item stack_solve_algo = @var{INTEGER}
 Algorithm used for computing the solution. Possible values are:
@@ -3378,10 +3402,17 @@ Specify the minimal number of periods where the model has to be
 solved, before using a constant set of operations for the remaining
 periods. Only used when @code{stack_solve_algo = 5}. Default: @code{1}.
 
-@item datafile = @var{FILENAME}
-If the variables of the model are not constant over time, their
-initial values, stored in a text file, could be loaded, using that
-option, as initial values before a deterministic simulation.
+@item endogenous_terminal_period
+The  number of  periods is  not constant  across Newton  iterations when
+solving the perfect foresight model. The size of the nonlinear system of
+equations  is  reduced  by  removing  the  portion  of  the  paths  (and
+associated equations) for which the solution has already been identified
+(up to the  tolerance parameter). This strategy can be  interpreted as a
+mix  of the  shooting and  relaxation  approaches. Note  that round  off
+errors are  more important with  this mixed strategy (user  should check
+the reported value  of the maximum absolute error).  Only available with
+option @code{stack_solve_algo==0}.
+
 @end table
 
 @outputhead
@@ -3391,11 +3422,28 @@ The simulated endogenous variables are available in global matrix
 
 @end deffn
 
+@deffn Command simul ;
+@deffnx Command simul (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+Short-form command for triggering the computation of a deterministic simulation
+of the model. It is strictly equivalent to a call to
+@code{perfect_foresight_setup} followed by a call to
+@code{perfect_foresight_solver}.
+
+@optionshead
+
+Accepts all the options of @code{perfect_foresight_setup} and
+@code{perfect_foresight_solver}.
+
+@end deffn
+
 @anchor{oo_.endo_simul}
 @defvr {MATLAB/Octave variable} oo_.endo_simul
-This variable stores the result of a deterministic simulation
-(computed by @code{simul}) or of a stochastic simulation (computed by
-@code{stoch_simul} with the @code{periods} option or by
+This variable stores the result of a deterministic simulation (computed by
+@code{perfect_foresight_solver} or @code{simul}) or of a stochastic simulation
+(computed by @code{stoch_simul} with the @code{periods} option or by
 @code{extended_path}).
 
 The variables are arranged row by row, in order of declaration (as in
@@ -3406,9 +3454,9 @@ and terminal conditions, so it has more columns than the value of
 
 @anchor{oo_.exo_simul}
 @defvr {MATLAB/Octave variable} oo_.exo_simul
-This variable stores the path of exogenous variables during a
-simulation (computed by @code{simul}, @code{stoch_simul} or
-@code{extended_path}).
+This variable stores the path of exogenous variables during a simulation
+(computed by @code{perfect_foresight_solver}, @code{simul}, @code{stoch_simul}
+or @code{extended_path}).
 
 The variables are arranged in columns, in order of declaration (as in
 @code{M_.endo_names}). Periods are in rows. Note that this convention
@@ -7919,10 +7967,10 @@ Dynare has comments to plot the results of a simulation and to save the results.
 @deffn Command rplot @var{VARIABLE_NAME}@dots{};
 
 Plots the simulated path of one or several variables, as stored in
-@var{oo_.endo_simul} by either @var{simul} (@pxref{Deterministic
-simulation}) or @var{stoch_simul} with
-option @var{periods} (@pxref{Computing the stochastic solution}). The
-variables are plotted in levels.
+@code{oo_.endo_simul} by either @code{perfect_foresight_solver}, @code{simul}
+(@pxref{Deterministic simulation}) or @code{stoch_simul} with option
+@code{periods} (@pxref{Computing the stochastic solution}). The variables are
+plotted in levels.
 
 @end deffn
 
