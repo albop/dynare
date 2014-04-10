@@ -3405,6 +3405,12 @@ options).
 
 @end table
 
+@item no_homotopy
+By default, the perfect foresight solver uses a homotopy technique if it cannot
+solve the problem. Concretely, it divides the problem into smaller steps by
+diminishing the size of shocks and increasing them progressively until the
+problem converges. This option tells Dynare to disable that behavior.
+
 @item markowitz = @var{DOUBLE}
 Value of the Markowitz criterion, used to select the pivot. Only used
 when @code{stack_solve_algo = 5}. Default: @code{0.5}.
