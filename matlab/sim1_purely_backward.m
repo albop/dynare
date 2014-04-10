@@ -48,7 +48,7 @@ function sim1_purely_backward()
                               options_.simul.maxit,options_.debug,oo_.exo_simul, ...
                               M_.params, oo_.steady_state, it);
 
-        if info
+        if check
             oo_.deterministic_simulation.status = 0;
         end
 
