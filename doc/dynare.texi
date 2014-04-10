@@ -2448,7 +2448,16 @@ isn't used in the computation of moments and of Impulse Response
 Functions. Setting a variance to zero is an easy way of removing an
 exogenous shock.
 
+Note that, by default, if there are several @code{shocks} or @code{mshocks}
+blocks in the same @file{.mod} file, then they are cumulative: all the shocks
+declared in all the blocks are considered; however, if a @code{shocks} or
+@code{mshocks} block is declared with the @code{overwrite} option, then it
+replaces all the previous @code{shocks} and @code{mshocks} blocks.
+
 @deffn Block shocks ;
+@deffnx Block shocks (overwrite) ;
+
+See above for the meaning of the @code{overwrite} option.
 
 @customhead{In deterministic context}
 
@@ -2584,6 +2593,7 @@ forecast;
 
 
 @deffn Block mshocks ;
+@deffnx Block mshocks (overwrite) ;
 
 The purpose of this block is similar to that of the @code{shocks}
 block for deterministic shocks, except that the numeric values given
@@ -2605,6 +2615,8 @@ on exogenous variables with a non-zero steady state, in a deterministic setup,
 on deterministic exogenous variables with a non-zero steady state, in
 a stochastic setup.
 @end itemize
+
+See above for the meaning of the @code{overwrite} option.
 
 @end deffn
 
