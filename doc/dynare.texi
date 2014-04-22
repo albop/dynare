@@ -9917,7 +9917,7 @@ Merge two @dseries objects along the time dimension. The two objects must have t
 
 @examplehead
 @example
->> ts = dseries([1; 2; 3; 4],dates('1950Q1'))
+>> ts = dseries([1; 2; 3; 4],dates(`1950Q1'))
 
 ts is a dseries object:
 
@@ -9927,15 +9927,15 @@ ts is a dseries object:
 1950Q3 | 3
 1950Q4 | 4
 
->> us = dseries([3; 4; 5; 6],dates('1950Q3'))
+>> us = dseries([3; 4; 5; 6],dates(`1950Q3'))
 
 us is a dseries object:
 
        | Variable_1
-1950Q3 | 3.1
-1950Q4 | 4.1
-1951Q1 | 8.2
-1951Q2 | 16.4
+1950Q3 | 3
+1950Q4 | 4
+1951Q1 | 5
+1951Q2 | 6
 
 >> chain(ts, us)
 
@@ -9946,8 +9946,8 @@ ans is a dseries object:
 1950Q2 | 2
 1950Q3 | 3
 1950Q4 | 4
-1951Q1 | 8
-1951Q2 | 16
+1951Q1 | 5
+1951Q2 | 6
 
 @end example
 
