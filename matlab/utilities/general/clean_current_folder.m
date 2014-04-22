@@ -19,11 +19,18 @@ function clean()
 
 a = dir('*.mod');
 
+
 for i = 1:length(a)
     [junk,basename,extension] = fileparts(a(i).name);
-    delete([basename '.m']);
-    delete([basename '.log']);
-    rmdir(basename,'s');
+    if exist([basename '.m'])
+        delete([basename '.m']);
+    end
+    if exist([basename '.log'])
+        delete([basename '.log']);
+    end
+    if exist(basename,'dir')
+        rmdir(basename,'s');
+    end
     if exist([basename '_steadystate.m'])
         movefile([basename '_steadystate.m'],['protect_' basename '_steadystate.m']);
     end
