@@ -112,6 +112,8 @@ else
         oo_.endo_simul(:,1:M_.maximum_endo_lag) = endocombi(:,1:M_.maximum_endo_lag);
         oo_.endo_simul(:,(end-M_.maximum_endo_lead):end) = endocombi(:,(end-M_.maximum_endo_lead):end);
 
+        saved_endo_simul = oo_.endo_simul;
+
         simulation_core;
 
         if oo_.deterministic_simulation.status == 1
@@ -128,6 +130,7 @@ else
                 disp([ 'Homotopy step succeeded (completed ' sprintf('%.1f', current_weight*100) '%, step size ' sprintf('%.3g', step) ')' ])
             end
         else
+            oo_.endo_simul = saved_endo_simul;
             success_counter = 0;
             step = step / 2;
             disp([ 'Homotopy step failed, halving step size (completed ' sprintf('%.1f', current_weight*100) '%, step size ' sprintf('%.3g', step) ')' ])
