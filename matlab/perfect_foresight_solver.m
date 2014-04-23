@@ -123,14 +123,14 @@ else
             if success_counter >= 3
                 success_counter = 0;
                 step = step * 2;
-                disp('Homotopy step succeeded, doubling step size')
+                disp([ 'Homotopy step succeeded, doubling step size (completed ' sprintf('%.1f', current_weight*100) '%, step size ' sprintf('%.3g', step) ')' ])
             else
-                disp('Homotopy step succeeded')
+                disp([ 'Homotopy step succeeded (completed ' sprintf('%.1f', current_weight*100) '%, step size ' sprintf('%.3g', step) ')' ])
             end
         else
             success_counter = 0;
             step = step / 2;
-            disp('Homotopy step failed, halving step size')
+            disp([ 'Homotopy step failed, halving step size (completed ' sprintf('%.1f', current_weight*100) '%, step size ' sprintf('%.3g', step) ')' ])
         end
     end
 end
