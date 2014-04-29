@@ -1,0 +1,260 @@
+\documentclass[10pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{epsf}
+\usepackage{graphicx}
+\usepackage{wasysym}
+\usepackage{tikz}
+\usetikzlibrary{positioning,shapes,shadows,arrows}
+\definecolor{links}{HTML}{0000CC}
+\hypersetup{colorlinks,linkcolor=,urlcolor=links}
+
+
+\mode<handout>
+{
+  \usepackage{pgfpages}
+  \pgfpagesuselayout{4 on 1}[a4paper,border shrink=3mm,landscape]
+  \usetheme{CambridgeUS}
+  \usecolortheme{lily}
+}
+
+\mode<beamer>
+{
+  \usetheme{CambridgeUS}
+}
+
+\title{Dynare Time Series \& Reporting}
+\author{Houtan Bastani}
+\institute{CEPREMAP}
+\date{13 June 2014}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+\setbeamerfont{frametitle}{family=\rmfamily,series=\bfseries,size={\fontsize{10}{10}}}
+\setbeamertemplate{frametitle continuation}[from second]
+
+\tikzstyle{abstract}=[rectangle, rounded corners, draw=black, anchor=north, fill=blue!10, text centered, minimum height={height("Gp")+2pt}, minimum width=3cm, font=\footnotesize]
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}[t]
+  \frametitle{Outline}
+  \tableofcontents
+\end{frame}
+
+
+
+
+%
+% DSERIES
+%
+\section{Time Series}
+
+\subsection{Overview}
+\begin{frame}[fragile,t]
+  \frametitle{Overview}
+  \begin{itemize}
+  \item Provide support for time series in Dynare
+  \item Introduced in Dynare 4.4
+  \item Currently only used for reporting.
+  \item Use will increase with time (\textit{e.g.,} to be included in new estimation code)
+  \end{itemize}
+\end{frame}
+
+
+\subsection{Syntax}
+\begin{frame}[fragile,t]
+  \frametitle{Syntax}
+  \begin{itemize}
+  \item Two components of a time series:
+    \begin{itemize}
+    \item A time component. In Dynare: \texttt{dates}
+    \item A data component mapped to time. In Dynare: \texttt{dseries}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\subsubsection{\texttt{dates} Syntax}
+\begin{frame}[fragile,t]
+  \frametitle{\texttt{dates} Syntax}
+  \begin{itemize}
+  \item The \texttt{dates} command creates an object that represents at least one date at a given frequency
+    \begin{itemize}
+    \item Yearly: \texttt{`Y', `y', 1}
+    \item Quarterly: \texttt{`Q', `q', 4}
+    \item Monthly: \texttt{`M', `m', 12}
+    \item Weekly: \texttt{`W', `w', 52}
+    \end{itemize}
+  \item It has two slightly different syntaxes
+    \begin{itemize}
+    \item One for inclusion in \texttt{.m} files
+    \item One for inclusion in \texttt{.mod} files (simplified, taking advantage of the preprocessor)
+    \end{itemize}
+  \item Minimal restrictions on dates. Can be
+    \begin{itemize}
+      \item Negative
+      \item Empty
+      \item Noncontiguous
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Creating a new \texttt{dates} object}
+  \begin{itemize}
+  \item A single date:
+    \begin{itemize}
+    \item In a \texttt{.m} file: \texttt{t = dates(`1999y');}
+    \item In a \texttt{.mod} file: \texttt{t = 1999y;}
+    \end{itemize}
+  \item A date range:
+    \begin{itemize}
+    \item In a \texttt{.m} file: \texttt{t = dates(`1999y'):dates(`2020y');}
+    \item In a \texttt{.mod} file: \texttt{t = 1999y:2020y;}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Modifying \texttt{dates}}
+  \begin{itemize}
+  \item \texttt{append}: appends a date to the date
+    \begin{itemize}
+    \item \texttt{t.append(dates(`2021y'));}
+    \end{itemize}
+  \item \texttt{pop}:
+  \item \texttt{sort}:
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Getting info about \texttt{dates}}
+  \begin{itemize}
+  \item \texttt{double}: returns a floating point representation of the date
+    \begin{itemize}
+    \item \texttt{t.double;}
+    \end{itemize}
+  \item \texttt{freq}: returns the frequency
+    \begin{itemize}
+    \item \texttt{t.freq;}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Comparing \texttt{dates}}
+  \begin{itemize}
+  \item 
+  \end{itemize}
+\end{frame}
+
+\subsubsection{\texttt{dseries} Syntax}
+
+
+\subsection{Examples}
+
+
+%
+% REPORTING
+%
+\section{Reporting}
+\subsection{Overview}
+\begin{frame}
+  \frametitle{Overview}
+  \begin{itemize}
+  \item Introduced in Dynare 4.4
+  \item Introduce reporting functionality to Dynare
+      \begin{itemize}
+      \item Input: \texttt{dseries}
+      \item Output: \LaTeX\ report \& compiled \texttt{.pdf}
+      \end{itemize}
+    \item Graphs and Tables are modular
+      \begin{itemize}
+      \item Can easily be included in another document
+      \end{itemize}
+    \item Graphs are produced in Ti$k$Z
+      \begin{itemize}
+      \item Scales well
+      \item Formating follows that of enclosing document
+      \end{itemize}
+    \item Works with Matlab \& Octave
+    \item Works approximately 5 times faster than Iris reporting
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Reporting Class Hierarchy}
+  \centering {
+    \begin{tikzpicture}[
+        node distance = .45cm,
+        auto,
+        line/.style={->, >=stealth'},
+      ]
+      \node (Report) [abstract, rectangle split, rectangle split parts=2]
+            {
+              \textbf{Report}
+              \nodepart{second}\texttt{report(...);}
+            };
+      \node (Page) [abstract, rectangle split, rectangle split parts=2, below=of Report]
+            {
+              \textbf{Page}
+              \nodepart{second}\texttt{addPage(...);}
+            };
+      \node (Section) [abstract, rectangle split, rectangle split parts=2, below=of Page]
+            {
+              \textbf{Section}
+              \nodepart{second}\texttt{addSection(...);}
+            };
+      \node (Vspace) [abstract, rectangle split, rectangle split parts=2, below=of Section]
+            {
+              \textbf{Vspace}
+              \nodepart{second}\texttt{addVspace(...);}
+            };
+      \node (Graph) [abstract, rectangle split, rectangle split parts=2, left=of Vspace]
+            {
+              \textbf{Graph}
+              \nodepart{second}\texttt{addGraph(...);}
+            };
+      \node (Table) [abstract, rectangle split, rectangle split parts=2, right=of Vspace, text height=]
+            {
+              \textbf{Table}
+              \nodepart{second}\texttt{addTable(...);}
+            };
+      \node (Series) [abstract, rectangle split, rectangle split parts=2, below=of Vspace]
+            {
+              \textbf{Series}
+              \nodepart{second}\texttt{addSeries(...);}
+            };
+      \draw [line] (Series) to node { } (Table);
+      \draw [line] (Series) to node { } (Graph);
+      \draw [line] (Table) to node { } (Section);
+      \draw [line] (Graph) to node { } (Section);
+      \draw [line] (Vspace) to node { } (Section);
+      \draw [line] (Section) to node { } (Page);
+      \draw [line] (Page) to node { } (Report);
+    \end{tikzpicture}
+  }
+\end{frame}
+
+\subsection{Syntax}
+
+
+\subsection{Examples}
+
+\end{document}
