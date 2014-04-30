@@ -257,13 +257,17 @@ if fload==0,
         %try stoch_simul([]);
         try
             [Tt,Rr,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_,'restrict');
+            if info(1)==0,
+                info=endogenous_prior_restrictions(Tt,Rr,M_,options_,oo_);
+            end
             infox(j,1)=info(1);
             if infox(j,1)==0 && ~exist('T'),
                 dr_=oo_.dr;
                 if prepSA,
                     try
                         T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam);
-                    catch ME
+                    catch
+                        ME = lasterror();
                         if strcmp('MATLAB:nomem',ME.identifier),
                             prepSA=0;
                             disp('The model is too large for storing state space matrices ...')
@@ -467,23 +471,23 @@ if pprior
     aunstablename=[aname, '_unst'];  aunstabletitle='Prior StabMap: Parameter driving explosiveness of solution';
     awronguniname=[aname, '_wrong']; awrongunititle='Prior StabMap: Parameter driving inability to find solution';
     % bivariate
-    auname='prior_unacceptable'; autitle='Prior Unacceptable';
-    aunstname='prior_unstable'; aunsttitle='Prior Unstable';
-    aindname='prior_indeterm'; aindtitle='Prior Indeterminacy';
-    awrongname='prior_wrong'; awrongtitle='Prior No Solution Found';
-    asname='prior_stable'; astitle='Prior Stable';
+    auname='prior_unacceptable'; autitle='Prior StabMap: non-existence of unique stable solution (Unacceptable)';
+    aunstname='prior_unstable'; aunsttitle='Prior StabMap: explosiveness of solution';
+    aindname='prior_indeterm'; aindtitle='Prior StabMap: Indeterminacy';
+    awrongname='prior_wrong'; awrongtitle='Prior StabMap: inability to find solution';
+    asname='prior_stable'; astitle='Prior StabMap: unique Stable Saddle-Path';
 else
     % univariate
-    aname='mc_stab'; atitle='Posterior StabMap: Parameter driving non-existence of unique stable solution (Unacceptable)';
-    aindetname=[aname, '_indet']; aindettitle='Posterior StabMap: Parameter driving indeterminacy';
-    aunstablename=[aname, '_unst'];  aunstabletitle='Posterior StabMap: Parameter driving explosiveness of solution';
-    awronguniname=[aname, '_wrong']; awrongunititle='Posterior StabMap: Parameter driving inability to find solution';
+    aname='mc_stab'; atitle='MC (around posterior mode) StabMap: Parameter driving non-existence of unique stable solution (Unacceptable)';
+    aindetname=[aname, '_indet']; aindettitle='MC (around posterior mode) StabMap: Parameter driving indeterminacy';
+    aunstablename=[aname, '_unst'];  aunstabletitle='MC (around posterior mode) StabMap: Parameter driving explosiveness of solution';
+    awronguniname=[aname, '_wrong']; awrongunititle='MC (around posterior mode) StabMap: Parameter driving inability to find solution';
     % bivariate
-    auname='mc_unacceptable'; autitle='Posterior Unacceptable';
-    aunstname='mc_unstable'; aunsttitle='Posterior Unstable';
-    aindname='mc_indeterm';  aindtitle='Posterior Indeterminacy';
-    awrongname='mc_wrong'; awrongtitle='Posterior No Solution Found';
-    asname='mc_stable'; astitle='Posterior Stable';
+    auname='mc_unacceptable'; autitle='MC (around posterior mode) StabMap: non-existence of unique stable solution (Unacceptable)';
+    aunstname='mc_unstable'; aunsttitle='MC (around posterior mode) StabMap: explosiveness of solution';
+    aindname='mc_indeterm';  aindtitle='MC (around posterior mode) StabMap: Indeterminacy';
+    awrongname='mc_wrong'; awrongtitle='MC (around posterior mode) StabMap: inability to find solution';
+    asname='mc_stable'; astitle='MC (around posterior mode) StabMap: Unique Stable Saddle-Path';
 end
 delete([OutputDirectoryName,filesep,fname_,'_',aname,'_*.*']);
 %delete([OutputDirectoryName,filesep,fname_,'_',aname,'_SA_*.*']);
@@ -531,6 +535,9 @@ if length(iunstable)>0 && length(iunstable)<Nsam,
         end
         if any(infox==30),
             disp(['    For ',num2str(length(find(infox==30))/Nsam*100,'%1.3f'),'\% Ergodic variance can''t be computed.'])
+        end
+        if any(infox==49),
+            disp(['    For ',num2str(length(find(infox==49))/Nsam*100,'%1.3f'),'\% The model violates one (many) endogenous prior restriction(s).'])
         end
 
     end
@@ -596,7 +603,9 @@ if length(iunstable)>0 && length(iunstable)<Nsam,
     c0=corrcoef(lpmat(istable,:));
     c00=tril(c0,-1);
 
-    stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName,xparam1,astitle);
+    if length(istable)>10,
+        stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName,xparam1,astitle);
+    end
     if length(iunstable)>10,
         stab_map_2(lpmat(iunstable,:),alpha2, pvalue_corr, auname, OutputDirectoryName,xparam1,autitle);
     end

@@ -14,7 +14,7 @@ function [options_, oo_]=ms_compute_mdd(M_, options_, oo_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -75,5 +75,6 @@ if exist(mdd_filename,'file')
     end
     oo_.ms.mueller_log_mdd = muller_mdd;
     oo_.ms.bridged_log_mdd = bridge_mdd;
+    fclose(mdd_fid);
 end
 end

@@ -36,8 +36,11 @@ function [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_)
 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
 nblck = options_.mh_nblck;
 
-MhDirectoryName = CheckPath('metropolis',M_.dname);
-load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
+MetropolisFolder = CheckPath('metropolis',M_.dname);
+ModelName = M_.fname;
+BaseName = [MetropolisFolder filesep ModelName];
+
+load_last_mh_history_file(MetropolisFolder, ModelName);
 
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine; ifil = FirstLine;
@@ -46,7 +49,7 @@ TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 TODROP = floor(options_.mh_drop*TotalNumberOfMhDraws);
 
-fprintf('MH: I''m computing the posterior mean and covariance... ');
+fprintf('Estimation::marginal density: I''m computing the posterior mean and covariance... ');
 [posterior_mean,posterior_covariance,posterior_mode,posterior_kernel_at_the_mode] = compute_mh_covariance_matrix();
 
 MU = transpose(posterior_mean);
@@ -56,12 +59,12 @@ xparam1 = posterior_mean;
 hh = inv(SIGMA);
 fprintf(' Done!\n');
 
-%% save the posterior mean and the inverse of the covariance matrix
-%% (usefull if the user wants to perform some computations using
-%% the posterior mean instead of the posterior mode ==> ). 
+% save the posterior mean and the inverse of the covariance matrix
+% (usefull if the user wants to perform some computations using
+% the posterior mean instead of the posterior mode ==> ). 
 save([M_.fname '_mean.mat'],'xparam1','hh','SIGMA');
-skipline()
-disp('MH: I''m computing the posterior log marginal density (modified harmonic mean)... ');
+
+fprintf('Estimation::marginal density: I''m computing the posterior log marginal density (modified harmonic mean)... ');
 detSIGMA = det(SIGMA);
 invSIGMA = inv(SIGMA);
 marginal = zeros(9,2);
@@ -75,7 +78,7 @@ while check_coverage
         tmp = 0;
         for n = FirstMhFile:TotalNumberOfMhFiles
             for b=1:nblck
-                load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2');
+                load([ BaseName '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2');
                 EndOfFile = size(x2,1);
                 for i = ifil:EndOfFile
                     deviation  = (x2(i,:)-MU)*invSIGMA*(x2(i,:)-MU)';
@@ -94,15 +97,16 @@ while check_coverage
         warning(warning_old_state);
     end
     if abs((marginal(9,2)-marginal(1,2))/marginal(9,2)) > 0.01 || isinf(marginal(1,2))
+        fprintf('\n')
         if increase == 1
-            disp('MH: The support of the weighting density function is not large enough...')
-            disp('MH: I increase the variance of this distribution.')
+            disp('Estimation::marginal density: The support of the weighting density function is not large enough...')
+            disp('Estimation::marginal density: I increase the variance of this distribution.')
             increase = 1.2*increase;
             invSIGMA = inv(SIGMA*increase);
             detSIGMA = det(SIGMA*increase);
             linee    = 0;   
         else
-            disp('MH: Let me try again.')
+            disp('Estimation::marginal density: Let me try again.')
             increase = 1.2*increase;
             invSIGMA = inv(SIGMA*increase);
             detSIGMA = det(SIGMA*increase);
@@ -110,13 +114,13 @@ while check_coverage
             if increase > 20
                 check_coverage = 0;
                 clear invSIGMA detSIGMA increase;
-                disp('MH: There''s probably a problem with the modified harmonic mean estimator.')    
+                disp('Estimation::marginal density: There''s probably a problem with the modified harmonic mean estimator.')    
             end
         end  
     else
         check_coverage = 0;
         clear invSIGMA detSIGMA increase;
-        disp('MH: Modified harmonic mean estimator, done!')
+        fprintf('Done!\n')
     end
 end
 

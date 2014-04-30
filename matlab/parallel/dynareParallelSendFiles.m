@@ -41,7 +41,7 @@ end
 
 for indPC=1:length(Parallel),
     if Parallel(indPC).Local==0,
-        if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), %isunix || (~matlab_ver_less_than('7.4') && ismac),
+        if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem),
             if ~isempty(Parallel(indPC).Port),
                 ssh_token = ['-p ',Parallel(indPC).Port];
             else
@@ -63,7 +63,7 @@ for indPC=1:length(Parallel),
                 if ~isempty(NamFileInput{jfil,1})
                     if isempty(dynareParallelDir(NamFileInput{jfil,1},PRCDir,Parallel(indPC)))
                         
-                        if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of mkdir under Windows.
+                        if isoctave % Patch for peculiar behaviour of mkdir under Windows.
                             
                             % It is Necessary because Octave is not able to
                             % create two nested directory at the same time.
@@ -89,7 +89,7 @@ for indPC=1:length(Parallel),
                     end
                 end
                 
-                if exist('OCTAVE_VERSION') % Patch for peculiar behaviour copyfile ls under Windows.
+                if isoctave % Patch for peculiar behaviour copyfile ls under Windows.
                     
                     % It is Necessary because Octave is not able to
                     % use the jolly char '*' with copyfile.

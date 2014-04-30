@@ -180,7 +180,7 @@ try
     % In Octave: [aa bb q z v w] = qz(a,b) s.t. q'az = aa, q'bz=bb %
     % and qzcomplex() extension based on lapack zgges produces same 
     % qz output for Octave as Matlab qz() does for Matlab thus:
-    if exist('OCTAVE_VERSION')
+    if isoctave
         [a b q z]=qzcomplex(G0pi,G1pi);
         q=q';
     else

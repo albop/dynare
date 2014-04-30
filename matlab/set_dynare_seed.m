@@ -2,7 +2,7 @@ function set_dynare_seed(a,b)
 % Set seeds depending on matlab (octave) version. This routine is called in dynare_config and can be called by the 
 % user in the mod file.
 %    
-% Copyright (C) 2010-2013 Dynare Team
+% Copyright (C) 2010-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -24,7 +24,7 @@ if ~nargin
     error('set_dynare_seed:: I need at least one input argument!')
 end
 
-matlab_random_streams = ~(exist('OCTAVE_VERSION') || matlab_ver_less_than('7.7') || options_.parallel_info.isHybridMatlabOctave);
+matlab_random_streams = ~(isoctave || matlab_ver_less_than('7.7') || options_.parallel_info.isHybridMatlabOctave);
 
 if matlab_random_streams% Use new matlab interface.
     if nargin==1
@@ -93,10 +93,9 @@ if matlab_random_streams% Use new matlab interface.
 else% Use old matlab interface.
     if nargin==1
         if ischar(a) && strcmpi(a,'default')
-            if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.4')
+            if isoctave
                 options_.DynareRandomStreams.algo = 'state';
             else
-                % Twister was introduced in MATLAB 7.4
                 options_.DynareRandomStreams.algo = 'twister';
             end
             options_.DynareRandomStreams.seed = 0;

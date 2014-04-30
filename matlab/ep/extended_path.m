@@ -1,4 +1,4 @@
-function time_series = extended_path(initial_conditions,sample_size)
+function ts = extended_path(initial_conditions,sample_size)
 % Stochastic simulation of a non linear DSGE model using the Extended Path method (Fair and Taylor 1983). A time
 % series of size T  is obtained by solving T perfect foresight models.
 %
@@ -46,11 +46,15 @@ dynatol = options_.dynatol;
 
 % Set default initial conditions.
 if isempty(initial_conditions)
-    initial_conditions = oo_.steady_state;
+    if isempty(M_.endo_histval)
+        initial_conditions = oo_.steady_state;
+    else
+        initial_conditions = M_.endo_histval;
+    end
 end
 
 % Set maximum number of iterations for the deterministic solver.
-options_.maxit_ = options_.ep.maxit;
+options_.simul.maxit = options_.ep.maxit;
 
 % Set the number of periods for the perfect foresight model
 periods = options_.ep.periods;
@@ -111,7 +115,7 @@ bytecode_flag = options_.ep.use_bytecode;
 % Simulate shocks.
 switch options_.ep.innovation_distribution
   case 'gaussian'
-      oo_.ep.shocks = randn(sample_size,effective_number_of_shocks)*covariance_matrix_upper_cholesky;
+      oo_.ep.shocks = transpose(transpose(covariance_matrix_upper_cholesky)*randn(effective_number_of_shocks,sample_size));
   otherwise
     error(['extended_path:: ' options_.ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
@@ -350,4 +354,12 @@ end% (while) loop over t
 
 dyn_waitbar_close(hh);
 
-oo_.endo_simul = oo_.steady_state;
+if nargout
+    ts = dseries(transpose([initial_conditions, time_series]),options_.initial_period,cellstr(M_.endo_names));
+else
+    oo_.endo_simul = [initial_conditions, time_series];
+    ts = dseries(transpose(oo_.endo_simul),options_.initial_period,cellstr(M_.endo_names));
+    dyn2vec;
+end
+
+ assignin('base', 'Simulated_time_series', ts);

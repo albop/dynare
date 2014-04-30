@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2012 Dynare Team
+dnl Copyright (C) 2009-2014 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.62])
-AC_INIT([dynare], [4.4-unstable])
+AC_INIT([dynare], [4.5-unstable])
 AC_CONFIG_SRCDIR([configure.ac])
 AM_INIT_AUTOMAKE([-Wall -Wno-portability foreign])
 
@@ -60,10 +60,18 @@ AC_PROG_RANLIB
 AX_PROG_LN_S
 AC_PROG_MKDIR_P
 AM_PROG_AR
+
+case ${host_os} in
+  *mingw32*)
+    # Ensure that -lpthread is statically linked under MinGW
+    PTHREAD_LIBS="-Wl,-Bstatic -lpthread -Wl,-Bdynamic"
+    ;;
+esac
 AX_PTHREAD
+
 # Check for boost libraries used in estimation DLL
 AC_LANG_PUSH([C++])
-AX_BOOST_BASE([1.36])
+AX_BOOST_BASE([1.36], [], [AC_MSG_ERROR([Can't find Boost >= 1.36])])
 CPPFLAGS_SAVED="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 AC_CHECK_HEADER([boost/random/linear_congruential.hpp], [], [AC_MSG_ERROR([Can't find Boost Random Library])])

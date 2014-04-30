@@ -53,8 +53,8 @@ lb = [];
 bayestopt_.pshape = [];
 bayestopt_.p1 = []; % prior mean
 bayestopt_.p2 = []; % prior standard deviation
-bayestopt_.p3 = []; % lower bound
-bayestopt_.p4 = []; % upper bound
+bayestopt_.p3 = []; % lower bound of the distribution, only considering whether a generalized distribution is used, not when the prior is truncated
+bayestopt_.p4 = []; % upper bound of the distribution, only considering whether a generalized distribution is used, not when the prior is truncated
 bayestopt_.p5 = zeros(nvx+nvn+ncx+ncn+np,1); % prior mode
 bayestopt_.p6 = []; % first hyper-parameter (\alpha for the BETA and GAMMA distributions, s for the INVERSE GAMMAs, expectation for the GAUSSIAN distribution, lower bound for the UNIFORM distribution).
 bayestopt_.p7 = []; % second hyper-parameter (\beta for the BETA and GAMMA distributions, \nu for the INVERSE GAMMAs, standard deviation for the GAUSSIAN distribution, upper bound for the UNIFORM distribution).
@@ -68,16 +68,17 @@ if nvx
     bayestopt_.pshape =  estim_params_.var_exo(:,5);
     bayestopt_.p1 =  estim_params_.var_exo(:,6);
     bayestopt_.p2 =  estim_params_.var_exo(:,7);
-    bayestopt_.p3 =  estim_params_.var_exo(:,8);
-    bayestopt_.p4 =  estim_params_.var_exo(:,9);
+    bayestopt_.p3 =  estim_params_.var_exo(:,8); %take generalized distribution into account
+    bayestopt_.p4 =  estim_params_.var_exo(:,9); %take generalized distribution into account
     bayestopt_.jscale =  estim_params_.var_exo(:,10);
     bayestopt_.name = cellstr(M_.exo_names(estim_params_.var_exo(:,1),:));
 end
 if nvn
     estim_params_.nvn_observable_correspondence=NaN(nvn,1); % stores number of corresponding observable
-    if isequal(M_.H,0)
-        nvarobs = length(options_.varobs);
+    if isequal(M_.H,0) %if no previously set measurement error, initialize H
+        nvarobs = size(options_.varobs,1);
         M_.H = zeros(nvarobs,nvarobs);
+        M_.Correlation_matrix_ME = eye(nvarobs);
     end
     for i=1:nvn
         obsi_ = strmatch(deblank(M_.endo_names(estim_params_.var_endo(i,1),:)),options_.varobs,'exact');
@@ -92,8 +93,8 @@ if nvn
     bayestopt_.pshape = [ bayestopt_.pshape; estim_params_.var_endo(:,5)];
     bayestopt_.p1 = [ bayestopt_.p1; estim_params_.var_endo(:,6)];
     bayestopt_.p2 = [ bayestopt_.p2; estim_params_.var_endo(:,7)];
-    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.var_endo(:,8)];
-    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.var_endo(:,9)];
+    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.var_endo(:,8)]; %take generalized distribution into account
+    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.var_endo(:,9)]; %take generalized distribution into account
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.var_endo(:,10)];
     bayestopt_.name = [ bayestopt_.name; options_.varobs{estim_params_.nvn_observable_correspondence}];
 end
@@ -104,8 +105,8 @@ if ncx
     bayestopt_.pshape = [ bayestopt_.pshape; estim_params_.corrx(:,6)];
     bayestopt_.p1 = [ bayestopt_.p1; estim_params_.corrx(:,7)];
     bayestopt_.p2 = [ bayestopt_.p2; estim_params_.corrx(:,8)];
-    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrx(:,9)];
-    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrx(:,10)];
+    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrx(:,9)]; %take generalized distribution into account
+    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrx(:,10)]; %take generalized distribution into account
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrx(:,11)];
     bayestopt_.name = [bayestopt_.name; cellstr([repmat('corr ',ncx,1)...
                         deblank(M_.exo_names(estim_params_.corrx(:,1),:)) ...
@@ -116,6 +117,7 @@ if ncn
     if isequal(M_.H,0)
         nvarobs = length(options_.varobs);
         M_.H = zeros(nvarobs,nvarobs);
+        M_.Correlation_matrix_ME = eye(nvarobs);
     end
     xparam1 = [xparam1; estim_params_.corrn(:,3)];
     ub = [ub; max(min(estim_params_.corrn(:,5),1),-1)];
@@ -123,8 +125,8 @@ if ncn
     bayestopt_.pshape = [ bayestopt_.pshape; estim_params_.corrn(:,6)];
     bayestopt_.p1 = [ bayestopt_.p1; estim_params_.corrn(:,7)];
     bayestopt_.p2 = [ bayestopt_.p2; estim_params_.corrn(:,8)];
-    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrn(:,9)];
-    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrn(:,10)];
+    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrn(:,9)]; %take generalized distribution into account
+    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrn(:,10)]; %take generalized distribution into account
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrn(:,11)];
     bayestopt_.name = [bayestopt_.name; cellstr([repmat('corr ',ncn,1) ...
                         deblank(M_.endo_names(estim_params_.corrn(:,1),:)) ...
@@ -144,8 +146,8 @@ if np
     bayestopt_.pshape = [ bayestopt_.pshape; estim_params_.param_vals(:,5)];
     bayestopt_.p1 = [ bayestopt_.p1; estim_params_.param_vals(:,6)];
     bayestopt_.p2 = [ bayestopt_.p2; estim_params_.param_vals(:,7)];
-    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.param_vals(:,8)];
-    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.param_vals(:,9)];
+    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.param_vals(:,8)]; %take generalized distribution into account
+    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.param_vals(:,9)]; %take generalized distribution into account
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.param_vals(:,10)];
     bayestopt_.name = [bayestopt_.name; cellstr(M_.param_names(estim_params_.param_vals(:,1),:))];
 end
@@ -257,8 +259,7 @@ if options_.initialize_estimated_parameters_with_the_prior_mode
     if ~isempty(k)
         xparam1(k) = bayestopt_.p1(k);
     end
-    xparam1 = transpose(xparam1);
-end 
+end
 
 % I create subfolder M_.dname/prior if needed.
 CheckPath('prior',M_.dname);

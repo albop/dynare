@@ -192,9 +192,9 @@ for it_=start:incr:finish
                         continue;
                     else
                         if(cutoff == 0)
-                            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.maxit_".\n',Block_Num, it_, iter);
+                            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit".\n',Block_Num, it_, iter);
                         else
-                            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.maxit_" or set "cutoff=0" in model options.\n',Block_Num, it_, iter);
+                            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit" or set "cutoff=0" in model options.\n',Block_Num, it_, iter);
                         end;
                         if(is_dynamic)
                             oo_.deterministic_simulation.status = 0;
@@ -224,7 +224,7 @@ for it_=start:incr:finish
                 if (verbose == 1)
                     disp('steady: fsolve');
                 end
-                if ~exist('OCTAVE_VERSION')
+                if ~isoctave
                     if ~user_has_matlab_license('optimization_toolbox')
                         error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
                     end
@@ -235,7 +235,7 @@ for it_=start:incr:finish
                 options.TolFun=1e-8;
                 options.Display = 'iter';
                 options.Jacobian = 'on';
-                if ~exist('OCTAVE_VERSION')
+                if ~isoctave
                     [yn,fval,exitval,output] = fsolve(@local_fname, y(y_index_eq), ...
                                                       options, x, params, steady_state, y, y_index_eq, fname, 0);
                 else
@@ -309,7 +309,7 @@ for it_=start:incr:finish
                 end;
             elseif((stack_solve_algo==2 && is_dynamic) || (options.solve_algo==7 && ~is_dynamic)),
                 flag1=1;
-                if exist('OCTAVE_VERSION')
+                if isoctave
                     error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=7 since GMRES is not implemented in Octave')
                 end
                 if (verbose == 1 && ~is_dynamic)
@@ -397,9 +397,9 @@ for it_=start:incr:finish
     end
     if cvg==0
         if(cutoff == 0)
-            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.maxit_\".\n',Block_Num, it_,iter);
+            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit\".\n',Block_Num, it_,iter);
         else
-            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.maxit_" or set "cutoff=0" in model options.\n',Block_Num, it_,iter);
+            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit" or set "cutoff=0" in model options.\n',Block_Num, it_,iter);
         end;
         if(is_dynamic)
             oo_.deterministic_simulation.status = 0;

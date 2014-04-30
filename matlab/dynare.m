@@ -16,7 +16,7 @@ function dynare(fname, varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2013 Dynare Team
+% Copyright (C) 2001-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -44,15 +44,18 @@ if strcmpi(fname,'help')
     return
 end
 
+% detect if MEX files are present; if not, use alternative M-files
+dynareroot = dynare_config;
+
 warning_config()
 
-if exist('OCTAVE_VERSION')
+if isoctave 
     if octave_ver_less_than('3.6.0')
         warning('This version of Dynare has only been tested on Octave 3.6.0 and above. Since your Octave version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Octave installation.');
     end
 else
-    if matlab_ver_less_than('7.3')
-        warning('This version of Dynare has only been tested on MATLAB 7.3 (R2006b) and above. Since your MATLAB version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your MATLAB installation, or switch to Octave.');
+    if matlab_ver_less_than('7.5')
+        warning('This version of Dynare has only been tested on MATLAB 7.5 (R2007b) and above. Since your MATLAB version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your MATLAB installation, or switch to Octave.');
     end
 end
 
@@ -60,12 +63,13 @@ end
 more off
 
 % sets default format for save() command
-if exist('OCTAVE_VERSION')
-    default_save_options('-mat')
+if isoctave
+    if octave_ver_less_than('3.8')
+        default_save_options('-mat')
+    else
+        save_default_options('-mat')
+    end
 end
-
-% detect if MEX files are present; if not, use alternative M-files
-dynareroot = dynare_config;
 
 if nargin < 1
     error('DYNARE: you must provide the name of the MOD file in argument')
@@ -78,6 +82,7 @@ end
 % Testing if file have extension
 % If no extension default .mod is added
 if isempty(strfind(fname,'.'))
+    fnamelength = length(fname);
     fname1 = [fname '.dyn'];
     d = dir(fname1);
     if length(d) == 0
@@ -90,15 +95,54 @@ else
             && ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.DYN')
         error('DYNARE: argument must be a filename with .mod or .dyn extension')
     end;
+    fnamelength = length(fname) - 4;
 end;
-d = dir(fname);
-if length(d) == 0
-    error(['DYNARE: can''t open ' fname])
+
+if fnamelength + length('_set_auxiliary_variables') > namelengthmax()
+    error('The name of your MOD file is too long, please shorten it')
+end
+
+% Workaround for a strange bug with Octave: if there is any call to exist(fname)
+% before the call to the preprocessor, then Octave will use the old copy of
+% the .m instead of the newly generated one. Deleting the .m beforehand
+% fixes the problem.
+if isoctave && length(dir([fname(1:(end-4)) '.m'])) > 0
+    delete([fname(1:(end-4)) '.m'])
+end
+
+if ~isempty(strfind(fname,filesep))
+    fprintf('\nIt seems you are trying to call a mod-file not located in the "Current Folder". This is not possible (the %s symbol is not allowed in the name of the mod file).\n', filesep)
+    [pathtomodfile,basename,ext] = fileparts(fname);
+    if exist(pathtomodfile,'dir')
+        filesindirectory = dir(pathtomodfile);
+        filesindirectory = struct2cell(filesindirectory);
+        filesindirectory = filesindirectory(1,:);
+        if ~isempty(strmatch([basename '.mod'],filesindirectory)) || ~isempty(strmatch([basename '.dyn'],filesindirectory))
+            fprintf('Please set your "Current Folder" to the folder where the mod-file is located using the following command:\n')
+            fprintf('\n  >> cd %s\n\n',pathtomodfile)
+        else
+            fprintf('The file %s[.mod,.dyn] could not be located!\n\n',basename)
+        end
+    end
+    error(['dynare:: can''t open ' fname, '.'])
+end
+
+if ~exist(fname,'file') || isequal(fname,'dir')
+    fprintf('\nThe file %s could not be located in the "Current Folder". Check whether you typed in the correct filename\n',fname)
+    fprintf('and whether the file is really located in the "Current Folder".\n')
+    try
+        list_of_mod_files = ls('*.mod');
+        fprintf('\nCurrent folder is %s, and contains the following mod files:\n\n',pwd)
+        disp(list_of_mod_files)
+    catch
+        fprintf('\nCurrent folder is %s, and does not contain any mod files.\n\n',pwd)
+    end
+    error(['dynare:: can''t open ' fname])
 end
 
 % pre-dynare-preprocessor-hook
-if exist([fname(1:end-4) '_pre_dynare_preprocessor_hook.m'],'file')
-    eval([fname(1:end-4) '_pre_dynare_preprocessor_hook'])
+if exist(fname(1:end-4),'dir') && exist([fname(1:end-4) filesep 'hooks'],'dir') && exist([fname(1:end-4) filesep 'hooks/priorprocessing.m'],'file')
+    run([fname(1:end-4) filesep 'hooks/priorprocessing'])
 end
 
 command = ['"' dynareroot 'dynare_m" ' fname] ;
@@ -108,10 +152,14 @@ end
 
 [status, result] = system(command);
 disp(result)
+if ismember('onlymacro', varargin)
+    disp('Preprocesser stopped after macroprocessing step because of ''onlymacro'' option.');
+    return;
+end
 
 % post-dynare-prerocessor-hook
-if exist([fname(1:end-4) '_post_dynare_preprocessor_hook.m'],'file')
-    eval([fname(1:end-4) '_post_dynare_preprocessor_hook'])
+if exist(fname(1:end-4),'dir') && exist([fname(1:end-4) filesep 'hooks'],'dir') && exist([fname(1:end-4) filesep 'hooks/postprocessing.m'],'file')
+    run([fname(1:end-4) filesep 'hooks/postprocessing'])
 end
 
 % Save preprocessor result in logfile (if `no_log' option not present)

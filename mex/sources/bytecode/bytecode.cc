@@ -363,7 +363,7 @@ Get_Arguments_and_global_variables(int nrhs,
         }
     }
   *M_ = mexGetVariable("global", "M_");
-  if (M_ == NULL)
+  if (*M_ == NULL)
     {
       ostringstream tmp;
       tmp << " in main, global variable not found: M_\n";
@@ -371,14 +371,14 @@ Get_Arguments_and_global_variables(int nrhs,
     }
   /* Gets variables and parameters from global workspace of Matlab */
   *oo_ = mexGetVariable("global", "oo_");
-  if (oo_ == NULL)
+  if (*oo_ == NULL)
     {
       ostringstream tmp;
       tmp << " in main, global variable not found: oo_\n";
       throw FatalExceptionHandling(tmp.str());
     }
   *options_ = mexGetVariable("global", "options_");
-  if (options_ == NULL)
+  if (*options_ == NULL)
     {
       ostringstream tmp;
       tmp << " in main, global variable not found: options_\n";
@@ -527,7 +527,7 @@ main(int nrhs, const char *prhs[])
       for (vector<s_plan>::iterator it = splan.begin(); it != splan.end(); it++)
         {
           mexPrintf("----------------------------------------------------------------------------------------------------\n");
-          mexPrintf("suprise n°%d\n", i+1);
+          mexPrintf("suprise #%d\n", i+1);
           if (it->exo.length())
             mexPrintf(" plan fliping var=%s (%d) exo=%s (%d) for the following periods and with the following values:\n", it->var.c_str(), it->var_num, it->exo.c_str(), it->exo_num);
           else
@@ -605,7 +605,7 @@ main(int nrhs, const char *prhs[])
       for (vector<s_plan>::iterator it = spfplan.begin(); it != spfplan.end(); it++)
         {
           mexPrintf("----------------------------------------------------------------------------------------------------\n");
-          mexPrintf("perfect foresight n°%d\n", i+1);
+          mexPrintf("perfect foresight #%d\n", i+1);
           if (it->exo.length())
             mexPrintf(" plan flipping var=%s (%d) exo=%s (%d) for the following periods and with the following values:\n", it->var.c_str(), it->var_num, it->exo.c_str(), it->exo_num);
           else
@@ -707,10 +707,25 @@ main(int nrhs, const char *prhs[])
     DYN_MEX_FUNC_ERR_MSG_TXT("verbosity is not a field of options_");
   if (verbose)
     print_it = true;
-  field = mxGetFieldNumber(options_, "maxit_");
-  if (field < 0)
-    DYN_MEX_FUNC_ERR_MSG_TXT("maxit_ is not a field of options_");
-  int maxit_ = int (floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, field)))));
+  if (!steady_state)
+    field = mxGetFieldNumber(options_, "simul");
+  else
+    field = mxGetFieldNumber(options_, "steady");
+  mxArray *temporaryfield;
+  if (field >= 0)
+    temporaryfield = mxGetFieldByNumber(options_, 0, field);
+  else
+    if (!steady_state)
+      DYN_MEX_FUNC_ERR_MSG_TXT("simul is not a field of options_");
+    else
+      DYN_MEX_FUNC_ERR_MSG_TXT("steady is not a field of options_");
+  field = mxGetFieldNumber(temporaryfield, "maxit");
+  if (field<0)
+    if (!steady_state)
+      DYN_MEX_FUNC_ERR_MSG_TXT("maxit is not a field of options_.simul");
+    else
+      DYN_MEX_FUNC_ERR_MSG_TXT("maxit is not a field of options_.steady");
+  int maxit_ = int (floor(*(mxGetPr(mxGetFieldByNumber(temporaryfield, 0, field)))));
   field = mxGetFieldNumber(options_, "slowc");
   if (field < 0)
     DYN_MEX_FUNC_ERR_MSG_TXT("slows is not a field of options_");

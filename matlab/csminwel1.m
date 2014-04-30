@@ -100,7 +100,7 @@ f=f0;
 H=H0;
 cliff=0;
 while ~done
-    % penalty for dsge_likelihood and DsgeVarLikelihood
+    % penalty for dsge_likelihood and dsge_var_likelihood
     objective_function_penalty_base = f;
 
     g1=[]; g2=[]; g3=[];

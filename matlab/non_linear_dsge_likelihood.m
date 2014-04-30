@@ -133,6 +133,11 @@ ys              = [];
 trend_coeff     = [];
 exit_flag       = 1;
 
+% Issue an error if loglinear option is used.
+if DynareOptions.loglinear
+    error('non_linear_dsge_likelihood: It is not possible to use a non linear filter with the option loglinear!')
+end
+
 % Set the number of observed variables
 nvobs = DynareDataset.info.nvobs;
 
@@ -163,7 +168,7 @@ Model = set_all_parameters(xparam1,EstimatedParameters,Model);
 Q = Model.Sigma_e;
 H = Model.H;
 
-if ~isscalar(Q) &&  EstimatedParameters.ncx
+if ~issquare(Q) || EstimatedParameters.ncx || isfield(EstimatedParameters,'calibrated_covariances')
     [Q_is_positive_definite, penalty] = ispd(Q);
     if ~Q_is_positive_definite
         fval = objective_function_penalty_base+penalty;
@@ -171,9 +176,20 @@ if ~isscalar(Q) &&  EstimatedParameters.ncx
         info = 43;
         return
     end
+    if isfield(EstimatedParameters,'calibrated_covariances')
+        correct_flag=check_consistency_covariances(Q);
+        if ~correct_flag
+            penalty = sum(Q(EstimatedParameters.calibrated_covariances.position).^2);
+            fval = objective_function_penalty_base+penalty;
+            exit_flag = 0;
+            info = 71;
+            return
+        end
+    end
+
 end
 
-if ~isscalar(H) && EstimatedParameters.ncn
+if ~issquare(H) || EstimatedParameters.ncn || isfield(EstimatedParameters,'calibrated_covariances_ME')
     [H_is_positive_definite, penalty] = ispd(H);
     if ~H_is_positive_definite
         fval = objective_function_penalty_base+penalty;
@@ -181,6 +197,17 @@ if ~isscalar(H) && EstimatedParameters.ncn
         info = 44;
         return
     end
+    if isfield(EstimatedParameters,'calibrated_covariances_ME')
+        correct_flag=check_consistency_covariances(H);
+        if ~correct_flag
+            penalty = sum(H(EstimatedParameters.calibrated_covariances_ME.position).^2);
+            fval = objective_function_penalty_base+penalty;
+            exit_flag = 0;
+            info = 72;
+            return
+        end
+    end
+
 end
 
 %------------------------------------------------------------------------------
@@ -207,11 +234,7 @@ BayesInfo.mf = BayesInfo.mf1;
 if DynareOptions.noconstant
     constant = zeros(nvobs,1);
 else
-    if DynareOptions.loglinear
-        constant = log(SteadyState(BayesInfo.mfys));
-    else
-        constant = SteadyState(BayesInfo.mfys);
-    end
+    constant = SteadyState(BayesInfo.mfys);
 end
 
 % Define the deterministic linear trend of the measurement equation.

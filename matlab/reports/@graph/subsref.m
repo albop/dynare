@@ -1,7 +1,7 @@
 function A = subsref(A, S)
 %function A = subsref(A, S)
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -26,7 +26,7 @@ switch S(1).type
             case methods(A)
                 if areParensNext(S)
                     A = feval(S(1).subs, A, S(2).subs{:});
-                    S = shiftS(S);
+                    S = shiftS(S,1);
                 else
                     A = feval(S(1).subs, A);
                 end
@@ -34,14 +34,19 @@ switch S(1).type
                 error(['@graph.subsref: unknown field or method: ' S(1).subs]);
         end
     case '()'
-        A = A.seriesElements.getSeriesElements(S(1).subs{:});
+        if isempty(S(1).subs{:})
+            A = A.series;
+        else
+            assert(isnumeric(S(1).subs{:}));
+            A = A.series{S(1).subs{:}};
+        end
     case '{}'
-        error(['@graph.subsref: ' S(1).type ' indexing not supported.']);
+        A = A.series{S(1).subs{:}};
     otherwise
         error('@graph.subsref: impossible case')
 end
 
-S = shiftS(S);
+S = shiftS(S,1);
 if length(S) >= 1
     A = subsref(A, S);
 end

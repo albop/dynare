@@ -20,7 +20,7 @@ function oo_=display_estimation_results_table(xparam1,stdh,M_,options_,estim_par
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -169,6 +169,9 @@ if ncn
     end
     skipline()
 end
+if any(xparam1(1:nvx+nvn)<0)
+    warning('Some estimated standard deviations are negative. Dynare internally works with variances so that the sign does not matter. Nevertheless, it is recommended to impose either prior restrictions (Bayesian Estimation) or a lower bound (ML) to assure positive values.')
+end
 
 OutputDirectoryName = CheckPath('Output',M_.dname);
 
@@ -183,13 +186,12 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcccc} \n');
-        fprintf(fidTeX,'\\caption{Results from posterior maximization (parameters)}\n ');
+        fprintf(fidTeX,'\\caption{Results from posterior maximization (parameters)}\\\\\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:1}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:1}\\\\\n');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
         fprintf(fidTeX,'\\hline \\endhead \n');
@@ -221,12 +223,12 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcccc} \n');
-        fprintf(fidTeX,'\\caption{Results from posterior maximization (standard deviation of structural shocks)}\n ');
+        fprintf(fidTeX,'\\caption{Results from posterior maximization (standard deviation of structural shocks)}\\\\\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:2}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:2}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
@@ -260,12 +262,12 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcccc} \n');
-        fprintf(fidTeX,'\\caption{Results from posterior maximization (standard deviation of measurement errors)}\n ');
+        fprintf(fidTeX,'\\caption{Results from posterior maximization (standard deviation of measurement errors)}\\\\\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:3}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:3}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
@@ -299,12 +301,12 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcccc} \n');
-        fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of structural shocks)}\n ');
+        fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of structural shocks)}\\\\\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:4}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:4}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
@@ -339,12 +341,12 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcccc} \n');
-        fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of measurement errors)}\n ');
+        fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of measurement errors)}\\\\\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:5}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:5}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
@@ -380,12 +382,12 @@ elseif all(bayestopt_.pshape == 0) && options_.TeX %% MLE and GMM Latex output
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcc} \n');
-        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (parameters)}\n ']);
+        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (parameters)}\\\\\n ']);
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':1}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':1}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');
@@ -416,12 +418,12 @@ elseif all(bayestopt_.pshape == 0) && options_.TeX %% MLE and GMM Latex output
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcc} \n');
-        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (standard deviation of structural shocks)}\n ']);
+        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (standard deviation of structural shocks)}\\\\\n ']);
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':2}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':2}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');
@@ -453,12 +455,12 @@ elseif all(bayestopt_.pshape == 0) && options_.TeX %% MLE and GMM Latex output
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcc} \n');
-        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (standard deviation of measurement errors)}\n ']);
+        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (standard deviation of measurement errors)}\\\\\n ']);
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':3}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':3}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');
@@ -490,12 +492,12 @@ elseif all(bayestopt_.pshape == 0) && options_.TeX %% MLE and GMM Latex output
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcc} \n');
-        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (correlation of structural shocks)}\n ']);
+        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (correlation of structural shocks)}\\\\\n ']);
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':4}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':4}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');
@@ -528,12 +530,12 @@ elseif all(bayestopt_.pshape == 0) && options_.TeX %% MLE and GMM Latex output
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{center}\n');
         fprintf(fidTeX,'\\begin{longtable}{l|lcc} \n');
-        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (correlation of measurement errors)}\n ']);
+        fprintf(fidTeX,['\\caption{Results from ' table_title ' maximization (correlation of measurement errors)}\\\\\n ']);
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':5}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');
         fprintf(fidTeX,'\\hline \\endfirsthead \n');
-        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
         fprintf(fidTeX,['\\label{Table:' LaTeXtitle ':5}\\\\\n']);
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Mode & s.d. & t-stat\\\\ \n');

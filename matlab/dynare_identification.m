@@ -38,7 +38,7 @@ function [pdraws, TAU, GAM, LRE, gp, H, JJ] = dynare_identification(options_iden
 
 global M_ options_ oo_ bayestopt_ estim_params_
 
-if exist('OCTAVE_VERSION')
+if isoctave
     warning('off'),
 else
     warning off,
@@ -198,15 +198,23 @@ else
     name_tex = [cellstr(M_.exo_names_tex); cellstr(M_.param_names_tex)];
 end
 
+skipline()
+disp(['==== Identification analysis ====' ]),
+skipline()
+if nparam<2,
+    options_ident.advanced=0;
+    advanced = options_ident.advanced;
+    disp('There is only one parameter to study for identitification.')
+    disp('The advanced option is re-set to 0.')
+    skipline()
+end
+
 options_ident = set_default_option(options_ident,'max_dim_cova_group',min([2,nparam-1]));
 options_ident.max_dim_cova_group = min([options_ident.max_dim_cova_group,nparam-1]);
 
 
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
 store_options_ident = options_ident;
-skipline()
-disp(['==== Identification analysis ====' ]),
-skipline()
 
 if iload <=0,
     
@@ -317,6 +325,8 @@ if iload <=0,
             disp('----------- ')
             skipline()
             return
+        else
+            parameters = 'Random_prior_params';
         end
     else
     idehess_point.params=params;
@@ -327,6 +337,7 @@ if iload <=0,
 %     normJ = max(abs(siJ)')';
 %     normLRE = max(abs(siLRE)')';
     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_point', 'idemoments_point','idemodel_point', 'idelre_point','store_options_ident')
+    save([IdentifDirectoryName '/' M_.fname '_' parameters '_identif.mat'], 'idehess_point', 'idemoments_point','idemodel_point', 'idelre_point','store_options_ident')
     disp_identification(params, idemodel_point, idemoments_point, name, advanced);
     if ~options_.nograph,
         plot_identification(params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName);
@@ -433,7 +444,7 @@ if iload <=0,
             end
             
             if SampleSize > 1,
-%                 if exist('OCTAVE_VERSION') || options_.console_mode,
+%                 if isoctave || options_.console_mode,
 %                     console_waitbar(0,iteration/SampleSize);
 %                 else
                     dyn_waitbar(iteration/SampleSize,h,['MC identification checks ',int2str(iteration),'/',int2str(SampleSize)])
@@ -445,7 +456,7 @@ if iload <=0,
     
     
     if SampleSize > 1,
-        if exist('OCTAVE_VERSION') || options_.console_mode,
+        if isoctave || options_.console_mode,
             fprintf('\n');
             diary on;
         else
@@ -513,7 +524,7 @@ if SampleSize > 1,
     disp('Testing MC sample')
     disp_identification(pdraws, idemodel, idemoments, name);
     if ~options_.nograph,
-        plot_identification(pdraws,idemoments,idehess_point,idemodel,idelre,advanced,'MC sample - ',name, IdentifDirectoryName);
+        plot_identification(pdraws,idemoments,idehess_point,idemodel,idelre,advanced,'MC sample ',name, IdentifDirectoryName);
     end
     if advanced,
         jcrit=find(idemoments.ino);
@@ -572,7 +583,7 @@ if SampleSize > 1,
     end
 end
 
-if exist('OCTAVE_VERSION')
+if isoctave
     warning('on'),
 else
     warning on,

@@ -47,7 +47,7 @@ if ~options_.noconstant
         bvar.NumberOfVariables;
 end
 
-[fval,cost_flag,info,PHI,SIGMAu,iXX,prior] =  DsgeVarLikelihood(deep',DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+[fval,cost_flag,info,PHI,SIGMAu,iXX,prior] =  dsge_var_likelihood(deep',DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 
 % Conditionnal posterior density of the lagged matrices (given Sigma) ->
 % Matric-variate normal distribution.

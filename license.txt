@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Dynare
-Upstream-Contact: Dynare Team, whose members in 2013 are:
+Upstream-Contact: Dynare Team, whose members in 2014 are:
                   Stéphane Adjemian <stephane.adjemian@univ-lemans.fr>
                   Houtan Bastani <houtan@dynare.org>
                   Michel Juillard <michel.juillard@mjui.fr>
@@ -14,7 +14,7 @@ Upstream-Contact: Dynare Team, whose members in 2013 are:
 Source: http://www.dynare.org
 
 Files: *
-Copyright: 1996-2013 Dynare Team
+Copyright: 1996-2014 Dynare Team
 License: GPL-3+
 
 Files: matlab/AIM/SP*
@@ -40,12 +40,12 @@ License: public-domain
  pages 472-489
 
 Files: matlab/bfgsi1.m matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m
- matlab/numgrad2_.m matlab/numgrad3.m matlab/numgrad3_.m matlab/numgrad5.m
+ matlab/numgrad3.m matlab/numgrad3_.m matlab/numgrad5.m
  matlab/numgrad5_.m matlab/csminwel1.m matlab/bvar_density.m
  matlab/bvar_toolbox.m matlab/partial_information/PI_gensys.m matlab/qzswitch.m
  matlab/qzdiv.m
 Copyright: 1993-2009 Christopher Sims
-           2006-2012 Dynare Team
+           2006-2013 Dynare Team
 License: GPL-3+
 
 Files: matlab/cmaes.m
@@ -55,6 +55,17 @@ License: GPL-3+
 
 Files: matlab/endogenous_prior.m
 Copyright: 2011 Lawrence J. Christiano, Mathias Trabandt and Karl Walentin
+           2013 Dynare Team
+License: GPL-3+
+
+Files: matlab/trust_region.m
+Copyright: 2008-2012 VZLU Prague, a.s.
+           2014 Dynare Team
+License: GPL-3+
+
+Files: matlab/simpsa.m matlab/simpsaget.m matlab/simpsaset.m
+Copyright: 2005 Henning Schmidt, FCC, henning@fcc.chalmers.se
+           2006 Brecht Donckels, BIOMATH, brecht.donckels@ugent.be
            2013 Dynare Team
 License: GPL-3+
 
@@ -79,7 +90,7 @@ Copyright: 2007 Muthiah Annamalai <muthiah.annamalai@uta.edu>
 License: GPL-3+
 
 Files: doc/dynare.texi doc/*.tex doc/*.svg doc/*.dia doc/*.pdf doc/*.bib
-Copyright: 1996-2013 Dynare Team
+Copyright: 1996-2014 Dynare Team
 License: GFDL-NIV-1.3+
 
 Files: doc/userguide/*.tex doc/userguide/*.bib doc/userguide/*.pdf
@@ -107,23 +118,25 @@ License: GPL-3+ with Autoconf exception
 
 Files: m4/ax_pthread.m4
 Copyright: 2008 Steven G. Johnson <stevenj@alum.mit.edu>
-           2010 Dynare Team
+           2011 Daniel Richard G. <skunk@iSKUNK.ORG>
 License: GPL-3+ with Autoconf exception
 
 Files: m4/ax_boost_base.m4
 Copyright: 2008 Thomas Porschberg <thomas@randspringer.de>
-           2009 Dynare Team
+           2009 Peter Adolphs
 License: other
  Copying and distribution of this file, with or without modification, are
  permitted in any medium without royalty provided the copyright notice
- and this notice are preserved.
+ and this notice are preserved. This file is offered as-is, without any
+ warranty.
 
 Files: m4/ax_compare_version.m4
 Copyright: 2008 Tim Toolan <toolan@ele.uri.edu>
 License: other
  Copying and distribution of this file, with or without modification, are
  permitted in any medium without royalty provided the copyright notice
- and this notice are preserved.
+ and this notice are preserved. This file is offered as-is, without any
+ warranty.
 
 Files: m4/ax_latex_bibtex_test.m4 m4/ax_latex_class.m4 m4/ax_tex_test.m4
 Copyright: 2008 Boretti Mathieu <boretti@eig.unige.ch>
@@ -227,6 +240,33 @@ Files: contrib/ms-sbvar/TZcode/MatlabFiles/qplot2.m
  contrib/ms-sbvar/TZcode/MatlabFiles/ellipse.m
 Copyright: 1997-2012 Clark A. Burdick
 License: GPL-3+
+
+Files: contrib/dmm/*
+Copyright: 2010-2014 European Commission
+           2006-2012 Dynare Team
+License: GPL-3+
+
+Files: contrib/dmm/randlib/*
+Copyright: none
+License: public-domain
+ We place the Randlib code that we have written in the public domain.  
+ .
+                                 NO WARRANTY
+ .    
+     WE PROVIDE ABSOLUTELY  NO WARRANTY  OF ANY  KIND  EITHER  EXPRESSED OR
+     IMPLIED,  INCLUDING BUT   NOT LIMITED TO,  THE  IMPLIED  WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK
+     AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS  WITH YOU.  SHOULD
+     THIS PROGRAM PROVE  DEFECTIVE, YOU ASSUME  THE COST  OF  ALL NECESSARY
+     SERVICING, REPAIR OR CORRECTION.
+ .    
+     IN NO  EVENT  SHALL THE UNIVERSITY  OF TEXAS OR  ANY  OF ITS COMPONENT
+     INSTITUTIONS INCLUDING M. D.   ANDERSON HOSPITAL BE LIABLE  TO YOU FOR
+     DAMAGES, INCLUDING ANY  LOST PROFITS, LOST MONIES,   OR OTHER SPECIAL,
+     INCIDENTAL   OR  CONSEQUENTIAL DAMAGES   ARISING   OUT  OF  THE USE OR
+     INABILITY TO USE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA OR
+     ITS ANALYSIS BEING  RENDERED INACCURATE OR  LOSSES SUSTAINED  BY THIRD
+     PARTIES) THE PROGRAM.
 
 License: GFDL-NIV-1.3+
  Permission is granted to copy, distribute and/or modify this document

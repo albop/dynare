@@ -1,10 +1,12 @@
-function o = write(o, fid)
-%function o = write(o, fid)
+function o = write(o, fid, pg, sec)
+%function o = write(o, fid, pg, sec)
 % Write Section object
 %
 % INPUTS
 %   o         [section] section object
 %   fid       [integer] file id
+%   pg        [integer] this page number
+%   sec       [integer] this section number
 %
 % OUTPUTS
 %   o         [section] section object
@@ -12,7 +14,7 @@ function o = write(o, fid)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,7 +32,6 @@ function o = write(o, fid)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(fid ~= -1);
-
 fprintf(fid, '%% Section Object\n');
 if ~isempty(o.height)
     fprintf(fid, '\\setlength\\sectionheight{%s}%%\n', o.height);
@@ -48,23 +49,25 @@ for i=1:o.cols
 end
 fprintf(fid, '}\n');
 ne = numElements(o);
-nvspace = numVspace(o);
 nlcounter = 0;
+row = 1;
+col = 1;
 for i=1:ne
-    disp(['Writing Section Element: ' num2str(i)]);
-    if isa(o.elements(i), 'vspace')
-        assert(rem(nlcounter, o.cols) == 0, ['@section.write: must place ' ...
+    if isa(o.elements{i}, 'vspace')
+        assert(col == o.cols, ['@section.write: must place ' ...
                             'vspace command after a linebreak in the table ' ...
                             'or series of charts']);
-        o.elements(i).write(fid);
+        o.elements{i}.write(fid);
         fprintf(fid, '\\\\\n');
     else
-        o.elements(i).write(fid);
-        nlcounter = nlcounter + 1;
-        if rem(nlcounter, o.cols)
+        o.elements{i}.write(fid, pg, sec, row, col);
+        if col ~= o.cols
             fprintf(fid, ' & ');
+            col = col + 1;
         else
             fprintf(fid, '\\\\\n');
+            row = row + 1;
+            col = 1;
         end
     end
 end

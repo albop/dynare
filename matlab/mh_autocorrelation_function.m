@@ -47,14 +47,8 @@ if isempty(column)
 end
 
 % Get informations about the posterior draws:
-DirectoryName = CheckPath('metropolis',M_.dname);
-try
-    load([DirectoryName '/' M_.fname '_mh_history.mat']); 
-catch
-    disp(['trace_plot:: I can''t find ' M_.fname '_results.mat !'])
-    disp(['trace_plot:: Did you run a metropolis?'])
-    return
-end
+MetropolisFolder = CheckPath('metropolis',M_.dname);
+load_last_mh_history_file(MetropolisFolder, M_.fname);
 
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine; ifil = FirstLine;

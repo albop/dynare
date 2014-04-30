@@ -44,10 +44,10 @@ function dyn_save_graph(dirname,graph_name,graph_formats,TeX,names,texnames,capt
     if graph_formats.eps || TeX
         print([ graph_name '.eps' ],'-depsc2');
     end
-    if graph_formats.pdf && ~exist(OCTAVE_VERSION)
+    if graph_formats.pdf && ~isoctave
         print(graph_name,'-dpdf');
     end
-    if graph_formats.fig && ~exist(OCTAVE_VERSION)
+    if graph_formats.fig && ~isoctave
         print(graph_name,'-dfig');
     end
     

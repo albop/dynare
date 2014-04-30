@@ -36,7 +36,7 @@ nCPU='';
 if nargin < 2,
 % Determine a specific operating system or software version when necessary
 % for different command (sintax, name, ...).
-Environment=~ispc; %isunix || (~matlab_ver_less_than('7.4') && ismac);
+Environment=~ispc;
 end
 
 switch Environment

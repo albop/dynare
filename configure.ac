@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2013 Dynare Team
+dnl Copyright (C) 2009-2014 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.62])
-AC_INIT([dynare], [4.4-unstable])
+AC_INIT([dynare], [4.5-unstable])
 AC_CONFIG_SRCDIR([preprocessor/DynareMain.cc])
 AM_INIT_AUTOMAKE([1.11 -Wall -Wno-portability foreign no-dist-gzip dist-xz tar-pax])
 
@@ -62,6 +62,9 @@ AX_PROG_LN_S
 AC_PROG_MKDIR_P
 
 AM_PROG_LEX
+# Hack to get lex include dir, ticket #575
+AC_PATH_PROG([LEXPATH], [$LEX])
+AC_SUBST([LEXINC], [`eval "echo $LEXPATH | sed 's|$LEX$|../include|'"`])
 
 AC_CHECK_PROG([YACC], [bison], [bison])
 if test "x$YACC" = "x"; then
@@ -70,7 +73,7 @@ if test "x$YACC" = "x"; then
 fi
 
 # We need 1.36 because of unordered_{set,hash} used by Dynare++
-AX_BOOST_BASE([1.36])
+AX_BOOST_BASE([1.36], [], [AC_MSG_ERROR([Can't find Boost >= 1.36])])
 
 CPPFLAGS_SAVED="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
@@ -160,6 +163,12 @@ fi
 AM_CONDITIONAL([HAVE_BLAS], [test x"$ax_blas_ok" = "xyes"])
 AM_CONDITIONAL([HAVE_LAPACK], [test x"$ax_lapack_ok" = "xyes"])
 
+case ${host_os} in
+  *mingw32*)
+    # Ensure that -lpthread is statically linked under MinGW
+    PTHREAD_LIBS="-Wl,-Bstatic -lpthread -Wl,-Bdynamic"
+    ;;
+esac
 AX_PTHREAD
 
 AC_CONFIG_FILES([Makefile

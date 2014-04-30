@@ -4,9 +4,6 @@ function r = matlab_ver_less_than(verstr)
 % Returns 1 if current Matlab version is strictly older than
 % the one given in argument.
 %
-% It basically does the same job than verLessThan(), which is
-% only available since Matlab 7.4.
-%
 % Note that this function will fail under Octave.
 %
 % INPUTS
@@ -18,7 +15,7 @@ function r = matlab_ver_less_than(verstr)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,15 +32,4 @@ function r = matlab_ver_less_than(verstr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-ver_struct = ver('matlab');
-cur_verstr = ver_struct.Version;
-
-r = get_ver_numeric(cur_verstr) < get_ver_numeric(verstr);
-
-
-function x = get_ver_numeric(verstr)
-nums = sscanf(verstr, '%d.%d.%d')';
-if length(nums) < 3
-    nums(3) = 0;
-end
-x = nums * [1; 0.01; 0.0001 ];
+r = verLessThan('matlab', verstr);

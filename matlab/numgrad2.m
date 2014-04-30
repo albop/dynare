@@ -1,11 +1,10 @@
 function [g, badg] = numgrad2(fcn,f0,x,epsilon,varargin)
-% function [g badg] = numgrad2(fcn,xvarargin)
 
 % Original file downloaded from:
 % http://sims.princeton.edu/yftp/optimize/mfiles/numgrad.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2008-2013 Dynare Team
+% Copyright (C) 2008-2014 Dynare Team
 %
 % This file is part of Dynare.
 %

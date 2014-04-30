@@ -20,7 +20,7 @@ Here, we explain how to build from source:
 
 This source can be retrieved in three forms:
 - via git, at <https://github.com/DynareTeam/dynare.git>
-- using the stable source archive of the latest Dynare version (currently 4.3) from <http://www.dynare.org/download/dynare-4.3/source>
+- using the stable source archive of the latest Dynare version (currently 4.4) from <http://www.dynare.org/download/dynare-stable/>
 - using a source snapshot of the unstable version, from <http://www.dynare.org/download/dynare-unstable/source-snapshot>
 
 Note that if you obtain the source code via git, you will need to install more tools (see below).
@@ -52,25 +52,24 @@ A number of tools and libraries are needed in order to recompile everything. You
 - [MATLAB](http://www.dynare.org/DynareWiki/BuildingDynareFromSource?action=AttachFile&do=view&target=dynare-mingw64-libs.zip) (if you want to compile MEX for MATLAB)
 - [GNU Octave](http://www.octave.org), with the development headers (if you want to compile MEX for Octave)
 - [Boost libraries](http://www.boost.org), version 1.36 or later
-- [Bison](http://www.gnu.org/software/bison/), version 2.3 or later (only if you get the source through Git)
+- [Bison](http://www.gnu.org/software/bison/), version 2.5 or later (only if you get the source through Git)
 - [Flex](http://flex.sourceforge.net/), version 2.5.4 or later (only if you get the source through Git)
 - [Autoconf](http://www.gnu.org/software/autoconf/), version 2.62 or later (only if you get the source through Git) (see [Installing an updated version of Autoconf in your own directory, in GNU/Linux](http://www.dynare.org/DynareWiki/AutoMake))
 - [Automake](http://www.gnu.org/software/automake/), version 1.11.2 or later (only if you get the source through Git) (see [Installing an updated version of AutoMake in your own directory, in GNU/Linux](http://www.dynare.org/DynareWiki/AutoMake))
 - [CWEB](http://www-cs-faculty.stanford.edu/%7Eknuth/cweb.html), with its tools `ctangle` and `cweave` (only if you want to build Dynare++ and get the source through Git)
 - An implementation of BLAS and LAPACK: either [ATLAS](http://math-atlas.sourceforge.net/), [OpenBLAS](http://xianyi.github.com/OpenBLAS/), Netlib ([BLAS](http://www.netlib.org/blas/), [LAPACK](http://www.netlib.org/lapack/)) or [MKL](http://software.intel.com/en-us/intel-mkl/) (only if you want to build Dynare++)
 - An implementation of [POSIX Threads](http://en.wikipedia.org/wiki/POSIX_Threads) (optional, for taking advantage of multi-core)
-- [MAT File I/O library](http://sourceforge.net/projects/matio/) (if you want to compile Markov-Switching code, the estimation DLL, k-order DLL and Dynare++ in unstable)
+- [MAT File I/O library](http://sourceforge.net/projects/matio/) (if you want to compile Markov-Switching code, the estimation DLL, k-order DLL and Dynare++)
 - [SLICOT](http://www.slicot.org) (if you want to compile the Kalman steady state DLL)
 - [GSL library](http://www.gnu.org/software/gsl/) (if you want to compile Markov-Switching code)
 - A decent LaTeX distribution (if you want to compile PDF documentation). The following extra components may be needed:
-  - The Econometrica bibliography style: you need [harvard](http://www.ctan.org/tex-archive/macros/latex/contrib/harvard/) and [economic](http://www.ctan.org/tex-archive/biblio/bibtex/contrib/economic/) packages from CTAN (only if you want to build Dynare user guide, no more needed with Dynare unstable)
   - [Eplain](http://www.tug.org/eplain/) TeX macros (only if you want to build Dynare++ source documentation)
   - [Beamer](http://latex-beamer.sourceforge.net/) (for some PDF presentations)
 - For building the reference manual:
   - [GNU Texinfo](http://www.gnu.org/software/texinfo/)
   - [Texi2HTML](http://www.nongnu.org/texi2html) and [Latex2HTML](http://www.latex2html.org), if you want nice mathematical formulas in HTML output
   - [Doxygen](http://www.stack.nl/%7Edimitri/doxygen/) (if you want to build Dynare preprocessor source documentation)
-- For Octave, the development libraries corresponding to the UMFPACK packaged with Octave (only in unstable)
+- For Octave, the development libraries corresponding to the UMFPACK packaged with Octave
 
 ### Preparing the sources
 
@@ -78,9 +77,8 @@ If you have downloaded the sources from an official source archive or the source
 
 If you want to use Git, do the following from a terminal:
 
-    git clone http://github.com/DynareTeam/dynare.git
+    git clone --recursive http://github.com/DynareTeam/dynare.git
     cd dynare
-    git submodule update --init
     autoreconf -si
 
 The last line runs Autoconf and Automake in order to prepare the build environment (this is not necessary if you got the sources from an official source archive or the source snapshot).
@@ -139,12 +137,12 @@ apt-get build-dep dynare
 Alternatively, if you want to build everything, manually install the following packages:
 
 - `build-essential` (for gcc, g++ and make)
-- `octave3.2-headers` or `liboctave-dev` (will install ATLAS)
+- `liboctave-dev` or `octave3.2-headers` (will install ATLAS)
 - `libboost-graph-dev`
 - `libgsl0-dev`
 - `libmatio-dev`
 - `libslicot-dev` and `libslicot-pic`
-- `libsuitesparse-dev` (only for Unstable)
+- `libsuitesparse-dev`
 - `flex`
 - `bison`
 - `autoconf`
@@ -257,21 +255,24 @@ Configure and make:
     - Next to `Command Line Tools`, click on `Install`
 - Download [MacOSX10.6.sdk.zip](http://www.jamesgeorge.org/uploads/MacOSX10.6.sdk.zip) and unzip it in `/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs`. Change the owner to be `root` and the group to be `wheel`
 
-- Install [Homebrew](http://mxcl.github.io/homebrew/)
+- Install [Homebrew](http://mxcl.github.io/homebrew/) and [Homebrew Science](https://github.com/Homebrew/homebrew-science)
 - Install the following brews:
-```
-    brew install automake
-    brew install gsl
-    brew install boost
-    brew install gfortran
-    brew install matlab2tikz --HEAD
-    brew install libmatio --with-hdf5
-    brew install slicot --with-default-integer-8
-```
+    - ```brew install automake```
+    - ```brew install gsl```
+    - ```brew install bison```
+    - ```brew install boost```
+    - ```brew install gfortran```
+    - ```brew install libmatio --with-hdf5```
+    - ```brew install slicot --with-default-integer-8```
 - **(Optional)** To compile Dynare mex files for use on Octave, first install Octave following the [Simple Installation Instructions](http://wiki.octave.org/Octave_for_MacOS_X#Simple_Installation_Instructions_3). Then, you will probably also want to install graphicsmagick via Homebrew with `brew install graphicsmagick`.
-- **(Optional)** To compile Dynare's documentation, first install the latest version of [MacTeX](http://www.tug.org/mactex/). Then install `doxygen` and `latex2html` via Homebrew with the following commands:
+- **(Optional)** To compile Dynare's documentation, first install the latest version of [MacTeX](http://www.tug.org/mactex/). Then install `doxygen`, `latex2html` and `texi2html` via Homebrew with the following commands:
+    - ```brew install doxygen```
+    - ```brew install texinfo```
+    - ```brew install latex2html```
+    - ```brew install texi2html```
 - **(On OS X 10.7 Only)** Copy [FlexLexer.h](http://www.dynare.org/DynareWiki/BuildingDynareFromSource?action=AttachFile&do=view&target=FlexLexer.h) into the `preprocessor` directory (there was an error in the `FlexLexer.h` file distributed with 10.7)
 - Finally, switch to the root dynare directory. Ensure your path contains `/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/X11/bin:/usr/texbin:/usr/local/sbin`. Run:
     - `autoconf -si`
-    - `./configure --with-matlab=/Applications/MATLAB_R2013a.app MATLAB_VERSION=8.1` for builds with Matlab or `./configure` for builds just using Octave
+    - `./configure --with-matlab=/Applications/MATLAB_R2013a.app MATLAB_VERSION=8.1 YACC=/usr/local/Cellar/bison/<<BISON VERSION>>/bin/bison`
     - `make`
+    - `make pdf TEXI2DVI=/usr/local/Cellar/texinfo/5.2/bin/texi2dvi`, where you replace everything after the equal sign with the path to the `texi2dvi` installed by homebrew when you installed `texinfo`.

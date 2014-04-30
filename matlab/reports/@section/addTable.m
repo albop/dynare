@@ -1,11 +1,11 @@
 function o = addTable(o, varargin)
 %function o = addTable(o, varargin)
-% Add a table to the Cell Array of tables in the report
+% Add a report_table to the Cell Array of report_tables in the report
 %
 % INPUTS
-%   1 args => add empty table
-%   2 args => add given table
-%   3 args => add table at index
+%   1 args => add empty report_table
+%   2 args => add given report_table
+%   3 args => add report_table at index
 %
 % OUTPUTS
 %   updated section object
@@ -13,7 +13,7 @@ function o = addTable(o, varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,6 +30,5 @@ function o = addTable(o, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp(['Processing Section Element: ' num2str(numElements(o)+1)]);
-o.elements = o.elements.addTable(varargin{:});
+o.elements{end+1} = report_table(varargin{:});
 end

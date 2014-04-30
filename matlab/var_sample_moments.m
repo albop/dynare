@@ -78,7 +78,7 @@ XtX = [];
 data = read_variables(datafile,char(varobs),[],xls_sheet,xls_range);
 
 if qlag > FirstObservation
-    disp('VarSampleMoments :: not enough data to initialize! Try to increase FirstObservation.')
+    error('VarSampleMoments :: not enough data to initialize! Try to increase FirstObservation.')
     return
 end
 
@@ -93,7 +93,7 @@ elseif var_trend_order == 1;% Constant and linear trend case.
 X = ones(NumberOfObservations,NumberOfVariables*qlag+2);
 indx = NumberOfVariables*qlag+1:NumberOfVariables*qlag+2;
 else
-    disp('var_sample_moments :: trend must be equal to -1,0 or 1!')
+    error('var_sample_moments :: trend must be equal to -1,0 or 1!')
     return
 end
 

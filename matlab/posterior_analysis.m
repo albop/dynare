@@ -17,7 +17,7 @@ function oo_ = posterior_analysis(type,arg1,arg2,arg3,options_,M_,oo_)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 info = check_posterior_analysis_data(type,M_);
-SampleSize = options_.PosteriorSampleSize;
+SampleSize = options_.sub_draws;
 switch info
   case 0
     disp('check_posterior_analysis_data:: Can''t find any mcmc file!')

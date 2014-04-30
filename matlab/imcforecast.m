@@ -1,4 +1,4 @@
-function imcforecast(constrained_paths, constrained_vars, options_cond_fcst, constrained_perfect_foresight)
+function imcforecast(constrained_paths, constrained_vars, options_cond_fcst)
 % Computes conditional forecasts.
 %
 % INPUTS
@@ -26,7 +26,7 @@ function imcforecast(constrained_paths, constrained_vars, options_cond_fcst, con
 %  [1] Results are stored in a structure which is saved in a mat file called conditional_forecasts.mat.
 %  [2] Use the function plot_icforecast to plot the results. 
 
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -46,14 +46,6 @@ function imcforecast(constrained_paths, constrained_vars, options_cond_fcst, con
 global options_ oo_ M_ bayestopt_
 
 
-if isfield(options_cond_fcst, 'simulation_type')
-    if strcmp(options_cond_fcst.simulation_type, 'deterministic')
-        disp('deterministic condtional forecast');
-        det_cond_forecast(constrained_paths, constrained_vars, options_cond_fcst, constrained_perfect_foresight);
-        return;
-    end
-end
-    
 if ~isfield(options_cond_fcst,'parameter_set') || isempty(options_cond_fcst.parameter_set)
     options_cond_fcst.parameter_set = 'posterior_mode';
 end
@@ -205,7 +197,7 @@ tt = (1-options_cond_fcst.conf_sig)/2;
 t1 = round(options_cond_fcst.replic*tt);
 t2 = round(options_cond_fcst.replic*(1-tt));
 
-forecasts.controled_variables = constrained_vars;
+forecasts.controlled_variables = constrained_vars;
 forecasts.instruments = options_cond_fcst.controlled_varexo;
 
 for i = 1:EndoSize

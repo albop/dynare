@@ -14,7 +14,7 @@ function o = graph(varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,34 +33,44 @@ function o = graph(varargin)
 
 o = struct;
 
-o.seriesElements = seriesElements();
+o.series = {};
 
 o.title = '';
+o.titleFormat = '';
 o.ylabel = '';
 o.xlabel = '';
 
-o.figname = '';
+o.graphDirName = 'tmpRepDir';
+o.graphName = '';
 o.data = '';
 o.seriesToUse = '';
 o.xrange = '';
+o.xAxisTight = true;
 o.yrange = '';
+o.yAxisTight = false;
 
 o.shade = '';
 o.shadeColor = 'green';
-o.shadeOpacity = .2;
+o.shadeOpacity = 20;
 
 o.showGrid = true;
 
 o.showLegend = false;
 o.showLegendBox = false;
-o.legendLocation = 'SouthEast';
+o.legendLocation = 'south east';
 o.legendOrientation = 'horizontal';
-o.legendFontSize = 8;
+o.legendFontSize = 'tiny';
 
 o.showZeroline = false;
 
 o.graphSize = [];
+o.xTicks = [];
 o.xTickLabels = {};
+o.xTickLabelRotation = 0;
+o.xTickLabelAnchor = 'east';
+
+o.width = 6;
+o.height = 4.5;
 
 if nargin == 1
     assert(isa(varargin{1}, 'graph'),['@graph.graph: with one arg you ' ...
@@ -88,67 +98,99 @@ elseif nargin > 1
 end
 
 % Check options provided by user
-assert(ischar(o.title), '@graph.graph: title must be a string');
+if ischar(o.title)
+    o.title = {o.title};
+end
+assert(iscellstr(o.title), '@graph.graph: title must be a cell array of string(s)');
+assert(ischar(o.titleFormat), '@graph.graph: titleFormat file must be a string');
 assert(ischar(o.xlabel), '@graph.graph: xlabel file must be a string');
 assert(ischar(o.ylabel), '@graph.graph: ylabel file must be a string');
-assert(ischar(o.figname), '@graph.graph: figname must be a string');
+assert(ischar(o.graphName), '@graph.graph: graphName must be a string');
+assert(ischar(o.graphDirName), '@graph.graph: graphDirName must be a string');
 assert(islogical(o.showGrid), '@graph.graph: showGrid must be either true or false');
+assert(islogical(o.xAxisTight), '@graph.graph: xAxisTight must be either true or false');
+assert(islogical(o.yAxisTight), '@graph.graph: yAxisTight must be either true or false');
 assert(islogical(o.showLegend), '@graph.graph: showLegend must be either true or false');
 assert(islogical(o.showLegendBox), '@graph.graph: showLegendBox must be either true or false');
-assert(isint(o.legendFontSize), '@graph.graph: legendFontSize must be an integer');
 assert(islogical(o.showZeroline), '@graph.graph: showZeroline must be either true or false');
-assert(ischar(o.shadeColor), '@graph.graph: shadeColor must be a string');
 assert(isfloat(o.shadeOpacity) && length(o.shadeOpacity)==1 && ...
-       o.shadeOpacity >= 0 && o.shadeOpacity <= 1, ...
-       '@graph.graph: o.shadeOpacity must be a real in [0 1]');
+       o.shadeOpacity >= 0 && o.shadeOpacity <= 100, ...
+       '@graph.graph: o.shadeOpacity must be a real in [0 100]');
+assert(isfloat(o.width), '@graph.graph: o.width must be a real number');
+assert(isfloat(o.height), '@graph.graph: o.height must be a real number');
+assert(isfloat(o.xTickLabelRotation), '@graph.graph: o.xTickLabelRotation must be a real number');
+assert(ischar(o.xTickLabelAnchor), '@graph.graph: xTickLabelAnchor must be a string');
+
+valid_shadeColor = {'red', 'green', 'blue', 'cyan ', 'magenta', 'yellow', ...
+                    'black', 'gray', 'darkgray', 'lightgray', 'brown', ...
+                    'lime', 'olive', 'orange', 'pink', 'purple', 'teal', 'violet', 'white'};
+assert(any(strcmp(o.shadeColor, valid_shadeColor)), ['@graph.graph: shadeColor must be one of ' ...
+        strjoin(valid_shadeColor)]);
+
 valid_legend_locations = ...
-    {'North', 'South', 'East', 'West', ...
-     'NorthEast', 'SouthEast', 'NorthWest', 'SouthWest', ...
-     'NorthOutside', 'SouthOutside', 'EastOutside', 'WestOutside', ...
-     'NorthEastOutside', 'SouthEastOutside', 'NorthWestOutside', 'SouthWestOutside', ...
-     'Best', 'BestOutside', ...
-    };
+    {'south west','south east','north west','north east','outer north east'};
 assert(any(strcmp(o.legendLocation, valid_legend_locations)), ...
        ['@graph.graph: legendLocation must be one of ' strjoin(valid_legend_locations, ' ')]);
+
+valid_legend_font_sizes = {'tiny', 'scriptsize', 'footnotesize', 'small', ...
+                    'normalsize', 'large', 'Large', 'LARGE', 'huge', 'Huge'};
+assert(any(strcmp(o.legendFontSize, valid_legend_font_sizes)), ...
+       ['@graph.graph: legendFontSize must be one of ' strjoin(valid_legend_font_sizes)]);
 
 valid_legend_orientations = {'vertical', 'horizontal'};
 assert(any(strcmp(o.legendOrientation, valid_legend_orientations)), ...
        ['@graph.graph: legendOrientation must be one of ' strjoin(valid_legend_orientations, ' ')]);
 
-assert(isempty(o.shade) || (isa(o.shade, 'dynDates') && o.shade.ndat >= 2), ...
-       ['@graph.graph: shade is specified as a dynDates range, e.g. ' ...
-        '''dynDates(''1999q1''):dynDates(''1999q3'')''.']);
-assert(isempty(o.xrange) || (isa(o.xrange, 'dynDates') && o.xrange.ndat >= 2), ...
-       ['@graph.graph: xrange is specified as a dynDates range, e.g. ' ...
-        '''dynDates(''1999q1''):dynDates(''1999q3'')''.']);
+assert(isempty(o.shade) || (isa(o.shade, 'dates') && o.shade.ndat >= 2), ...
+       ['@graph.graph: shade is specified as a dates range, e.g. ' ...
+        '''dates(''1999q1''):dates(''1999q3'')''.']);
+assert(isempty(o.xrange) || (isa(o.xrange, 'dates') && o.xrange.ndat >= 2), ...
+       ['@graph.graph: xrange is specified as a dates range, e.g. ' ...
+        '''dates(''1999q1''):dates(''1999q3'')''.']);
 assert(isempty(o.yrange) || (isfloat(o.yrange) && length(o.yrange) == 2 && ...
                              o.yrange(1) < o.yrange(2)), ...
        ['@graph.graph: yrange is specified an array with two float entries, ' ...
         'the lower bound and upper bound.']);
-assert(isempty(o.data) || isa(o.data, 'dynSeries'), ['@graph.graph: data must ' ...
-                    'be a dynSeries']);
+assert(isempty(o.data) || isa(o.data, 'dseries'), ['@graph.graph: data must ' ...
+                    'be a dseries']);
 assert(isempty(o.seriesToUse) || iscellstr(o.seriesToUse), ['@graph.graph: ' ...
-                    'series to use must be a cell array of string(s)']);
+                    'seriesToUse must be a cell array of string(s)']);
 
 assert(isempty(o.graphSize) || ((isfloat(o.graphSize) && length(o.graphSize) == 2)),...
        ['@graph.graph: graphSize is specified as an array with two float ' ...
         'entries, [width height]']);
-assert(iscellstr(o.xTickLabels), ...
-       '@graph.graph: xTickLabels must be a cell array of strings');
-% using o.seriesToUse, create series objects and put them in o.seriesElements
+assert(isempty(o.xTicks) || isfloat(o.xTicks),...
+       '@graph.graph: xTicks must be a numerical array');
+assert(iscellstr(o.xTickLabels) || (ischar(o.xTickLabels) && strcmpi(o.xTickLabels, 'ALL')), ...
+       ['@graph.graph: xTickLabels must be a cell array of strings or ' ...
+        'equivalent to the string ''ALL''']);
+if ~isempty(o.xTickLabels)
+    assert((ischar(o.xTickLabels) && strcmpi(o.xTickLabels, 'ALL')) || ...
+            ~isempty(o.xTicks), ['@graph.graph: if you set xTickLabels and ' ...
+                        'it''s not equal to ''ALL'', you must set xTicks']);
+end
+if ~isempty(o.xTicks)
+    assert(~isempty(o.xTickLabels), '@graph.graph: if you set xTicks, you must set xTickLabels');
+end
+
+% using o.seriesToUse, create series objects and put them in o.series
 if ~isempty(o.data)
     if isempty(o.seriesToUse)
         for i=1:o.data.vobs
-            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.data.name{i}});
+            o = o.addSeries('data', o.data{o.data.name{i}});
         end
     else
         for i=1:length(o.seriesToUse)
-            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.seriesToUse{i}});
+            o = o.addSeries('data', o.data{o.seriesToUse{i}});
         end
     end
 end
 o = rmfield(o, 'seriesToUse');
 o = rmfield(o, 'data');
+
+if ~exist(o.graphDirName, 'file')
+    mkdir(o.graphDirName);
+end
 
 % Create graph object
 o = class(o, 'graph');

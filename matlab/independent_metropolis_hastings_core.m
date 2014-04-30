@@ -37,7 +37,6 @@ if nargin<4,
     whoiam=0;
 end
 
-
 global bayestopt_ estim_params_ options_  M_ oo_ objective_function_penalty_base
 
 % Reshape 'myinputs' for local computation.
@@ -71,7 +70,8 @@ end
 % (re)Set the penalty.
 objective_function_penalty_base = Inf;
 
-MhDirectoryName = CheckPath('metropolis',M_.dname);
+MetropolisFolder = CheckPath('metropolis',M_.dname);
+BaseName = [MetropolisFolder filesep ModelName];
 
 OpenOldFile = ones(nblck,1);
 if strcmpi(ProposalFun,'rand_multivariate_normal')
@@ -81,10 +81,9 @@ elseif strcmpi(ProposalFun,'rand_multivariate_student')
     n = options_.student_degrees_of_freedom;
     ProposalDensity = 'multivariate_student_pdf';
 end
-% load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
-%%%%
-%%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
-%%%%
+
+
+% Now I run the (nblck-fblck+1) metropolis-hastings chains
 
 if any(isnan(bayestopt_.jscale))
     if exist([ModelName '_optimal_mh_scale_parameter.mat'])% This file is created by mode_compute=6.
@@ -111,16 +110,15 @@ for b = fblck:nblck,
         set_dynare_seed(options_.DynareRandomStreams.algo,...
                         options_.DynareRandomStreams.seed);
         % this set the state 
-        set_dynare_random_generator_state(record.Seeds(b).Unifor, ...
-                                          record.Seeds(b).Normal);
+        set_dynare_random_generator_state(record.InitialSeeds(b).Unifor, ...
+                                          record.InitialSeeds(b).Normal);
     catch
         % if the state set by master is incompatible with the slave, we
         % only reseed 
         set_dynare_seed(options_.DynareRandomStreams.seed+b);
     end
     if (options_.load_mh_file~=0)  && (fline(b)>1) && OpenOldFile(b)
-        load([pwd filesep MhDirectoryName filesep ModelName '_mh' int2str(NewFile(b)) ...
-              '_blck' int2str(b) '.mat'])
+        load([BaseName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'])
         x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
         logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
         OpenOldFile(b) = 0;
@@ -128,7 +126,7 @@ for b = fblck:nblck,
         x2 = zeros(InitSizeArray(b),npar);
         logpo2 = zeros(InitSizeArray(b),1);
     end
-    if exist('OCTAVE_VERSION') || options_.console_mode
+    if isoctave || options_.console_mode
         diary off
         skipline()
     elseif whoiam
@@ -176,14 +174,14 @@ for b = fblck:nblck,
             logpo2(irun) = ilogpo2(b);
         end
         prtfrc = j/nruns(b);
-        if exist('OCTAVE_VERSION') || options_.console_mode
+        if isoctave || options_.console_mode
             if mod(j, 10) == 0
-                if exist('OCTAVE_VERSION')
+                if isoctave
                     if (whoiam==0),
-                        printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                        printf('Estimation::mcmc: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, Current acceptance ratio: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
                     end
                 else
-                    fprintf('   MH: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, acception rate: %3.f \b%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                    fprintf('Estimation::mcmc: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, Current acceptance ratio: %3.f \b%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
                 end
             end
             if mod(j,50)==0 && whoiam,
@@ -193,22 +191,22 @@ for b = fblck:nblck,
             end
         else
             if mod(j, 3)==0 && ~whoiam
-                waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
+                waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, Current acceptance ratio %f',prtfrc,isux/j)]);
             elseif mod(j,50)==0 && whoiam,
                 %             keyboard;
-                waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)];
+                waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, Current acceptance ratio %f',prtfrc,isux/j)];
                 fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab))
             end
         end
 
         if (irun == InitSizeArray(b)) || (j == nruns(b)) % Now I save the simulations
-            save([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
-            fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
+            save([BaseName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
+            fidlog = fopen([MetropolisFolder '/metropolis.log'],'a');
             fprintf(fidlog,['\n']);
             fprintf(fidlog,['%% Mh' int2str(NewFile(b)) 'Blck' int2str(b) ' (' datestr(now,0) ')\n']);
             fprintf(fidlog,' \n');
             fprintf(fidlog,['  Number of simulations.: ' int2str(length(logpo2)) '\n']);
-            fprintf(fidlog,['  Acceptation rate......: ' num2str(jsux/length(logpo2)) '\n']);
+            fprintf(fidlog,['  Acceptance ratio......: ' num2str(jsux/length(logpo2)) '\n']);
             fprintf(fidlog,['  Posterior mean........:\n']);
             for i=1:length(x2(1,:))
                 fprintf(fidlog,['    params:' int2str(i) ': ' num2str(mean(x2(:,i))) '\n']);
@@ -244,15 +242,15 @@ for b = fblck:nblck,
         j=j+1;
         irun = irun + 1;
     end% End of the simulations for one mh-block.
-    record.AcceptationRates(b) = isux/j;
-    if exist('OCTAVE_VERSION') || options_.console_mode
+    record.AcceptanceRatio(b) = isux/j;
+    if isoctave || options_.console_mode
         printf('\n');
         diary on
     elseif ~whoiam
         close(hh);
     end
-    [record.Seeds(b).Unifor, record.Seeds(b).Normal] = get_dynare_random_generator_state();
-    OutputFileName(jloop,:) = {[MhDirectoryName,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
+    [record.LastSeeds(b).Unifor, record.LastSeeds(b).Normal] = get_dynare_random_generator_state();
+    OutputFileName(jloop,:) = {[MetropolisFolder,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
 end% End of the loop over the mh-blocks.
 
 
@@ -260,5 +258,3 @@ myoutput.record = record;
 myoutput.irun = irun;
 myoutput.NewFile = NewFile;
 myoutput.OutputFileName = OutputFileName;
-
-

@@ -1,5 +1,5 @@
 # ===========================================================================
-#            http://www.nongnu.org/autoconf-archive/ax_lapack.html
+#         http://www.gnu.org/software/autoconf-archive/ax_lapack.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -14,7 +14,7 @@
 #
 #   To link with LAPACK, you should link with:
 #
-#       $LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS
+#     $LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS
 #
 #   in that order. BLAS_LIBS is the output variable of the AX_BLAS macro,
 #   called automatically. FLIBS is the output variable of the
@@ -64,13 +64,15 @@
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
+#serial 7
+
 AU_ALIAS([ACX_LAPACK], [AX_LAPACK])
 AC_DEFUN([AX_LAPACK], [
 AC_REQUIRE([AX_BLAS])
 ax_lapack_ok=no
 
 AC_ARG_WITH(lapack,
-        [AC_HELP_STRING([--with-lapack=<lib>], [use LAPACK library <lib>])])
+        [AS_HELP_STRING([--with-lapack=<lib>], [use LAPACK library <lib>])])
 case $with_lapack in
         yes | "") ;;
         no) ax_lapack_ok=disable ;;

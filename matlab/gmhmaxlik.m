@@ -84,7 +84,7 @@ npar = length(xparam1);
 NumberOfIterations = options.number;
 MaxNumberOfTuningSimulations   = options.nscale;
 MaxNumberOfClimbingSimulations = options.nclimb;
-AcceptanceTarget               = 1/3;
+AcceptanceTarget               = options.target;
 
 CovJump = VarCov;
 ModePar = xparam1;
@@ -122,7 +122,7 @@ while j<=MaxNumberOfTuningSimulations
     end% ... otherwise I don't move.
     prtfrc = j/MaxNumberOfTuningSimulations;
     if mod(j, 10)==0
-        dyn_waitbar(prtfrc,hh,sprintf('Acceptance rates: %f [%f]',isux/j,jsux/jj));
+        dyn_waitbar(prtfrc,hh,sprintf('Acceptance ratio [during last 500]: %f [%f]',isux/j,jsux/jj));
     end
     if  j/500 == round(j/500)
         test1 = jsux/jj;
@@ -171,7 +171,7 @@ while j<= NumberOfIterations
     end% ... otherwise I don't move.    
     prtfrc = j/NumberOfIterations;
     if mod(j, 10)==0
-        dyn_waitbar(prtfrc,hh,sprintf('Acceptance rate: %f',isux/j));
+        dyn_waitbar(prtfrc,hh,sprintf('Acceptance ratio: %f',isux/j));
     end
     % I update the covariance matrix and the mean:
     oldMeanPar = MeanPar;
@@ -215,7 +215,7 @@ if strcmpi(info,'LastCall')
         end% ... otherwise I don't move.
         prtfrc = j/MaxNumberOfTuningSimulations;
         if mod(j, 10)==0
-            dyn_waitbar(prtfrc,hh,sprintf('Acceptance rates: %f [%f]',isux/j,jsux/jj));
+            dyn_waitbar(prtfrc,hh,sprintf('Acceptance ratio [during last 1000]: %f [%f]',isux/j,jsux/jj));
         end
         if j/1000 == round(j/1000) 
             test1 = jsux/jj;  

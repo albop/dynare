@@ -41,7 +41,7 @@ end
 % Reshape 'myinputs' for local computation.
 % In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
 
-MhDirectoryName=myinputs.MhDirectoryName;
+MetropolisFolder=myinputs.MetropolisFolder;%myinputs.MetropolisFolder;
 nblck=myinputs.nblck;
 NumberOfMcFilesPerBlock=myinputs.NumberOfMcFilesPerBlock;
 Origin=myinputs.Origin;
@@ -55,8 +55,8 @@ M_=myinputs.M_;
 if whoiam
     Parallel=myinputs.Parallel;
 end
-if ~exist('MhDirectoryName'),
-    MhDirectoryName = CheckPath('metropolis',M_.dname);
+if ~exist('MetropolisFolder'),
+    MetropolisFolder = CheckPath('metropolis',M_.dname);
 end
 
 ALPHA = 0.2;                                % increase too much with the number of simulations.
@@ -73,7 +73,7 @@ if whoiam
     fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
 end
 for j=fpar:npar,
-    if exist('OCTAVE_VERSION'),
+    if isoctave
         if (whoiam==0),
             printf('    Parameter %d...  ',j);
         end
@@ -83,19 +83,11 @@ for j=fpar:npar,
     for b = 1:nblck
         startline = 0;
         for n = 1:NumberOfMcFilesPerBlock
-            %load([MhDirectoryName '/' mcfiles(n,1,b).name],'x2');
-            load([MhDirectoryName '/' M_.fname '_mh',int2str(n),'_blck' int2str(b) ...
-                  '.mat'],'x2');
+            load([MetropolisFolder '/' M_.fname '_mh',int2str(n),'_blck' int2str(b) '.mat'],'x2');
             nx2 = size(x2,1);
             tmp((b-1)*NumberOfDraws+startline+(1:nx2),1) = x2(:,j);
-            %      clear x2;
             startline = startline + nx2;
         end
-% $$$     %load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');
-% $$$     load([MhDirectoryName '/' M_.fname '_mh',int2str(NumberOfMcFilesPerBlock),'_blck' int2str(b) '.mat'],'x2');
-% $$$     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = x2(:,j);
-% $$$     clear x2;
-% $$$     startline = startline + LastLineNumber;
     end
     tmp(:,2) = kron(transpose(1:nblck),ones(NumberOfDraws,1));
     tmp(:,3) = kron(ones(nblck,1),time');
@@ -122,7 +114,7 @@ for j=fpar:npar,
             UDIAG(ligne,6,j-fpar+1) = UDIAG(ligne,6,j-fpar+1) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
         end
     end
-    if exist('OCTAVE_VERSION'),
+    if isoctave
         if (whoiam==0),
             printf('Done! \n');
         end

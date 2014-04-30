@@ -3,6 +3,9 @@ MODFILES = \
 	estimation/fs2000_mc4_mf.mod \
 	estimation/fs2000_mc6.mod \
 	estimation/fs2000_mc6_mf.mod \
+	estimation/fs2000_MCMC_jumping_covariance.mod \
+	estimation/fs2000_initialize_from_calib.mod	\
+	estimation/fs2000_calibrated_covariance.mod \
 	gsa/ls2003.mod \
 	ramst.mod \
 	ramst_a.mod \
@@ -15,9 +18,11 @@ MODFILES = \
 	example1_abs_sign.mod \
 	example1_macroif.mod \
 	t_sgu_ex1.mod \
-	osr_example.mod \
+	optimal_policy/osr_example.mod \
 	optimal_policy/ramsey.mod \
 	optimal_policy/nk_ramsey.mod \
+	optimal_policy/nk_ramsey_model.mod \
+	optimal_policy/nk_ramsey_det.mod \
 	optimal_policy/nk_ramsey_expectation.mod \
 	optimal_policy/nk_ramsey_expectation_a.mod \
 	optimal_policy/mult_elimination_test.mod \
@@ -42,6 +47,7 @@ MODFILES = \
 	steady_state/walsh1_ssm.mod \
 	steady_state/walsh1_ssm_block.mod \
 	steady_state/multi_leads.mod \
+	steady_state/example1_trust_region.mod \
 	steady_state_operator/standard.mod \
 	steady_state_operator/use_dll.mod \
 	steady_state_operator/block.mod \
@@ -71,11 +77,13 @@ MODFILES = \
 	fs2000/fs2000a.mod \
 	fs2000/fs2000c.mod \
 	fs2000/fs2000d.mod \
+	fs2000/fs2000e.mod \
 	fs2000/fs2000_cmaes.mod \
 	fs2000/fs2000_calib.mod \
 	fs2000/fs2000_analytic_derivation.mod \
 	fs2000/fs2000_missing_data.mod \
 	fs2000/fs2000_sd.mod \
+	fs2000/fs2000_mode_compute_8.mod \
 	homotopy/homotopy1_test.mod \
 	homotopy/homotopy2_test.mod \
 	homotopy/homotopy3_test.mod \
@@ -95,12 +103,12 @@ MODFILES = \
 	dsge-var/simul_hybrid.mod \
 	dsge-var/dsgevar_forward_calibrated_lambda.mod \
 	dsge-var/dsgevar_forward_estimated_lambda.mod \
-	external_function/example1_1st_and_2nd_deriv_functions_provided.mod \
-	external_function/example1_1st_and_2nd_deriv_functions_provided_dll.mod \
-	external_function/example1_1st_deriv_function_provided.mod \
-	external_function/example1_1st_deriv_function_provided_dll.mod \
-	external_function/example1_no_deriv_functions_provided.mod \
-	external_function/example1_no_deriv_functions_provided_dll.mod \
+	external_function/first_and_2nd_deriv_fcns_provided.mod \
+	external_function/first_and_2nd_deriv_fcns_provided_dll.mod \
+	external_function/first_deriv_fcn_provided.mod \
+	external_function/first_deriv_fcn_provided_dll.mod \
+	external_function/no_deriv_fcns_provided.mod \
+	external_function/no_deriv_fcns_provided_dll.mod \
 	seeds.mod \
 	identification/kim/kim2.mod \
 	identification/as2007/as2007.mod \
@@ -118,6 +126,7 @@ MODFILES = \
 	ms-sbvar/test_upper_cholesky_nc.mod \
 	ms-sbvar/test_ms_variances.mod \
 	ms-sbvar/test_ms_variances_repeated_runs.mod \
+	ms-dsge/test_ms_dsge.mod \
 	kalman_filter_smoother/gen_data.mod \
 	kalman_filter_smoother/algo1.mod \
 	kalman_filter_smoother/algo2.mod \
@@ -138,7 +147,7 @@ MODFILES = \
 	ep/rbc.mod \
 	ep/rbc2.mod \
 	ep/rbcii.mod \
-	ep/linear.mod \
+	ep/linearmodel.mod \
 	deterministic_simulations/deterministic_model_purely_forward.mod \
 	deterministic_simulations/deterministic_model_purely_backward.mod \
 	deterministic_simulations/rbc_det1.mod \
@@ -146,6 +155,8 @@ MODFILES = \
 	deterministic_simulations/rbc_det3.mod \
 	deterministic_simulations/rbc_det4.mod \
 	deterministic_simulations/rbc_det5.mod \
+	deterministic_simulations/rbc_det6.mod \
+	deterministic_simulations/homotopy.mod \
 	walsh.mod \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
@@ -155,9 +166,20 @@ MODFILES = \
 	shock_decomposition/fs2000_est.mod \
 	shock_decomposition/fs2000_est_varlist.mod \
 	stochastic_purely_forward/stochastic_purely_forward.mod \
-	stochastic_purely_forward/stochastic_purely_forward_with_static.mod
+	stochastic_purely_forward/stochastic_purely_forward_with_static.mod \
+	gradient/fs2000_numgrad_13.mod \
+	gradient/fs2000_numgrad_15.mod \
+	gradient/fs2000_numgrad_2.mod \
+	gradient/fs2000_numgrad_3.mod \
+	gradient/fs2000_numgrad_5.mod \
+	filter_step_ahead/fs2000_filter_step_ahead_bayesian.mod \
+	filter_step_ahead/fs2000_filter_step_ahead_ML.mod \
+	loglinear/example4_loglinear.mod \
+	smoother2histval/fs2000_simul.mod \
+	smoother2histval/fs2000_smooth.mod
 
-XFAIL_MODFILES = ramst_xfail.mod
+XFAIL_MODFILES = ramst_xfail.mod \
+	estim_param_in_shock_value.mod
 
 # Dependencies
 example1_use_dll.m.trs: example1.m.trs
@@ -225,14 +247,17 @@ dsge-var/dsgevar_forward_estimated_lambda.m.trs: dsge-var/simul_hybrid.m.trs
 dsge-var/dsgevar_forward_calibrated_lambda.o.trs: dsge-var/simul_hybrid.o.trs
 dsge-var/dsgevar_forward_estimated_lambda.o.trs: dsge-var/simul_hybrid.o.trs
 
+smoother2histval/fs2000_simul.m.trs: smoother2histval/fs2000_smooth.m.trs
+smoother2histval/fs2000_simul.o.trs: smoother2histval/fs2000_smooth.o.trs
+
 # Matlab TRS Files
 M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
-M_TRS_FILES += run_block_byte_tests_matlab.m.trs run_reporting_test_matlab.m.trs
+M_TRS_FILES += run_block_byte_tests_matlab.m.trs run_reporting_test_matlab.m.trs run_all_unitary_tests.m.trs
 M_XFAIL_TRS_FILES = $(patsubst %.mod, %.m.trs, $(XFAIL_MODFILES))
 
 # Octave TRS Files
 O_TRS_FILES = $(patsubst %.mod, %.o.trs, $(MODFILES))
-O_TRS_FILES += run_block_byte_tests_octave.o.trs run_reporting_test_octave.o.trs
+O_TRS_FILES += run_block_byte_tests_octave.o.trs run_reporting_test_octave.o.trs run_all_unitary_tests.o.trs
 O_XFAIL_TRS_FILES = $(patsubst %.mod, %.o.trs, $(XFAIL_MODFILES))
 
 EXTRA_DIST = \
@@ -245,6 +270,7 @@ EXTRA_DIST = \
 	run_block_byte_tests_octave.m \
 	run_reporting_test_matlab.m \
 	run_reporting_test_octave.m \
+	run_all_unitary_tests.m \
 	reporting/AnnualTable.m \
 	reporting/CommResidTablePage.m \
 	reporting/CountryGraphPage.m \
@@ -309,7 +335,13 @@ EXTRA_DIST = \
 	third_order/comparison_policy_functions_dynare_mathematica.m \
 	third_order/policyfunctions.mat \
 	shock_decomposition/example1_calib_shock_decomp_data.mat \
-	shock_decomposition/fsdat_simul.m
+	shock_decomposition/fsdat_simul.m \
+	estimation/fs2000_MCMC_jumping_covariance_steadystate.m \
+	estimation/fs2000_initialize_from_calib_steadystate.m \
+	filter_step_ahead/fs2000_filter_step_ahead_bayesian_steadystate.m \
+	filter_step_ahead/fs2000_filter_step_ahead_ML_steadystate.m \
+	loglinear/results_exp.mat \
+	smoother2histval/fsdat_simul.m
 
 TARGETS =
 
@@ -417,3 +449,5 @@ clean-local:
 		ms-sbvar/*.dat \
 		ms-sbvar/tmv_rr_sr \
 		ms-sbvar/tmv_rr_tr
+
+	rm -f estimation/test_matrix.mat

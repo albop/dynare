@@ -95,9 +95,8 @@ end
 delete([MhDirectoryName filesep M_.fname '_IRF_DSGEs*.mat']);
 delete([MhDirectoryName filesep M_.fname '_IRF_BVARDSGEs*.mat']);
 if strcmpi(type,'posterior')
-    load([ MhDirectoryName filesep  M_.fname '_mh_history.mat'])
-    TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+    B = options_.sub_draws;
+    options_.B = B;
 elseif strcmpi(type,'gsa')
     RootDirectoryName = CheckPath('gsa',M_.dname);
     if options_.opt_gsa.pprior
@@ -107,13 +106,10 @@ elseif strcmpi(type,'gsa')
     end
     x=[lpmat0(istable,:) lpmat(istable,:)];
     clear lpmat istable
-    NumberOfDraws=size(x,1);
-    B=NumberOfDraws; options_.B = B;
+    B=size(x,1); options_.B = B;
 else% type = 'prior'
-    NumberOfDraws = 500;
-end
-if ~strcmpi(type,'gsa')
-    B = min([round(.5*NumberOfDraws),500]); options_.B = B;
+    B = options_.prior_draws;
+    options_.B = B;
 end
 try 
     delete([MhDirectoryName filesep M_.fname '_irf_dsge*.mat'])
@@ -288,7 +284,7 @@ if options_.TeX
     end
 end
 
-fprintf('MH: Posterior (dsge) IRFs...\n');
+fprintf('Estimation::mcmc: Posterior (dsge) IRFs...\n');
 tit(M_.exo_names_orig_ord,:) = M_.exo_names;
 kdx = 0;
 
@@ -328,7 +324,7 @@ if MAX_nirfs_dsgevar
     VarIRFdsgevar = zeros(options_.irf,nvar,M_.exo_nbr);
     DistribIRFdsgevar = zeros(options_.irf,9,nvar,M_.exo_nbr);
     HPDIRFdsgevar = zeros(options_.irf,2,nvar,M_.exo_nbr);    
-    fprintf('MH: Posterior (bvar-dsge) IRFs...\n');
+    fprintf('Estimation::mcmc: Posterior (bvar-dsge) IRFs...\n');
     tit(M_.exo_names_orig_ord,:) = M_.exo_names;
     kdx = 0;
     for file = 1:NumberOfIRFfiles_dsgevar
@@ -358,9 +354,9 @@ if MAX_nirfs_dsgevar
         end
     end
 end
-%%
-%%      Finally I build the plots.
-%%
+%
+%      Finally I build the plots.
+%
 
 
 % Second block of code executed in parallel, with the exception of file
@@ -390,7 +386,7 @@ if options_.dsge_var
     localVars.MeanIRFdsgevar = MeanIRFdsgevar;
 end    
 
-%%% The files .TeX are genereted in sequential way always!
+% The files .TeX are genereted in sequential way always!
 
 if options_.TeX
     fidTeX = fopen([DirectoryName filesep M_.fname '_BayesianIRF.TeX'],'w');
@@ -404,7 +400,7 @@ if options_.TeX
         TEXNAMES = [];
         
         for j=1:nvar
-            if max(abs(MeanIRF(:,j,i))) > 10^(-6)  
+            if max(abs(MeanIRF(:,j,i))) > options_.impulse_responses.plot_threshold  
                 
                 name = deblank(varlist(j,:));
                 texname = deblank(varlist_TeX(j,:));
@@ -444,7 +440,7 @@ end
 
 
 % Comment for testing!
-if ~exist('OCTAVE_VERSION')
+if ~isoctave
     if isnumeric(options_.parallel)  || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,
         [fout] = PosteriorIRF_core2(localVars,1,M_.exo_nbr,0);
     else
@@ -467,4 +463,4 @@ end
 % END parallel code!
 
 
-fprintf('MH: Posterior IRFs, done!\n');
+fprintf('Estimation::mcmc: Posterior IRFs, done!\n');

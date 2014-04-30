@@ -1,7 +1,7 @@
 function M = set_all_parameters(xparam1,estim_params,M)
 
 %@info:
-%! @deftypefn {Function File} {@var{M} =} dynSeries (@var{xparams1},@var{estim_params},@var{M})
+%! @deftypefn {Function File} {@var{M} =} dseries (@var{xparams1},@var{estim_params},@var{M})
 %! @anchor{set_all_parameters}
 %! @sp 1
 %! Update parameter values (deep parameters and covariance matrices).
@@ -56,9 +56,11 @@ nvn = estim_params.nvn;
 ncn = estim_params.ncn;
 np = estim_params.np;
 Sigma_e = M.Sigma_e;
+Correlation_matrix = M.Correlation_matrix;
 H = M.H;
-
-% setting shocks variance
+Correlation_matrix_ME = M.Correlation_matrix_ME;
+% setting shocks variance on the diagonal of Covariance matrix; used later
+% for updating covariances
 if nvx
     var_exo = estim_params.var_exo;
     for i=1:nvx
@@ -69,7 +71,8 @@ end
 % update offset
 offset = nvx;
 
-% setting measument error variance
+% setting measument error variance; on the diagonal of Covariance matrix; used later
+% for updating covariances
 if nvn
     for i=1:nvn
         k = estim_params.nvn_observable_correspondence(i,1);
@@ -81,37 +84,41 @@ end
 offset = nvx+nvn;
 
 % setting shocks covariances
-if ~isempty(M.Correlation_matrix)
-    Sigma_e = diag(sqrt(diag(Sigma_e)))*M.Correlation_matrix*diag(sqrt(diag(Sigma_e))); % use of old correlation matrix is correct due to the diagonal structure and later only using the hence correctly updated diagonal entries of Sigma_e
-end
 if ncx
     corrx = estim_params.corrx;
     for i=1:ncx
         k1 = corrx(i,1);
         k2 = corrx(i,2);
-        M.Correlation_matrix(k1,k2) = xparam1(i+offset);
-        M.Correlation_matrix(k2,k1) = M.Correlation_matrix(k1,k2);
-        Sigma_e(k1,k2) = xparam1(i+offset)*sqrt(Sigma_e(k1,k1)*Sigma_e(k2,k2));
-        Sigma_e(k2,k1) = Sigma_e(k1,k2);
+        Correlation_matrix(k1,k2) = xparam1(i+offset);
+        Correlation_matrix(k2,k1) = Correlation_matrix(k1,k2);
     end
 end
-
+%build covariance matrix from correlation matrix and variances already on
+%diagonal
+Sigma_e = diag(sqrt(diag(Sigma_e)))*Correlation_matrix*diag(sqrt(diag(Sigma_e))); 
+%if calibrated covariances, set them now to their stored value
+if isfield(estim_params,'calibrated_covariances')
+    Sigma_e(estim_params.calibrated_covariances.position)=estim_params.calibrated_covariances.cov_value;
+end
 % update offset
 offset = nvx+nvn+ncx;
+
 % setting measurement error covariances
-if ~isempty(M.Correlation_matrix_ME)
-    H = diag(sqrt(diag(H)))*M.Correlation_matrix_ME*diag(sqrt(diag(H)));
-end
 if ncn
     corrn_observable_correspondence = estim_params.corrn_observable_correspondence;
     for i=1:ncn
         k1 = corrn_observable_correspondence(i,1);
         k2 = corrn_observable_correspondence(i,2);
-        M.Correlation_matrix_ME(k1,k2) = xparam1(i+offset);
-        M.Correlation_matrix_ME(k2,k1) = M.Correlation_matrix_ME(k1,k2);
-        H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
-        H(k2,k1) = H(k1,k2);
+        Correlation_matrix_ME(k1,k2) = xparam1(i+offset);
+        Correlation_matrix_ME(k2,k1) = Correlation_matrix_ME(k1,k2);
     end
+end
+%build covariance matrix from correlation matrix and variances already on
+%diagonal
+H = diag(sqrt(diag(H)))*Correlation_matrix_ME*diag(sqrt(diag(H)));
+%if calibrated covariances, set them now to their stored value
+if isfield(estim_params,'calibrated_covariances_ME')
+    H(estim_params.calibrated_covariances_ME.position)=estim_params.calibrated_covariances_ME.cov_value;
 end
 
 % update offset
@@ -125,7 +132,9 @@ end
 % updating matrices in M
 if nvx || ncx
     M.Sigma_e = Sigma_e;
+    M.Correlation_matrix=Correlation_matrix;
 end
 if nvn || ncn
     M.H = H;
+    M.Correlation_matrix_ME=Correlation_matrix_ME;    
 end

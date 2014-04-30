@@ -12,7 +12,7 @@ function o = page(varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,11 +31,12 @@ function o = page(varargin)
 
 o = struct;
 o.paper = '';
-o.title = {};
-o.titleFormat = {};
+o.title = {''};
+titleFormatDefalut = {'\large\bfseries'};
+o.titleFormat = titleFormatDefalut;
 o.orientation = '';
 o.footnote = {};
-o.sections = sections();
+o.sections = {};
 
 if nargin == 1
     assert(isa(varargin{1}, 'page'), ['@page.page: with one arg to Page ' ...
@@ -69,12 +70,13 @@ end
 if ischar(o.titleFormat)
     o.titleFormat = {o.titleFormat};
 end
+if length(o.title) ~= length(o.titleFormat)
+    o.titleFormat = repmat(titleFormatDefalut, 1, length(o.title));
+end
 assert(iscellstr(o.title), ...
        '@page.page: title must be a cell array of strings');
 assert(iscellstr(o.titleFormat), ...
        '@page.page: titleFormat must be a cell array of strings');
-assert(length(o.title)==length(o.titleFormat), ...
-       '@page.page: title and titleFormat must be of the same length');
 
 valid_paper = {'a4', 'letter'};
 assert(any(strcmp(o.paper, valid_paper)), ...

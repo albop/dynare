@@ -9,7 +9,7 @@ function [freq, init, data, varlist] = load_xls_file_data(file, sheet, range)
 %
 % OUTPUTS 
 %  o freq       integer scalar (1, 4, 12 or 52), code for frequency.
-%  o init       dynDate object, initial date of the sample.
+%  o init       dates object, initial date of the sample.
 %  o data       matrix of doubles, the raw data.
 %  o varlist    cell of strings (column), names of the variables in the database.
 %
@@ -61,6 +61,9 @@ if ~(check_file_extension(file,'xls') || check_file_extension(file,'xlsx'))
 end
 
 % load excel file.
+if isoctave && ~user_has_octave_forge_package('io')
+    error('The io package is required to read XLS/XLSX files from Octave')
+end
 [num,txt,raw] = xlsread(file, sheet, range);
 
 % Get dimensions of num, txt and raw
@@ -89,7 +92,7 @@ end
 
 % Output initialization.
 freq = 1;
-init = dynDate(1);
+init = dates(1,1);
 varlist = [];
 data = num;
 
@@ -100,8 +103,15 @@ if ~notime
     else
         first_date = txt{1,1};
     end
-    init = dynDate(first_date);
-    freq = init.freq;
+    if isnumeric(first_date) && isint(first_date)
+        first_date = [num2str(first_date) 'Y'];
+    end
+    if isdate(first_date)
+        init = dates(first_date);
+        freq = init.freq;
+    else
+        error('load_xls_file_data: I am not able to read the dates!')
+    end
 end
 
 % Update varlist.

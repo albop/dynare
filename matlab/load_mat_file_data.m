@@ -1,36 +1,20 @@
 function [freq,init,data,varlist,tex] = load_mat_file_data(file)
- 
-%@info:
-%! @deftypefn {Function File} {@var{freq}, @var{init}, @var{data}, @var{varlist} =} load_m_file_data (@var{file})
-%! @anchor{load_m_file_data}
-%! @sp 1
-%! Loads data in a matlab/octave mat-file.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item file
-%! string, name of the mat file.
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item freq
-%! Scalar integer (1, 4, 12, 52).
-%! @item init
-%! dynDate object, initial date.
-%! @item data
-%! Matrix of doubles, data.
-%! @item varlist
-%! Cell of strings (names of the variables in the database).
-%! @end table
-%! @sp 2
-%! @strong{Remarks}
-%! @sp 1
-%! The frequency and initial date can be specified with variables FREQ__ and INIT__ in the matlab/octave mat file. FREQ__ must be a scalar integer and INIT__ a string like '1938M11', '1945Q3', '1973W3' or '2009'. If these variables are not specified, default values for freq and init are 1 and dynDate(1).
-%! @end deftypefn
-%@eod:
+
+% Loads data in a matlab/octave mat-file.
+%
+% INPUTS 
+%  o file         string, name of the matlab/octave mat file (with path)
+%
+% OUTPUTS 
+%  o freq        integer scalar equal to 1, 4, 12 or 52 (for annual, quaterly, monthly or weekly frequencies).
+%  o init        dates object, initial date in the dataset.
+%  o data        matrix of doubles, the data.
+%  o varlist     cell of strings, names of the variables.
+%
+% REMARKS 
+% The frequency and initial date can be specified with variables FREQ__ and INIT__ in the matlab/octave binary file. FREQ__ must 
+% be a scalar integer and INIT__ a string like '1938M11', '1945Q3', '1973W3' or '2009A'. If these variables are not specified 
+% default values for freq and init are 1 and dates(1,1).
 
 % Copyright (C) 2012-2013 Dynare Team
 %
@@ -52,17 +36,25 @@ function [freq,init,data,varlist,tex] = load_mat_file_data(file)
 datafile = load(file);
 
 if isfield(datafile,'INIT__')
-    init = dynDate(datafile.INIT__);
-    datafile = rmfield(datafile, 'INIT__');
+    if isdate(datafile.INIT__)
+        init = dates(datafile.INIT__);
+        datafile = rmfield(datafile, 'INIT__');
+    else
+        error('load_mat_file_data: INIT__ cannot be interpreted as a date.')
+    end
 else
-    init = dynDate(1);
+    init = dates(1,1);
 end
 
 if isfield(datafile,'FREQ__')
     freq = datafile.FREQ__;
     datafile = rmfield(datafile, 'FREQ__');
 else
-    freq = 1;
+    freq = init.freq;
+end
+
+if ~isequal(freq,init.freq)
+    error('load_mat_file_data: INIT__ and FREQ__ are not consistent!')
 end
 
 if isfield(datafile,'NAMES__')
@@ -116,7 +108,7 @@ end
 %$
 %$ % Check the results.
 %$ t(2) = dyn_assert(freq,12);
-%$ t(3) = dyn_assert(isa(init,'dynDate'),1);
+%$ t(3) = dyn_assert(isa(init,'dates'),1);
 %$ t(4) = dyn_assert(init.freq,12);
 %$ t(5) = dyn_assert(init.time,[1938 11]);
 %$ t(6) = dyn_assert(varlist,{'hagop';'bedros'});

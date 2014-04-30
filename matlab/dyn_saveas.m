@@ -31,7 +31,7 @@ function dyn_saveas(h,fname,DynareOptions)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if any(strcmp('eps',cellstr(DynareOptions.graph_format)))
-    if exist('OCTAVE_VERSION')
+    if isoctave
         fname = strrep(fname,'/',filesep);
         fname = strrep(fname,'\',filesep);
         if DynareOptions.nodisplay && ispc,
@@ -41,14 +41,14 @@ if any(strcmp('eps',cellstr(DynareOptions.graph_format)))
     print(h,'-depsc2',[fname,'.eps']) 
 end
 if any(strcmp('pdf',cellstr(DynareOptions.graph_format)))
-    if exist('OCTAVE_VERSION')
+    if isoctave
         error('Octave cannot create pdf files!')
     else
         print(h,'-dpdf',[fname,'.pdf']) 
     end
 end
 if any(strcmp('fig',cellstr(DynareOptions.graph_format)))
-    if exist('OCTAVE_VERSION')
+    if isoctave
         error('Octave cannot create fig files!')
     else
         if DynareOptions.nodisplay

@@ -62,6 +62,7 @@ ar-lib
 /doc/dynare.pg
 /doc/dynare.tp
 /doc/dynare.vr
+/doc/dynare.t2p/*
 /doc/texinfo.tex
 /doc/version.texi
 /doc/mdate-sh
@@ -192,3 +193,6 @@ mex/build/matlab/run_m2html.m
 /contrib/ms-sbvar/*.dat
 /contrib/ms-sbvar/sbvar_commandline
 /contrib/ms-sbvar/sbvar_init_file
+
+# Reporting
+*synctex.gz

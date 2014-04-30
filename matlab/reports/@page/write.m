@@ -1,10 +1,11 @@
-function o = write(o, fid)
-%function o = write(o, fid)
+function o = write(o, fid, pg)
+%function o = write(o, fid, pg)
 % Write a Page object
 %
 % INPUTS
 %   o              [page]     page object
 %   fid            [integer]  file id
+%   pg             [integer]  this page number
 %
 % OUTPUTS
 %   o              [page]     page object
@@ -12,7 +13,7 @@ function o = write(o, fid)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,7 +34,7 @@ assert(fid ~= -1);
 
 fprintf(fid, '\n%% Page Object\n');
 if strcmpi(o.orientation, 'landscape')
-    fprintf(fid, '\\begin{landscape}\n')
+    fprintf(fid, '\\begin{landscape}\n');
 end
 
 for i=1:length(o.footnote)
@@ -46,7 +47,10 @@ for i=1:length(o.title)
     fprintf(fid,'\\multicolumn{1}{c}{%s %s}\\\\\n', o.titleFormat{i}, o.title{i});
 end
 
-o.sections.write(fid);
+nps = length(o.sections);
+for i=1:nps
+    o.sections{i}.write(fid, pg, i);
+end
 
 if strcmpi(o.orientation, 'landscape')
     fprintf(fid, '\\end{landscape}\n');

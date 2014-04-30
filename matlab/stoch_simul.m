@@ -19,6 +19,11 @@ function info=stoch_simul(var_list)
 
 global M_ options_ oo_ it_
 
+% Test if the order of approximation is nonzero (the preprocessor tests if order is non negative).
+if isequal(options_.order,0)
+    error('stoch_simul:: The order of the Taylor approximation cannot be 0!')
+end
+
 test_for_deep_parameters_calibration(M_);
 
 dr = oo_.dr;
@@ -40,7 +45,7 @@ end
 if options_.partial_information == 1 || options_.ACES_solver == 1
     PI_PCL_solver = 1;
     if options_.order ~= 1
-        warning('STOCH_SIMUL: forcing order=1 since you are using partial_information or ACES solver')
+        warning('stoch_simul:: forcing order=1 since you are using partial_information or ACES solver')
         options_.order = 1;
     end
 else
@@ -68,14 +73,22 @@ if PI_PCL_solver
     [oo_.dr, info] = PCL_resol(oo_.steady_state,0);
 elseif options_.discretionary_policy
     if ~options_.linear
-        error(['discretionary_policy solves only linear_quadratic ' ...
-               'problems']);
+        error('discretionary_policy: only linear-quadratic problems can be solved');
     end
     [oo_.dr,ys,info] = discretionary_policy_1(oo_,options_.instruments);
 else
+    if options_.logged_steady_state %if steady state was previously logged, undo this
+        oo_.dr.ys=exp(oo_.dr.ys);
+        oo_.steady_state=exp(oo_.steady_state);
+    end
     [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 end
 
+if options_.loglinear %log steady state for correct display of decision rules and simulations
+    oo_.dr.ys=log(oo_.dr.ys);
+    oo_.steady_state=log(oo_.steady_state);
+    options_old.logged_steady_state = 1;
+end
 if info(1)
     options_ = options_old;
     print_info(info, options_.noprint, options_);
@@ -123,8 +136,8 @@ end
 
 if options_.periods > 0 && ~PI_PCL_solver
     if options_.periods <= options_.drop
-        disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
-              ' than the number of observations to be dropped'])
+        fprintf('\nSTOCH_SIMUL error: The horizon of simulation is shorter than the number of observations to be dropped.\n')
+        fprintf('STOCH_SIMUL error: Either increase options_.periods or decrease options_.drop.\n')
         options_ =options_old;
         return
     end
@@ -176,6 +189,12 @@ if options_.irf
                 y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
                       options_.replic, options_.order);
             end
+            if ~options_.noprint && any(any(isnan(y))) && ~options_.pruning && ~(options_.order==1)
+                fprintf('\nstoch_simul:: The simulations conducted for generating IRFs to %s were explosive.\n',M_.exo_names(i,:))
+                fprintf('stoch_simul:: No IRFs will be displayed. Either reduce the shock size, \n')
+                fprintf('stoch_simul:: use pruning, or set the approximation order to 1.');
+                skipline(2);
+            end
             if options_.relative_irf
                 y = 100*y/cs(i,i);
             end
@@ -189,7 +208,7 @@ if options_.irf
                          y(i_var(j),:)');
                 eval(['oo_.irfs.' deblank(M_.endo_names(i_var(j),:)) '_' ...
                       deblank(M_.exo_names(i,:)) ' = y(i_var(j),:);']);
-                if max(y(i_var(j),:)) - min(y(i_var(j),:)) > 1e-10
+                if max(abs(y(i_var(j),:))) > options_.impulse_responses.plot_threshold
                     irfs  = cat(1,irfs,y(i_var(j),:));
                     if isempty(mylist)
                         mylist = deblank(var_list(j,:));
@@ -202,6 +221,10 @@ if options_.irf
                         else
                             mylistTeX = char(mylistTeX,deblank(var_listTeX(j,:)));
                         end
+                    end
+                else
+                    if options_.debug
+                        fprintf('stoch_simul:: The IRF of %s to %s is smaller than the irf_plot_threshold of %4.3f and will not be displayed.\n',deblank(M_.endo_names(i_var(j),:)),deblank(M_.exo_names(i,:)),options_.impulse_responses.plot_threshold)
                     end
                 end
             end

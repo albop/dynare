@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2013 Dynare Team
+dnl Copyright (C) 2009-2014 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.62])
-AC_INIT([dynare], [4.4-unstable])
+AC_INIT([dynare], [4.5-unstable])
 AC_CONFIG_SRCDIR([configure.ac])
 AM_INIT_AUTOMAKE([-Wall -Wno-portability foreign])
 
@@ -31,7 +31,12 @@ if test "x$MKOCTFILE" != "x"; then
   FFLAGS=`$MKOCTFILE -p FFLAGS`
   CXXFLAGS=`$MKOCTFILE -p CXXFLAGS`
   LDFLAGS="`$MKOCTFILE -p LFLAGS` `$MKOCTFILE -p LDFLAGS`"
+  OCTAVE_VERSION=`$MKOCTFILE -v 2>&1 | sed 's/mkoctfile, version //'`
+  AX_COMPARE_VERSION([$OCTAVE_VERSION], [lt], [3.6], [AC_MSG_ERROR([Your Octave is too old, please upgrade to version 3.6 at least.])])
+  AX_COMPARE_VERSION([$OCTAVE_VERSION], [ge], [3.8], [OCTAVE38=yes])
 fi
+
+AM_CONDITIONAL([COMPILE_LINSOLVE], [test "$OCTAVE38" != "yes"])
 
 CFLAGS="$CFLAGS -Wall -Wno-parentheses"
 FFLAGS="$FFLAGS -Wall"
@@ -47,7 +52,7 @@ AM_PROG_AR
 AX_PTHREAD
 # Check for boost libraries used in estimation DLL
 AC_LANG_PUSH([C++])
-AX_BOOST_BASE([1.36])
+AX_BOOST_BASE([1.36], [], [AC_MSG_ERROR([Can't find Boost >= 1.36])])
 CPPFLAGS_SAVED="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 AC_CHECK_HEADER([boost/random/linear_congruential.hpp], [], [AC_MSG_ERROR([Can't find Boost Random Library])])
@@ -110,6 +115,12 @@ else
    BUILD_MS_SBVAR_MEX_OCTAVE="no (missing GSL or MatIO library)"
 fi
 
+if test -n "$MKOCTFILE" -a "$OCTAVE38" != "yes"; then
+   BUILD_LINSOLVE_OCTAVE="yes"
+else
+   BUILD_LINSOLVE_OCTAVE="no (Octave >= 3.8)"
+fi
+
 AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
   if test "x$enable_openmp" = "xyes"; then
     CPPFLAGS="$CPPFLAGS -DUSE_OMP"
@@ -127,6 +138,7 @@ Binaries (with "make"):
  MS-SBVAR MEX files for Octave:                                      $BUILD_MS_SBVAR_MEX_OCTAVE
  Kalman Steady State MEX file for Octave:                            $BUILD_KALMAN_STEADY_STATE_OCTAVE
  Estimation, k-order and dynare_simul MEX for Octave:                $BUILD_ESTIMATION_KORDER_DYNSIMUL_MEX_OCTAVE
+ Linsolve for Octave:                                                $BUILD_LINSOLVE_OCTAVE
 
 ])
 

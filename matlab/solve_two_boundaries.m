@@ -1,4 +1,4 @@
-function y = solve_two_boundaries(fname, y, x, params, steady_state, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, M, oo)
+function [y, oo]= solve_two_boundaries(fname, y, x, params, steady_state, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, M, oo)
 % Computes the deterministic simulation of a block of equation containing
 % both lead and lag variables using relaxation methods 
 %
@@ -32,10 +32,13 @@ function y = solve_two_boundaries(fname, y, x, params, steady_state, y_index, nz
 %                                            - 2 GMRES
 %                                            - 3 BicGStab
 %                                            - 4 Optimal path length
+%   M                   [structure]     Model description
+%   oo                  [structure]     Results
 %
 % OUTPUTS
 %   y                   [matrix]        All endogenous variables of the model      
-%  
+%   oo                  [structure]     Results
+%
 % ALGORITHM
 %   Newton with LU or GMRES or BicGstab
 %    
@@ -133,9 +136,9 @@ while ~(cvg==1 || iter>maxit_),
                     continue;
                 else
                     if(cutoff == 0)
-                        fprintf('Error in simul: Convergence not achieved in block %d, after %d iterations.\n Increase "options_.maxit_".\n',Block_Num, iter);
+                        fprintf('Error in simul: Convergence not achieved in block %d, after %d iterations.\n Increase "options_.simul.maxit".\n',Block_Num, iter);
                     else
-                        fprintf('Error in simul: Convergence not achieved in block %d, after %d iterations.\n Increase "options_.maxit_" or set "cutoff=0" in model options.\n',Block_Num, iter);
+                        fprintf('Error in simul: Convergence not achieved in block %d, after %d iterations.\n Increase "options_.simul.maxit" or set "cutoff=0" in model options.\n',Block_Num, iter);
                     end;
                     oo.deterministic_simulation.status = 0;
                     oo.deterministic_simulation.error = max_res;

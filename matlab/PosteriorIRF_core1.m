@@ -1,6 +1,7 @@
 function myoutput=PosteriorIRF_core1(myinputs,fpar,B,whoiam, ThisMatlab)
+%   Generates and stores Posterior IRFs
 %   PARALLEL CONTEXT
-%   This function perfom in parallel a portion of  PosteriorIRF.m code.
+%   This function perfoms in parallel execution a portion of the PosteriorIRF.m code.
 %   This is a special kind of parallel function. Unlike of other parallel functions,
 %   that running in parallel a 'for' cycle, this function run in parallel a
 %   'while' loop! The parallelization of 'while' loop (when possible) is a more
@@ -188,7 +189,7 @@ while fpar<B
     end
     if MAX_nirfs_dsgevar
         IRUN = IRUN+1;
-        [fval,junk1,junk2,cost_flag,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [fval,junk1,junk2,cost_flag,info,PHI,SIGMAu,iXX] =  dsge_var_likelihood(deep',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
         DSGE_PRIOR_WEIGHT = floor(dataset_.info.ntobs*(1+dsge_prior_weight));
         SIGMA_inv_upper_chol = chol(inv(SIGMAu*dataset_.info.ntobs*(dsge_prior_weight+1)));
@@ -278,7 +279,7 @@ while fpar<B
         ifil2 = ifil2 + 1;
         irun2 = 0;
     end
-%     if exist('OCTAVE_VERSION'),
+%     if isoctave
 %         if (whoiam==0),
 %             printf(['Posterior IRF  %3.f%% done\r'],(fpar/B*100));
 %         end
@@ -286,7 +287,7 @@ while fpar<B
 %         waitbar(fpar/B,h);
 %     end
 %     if whoiam,
-%         if ~exist('OCTAVE_VERSION')
+%         if ~isoctave
 %             fprintf('Done! \n');
 %         end
 %         waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(B) ' done.'];

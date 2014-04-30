@@ -32,7 +32,17 @@ function [b,c,d] = isint(a)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if ~isnumeric(a)
+    b = 0;
+    if nargout>1
+        c = [];
+        d = [];
+    end
+    return
+end
+
 [m,n] = size(a);
+
 b = abs(fix(a)-a)<1e-15;
 
 if nargout>1

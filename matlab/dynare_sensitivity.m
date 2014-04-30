@@ -23,6 +23,10 @@ function x0=dynare_sensitivity(options_gsa)
 
 global M_ options_ oo_ bayestopt_ estim_params_
 
+if options_.dsge_var
+   error('Identification does not support DSGE-VARs at the current stage') 
+end
+
 fname_ = M_.fname;
 if ~isfield(M_,'dname'),
     M_.dname = M_.fname;
@@ -281,10 +285,12 @@ if options_gsa.redform && ~isempty(options_gsa.namendo),% ...
         % check existence of the SS_ANOVA toolbox
         if isempty(options_gsa.threshold_redform) && ...
          ~(exist('gsa_sdp','file')==6 || exist('gsa_sdp','file')==2),
-            disp('Download Mapping routines at:')
-            disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
-            disp(' ' )
-            error('Mapping routines missing!')
+            fprintf('\nThe "SS-ANOVA-R: MATLAB Toolbox for the estimation of Smoothing Spline ANOVA models with Recursive algorithms" is missing.\n')
+            fprintf('To obtain it, go to:\n\n')
+            fprintf('http://ipsc.jrc.ec.europa.eu/?id=790 \n\n')
+            fprintf('and follow the instructions there.\n')
+            fprintf('After obtaining the files, you need to unpack them and set a Matlab Path to those files.\n')
+            error('SS-ANOVA-R Toolbox missing!')
         end
 
         redform_map(OutputDirectoryName,options_gsa);
@@ -300,7 +306,7 @@ if options_gsa.rmse,
         else
             a=whos('-file',[OutputDirectoryName,'/',fname_,'_mc'],'logpo2');
         end
-        if exist('OCTAVE_VERSION'),
+        if isoctave
             aflag=0;
             for ja=1:length(a),
                 aflag=aflag+strcmp('logpo2',a(ja).name);
@@ -386,7 +392,7 @@ if options_gsa.glue,
     gend = options_.nobs;
     rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
     rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-    if options_.loglinear == 1
+    if options_.loglinear
         rawdata = log(rawdata);
     end
     if options_.prefilter == 1

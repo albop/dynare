@@ -32,6 +32,10 @@ function sim1()
 
 global M_ options_ oo_
 
+endogenous_terminal_period = options_.endogenous_terminal_period;
+vperiods = options_.periods*ones(1,options_.simul.maxit);
+azero = options_.dynatol.f/1e7;
+
 lead_lag_incidence = M_.lead_lag_incidence;
 
 ny = M_.endo_nbr;
@@ -69,10 +73,9 @@ i_upd = ny+(1:periods*ny);
 
 Y = endo_simul(:);
 
+skipline()
 disp (['-----------------------------------------------------']) ;
-disp (['MODEL SIMULATION :']) ;
-fprintf('\n') ;
-
+fprintf('MODEL SIMULATION:\n');
 
 model_dynamic = str2func([M_.fname,'_dynamic']);
 z = Y(find(lead_lag_incidence'));
@@ -82,19 +85,21 @@ z = Y(find(lead_lag_incidence'));
 A = sparse([],[],[],periods*ny,periods*ny,periods*nnz(jacobian));
 res = zeros(periods*ny,1);
 
-    
+o_periods = periods;
+
+ZERO = zeros(length(i_upd),1);
+
 h1 = clock ;
-for iter = 1:options_.maxit_
+for iter = 1:options_.simul.maxit
     h2 = clock ;
     
     i_rows = 1:ny;
     i_cols = find(lead_lag_incidence');
     i_cols_A = i_cols;
-    
+
     for it = (M_.maximum_lag+1):(M_.maximum_lag+periods)
 
-        [d1,jacobian] = model_dynamic(Y(i_cols),exo_simul, params, ...
-                                      steady_state,it);
+        [d1,jacobian] = model_dynamic(Y(i_cols), exo_simul, params, steady_state,it);
         if it == M_.maximum_lag+periods && it == M_.maximum_lag+1
             A(i_rows,i_cols_A0) = jacobian(:,i_cols_0);
         elseif it == M_.maximum_lag+periods
@@ -107,8 +112,18 @@ for iter = 1:options_.maxit_
 
         res(i_rows) = d1;
         
+        if endogenous_terminal_period && iter>1
+            dr = max(abs(d1));
+            if dr<azero
+                vperiods(iter) = it;
+                periods = it-M_.maximum_lag;
+                break
+            end
+        end
+    
         i_rows = i_rows + ny;
         i_cols = i_cols + ny;
+        
         if it > M_.maximum_lag+1
             i_cols_A = i_cols_A + ny;
         end
@@ -116,37 +131,69 @@ for iter = 1:options_.maxit_
         
     err = max(abs(res));
     
+    if options_.debug
+        fprintf('\nLargest absolute residual at iteration %d: %10.3f\n',iter,err);    
+        if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
+            fprintf('\nWARNING: NaN or Inf detected in the residuals or endogenous variables.\n');    
+        end
+        skipline()
+    end
+    
     if err < options_.dynatol.f
         stop = 1 ;
-        fprintf('\n') ;
-        disp([' Total time of simulation        :' num2str(etime(clock,h1))]) ;
-        fprintf('\n') ;
-        disp([' Convergency obtained.']) ;
-        fprintf('\n') ;
-        oo_.deterministic_simulation.status = 1;% Convergency obtained.
-        oo_.deterministic_simulation.error = err;
-        oo_.deterministic_simulation.iterations = iter;
-        oo_.endo_simul = reshape(Y,ny,periods+2);
         break
     end
 
-    dy = -A\res;
+    if endogenous_terminal_period && iter>1
+        dy = ZERO;
+        dy(1:i_rows(end)) = -A(1:i_rows(end),1:i_rows(end))\res(1:i_rows(end));
+    else
+        dy = -A\res;
+    end
     
     Y(i_upd) =   Y(i_upd) + dy;
 
 end
 
+if endogenous_terminal_period
+    err = evaluate_max_dynamic_residual(model_dynamic, Y, oo_.exo_simul, params, steady_state, o_periods, ny, max_lag, lead_lag_incidence);
+    periods = o_periods;
+end
 
-if ~stop
-    fprintf('\n') ;
-    disp(['     Total time of simulation        :' num2str(etime(clock,h1))]) ;
-    fprintf('\n') ;
-    disp(['WARNING : maximum number of iterations is reached (modify options_.maxit_).']) ;
-    fprintf('\n') ;
+
+if stop
+    if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
+        oo_.deterministic_simulation.status = 0;% NaN or Inf occurred
+        oo_.deterministic_simulation.error = err;
+        oo_.deterministic_simulation.iterations = iter;
+        oo_.deterministic_simulation.periods = vperiods(1:iter);
+        oo_.endo_simul = reshape(Y,ny,periods+2);
+        skipline();
+        fprintf('\nSimulation terminated after %d iterations.\n',iter);
+        fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
+        error('Simulation terminated with NaN or Inf in the residuals or endogenous variables. There is most likely something wrong with your model.');
+    else
+        skipline();
+        fprintf('\nSimulation concluded successfully after %d iterations.\n',iter);
+        fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
+        fprintf('Max. Abs. Error         : %16.13f\n',err);
+        fprintf('Convergency obtained!\n');
+        oo_.deterministic_simulation.status = 1;% Convergency obtained.
+        oo_.deterministic_simulation.error = err;
+        oo_.deterministic_simulation.iterations = iter;
+        oo_.deterministic_simulation.periods = vperiods(1:iter);
+        oo_.endo_simul = reshape(Y,ny,periods+2);
+    end
+elseif ~stop
+    skipline();
+    fprintf('\nSimulation terminated after %d iterations.\n',iter);
+    fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
+    fprintf('Max. Abs. Error         : %16.13f\n',err);
+    fprintf('WARNING : maximum number of iterations is reached (modify option maxit).\n') ;
     oo_.deterministic_simulation.status = 0;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
-    %oo_.deterministic_simulation.errors = c/abs(err)    
-    oo_.deterministic_simulation.iterations = options_.maxit_;
+    oo_.deterministic_simulation.periods = vperiods(1:iter);
+    oo_.deterministic_simulation.iterations = options_.simul.maxit;
 end
 disp (['-----------------------------------------------------']) ;
-
+skipline();

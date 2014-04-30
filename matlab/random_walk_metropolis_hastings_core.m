@@ -99,11 +99,12 @@ varargin=myinputs.varargin;
 if whoiam
     Parallel=myinputs.Parallel;
     % initialize persistent variables in priordens()
-    priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, ...
-        bayestopt_.p3,bayestopt_.p4,1);
+    priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, bayestopt_.p3,bayestopt_.p4,1);
 end
 
-MhDirectoryName = CheckPath('metropolis',M_.dname);
+MetropolisFolder = CheckPath('metropolis',M_.dname);
+ModelName = M_.fname;
+BaseName = [MetropolisFolder filesep ModelName];
 
 options_.lik_algo = 1;
 OpenOldFile = ones(nblck,1);
@@ -113,9 +114,9 @@ elseif strcmpi(ProposalFun,'rand_multivariate_student')
     n = options_.student_degrees_of_freedom;
 end
 
-%%%%
-%%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
-%%%%
+%
+% NOW i run the (nblck-fblck+1) metropolis-hastings chains
+%
 
 proposal_covariance_Cholesky_decomposition = d*diag(bayestopt_.jscale);
 
@@ -125,25 +126,22 @@ JSUM = 0;
 for b = fblck:nblck,
     jloop=jloop+1;
     try
-        % this will not work if the master uses a random generator not
+        % This will not work if the master uses a random generator not
         % available in the slave (different Matlab version or
         % Matlab/Octave cluster). Therefor the trap.
-        
-        % this set the random generator type (the seed is useless but
+        %
+        % This set the random generator type (the seed is useless but
         % needed by the function)
-        set_dynare_seed(options_.DynareRandomStreams.algo,...
-                        options_.DynareRandomStreams.seed);
-        % this set the state 
-        set_dynare_random_generator_state(record.Seeds(b).Unifor, ...
-                                          record.Seeds(b).Normal);
+        set_dynare_seed(options_.DynareRandomStreams.algo, options_.DynareRandomStreams.seed);
+        % This set the state 
+        set_dynare_random_generator_state(record.InitialSeeds(b).Unifor, record.InitialSeeds(b).Normal);
     catch
-        % if the state set by master is incompatible with the slave, we
+        % If the state set by master is incompatible with the slave, we
         % only reseed 
         set_dynare_seed(options_.DynareRandomStreams.seed+b);
     end
     if (options_.load_mh_file~=0) && (fline(b)>1) && OpenOldFile(b)
-        load([pwd filesep MhDirectoryName filesep ModelName '_mh' int2str(NewFile(b)) ...
-            '_blck' int2str(b) '.mat'])
+        load([BaseName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'])
         x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
         logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
         OpenOldFile(b) = 0;
@@ -152,7 +150,7 @@ for b = fblck:nblck,
         logpo2 = zeros(InitSizeArray(b),1);
     end
     if whoiam
-        prc0=(b-fblck)/(nblck-fblck+1)*(exist('OCTAVE_VERSION') || options_.console_mode);
+        prc0=(b-fblck)/(nblck-fblck+1)*(isoctave || options_.console_mode);
         hh = dyn_waitbar({prc0,whoiam,options_.parallel(ThisMatlab)},['MH (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
     else
         hh = dyn_waitbar(0,['Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
@@ -185,48 +183,17 @@ for b = fblck:nblck,
             logpo2(irun) = ilogpo2(b);
         end
         prtfrc = j/nruns(b);
-%         if exist('OCTAVE_VERSION') || options_.console_mode
-%             if mod(j, 10) == 0
-%                 if exist('OCTAVE_VERSION')
-%                     if (whoiam==0)
-%                         printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
-%                     end
-%                 else
-%                     s0=repmat('\b',1,length(newString));
-%                     newString=sprintf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acceptance rate: %3.f%%', b, nblck, 100 * prtfrc, 100 * isux / j);
-%                     fprintf([s0,'%s'],newString);
-%                 end
-%             end
-%             if mod(j,50)==0 && whoiam
-%                 %             keyboard;
-%                 if (strcmp([options_.parallel(ThisMatlab).MatlabOctavePath], 'octave'))
-%                     waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%',100 * isux / j)];
-%                     fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
-%                 else
-%                     waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%', 100 * isux/j)];
-%                     fMessageStatus((b-fblck)/(nblck-fblck+1)+prtfrc/(nblck-fblck+1),whoiam,waitbarString, '', options_.parallel(ThisMatlab));
-%                 end
-%             end
-%         else
-%             if mod(j, 3)==0 && ~whoiam
-%                 waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
-%             elseif mod(j,50)==0 && whoiam,
-%                 %             keyboard;
-%                 waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)];
-%                 fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
-%             end
-%         end
         if (mod(j, 3)==0 && ~whoiam) || (mod(j,50)==0 && whoiam)
-            dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('acceptation rate %4.3f', isux/j)]);
+            dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('Current acceptance ratio %4.3f', isux/j)]);
         end
         if (irun == InitSizeArray(b)) || (j == nruns(b)) % Now I save the simulations
-            save([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
-            fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
+            save([BaseName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
+            fidlog = fopen([MetropolisFolder '/metropolis.log'],'a');
             fprintf(fidlog,['\n']);
             fprintf(fidlog,['%% Mh' int2str(NewFile(b)) 'Blck' int2str(b) ' (' datestr(now,0) ')\n']);
             fprintf(fidlog,' \n');
             fprintf(fidlog,['  Number of simulations.: ' int2str(length(logpo2)) '\n']);
-            fprintf(fidlog,['  Acceptation rate......: ' num2str(jsux/length(logpo2)) '\n']);
+            fprintf(fidlog,['  Acceptance ratio......: ' num2str(jsux/length(logpo2)) '\n']);
             fprintf(fidlog,['  Posterior mean........:\n']);
             for i=1:length(x2(1,:))
                 fprintf(fidlog,['    params:' int2str(i) ': ' num2str(mean(x2(:,i))) '\n']);
@@ -262,20 +229,10 @@ for b = fblck:nblck,
         j=j+1;
         irun = irun + 1;
     end% End of the simulations for one mh-block.
-    record.AcceptationRates(b) = isux/j;
-%     if exist('OCTAVE_VERSION') || options_.console_mode || whoiam
-%         if exist('OCTAVE_VERSION')
-%             printf('\n');
-%         else
-%             fprintf('\n');
-%         end
-%         diary on;
-%     else %if ~whoiam
-%         close(hh);
-%     end
+    record.AcceptanceRatio(b) = isux/j;
     dyn_waitbar_close(hh);
-    [record.Seeds(b).Unifor, record.Seeds(b).Normal] = get_dynare_random_generator_state();
-    OutputFileName(jloop,:) = {[MhDirectoryName,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
+    [record.LastSeeds(b).Unifor, record.LastSeeds(b).Normal] = get_dynare_random_generator_state();
+    OutputFileName(jloop,:) = {[MetropolisFolder,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
 end% End of the loop over the mh-blocks.
 
 

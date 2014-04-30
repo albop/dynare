@@ -35,7 +35,7 @@ function [ys_, params, info] = rbcii_steadystate2(ys_, exo_, params)
     ys_(5)=params(6)*ys_(1);
     
     % Steady state level of the expected term appearing in the Euler equation
-    ys_(14)=params(1)*(ys_(4)^params(2)*(1-ys_(3))^(1-params(2)))^(1-params(3))/ys_(4)*(1+params(4)*(ys_(2)/ys_(1))^(1-params(5))-params(6));
+    ys_(14)=(ys_(4)^params(2)*(1-ys_(3))^(1-params(2)))^(1-params(3))/ys_(4)*(1+params(4)*(ys_(2)/ys_(1))^(1-params(5))-params(6));
 
     % Steady state level of output in the unconstrained regime (positive investment)
     ys_(6)=ys_(2);

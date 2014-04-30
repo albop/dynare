@@ -73,7 +73,7 @@ oo.dr=set_state_space(oo.dr,M,options);
 [dr,info,M,options,oo] = resol(1,M,options,oo);
 
 if info(1) ~= 0 && info(1) ~= 3 && info(1) ~= 4
-    print_info(info, options.noprint, options);
+    print_info(info, 0, options);
 end
 
 eigenvalues_ = dr.eigval;
@@ -107,7 +107,7 @@ if options.noprint == 0
     if result
         disp('The rank condition is verified.')
     else
-        disp('The rank conditions ISN''T verified!')
+        disp('The rank condition ISN''T verified!')
     end
     skipline()
 end

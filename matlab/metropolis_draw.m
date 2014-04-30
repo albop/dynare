@@ -30,7 +30,10 @@ function [xparams, logpost]=metropolis_draw(init)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global options_ estim_params_ M_
-persistent mh_nblck NumberOfDraws fname FirstLine FirstMhFile MAX_nruns
+persistent mh_nblck NumberOfDraws BaseName FirstLine FirstMhFile MAX_nruns
+
+xparams = 0;
+logpost = 0;
 
 if init
     nvx  = estim_params_.nvx;
@@ -39,9 +42,10 @@ if init
     ncn  = estim_params_.ncn;
     np   = estim_params_.np ;
     npar = nvx+nvn+ncx+ncn+np;
-    MhDirectoryName = CheckPath('metropolis',M_.dname);
-    fname = [ MhDirectoryName '/' M_.fname];
-    load([ fname '_mh_history']);
+    MetropolisFolder = CheckPath('metropolis',M_.dname);
+    FileName = M_.fname;
+    BaseName = [MetropolisFolder filesep FileName];
+    load_last_mh_history_file(MetropolisFolder, FileName);
     FirstMhFile = record.KeepedDraws.FirstMhFile;
     FirstLine = record.KeepedDraws.FirstLine; 
     TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); 
@@ -50,6 +54,18 @@ if init
     NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
     MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
     mh_nblck = options_.mh_nblck;
+    % set sub_draws option if empty
+    if isempty(options_.sub_draws)
+        options_.sub_draws = min(options_.posterior_max_subsample_draws, round(.25*NumberOfDraws));
+    else
+        if options_.sub_draws>NumberOfDraws
+            skipline()
+            disp(['Estimation::mcmc: The value of option sub_draws (' num2str(options_.sub_draws) ') is greater than the number of available draws in the MCMC (' num2str(NumberOfDraws) ')!'])
+            disp('Estimation::mcmc: You can either change the value of sub_draws, reduce the value of mh_drop, or run another mcmc (with the load_mh_file option).')
+            skipline()
+            xparams = 1; % xparams is interpreted as an error flag
+        end
+    end
     return
 end
 
@@ -65,6 +81,6 @@ else
     MhLine = DrawNumber-(MhFilNumber-FirstMhFile-1)*MAX_nruns;
 end
 
-load( [ fname '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2','logpo2');
+load( [ BaseName '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2','logpo2');
 xparams = x2(MhLine,:);
 logpost= logpo2(MhLine);

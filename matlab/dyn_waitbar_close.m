@@ -22,7 +22,7 @@ function dyn_waitbar_close(h)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 global options_
 
-if exist('OCTAVE_VERSION') || options_.console_mode,
+if isoctave || options_.console_mode,
     clear dyn_waitbar;
     diary on,
     fprintf('\n');

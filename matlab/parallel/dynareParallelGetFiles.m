@@ -35,7 +35,7 @@ NamFileInput0=NamFileInput;
 
 for indPC=1:length(Parallel),
     if Parallel(indPC).Local==0,
-        if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), %isunix || (~matlab_ver_less_than('7.4') && ismac),
+        if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem),
             if ~isempty(Parallel(indPC).Port),
                 ssh_token = ['-p ',Parallel(indPC).Port];
             else
@@ -54,7 +54,7 @@ for indPC=1:length(Parallel),
             end
             for jfil=1:size(NamFileInput,1),
 
-                if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of ls under Linux.
+                if isoctave % Patch for peculiar behaviour of ls under Linux.
                     % It is necessary to manage the jolly char '*'!
 
                     FindAst=strfind(NamFileInput{jfil,2},'comp_status_random_walk_metropolis_hastings_core*');

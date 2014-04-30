@@ -59,7 +59,7 @@ if nargout>1
     % Third column   status of the unitary test (0 if the test fails, 1 otherwise)
     % Fourth column  details about the failure (vector of integers)
     % Fifth column   elapsed time in seconds (cpu time).
-    info = cell(nn,4);
+    info = cell(nn,5);
 end
 
 % Perform the tests.
@@ -73,12 +73,19 @@ for i=1:nn
     fprintf(tid,['function [T,t,LOG] = ' FNAME '_test_' int2str(i) '()\n']);
     fprintf(tid,['try\n']);
     for j=b1(i):b2(i)
-        str = file{j};
-        fprintf(tid,[str(4:end) '\n']);
+        str = sprintf('%s \n',file{j}(4:end));
+        str = regexprep(str, '%', '%%');
+        fprintf(tid,str);
     end
     fprintf(tid,['LOG = NaN;\n']);
-    fprintf(tid,['catch exception\n']);
-    fprintf(tid,['LOG = getReport(exception,''extended'');\n']);
+    if isoctave
+        fprintf(tid,'catch\n');
+        fprintf(tid,'exception = lasterror;\n');
+        fprintf(tid, 'LOG = ''%s'';\n','The Log output is not available with Octave!');
+    else
+        fprintf(tid,'catch exception\n');
+        fprintf(tid,['LOG = getReport(exception,''extended'');\n']);
+    end
     fprintf(tid,['T = NaN;\n']);
     fprintf(tid,['t = NaN;\n']);
     fprintf(tid,['end\n']);
@@ -91,7 +98,9 @@ for i=1:nn
         fprintf(['\n'])
         fprintf(['Call to ' FNAME ' test routine n°' int2str(i) ' failed (' datestr(now) ')!\n'])
         fprintf(['\n'])
-        disp(LOG)
+        if ~isoctave
+            disp(LOG)
+        end
         check = 0;
         if nargout>1
             info(i,3) = {0};

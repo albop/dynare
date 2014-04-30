@@ -98,19 +98,13 @@ end
 if isequal(options_.lik_init,1)
     if isempty(options_.qz_criterium)
         options_.qz_criterium = 1-1e-6;
-    elseif options_.qz_criterium>1-eps
-        error(['estimation: option qz_criterium is too large for estimating ' ...
+    elseif options_.qz_criterium > 1-eps
+        error(['Estimation: option qz_criterium is too large for estimating ' ...
                'a stationary model. If your model contains unit roots, use ' ...
                'option diffuse_filter'])
     end
 elseif isempty(options_.qz_criterium)
     options_.qz_criterium = 1+1e-6;
-end
-
-% If the data are prefiltered then there must not be constants in the
-% measurement equation of the DSGE model or in the DSGE-VAR model.
-if isequal(options_.prefilter,1)
-    options_.noconstant = 1;
 end
 
 % Set options related to filtered variables.
@@ -141,13 +135,18 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
     number_of_estimated_parameters = length(xparam1);
     mode_file = load(options_.mode_file);
     if number_of_estimated_parameters>length(mode_file.xparam1)
+        % More estimated parameters than parameters in the mode file.
         skipline()
         disp(['The posterior mode file ' options_.mode_file ' has been generated using another specification of the model or another model!'])
         disp(['Your mode file contains estimates for ' int2str(length(mode_file.xparam1)) ' parameters, while you are attempting to estimate ' int2str(number_of_estimated_parameters) ' parameters:'])
+        md = []; xd = [];
         for i=1:number_of_estimated_parameters
             id = strmatch(deblank(bayestopt_.name(i,:)),mode_file.parameter_names,'exact');
             if isempty(id)
-                disp(['--> Estimated parameter ' bayestopt_.name{i} ' is not present in the loaded mod_file.'])
+                disp(['--> Estimated parameter ' bayestopt_.name{i} ' is not present in the loaded mode file (prior mean will be used, if possible).'])
+            else
+                xd = [xd; i];
+                md = [md; id];
             end
         end
         for i=1:length(mode_file.xparam1)
@@ -156,20 +155,30 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
                 disp(['--> Parameter ' mode_file.parameter_names{i} ' is not estimated according to the current mod file.'])
             end
         end
-        error('Please change the mode_file option or the list of estimated parameters.')
+        if ~options_.mode_compute
+            % The posterior mode is not estimated.
+            error('Please change the mode_file option, the list of estimated parameters or set mode_compute>0.')
+        else
+            % The posterior mode is estimated, the Hessian evaluated at the mode is not needed so we set values for the parameters missing in the mode file using the prior mean. 
+            if ~isempty(xd)
+                xparam1(xd) = mode_file.xparam1(md);
+            else
+                error('Please remove the mode_file option.')
+            end
+        end
     elseif number_of_estimated_parameters<length(mode_file.xparam1)
+        % Less estimated parameters than parameters in the mode file.
         skipline()
         disp(['The posterior mode file ' options_.mode_file ' has been generated using another specification of the model or another model!'])
         disp(['Your mode file contains estimates for ' int2str(length(mode_file.xparam1)) ' parameters, while you are attempting to estimate only ' int2str(number_of_estimated_parameters) ' parameters:'])
-        Id = [];
+        md = []; xd = [];
         for i=1:number_of_estimated_parameters
             id = strmatch(deblank(bayestopt_.name(i,:)),mode_file.parameter_names,'exact');
             if isempty(id)
-                disp(['--> Estimated parameter ' deblank(bayestopt_.name(i,:)) ' is not present in the loaded mode file.'])
-                Id = [];
-                break
+                disp(['--> Estimated parameter ' deblank(bayestopt_.name(i,:)) ' is not present in the loaded mode file (prior mean will be used, if possible).'])
             else
-                Id = [Id; id];
+                xd = [xd; i];
+                md = [md; id];
             end
         end
         for i=1:length(mode_file.xparam1)
@@ -178,59 +187,72 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
                 disp(['--> Parameter ' mode_file.parameter_names{i} ' is not estimated according to the current mod file.'])
             end
         end
-        if isempty(Id)
-            % None of the estimated parameters are present in the mode_file.
-            error('Please change the mode_file option or the list of estimated parameters.')
-        else
-            % If possible, fix the mode_file.
-            if isequal(length(Id),number_of_estimated_parameters)
+        if ~options_.mode_compute
+            % The posterior mode is not estimated. If possible, fix the mode_file.
+            if isequal(length(xd),number_of_estimated_parameters)
                 disp('==> Fix mode file (remove unused parameters).')
-                mode_file.parameter_names = mode_file.parameter_names(Id,:);
-                mode_file.xparam1 = mode_file.xparam1(Id);
+                xparam1 = mode_file.xparam1(md);
                 if isfield(mode_file,'hh')
-                    mode_file.hh = mode_file.hh(Id,Id);
+                    hh = mode_file.hh(md,md);
                 end
+            else
+                error('Please change the mode_file option, the list of estimated parameters or set mode_compute>0.')
+            end
+        else
+            % The posterior mode is estimated, the Hessian evaluated at the mode is not needed so we set values for the parameters missing in the mode file using the prior mean. 
+            if ~isempty(xd)
+                xparam1(xd) = mode_file.xparam1(md);
+            else
+                % None of the estimated parameters are present in the mode_file.
+                error('Please remove the mode_file option.')
             end
         end
     else
         % The number of declared estimated parameters match the number of parameters in the mode file. 
         % Check that the parameters in the mode file and according to the current mod file are identical.
         if isequal(mode_file.parameter_names, bayestopt_.name)
-            % Ok! Nothing to do here.
+            xparam1 = mode_file.xparam1;
+            if isfield(mode_file,'hh')
+                hh = mode_file.hh;
+            end
         else
             skipline()
             disp(['The posterior mode file ' options_.mode_file ' has been generated using another specification of the model or another model!'])
-            % Check if this only an ordering issue.
-            Id = [];
+            % Check if this only an ordering issue or if the missing parameters can be initialized with the prior mean.
+            md = []; xd = [];
             for i=1:number_of_estimated_parameters
-                id = strmatch(deblank(bayestopt_.name(i,:)),mode_file.parameter_names,'exact');
+                id = strmatch(deblank(bayestopt_.name(i,:)), mode_file.parameter_names,'exact');
                 if isempty(id)
                     disp(['--> Estimated parameter ' bayestopt_.name{i} ' is not present in the loaded mode file.'])
-                    Id = [];
-                    break
                 else
-                    Id = [Id; id];
+                    xd = [xd; i];
+                    md = [md; id];
                 end
             end
-            if isempty(Id)
-                % None of the estimated parameters are present in the mode_file.
-                error('Please change the mode_file option or the list of estimated parameters.')
-            else
-                % If possible, fix the mode_file.
-                if isequal(length(Id),number_of_estimated_parameters)
-                    disp('==> Fix mode file (reorder the parameters).')
-                    mode_file.parameter_names = mode_file.parameter_names(Id,:);
-                    mode_file.xparam1 = mode_file.xparam1(Id);
+            if ~options_.mode_compute
+                % The posterior mode is not estimated
+                if isequal(length(xd), number_of_estimated_parameters)
+                    % This is an ordering issue.
+                    xparam1 = mode_file.xparam1(md);
                     if isfield(mode_file,'hh')
-                        mode_file.hh = mode_file.hh(Id,Id);
+                        hh = mode_file.hh(md,md);
                     end
+                else
+                    error('Please change the mode_file option, the list of estimated parameters or set mode_compute>0.')
+                end
+            else
+                % The posterior mode is estimated, the Hessian evaluated at the mode is not needed so we set values for the parameters missing in the mode file using the prior mean. 
+                if ~isempty(xd)
+                    xparam1(xd) = mode_file.xparam1(md);
+                    if isfield(mode_file,'hh')
+                        hh(xd,xd) = mode_file.hh(md,md);
+                    end
+                else
+                    % None of the estimated parameters are present in the mode_file.
+                    error('Please remove the mode_file option.')
                 end
             end
         end
-    end
-    xparam1 = mode_file.xparam1;
-    if isfield(mode_file,'hh')
-        hh = mode_file.hh;
     end
     skipline()
 end
@@ -253,17 +275,8 @@ if ~isempty(estim_params_)
         bounds(:,2) = ub;
     end
     % Test if initial values of the estimated parameters are all between the prior lower and upper bounds.
-    outside_bound_pars=find(xparam1 < bounds(:,1) | xparam1 > bounds(:,2));
-    if ~isempty(outside_bound_pars)
-        for ii=1:length(outside_bound_pars)
-            outside_bound_par_names{ii,1}=get_the_name(ii,0,M_,estim_params_,options_);
-        end
-        disp_string=[outside_bound_par_names{1,:}];
-        for ii=2:size(outside_bound_par_names,1)
-            disp_string=[disp_string,', ',outside_bound_par_names{ii,:}];
-        end
-        error(['Initial value(s) of ', disp_string ,' are outside parameter bounds. Potentially, you should set prior_trunc=0. If you used the mode_file-option, check whether your mode-file is consistent with the priors.'])
-    end
+    check_prior_bounds(xparam1,bounds,M_,estim_params_,options_,bayestopt_)
+
     lb = bounds(:,1);
     ub = bounds(:,2);
     bayestopt_.lb = lb;
@@ -272,7 +285,7 @@ end
 
 if isempty(estim_params_)% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
     if ~options_.smoother
-        error('ESTIMATION: the ''estimated_params'' block is mandatory (unless you are running a smoother)')
+        error('Estimation: the ''estimated_params'' block is mandatory (unless you are running a smoother)')
     end
     xparam1 = [];
     bayestopt_.lb = [];
@@ -512,7 +525,7 @@ dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_o
 
 options_.nobs = dataset_.info.ntobs;
 
-% setting noconstant option
+% setting steadystate_check_flag option
 if options_.diffuse_filter
     steadystate_check_flag = 0;
 else
@@ -532,4 +545,14 @@ if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
     options_.noconstant = 1;
 else
     options_.noconstant = 0;
+    % If the data are prefiltered then there must not be constants in the
+    % measurement equation of the DSGE model or in the DSGE-VAR model.
+    if options_.prefilter
+        skipline()
+        disp('You have specified the option "prefilter" to demean your data but the')
+        disp('steady state of of the observed variables is non zero.')
+        disp('Either change the measurement equations, by centering the observed')
+        disp('variables in the model block, or drop the prefiltering.')
+        error('The option "prefilter" is inconsistent with the non-zero mean measurement equations in the model.')
+    end
 end

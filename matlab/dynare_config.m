@@ -15,7 +15,7 @@ function dynareroot = dynare_config(path_to_dynare,verbose)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2013 Dynare Team
+% Copyright (C) 2001-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -67,7 +67,7 @@ addpath([dynareroot '/reports/'])
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions
 
-if ~exist('OCTAVE_VERSION')
+if ~isoctave
     % Replacements for rows(), columns() and issquare() (inexistent under MATLAB)
     addpath([dynareroot '/missing/rows_columns'])
     addpath([dynareroot '/missing/issquare'])
@@ -80,65 +80,49 @@ if ~exist('OCTAVE_VERSION')
 end
 
 % ordeig() doesn't exist in Octave
-if exist('OCTAVE_VERSION')
+if isoctave
     addpath([dynareroot '/missing/ordeig'])
 end
 
-% bsxfun is missing in old versions of MATLAB (and exists in Octave)
-if ~exist('OCTAVE_VERSION') && matlab_ver_less_than('7.4')
-    addpath([dynareroot '/missing/bsxfun'])
-end
-
-% ilu is missing in old versions of MATLAB and in Octave
-if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.4')
+% ilu is missing in Octave
+if isoctave
     addpath([dynareroot '/missing/ilu'])
 end
 
-% strjoin is missing in older versions of MATLAB and in Octave
-if exist('OCTAVE_VERSION') || matlab_ver_less_than('8.1')
+% strjoin is missing in older versions of MATLAB and in Octave < 3.8
+if (isoctave && octave_ver_less_than('3.8')) || ...
+        (~isoctave && matlab_ver_less_than('8.1'))
     addpath([dynareroot '/missing/strjoin'])
 end
 
 % nanmean is in Octave Forge Statistics package and in MATLAB Statistics
 % toolbox
-if (exist('OCTAVE_VERSION') && ~user_has_octave_forge_package('statistics')) ...
-    || (~exist('OCTAVE_VERSION') && ~user_has_matlab_license('statistics_toolbox'))
+if (isoctave && ~user_has_octave_forge_package('statistics')) ...
+    || (~isoctave && ~user_has_matlab_license('statistics_toolbox'))
     addpath([dynareroot '/missing/nanmean'])
 end
 
 % Add path to MEX files
-if exist('OCTAVE_VERSION')
+if isoctave
     addpath([dynareroot '../mex/octave/']);
 else
     % Add win32 specific paths for Dynare Windows package
     if strcmp(computer, 'PCWIN')
-        if matlab_ver_less_than('7.5')
-            mexpath = [dynareroot '../mex/matlab/win32-7.3-7.4'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        else
-            mexpath = [dynareroot '../mex/matlab/win32-7.5-8.1'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
+        mexpath = [dynareroot '../mex/matlab/win32-7.5-8.3'];
+        if exist(mexpath, 'dir')
+            addpath(mexpath)
         end
     end
 
     % Add win64 specific paths for Dynare Windows package
     if strcmp(computer, 'PCWIN64')
-        if matlab_ver_less_than('7.5')
-            mexpath = [dynareroot '../mex/matlab/win64-7.3-7.4'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        elseif matlab_ver_less_than('7.8')
+        if matlab_ver_less_than('7.8')
             mexpath = [dynareroot '../mex/matlab/win64-7.5-7.7'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
         else
-            mexpath = [dynareroot '../mex/matlab/win64-7.8-8.1'];
+            mexpath = [dynareroot '../mex/matlab/win64-7.8-8.3'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
@@ -146,16 +130,9 @@ else
     end
 
     if strcmp(computer, 'MACI')
-        if matlab_ver_less_than('7.5')
-            mexpath = [dynareroot '../mex/matlab/osx32-7.4'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        else
-            mexpath = [dynareroot '../mex/matlab/osx32-7.5-7.11'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
+        mexpath = [dynareroot '../mex/matlab/osx32-7.5-7.11'];
+        if exist(mexpath, 'dir')
+            addpath(mexpath)
         end
     end
 
@@ -168,23 +145,6 @@ else
 
     % Add generic MATLAB path (with higher priority than the previous ones)
     addpath([dynareroot '../mex/matlab/']);
-end
-
-% matlab2tikz
-if strncmp(computer, 'GLNX', 4) || ~isempty(regexpi(computer, '.*linux.*', 'once'))
-    if exist('matlab2tikz.m') == 0 && exist('/usr/share/matlab2tikz/matlab2tikz.m') == 2
-        addpath('/usr/share/matlab2tikz');
-    end
-elseif strncmp(computer, 'MACI', 4) || ~isempty(regexpi(computer, '.*apple.*', 'once'))
-    if exist([dynareroot '../contrib/matlab2tikz/matlab2tikz.m']) == 2
-        addpath([dynareroot '../contrib/matlab2tikz']);
-    elseif exist('/usr/local/share/matlab2tikz/matlab2tikz.m') == 2
-        addpath('/usr/local/share/matlab2tikz');
-    end
-else
-    if exist([dynareroot '../contrib/matlab2tikz/matlab2tikz.m']) == 2
-        addpath([dynareroot '../contrib/matlab2tikz']);
-    end
 end
 
 %% Set mex routine names

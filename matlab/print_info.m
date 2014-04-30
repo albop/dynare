@@ -36,7 +36,8 @@ if ~noprint
       case 2
         error(['The generalized Schur (QZ) decomposition failed. ' ...
                'For more information, see the documentation for Lapack function dgges: info=' ...
-               int2str(info(2)) ', n=' int2str(info(3))])
+               int2str(info(2)) ', n=' int2str(info(3)) ...
+               '. You can also run model_diagnostics to get more information on what may cause this problem.'])
       case 3
         error(['Blanchard Kahn conditions are not satisfied: no stable' ...
                ' equilibrium'])
@@ -61,7 +62,7 @@ if ~noprint
           error(['The Jacobian contains NaNs because the following parameters are NaN: '...
               disp_string])
         else
-          error(['The Jacobian contains NaNs'])
+          error(['The Jacobian contains NaNs. For more information, use options_.debug.'])
         end
       case 9
         error(['k_order_pert was unable to compute the solution']) 
@@ -105,14 +106,18 @@ if ~noprint
         error('The model violates one (many) endogenous prior restriction(s)')
       case 51
         error('You are estimating a DSGE-VAR model, but the value of the dsge prior weight is too low!')
-      case 52 %DsgeVarLikelihood
-        error('');
+      case 52 %dsge_var_likelihood
+        error('You are estimating a DSGE-VAR model, but the implied covariance matrix of the VAR''s innovations is not positive definite!');
       case 61 %Discretionary policy
         error(['Discretionary policy: maximum number of iterations has been reached. Procedure failed. ']);
       case 62
         error(['Discretionary policy: some eigenvalues greater than options_.qz_criterium. Model potentially unstable.']);
       case 63
         error(['Discretionary policy: NaN elements are present in the solution. Procedure failed.']);
+      case 71
+        error(['Calibrated covariance of the structural errors implies correlation larger than  +-1.']);
+      case 72
+        error(['Calibrated covariance of the measurement errors implies correlation larger than  +-1.']);
         % Aim Code Conversions by convertAimCodeToInfo.m
       case 102
         error('Aim: roots not correctly computed by real_schur');

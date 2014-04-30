@@ -41,7 +41,7 @@ options_.ms.create_init = 1;
 options_.ms.coefficients_prior_hyperparameters = [1.0 1.0 0.1 1.2 1.0 1.0];
 options_.ms.freq = 4;
 options_.ms.initial_subperiod = 1;
-options_.ms.final_subperiod=4;
+options_.ms.final_subperiod = '';
 options_.ms.nlags = 1;
 options_.ms.cross_restrictions = 0;
 options_.ms.contemp_reduced_form = 0;
@@ -73,6 +73,7 @@ options_.ms.mh_replic = 10000; % default differs from Dan's code
 options_.ms.thinning_factor = 1;
 options_.ms.drop = 0.1*options_.ms.mh_replic*options_.ms.thinning_factor;
 options_.ms.adaptive_mh_draws = 30000;
+options_.ms.save_draws = 0;
 % mdd
 options_.ms.proposal_draws = 100000;
 options_.ms.use_mean_center = 0;

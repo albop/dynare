@@ -125,7 +125,7 @@ for i=1:maxit
     record = random_walk_metropolis_hastings(TargetFun,ProposalFun, ...
                                              xparam1,vv, ...
                                              mh_bounds,varargin{:});
-    AvRates(i) = mean(record.AcceptationRates);    
+    AvRates(i) = mean(record.AcceptanceRatio);
 
     if i < test_runs
         i_kept_runs = 1:i;
@@ -169,5 +169,5 @@ end
 error('AMH scale tuning: tuning didn''t converge')
 
 function y = total_draws(M_)
-load([M_.fname '/metropolis/' M_.fname '_mh_history'])
+load_last_mh_history_file([M_.dname filesep 'metropolis'],M_.fname);
 y = sum(record.MhDraws(:,1));

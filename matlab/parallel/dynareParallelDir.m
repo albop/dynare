@@ -29,14 +29,14 @@ function dirlist = dynareParallelDir(filename,PRCDir,Parallel)
 
 dirlist=[];
 for indPC=1:length(Parallel),
-    if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), %isunix || (~matlab_ver_less_than('7.4') && ismac),
+    if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem),
         if Parallel(indPC).Local==0,
             if ~isempty(Parallel(indPC).Port),
                 ssh_token = ['-p ',Parallel(indPC).Port];
             else
                 ssh_token = '';
             end
-            if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of ssh-ls under Linux.
+            if isoctave % Patch for peculiar behaviour of ssh-ls under Linux.
                 % It is necessary to capture the ls warning message.
                 % To do it under the ssh protocol it is necessary to redirect the ls message in a text file.
                 % The file is 'OctaveStandardOutputMessage.txt' and it is
@@ -56,7 +56,7 @@ for indPC=1:length(Parallel),
             end
         else
 
-            if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of ls under Linux.
+            if isoctave % Patch for peculiar behaviour of ls under Linux.
                 
                 % It is necessary to capture the ls warning message and properly manage the jolly char '*'!
                 [check ax]=system(['ls ' ,filename, ' 2> OctaveStandardOutputMessage.txt']);
@@ -74,7 +74,7 @@ for indPC=1:length(Parallel),
 
         end
     else
-        if exist('OCTAVE_VERSION'),     % Patch for peculiar behaviour of ls under Windows.
+        if isoctave     % Patch for peculiar behaviour of ls under Windows.
             if Parallel(indPC).Local==0,
                 ax0=dir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',filename]);
             else

@@ -1,36 +1,20 @@
 function [freq,init,data,varlist,tex] = load_m_file_data(file)
 
-%@info:
-%! @deftypefn {Function File} {@var{freq}, @var{init}, @var{data}, @var{varlist} =} load_m_file_data (@var{file})
-%! @anchor{load_m_file_data}
-%! @sp 1
-%! Loads data in a matlab/octave m-file.
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item file
-%! string, name of the m file (matlab/octave script).
-%! @end table
-%! @sp 2
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item freq
-%! Scalar integer (1, 4, 12, 52).
-%! @item init
-%! dynDate object, initial date.
-%! @item data
-%! Matrix of doubles, data.
-%! @item varlist
-%! Cell of strings (names of the variables in the database).
-%! @end table
-%! @sp 2
-%! @strong{Remarks}
-%! @sp 1
-%! The frequency and initial date can be specified with variables FREQ__ and INIT__ in the matlab/octave script. FREQ__ must be a scalar integer and INIT__ a string like '1938M11', '1945Q3', '1973W3' or '2009'. If these variables are not specified default values for freq and init are 1 and dynDate(1).
-%! @end deftypefn
-%@eod:
+% Loads data in a matlab/octave script.
+%
+% INPUTS 
+%  o file         string, name of the matlab/octave script (with path)
+%
+% OUTPUTS 
+%  o freq        integer scalar equal to 1, 4, 12 or 52 (for annual, quaterly, monthly or weekly frequencies).
+%  o init        dates object, initial date in the dataset.
+%  o data        matrix of doubles, the data.
+%  o varlist     cell of strings, names of the variables.
+%
+% REMARKS 
+% The frequency and initial date can be specified with variables FREQ__ and INIT__ in the matlab/octave script. FREQ__ must 
+% be a scalar integer and INIT__ a string like '1938M11', '1945Q3', '1973W3' or '2009A'. If these variables are not specified 
+% default values for freq and init are 1 and dates(1,1).
 
 % Copyright (C) 2012-2013 Dynare Team
 %
@@ -49,22 +33,33 @@ function [freq,init,data,varlist,tex] = load_m_file_data(file)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-[basename, ext] = strtok(file,'.');
-    
-run(basename);
+if isoctave
+    run(file);
+else
+    [basename, ext] = strtok(file,'.');
+    run(basename);
+end
 
 if exist('INIT__','var')
-    init = dynDate(INIT__);
-    clear('INIT__')
+    if isdate(INIT__)
+        init = dates(INIT__);
+        clear('INIT__')
+    else
+        error('load_m_file_data: INIT__ cannot be interpreted as a date.')
+    end
 else
-    init = dynDate(1);
+    init = dates(1,1); % Default initial date is year one.
 end
 
 if exist('FREQ__','var')
     freq = FREQ__;
     clear('FREQ__');
 else
-    freq = 1;
+    freq = init.freq;
+end
+
+if ~isequal(freq,init.freq)
+    error('load_m_file_data: INIT__ and FREQ__ are not consistent!')
 end
 
 if exist('NAMES__','var')
@@ -144,7 +139,7 @@ end
 %$
 %$ % Check the results.
 %$ t(2) = dyn_assert(freq,4);
-%$ t(3) = dyn_assert(isa(init,'dynDate'),1);
+%$ t(3) = dyn_assert(isa(init,'dates'),1);
 %$ t(4) = dyn_assert(init.freq,4);
 %$ t(5) = dyn_assert(init.time,[1938 4]);
 %$ t(6) = dyn_assert(varlist,{'azert';'yuiop'});

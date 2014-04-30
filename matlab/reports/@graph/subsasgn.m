@@ -1,7 +1,7 @@
 function B = subsasgn(A, S, V)
 % function B = subsasgn(A, S, V)
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,7 +32,7 @@ switch S.type
     case '()'
         index = S.subs{:};
         assert(isnumeric(index));
-        B.seriesElements(index) = V;
+        B.series{index} = V;
     case '.'
         switch S.subs
             case fieldnames(A)
@@ -40,6 +40,9 @@ switch S.type
             otherwise
                 error(['@graph.subsasgn: field ' S.subs 'does not exist']);
         end
+    case '{}'
+        assert(isint(S.subs{1}));
+        B{S.subs{1}} = V;
     otherwise
         error('@graph.subsasgn: syntax error');
 end

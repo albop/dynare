@@ -1,4 +1,4 @@
-function record=independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
+function independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
 
 % Independent Metropolis-Hastings algorithm. 
 % 
@@ -10,9 +10,6 @@ function record=independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv
 %   o mh_bounds  [double]   (p*2) matrix defining lower and upper bounds for the parameters. 
 %   o varargin              list of argument following mh_bounds
 %  
-% OUTPUTS 
-%   o record     [struct]   structure describing the iterations
-%
 % ALGORITHM 
 %   Metropolis-Hastings.       
 %
@@ -40,16 +37,17 @@ function record=independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ bayestopt_ estim_params_ oo_
-%%%%
-%%%% Initialization of the independent metropolis-hastings chains.
-%%%%
-[ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
+
+% Initialization of the independent metropolis-hastings chains.
+
+[ ix2, ilogpo2, ModelName, MetropolisFolder, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
     metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds, varargin{:});
 
-xparam1 = transpose(xparam1);      
+xparam1 = transpose(xparam1);
 InitSizeArray = min([repmat(MAX_nruns,nblck,1) fline+nruns-1],[],2);
 
-load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
+% Load last mh history file
+load_last_mh_history_file(MetropolisFolder, ModelName);
 
 %The mandatory variables for local/remote parallel computing are stored in localVars struct.
 
@@ -83,7 +81,6 @@ else
                         'bayestopt_', bayestopt_, ...
                         'estim_params_', estim_params_, ...
                         'oo_', oo_);
-    
     % which files have to be copied to run remotely
     NamFileInput(1,:) = {'',[ModelName '_static.m']};
     NamFileInput(2,:) = {'',[ModelName '_dynamic.m']};
@@ -91,35 +88,32 @@ else
         NamFileInput(length(NamFileInput)+1,:)={'',[ModelName '_steadystate.m']};
     end
     if (options_.load_mh_file~=0) && any(fline>1) ,
-        NamFileInput(length(NamFileInput)+1,:)={[M_.dname '/metropolis/'],[ModelName '_mh' int2str(NewFile(1)) '_blck*.mat']};
+        NamFileInput(length(NamFileInput)+1,:)={[MetropolisFolder filesesep],[ModelName '_mh' int2str(NewFile(1)) '_blck*.mat']};
     end
     if exist([ModelName '_optimal_mh_scale_parameter.mat'])
         NamFileInput(length(NamFileInput)+1,:)={'',[ModelName '_optimal_mh_scale_parameter.mat']};
     end
-    
     % from where to get back results
     %     NamFileOutput(1,:) = {[M_.dname,'/metropolis/'],'*.*'};
-    
     [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'independent_metropolis_hastings_core', localVars, globalVars, options_.parallel_info);
     for j=1:totCPU,
         offset = sum(nBlockPerCPU(1:j-1))+fblck-1;
         record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)));
         record.LastParameters(offset+1:sum(nBlockPerCPU(1:j)),:)=fout(j).record.LastParameters(offset+1:sum(nBlockPerCPU(1:j)),:);
-        record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)));
-        record.Seeds(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.Seeds(offset+1:sum(nBlockPerCPU(1:j)));
+        record.AcceptanceRatio(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)));
+        record.LastSeeds(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastSeeds(offset+1:sum(nBlockPerCPU(1:j)));
     end
-
 end
 
 irun = fout(1).irun;
 NewFile = fout(1).NewFile;
 
-% record.Seeds.Normal = randn('state');
-% record.Seeds.Unifor = rand('state');
-save([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
-disp(['MH: Number of mh files                   : ' int2str(NewFile(1)) ' per block.'])
-disp(['MH: Total number of generated files      : ' int2str(NewFile(1)*nblck) '.'])
-disp(['MH: Total number of iterations           : ' int2str((NewFile(1)-1)*MAX_nruns+irun-1) '.'])
-disp('MH: average acceptation rate per chain   : ')
-disp(record.AcceptationRates);
+update_last_mh_history_file(MetropolisFolder, ModelName, record);
+
+skipline()
+disp(['Estimation::mcmc: Number of mh files                   : ' int2str(NewFile(1)) ' per block.'])
+disp(['Estimation::mcmc: Total number of generated files      : ' int2str(NewFile(1)*nblck) '.'])
+disp(['Estimation::mcmc: Total number of iterations           : ' int2str((NewFile(1)-1)*MAX_nruns+irun-1) '.'])
+disp('Estimation::mcmc: Current acceptance ratio per chain   : ')
+disp(record.AcceptanceRatio);
 skipline()

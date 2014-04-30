@@ -1,11 +1,22 @@
-function osr1(i_params,i_var,weights)
+function osr_res = osr1(i_params,i_var,weights)
 % Compute the Optimal Simple Rules
 % INPUTS
 %   i_params                  vector           index of optimizing parameters in M_.params
-%   i_var                     vector           variables indices
+%   i_var                     vector           variables indices in declaration order
 %   weights                   vector           weights in the OSRs
 %
-% Copyright (C) 2005-2013 Dynare Team
+% OUTPUTS
+%   osr_res:    [structure] results structure containing:
+%    - objective_function [scalar double]   value of the objective
+%                                               function at the optimum
+%    - optim_params       [structure]       parameter values at the optimum 
+% 
+% Algorithm:
+% 
+%   Uses Newton-type optimizer csminwel to directly solve quadratic
+%   osr-problem
+% 
+% Copyright (C) 2005-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,7 +51,15 @@ if ~ M_.lead_lag_incidence(M_.maximum_lag+1,:) > 0
 end
 
 if M_.maximum_lead == 0
-    error ('Backward or static model: no point in using OSR') ;
+    error ('OSR: Backward or static model: no point in using OSR') ;
+end
+
+if any(any(isinf(weights)))
+    error ('OSR: At least one of the optim_weights is infinite.') ;
+end
+
+if any(isnan(M_.params(i_params)))
+    error ('OSR: At least one of the initial parameter values for osr_params is NaN') ;
 end
 
 exe =zeros(M_.exo_nbr,1);
@@ -50,6 +69,8 @@ oo_.dr = set_state_space(oo_.dr,M_,options_);
 
 np = size(i_params,1);
 t0 = M_.params(i_params);
+
+
 inv_order_var = oo_.dr.inv_order_var;
 
 H0 = 1e-4*eye(np);
@@ -64,18 +85,25 @@ if info~=0
 else
    fprintf('\nOSR: Initial value of the objective function: %g \n\n',loss);
 end
+if isinf(loss)
+   fprintf('\nOSR: The initial value of the objective function is infinite.\n');
+   fprintf('\nOSR: Check whether the unconditional variance of a target variable is infinite\n');
+   fprintf('\nOSR: due to the presence of a unit root.\n');
+   error('OSR: Initial likelihood is infinite')
+end
 
 %%do actual optimization
 [f,p]=csminwel1('osr_obj',t0,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,i_params,...
                 inv_order_var(i_var),weights(i_var,i_var));
-oo_.osr.objective_function = f;
+osr_res.objective_function = f;
+for i=1:length(i_params)
+    osr_res.optim_params.(deblank(M_.param_names(i_params(i),:))) = p(i);
+end
 
 %  options = optimset('fminunc');
 %  options = optimset('display','iter');
 %  [p,f]=fminunc(@osr_obj,t0,options,i_params,...
 %               inv_order_var(i_var),weights(i_var,i_var));
-
-
 
 skipline()
 disp('OPTIMAL VALUE OF THE PARAMETERS:')
@@ -86,5 +114,3 @@ end
 disp(sprintf('Objective function : %16.6g\n',f));
 skipline()
 [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
-
-% 05/10/03 MJ modified to work with osr.m and give full report

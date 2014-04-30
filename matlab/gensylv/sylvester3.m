@@ -35,7 +35,7 @@ if m == 1
     return;
 end
 [u,t]=schur(c);
-if exist('OCTAVE_VERSION')
+if isoctave
     [aa,bb,qq,zz]=qz(full(a),full(b));
     for j=1:p,
         if octave_ver_less_than('3.4.0')

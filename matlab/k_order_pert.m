@@ -97,11 +97,10 @@ else
     dr.ghx = dr.g_1(:,1:nspred);
     dr.ghu = dr.g_1(:,nspred+1:end);
 
-    if options.loglinear == 1
+    if options.loglinear
         k = find(dr.kstate(:,2) <= M.maximum_endo_lag+1);
         klag = dr.kstate(k,[1 2]);
         k1 = dr.order_var;
-    
         dr.ghx = repmat(1./dr.ys(k1),1,size(dr.ghx,2)).*dr.ghx.* ...
                  repmat(dr.ys(k1(klag(:,1)))',size(dr.ghx,1),1);
         dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;

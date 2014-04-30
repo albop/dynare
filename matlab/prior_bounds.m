@@ -95,7 +95,7 @@ for i=1:length(p6)
                 bounds(i,2) = gaminv(1-prior_trunc,p6(i),p7(i))+p3(i);
             catch
                 % Workaround for ticket #161
-                if exist('OCTAVE_VERSION')
+                if isoctave
                     error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt.name{i} ', or use another shape'])
                 else
                     rethrow(lasterror)
@@ -121,7 +121,7 @@ for i=1:length(p6)
                                             2/p6(i)))+p3(i);
             catch
                 % Workaround for ticket #161
-                if exist('OCTAVE_VERSION')
+                if isoctave
                     error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt.name{i} ', or use another shape'])
                 else
                     rethrow(lasterror)
@@ -146,7 +146,7 @@ for i=1:length(p6)
                 bounds(i,2) = 1/gaminv(prior_trunc, p7(i)/2, 2/p6(i))+ p3(i);
             catch
                 % Workaround for ticket #161
-                if exist('OCTAVE_VERSION')
+                if isoctave
                     error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt.name{i} ', or use another shape'])
                 else
                     rethrow(lasterror)

@@ -11,6 +11,7 @@
 *.dat
 *.prn
 *_simul
+*-macroexp.mod
 
 wsOct
 /run_test_octave_output.txt
@@ -28,6 +29,11 @@ wsOct
 !/run_test.m
 !/run_test_matlab.m
 !/run_test_octave.m
+!/run_reporting_test_matlab.m
+!/run_reporting_test_octave.m
+!/run_block_byte_tests_matlab.m
+!/run_block_byte_tests_octave.m
+!/run_unitary_tests.m
 !/test.m
 !/AIM/data_ca1.m
 !/AIM/fs2000_b1L1L_AIM_steadystate.m
@@ -76,3 +82,4 @@ wsOct
 !/practicing/dataHST.mat
 !/practicing/datasaver.m
 !/recursive/data_ca1.m
+!/smoother2histval/fsdat_simul.m

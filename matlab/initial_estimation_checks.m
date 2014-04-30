@@ -3,9 +3,14 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 % Checks data (complex values, ML evaluation, initial values, BK conditions,..)
 %
 % INPUTS
-%    xparam1:          vector of parameters to be estimated
-%    gend:             scalar specifying the number of observations
-%    data:             matrix of data
+%   objective_function  [function handle] of the objective function
+%   xparam1:            [vector] of parameters to be estimated
+%   DynareDataset:      [structure] storing the dataset information
+%   Model:              [structure] decribing the model
+%   EstimatedParameters [structure] characterizing parameters to be estimated
+%   DynareOptions       [structure] describing the options
+%   BayesInfo           [structure] describing the priors
+%   DynareResults       [structure] storing the results
 %
 % OUTPUTS
 %    DynareResults     structure of temporary results
@@ -13,7 +18,7 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -41,6 +46,29 @@ end
 % check if steady state solves static model (except if diffuse_filter == 1)
 [DynareResults.steady_state] = evaluate_steady_state(DynareResults.steady_state,Model,DynareOptions,DynareResults,DynareOptions.diffuse_filter==0);
 
+if any(BayesInfo.pshape) % if Bayesian estimation
+    nvx=EstimatedParameters.nvx;
+    if nvx && any(BayesInfo.p3(1:nvx)<0) 
+        warning('Your prior allows for negative standard deviations for structural shocks. Due to working with variances, Dynare will be able to continue, but it is recommended to change your prior.')
+    end
+    offset=nvx;
+    nvn=EstimatedParameters.nvn;
+    if nvn && any(BayesInfo.p3(1+offset:offset+nvn)<0) 
+        warning('Your prior allows for negative standard deviations for measurement error. Due to working with variances, Dynare will be able to continue, but it is recommended to change your prior.')
+    end
+    offset = nvx+nvn;
+    ncx=EstimatedParameters.ncx; 
+    if ncx && (any(BayesInfo.p3(1+offset:offset+ncx)<-1) || any(BayesInfo.p4(1+offset:offset+ncx)>1)) 
+        warning('Your prior allows for correlations between measurement errors larger than +-1 and will not integrate to 1 due to truncation. Please change your prior')
+    end
+    offset = nvx+nvn+ncx;
+    ncn=EstimatedParameters.ncn; 
+    if ncn && (any(BayesInfo.p3(1+offset:offset+ncn)<-1) || any(BayesInfo.p4(1+offset:offset+ncn)>1)) 
+        warning('Your prior allows for correlations between structural shocks larger than +-1 and will not integrate to 1 due to truncation. Please change your prior')
+    end
+end
+
+    
 % Evaluate the likelihood.
 ana_deriv = DynareOptions.analytic_derivation;
 DynareOptions.analytic_derivation=0;

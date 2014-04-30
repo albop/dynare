@@ -195,12 +195,12 @@ for b=fpar:B
         if horizon
             yyyy = alphahat(iendo,i_last_obs);
             yf = forcst2a(yyyy,dr,zeros(horizon,exo_nbr));
-            if options_.prefilter == 1
+            if options_.prefilter
                 yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
                                                  horizon+maxlag,1);
             end
             yf(:,IdObs) = yf(:,IdObs)+(gend+[1-maxlag:horizon]')*trend_coeff';
-            if options_.loglinear == 1
+            if options_.loglinear
                 yf = yf+repmat(log(SteadyState'),horizon+maxlag,1);
             else
                 yf = yf+repmat(SteadyState',horizon+maxlag,1);
@@ -212,7 +212,7 @@ for b=fpar:B
             end
             yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-maxlag:horizon]')* ...
                                                    trend_coeff',[1,1,1]);
-            if options_.loglinear == 1
+            if options_.loglinear
                 yf1 = yf1 + repmat(log(SteadyState'),[horizon+maxlag,1,1]);
             else
                 yf1 = yf1 + repmat(SteadyState',[horizon+maxlag,1,1]);

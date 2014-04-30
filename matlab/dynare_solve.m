@@ -46,20 +46,9 @@ if jacobian_flag
         [infrow,infcol]=find(isinf(fjac) | isnan(fjac));
         M=evalin('base','M_'); %get variable names from workspace
         fprintf('\nSTEADY:  The Jacobian contains Inf or NaN. The problem arises from: \n\n')
-        for ii=1:length(infrow)
-            if infcol(ii)<=M.orig_endo_nbr
-                fprintf('STEADY:  Derivative of Equation %d with respect to Variable %s  (initial value of %s: %g) \n',infrow(ii),deblank(M.endo_names(infcol(ii),:)),deblank(M.endo_names(infcol(ii),:)),x(infcol(ii)))
-            else %auxiliary vars
-                orig_var_index=M.aux_vars(1,infcol(ii)-M.orig_endo_nbr).orig_index;
-                fprintf('STEADY:  Derivative of Equation %d with respect to Variable %s  (initial value of %s: %g) \n',infrow(ii),deblank(M.endo_names(orig_var_index,:)),deblank(M.endo_names(orig_var_index,:)),x(infcol(ii)))            
-            end
-        end
-        fprintf('\nSTEADY:  The problem most often occurs, because a variable with\n')
-        fprintf('STEADY:  exponent smaller than 1 has been initialized to 0. Taking the derivative\n')
-        fprintf('STEADY:  and evaluating it at the steady state then results in a division by 0.\n')
+        display_problematic_vars_Jacobian(infrow,infcol,M,x,'static','STEADY: ')
         error('An element of the Jacobian is not finite or NaN') 
     end
-
 else
     fvec = feval(func,x,varargin{:});
     fjac = zeros(nn,nn) ;
@@ -84,7 +73,7 @@ if max(abs(fvec)) < tolf
 end
 
 if options_.solve_algo == 0
-    if ~exist('OCTAVE_VERSION')
+    if ~isoctave
         if ~user_has_matlab_license('optimization_toolbox')
             error('You can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
         end
@@ -99,7 +88,7 @@ if options_.solve_algo == 0
     else
         options.Jacobian = 'off';
     end
-    if ~exist('OCTAVE_VERSION')
+    if ~isoctave
         [x,fval,exitval,output] = fsolve(func,x,options,varargin{:});
     else
         % Under Octave, use a wrapper, since fsolve() does not have a 4th arg
@@ -120,10 +109,17 @@ if options_.solve_algo == 0
         info = 1;
     end
 elseif options_.solve_algo == 1
-    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,1,options_.gstep, ...
+    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,options_.gstep, ...
                     tolf,options_.solve_tolx, ...
-                    options_.solve_maxit,options_.debug,varargin{:});
+                    options_.steady.maxit,options_.debug,varargin{:});
 elseif options_.solve_algo == 2 || options_.solve_algo == 4
+
+    if options_.solve_algo == 2
+        solver = @solve1;
+    else
+        solver = @trust_region;
+    end
+
     if ~jacobian_flag
         fjac = zeros(nn,nn) ;
         dh = max(abs(x),options_.gstep(1)*ones(nn,1))*eps^(1/3);
@@ -140,26 +136,23 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
         disp(['DYNARE_SOLVE (solve_algo=2|4): number of blocks = ' num2str(length(r))]);
     end
 
-    % Activate bad conditioning flag for solve_algo = 2, but not for solve_algo = 4
-    bad_cond_flag = (options_.solve_algo == 2);
-    
     for i=length(r)-1:-1:1
         if options_.debug
             disp(['DYNARE_SOLVE (solve_algo=2|4): solving block ' num2str(i) ', of size ' num2str(r(i+1)-r(i)) ]);
         end
-        [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, ...
-                        bad_cond_flag, options_.gstep, ...
+        [x,info]=solver(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, ...
+                        options_.gstep, ...
                         tolf,options_.solve_tolx, ...
-                        options_.solve_maxit,options_.debug,varargin{:});
+                        options_.steady.maxit,options_.debug,varargin{:});
         if info
             return
         end
     end
     fvec = feval(func,x,varargin{:});
     if max(abs(fvec)) > tolf
-        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag, bad_cond_flag, ...
+        [x,info]=solver(func,x,1:nn,1:nn,jacobian_flag, ...
                         options_.gstep, tolf,options_.solve_tolx, ...
-                        options_.solve_maxit,options_.debug,varargin{:});
+                        options_.steady.maxit,options_.debug,varargin{:});
     end
 elseif options_.solve_algo == 3
     if jacobian_flag

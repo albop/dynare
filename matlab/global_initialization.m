@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2013 Dynare Team
+% Copyright (C) 2003-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,7 +28,7 @@ function global_initialization()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_  ex_det0_
+global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_
 
 estim_params_ = [];
 bayestopt_ = [];
@@ -40,7 +40,6 @@ options_.rplottype = 0;
 options_.smpl = 0;
 options_.dynatol.f = 1e-5;
 options_.dynatol.x = 1e-5;
-options_.maxit_ = 10;
 options_.slowc = 1;
 options_.timing = 0;
 options_.gstep = ones(2,1);
@@ -56,7 +55,10 @@ options_.qz_zero_threshold = 1e-6;
 options_.lyapunov_complex_threshold = 1e-15;
 options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);
-options_.solve_maxit = 500;
+
+options_.dp.maxit = 3000;
+options_.steady.maxit = 10;
+options_.simul.maxit = 10;
 
 options_.mode_check.status = 0;
 options_.mode_check.neighbourhood_size = .5;
@@ -106,6 +108,7 @@ gmhmaxlik.iterations = 3;
 gmhmaxlik.number = 20000;
 gmhmaxlik.nclimb = 200000;
 gmhmaxlik.nscale = 200000;
+gmhmaxlik.target = 1/3; % Target for the acceptance rate.
 options_.gmhmaxlik = gmhmaxlik;
 
 % Request user input.
@@ -122,15 +125,13 @@ options_.nograph = 0;
 options_.XTick = [];
 options_.XTickLabel = [];
 options_.console_mode = 0;
-if exist('OCTAVE_VERSION')
+if isoctave
     if sum(get(0,'screensize'))==4
         options_.console_mode = 1;
         options_.nodisplay = 1;
     end
 else
-    if isunix && (~usejava('jvm') || ...
-            ((matlab_ver_less_than('7.5') && sum(get(0,'ScreenSize'))==4) || ...
-            (~matlab_ver_less_than('7.5') && ~feature('ShowFigureWindows'))))
+    if isunix && (~usejava('jvm') || ~feature('ShowFigureWindows'))
         options_.console_mode = 1;
         options_.nodisplay = 1;
     end
@@ -138,6 +139,7 @@ end
 
 % IRFs & other stoch_simul output
 options_.irf = 40;
+options_.impulse_responses.plot_threshold=1e-10;
 options_.relative_irf = 0;
 options_.ar = 5;
 options_.hp_filter = 0;
@@ -259,6 +261,8 @@ options_.xls_sheet = 1; % Octave does not support the empty string, rather use f
 options_.xls_range = '';
 
 % Prior draws
+options_.prior_draws = 10000;
+
 options_.forecast = 0;
 
 % Model
@@ -268,11 +272,13 @@ options_.linear = 0;
 options_.stack_solve_algo = 0;
 options_.markowitz = 0.5;
 options_.minimal_solving_periods = 1;
+options_.endogenous_terminal_period = 0;
+options_.no_homotopy = 0;
 
 % Solution
 options_.order = 2;
 options_.pruning = 0;
-options_.solve_algo = 2;
+options_.solve_algo = 4;
 options_.linear = 0;
 options_.replic = 50;
 options_.simul_replic = 1;
@@ -341,16 +347,15 @@ estimation_info.measurement_error_corr.range_index = {};
 estimation_info.structural_innovation_corr_prior_index = {};
 estimation_info.structural_innovation_corr_options_index = {};
 estimation_info.structural_innovation_corr.range_index = {};
-options_.initial_period = dynDate(1);
-options_.old_dataset.firstobs = options_.initial_period;
-options_.old_dataset.lastobs = NaN;
-options_.old_dataset.nobs = NaN;
-options_.old_dataset.xls_sheet = NaN;
-options_.old_dataset.xls_range = NaN;
+options_.initial_period = dates(1,1);
+options_.dataset.firstobs = options_.initial_period;
+options_.dataset.lastobs = NaN;
+options_.dataset.nobs = NaN;
+options_.dataset.xls_sheet = NaN;
+options_.dataset.xls_range = NaN;
 options_.Harvey_scale_factor = 10;
 options_.MaxNumberOfBytes = 1e6;
 options_.MaximumNumberOfMegaBytes = 111;
-options_.PosteriorSampleSize = 1000;
 options_.analytic_derivation = 0;
 options_.analytic_derivation_mode = 0;
 options_.bayesian_irf = 0;
@@ -369,6 +374,7 @@ options_.lik_init = 1;
 options_.load_mh_file = 0;
 options_.logdata = 0;
 options_.loglinear = 0;
+options_.logged_steady_state = 0;
 options_.mh_conf_sig = 0.90;
 options_.prior_interval = 0.90;
 options_.mh_drop = 0.5;
@@ -379,6 +385,9 @@ options_.mh_nblck = 2;
 options_.mh_recover = 0;
 options_.mh_replic = 20000;
 options_.recursive_estimation_restart = 0;
+options_.MCMC_jumping_covariance='hessian';
+options_.use_calibration_initialization = 0;
+options_.endo_vars_for_moment_computations_in_estimation=[];
 
 options_.mode_compute = 4;
 options_.mode_file = '';
@@ -392,6 +401,7 @@ options_.presample = 0;
 options_.prior_trunc = 1e-10;
 options_.smoother = 0;
 options_.student_degrees_of_freedom = 3;
+options_.posterior_max_subsample_draws = 1200;
 options_.sub_draws = [];
 options_.use_mh_covariance_matrix = 0;
 options_.gradient_method = 2;
@@ -426,7 +436,6 @@ oo_.exo_simul = [];
 oo_.endo_simul = [];
 ys0_ = [];
 ex0_ = [];
-ex_det0_ = [];
 oo_.dr = [];
 oo_.exo_steady_state = [];
 oo_.exo_det_steady_state = [];
@@ -437,13 +446,18 @@ M_.endo_histval = [];
 M_.Correlation_matrix = [];
 M_.Correlation_matrix_ME = [];
 
-% homotopy
+% homotopy for steady state
 options_.homotopy_mode = 0;
 options_.homotopy_steps = 1;
 options_.homotopy_force_continue = 0;
 
 % Simplex optimization routine (variation on Nelder Mead algorithm).
-options_.simplex = [];
+simplex.tolerance.x = 1e-4;
+simplex.tolerance.f = 1e-4;
+simplex.maxiter = 5000;
+simplex.maxfcallfactor = 500;
+simplex.maxfcall = [];
+options_.simplex = simplex;
 
 % CMAES optimization routine.
 cmaes.SaveVariables='off';
@@ -452,8 +466,25 @@ cmaes.WarnOnEqualFunctionValues='no';
 cmaes.DispModulo='10';
 cmaes.LogModulo='0';
 cmaes.LogTime='0';
+cmaes.TolFun = 1e-7;
+cmaes.TolX = 1e-7;
 options_.cmaes = cmaes;
 
+% simpsa optimization routine.
+simpsa.TOLFUN = 1e-4;
+simpsa.TOLX = 1e-4;
+simpsa.TEMP_END = .1;
+simpsa.COOL_RATE = 10;
+simpsa.INITIAL_ACCEPTANCE_RATIO = .95;
+simpsa.MIN_COOLING_FACTOR = .9;
+simpsa.MAX_ITER_TEMP_FIRST = 50;
+simpsa.MAX_ITER_TEMP_LAST = 2000;
+simpsa.MAX_ITER_TEMP = 10;
+simpsa.MAX_ITER_TOTAL = 5000;
+simpsa.MAX_TIME = 2500;
+simpsa.MAX_FUN_EVALS = 20000;
+simpsa.DISPLAY = 'iter';
+options_.simpsa = simpsa;
 
 % prior analysis
 options_.prior_mc = 20000;
@@ -577,6 +608,10 @@ options_.osr.verbose=2;
 
 % use GPU
 options_.gpu = 0;
+
+%Geweke convergence diagnostics
+options_.convergence.geweke.taper_steps=[4 8 15];
+options_.convergence.geweke.geweke_interval=[0.2 0.5];
 
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);

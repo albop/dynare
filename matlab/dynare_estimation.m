@@ -30,7 +30,12 @@ function dynare_estimation(var_list,dname)
 
 global options_ oo_ M_ oo_recursive_
 
-%% Decide if a DSGE or DSGE-VAR has to be estimated.
+% Test if the order of approximation is nonzero (the preprocessor tests if order is non negative).
+if isequal(options_.order,0)
+    error('Estimation:: The order of the Taylor approximation cannot be 0!')
+end
+
+% Decide if a DSGE or DSGE-VAR has to be estimated.
 if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
     options_.dsge_var = 1;
 end
@@ -53,11 +58,17 @@ end
 
 M_.dname = dname;
 
-if options_.mode_compute && options_.analytic_derivation,
+if (isnumeric(options_.mode_compute) && options_.mode_compute && options_.analytic_derivation) ... %no user supplied function
+        || (~isnumeric(options_.mode_compute) && options_.analytic_derivation) % user supplied function
     analytic_derivation0=options_.analytic_derivation;
     options_.analytic_derivation=1;
 end
-    
+
+if options_.logged_steady_state
+    oo_.dr.ys=exp(oo_.dr.ys);
+    oo_.steady_state=exp(oo_.steady_state);
+end
+
 
 if nnobs > 1
     for i=1:nnobs
@@ -105,11 +116,9 @@ if nnobs > 1 && horizon > 0
         SelecVariables = [];
         for i=1:nvar
             if ~isempty(strmatch(var_list(i,:),endo_names,'exact'))
-                SelecVariables = [SelecVariables;strmatch(var_list(i,:),endo_names, ...
-                                                          'exact')];
+                SelecVariables = [SelecVariables;strmatch(var_list(i,:),endo_names, 'exact')];
             else
-                error(['Estimation: ' var_list(i,:) ' isn''t an endogenous' ...
-                       'variable'])
+                error(['Estimation:: ' var_list(i,:) ' isn''t an endogenous variable'])
             end
         end
     end

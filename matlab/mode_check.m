@@ -168,7 +168,7 @@ for plt = 1:nbplt,
         drawnow
     end
     if DynareOptions.mode_check.nolik==0,
-        if exist('OCTAVE_VERSION'),
+        if isoctave
             axes('outerposition',[0.3 0.93 0.42 0.07],'box','on'),
         else
             axes('position',[0.3 0.01 0.42 0.05],'box','on'),
