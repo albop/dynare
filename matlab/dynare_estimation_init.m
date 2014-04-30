@@ -471,8 +471,8 @@ else
     error('You have to specify the datafile!')
 end
 
-% Load the data in a dynSeries object.
-dataset = dynSeries(datafile);
+% Load the data in a dseries object.
+dataset = dseries(datafile);
 
 % Select a subset of the variables.
 dataset = dataset{options_.varobs{:}};
@@ -499,7 +499,7 @@ end
 if ~set_time_default_initial_period && dataset_default_initial_period
     % Overwrite the initial period in dataset (it was set to default).
     % Note that the update of freq and time members is auto-magically 
-    % done by dynSeries::subsasgn overload method.
+    % done by dseries::subsasgn overload method.
     dataset.init = options_.initial_period;
 end
 
