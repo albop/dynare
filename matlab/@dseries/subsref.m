@@ -157,6 +157,9 @@ switch S(1).type
       case {'set_names','rename','tex_rename'}
         B = feval(S(1).subs,A,S(2).subs{:});
         S = shiftS(S,1);
+      case {'disp'}
+        feval(S(1).subs,A);
+        return
       otherwise                                                            % Extract a sub-object by selecting one variable.
         ndx = find(strcmp(S(1).subs,A.name));
         if ~isempty(ndx)

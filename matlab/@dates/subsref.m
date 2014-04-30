@@ -37,7 +37,7 @@ switch S(1).type
             error(['dates::subsref: ' S(1).subs ' is not a method but a member!'])
         end
         B = builtin('subsref', A, S(1));
-      case {'sort','unique','double','isempty','length'}% Public methods (without arguments)
+      case {'sort','unique','double','isempty','length'}% Public methods (without input arguments)
         B = feval(S(1).subs,A);
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
            S = shiftS(S,1);
@@ -49,6 +49,9 @@ switch S(1).type
         else
             error('dates::subsref: Something is wrong in your syntax!')
         end
+      case {'disp'}
+        feval(S(1).subs,A);
+        return
       otherwise
         error('dates::subsref: Unknown public member or method!')
     end
