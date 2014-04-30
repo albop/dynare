@@ -348,6 +348,7 @@ estimation_info.structural_innovation_corr_prior_index = {};
 estimation_info.structural_innovation_corr_options_index = {};
 estimation_info.structural_innovation_corr.range_index = {};
 options_.initial_period = dates(1,1);
+options_.dataset.file = [];
 options_.dataset.firstobs = options_.initial_period;
 options_.dataset.lastobs = NaN;
 options_.dataset.nobs = NaN;

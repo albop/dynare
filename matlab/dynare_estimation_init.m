@@ -461,11 +461,11 @@ if ~isfield(options_,'nobs')
     options_.nobs = [];
 end
 
-if isempty(options_.datafile) && ~isempty(options_.dataset)
+if isempty(options_.datafile) && ~isempty(options_.dataset.file)
     datafile = options_.dataset.file;
-elseif ~isempty(options_.datafile) && isempty(options_.dataset)
+elseif ~isempty(options_.datafile) && isempty(options_.dataset.file)
     datafile = options_.datafile;
-elseif isempty(options_.datafile) && ~isempty(options_.dataset)
+elseif isempty(options_.datafile) && ~isempty(options_.dataset.file)
     error('You cannot use simultaneously the data command and the datafile option (in the estimation command)!')
 else
     error('You have to specify the datafile!')
