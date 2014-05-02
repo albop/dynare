@@ -471,6 +471,29 @@ else
     error('You have to specify the datafile!')
 end
 
+
+% Check extension.
+allowed_extensions = {'m','mat','csv','xls','xlsx'};
+datafile_extension = get_file_extension(datafile);
+if isempty(datafile_extension)
+    available_extensions = {}; j = 1;
+    for i=1:length(allowed_extensions)
+        if exist([datafile '.' allowed_extensions{i}])
+            available_extensions(j) = {allowed_extensions{i}};
+            j = j+1;
+        end
+    end
+    if isempty(available_extensions)
+        error(['I can''t find a datafile (with allowed extension)!'])
+    end
+    if length(available_extensions)>1
+        error(sprintf(['You did not specify an extension for the datafile, but more than one candidate ' ...
+                       'are available in the designed folder!\nPlease, add an extension to the datafile ' ...
+                       '(m, mat, csv, xls or xlsx are legal extensions).']));
+    end
+    datafile = [datafile '.' available_extensions];
+end
+
 % Load the data in a dseries object.
 dataset = dseries(datafile);
 
