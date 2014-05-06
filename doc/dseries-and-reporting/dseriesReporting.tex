@@ -1,15 +1,11 @@
 \documentclass[10pt]{beamer}
-\usepackage[utf8]{inputenc}
-\usepackage{color}
-\usepackage{amsmath}
-\usepackage{epsf}
-\usepackage{graphicx}
-\usepackage{wasysym}
+
 \usepackage{tikz}
 \usetikzlibrary{positioning,shapes,shadows,arrows}
+\tikzstyle{abstract}=[rectangle, rounded corners, draw=black, anchor=north, fill=blue!10, text centered, minimum height={height("Gp")+2pt}, minimum width=3cm, font=\footnotesize]
+
 \definecolor{links}{HTML}{0000CC}
 \hypersetup{colorlinks,linkcolor=,urlcolor=links}
-
 
 \mode<handout>
 {
@@ -24,11 +20,6 @@
   \usetheme{CambridgeUS}
 }
 
-\title{Dynare Time Series \& Reporting}
-\author{Houtan Bastani}
-\institute{CEPREMAP}
-\date{13 June 2014}
-
 \AtBeginSection[]
 {
   \begin{frame}
@@ -40,8 +31,10 @@
 \setbeamerfont{frametitle}{family=\rmfamily,series=\bfseries,size={\fontsize{10}{10}}}
 \setbeamertemplate{frametitle continuation}[from second]
 
-\tikzstyle{abstract}=[rectangle, rounded corners, draw=black, anchor=north, fill=blue!10, text centered, minimum height={height("Gp")+2pt}, minimum width=3cm, font=\footnotesize]
-
+\title{Dynare Time Series \& Reporting}
+\author{Houtan Bastani}
+\institute{CEPREMAP}
+\date{13 June 2014}
 
 \begin{document}
 
@@ -54,11 +47,8 @@
   \tableofcontents
 \end{frame}
 
-
-
-
 %
-% DSERIES
+% DATES
 %
 \section{Time Series}
 
@@ -100,7 +90,10 @@
   \item It has two slightly different syntaxes
     \begin{itemize}
     \item One for inclusion in \texttt{.m} files
-    \item One for inclusion in \texttt{.mod} files (simplified, taking advantage of the preprocessor)
+    \item One for inclusion in \texttt{.mod} files (simplified using the preprocessor)
+      \begin{itemize}
+        \item To prevent date translation, escape the date with `\texttt{\$}' (\textit{e.g.,} \texttt{\$2020y})
+      \end{itemize}
     \end{itemize}
   \item Minimal restrictions on dates. Can be
     \begin{itemize}
@@ -122,8 +115,8 @@
     \end{itemize}
   \item A date range:
     \begin{itemize}
-    \item In a \texttt{.m} file: \texttt{t = dates(`1999y'):dates(`2020y');}
-    \item In a \texttt{.mod} file: \texttt{t = 1999y:2020y;}
+    \item In a \texttt{.m} file: \texttt{dr = dates(`1999y'):dates(`2020y');}
+    \item In a \texttt{.mod} file: \texttt{dr = 1999y:2020y;}
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -134,10 +127,42 @@
   \begin{itemize}
   \item \texttt{append}: appends a date to the date
     \begin{itemize}
-    \item \texttt{t.append(dates(`2021y'));}
+    \item \texttt{t=t.append(dates(`1900y')); \% <dates: 1999Y, 1900Y>}
     \end{itemize}
-  \item \texttt{pop}:
-  \item \texttt{sort}:
+  \item \texttt{horzcat}: horizontal concatenation
+    \begin{itemize}
+    \item \texttt{[t t]; \% <dates: 1999Y, 1900Y, 1999Y, 1900Y>};
+    \end{itemize}
+  \item \texttt{minus}: either the distance between two \texttt{dates} or lag one \texttt{dates}
+    \begin{itemize}
+    \item \texttt{t-t \% [0 0]'}
+    \item \texttt{t-[3 3]' \% <dates: 1996Y, 1897Y>}
+    \end{itemize}
+  \item \texttt{plus}: either combine two \texttt{dates} or forward one \texttt{dates}
+    \begin{itemize}
+    \item \texttt{t+t \% <dates: 1999Y, 1900Y, 1999Y, 1900Y>}
+    \item \texttt{t+[3 3]' \% <dates: 2002Y, 1903Y>}
+    \end{itemize}
+  \item \texttt{pop}: remove last element
+    \begin{itemize}
+    \item \texttt{t.pop(); \% <dates: 1999Y>}
+    \end{itemize}
+  \item \texttt{sort}: sort dates in ascending order
+    \begin{itemize}
+    \item \texttt{t=t.sort(); \% <dates: 1900Y, 1999Y>}
+    \end{itemize}
+  \item \texttt{uminus}: shifts dates back one period
+    \begin{itemize}
+    \item \texttt{-t; \% <dates: 1998Y, 1899Y>}
+    \end{itemize}
+  \item \texttt{unique}: removes repetitions
+    \begin{itemize}
+    \item \texttt{t.append(dates(`1999y')).unique() \% <dates: 1900Y, 1999Y>}
+    \end{itemize}
+  \item \texttt{uplus}: shifts dates forward one period
+    \begin{itemize}
+    \item \texttt{++t; \% <dates: 2001Y, 1902Y>}
+    \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -145,25 +170,69 @@
 \begin{frame}[fragile,t]
   \frametitle{Getting info about \texttt{dates}}
   \begin{itemize}
+  \item \texttt{char}: returns a single date as a string
+    \begin{itemize}
+    \item \texttt{t(1).char() \% 1999Y}
+    \end{itemize}
   \item \texttt{double}: returns a floating point representation of the date
     \begin{itemize}
-    \item \texttt{t.double;}
+    \item \texttt{t.double() \% [1999 1900]'}
     \end{itemize}
   \item \texttt{freq}: returns the frequency
     \begin{itemize}
-    \item \texttt{t.freq;}
+    \item \texttt{t.freq; \% 1}
+    \end{itemize}
+  \item \texttt{isequal}: returns true if the two arguments are equal
+    \begin{itemize}
+    \item \texttt{isequal(t,t) \% 1}
+    \end{itemize}
+  \item \texttt{length}: returns the number of dates
+    \begin{itemize}
+    \item \texttt{t.length() \% 2}
+    \end{itemize}
+  \item \texttt{max}: returns the maximum \texttt{dates} in the arguments
+    \begin{itemize}
+    \item \texttt{max(t,dr) \% <dates: 2020Y>}
+    \end{itemize}
+  \item \texttt{min}: returns the minimum \texttt{dates} in the arguments
+    \begin{itemize}
+    \item \texttt{min(t,dr) \% <dates: 1900Y>}
+    \end{itemize}
+  \item \texttt{eq, ge, gt, le, lt, ne}: returns boolean value of comparison
+    \begin{itemize}
+    \item \texttt{t==t \% [1 1]'}
+    \item \texttt{t>=dates(`1950y') \% [1 0]'}
+    \item \texttt{t$\thicksim$=dates(`1999y') \% [0 1]'}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile,t]
+  \frametitle{Set Operations on \texttt{dates}}
+  \begin{itemize}
+  \item \texttt{intersect}: returns the intersection of the arguments
+    \begin{itemize}
+    \item \texttt{intersect(t,dr) \% <dates: 1999Y>}
+    \end{itemize}
+  \item \texttt{isempty}: returns true if the argument is empty
+    \begin{itemize}
+    \item \texttt{isempty(t) \% 0}
+    \end{itemize}
+  \item \texttt{setdiff}: returns dates present in first arg but not in second
+    \begin{itemize}
+    \item \texttt{setdiff(t,dr) \% <dates: 1900Y>}
+    \end{itemize}
+  \item \texttt{union}:
+    \begin{itemize}
+    \item \texttt{union(dr,t) \% <dates: 1900Y, 1999Y,  ..., 2019Y, 2020Y>}
     \end{itemize}
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}[fragile,t]
-  \frametitle{Comparing \texttt{dates}}
-  \begin{itemize}
-  \item 
-  \end{itemize}
-\end{frame}
-
+%
+% DSERIES
+%
 \subsubsection{\texttt{dseries} Syntax}
 
 
