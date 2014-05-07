@@ -2758,7 +2758,8 @@ using the same solver as value @code{1}
 Use Chris Sims' solver
 
 @item 4
-Trust-region solver with autoscaling.
+Splits the model into recursive blocks and solves each block in turn
+using a trust-region solver with autoscaling.
 
 @item 5
 Newton algorithm with a sparse Gaussian elimination (SPE) (requires
@@ -2777,6 +2778,9 @@ each iteration (requires @code{bytecode} and/or @code{block} option,
 Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB)
 solver at each iteration (requires @code{bytecode} and/or @code{block}
 option, @pxref{Model declaration})
+
+@item 9
+Trust-region algorithm on the entire model.
 @end table
 
 @noindent
