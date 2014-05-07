@@ -181,7 +181,6 @@ while (niter < maxiter && ~info)
     % FIXME -- why tolf*n*xn? If abs (e) ~ abs(x) * eps is a vector
     % of perturbations of x, then norm (fjac*e) <= eps*n*xn, i.e. by
     % tolf ~ eps we demand as much accuracy as we can expect.
-    disp([niter fn ratio])
     if (fn <= tolf*n*xn)
         info = 1;
         % The following tests done only after successful step.
