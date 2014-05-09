@@ -28,7 +28,7 @@ function global_initialization()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_  ex_det0_
+global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_
 
 estim_params_ = [];
 bayestopt_ = [];
@@ -272,6 +272,7 @@ options_.stack_solve_algo = 0;
 options_.markowitz = 0.5;
 options_.minimal_solving_periods = 1;
 options_.endogenous_terminal_period = 0;
+options_.no_homotopy = 0;
 
 % Solution
 options_.order = 2;
@@ -434,7 +435,6 @@ oo_.exo_simul = [];
 oo_.endo_simul = [];
 ys0_ = [];
 ex0_ = [];
-ex_det0_ = [];
 oo_.dr = [];
 oo_.exo_steady_state = [];
 oo_.exo_det_steady_state = [];
@@ -445,7 +445,7 @@ M_.endo_histval = [];
 M_.Correlation_matrix = [];
 M_.Correlation_matrix_ME = [];
 
-% homotopy
+% homotopy for steady state
 options_.homotopy_mode = 0;
 options_.homotopy_steps = 1;
 options_.homotopy_force_continue = 0;

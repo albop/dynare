@@ -228,7 +228,7 @@ if (xn > delta)
             bn = norm (b);
             dxn = delta/xn; snmd = snm/delta;
             t = (bn/sn) * (bn/xn) * snmd;
-            t = t - dxn * snmd^2 - sqrt ((t-dxn)^2 + (1-dxn^2)*(1-snmd^2));
+            t = t - dxn * snmd^2 + sqrt ((t-dxn)^2 + (1-dxn^2)*(1-snmd^2));
             alpha = dxn*(1-snmd^2) / t;
         else
             alpha = 0;

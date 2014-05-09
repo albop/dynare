@@ -30,7 +30,8 @@ EXTRA_DIST = \
 	windows/README.txt \
 	osx \
 	examples \
-	scripts
+	scripts \
+	.dir-locals.el
 
 dist-hook:
 	rm -rf `find $(distdir)/matlab $(distdir)/examples -name *~`

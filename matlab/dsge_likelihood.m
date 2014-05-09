@@ -1,5 +1,7 @@
 function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults] = dsge_likelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults,derivatives_info)
-% Evaluates the posterior kernel of a dsge model.
+% Evaluates the posterior kernel of a dsge model using the specified
+% kalman_algo; the resulting posterior includes the 2*pi constant of the
+% likelihood function
 
 %@info:
 %! @deftypefn {Function File} {[@var{fval},@var{exit_flag},@var{ys},@var{trend_coeff},@var{info},@var{Model},@var{DynareOptions},@var{BayesInfo},@var{DynareResults},@var{DLIK},@var{AHess}] =} dsge_likelihood (@var{xparam1},@var{DynareDataset},@var{DynareOptions},@var{Model},@var{EstimatedParameters},@var{BayesInfo},@var{DynareResults},@var{derivatives_flag})

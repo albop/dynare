@@ -1,24 +1,28 @@
-function smoother2histval(file, period, invars, outvars)
-% This function takes values from oo_.SmoothedVariables and copies them into
-% M_.histval.
+function smoother2histval(opts)
+% This function takes values from oo_.SmoothedVariables (and possibly
+% oo_.SmoothedShocks) and copies them into M_.histval.
 % 
-% INPUTS
-%    file:        An optional *_results MAT file created by Dynare.
-%                 If present, oo_.SmoothedVariables is read from there.
-%                 Otherwise, it is read from the global workspace.
+% Optional fields in 'opts' structure:
+%    infile:      An optional *_results MAT file created by Dynare.
+%                 If present, oo_.Smoothed{Variables,Shocks} are read from 
+%                 there. Otherwise, they are read from the global workspace.
+%    invars:      An optional char or cell array listing variables to read in
+%                 oo_.SmoothedVariables. If absent, all the endogenous
+%                 variables present in oo_.SmoothedVariables are used.
 %    period:      An optional period number to use as the starting point
 %                 for subsequent simulations. It should be between 1 and
 %                 the number of observations that were used to produce the
 %                 smoothed values. If absent, the last observation is used.
-%    invars:      An optional cell array listing variables to read in
-%                 oo_.SmoothedVariables. If absent, all the endogenous
-%                 variables of the current model are used (from M_.endo_names)
-%    outvars:     An optional cell array listing variables to be written in
-%                 M_.histval. This cell must be of same length than invars,
-%                 and there is a mapping between the input variable at the
-%                 i-th position in invars, and the output variable at the
-%                 i-th position in outvars. If absent, then taken as equal
-%                 to invars.
+%    outfile:     An optional MAT file in which to save the histval structure.
+%                 If absent, the output will be written in M_.endo_histval
+%    outvars:     An optional char or cell array listing variables to be written in
+%                 outfile or M_.endo_histval. This cell must be of same
+%                 length than invars, and there is a mapping between the input
+%                 variable at the i-th position in invars, and the output
+%                 variable at the i-th position in outvars. If absent, then
+%                 taken as equal to invars.
+%
+% The function also uses the value of option_.parameter_set
 
 % Copyright (C) 2014 Dynare Team
 %
@@ -39,57 +43,172 @@ function smoother2histval(file, period, invars, outvars)
 
 global M_ options_ oo_
 
-if nargin == 0
+if ~isfield(opts, 'infile')
     if ~isfield(oo_, 'SmoothedVariables')
         error('Could not find smoothed variables; did you set the "smoother" option?')
     end
-    smoothedvals = oo_.SmoothedVariables;
+    smoothedvars = oo_.SmoothedVariables;
+    smoothedshocks = oo_.SmoothedShocks;
 else
-    S = load(file);
+    S = load(opts.infile);
     if ~isfield(S, 'oo_') || ~isfield(S.oo_, 'SmoothedVariables')
         error('Could not find smoothed variables in file; is this a Dynare results file, and did you set the "smoother" option when producing it?')
     end
-    smoothedvals = S.oo_.SmoothedVariables;
+    smoothedvars = S.oo_.SmoothedVariables;
+    smoothedshocks = S.oo_.SmoothedShocks;
 end
 
-n = size(getfield(smoothedvals, fieldnames(smoothedvals){1}));
+% Hack to determine if oo_.SmoothedVariables was computed after a Metropolis
+tmp = fieldnames(smoothedvars);
+if isstruct(getfield(smoothedvars, tmp{1}))
+    post_metropolis = 1;
+else
+    post_metropolis = 0;
+end
+
+% If post-Metropolis, select the parameter set
+if isempty(options_.parameter_set)
+    if post_metropolis
+        smoothedvars = smoothedvars.Mean;
+        smoothedshocks = smoothedshocks.Mean;
+    end
+else
+    switch options_.parameter_set
+      case 'calibration'
+        if post_metropolis
+            error('Option parameter_set=calibration is not consistent with computed smoothed values.')
+        end
+      case 'posterior_mode'
+        if post_metropolis
+            error('Option parameter_set=posterior_mode is not consistent with computed smoothed values.')
+        end
+      case 'posterior_mean'
+        if ~post_metropolis
+            error('Option parameter_set=posterior_mean is not consistent with computed smoothed values.')
+        end
+        smoothedvars = smoothedvars.Mean;
+        smoothedshocks = smoothedshocks.Mean;
+      case 'posterior_median'
+        if ~post_metropolis
+            error('Option parameter_set=posterior_median is not consistent with computed smoothed values.')
+        end
+        smoothedvars = smoothedvars.Median;
+        smoothedshocks = smoothedshocks.Median;
+      otherwise
+        error([ 'Option parameter_set=' options_.parameter_set ' unsupported.' ])
+    end
+end
+
+% Determine number of periods
+tmp = fieldnames(smoothedvars);
+n = size(getfield(smoothedvars, tmp{1}));
 
 if n < M_.maximum_endo_lag
     error('Not enough observations to create initial conditions')
 end
 
-if nargin < 2
-    period = n;
+if isfield(opts, 'invars')
+    invars = opts.invars;
+    if ischar(invars)
+        invars = cellstr(invars);
+    end
 else
+    invars = [fieldnames(smoothedvars); fieldnames(smoothedshocks)];
+end
+
+if isfield(opts, 'period')
+    period = opts.period;
     if period > n
         error('The period that you indicated is beyond the data sample')
     end
     if period < M_.maximum_endo_lag
         error('The period that you indicated is too small to construct initial conditions')
     end
-end
-
-if nargin < 3
-    invars = cellstr(M_.endo_names);
-end
-
-if nargin < 4
-    outvars = invars;
 else
+    period = n;
+end
+
+if isfield(opts, 'outvars')
+    outvars = opts.outvars;
+    if ischar(outvars)
+        outvars = cellstr(outvars);
+    end
     if length(invars) ~= length(outvars)
         error('The number of input and output variables is not the same')
     end
+else
+    outvars = invars;
 end
 
-M_.endo_histval = repmat(oo_.steady_state, 1, M_.maximum_endo_lag);
+% Initialize outputs
+if ~isfield(opts, 'outfile')
+    % Output to M_.endo_histval
+    M_.endo_histval = repmat(oo_.steady_state, 1, M_.maximum_endo_lag);
+else
+    % Output to a file
+    o = struct();
+end
 
+% Handle all endogenous variables to be copied
 for i = 1:length(invars)
-    s = getfield(smoothedvals, invars{i});
-    j = strmatch(outvars{i}, M_.endo_names, 'exact');
-    if isempty(j)
-        error(['Ouput variable ' outvars{i} ' does not exist'])
+    if isempty(strmatch(invars{i}, M_.endo_names))
+        % Skip exogenous
+        continue
     end
-    M_.endo_histval(j, :) = s((period-M_.maximum_endo_lag+1):period);
+    s = getfield(smoothedvars, invars{i});
+    v = s((period-M_.maximum_endo_lag+1):period);
+    if ~isfield(opts, 'outfile')
+        j = strmatch(outvars{i}, M_.endo_names, 'exact');
+        if isempty(j)
+            error(['smoother2histval: output variable ' outvars{i} ' does not exist.'])
+        else
+            M_.endo_histval(j, :) = v;
+        end
+    else
+        % When saving to a file, x(-1) is in the variable called "x_"
+        o = setfield(o, [ outvars{i} '_' ], v);
+    end
+end
+
+% Handle auxiliary variables for lags (both on endogenous and exogenous)
+for i = 1:length(M_.aux_vars)
+    if M_.aux_vars(i).type ~= 1 && M_.aux_vars(i).type ~= 3
+        continue
+    end
+    if M_.aux_vars(i).type == 1
+        % Endogenous
+        orig_var = deblank(M_.endo_names(M_.aux_vars(i).orig_index, :));
+    else
+        % Exogenous
+        orig_var = deblank(M_.exo_names(M_.aux_vars(i).orig_index, :));
+    end
+    [m, k] = ismember(orig_var, outvars);
+    if m
+        if ~isempty(strmatch(invars{k}, M_.endo_names))
+            s = getfield(smoothedvars, invars{k});
+        else
+            s = getfield(smoothedshocks, invars{k});
+        end
+        l = M_.aux_vars(i).orig_lead_lag;
+        if period-M_.maximum_endo_lag+1+l < 1
+            error('The period that you indicated is too small to construct initial conditions')
+        end
+        v = s((period-M_.maximum_endo_lag+1+l):(period+l));
+        if ~isfield(opts, 'outfile')
+            j = M_.aux_vars(i).endo_index;
+            M_.endo_histval(j, :) = v;
+        else
+            % When saving to a file, x(-2) is in the variable called "x_l2"
+            lead_lag = num2str(l);
+            lead_lag = regexprep(lead_lag, '-', 'l');
+            o = setfield(o, [ orig_var '_' lead_lag ], v);
+        end
+    end
+end
+
+% Finalize output
+if isfield(opts, 'outfile')
+    save(opts.outfile, '-struct', 'o')
 end
 
 end

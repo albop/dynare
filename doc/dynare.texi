@@ -2059,9 +2059,9 @@ period (unless some of these initial values are modified by
 Second, in the absence of an @code{endval} block, it sets the terminal
 conditions for all the periods succeeding the last simulation period.
 
-Third, in the absence of an @code{endval} block, it provides initial
-guess values at all simulation dates for the non-linear solver
-implemented in @code{simul}.
+Third, in the absence of an @code{endval} block, it provides initial guess
+values at all simulation dates for the perfect foresight solver, and is
+therefore used by @code{perfect_foresight_setup} and @code{simul}.
 
 For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{initval} block (even though,
@@ -2147,8 +2147,9 @@ serves two purposes.
 First, it sets the terminal conditions for all the periods succeeding
 the last simulation period.
 
-Second, it provides initial guess values at all the simulation dates
-for the non-linear solver implemented in @code{simul}.
+Second, it provides initial guess values at all the simulation dates for the
+perfect foresight solver, and is therefore used by
+@code{perfect_foresight_setup} and @code{simul}.
 
 For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{endval} block (even though,
@@ -2226,6 +2227,8 @@ x = 1.1;
 end;
 simul(periods=200);
 
+@end example
+
 In this example, the problem is finding the optimal path for consumption
 and capital for the periods t=1 to T=200, given the path of the exogenous
 technology level @code{x}. Setting @code{x=1.1} in the
@@ -2276,13 +2279,13 @@ may result in strange-looking large jumps. In the example above,
 consumption will display a large jump from t=0 to t=1 and capital will
 jump from t=200 to t=201.
 
-@end example
-
 @end deffn
 
 @deffn Block histval ;
 
 @descriptionhead
+
+@customhead{In a deterministic perfect foresight context}
 
 In models with lags on more than one period, the @code{histval} block
 permits to specify different historical initial values for different
@@ -2310,6 +2313,14 @@ differs from the case where there is no @code{histval} block, where all
 variables are initialized at their steady state value at period 0 and
 before (except when a @code{steady} command doesn't follow an
 @code{initval} block).
+
+@customhead{In a stochastic simulation context}
+
+In the context of stochastic simulations, @code{histval} allows setting
+the starting point of those simulations in the state space (it does not
+affect the starting point for impulse response functions). As for the case of
+perfect foresight simulations, all not explicitly specified variables are set to 0.
+Moreover, as only states enter the recursive policy functions, all values specified for control variables will be ignored.
 
 @examplehead
 
@@ -2400,6 +2411,15 @@ type.
 
 @end deffn
 
+@deffn Command histval_file (filename = @var{FILENAME});
+
+This command is equivalent to @code{histval}, except that it reads its input
+from a file.
+
+This command is typically used in conjunction with @code{smoother2histval}.
+
+@end deffn
+
 @node Shocks on exogenous variables
 @section Shocks on exogenous variables
 
@@ -2428,7 +2448,16 @@ isn't used in the computation of moments and of Impulse Response
 Functions. Setting a variance to zero is an easy way of removing an
 exogenous shock.
 
+Note that, by default, if there are several @code{shocks} or @code{mshocks}
+blocks in the same @file{.mod} file, then they are cumulative: all the shocks
+declared in all the blocks are considered; however, if a @code{shocks} or
+@code{mshocks} block is declared with the @code{overwrite} option, then it
+replaces all the previous @code{shocks} and @code{mshocks} blocks.
+
 @deffn Block shocks ;
+@deffnx Block shocks (overwrite) ;
+
+See above for the meaning of the @code{overwrite} option.
 
 @customhead{In deterministic context}
 
@@ -2564,6 +2593,7 @@ forecast;
 
 
 @deffn Block mshocks ;
+@deffnx Block mshocks (overwrite) ;
 
 The purpose of this block is similar to that of the @code{shocks}
 block for deterministic shocks, except that the numeric values given
@@ -2585,6 +2615,8 @@ on exogenous variables with a non-zero steady state, in a deterministic setup,
 on deterministic exogenous variables with a non-zero steady state, in
 a stochastic setup.
 @end itemize
+
+See above for the meaning of the @code{overwrite} option.
 
 @end deffn
 
@@ -2634,9 +2666,9 @@ Reduces the number of periods considered in subsequent output commands.
 
 @descriptionhead
 
-This command is now deprecated (but will still work for older model
-files). It is not necessary when no simulation is performed and is
-replaced by an option @code{periods} in @code{simul} and
+This command is now deprecated (but will still work for older model files). It
+is not necessary when no simulation is performed and is replaced by an option
+@code{periods} in @code{perfect_foresight_setup}, @code{simul} and
 @code{stoch_simul}.
 
 This command sets the number of periods in the simulation. The periods
@@ -2697,10 +2729,11 @@ add new variables one by one.
 @table @code
 
 @item maxit = @var{INTEGER}
-Determines the maximum number of iterations used in the non-linear solver.
-The default value of @code{maxit} is 10. The @code{maxit} option is shared with the
-@code{simul} command. So a change in @code{maxit} in a @code{steady} command will
-also be considered in the following @code{simul} commands.
+Determines the maximum number of iterations used in the non-linear solver. The
+default value of @code{maxit} is 10. The @code{maxit} option is shared with the
+@code{perfect_foresight_solver} and @code{simul} commands. So a change in
+@code{maxit} in a @code{steady} command will also be considered in the
+following @code{perfect_foresight_solver} and @code{simul} commands.
 
 
 @item solve_algo = @var{INTEGER}
@@ -2725,7 +2758,8 @@ using the same solver as value @code{1}
 Use Chris Sims' solver
 
 @item 4
-Trust-region solver with autoscaling.
+Splits the model into recursive blocks and solves each block in turn
+using a trust-region solver with autoscaling.
 
 @item 5
 Newton algorithm with a sparse Gaussian elimination (SPE) (requires
@@ -2744,6 +2778,9 @@ each iteration (requires @code{bytecode} and/or @code{block} option,
 Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB)
 solver at each iteration (requires @code{bytecode} and/or @code{block}
 option, @pxref{Model declaration})
+
+@item 9
+Trust-region algorithm on the entire model.
 @end table
 
 @noindent
@@ -3273,15 +3310,17 @@ aid the solution process.  These solution algorithms can provide a
 significant speed-up on large models.
 
 
-
-
-@deffn Command simul ;
-@deffnx Command simul (@var{OPTIONS}@dots{});
+@deffn Command perfect_foresight_setup ;
+@deffnx Command perfect_foresight_setup (@var{OPTIONS}@dots{});
 
 @descriptionhead
 
-Triggers the computation of a deterministic simulation of the model
-for the number of periods set in the option @code{periods}.
+Prepares a perfect foresight simulation, by extracting the information in the
+@code{initval}, @code{endval} and @code{shocks} blocks and converting them into
+simulation paths for exogenous and endogenous variables.
+
+This command must always be called before running the simulation with
+@code{perfect_foresight_solver}.
 
 @optionshead
 
@@ -3290,23 +3329,43 @@ for the number of periods set in the option @code{periods}.
 @item periods = @var{INTEGER}
 Number of periods of the simulation
 
-@item endogenous_terminal_period
-The  number of  periods is  not constant  across Newton  iterations when
-solving the perfect foresight model. The size of the nonlinear system of
-equations  is  reduced  by  removing  the  portion  of  the  paths  (and
-associated equations) for which the solution has already been identified
-(up to the  tolerance parameter). This strategy can be  interpreted as a
-mix  of the  shooting and  relaxation  approaches. Note  that round  off
-errors are  more important with  this mixed strategy (user  should check
-the reported value  of the maximum absolute error).  Only available with
-option @code{stack_solve_algo==0}.
+@item datafile = @var{FILENAME}
+If the variables of the model are not constant over time, their
+initial values, stored in a text file, could be loaded, using that
+option, as initial values before a deterministic simulation.
+@end table
+
+@outputhead
+
+The paths for the exogenous variables are stored into @code{oo_.exo_simul}.
+
+The initial and terminal conditions for the endogenous variables and the
+initial guess for the path of endogenous variables are stored into
+@code{oo_.endo_simul}.
+
+@end deffn
+
+
+@deffn Command perfect_foresight_solver ;
+@deffnx Command perfect_foresight_solver (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+Computes the perfect foresight (or deterministic) simulation of the model.
+
+Note that @code{perfect_foresight_setup} must be called before this command, in
+order to setup the environment for the simulation.
+
+@optionshead
+
+@table @code
 
 @item maxit = @var{INTEGER}
-Determines the maximum number of iterations used in the non-linear solver.
-The default value of @code{maxit} is 10. The @code{maxit} option is shared with the
-@code{steady} command. So a change in @code{maxit} in a @code{simul} command will
-also be considered in the following @code{steady} commands.
-
+Determines the maximum number of iterations used in the non-linear solver. The
+default value of @code{maxit} is 10. The @code{maxit} option is shared with the
+@code{steady} command. So a change in @code{maxit} in a
+@code{perfect_foresight_solver} command will also be considered in the
+following @code{steady} commands.
 
 @item stack_solve_algo = @var{INTEGER}
 Algorithm used for computing the solution. Possible values are:
@@ -3350,6 +3409,12 @@ options).
 
 @end table
 
+@item no_homotopy
+By default, the perfect foresight solver uses a homotopy technique if it cannot
+solve the problem. Concretely, it divides the problem into smaller steps by
+diminishing the size of shocks and increasing them progressively until the
+problem converges. This option tells Dynare to disable that behavior.
+
 @item markowitz = @var{DOUBLE}
 Value of the Markowitz criterion, used to select the pivot. Only used
 when @code{stack_solve_algo = 5}. Default: @code{0.5}.
@@ -3359,10 +3424,17 @@ Specify the minimal number of periods where the model has to be
 solved, before using a constant set of operations for the remaining
 periods. Only used when @code{stack_solve_algo = 5}. Default: @code{1}.
 
-@item datafile = @var{FILENAME}
-If the variables of the model are not constant over time, their
-initial values, stored in a text file, could be loaded, using that
-option, as initial values before a deterministic simulation.
+@item endogenous_terminal_period
+The  number of  periods is  not constant  across Newton  iterations when
+solving the perfect foresight model. The size of the nonlinear system of
+equations  is  reduced  by  removing  the  portion  of  the  paths  (and
+associated equations) for which the solution has already been identified
+(up to the  tolerance parameter). This strategy can be  interpreted as a
+mix  of the  shooting and  relaxation  approaches. Note  that round  off
+errors are  more important with  this mixed strategy (user  should check
+the reported value  of the maximum absolute error).  Only available with
+option @code{stack_solve_algo==0}.
+
 @end table
 
 @outputhead
@@ -3372,11 +3444,28 @@ The simulated endogenous variables are available in global matrix
 
 @end deffn
 
+@deffn Command simul ;
+@deffnx Command simul (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+Short-form command for triggering the computation of a deterministic simulation
+of the model. It is strictly equivalent to a call to
+@code{perfect_foresight_setup} followed by a call to
+@code{perfect_foresight_solver}.
+
+@optionshead
+
+Accepts all the options of @code{perfect_foresight_setup} and
+@code{perfect_foresight_solver}.
+
+@end deffn
+
 @anchor{oo_.endo_simul}
 @defvr {MATLAB/Octave variable} oo_.endo_simul
-This variable stores the result of a deterministic simulation
-(computed by @code{simul}) or of a stochastic simulation (computed by
-@code{stoch_simul} with the @code{periods} option or by
+This variable stores the result of a deterministic simulation (computed by
+@code{perfect_foresight_solver} or @code{simul}) or of a stochastic simulation
+(computed by @code{stoch_simul} with the @code{periods} option or by
 @code{extended_path}).
 
 The variables are arranged row by row, in order of declaration (as in
@@ -3387,9 +3476,9 @@ and terminal conditions, so it has more columns than the value of
 
 @anchor{oo_.exo_simul}
 @defvr {MATLAB/Octave variable} oo_.exo_simul
-This variable stores the path of exogenous variables during a
-simulation (computed by @code{simul}, @code{stoch_simul} or
-@code{extended_path}).
+This variable stores the path of exogenous variables during a simulation
+(computed by @code{perfect_foresight_solver}, @code{simul}, @code{stoch_simul}
+or @code{extended_path}).
 
 The variables are arranged in columns, in order of declaration (as in
 @code{M_.endo_names}). Periods are in rows. Note that this convention
@@ -3624,7 +3713,7 @@ period(s). The periods must be strictly positive. Conditional variances are give
 decomposition provides the decomposition of the effects of shocks upon
 impact. The results are stored in
 @code{oo_.conditional_variance_decomposition}
-(@pxref{oo_.conditional_variance_decomposition}). The variance decomposition is only conducted, if theoretical moments are requested, i.e. using the @code{periods=0}-option. In case of @code{order=2}, Dynare provides a second-order accurate approximation to the true second moments based on the linear terms of the second-order solution (see @cite{Kim, Kim, Schaumburg and Sims (2008)}).
+(@pxref{oo_.conditional_variance_decomposition}). The variance decomposition is only conducted, if theoretical moments are requested, i.e. using the @code{periods=0}-option. In case of @code{order=2}, Dynare provides a second-order accurate approximation to the true second moments based on the linear terms of the second-order solution (see @cite{Kim, Kim, Schaumburg and Sims (2008)}). Note that the unconditional variance decomposition (i.e. at horizon infinity) is automatically conducted if theoretical moments are requested (@pxref{oo_.variance_decomposition})
 
 @item pruning
 Discard higher order terms when iteratively computing simulations of
@@ -3773,7 +3862,7 @@ number of the matrix in the cell array corresponds to the order of
 autocorrelation. The option @code{ar} specifies the number of
 autocorrelation matrices available. Contains theoretical
 autocorrelations if the @code{periods} option is not present (or an approximation thereof for @code{order=2}), and
-empirical autocorrelations otherwise.
+empirical autocorrelations otherwise. The field is only created if stationary variables are present.
 
 The element @code{oo_.autocorr@{i@}(k,l)} is equal to the correlation
 between @math{y^k_t} and @math{y^l_{t-i}}, where @math{y^k}
@@ -3800,7 +3889,7 @@ details. Beware, this is the @i{autocorrelation} function, not the
 @i{autocovariance} function.
 
 @item oo_.gamma@{nar+2@}
-Variance decomposition.
+Unconditional variance decomposition @pxref{oo_.variance_decomposition}
 
 @item oo_.gamma@{nar+3@}
 If a second order approximation has been requested, contains the
@@ -3809,6 +3898,22 @@ vector of the mean correction terms.
 
 In case of @code{order=2}, the theoretical second moments are a second order accurate approximation of the true second moments, see @code{conditional_variance_decomposition}.
 
+@end defvr
+
+@anchor{oo_.variance_decomposition}
+@defvr {MATLAB/Octave variable} oo_.variance_decomposition
+After a run of @code{stoch_simul} when requesting theoretical moments (@code{periods=0}), contains a matrix with the result of the unconditional variance decomposition (i.e. at horizon infinity). The first dimension corresponds to the endogenous variables (in the order of declaration) and the second dimension corresponds to exogenous variables (in the order of declaration). Numbers are in percent and sum up to 100 across columns.
+@end defvr
+
+@anchor{oo_.conditional_variance_decomposition}
+@defvr {MATLAB/Octave variable} oo_.conditional_variance_decomposition
+After a run of @code{stoch_simul} with the
+@code{conditional_variance_decomposition} option, contains a
+three-dimensional array with the result of the decomposition. The
+first dimension corresponds to forecast horizons (as declared with the
+option), the second dimension corresponds to endogenous variables (in
+the order of declaration), the third dimension corresponds to
+exogenous variables (in the order of declaration).
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.irfs
@@ -4104,16 +4209,6 @@ three times in the unfolded @math{G_3} matrix, they must be multiplied
 by 3 when computing the decision rules.
 @end itemize
 
-@anchor{oo_.conditional_variance_decomposition}
-@defvr {MATLAB/Octave variable} oo_.conditional_variance_decomposition
-After a run of @code{stoch_simul} with the
-@code{conditional_variance_decomposition} option, contains a
-three-dimensional array with the result of the decomposition. The
-first dimension corresponds to forecast horizons (as declared with the
-option), the second dimension corresponds to endogenous variables (in
-the order of declaration), the third dimension corresponds to
-exogenous variables (in the order of declaration).
-@end defvr
 
 @node Estimation
 @section Estimation
@@ -4965,8 +5060,7 @@ model. Default: @code{4}.
 @anchor{moments_varendo} Triggers the computation of the posterior
 distribution of the theoretical moments of the endogenous
 variables. Results are stored in
-@code{oo_.PosteriorTheoreticalMoments} (see below for a description of
-this variable). The number of lags in the autocorrelation function is
+@code{oo_.PosteriorTheoreticalMoments} (@pxref{oo_.PosteriorTheoreticalMoments}). The number of lags in the autocorrelation function is
 controlled by the @code{ar} option.
 
 @item conditional_variance_decomposition = @var{INTEGER}
@@ -4983,7 +5077,7 @@ period 1, the conditional variance decomposition provides the
 decomposition of the effects of shocks upon impact. The results are
 stored in
 @code{oo_.PosteriorTheoreticalMoments.dsge.ConditionalVarianceDecomposition},
-but currently there is no output. Note that this option requires the
+but currently there is no displayed output. Note that this option requires the
 option @code{moments_varendo} to be specified.
 
 @item filtered_vars
@@ -5309,9 +5403,16 @@ Variable set by the @code{estimation} command, if it is used with
 
 @defvr {MATLAB/Octave variable} oo_.FilteredVariables
 Variable set by the @code{estimation} command, if it is used with the
-@code{filtered_vars} option. Fields are of the form:
+@code{filtered_vars} option.
+
+After an estimation without Metropolis, fields are of the form:
 @example
 @code{oo_.FilteredVariables.@var{VARIABLE_NAME}}
+@end example
+
+After an estimation with Metropolis, fields are of the form:
+@example
+@code{oo_.FilteredVariables.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 
@@ -5352,32 +5453,58 @@ Variable set by the @code{estimation} command, if it is used with the
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.SmoothedShocks
-Variable set by the @code{estimation} command, if it is used with the
-@code{smoother} option. Fields are of the form:
+Variable set by the @code{estimation} command (if used with the
+@code{smoother} option), or by the @code{calib_smoother} command.
+
+After an estimation without Metropolis, or if computed by
+@code{calib_smoother}, fields are of the form:
 @example
 @code{oo_.SmoothedShocks.@var{VARIABLE_NAME}}
 @end example
+
+After an estimation with Metropolis, fields are of the form:
+@example
+@code{oo_.SmoothedShocks.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.SmoothedVariables
-Variable set by the @code{estimation} command, if it is used with the
-@code{smoother} option. Fields are of the form:
+Variable set by the @code{estimation} command (if used with the
+@code{smoother} option), or by the @code{calib_smoother} command.
+
+After an estimation without Metropolis, or if computed by
+@code{calib_smoother}, fields are of the form:
 @example
 @code{oo_.SmoothedVariables.@var{VARIABLE_NAME}}
+@end example
+
+After an estimation with Metropolis, fields are of the form:
+@example
+@code{oo_.SmoothedVariables.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.UpdatedVariables
-Variable set by the @code{estimation} command, if it is used with the
-@code{smoother} option. Contains the estimation of the expected value of
-variables given the information available at the @emph{current}
-date. Fields are of the form:
+Variable set by the @code{estimation} command (if used with the
+@code{smoother} option), or by the @code{calib_smoother} command.
+Contains the estimation of the expected value of variables given the
+information available at the @emph{current} date.
+
+After an estimation without Metropolis, or if computed by
+@code{calib_smoother}, fields are of the form:
 @example
 @code{oo_.UpdatedVariables.@var{VARIABLE_NAME}}
+@end example
+
+After an estimation with Metropolis, fields are of the form:
+@example
+@code{oo_.UpdatedVariables.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.PosteriorTheoreticalMoments
+@anchor{oo_.PosteriorTheoreticalMoments}
 Variable set by the @code{estimation} command, if it is used with the
 @code{moments_varendo} option. Fields are of the form:
 @example
@@ -5395,7 +5522,7 @@ Auto- and cross-correlation of endogenous variables. Fields are vectors with cor
 
 
 @item VarianceDecomposition
-Decomposition of variance@footnote{When the shocks are correlated, it
+Decomposition of variance (unconditional variance, i.e. at horizon infinity)@footnote{When the shocks are correlated, it
 is the decomposition of orthogonalized shocks via Cholesky
 decomposition according to the order of declaration of shocks
 (@pxref{Variable declarations})}
@@ -5697,7 +5824,7 @@ confidence interval.
 @table @code
 
 @item periods = @var{INTEGER}
-Number of periods of the forecast. Default: @code{40}
+Number of periods of the forecast. Default: @code{5}.
 
 @item conf_sig = @var{DOUBLE}
 @anchor{conf_sig} Level of significance for confidence
@@ -5974,37 +6101,37 @@ can be computed using an extended path method. The forecast scenario describing 
 The first step is the forecast scenario initialization using the function @code{init_plan}:
 
 @anchor{init_plan}
-@deffn {MATLAB/Octave command} HANDLE = init_plan(DATES) ;
+@deftypefn {MATLAB/Octave command} {HANDLE =} init_plan (DATES) ;
 
 Creates a new forecast scenario for a forecast period (indicated as a dates class, see @ref{dates class members}). This function return a handle on the new forecast scenario.
 
-@end deffn
+@end deftypefn
 
 The forecast scenario can contain some simple shocks on the exogenous variables. This shocks are described using the function @code{basic_plan}:
 
 @anchor{basic_plan}
-@deffn {MATLAB/Octave command} HANDLE = basic_plan(HANDLE, 'VARIABLE_NAME', 'SHOCK_TYPE', DATES, MATLAB VECTOR OF DOUBLE |  [DOUBLE | EXPRESSION [DOUBLE | | EXPRESSION] ] ) ;
+@deftypefn {MATLAB/Octave command} {HANDLE =} basic_plan (HANDLE, 'VARIABLE_NAME', 'SHOCK_TYPE', DATES, MATLAB VECTOR OF DOUBLE |  [DOUBLE | EXPRESSION [DOUBLE | | EXPRESSION] ] ) ;
 
 Adds to the forecast scenario a shock on the exogenous variable indicated between quotes in the second argument. The shock type has to be specified in the third argument between quotes: 'surprise' in case of an unexpected shock  or 'perfect_foresight' for a perfectly anticipated shock. The fourth argument indicates the period of the shock using a dates class (see @ref{dates class members}). The last argument is the shock path indicated as a Matlab vector of double. This function return the handle of the updated forecast scenario.
 
-@end deffn
+@end deftypefn
 
 The forecast scenario can also contain a constrained path on an endogenous variable. The values of the related exogenous variable compatible with the constrained path are in this case computed. In other words, a conditional forecast is performed. This kind of shock is described with the function  @code{flip_plan}:
 
 @anchor{flip_plan}
-@deffn {MATLAB/Octave command} HANDLE = flip_plan(HANDLE, 'VARIABLE_NAME, 'VARIABLE_NAME', 'SHOCK_TYPE', DATES, MATLAB VECTOR OF DOUBLE |  [DOUBLE | EXPRESSION [DOUBLE | | EXPRESSION] ] ) ;
+@deftypefn {MATLAB/Octave command} {HANDLE =} flip_plan (HANDLE, 'VARIABLE_NAME, 'VARIABLE_NAME', 'SHOCK_TYPE', DATES, MATLAB VECTOR OF DOUBLE |  [DOUBLE | EXPRESSION [DOUBLE | | EXPRESSION] ] ) ;
 
 Adds to the forecast scenario a constrained path on the endogenous variable specified between quotes in the second argument. The associated exogenous variable provided in the third argument between quotes, is considered as an endogenous variable and its values compatible with the constrained path on the endogenous variable will be computed. The nature of the expectation on the constrained  path has to be specified in the fourth argument between quotes: 'surprise' in case of an unexpected path or 'perfect_foresight' for a perfectly anticipated path. The fifth argument indicates the period where the path of the endogenous variable is constrained using a dates class (see @ref{dates class members}). The last argument contains the constrained path as a Matlab vector of double. This function return the handle of the updated forecast scenario.
 
-@end deffn
+@end deftypefn
 
 Once the forecast scenario if fully described, the forecast is computed with the command @code{det_cond_forecast}:
 @anchor{det_cond_forecast}
-@deffn {MATLAB/Octave command} DSERIES = det_cond_forecast(HANDLE[, DSERIES [, DATES]]) ;
+@deftypefn {MATLAB/Octave command} {DSERIES =} det_cond_forecast (HANDLE[, DSERIES [, DATES]]) ;
 
 Computes the forecast or the conditional forecast using an extended path method for the given forecast scenario (first argument). The past values of the endogenous and exogenous variables provided with a dseries class (see @ref{dseries class members}) can be indicated in the second argument. By default, the past values of the variables are equal to their steady-state values. The initial date of the forecast can be provided in the third argument. By default, the forecast will start at the first date indicated in the @code{init_plan} command. This function returns a dset containing the historical and forecast values for the endogenous and exogenous variables.
 
-@end deffn
+@end deftypefn
 
 
 
@@ -6030,6 +6157,68 @@ dset_forecast = det_cond_forecast(fplan, smoothed);
 plot(dset_forecast.@{'y','u'@});
 plot(dset_forecast.@{'r','e'@});
 @end example
+
+@deffn Command smoother2histval [(@var{OPTIONS}@dots{})]
+
+@descriptionhead
+
+The purpose of this command is to construct initial conditions (for a
+subsequent simulation) that are the smoothed values of a previous estimation.
+
+More precisely, after an estimation run with the @code{smoother} option,
+@code{smoother2histval} will extract the smoothed values (from
+@code{oo_.SmoothedVariables}, and possibly from @code{oo_.SmoothedShocks} if
+there are lagged exogenous), and will use these values to construct initial
+conditions (as if they had been manually entered through @code{histval}).
+
+@optionshead
+
+@table @code
+
+@item period = @var{INTEGER}
+Period number to use as the starting point for the subsequent simulation.
+It should be between @code{1} and the number of observations that were used to produce the
+smoothed values. Default: the last observation.
+
+@item infile = @var{FILENAME}
+Load the smoothed values from a @file{_results.mat} file created by a previous
+Dynare run. Default: use the smoothed values currently in the global workspace.
+
+@item invars = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
+A list of variables to read from the smoothed values. It can contain state
+endogenous variables, and also exogenous variables having a lag. Default: all
+the state endogenous variables, and all the exogenous variables with a lag.
+
+@item outfile = @var{FILENAME}
+Write the initial conditions to a file. Default: write the initial conditions
+in the current workspace, so that a simulation can be performed.
+
+@item outvars = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
+A list of variables which will be given the initial conditions. This list must
+have the same length than the list given to @code{invars}, and there will be a
+one-to-one mapping between the two list. Default: same value as option
+@code{invars}.
+
+@end table
+
+@customhead{Use cases}
+
+There are three possible ways of using this command:
+
+@itemize
+
+@item
+Everything in a single file: run an estimation with a smoother, then run @code{smoother2histval} (without the @code{infile} and @code{outfile} options), then run a stochastic simulation.
+
+@item
+In two files: in the first file, run the smoother and then run @code{smoother2histval} with the @code{outfile} option; in the second file, run @code{histval_file} to load the initial conditions, and run a (deterministic or stochastic) simulation
+
+@item
+In two files: in the first file, run the smoother; in the second file, run @code{smoother2histval} with the @code{infile} option equal to the @file{_results.mat} file created by the first file, and then run a (deterministic or stochastic) simulation
+
+@end itemize
+
+@end deffn
 
 @node Optimal policy
 @section Optimal policy
@@ -6057,7 +6246,7 @@ This command computes optimal simple policy rules for
 linear-quadratic problems of the form:
 
 @quotation
-@math{\max_\gamma E(y'_tWy_t)}
+@math{\min_\gamma E(y'_tWy_t)}
 @end quotation
 
 such that:
@@ -6067,46 +6256,84 @@ such that:
 
 where:
 
-@itemize
+@itemize 
+@item
+@math{E} denotes the unconditional expectations operator;
 
 @item
-@math{\gamma} are parameters to be optimized. They must be elements of matrices
-@math{A_1}, @math{A_2}, @math{A_3};
+@math{\gamma} are parameters to be optimized. They must be elements
+of the matrices @math{A_1}, @math{A_2}, @math{A_3}, i.e. be specified as
+parameters in the @code{params}-command and be entered in the
+@code{model}-block;
 
 @item
-@math{y} are the endogenous variables;
+@math{y} are the endogenous variables, specified in the
+@code{var}-command, whose (co)-variance enters the loss function;
 
 @item
-@math{e} are the exogenous stochastic shocks;
+@math{e} are the exogenous stochastic shocks, specified in the
+@code{var_exo}-command;
+
+@item
+@math{W} is the weighting matrix;
+
 @end itemize
 
-The parameters to be optimized must be listed with @code{osr_params}.
+The linear quadratic problem consists of choosing a subset of model
+parameters to minimize the weighted (co)-variance of a specified subset
+of endogenous variables, subject to a linear law of motion implied by the
+first order conditions of the model. A few things are worth mentioning.
+First, @math{y} denotes the selected endogenous variables' deviations
+from their steady state, i.e. in case they are not already mean 0 the
+variables entering the loss function are automatically demeaned so that
+the centered second moments are minimized. Second, @code{osr} only solves
+linear quadratic problems of the type resulting from combining the
+specified quadratic loss function with a first order approximation to the
+model's equilibrium conditions. The reason is that the first order
+state-space representation is used to compute the unconditional
+(co)-variances. Hence, @code{osr} will automatically select
+@code{order=1}. Third, because the objective involves minimizing a
+weighted sum of unconditional second moments, those second moments must
+be finite. In particular, unit roots in @math{y} are not allowed.
 
-The quadratic objectives must be listed with @code{optim_weights}.
+The subset of the model parameters over which the optimal simple rule is
+to be optimized, @math{\gamma}, must be listed with @code{osr_params}.
 
-This problem is solved using the numerical optimizer @code{csminwel} of Chris Sims.
+The weighting matrix @math{W} used for the quadratic objective function
+is specified in the @code{optim_weights}-block. By attaching weights to
+endogenous variables, the subset of endogenous variables entering the
+objective function, @math{y}, is implicitly specified.
+
+The linear quadratic problem is solved using the numerical optimizer
+@code{csminwel} of Chris Sims.
 
 
 @optionshead
 
-The @code{osr} command will subsequently run @code{stoch_simul}
-and accepts the same options, including restricting the endogenous variables by listing them after the command, as @code{stoch_simul}
+The @code{osr} command will subsequently run @code{stoch_simul} and
+accepts the same options, including restricting the endogenous variables
+by listing them after the command, as @code{stoch_simul}
 (@pxref{Computing the stochastic solution}) plus
 
 @table @code
 
-@item maxit = @var{INTEGER}
-Determines the maximum number of iterations used in the non-linear solver. Default: @code{1000}
+@item maxit = @var{INTEGER} Determines the maximum number of iterations
+used in the non-linear solver. Default: @code{1000}
 
-@item tolf = @var{DOUBLE}
-Convergence criterion for termination based on the function value. Iteration will
-cease when it proves impossible to improve the function value by more than tolf. Default: @code{1e-7}
+@item tolf = @var{DOUBLE} Convergence criterion for termination based on
+the function value. Iteration will cease when it proves impossible to
+improve the function value by more than tolf. Default: @code{1e-7}
+
 @end table
 
 The value of the objective is stored in the variable
 @code{oo_.osr.objective_function} and the value of parameters at the
 optimum is stored in @code{oo_.osr.optim_params}. See below for more
 details.
+
+After running @code{osr} the parameters entering the simple rule will be
+set to their optimal value so that subsequent runs of @code{stoch_simul}
+will be conducted at these values.
 
 @end deffn
 
@@ -6120,11 +6347,12 @@ This command declares parameters to be optimized by @code{osr}.
 
 This block specifies quadratic objectives for optimal policy problems
 
-More precisely, this block specifies the nonzero elements of the
-quadratic weight matrices for the objectives in @code{osr}.
+More precisely, this block specifies the nonzero elements of the weight
+matrix @math{W} used in the quadratic form of the objective function in
+@code{osr}.
 
-An element of the diagonal of the weight matrix is given by a line of
-the form:
+An element of the diagonal of the weight matrix is given by a line of the
+form:
 @example
 @var{VARIABLE_NAME} @var{EXPRESSION};
 @end example
@@ -6137,14 +6365,54 @@ the form:
 
 @end deffn
 
-@defvr {MATLAB/Octave variable} oo_.osr.objective_function
-After an execution of the @code{osr} command, this variable contains
-the value of the objective under optimal policy.
+@examplehead
+
+@example
+var y inflation r; 
+varexo y_ inf_;
+
+parameters delta sigma alpha kappa gammarr gammax0 gammac0 gamma_y_ gamma_inf_;
+
+delta =  0.44;
+kappa =  0.18;
+alpha =  0.48;
+sigma = -0.06;
+
+gammarr = 0;
+gammax0 = 0.2;
+gammac0 = 1.5;
+gamma_y_ = 8;
+gamma_inf_ = 3;
+
+model(linear); 
+y  = delta * y(-1)  + (1-delta)*y(+1)+sigma *(r - inflation(+1)) + y_;
+inflation  =   alpha * inflation(-1) + (1-alpha) * inflation(+1) + kappa*y + inf_;
+r = gammax0*y(-1)+gammac0*inflation(-1)+gamma_y_*y_+gamma_inf_*inf_; 
+end;
+
+shocks; 
+var y_; stderr 0.63; 
+var inf_; stderr 0.4; 
+end;
+
+optim_weights; 
+inflation 1; 
+y 1; 
+y, inflation 0.5; 
+end;
+
+osr_params gammax0 gammac0 gamma_y_ gamma_inf_; 
+osr y; 
+@end example
+
+@defvr {MATLAB/Octave variable} oo_.osr.objective_function 
+After an execution of the @code{osr} command, this variable contains the value of
+the objective under optimal policy.
 @end defvr
 
-@defvr {MATLAB/Octave variable} oo_.osr.optim_params
-After an execution of the @code{osr} command, this variable contains
-the value of parameters at the optimum, stored in fields of the form
+@defvr {MATLAB/Octave variable} oo_.osr.optim_params 
+After an execution of the @code{osr} command, this variable contains the value of parameters
+at the optimum, stored in fields of the form
 @code{oo_.osr.optim_params.@var{PARAMETER_NAME}}.
 @end defvr
 
@@ -7727,10 +7995,10 @@ Dynare has comments to plot the results of a simulation and to save the results.
 @deffn Command rplot @var{VARIABLE_NAME}@dots{};
 
 Plots the simulated path of one or several variables, as stored in
-@var{oo_.endo_simul} by either @var{simul} (@pxref{Deterministic
-simulation}) or @var{stoch_simul} with
-option @var{periods} (@pxref{Computing the stochastic solution}). The
-variables are plotted in levels.
+@code{oo_.endo_simul} by either @code{perfect_foresight_solver}, @code{simul}
+(@pxref{Deterministic simulation}) or @code{stoch_simul} with option
+@code{periods} (@pxref{Computing the stochastic solution}). The variables are
+plotted in levels.
 
 @end deffn
 
@@ -9440,10 +9708,10 @@ A scalar integer, the number of observations.
 A scalar integer, the number of variables.
 
 @item name
-A cell of strings, the names of the variables.
+A @code{nobs}*1 cell of strings or a @code{nobs}*p character array, the names of the variables.
 
 @item tex
- A cell of strings, the tex names of the variables.
+ A @code{nobs}*1 cell of strings or a @code{nobs}*p character array, the tex names of the variables.
 
 @item freq
 A scalar integer equal to 1, 4, 12 or 52, the frequency of the dataset.
@@ -9463,8 +9731,9 @@ A @code{nobs} by @code{vobs} array of doubles, the data.
 
 @deftypefn  {dseries} dseries ()
 @deftypefnx {dseries} dseries (@var{INITIAL_DATE})
+@deftypefnx {dseries} dseries (@var{RANGE_OF_DATES})
 
-Instantiates an empty @dseries object, with, if defined, an initial date given by the single element @dates object @var{INITIAL_DATE} (the frequency is then set accordingly).
+Instantiates an empty @dseries object, with, if defined, an initial date given by the single element @dates object @var{INITIAL_DATE} or the first element of the @dates object @var{RANGE_OF_DATES} (the frequency is then set accordingly).
 
 @end deftypefn
 
@@ -9490,8 +9759,9 @@ If a @file{.mat} file is used instead, it should provide the same informations. 
 @sp 1
 
 @deftypefn {dseries} dseries (@var{DATA_MATRIX}[, @var{INITIAL_DATE}[, @var{LIST_OF_NAMES}[, @var{LIST_OF_TEX_NAMES}]]])
+@deftypefnx {dseries} dseries (@var{DATA_MATRIX}[, @var{RANGE_OF_DATES}[, @var{LIST_OF_NAMES}[, @var{LIST_OF_TEX_NAMES}]]])
 
-If the data is not read from a file, it can be provided via a @math{T}x@math{N} matrix as the first argument to @code{dseries}' constructor, with @math{T} representing the number of observations on @math{N} variables. The optional second argument, @var{INITIAL_DATE}, can be either a @dates object representing the period of the first observation or a string which would be used to instantiate a @dates object. Its default value is @code{dates('1Y')}. The optional third argument, @var{LIST_OF_NAMES}, is a @math{N} by @math{1} cell of strings  with one entry for each variable name. The default name associated with column @code{i} of @var{DATA_MATRIX} is @code{Variable_i}. The final argument, @var{LIST_OF_TEX_NAMES}, is a @math{N} by @math{1} cell of strings composed of the @LaTeX{} names associated with the variables. The default @LaTeX{} name associated with column @code{i} of @var{DATA_MATRIX} is @code{Variable\_i}.
+If the data is not read from a file, it can be provided via a @math{T}x@math{N} matrix as the first argument to @code{dseries}' constructor, with @math{T} representing the number of observations on @math{N} variables. The optional second argument, @var{INITIAL_DATE}, can be either a @dates object representing the period of the first observation or a string which would be used to instantiate a @dates object. Its default value is @code{dates('1Y')}. The optional third argument, @var{LIST_OF_NAMES}, is a @math{N} by @math{1} cell of strings  with one entry for each variable name. The default name associated with column @code{i} of @var{DATA_MATRIX} is @code{Variable_i}. The final argument, @var{LIST_OF_TEX_NAMES}, is a @math{N} by @math{1} cell of strings composed of the @LaTeX{} names associated with the variables. The default @LaTeX{} name associated with column @code{i} of @var{DATA_MATRIX} is @code{Variable\_i}. If the optional second input argument is a range of dates, @dates object @var{RANGE_OF_DATES}, the number of rows in the first argument must match the number of elements @var{RANGE_OF_DATES} or be equal to one (in which case the single observation is replicated).
 
 @end deftypefn
 
@@ -9651,7 +9921,7 @@ Merge two @dseries objects along the time dimension. The two objects must have t
 
 @examplehead
 @example
->> ts = dseries([1; 2; 3; 4],dates('1950Q1'))
+>> ts = dseries([1; 2; 3; 4],dates(`1950Q1'))
 
 ts is a dseries object:
 
@@ -9661,15 +9931,15 @@ ts is a dseries object:
 1950Q3 | 3
 1950Q4 | 4
 
->> us = dseries([3; 4; 5; 6],dates('1950Q3'))
+>> us = dseries([3; 4; 5; 6],dates(`1950Q3'))
 
 us is a dseries object:
 
        | Variable_1
-1950Q3 | 3.1
-1950Q4 | 4.1
-1951Q1 | 8.2
-1951Q2 | 16.4
+1950Q3 | 3
+1950Q4 | 4
+1951Q1 | 5
+1951Q2 | 6
 
 >> chain(ts, us)
 
@@ -9680,8 +9950,8 @@ ans is a dseries object:
 1950Q2 | 2
 1950Q3 | 3
 1950Q4 | 4
-1951Q1 | 8
-1951Q2 | 16
+1951Q1 | 5
+1951Q2 | 6
 
 @end example
 

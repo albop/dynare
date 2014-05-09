@@ -47,7 +47,7 @@ problem_dummy=0;
 k = find(lead_lag_incidence(maximum_endo_lag+1,:)==0);
 if ~isempty(k)
     problem_dummy=1;
-    disp(['The following endogenous variables aren''t present at ' ...
+    disp(['MODEL_DIAGNOSTICS: The following endogenous variables aren''t present at ' ...
           'the current period in the model:'])
     for i=1:length(k)
         disp(endo_names(k(i),:))
@@ -63,25 +63,32 @@ if M.exo_nbr == 0
     oo.exo_steady_state = [] ;
 end
 
+
+info=test_for_deep_parameters_calibration(M);
+if info
+    problem_dummy=1;
+end;
+
 % check if ys is steady state
+options.debug=1; %locally set debug option to 1
 [dr.ys,params,check1]=evaluate_steady_state(oo.steady_state,M,options,oo,1);
 
 % testing for problem
 if check1(1)
     problem_dummy=1;
-    disp('model diagnostic can''t obtain the steady state')
+    disp('MODEL_DIAGNOSTICS: The steady state cannot be computed')
     if any(isnan(dr.ys))
-        disp(['model diagnostic obtains a steady state with NaNs'])
+        disp(['MODEL_DIAGNOSTICS: Steady state contains NaNs'])
     end
     if any(isinf(dr.ys))
-        disp(['model diagnostic obtains a steady state with Inf'])
+        disp(['MODEL_DIAGNOSTICS: Steady state contains Inf'])
     end
     return;
 end
 
 if ~isreal(dr.ys)
     problem_dummy=1;
-    disp(['model diagnostic obtains a steady state with complex ' ...
+    disp(['MODEL_DIAGNOSTICS: Steady state contains complex ' ...
           'numbers'])
     return
 end
@@ -110,13 +117,23 @@ for b=1:nb
     else
         [res,jacob]=feval([M.fname '_static'],dr.ys,exo,M.params);
     end
-    rank_jacob = rank(jacob);
+    if any(any(isinf(jacob) | isnan(jacob)))
+        problem_dummy=1;
+        [infrow,infcol]=find(isinf(jacob) | isnan(jacob));
+        fprintf('\nMODEL_DIAGNOSTICS: The Jacobian of the static model contains Inf or NaN. The problem arises from: \n\n')
+        display_problematic_vars_Jacobian(infrow,infcol,M,dr.ys,'static','MODEL_DIAGNOSTICS: ')
+    end
+    try
+        rank_jacob = rank(jacob); %can sometimes fail
+    catch
+        rank_jacob=size(jacob,1);
+    end
     if rank_jacob < size(jacob,1)
         problem_dummy=1;
         singularity_problem = 1;
-        disp(['model_diagnostic: the Jacobian of the static model is ' ...
+        disp(['MODEL_DIAGNOSTICS:  The Jacobian of the static model is ' ...
               'singular'])
-        disp(['there is ' num2str(endo_nbr-rank_jacob) ...
+        disp(['MODEL_DIAGNOSTICS:  there is ' num2str(endo_nbr-rank_jacob) ...
               ' colinear relationships between the variables and the equations'])
         ncol = null(jacob);
         n_rel = size(ncol,2);
@@ -150,13 +167,61 @@ for b=1:nb
         end
     end
 end
+    
 if singularity_problem 
-    fprintf('The presence of a singularity problem typically indicates that there is one\n')
-    fprintf('redundant equation entered in the model block, while another non-redundant equation\n')
-    fprintf('is missing. The problem often derives from Walras Law.\n')
+    fprintf('MODEL_DIAGNOSTICS:  The presence of a singularity problem typically indicates that there is one\n')
+    fprintf('MODEL_DIAGNOSTICS:  redundant equation entered in the model block, while another non-redundant equation\n')
+    fprintf('MODEL_DIAGNOSTICS:  is missing. The problem often derives from Walras Law.\n')
 end
 
+%%check dynamic Jacobian
+klen = M.maximum_lag + M.maximum_lead + 1;
+exo_simul = [repmat(oo.exo_steady_state',klen,1) repmat(oo.exo_det_steady_state',klen,1)];
+iyv = M.lead_lag_incidence';
+iyv = iyv(:);
+iyr0 = find(iyv) ;
+it_ = M.maximum_lag + 1;
+z = repmat(dr.ys,1,klen);
+
+if options.order == 1
+    if (options.bytecode)
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_simul, ...
+                                        M.params, dr.ys, 1);
+        jacobia_ = [loc_dr.g1 loc_dr.g1_x loc_dr.g1_xd];
+    else
+        [junk,jacobia_] = feval([M.fname '_dynamic'],z(iyr0),exo_simul, ...
+                            M.params, dr.ys, it_);
+    end;
+elseif options.order == 2
+    if (options.bytecode)
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_simul, ...
+                            M.params, dr.ys, 1);
+        jacobia_ = [loc_dr.g1 loc_dr.g1_x];
+    else
+        [junk,jacobia_,hessian1] = feval([M.fname '_dynamic'],z(iyr0),...
+                                         exo_simul, ...
+                                         M.params, dr.ys, it_);
+    end;
+    if options.use_dll
+        % In USE_DLL mode, the hessian is in the 3-column sparse representation
+        hessian1 = sparse(hessian1(:,1), hessian1(:,2), hessian1(:,3), ...
+                          size(jacobia_, 1), size(jacobia_, 2)*size(jacobia_, 2));
+    end
+end
+
+if any(any(isinf(jacobia_) | isnan(jacobia_)))
+    problem_dummy=1;
+    [infrow,infcol]=find(isinf(jacobia_) | isnan(jacobia_));
+    fprintf('\nMODEL_DIAGNOSTICS: The Jacobian of the dynamic model contains Inf or NaN. The problem arises from: \n\n')
+    display_problematic_vars_Jacobian(infrow,infcol,M,dr.ys,'dynamic','MODEL_DIAGNOSTICS: ')
+end
+if exist('hessian1','var')
+    if any(any(isinf(hessian1) | isnan(hessian1)))
+        problem_dummy=1;
+        fprintf('\nMODEL_DIAGNOSTICS: The Hessian of the dynamic model contains Inf or NaN.\n')
+    end
+end
 if problem_dummy==0
-    fprintf('model_diagnostics was not able to detect any obvious problems with this mod-file.\n')
+    fprintf('MODEL_DIAGNOSTICS:  No obvious problems with this mod-file were detected.\n')
 end
 

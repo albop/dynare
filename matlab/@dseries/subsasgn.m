@@ -162,6 +162,41 @@ switch length(S)
               else
                   error('dseries::subsasgn: The object on the right hand side must be a dseries object or a numeric array!')
               end
+          elseif ischar(S(1).subs{1}) && isequal(S(1).subs{1},':') && isempty(A)
+              if isnumeric(B)
+                  if isequal(rows(B),1)
+                      A.data = repmat(B,A.dates.ndat,1);
+                      A.nobs = rows(A.data);
+                      A.vobs = columns(A.data);
+                  elseif isequal(rows(B),A.dates.ndat)
+                      A.data = B;
+                      A.nobs = rows(A.data);
+                      A.vobs = columns(A.data);
+                  else
+                      error('dseries::subsasgn: Wrong syntax!')
+                  end
+                  if isempty(A.name)
+                      A.name = default_name(A.vobs);
+                      A.tex = name2tex(A.name);
+                  end
+              elseif isdseries(B)
+                  if isequal(B.nobs,1)
+                      A.data = repmat(B.data,A.dates.ndat,1);
+                      A.nobs = rows(A.data);
+                      A.vobs = columns(A.data);
+                  elseif isequal(B.nobs,A.dates.ndat)
+                      A.data = B;
+                      A.nobs = rows(A.data);
+                      A.vobs = columns(A.data);
+                  else
+                      error('dseries::subsasgn: Wrong syntax!')
+                  end
+                  if isempty(A.name)
+                      A.name = B.name;
+                      A.tex = B.tex;
+                  end
+              end
+              return
           else
               error('dseries::subsasgn: Wrong syntax!')
           end
@@ -785,3 +820,51 @@ end
 %$ end
 %$ T = all(t);
 %@eof:20
+
+%@test:21
+%$ % Define a datasets.
+%$ A = rand(4,3);
+%$
+%$ % Instantiate an empty dseries object.
+%$ ts = dseries(dates('1950Q1'):dates('1950Q4'));
+%$
+%$ % Populate ts
+%$ try
+%$     ts(:) = A;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts.vobs,3);
+%$    t(3) = dyn_assert(ts.nobs,4);
+%$    t(4) = dyn_assert(ts.data,A,1e-15);
+%$ end
+%$ T = all(t);
+%@eof:21
+
+%@test:21
+%$ % Define a datasets.
+%$ A = rand(1,3);
+%$
+%$ % Instantiate an empty dseries object.
+%$ ts = dseries(dates('1950Q1'):dates('1950Q4'));
+%$
+%$ % Populate ts
+%$ try
+%$     ts(:) = A;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts.vobs,3);
+%$    t(3) = dyn_assert(ts.nobs,4);
+%$    t(4) = dyn_assert(ts.data,repmat(A,4,1),1e-15);
+%$ end
+%$ T = all(t);
+%@eof:21

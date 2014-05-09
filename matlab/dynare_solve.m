@@ -46,20 +46,9 @@ if jacobian_flag
         [infrow,infcol]=find(isinf(fjac) | isnan(fjac));
         M=evalin('base','M_'); %get variable names from workspace
         fprintf('\nSTEADY:  The Jacobian contains Inf or NaN. The problem arises from: \n\n')
-        for ii=1:length(infrow)
-            if infcol(ii)<=M.orig_endo_nbr
-                fprintf('STEADY:  Derivative of Equation %d with respect to Variable %s  (initial value of %s: %g) \n',infrow(ii),deblank(M.endo_names(infcol(ii),:)),deblank(M.endo_names(infcol(ii),:)),x(infcol(ii)))
-            else %auxiliary vars
-                orig_var_index=M.aux_vars(1,infcol(ii)-M.orig_endo_nbr).orig_index;
-                fprintf('STEADY:  Derivative of Equation %d with respect to Variable %s  (initial value of %s: %g) \n',infrow(ii),deblank(M.endo_names(orig_var_index,:)),deblank(M.endo_names(orig_var_index,:)),x(infcol(ii)))            
-            end
-        end
-        fprintf('\nSTEADY:  The problem most often occurs, because a variable with\n')
-        fprintf('STEADY:  exponent smaller than 1 has been initialized to 0. Taking the derivative\n')
-        fprintf('STEADY:  and evaluating it at the steady state then results in a division by 0.\n')
+        display_problematic_vars_Jacobian(infrow,infcol,M,x,'static','STEADY: ')
         error('An element of the Jacobian is not finite or NaN') 
     end
-
 else
     fvec = feval(func,x,varargin{:});
     fjac = zeros(nn,nn) ;
@@ -120,7 +109,11 @@ if options_.solve_algo == 0
         info = 1;
     end
 elseif options_.solve_algo == 1
-    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,options_.gstep, ...
+        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,options_.gstep, ...
+                    tolf,options_.solve_tolx, ...
+                    options_.steady.maxit,options_.debug,varargin{:});
+elseif options_.solve_algo == 5
+        [x,info]=trust_region(func,x,1:nn,1:nn,jacobian_flag,options_.gstep, ...
                     tolf,options_.solve_tolx, ...
                     options_.steady.maxit,options_.debug,varargin{:});
 elseif options_.solve_algo == 2 || options_.solve_algo == 4

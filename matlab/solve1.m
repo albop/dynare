@@ -90,9 +90,14 @@ for its = 1:maxit
 
     g = (fvec'*fjac)';
     if debug
-        disp(['cond(fjac) ' num2str(cond(fjac))])
+        disp(['cond(fjac) ' num2str(condest(fjac))])
     end
-    if rcond(fjac) < sqrt(eps)
+    if issparse(fjac)
+        rcond_fjac = 1/condest(fjac);
+    else
+        rcond_fjac = rcond(fjac);
+    end
+    if rcond_fjac < sqrt(eps)
         fjac2=fjac'*fjac;
         p=-(fjac2+1e6*sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
     else
