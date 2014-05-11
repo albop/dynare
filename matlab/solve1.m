@@ -41,7 +41,6 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,gstep,tolf,tolx,maxit,deb
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 nn = length(j1);
-fjac = zeros(nn,nn) ;
 g = zeros(nn,1) ;
 
 tolmin = tolx ;
@@ -71,6 +70,9 @@ end
 
 stpmax = stpmx*max([sqrt(x'*x);nn]) ;
 first_time = 1;
+if ~jacobian_flag
+    fjac = zeros(nn,nn) ;
+end
 for its = 1:maxit
     if jacobian_flag
         [fvec,fjac] = feval(func,x,varargin{:});
