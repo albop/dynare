@@ -49,11 +49,11 @@ for i = 1:order+1
         innovation = x;
         if i <= order && j == 1
             % first world, integrating future shocks
-            if nargin > 1
+            if nargout > 1
                 A1 = sparse([],[],[],i*ny,dimension,nnzA*world_nbr);
             end
             for k=1:nnodes
-                if nargin > 1
+                if nargout > 1
                     if i == 2
                         i_cols_Ap = i_cols_Ap0;
                     elseif i > 2
@@ -86,7 +86,7 @@ for i = 1:order+1
                          Y(i_cols_s,1);
                          Y(i_cols_f,k1)];
                 end
-                if nargin > 1
+                if nargout > 1
                     [d1,jacobian] = dynamic_model(z,innovation,params,steady_state,i+1);
                     if i == 1
                         % in first period we don't keep track of
@@ -102,14 +102,14 @@ for i = 1:order+1
                 end
                 res(:,i,1) = res(:,i,1)+weights(k)*d1;
             end
-            if nargin > 1
+            if nargout > 1
                 [ir,ic,v] = find(A1);
                 nzA{i,j} = [ir,ic,v]';
             end
         elseif j > 1 + (nnodes-1)*(i-2)
             % new world, using previous state of world 1 and hit
             % by shocks from nodes
-            if nargin > 1
+            if nargout > 1
                 i_cols_Ap = i_cols_Ap0 + ny*(i-2+(nnodes-1)*(i-2)*(i-3)/2);
                 i_cols_Af = i_cols_Af0 + ny*(i+(nnodes-1)*i*(i-1)/2+j-2);
             end
@@ -118,7 +118,7 @@ for i = 1:order+1
             z = [Y(i_cols_p,1);
                  Y(i_cols_s,j);
                  Y(i_cols_f,j)];
-            if nargin > 1
+            if nargout > 1
                 [d1,jacobian] = dynamic_model(z,innovation,params,steady_state,i+1);
                 i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
                 [ir,ic,v] = find(jacobian(:,i_cols_j));
@@ -127,34 +127,34 @@ for i = 1:order+1
                 d1 = dynamic_model(z,innovation,params,steady_state,i+1);
             end
             res(:,i,j) = d1;
-            if nargin > 1
+            if nargout > 1
                 i_cols_Af = i_cols_Af + ny;
             end
         else
             % existing worlds other than 1
-            if nargin > 1
+            if nargout > 1
                 i_cols_Ap = i_cols_Ap0 + ny*(i-2+(nnodes-1)*(i-2)*(i-3)/2+j-1);
                 i_cols_Af = i_cols_Af0 + ny*(i+(nnodes-1)*i*(i-1)/2+j-2);
             end
             z = [Y(i_cols_p,j);
                  Y(i_cols_s,j);
                  Y(i_cols_f,j)];
-            if nargin > 1
+            if nargout > 1
                 [d1,jacobian] = dynamic_model(z,innovation,params,steady_state,i+1);
                 i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
                 [ir,ic,v] = find(jacobian(:,i_cols_j));
                 nzA{i,j} = [i_rows(ir),i_cols_A(ic),v]';
+                i_cols_Af = i_cols_Af + ny;
             else
                 d1 = dynamic_model(z,innovation,params,steady_state,i+1);
             end
             res(:,i,j) = d1;
-            i_cols_Af = i_cols_Af + ny;
         end
         i_rows = i_rows + ny;
         if mod(j,nnodes) == 0
             i_w_p = i_w_p + 1;
         end
-        if nargin > 1 && i > 1
+        if nargout > 1 && i > 1
             i_cols_As = i_cols_As + ny;
         end
         offset_r0 = offset_r0 + ny;
@@ -168,7 +168,7 @@ for j=1:world_nbr
     offset_c = ny*(order+(nnodes-1)*(order-1)*order/2+j-1);
     offset_r = offset_r0+(j-1)*ny;
     for i=order+2:periods
-        if nargin > 1
+        if nargout > 1
             [d1,jacobian] = dynamic_model(Y(i_rows_y,j),x,params, ...
                                           steady_state,i+1);
             if i < periods
@@ -187,7 +187,7 @@ for j=1:world_nbr
         offset_r = offset_r + world_nbr*ny;
     end
 end
-if nargin > 1
+if nargout > 1
     iA = [nzA{:}]';
     A = sparse(iA(:,1),iA(:,2),iA(:,3),dimension,dimension);
 end

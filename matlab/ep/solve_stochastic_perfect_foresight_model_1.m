@@ -147,5 +147,9 @@ pfm.i_upd_y = i_upd_y;
 options_.solve_algo = 9;
 options_.steady.maxit = 100;
 y = repmat(steady_state,block_nbr,1);
-y = dynare_solve(@ep_problem_2,y,1,exo_simul,pfm);
+[y,info] = dynare_solve(@ep_problem_2,y,1,exo_simul,pfm);
+if info
+    flag = 1;
+    err = info;
+end
 endo_simul(:,2) = y(1:ny);
