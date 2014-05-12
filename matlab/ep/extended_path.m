@@ -150,6 +150,14 @@ if options_.ep.stochastic.order > 0
     pfm.nnodes = nnodes;
 end
 
+% compute number of blocks
+[block_nbr,pfm.world_nbr] = get_block_world_nbr(options_.ep.stochastic.algo,nnodes,options_.ep.ut.k,options_.ep.periods);
+% set boundaries if mcp
+[lb,ub,pfm.eq_index] = get_complementarity_conditions(M_);
+options_.lmmcp.lb = repmat(lb,block_nbr,1);
+options_.lmmcp.ub = repmat(ub,block_nbr,1);
+pfm.block_nbr = block_nbr;
+
 % Main loop.
 while (t<sample_size)
     if ~mod(t,10)
