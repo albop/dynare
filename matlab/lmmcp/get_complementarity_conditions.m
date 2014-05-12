@@ -23,30 +23,33 @@ ub = inf(M.endo_nbr,1);
 lb = -ub;
 eq_index = (1:M.endo_nbr)';
 for i=1:size(etags,1)
-    if strcmp(etags{i,2},'mcp') 
-        [b,m] = strsplit(etags{i,3},{' ','<','>'});
-        if length(m) == 1
-            if any(m{1} == '<')
-                k = find(strcmp(b{1},cellstr(M.endo_names)));
+    if strcmp(etags{i,2},'mcp')
+        str = etags{i,3};
+        kop = strfind(etags{i,3},'<');
+        if ~isempty(kop)
+                k = find(strcmp(strtrim(str(1:kop-1)),cellstr(M.endo_names)));
                 if isempty(k)
                     error(sprintf(['Complementarity condition %s: variable %s is ' ...
                                    'not recognized',etags{i,3},b{1}]))
                 end
-                ub(k) = str2num(b{2});
+                ub(k) = str2num(str(kop+1:end));
                 eq_index(etags{i,1}) = k;
                 eq_index(k) = etags{i,1};
-            elseif any(m{1} == '>')
-                k = find(strcmp(b{1},cellstr(M.endo_names)));
+        else
+            kop = strfind(etags{i,3},'>');
+            if ~isempty(kop)
+                k = find(strcmp(strtrim(str(1:kop-1)),cellstr(M.endo_names)));
                 if isempty(k)
                     error(sprintf(['Complementarity condition %s: variable %s is ' ...
                                    'not recognized',etags{i},b{1}]))
                 end
-                lb(k) = str2num(b{2});
+                lb(k) = str2num(str(kop+1:end));
                 eq_index(etags{i,1}) = k;
                 eq_index(k) = etags{i,1};
+            else
+                error(sprintf(['Complementarity condition %s can''t be ' ...
+                               'parsed'],etags{i,3}))
             end
-        else
-            error(sprintf('Complementarity condition %s can''t be parsed',etags{i,3}))
         end
     end
 end
