@@ -59,7 +59,7 @@ end
 
 % Set the number of periods for the perfect foresight model
 periods = options_.ep.periods;
-pfm.periods = options_.ep.periods;
+pfm.periods = periods;
 pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
 
 % keep a copy of pfm.i_upd
@@ -139,6 +139,17 @@ else
     pfm.dr = [];
 end
 
+% number of nonzero derivatives
+pfm.nnzA = M_.NNZDerivatives(1);
+
+% setting up integration nodes if order > 0
+if options_.ep.stochastic.order > 0
+    [nodes,weights,nnodes] = setup_integration_nodes(options_.ep,pfm);
+    pfm.nodes = nodes;
+    pfm.weights = weights;
+    pfm.nnodes = nnodes;
+end
+
 % Main loop.
 while (t<sample_size)
     if ~mod(t,10)
@@ -189,7 +200,7 @@ while (t<sample_size)
                             solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
                         case 1
                           [flag,tmp] = ...
-                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_.ep,pfm1,options_.ep.stochastic.order);
+                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_,pfm1,options_.ep.stochastic.order);
                     end
                 end
             end
@@ -273,7 +284,7 @@ while (t<sample_size)
                             solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
                         case 1
                           [flag,tmp] = ...
-                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_.ep,pfm1,options_.ep.stochastic.order);
+                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_,pfm1,options_.ep.stochastic.order);
                     end
                 end
             end
