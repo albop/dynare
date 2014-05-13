@@ -58,8 +58,9 @@
   \begin{itemize}
   \item Provide support for time series in Dynare
   \item Introduced in Dynare 4.4
-  \item Currently only used for reporting.
+  \item Currently only used for reporting
   \item Use will increase with time (\textit{e.g.,} to be included in new estimation code)
+  \item NB: More complete information is included in the Dynare manual
   \end{itemize}
 \end{frame}
 
@@ -101,6 +102,12 @@
       \item Empty
       \item Noncontiguous
     \end{itemize}
+  \item Can index a \texttt{dates} object. If \texttt{t} is a \texttt{dates} object, then
+    \begin{itemize}
+    \item \texttt{t(1) \% refers to the first date}
+    \item \texttt{t(1:3) \% refers to the first three dates}
+    \item \texttt{t([1,4,5]) \% refers to the first, fourth, and fifth dates}
+    \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -118,6 +125,7 @@
     \item In a \texttt{.m} file: \texttt{dr = dates(`1999y'):dates(`2020y');}
     \item In a \texttt{.mod} file: \texttt{dr = 1999y:2020y;}
     \end{itemize}
+  \item In what follows, \texttt{t} and \texttt{dr} are as above. Operations that assign to \texttt{t} and \texttt{dr} keep the value thereafter.
   \end{itemize}
 \end{frame}
 
@@ -149,13 +157,13 @@
     \end{itemize}
   \item \texttt{sort}: sort dates in ascending order
     \begin{itemize}
-    \item \texttt{t=t.sort(); \% <dates: 1900Y, 1999Y>}
+    \item \texttt{t.sort(); \% <dates: 1900Y, 1999Y>}
     \end{itemize}
   \item \texttt{uminus}: shifts dates back one period
     \begin{itemize}
     \item \texttt{-t; \% <dates: 1998Y, 1899Y>}
     \end{itemize}
-  \item \texttt{unique}: removes repetitions
+  \item \texttt{unique}: removes repetitions (keeping last unique value)
     \begin{itemize}
     \item \texttt{t.append(dates(`1999y')).unique() \% <dates: 1900Y, 1999Y>}
     \end{itemize}
@@ -217,6 +225,7 @@
   \item \texttt{isempty}: returns true if the argument is empty
     \begin{itemize}
     \item \texttt{isempty(t) \% 0}
+    \item \texttt{isempty(dates()) \% 1}
     \end{itemize}
   \item \texttt{setdiff}: returns dates present in first arg but not in second
     \begin{itemize}
@@ -234,6 +243,198 @@
 % DSERIES
 %
 \subsubsection{\texttt{dseries} Syntax}
+\begin{frame}[fragile,t]
+  \frametitle{\texttt{dseries} Syntax}
+  \begin{itemize}
+  \item A \texttt{dseries} is composed of one or more individual series
+  \item All time series in a dseries must have the same frequency
+  \item A \texttt{dseries} runs from the earliest date to the latest date, with \texttt{NaN}'s inserted to pad the shorter series
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Creating a new \texttt{dseries} object}
+  \begin{itemize}
+  \item Load series from data file (\texttt{.csv, .xls}). Dates in first column, optional variable names in first row
+    \begin{itemize}
+    \item \texttt{ts=dseries(`data.csv');}
+    \end{itemize}
+  \item Load series from a Matlab/Octave file (\texttt{.m, .mat}). Must define the variables \texttt{INIT\_\_}, \texttt{NAMES\_\_}, and, optionally, \texttt{TEX\_\_}.
+    \begin{itemize}
+    \item \texttt{ts=dseries(`data.m');}
+    \end{itemize}
+  \item Load data directly. Here: one variable, `MyVar1', with three annual observations starting in 1999. Only first argument is required.
+    \begin{itemize}
+    \item \texttt{ts=dseries([1;2;3], `1999y', \{`MyVar1'\}, \{`MyVar\_1'\});}
+    \end{itemize}
+  \item Create an empty time series. Usefull for programatically creating a series.
+    \begin{itemize}
+    \item \texttt{ts=dseries();}
+    \item \texttt{ts=dseries(dates(`1999y'));}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Referencing data from a \texttt{dseries}}
+  \begin{itemize}
+  \item For the following, let
+    \begin{itemize}
+    \item \texttt{ts1=dseries([1;2;3], `1999y', \{`MyVar1'\}, \{`MyVar\_1'\})}
+    \item \texttt{ts2=dseries([4;5;6], `2000y', \{`MyVar2'\}, \{`MyVar\_2'\})}
+    \item \texttt{ts3=[ts1 ts2]}
+    \end{itemize}
+  \item To get \texttt{MyVar1} from \texttt{t3}, you have three options
+    \begin{itemize}
+      \item \texttt{ts3\{1\}}
+      \item \texttt{ts3.MyVar1}
+      \item \texttt{ts3\{`MyVar1'\}}
+    \end{itemize}
+  \item To select a subsample of MyVar2 from 2001 to 2002:
+    \begin{itemize}
+      \item \texttt{ts3\{2\}(dates(`2001y'):dates(`2002y'))}
+      \item \texttt{ts3.MyVar2(dates(`2001y'):dates(`2002y'))}
+      \item \texttt{ts3\{`MyVar2'\}(dates(`2001y'):dates(`2002y'))}
+    \end{itemize}
+  \item To see the data for both variables in 2000:
+    \begin{itemize}
+      \item \texttt{ts3(`2000y')}
+      \item \texttt{ts3\{[1 2]\}(`2000y')}
+      \item \texttt{ts3\{`MyVar1',`MyVar2'\}(`2000y')}
+      \item \texttt{ts3\{`MyVar@1,2@'\}(`2000y')}
+      \item \texttt{ts3\{`MyVar[1-2]'\}(`2000y')}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Getting info about \texttt{dseries}}
+  \begin{itemize}
+  \item \texttt{eq, ne}: returns boolean value of element-wise comparison; series must have same start dates and number of observations
+    \begin{itemize}
+    \item \texttt{ts1==ts3.MyVar1(dates(`1999y'):dates(`2001y')) \% [1 1 1]'}
+    \item \texttt{ts1$\thicksim$=ts1 \% [0 0 0]'}
+    \end{itemize}
+  \item \texttt{isempty}: returns true if series is empty
+    \begin{itemize}
+    \item \texttt{isempty(dseries()) \% 1}
+    \end{itemize}
+  \item \texttt{isequal}: returns true if the series are equal
+    \begin{itemize}
+    \item \texttt{isequal(ts1,ts1) \% 1}
+    \end{itemize}
+  \item \texttt{size}: returns number of observations by number of variables
+    \begin{itemize}
+    \item \texttt{ts3.size() \% [4 2]}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Working with \texttt{dseries}}
+  \begin{itemize}
+  \item \texttt{baxter\_king\_filter}: the Baxter and King (1999) band pass filter
+    \begin{itemize}
+    \item \texttt{ts1.baxter\_king\_filter(high freq, low freq, K)}
+    \end{itemize}
+  \item \texttt{hpcycle}: HP Filters the \texttt{dseries}, returning the business cycle component
+    \begin{itemize}
+    \item \texttt{ts1.hptrend(lambda) \% lambda = 1600 by default}
+    \end{itemize}
+  \item \texttt{hptrend}: HP Filters the \texttt{dseries}, returning the trend component
+    \begin{itemize}
+    \item \texttt{ts1.hptrend(lambda) \% lambda = 1600 by default}
+    \end{itemize}
+  \item \texttt{qdiff}: Quarterly difference; works on quarterly, monthly, and weekly series
+    \begin{itemize}
+    \item \texttt{ts1.qdiff()}
+    \end{itemize}
+  \item \texttt{qgrowth}: Quarterly growth rate: $\frac{ts_t-ts_{t-1}}{ts_{t-1}}$. Works on quarterly, monthly, and weekly series
+    \begin{itemize}
+    \item \texttt{ts1.qgrowth()}
+    \end{itemize}
+  \item \texttt{yidff}: Yearly difference; works on yearly, quarterly, monthly, and weekly series
+    \begin{itemize}
+    \item \texttt{ts1.ydiff()}
+    \end{itemize}
+  \item \texttt{ygrowth}: Annual growth rate: $\frac{ts_t-ts_{t-1}}{ts_{t-1}}$. Works on yearly ($t-1$), quarterly ($t-4$), monthly ($t-12$), and weekly ($t-52$) series
+    \begin{itemize}
+    \item \texttt{ts1.ygrowth()}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Operations on \texttt{dseries}}
+  \begin{itemize}
+  \item \texttt{abs}: The absolute value of each data point
+  \item \texttt{cumprod}/\texttt{cumsum}: Cumulative product/sum
+  \item \texttt{exp}/\texttt{log}: The exponential/log for each data point
+  \item \texttt{mrdivide}/\texttt{mtimes}: Division/Multiplication
+  \item \texttt{minus}/\texttt{plus}: Subtraction/Addition
+  \item \texttt{mpower}: Power
+    \begin{itemize}
+    \item \texttt{ts1-ts2}
+    \item \texttt{ts1-3}
+    \item \texttt{ts1-[1:3]'}
+    \end{itemize}
+  \item \texttt{lag}/\texttt{lead}: lag/lead the series
+    \begin{itemize}
+    \item \texttt{ts1(-1)}/\texttt{ts1(2)}
+    \item \texttt{ts1.lag()}/\texttt{ts1.lead(2)}
+    \end{itemize}
+  \item \texttt{uminus}: Equivalent to multiplying by $-1$.
+    \begin{itemize}
+    \item \texttt{-ts1}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Modifying \texttt{dates}}
+  \begin{itemize}
+  \item \texttt{align}: Makes both series cover the same time range by padding with \texttt{NaN}'s
+    \begin{itemize}
+    \item \texttt{[ts1,ts2]=align(ts1,ts2)}
+    \end{itemize}
+  \item \texttt{chain}:
+  \item \texttt{horzcat}: Join two or more \texttt{dseries}
+    \begin{itemize}
+    \item \texttt{ts3=[ts1 ts2]}
+    \end{itemize}
+  \item \texttt{insert}: Inserts variables from one \texttt{dseries} into another
+    \begin{itemize}
+    \item \texttt{ts1.insert(ts2, 2)}
+    \end{itemize}
+  \item \texttt{merge}: Merge two series
+  \item \texttt{pop}: remove the last variable from \texttt{dseries}
+  \item \texttt{plot}: plot a \texttt{dseries}
+  \item \texttt{rename}: Rename a variable in a dseries
+    \begin{itemize}
+    \item \texttt{ts1.rename(`MyVar1',`MyFirstVar')}
+    \end{itemize}
+  \item \texttt{save}: Save a \texttt{dseries} in either \texttt{.csv} (default), \texttt{.m}, or \texttt{.mat}
+  \item \texttt{set\_names}: Rename all variables in a \texttt{dseries}
+    \begin{itemize}
+    \item \texttt{ts3.set\_names(`NewName1',`NewName2')}
+    \end{itemize}
+  \item \texttt{tex\_rename}: Rename the \LaTeX name for a given variable
+    \begin{itemize}
+    \item \texttt{ts1.tex\_rename(`MyVar1',`MyVar\textbackslash\_1')}
+    \end{itemize}
+  \item \texttt{vertcat}: Add more observations to existing \texttt{dseries}
+    \begin{itemize}
+    \item \texttt{[ts1; dseries(4,`2002y',`MyVar1')]}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
 
 
 \subsection{Examples}
@@ -325,5 +526,8 @@
 
 
 \subsection{Examples}
+
+
+\section{Putting it All Together}
 
 \end{document}
