@@ -424,7 +424,7 @@
     \begin{itemize}
     \item \texttt{ts3.set\_names(`NewName1',`NewName2')}
     \end{itemize}
-  \item \texttt{tex\_rename}: Rename the \LaTeX name for a given variable
+  \item \texttt{tex\_rename}: Rename the \LaTeX\ name for a given variable
     \begin{itemize}
     \item \texttt{ts1.tex\_rename(`MyVar1',`MyVar\textbackslash\_1')}
     \end{itemize}
@@ -438,6 +438,8 @@
 
 
 \subsection{Examples}
+
+
 
 
 %
@@ -458,19 +460,54 @@
       \begin{itemize}
       \item Can easily be included in another document
       \end{itemize}
-    \item Graphs are produced in Ti$k$Z
+    \item Graphs are produced in Ti$k$Z/PGFPlots (standard in a TeX distribution)
       \begin{itemize}
       \item Scales well
       \item Formating follows that of enclosing document
       \end{itemize}
+    \item Dynare provides a subset of the many Ti$k$Z options
+      \begin{itemize}
+      \item You can easily modify the Ti$k$Z graph if the option you want is not in Dynare
+      \end{itemize}
     \item Works with Matlab \& Octave
     \item Works approximately 5 times faster than Iris reporting
+    \item NB: Must install a \LaTeX\ distribution to compile reports
+      \begin{itemize}
+      \item Windows: MiKTeX \url{http://miktex.org}
+      \item Mac OS X: MacTeX \url{http://tug.org/mactex}
+      \item Linux: TeX Live (from your package manager)
+      \end{itemize}
   \end{itemize}
 \end{frame}
 
+
+\begin{frame}
+  \frametitle{How Reporting Works}
+  \begin{itemize}
+  \item Reports are created command by command
+    \begin{itemize}
+    \item Hence the order of commands matters
+    \end{itemize}
+  \item All reporting commands act on the previously added object until an object of greater or equal hierarchy is added (see next slide)
+    \begin{itemize}
+    \item \textit{e.g.,} Once you add a \texttt{Page} to your report with the \texttt{addPage()} command, every \texttt{Section} you add via the \texttt{addSection()} command will be placed on this page. Only when you add another \texttt{Page} will items go on a new page.
+    \item This will become more clear with an example
+    \end{itemize}
+  \item Options to reporting commands are passed in option name/value pairs
+    \begin{itemize}
+    \item \textit{e.g.,} \texttt{addPage(`title', \{`Page Title', `Page Subtitle'\})}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
 \begin{frame}
   \frametitle{Reporting Class Hierarchy}
-  \centering {
+  \begin{itemize}
+  \item Class names on the top half of the box, constructor names on the bottom
+  \item Arrows represent what the new object can be added to
+  \end{itemize}
+  \begin{center}
     \begin{tikzpicture}[
         node distance = .45cm,
         auto,
@@ -519,14 +556,75 @@
       \draw [line] (Section) to node { } (Page);
       \draw [line] (Page) to node { } (Report);
     \end{tikzpicture}
-  }
+  \end{center}
 \end{frame}
 
+
 \subsection{Syntax}
+\begin{frame}
+  \frametitle{Reporting Syntax}
+  \begin{itemize}
+  \item \texttt{report(\ldots)}: Create a report
+    \begin{itemize}
+    \item Options: \texttt{compiler}, \texttt{showDate}, \texttt{fileName}, \texttt{margin}, \texttt{marginUnit}, \texttt{orientation}, \texttt{paper}, \texttt{title}
+    \end{itemize}
+  \item \texttt{addPage(\ldots)}: Add a page to the \texttt{Report}
+    \begin{itemize}
+    \item Options: \texttt{footnote}, \texttt{orientation}, \texttt{paper}, \texttt{title}, \texttt{titleFormat}
+    \end{itemize}
+  \item \texttt{addSection(\ldots)}: Add a section to the current \texttt{Page}
+    \begin{itemize}
+    \item You can think of a section as a matrix. As graphs and/or tables are added section, it fills up from left to right. Once you have added \texttt{cols} objects, a new row is started.
+    \item Options: \texttt{cols}, \texttt{height}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Reporting Syntax (continued)}
+  \begin{itemize}
+  \item \texttt{addGraph(\ldots)}: Add a graph to the current \texttt{Section}
+    \begin{itemize}
+    \item Options: \texttt{data}, \texttt{graphDirName}, \texttt{graphName}, \texttt{graphSize}, \texttt{height}, \texttt{showGrid}, \texttt{showLegend}, \texttt{showLegendBox}, \texttt{legendLocation}, \texttt{legendOrientation}, \texttt{legendFontSize}, \texttt{seriesToUse}, \texttt{shade}, \texttt{shadeColor}, \texttt{shadeOpacity}, \texttt{title}, \texttt{titleFormat}, \texttt{width}, \texttt{xlabel}, \texttt{ylabel}, \texttt{xAxisTight}, \texttt{xrange}, \texttt{xTicks}, \texttt{xTickLabels}, \texttt{xTickLabelAnchor}, \texttt{xTickLabelRotation}, \texttt{yAxisTight}, \texttt{yrange}, \texttt{showZeroLine}
+    \end{itemize}
+  \item \texttt{addTable(\ldots)}: Add a table to the current \texttt{Section}
+    \begin{itemize}
+    \item Options: \texttt{data}, \texttt{showHlines}, \texttt{precision}, \texttt{range}, \texttt{seriesToUse}, \texttt{tableDirName}, \texttt{tableName}, \texttt{title}, \texttt{titleFormat}, \texttt{vlineAfter}, \texttt{vlineAfterEndOfPeriod}, \texttt{showVlines}
+    \end{itemize}
+  \item \texttt{addSeries(\ldots)}: Add a series to the current \texttt{Graph} or \texttt{Table}
+    \begin{itemize}
+    \item \texttt{data}, \texttt{graphLineStyle}, \texttt{graphLineWidth}, \texttt{graphMarker}, \texttt{graphMarkerEdgeColor}, \texttt{graphMarkerFaceColor}, \texttt{graphMarkerSize}, \texttt{tableDataRhs}, \texttt{tableRowColor}, \texttt{tableRowIndent}, \texttt{tableShowMarkers}, \texttt{tableAlignRight}, \texttt{tableMarkerLimit}, \texttt{tableNegColor}, \texttt{tablePosColor}, \texttt{tableSubSectionHeader}, \texttt{zeroTol}
+    \end{itemize}
+  \item Options: \texttt{addVspace(\ldots)}: Add a vertical space to the current \texttt{Section}
+    \begin{itemize}
+    \item \texttt{hline}, \texttt{number}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Output}
+  To create a report:
+  \begin{itemize}
+  \item \texttt{write()}: Writes the report to a \LaTeX\ file
+  \item \texttt{compile(\ldots)}: Compiles the report
+    \begin{itemize}
+    \item Options: \texttt{compiler}
+    \end{itemize}
+  \end{itemize}
+  Report Output
+  \begin{itemize}
+  \item Unless you pass the \texttt{fileName} option to \texttt{report(\ldots)}, the report will be located in your working directory with the name \texttt{report.tex}. The compiled version will be called \texttt{report.pdf}.
+  \item Unless you pass the \texttt{graphDirName} or \texttt{graphName} options to \texttt{addGraph(\ldots)}, your graphs will be in a subdirectory of your working directory called \texttt{tmpRepDir}. The default name will take the form \texttt{graph\_pg9\_sec1\_row1\_col5.tex}
+  \item The same holds for the tables (substituting `table' for `graph' above).
+  \item Thus you can easily modify these files and include them in another report.
+  \end{itemize}
+\end{frame}
 
 
 \subsection{Examples}
-
 
 \section{Putting it All Together}
 
