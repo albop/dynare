@@ -249,7 +249,7 @@ if preprocess==1
 
       i=0;
       mu=0;
-      if n<100000
+      if n<100
          i=1;
          mu=1e-16;
          if condest(DPhix'*DPhix)>1e25
