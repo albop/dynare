@@ -183,7 +183,14 @@ else
         elseif M_.maximum_endo_lag == 0 % Purely forward model
             sim1_purely_forward;
         else % General case
-            if options_.stack_solve_algo == 0
+            if options_.mcp
+                [oo_.endo_simul,info] = dyn_lmmcp(M_,options_,oo_);
+                if info == 1
+                    oo_.deterministic_simulation.status = 0;
+                else
+                    oo_.deterministic_simulation.status = 1;
+                end;
+            elseif options_.stack_solve_algo == 0
                 sim1;
             else % stack_solve_algo = 6
                 sim1_lbj;

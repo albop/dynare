@@ -1,4 +1,4 @@
-function [lb,ub,eq_index] = get_complementarity_condition(M)
+function [lb,ub,eq_index] = get_complementarity_conditions(M)
 
 % Copyright (C) 2014 Dynare Team
 %
