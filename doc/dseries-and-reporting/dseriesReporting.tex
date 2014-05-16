@@ -627,5 +627,58 @@
 \subsection{Examples}
 
 \section{Putting it All Together}
+\begin{frame}[fragile=singleslide]
+  \frametitle{Create Report of IRFs from \texttt{example1.mod}}
+  \begin{itemize}
+  \item \texttt{example1.mod} is located in the Dynare \texttt{examples} directory
+  \end{itemize}
+  \begin{block}{Create \texttt{dseries} from IRFs}
+\begin{verbatim}
+@#define endovars=["y", "c", "k", "a", "h", "b"]
+@#for var in endovars
+  shocke.@{var} = dseries(@{var}_e, 2014q3, `@{var}');
+  shocku.@{var} = dseries(@{var}_u, 2014q3, `@{var}');
+@#endfor
+\end{verbatim}
+  \end{block}
+\end{frame}
 
+\begin{frame}[fragile=singleslide]
+  \frametitle{Create Report of IRFs from \texttt{example1.mod}}
+  \begin{block}{Populate Report}
+\small{
+\begin{verbatim}
+@#for shock in ["e", "u"]
+    report = report.addPage(`title', {`Dseries \& Report Example', ...
+                                      `Shock to @{shock}'}, ...
+                            `titleFormat', {`\Large\bfseries', ...
+                                            `\large\bfseries'});
+    report = report.addSection(`cols', 2);
+@#  for var in endovars
+      report = report.addGraph(`data', shock@{shock}.@{var}, ...
+                               `title', `@{var}', ...
+                               `showGrid', false, ...
+                               `showZeroLine', true);
+@#  endfor
+    report = report.addSection(`cols', 1);
+    report = report.addTable();
+@#  for var in endovars
+      report = report.addSeries(`data', shock@{shock}.@{var});
+@#  endfor
+@#endfor
+\end{verbatim}
+}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Create Report of IRFs from \texttt{example1.mod}}
+  \begin{block}{Compile Report}
+\begin{verbatim}
+report.write();
+report.compile();
+\end{verbatim}
+  \end{block}
+\end{frame}
 \end{document}
