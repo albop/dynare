@@ -65,7 +65,6 @@ info = 0;
 fvec = fcn (x, varargin{:});
 fvec = fvec(j1);
 fn = norm (fvec);
-jcn = nan(n, 1);
 
 % Outer loop.
 while (niter < maxiter && ~info)
@@ -88,9 +87,7 @@ while (niter < maxiter && ~info)
     end
 
     % Get column norms, use them as scaling factors.
-    for j = 1:n
-        jcn(j) = norm(fjac(:,j));
-    end
+    jcn = sqrt(sum(fjac.*fjac))';
     if (niter == 1)
         dg = jcn;
         dg(dg == 0) = 1;
@@ -228,7 +225,7 @@ if (xn > delta)
             bn = norm (b);
             dxn = delta/xn; snmd = snm/delta;
             t = (bn/sn) * (bn/xn) * snmd;
-            t = t - dxn * snmd^2 - sqrt ((t-dxn)^2 + (1-dxn^2)*(1-snmd^2));
+            t = t - dxn * snmd^2 + sqrt ((t-dxn)^2 + (1-dxn^2)*(1-snmd^2));
             alpha = dxn*(1-snmd^2) / t;
         else
             alpha = 0;

@@ -33,7 +33,7 @@ function o = writeTableFile(o, pg, sec, row, col)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 ne = length(o.series);
-if length(o.series) == 0
+if ne == 0
     warning('@report_table.write: no series to plot, returning');
     return;
 end
@@ -56,6 +56,7 @@ nlhc = 1;
 
 if isempty(o.range)
     dates = getMaxRange(o.series);
+    o.range = {dates};
 else
     dates = o.range{1};
 end

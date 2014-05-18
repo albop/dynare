@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2012 Houtan Bastani, Daniel Waggoner, Tao Zha
+ * Copyright (C) 2014 DynareTeam
  *
  * This is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,6 @@
 
 #ifndef _DYNARE_C_DRIVER_H
 #define _DYNARE_C_DRIVER_H
-
-#include <cstdlib>
-#include <vector>
-#include <string>
-#include <map>
-#include <limits>
-
-using namespace std;
 
 struct aux_vars_t {
   int endo_index, type, orig_index, orig_lead_lag;

@@ -171,7 +171,7 @@ if stop
         skipline();
         fprintf('\nSimulation terminated after %d iterations.\n',iter);
         fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
-        error('Simulation terminated with NaN or Inf in the residuals or endogenous variables. There is most likely something wrong with your model.');
+        fprintf('WARNING: Simulation terminated with NaN or Inf in the residuals or endogenous variables. There is most likely something wrong with your model.\n');
     else
         skipline();
         fprintf('\nSimulation concluded successfully after %d iterations.\n',iter);

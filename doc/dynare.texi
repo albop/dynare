@@ -2758,7 +2758,8 @@ using the same solver as value @code{1}
 Use Chris Sims' solver
 
 @item 4
-Trust-region solver with autoscaling.
+Splits the model into recursive blocks and solves each block in turn
+using a trust-region solver with autoscaling.
 
 @item 5
 Newton algorithm with a sparse Gaussian elimination (SPE) (requires
@@ -2777,6 +2778,9 @@ each iteration (requires @code{bytecode} and/or @code{block} option,
 Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB)
 solver at each iteration (requires @code{bytecode} and/or @code{block}
 option, @pxref{Model declaration})
+
+@item 9
+Trust-region algorithm on the entire model.
 @end table
 
 @noindent
@@ -5820,7 +5824,7 @@ confidence interval.
 @table @code
 
 @item periods = @var{INTEGER}
-Number of periods of the forecast. Default: @code{40}
+Number of periods of the forecast. Default: @code{5}.
 
 @item conf_sig = @var{DOUBLE}
 @anchor{conf_sig} Level of significance for confidence
@@ -6097,37 +6101,37 @@ can be computed using an extended path method. The forecast scenario describing 
 The first step is the forecast scenario initialization using the function @code{init_plan}:
 
 @anchor{init_plan}
-@deffn {MATLAB/Octave command} HANDLE = init_plan(DATES) ;
+@deftypefn {MATLAB/Octave command} {HANDLE =} init_plan (DATES) ;
 
 Creates a new forecast scenario for a forecast period (indicated as a dates class, see @ref{dates class members}). This function return a handle on the new forecast scenario.
 
-@end deffn
+@end deftypefn
 
 The forecast scenario can contain some simple shocks on the exogenous variables. This shocks are described using the function @code{basic_plan}:
 
 @anchor{basic_plan}
-@deffn {MATLAB/Octave command} HANDLE = basic_plan(HANDLE, 'VARIABLE_NAME', 'SHOCK_TYPE', DATES, MATLAB VECTOR OF DOUBLE |  [DOUBLE | EXPRESSION [DOUBLE | | EXPRESSION] ] ) ;
+@deftypefn {MATLAB/Octave command} {HANDLE =} basic_plan (HANDLE, 'VARIABLE_NAME', 'SHOCK_TYPE', DATES, MATLAB VECTOR OF DOUBLE |  [DOUBLE | EXPRESSION [DOUBLE | | EXPRESSION] ] ) ;
 
 Adds to the forecast scenario a shock on the exogenous variable indicated between quotes in the second argument. The shock type has to be specified in the third argument between quotes: 'surprise' in case of an unexpected shock  or 'perfect_foresight' for a perfectly anticipated shock. The fourth argument indicates the period of the shock using a dates class (see @ref{dates class members}). The last argument is the shock path indicated as a Matlab vector of double. This function return the handle of the updated forecast scenario.
 
-@end deffn
+@end deftypefn
 
 The forecast scenario can also contain a constrained path on an endogenous variable. The values of the related exogenous variable compatible with the constrained path are in this case computed. In other words, a conditional forecast is performed. This kind of shock is described with the function  @code{flip_plan}:
 
 @anchor{flip_plan}
-@deffn {MATLAB/Octave command} HANDLE = flip_plan(HANDLE, 'VARIABLE_NAME, 'VARIABLE_NAME', 'SHOCK_TYPE', DATES, MATLAB VECTOR OF DOUBLE |  [DOUBLE | EXPRESSION [DOUBLE | | EXPRESSION] ] ) ;
+@deftypefn {MATLAB/Octave command} {HANDLE =} flip_plan (HANDLE, 'VARIABLE_NAME, 'VARIABLE_NAME', 'SHOCK_TYPE', DATES, MATLAB VECTOR OF DOUBLE |  [DOUBLE | EXPRESSION [DOUBLE | | EXPRESSION] ] ) ;
 
 Adds to the forecast scenario a constrained path on the endogenous variable specified between quotes in the second argument. The associated exogenous variable provided in the third argument between quotes, is considered as an endogenous variable and its values compatible with the constrained path on the endogenous variable will be computed. The nature of the expectation on the constrained  path has to be specified in the fourth argument between quotes: 'surprise' in case of an unexpected path or 'perfect_foresight' for a perfectly anticipated path. The fifth argument indicates the period where the path of the endogenous variable is constrained using a dates class (see @ref{dates class members}). The last argument contains the constrained path as a Matlab vector of double. This function return the handle of the updated forecast scenario.
 
-@end deffn
+@end deftypefn
 
 Once the forecast scenario if fully described, the forecast is computed with the command @code{det_cond_forecast}:
 @anchor{det_cond_forecast}
-@deffn {MATLAB/Octave command} DSERIES = det_cond_forecast(HANDLE[, DSERIES [, DATES]]) ;
+@deftypefn {MATLAB/Octave command} {DSERIES =} det_cond_forecast (HANDLE[, DSERIES [, DATES]]) ;
 
 Computes the forecast or the conditional forecast using an extended path method for the given forecast scenario (first argument). The past values of the endogenous and exogenous variables provided with a dseries class (see @ref{dseries class members}) can be indicated in the second argument. By default, the past values of the variables are equal to their steady-state values. The initial date of the forecast can be provided in the third argument. By default, the forecast will start at the first date indicated in the @code{init_plan} command. This function returns a dset containing the historical and forecast values for the endogenous and exogenous variables.
 
-@end deffn
+@end deftypefn
 
 
 
@@ -9867,7 +9871,7 @@ ts1 is a dseries object:
 
 @deftypefn {dseries} {@var{B} = } baxter_king_filter (@var{A}, @var{hf}, @var{lf}, @var{K})
 
-Implementation of the Baxter and King (1999) band pass filter for @dseries objects. This filter isolates business cycle fluctuations with a period of length ranging between @var{hf} (high frequency) to @var{lf} (low frequency) using a symmetric moving average smoother with @math{2K+1} points, so that K observations at the beginning and at the end of the  sample are lost in the computation of the filter.
+Implementation of the Baxter and King (1999) band pass filter for @dseries objects. This filter isolates business cycle fluctuations with a period of length ranging between @var{hf} (high frequency) to @var{lf} (low frequency) using a symmetric moving average smoother with @math{2K+1} points, so that K observations at the beginning and at the end of the  sample are lost in the computation of the filter. The default value for @var{hf} is @math{6}, for @var{lf} is @math{32}, and for @var{K} is 12.
 
 @examplehead
 @example
