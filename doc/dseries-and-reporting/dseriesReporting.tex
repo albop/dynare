@@ -631,6 +631,7 @@
   \frametitle{Create Report of IRFs from \texttt{example1.mod}}
   \begin{itemize}
   \item \texttt{example1.mod} is located in the Dynare \texttt{examples} directory
+  \item The lines below can be added at the end of that file.
   \end{itemize}
   \begin{block}{Create \texttt{dseries} from IRFs}
 \begin{verbatim}
@@ -660,12 +661,6 @@
                                `showGrid', false, ...
                                `showZeroLine', true);
 @#  endfor
-    report = report.addSection(`cols', 1);
-    report = report.addTable();
-@#  for var in endovars
-      report = report.addSeries(`data', shock@{shock}.@{var});
-@#  endfor
-@#endfor
 \end{verbatim}
 }
   \end{block}
@@ -674,11 +669,28 @@
 
 \begin{frame}[fragile=singleslide]
   \frametitle{Create Report of IRFs from \texttt{example1.mod}}
+  \begin{block}{Populate Report (continued)}
+\small{
+\begin{verbatim}
+    report = report.addVspace(`number', 2);
+    report = report.addSection(`cols', 1);
+    report = report.addTable(`range', dates(`2022q1'):dates(`2024q1'),...
+                             `precision', 5);
+@#  for var in endovars
+      report = report.addSeries(`data', shock@{shock}.@{var});
+@#  endfor
+@#endfor
+\end{verbatim}
+}
+  \end{block}
+
   \begin{block}{Compile Report}
+\small{
 \begin{verbatim}
 report.write();
 report.compile();
 \end{verbatim}
+}
   \end{block}
 \end{frame}
 \end{document}
