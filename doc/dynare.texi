@@ -11159,7 +11159,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
+@defmethod Report addGraph data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -11205,6 +11205,12 @@ Orientation of the legend. Default: @code{`horizontal'}
 
 @item legendFontSize, @code{`tiny'} | @code{`scriptsize'} | @code{`footnotesize'} | @code{`small'} | @code{`normalsize'} | @code{`large'} | @code{`Large'} | @code{`LARGE'} | @code{`huge'} | @code{`Huge'}
 The font size for legend entries. Default: @code{tiny}
+
+@item miscTikzAxisOptions, @code{STRING}
+If you are comfortable with PGFPLOTS/Ti@i{k}Z, you can use this option to pass
+arguments directly to the PGFPLOTS/Ti@i{k}Z @code{axis} environment
+command. Specifically to be used for desired PGFPLOTS/Ti@i{k}Z options that
+have not been incorporated into Dynare Reproting. Default: @code{empty}
 
 @item miscTikzPictureOptions, @code{STRING}
 If you are comfortable with PGFPLOTS/Ti@i{k}Z, you can use this option to pass
