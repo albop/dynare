@@ -11332,7 +11332,7 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
+@defmethod Report addSeries data, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @optionshead
 @table @code
@@ -11364,6 +11364,15 @@ The face color of the graph marker. Default: @code{graphLineColor}
 
 @item graphMarkerSize, @code{DOUBLE}
 The size of the graph marker. Default: @code{1}
+
+@item graphMiscTikzAddPlotOptions, @code{STRING}
+If you are comfortable with PGFPLOTS/Ti@i{k}Z, you can use this option to pass
+arguments directly to the PGFPLOTS/Ti@i{k}Z @code{addPlots} command. (@i{e.g.,}
+Instead of passing the marker options above, you can pass a string such as the
+following to this option: @code{`mark=halfcircle*,mark
+options={rotate=90,scale=3}'}). Specifically to be used for desired
+PGFPLOTS/Ti@i{k}Z options that have not been incorporated into Dynare
+Reproting. Default: @code{empty}
 
 @item tableDataRhs, @code{dseries}
 A series to be added to the right of the current series. Usefull for
