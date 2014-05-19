@@ -11189,6 +11189,7 @@ The height of the graph, in inches. Default: @code{4.5}
 Whether or not to display the major grid on the graph. Default:
 @code{true}
 
+@anchor{showLegend}
 @item showLegend, @code{BOOLEAN}
 Whether or not to display the legend. Default: @code{false}
 
@@ -11331,13 +11332,17 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
+@defmethod Report addSeries data, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @optionshead
 @table @code
 
 @item data, @code{dseries}
 @xref{data}.
+
+@item graphLegendName, @code{STRING}
+The name to display in the legend for this series. Will be displayed only if
+the @ref{data} option has been set. Default: the @code{tex} name of the series
 
 @item graphLineColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
 Color to use for the series in a graph. Default: @code{`black'}
