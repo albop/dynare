@@ -491,7 +491,7 @@ if isempty(datafile_extension)
                        'are available in the designed folder!\nPlease, add an extension to the datafile ' ...
                        '(m, mat, csv, xls or xlsx are legal extensions).']));
     end
-    datafile = [datafile '.' available_extensions];
+    datafile = [datafile '.' available_extensions{1}];
 end
 
 % Load the data in a dseries object.
