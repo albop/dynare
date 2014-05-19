@@ -10965,6 +10965,7 @@ ans =
 
 @sp 1
 
+@anchor{tex_rename}
 @deftypefn{dseries} {@var{B} =} tex_rename (@var{A}, @var{name}, @var{newtexname})
 
 Redefines the tex name of variable @var{name} to @var{newtexname}
@@ -11191,7 +11192,10 @@ Whether or not to display the major grid on the graph. Default:
 
 @anchor{showLegend}
 @item showLegend, @code{BOOLEAN}
-Whether or not to display the legend. Default: @code{false}
+Whether or not to display the legend. NB: Unless you use the
+@ref{graphLegendName} option, the name displayed in the legend is the
+@code{tex} name associated with the @code{dseries}. You can modify this
+@code{tex} name by using @ref{tex_rename}. Default: @code{false}
 
 @item showLegendBox, @code{BOOLEAN}
 Whether or not to display a box around the legend. Default:
@@ -11354,6 +11358,7 @@ Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @item data, @code{dseries}
 @xref{data}.
 
+@anchor{graphLegendName}
 @item graphLegendName, @code{STRING}
 The name to display in the legend for this series. Will be displayed only if
 the @ref{data} option has been set. Default: the @code{tex} name of the series
