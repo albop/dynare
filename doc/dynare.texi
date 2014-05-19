@@ -11044,7 +11044,9 @@ report as created through Dynare or pick out the pieces (tables and graphs) you
 want for inclusion in your own paper. Though Dynare provides a subset of
 options available through @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can easily
 modify the graphs created by Dynare using the options available in the
-@code{PGFPLOTS/Ti}@i{k}@code{Z} manual.
+@code{PGFPLOTS/Ti}@i{k}@code{Z} manual. You can either do this manually or by
+passing the options to @ref{miscTikzAxisOptions}, @ref{miscTikzAxisOptions}, or
+@ref{graphMiscTikzAddPlotOptions}.
 
 Reports are created and modified by calling methods on class
 objects. The objects are hierarchical, with the following order (from
@@ -11210,6 +11212,7 @@ Orientation of the legend. Default: @code{`horizontal'}
 @item legendFontSize, @code{`tiny'} | @code{`scriptsize'} | @code{`footnotesize'} | @code{`small'} | @code{`normalsize'} | @code{`large'} | @code{`Large'} | @code{`LARGE'} | @code{`huge'} | @code{`Huge'}
 The font size for legend entries. Default: @code{tiny}
 
+@anchor{miscTikzAxisOptions}
 @item miscTikzAxisOptions, @code{STRING}
 If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
 option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
@@ -11217,6 +11220,7 @@ option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
 @code{PGFPLOTS/Ti}@i{k}@code{Z} options that have not been incorporated into
 Dynare Reproting. Default: @code{empty}
 
+@anchor{miscTikzPictureOptions}
 @item miscTikzPictureOptions, @code{STRING}
 If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
 option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
@@ -11386,6 +11390,7 @@ The face color of the graph marker. Default: @code{graphLineColor}
 @item graphMarkerSize, @code{DOUBLE}
 The size of the graph marker. Default: @code{1}
 
+@anchor{graphMiscTikzAddPlotOptions}
 @item graphMiscTikzAddPlotOptions, @code{STRING}
 If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
 option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
