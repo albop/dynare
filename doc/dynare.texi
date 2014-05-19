@@ -11038,13 +11038,13 @@ Computes yearly differences or growth rates.
 @node Reporting
 @chapter Reporting
 
-Dynare provides a simple interface for creating @LaTeX{} reports,
-comprised of @LaTeX{} tables and @code{PGFPLOTS/TikZ/PGF} graphs. You
-can use the report as created through Dynare or pick out the pieces
-(tables and graphs) you want for inclusion in your own paper. Though
-Dynare provides a subset of options available through @code{PGFPLOTS},
-you can easily modify the graphs created by Dynare using the options
-available in the @code{PGFPLOTS} manual.
+Dynare provides a simple interface for creating @LaTeX{} reports, comprised of
+@LaTeX{} tables and @code{PGFPLOTS/Ti}@i{k}@code{Z} graphs. You can use the
+report as created through Dynare or pick out the pieces (tables and graphs) you
+want for inclusion in your own paper. Though Dynare provides a subset of
+options available through @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can easily
+modify the graphs created by Dynare using the options available in the
+@code{PGFPLOTS/Ti}@i{k}@code{Z} manual.
 
 Reports are created and modified by calling methods on class
 objects. The objects are hierarchical, with the following order (from
@@ -11211,17 +11211,19 @@ Orientation of the legend. Default: @code{`horizontal'}
 The font size for legend entries. Default: @code{tiny}
 
 @item miscTikzAxisOptions, @code{STRING}
-If you are comfortable with PGFPLOTS/Ti@i{k}Z, you can use this option to pass
-arguments directly to the PGFPLOTS/Ti@i{k}Z @code{axis} environment
-command. Specifically to be used for desired PGFPLOTS/Ti@i{k}Z options that
-have not been incorporated into Dynare Reproting. Default: @code{empty}
+If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
+option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{axis} environment command. Specifically to be used for desired
+@code{PGFPLOTS/Ti}@i{k}@code{Z} options that have not been incorporated into
+Dynare Reproting. Default: @code{empty}
 
 @item miscTikzPictureOptions, @code{STRING}
-If you are comfortable with PGFPLOTS/Ti@i{k}Z, you can use this option to pass
-arguments directly to the PGFPLOTS/Ti@i{k}Z @code{tikzpicture} environment
-command. (@i{e.g.,} to scale the graph in the x and y dimensions, you can pass
-following to this option: @code{`xscale=2.5, yscale=0.5'}). Specifically to be
-used for desired PGFPLOTS/Ti@i{k}Z options that have not been incorporated into
+If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
+option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{tikzpicture} environment command. (@i{e.g.,} to scale the graph in the x
+and y dimensions, you can pass following to this option: @code{`xscale=2.5,
+yscale=0.5'}). Specifically to be used for desired
+@code{PGFPLOTS/Ti}@i{k}@code{Z} options that have not been incorporated into
 Dynare Reproting. Default: @code{empty}
 
 @anchor{seriesToUse}
@@ -11261,8 +11263,8 @@ The x-axis label. Default: @code{none}
 The y-axis label. Default: @code{none}
 
 @item xAxisTight, @code{BOOLEAN}
-Use a tight x axis. If false, uses pgfplots @code{enlarge x limits} to
-choose appropriate axis size. Default: @code{true}
+Use a tight x axis. If false, uses @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{enlarge x limits} to choose appropriate axis size. Default: @code{true}
 
 @item xrange, @code{dates}
 The boundary on the x-axis to display in the graph. Default: all
@@ -11288,8 +11290,8 @@ Where to anchor the x tick label. Default: @code{`south'}
 The amount to rotate the x tick labels by. Default: @code{0}
 
 @item yAxisTight, @code{BOOLEAN}
-Use a tight y axis. If false, uses pgfplots @code{enlarge y limits} to
-choose appropriate axis size. Default: @code{false}
+Use a tight y axis. If false, uses @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{enlarge y limits} to choose appropriate axis size. Default: @code{false}
 
 @item yrange, @code{NUMERICAL_VECTOR}
 The boundary on the y-axis to display in the graph, represented as a
@@ -11385,13 +11387,13 @@ The face color of the graph marker. Default: @code{graphLineColor}
 The size of the graph marker. Default: @code{1}
 
 @item graphMiscTikzAddPlotOptions, @code{STRING}
-If you are comfortable with PGFPLOTS/Ti@i{k}Z, you can use this option to pass
-arguments directly to the PGFPLOTS/Ti@i{k}Z @code{addPlots} command. (@i{e.g.,}
-Instead of passing the marker options above, you can pass a string such as the
-following to this option: @code{`mark=halfcircle*,mark
-options={rotate=90,scale=3}'}). Specifically to be used for desired
-PGFPLOTS/Ti@i{k}Z options that have not been incorporated into Dynare
-Reproting. Default: @code{empty}
+If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
+option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{addPlots} command. (@i{e.g.,} Instead of passing the marker options
+above, you can pass a string such as the following to this option:
+@code{`mark=halfcircle*,mark options={rotate=90,scale=3}'}). Specifically to be
+used for desired @code{PGFPLOTS/Ti}@i{k}@code{Z} options that have not been
+incorporated into Dynare Reproting. Default: @code{empty}
 
 @item tableDataRhs, @code{dseries}
 A series to be added to the right of the current series. Usefull for
