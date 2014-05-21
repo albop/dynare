@@ -11400,7 +11400,7 @@ If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
 option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
 @code{addPlots} command. (@i{e.g.,} Instead of passing the marker options
 above, you can pass a string such as the following to this option:
-@code{`mark=halfcircle*,mark options={rotate=90,scale=3}'}). Specifically to be
+@code{`mark=halfcircle*,mark options=@{rotate=90,scale=3@}'}). Specifically to be
 used for desired @code{PGFPLOTS/Ti}@i{k}@code{Z} options that have not been
 incorporated into Dynare Reproting. Default: @code{empty}
 
