@@ -11358,7 +11358,9 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 
 @anchor{addSeries}
 @defmethod Report addSeries data, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
-Adds a @code{Series} to a @code{Graph} or a @code{Table}.
+Adds a @code{Series} to a @code{Graph} or a @code{Table}. NB: Options specific
+to graphs begin with `@code{graph}' while options specific to tables begin with
+`@code{table}'.
 @optionshead
 @table @code
 
