@@ -566,16 +566,20 @@
   \begin{itemize}
   \item \texttt{report(\ldots)}: Create a report
     \begin{itemize}
-    \item Options: \texttt{compiler}, \texttt{showDate}, \texttt{fileName}, \texttt{margin}, \texttt{marginUnit}, \texttt{orientation}, \texttt{paper}, \texttt{title}
+    \item \textbf{Options}: \texttt{compiler}, \texttt{showDate}, \texttt{fileName}, \texttt{margin}, \texttt{marginUnit}, \texttt{orientation}, \texttt{paper}, \texttt{title}
     \end{itemize}
   \item \texttt{addPage(\ldots)}: Add a page to the \texttt{Report}
     \begin{itemize}
-    \item Options: \texttt{footnote}, \texttt{orientation}, \texttt{paper}, \texttt{title}, \texttt{titleFormat}
+    \item \textbf{Options}: \texttt{footnote}, \texttt{orientation}, \texttt{paper}, \texttt{title}, \texttt{titleFormat}
     \end{itemize}
   \item \texttt{addSection(\ldots)}: Add a section to the current \texttt{Page}
     \begin{itemize}
     \item You can think of a section as a matrix. As graphs and/or tables are added section, it fills up from left to right. Once you have added \texttt{cols} objects, a new row is started.
-    \item Options: \texttt{cols}, \texttt{height}
+    \item \textbf{Options}: \texttt{cols}, \texttt{height}
+    \end{itemize}
+  \item \texttt{addVspace(\ldots)}: Add a vertical space to the current \texttt{Section}
+    \begin{itemize}
+    \item \textbf{Options}: \texttt{hline}, \texttt{number}
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -586,19 +590,15 @@
   \begin{itemize}
   \item \texttt{addGraph(\ldots)}: Add a graph to the current \texttt{Section}
     \begin{itemize}
-    \item Options: \texttt{data}, \texttt{graphDirName}, \texttt{graphName}, \texttt{graphSize}, \texttt{height}, \texttt{showGrid}, \texttt{showLegend}, \texttt{showLegendBox}, \texttt{legendLocation}, \texttt{legendOrientation}, \texttt{legendFontSize}, \texttt{seriesToUse}, \texttt{shade}, \texttt{shadeColor}, \texttt{shadeOpacity}, \texttt{title}, \texttt{titleFormat}, \texttt{width}, \texttt{xlabel}, \texttt{ylabel}, \texttt{xAxisTight}, \texttt{xrange}, \texttt{xTicks}, \texttt{xTickLabels}, \texttt{xTickLabelAnchor}, \texttt{xTickLabelRotation}, \texttt{yAxisTight}, \texttt{yrange}, \texttt{showZeroLine}
+    \item \textbf{Options}: \texttt{data}, \texttt{graphDirName}, \texttt{graphName}, \texttt{graphSize}, \texttt{height}, \texttt{showGrid}, \texttt{showLegend}, \texttt{showLegendBox}, \texttt{legendLocation}, \texttt{legendOrientation}, \texttt{legendFontSize}, \texttt{miscTikzAxisOptions}, \texttt{miscTikzPictureOptions}, \texttt{seriesToUse}, \texttt{shade}, \texttt{shadeColor}, \texttt{shadeOpacity}, \texttt{title}, \texttt{titleFormat}, \texttt{width}, \texttt{xlabel}, \texttt{ylabel}, \texttt{xAxisTight}, \texttt{xrange}, \texttt{xTicks}, \texttt{xTickLabels}, \texttt{xTickLabelAnchor}, \texttt{xTickLabelRotation}, \texttt{yAxisTight}, \texttt{yrange}, \texttt{showZeroLine}
     \end{itemize}
   \item \texttt{addTable(\ldots)}: Add a table to the current \texttt{Section}
     \begin{itemize}
-    \item Options: \texttt{data}, \texttt{showHlines}, \texttt{precision}, \texttt{range}, \texttt{seriesToUse}, \texttt{tableDirName}, \texttt{tableName}, \texttt{title}, \texttt{titleFormat}, \texttt{vlineAfter}, \texttt{vlineAfterEndOfPeriod}, \texttt{showVlines}
+    \item \textbf{Options}: \texttt{data}, \texttt{showHlines}, \texttt{precision}, \texttt{range}, \texttt{seriesToUse}, \texttt{tableDirName}, \texttt{tableName}, \texttt{title}, \texttt{titleFormat}, \texttt{vlineAfter}, \texttt{vlineAfterEndOfPeriod}, \texttt{showVlines}
     \end{itemize}
   \item \texttt{addSeries(\ldots)}: Add a series to the current \texttt{Graph} or \texttt{Table}
     \begin{itemize}
-    \item \texttt{data}, \texttt{graphLineStyle}, \texttt{graphLineWidth}, \texttt{graphMarker}, \texttt{graphMarkerEdgeColor}, \texttt{graphMarkerFaceColor}, \texttt{graphMarkerSize}, \texttt{tableDataRhs}, \texttt{tableRowColor}, \texttt{tableRowIndent}, \texttt{tableShowMarkers}, \texttt{tableAlignRight}, \texttt{tableMarkerLimit}, \texttt{tableNegColor}, \texttt{tablePosColor}, \texttt{tableSubSectionHeader}, \texttt{zeroTol}
-    \end{itemize}
-  \item Options: \texttt{addVspace(\ldots)}: Add a vertical space to the current \texttt{Section}
-    \begin{itemize}
-    \item \texttt{hline}, \texttt{number}
+    \item \textbf{Options}: \texttt{data}, \texttt{graphHline}, \texttt{graphLegendName}, \texttt{graphLineColor}, \texttt{graphLineStyle}, \texttt{graphLineWidth}, \texttt{graphMarker}, \texttt{graphMarkerEdgeColor}, \texttt{graphMarkerFaceColor}, \texttt{graphMarkerSize}, \texttt{graphMiscTikzAddPlotOptions}, \texttt{graphVline}, \texttt{tableDataRhs}, \texttt{tableRowColor}, \texttt{tableRowIndent}, \texttt{tableShowMarkers}, \texttt{tableAlignRight}, \texttt{tableMarkerLimit}, \texttt{tableNegColor}, \texttt{tablePosColor}, \texttt{tableSubSectionHeader}, \texttt{zeroTol}
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -611,7 +611,7 @@
   \item \texttt{write()}: Writes the report to a \LaTeX\ file
   \item \texttt{compile(\ldots)}: Compiles the report
     \begin{itemize}
-    \item Options: \texttt{compiler}
+    \item \textbf{Options}: \texttt{compiler}
     \end{itemize}
   \end{itemize}
   Report Output
