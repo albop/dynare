@@ -11162,6 +11162,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
+@anchor{addGraph}
 @defmethod Report addGraph data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
@@ -11356,7 +11357,7 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
+@defmethod Report addSeries data, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @optionshead
 @table @code
@@ -11403,6 +11404,10 @@ above, you can pass a string such as the following to this option:
 @code{`mark=halfcircle*,mark options=@{rotate=90,scale=3@}'}). Specifically to be
 used for desired @code{PGFPLOTS/Ti}@i{k}@code{Z} options that have not been
 incorporated into Dynare Reproting. Default: @code{empty}
+
+@item graphShowInLegend, @code{BOOLEAN}
+Whether or not to show this series in the legend, given that the
+@ref{showLegend} option was passed to @ref{addGraph}. Default: @code{true}
 
 @item graphVline, @code{dates}
 Use this option to draw a vertical line at a given date. Default: @code{empty}
