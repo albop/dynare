@@ -11460,9 +11460,9 @@ with it. It is equivalent to adding an empty series with a
 name. Default: @code{''}
 
 @item zeroTol, @code{DOUBLE}
-The zero tolerance. Anything smaller than @code{zeroTol} and larger
-than @code{-zeroTol} will be set to zero before being
-graphed. Default: @math{1e-6}
+The zero tolerance. Anything smaller than @code{zeroTol} and larger than
+@code{-zeroTol} will be set to zero before being graphed or written to the
+table. Default: @math{1e-6}
 
 @end table
 @end defmethod
