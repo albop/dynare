@@ -26,9 +26,9 @@ function [i,n,s,j] = describe_missing_data(data)   % --*-- Unitary tests --*--
 %!
 %! @end deftypefn
 %@eod:
-    
-% Copyright (C) 2008-2012 Dynare Team
-%    
+
+% Copyright (C) 2008-2014 Dynare Team
+%
 % This file is part of Dynare.
 %
 % Dynare is free software: you can redistribute it and/or modify
