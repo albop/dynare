@@ -11467,6 +11467,33 @@ table. Default: @math{1e-6}
 @end table
 @end defmethod
 
+@defmethod Report addParagraph balancedCols, cols, heading, indent, text
+Adds a @code{Paragraph} to a @code{Section}. NB: The @code{Section} can only be
+comprised of @code{Paragraphs} and must only have 1 column.
+@optionshead
+@table @code
+
+@item balancedCols, @code{BOOLEAN}
+Determines whether the text is spread out evenly across the columns when the
+@code{Paragraph} has more than one column. Default: @code{true}
+
+@item cols, @code{INTEGER}
+The number of columns for the @code{Paragraph}. Default: @code{1}
+
+@item heading, @code{STRING}
+The heading for the Paragraph (like a section heading). The string must be
+correct @LaTeX{} code. Default: @code{empty}
+
+@item indent, @code{BOOLEAN}
+Whether or not to indent the paragraph. Default: @code{true}
+
+@item text, @code{STRING}
+The paragraph itself. The string must be correct @LaTeX{} code. Default:
+@code{empty}
+
+@end table
+@end defmethod
+
 @defmethod Report addVspace hline, number
 Adds a @code{Vspace} (vertical space) to a @code{Section}.
 @optionshead
