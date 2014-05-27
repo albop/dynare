@@ -62,7 +62,7 @@
     \begin{itemize}
     \myitem Based on an implementation for handling dates (\texttt{dates})
     \end{itemize}
-  \myitem Introduced in Dynare 4.4
+  \myitem Beta version in Dynare 4.4. Mature version ready in Dynare 4.5
   \myitem Currently only used for reporting, though use will increase with time
     (\textit{e.g.,} to be included in new estimation code)
   \myitem Compatible with all setups that are supported by Dynare
@@ -174,16 +174,10 @@ X =
       \myitem{\textbf{\texttt{ndat}}}: The number of dates
       \myitem{\textbf{\texttt{time}}}: An \texttt{ndat$\times$2} matrix; the 1\textsuperscript{st} col is the year and the 2\textsuperscript{nd} col is the period
     \end{itemize}
-    \myitem Date members cannot be modified. Thus, this is not allowed:
+    \myitem \texttt{dseries} members cannot be modified. Thus, this is not allowed:
 \begin{alltt}
   >> dd.freq = 12;
 \end{alltt}
-    \myitem Can index a \texttt{dates} object. If \texttt{t} is a \texttt{dates} object, then
-    \begin{itemize}
-      \myitem \texttt{t(1) \% refers to the first date}
-      \myitem \texttt{t(1:3) \% refers to the first three dates}
-      \myitem \texttt{t([1,4,5]) \% refers to the first, fourth, and fifth dates}
-    \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -355,9 +349,9 @@ would be transformed into
   union(a, b)
   ans = <dates: 1990Q1, 1990Q2,  ..., 1991Q2, 1991Q3>
     \end{alltt}
-    \myitem \texttt{unique}: removes repititions from set (keeps last unique value)
+    \myitem \texttt{unique()}: removes repititions from set (keeps last unique value)
     \begin{alltt}
-  >> unique(a)
+  >> a.unique()
   ans = <dates: 1990Q2, 1990Q3, 1990Q4, 1991Q1, 1990Q1>
     \end{alltt}
   \end{itemize}
