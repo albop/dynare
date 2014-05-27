@@ -359,6 +359,34 @@ would be transformed into
 
 
 
+\begin{frame}[fragile,t]
+  \frametitle{Misc \texttt{dates} operations}
+  \begin{itemize}
+    \myitem Can index a \texttt{dates} object.
+    \begin{alltt}
+  >> a = dates(`2000y'):dates(`2009y');
+  >> a(1)
+  ans = <dates: 2000Y>
+  >> a(1:3)
+  ans = <dates: 2000Y, 2001Y, 2002Y>
+  >> a([1,4,5])
+  ans = <dates: 2000Y, 2003Y, 2004Y>
+    \end{alltt}
+    \myitem{\textbf{\texttt{pop()}}}: Remove last element
+    \begin{alltt}
+  >> a.pop()
+  ans = <dates: 2000Y, 2001Y,  ..., 2007Y, 2008Y>
+    \end{alltt}
+    \myitem{\textbf{\texttt{char()}}}: Return string representation
+    \begin{alltt}
+  >> a(1).char()
+  ans = 2000Y
+    \end{alltt}
+    \myitem More in the Dynare manual
+  \end{itemize}
+\end{frame}
+
+
 %
 % DSERIES
 %
@@ -366,35 +394,172 @@ would be transformed into
 \begin{frame}[fragile,t]
   \frametitle{\texttt{dseries} Syntax}
   \begin{itemize}
-  \myitem A \texttt{dseries} is composed of one or more individual series
-  \myitem All time series in a dseries must have the same frequency
-  \myitem A \texttt{dseries} runs from the earliest date to the latest date, with \texttt{NaN}'s inserted to pad the shorter series
+    \myitem A \texttt{dseries} is composed of one or more individual time series
+    \myitem All time series in a \texttt{dseries} must have the same frequency
+    \myitem A \texttt{dseries} runs from the earliest date to the latest date,
+    with \texttt{NaN}'s inserted to pad the shorter series
+    \myitem A \texttt{dseries} object contains 3 members:
+    \begin{itemize}
+      \myitem{\textbf{\texttt{data}}}: The data points
+      \myitem{\textbf{\texttt{dates}}}: The \texttt{dates} of the sample
+      \myitem{\textbf{\texttt{name}}}: Names of the variables
+      \myitem{\textbf{\texttt{nobs}}}: The number of observations
+      \myitem{\textbf{\texttt{vobs}}}: The number of variables
+      \myitem{\textbf{\texttt{tex}}}: \LaTeX\ names of the variables
+    \end{itemize}
+    \myitem \texttt{dseries} members cannot be modified
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Creating a new \texttt{dseries} object}
+  \frametitle{Creating a new \texttt{dseries} object (1/2)}
+  Load data directly
   \begin{itemize}
-  \myitem Load series from data file (\texttt{.csv, .xls}). Dates in first column, optional variable names in first row
-    \begin{itemize}
-    \myitem \texttt{ts=dseries(`data.csv');}
-    \end{itemize}
-  \myitem Load series from a Matlab/Octave file (\texttt{.m, .mat}). Must define the variables \texttt{INIT\_\_}, \texttt{NAMES\_\_}, and, optionally, \texttt{TEX\_\_}.
-    \begin{itemize}
-    \myitem \texttt{ts=dseries(`data.m');}
-    \end{itemize}
-  \myitem Load data directly. Here: one variable, `MyVar1', with three annual observations starting in 1999. Only first argument is required.
-    \begin{itemize}
-    \myitem \texttt{ts=dseries([1;2;3], `1999y', \{`MyVar1'\}, \{`MyVar\_1'\});}
-    \end{itemize}
-  \myitem Create an empty time series. Usefull for programatically creating a series.
-    \begin{itemize}
-    \myitem \texttt{ts=dseries();}
-    \myitem \texttt{ts=dseries(dates(`1999y'));}
-    \end{itemize}
+    \myitem Syntax:
+    \begin{alltt}
+  ts = dseries(DATA, INITIAL_PERIOD, NAMES, TEX_NAMES)
+    \end{alltt}
+    \myitem \textit{e.g.,} 2 variables, `MyVar1' and `MyVar2', with
+    3 annual observations starting in 1999:
+\small{
+    \begin{alltt}
+  >> ts = dseries([1 2;3 4;5 6], `1999y', ...
+                 \{`MyVar1', `MyVar2'\}, \{`MyVar\_1', 'MyVar\_2'\});
+
+  ts is a dseries object:
+
+        | MyVar1 | MyVar2
+  1999Y | 1      | 2
+  2000Y | 3      | 4
+  2001Y | 5      | 6
+    \end{alltt}}
   \end{itemize}
 \end{frame}
+
+\begin{frame}[fragile,t]
+  \frametitle{Creating a new \texttt{dseries} object (2/2)}
+  Load series from CSV/spreadsheet (\texttt{.csv, .xls}) or Matlab file (\texttt{.m, .mat})
+  \begin{itemize}
+    \myitem Syntax:
+    \begin{alltt}
+  >> ts = dseries(FILENAME);
+    \end{alltt}
+    \myitem File format (\texttt{.csv, .xls}): dates in first column (using the standard format:
+    199Q1 for quarterly data, 1990Y for annual data, \dots) and (optional)
+    variable names in the first row
+    \myitem File format (\texttt{.m, .mat}): must define the variables \texttt{INIT\_\_},
+    \texttt{NAMES\_\_}, and, optionally, \texttt{TEX\_\_}. More info in the
+    manual. Data are vectors.
+    \begin{alltt}
+      INIT__ = `1999q1’;
+      NAMES__ = \{`cons'\};
+      cons = randn(100,1);
+    \end{alltt}
+  \end{itemize}
+  Create an empty time series. Usefull for programatically creating a series.
+  \begin{itemize}
+    \myitem \texttt{ts=dseries();}
+    \myitem \texttt{ts=dseries(dates(`1999y'));}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Creating subsamples from a \texttt{dseries}}
+  \begin{itemize}
+    \myitem Let \texttt{ts} be a \texttt{dseries} with $N$ variables and 5
+    observations from \texttt{2000Y} to \texttt{2004Y}
+    \myitem To obtain a subsample from \texttt{2001Y} to \texttt{2003Y}
+    \begin{alltt}
+  ts(2001Y:2003Y)
+    \end{alltt}
+    \myitem Can also use integer indices
+    \begin{alltt}
+  start = find(ts.dates==2001Y);
+  ts(start:end);
+    \end{alltt}
+    \myitem NB: Integer indices cannot be used to extract a single observation
+    because of lag/lead notation (see below)
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Extracting variables from a \texttt{dseries}}
+  \begin{itemize}
+    \myitem Let
+    \begin{alltt}
+  >> ts = dseries(randn(5,6), `2000q1', ...
+                 \{`GDP_US', `GDP_FR', `GDP_JA', ...
+                  `CPI_US', `CPI_FR', `CPI_JA'\});
+    \end{alltt}
+    \myitem We can extract one variable using syntax like
+    \begin{alltt}
+  >> ts.GDP_US
+    \end{alltt}
+    \myitem To get all the \texttt{GDP} variables
+    \begin{alltt}
+  >> ts\{`GDP_US', `GDP_FR', `GDP_JA'\}
+    \end{alltt}
+    \myitem A shorter way to do the same thing
+    \begin{alltt}
+  >> ts\{`GDP_@US,FR,JA@'\}
+    \end{alltt}
+    \myitem To get \texttt{GDP} \& \texttt{CPI} (NB: max 2 implicit loops)
+    \begin{alltt}
+  >> ts\{`@GDP,CPI@_@US,FR,JA@'\}
+    \end{alltt}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Applying methods to \texttt{dseries}}
+  \begin{itemize}
+    \myitem Suppose \texttt{ts} is as above. Then, to apply a method
+    (\textit{e.g.,} \texttt{log()}) to \texttt{GDP}:
+    \begin{alltt}
+  ts\{`GDP_@US,FR,JA@'\}=ts\{`GDP_@US,FR,JA@'\}.log()
+    \end{alltt}
+    \myitem To apply a method to a subsample of all the variables:
+    \begin{alltt}
+  ts(2000Q2:2000Q4) = ts(2000Q2:2000Q4).log()
+    \end{alltt}
+    \myitem To apply a method to a subsample of some of the variables:
+    \begin{alltt}
+  ts(2000Q2:2000Q4)\{`GDP_@US,FR,JA@'\} = ...
+    ts(2000Q2:2000Q4)\{`GDP_@US,FR,JA@'\}.log()
+    \end{alltt}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Merging \texttt{dseries}}
+  \begin{itemize}
+    \myitem Suppose that \verb+ts+ and \verb+ds+ are two \texttt{dseries} objects
+    with the same variables observed on different time ranges. These
+    \texttt{dseries} objects can be merged using the following syntax:
+\begin{verbatim}
+    vs = [ts; ds];
+\end{verbatim}
+\myitem Suppose that \verb+ts+ and \verb+ds+ are two \texttt{dseries} objects
+with different variables observed on the same or different time ranges. These
+\texttt{dseries} objects can be merged using the following syntax:
+\begin{verbatim}
+    vs = [ts, ds];
+\end{verbatim}
+If \verb+ts+ and \verb+ds+ are not defined over the same time range,
+the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
+\verb+ds.dates+, \verb+NaN+s will be added for the missing observations.
+  \end{itemize}
+\end{frame}
+
+
+
 
 
 \begin{frame}[fragile,t]
@@ -570,7 +735,7 @@ would be transformed into
 \begin{frame}
   \frametitle{Overview}
   \begin{itemize}
-  \myitem Introduced in Dynare 4.4
+  \myitem Beta version in Dynare 4.4. Mature version ready in Dynare 4.5
   \myitem Introduce reporting functionality to Dynare
       \begin{itemize}
       \myitem Input: \texttt{dseries}
