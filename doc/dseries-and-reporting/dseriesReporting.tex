@@ -691,9 +691,10 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
   \frametitle{Reporting Class Hierarchy}
   \begin{itemize}
   \myitem Class names on the top half of the box, constructor names on the bottom
-  \myitem Arrows represent what the new object can be added to
+  \myitem Arrows represent what the new object can be added to; objects in ellipses are treated a bit differently (explained below)
   \end{itemize}
   \begin{center}
+    \scriptsize{
     \begin{tikzpicture}[
         node distance = .45cm,
         auto,
@@ -714,15 +715,15 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
               \textbf{Section}
               \nodepart{second}\texttt{addSection(...);}
             };
-      \node (Paragraph) [abstract, rectangle split, rectangle split parts=2, right=of Section]
+      \node (Paragraph) [abstract, ellipse split, rectangle split parts=2, right=of Section]
             {
               \textbf{Paragraph}
-              \nodepart{second}\texttt{addParagraph(...);}
+              \nodepart{lower}\texttt{addParagraph(...);}
             };
-      \node (Vspace) [abstract, rectangle split, rectangle split parts=2, left=of Section]
+      \node (Vspace) [abstract, ellipse split, rectangle split parts=2, left=of Section]
             {
               \textbf{Vspace}
-              \nodepart{second}\texttt{addVspace(...);}
+              \nodepart{lower}\texttt{addVspace(...);}
             };
       \node (Spacer) [abstract, rectangle split, rectangle split parts=2, opacity=0, below=of Section]
             {
@@ -750,56 +751,97 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
       \draw [line] (Vspace) to node { } (Section);
       \draw [line] (Section) to node { } (Page);
       \draw [line] (Page) to node { } (Report);
-    \end{tikzpicture}
+    \end{tikzpicture}}
   \end{center}
 \end{frame}
 
 
 \subsection{Syntax}
 \begin{frame}[fragile,t]
-  \frametitle{Reporting Syntax (1/2)}
+  \frametitle{Reporting Syntax (1/3)}
   \begin{itemize}
   \myitem \texttt{report(\ldots)}: Create a report
     \begin{itemize}
-    \myitem \textbf{Options}: \texttt{compiler}, \texttt{showDate}, \texttt{fileName}, \texttt{margin}, \texttt{marginUnit}, \texttt{orientation}, \texttt{paper}, \texttt{title}
+    \myitem \textbf{Options}: \texttt{compiler}, \texttt{showDate}, \texttt{fileName}, \texttt{margin}, \texttt{marginUnit}, \ldots
+    \begin{alltt}
+>> rep = report(`title', `Dynare Summer School 2014', ...
+                `fileName', `myDynareReport.tex');
+    \end{alltt}
     \end{itemize}
   \myitem \texttt{addPage(\ldots)}: Add a page to the \texttt{Report}
     \begin{itemize}
     \myitem \textbf{Options}: \texttt{footnote}, \texttt{orientation}, \texttt{paper}, \texttt{title}, \texttt{titleFormat}
+    \begin{alltt}
+>> rep = rep.addPage(`title', \{`Page Title', `Page Subtitle'\}, ...
+                     `titleFormat', \{`\textbackslash{}large\textbackslash{}bfseries', `\textbackslash{}large'\});
+    \end{alltt}
     \end{itemize}
   \myitem \texttt{addSection(\ldots)}: Add a section to the current \texttt{Page}
     \begin{itemize}
-    \myitem You can think of a section as a matrix. As graphs and/or tables are added section, it fills up from left to right. Once you have added \texttt{cols} objects, a new row is started.
+    \myitem You can think of a section as a matrix. As graphs and/or tables are added to a section, it fills up from left to right. Once you have added \texttt{cols} objects, a new row is started.
     \myitem \textbf{Options}: \texttt{cols}, \texttt{height}
-    \end{itemize}
-  \myitem \texttt{addVspace(\ldots)}: Add a vertical space to the current \texttt{Section}.
-    \begin{itemize}
-      \myitem If the row has been completely filled in, this adds space between this row and the next row. If not, this adds space at the end of the \texttt{Section} and closes it
-      \myitem \textbf{Options}: \texttt{hline}, \texttt{number}
-    \end{itemize}
-  \myitem \texttt{addParagraph(\ldots)}: Add text to the current \texttt{Section}
-    \begin{itemize}
-      \myitem To add anything other than \texttt{Paragraphs} to a \texttt{Section}, you must add a new \texttt{Section} to the page
-      \myitem \textbf{Options}: \texttt{balancedCols}, \texttt{cols}, \texttt{heading}, \texttt{index}, \texttt{text},
+    \begin{alltt}
+>> rep = rep.addSection(`cols', 3);
+    \end{alltt}
     \end{itemize}
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Reporting Syntax (2/2)}
+  \frametitle{Reporting Syntax (2/3)}
   \begin{itemize}
-  \myitem \texttt{addGraph(\ldots)}: Add a graph to the current \texttt{Section}
+    \myitem \texttt{addVspace(\ldots)}: Add a vertical space to the current \texttt{Section}.
     \begin{itemize}
-    \myitem \textbf{Options}: \texttt{data}, \texttt{graphDirName}, \texttt{graphName}, \texttt{graphSize}, \texttt{height}, \texttt{showGrid}, \texttt{showLegend}, \texttt{showLegendBox}, \texttt{legendLocation}, \texttt{legendOrientation}, \texttt{legendFontSize}, \texttt{miscTikzAxisOptions}, \texttt{miscTikzPictureOptions}, \texttt{seriesToUse}, \texttt{shade}, \texttt{shadeColor}, \texttt{shadeOpacity}, \texttt{title}, \texttt{titleFormat}, \texttt{width}, \texttt{xlabel}, \texttt{ylabel}, \texttt{xAxisTight}, \texttt{xrange}, \texttt{xTicks}, \texttt{xTickLabels}, \texttt{xTickLabelAnchor}, \texttt{xTickLabelRotation}, \texttt{yAxisTight}, \texttt{yrange}, \texttt{showZeroLine}
+      \myitem If the row has been completely filled in, this adds space between this row and the next row. If not, this adds space at the end of the \texttt{Section} and closes it; in other words, in this situation if you want to add more graphs, you'd have to create a new \texttt{Section} first.
+      \myitem \textbf{Options}: \texttt{hline}, \texttt{number}
+      \begin{alltt}
+>> rep = rep.addVspace(`hline', 2, `number', 3);
+    \end{alltt}
     \end{itemize}
-  \myitem \texttt{addTable(\ldots)}: Add a table to the current \texttt{Section}
+    \myitem \texttt{addParagraph(\ldots)}: Add text to the current \texttt{Section}
     \begin{itemize}
-    \myitem \textbf{Options}: \texttt{data}, \texttt{showHlines}, \texttt{precision}, \texttt{range}, \texttt{seriesToUse}, \texttt{tableDirName}, \texttt{tableName}, \texttt{title}, \texttt{titleFormat}, \texttt{vlineAfter}, \texttt{vlineAfterEndOfPeriod}, \texttt{showVlines}
+      \myitem To add anything other than a paragraph (or multiple paragraphs) to a \texttt{Section}, you must add a new \texttt{Section} to the page
+      \myitem \textbf{Options}: \texttt{balancedCols}, \texttt{cols}, \texttt{heading}, \texttt{index}, \texttt{text}
+      \begin{alltt}
+>> rep = rep.addParagraph(`text', `Lorem ipsum\textbackslash{}ldots\textbackslash{}newline');
+      \end{alltt}
     \end{itemize}
-  \myitem \texttt{addSeries(\ldots)}: Add a series to the current \texttt{Graph} or \texttt{Table}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Reporting Syntax (3/3)}
+  \begin{itemize}
+    \myitem \texttt{addGraph(\ldots)}: Add a graph to the current \texttt{Section}
     \begin{itemize}
-    \myitem \textbf{Options}: \texttt{data}, \texttt{graphHline}, \texttt{graphLegendName}, \texttt{graphLineColor}, \texttt{graphLineStyle}, \texttt{graphLineWidth}, \texttt{graphMarker}, \texttt{graphMarkerEdgeColor}, \texttt{graphMarkerFaceColor}, \texttt{graphMarkerSize}, \texttt{graphMiscTikzAddPlotOptions}, \texttt{graphShowInLegend}, \texttt{graphVline}, \texttt{tableDataRhs}, \texttt{tableRowColor}, \texttt{tableRowIndent}, \texttt{tableShowMarkers}, \texttt{tableAlignRight}, \texttt{tableMarkerLimit}, \texttt{tableNegColor}, \texttt{tablePosColor}, \texttt{tableSubSectionHeader}, \texttt{zeroTol}
+      \myitem \textbf{Options}: \texttt{data}, \texttt{graphDirName}, \texttt{graphName}, \texttt{graphSize}, \texttt{height}, \ldots
+      \begin{alltt}
+>> rep = rep.addGraph(`title', `Headline Inflation (y/y)', ...
+                      `xrange', prange, ...
+                      `shade', srange, ...
+                      `showZeroline', true);
+      \end{alltt}
+    \end{itemize}
+    \myitem \texttt{addTable(\ldots)}: Add a table to the current \texttt{Section}
+    \begin{itemize}
+      \myitem \textbf{Options}: \texttt{data}, \texttt{showHlines}, \texttt{precision}, \texttt{range}, \texttt{seriesToUse}, \ldots
+      \begin{alltt}
+>> rep = rep.addTable(`title', \{`Real GDP Growth',`subtitle 1'\}, ...
+                      `range', larange, ...
+                      `vlineAfter', dates(`2011y'));
+      \end{alltt}
+    \end{itemize}
+    \myitem \texttt{addSeries(\ldots)}: Add a series to the current \texttt{Graph} or \texttt{Table}
+    \begin{itemize}
+      \myitem \textbf{Options}: \texttt{data}, \texttt{graphHline}, \texttt{graphLegendName}, \texttt{graphLineColor}, \ldots
+      \begin{alltt}
+>> rep = rep.addSeries(`data', db\_q.LRPOIL\_WORLD, ...
+                       `graphLineColor', `blue', ...
+                       `graphLineWidth', 1.5, ...
+                       `graphMarker', `triangle*');
+      \end{alltt}
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -875,8 +917,8 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 \begin{verbatim}
     report = report.addVspace(`number', 2);
     report = report.addSection(`cols', 1);
-    report = report.addTable(`range', dates(`2022q1'):dates(`2024q1'),...
-                             `precision', 5);
+    report = report.addTable(`range', 2022q1:2024q1, `precision', 5);
+
 @#  for var in endovars
       report = report.addSeries(`data', shock@{shock}.@{var});
 @#  endfor
