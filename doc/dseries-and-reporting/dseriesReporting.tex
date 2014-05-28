@@ -633,7 +633,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 %
 \section{Reporting}
 \subsection{Overview}
-\begin{frame}
+\begin{frame}[fragile,t]
   \frametitle{Overview}
   \begin{itemize}
   \myitem Beta version in Dynare 4.4. Mature version ready in Dynare 4.5
@@ -644,9 +644,9 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
       \end{itemize}
     \myitem Graphs and Tables are modular
       \begin{itemize}
-      \myitem Can easily be included in another document
+      \item[$\Rightarrow$] Can easily be included in another document
       \end{itemize}
-    \myitem Graphs are produced in Ti$k$Z/PGFPlots (standard in a TeX distribution)
+    \myitem Graphs are produced in Ti$k$Z/PGFPlots (standard in a \TeX\ distribution)
       \begin{itemize}
       \myitem Scales well
       \myitem Formating follows that of enclosing document
@@ -659,18 +659,18 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
     \myitem Works much faster than similar softawre
     \myitem NB: Must install a \LaTeX\ distribution to compile reports
       \begin{itemize}
-      \myitem Windows: MiKTeX \url{http://miktex.org}
-      \myitem Mac OS X: MacTeX \url{http://tug.org/mactex}
-      \myitem Linux: TeX Live (from your package manager)
+      \myitem On Windows use MiKTeX: \url{http://miktex.org}
+      \myitem On Mac OS X use MacTeX: \url{http://tug.org/mactex}
+      \myitem On Linux use \TeX\ Live: available from your package manager
       \end{itemize}
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[fragile,t]
   \frametitle{How Reporting Works}
   \begin{itemize}
-  \myitem Reports are created command by command
+    \myitem Reports are created command by command
     \begin{itemize}
     \myitem Hence the order of commands matters
     \end{itemize}
@@ -687,7 +687,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[fragile,t]
   \frametitle{Reporting Class Hierarchy}
   \begin{itemize}
   \myitem Class names on the top half of the box, constructor names on the bottom
@@ -714,22 +714,30 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
               \textbf{Section}
               \nodepart{second}\texttt{addSection(...);}
             };
-      \node (Vspace) [abstract, rectangle split, rectangle split parts=2, below=of Section]
+      \node (Paragraph) [abstract, rectangle split, rectangle split parts=2, right=of Section]
+            {
+              \textbf{Paragraph}
+              \nodepart{second}\texttt{addParagraph(...);}
+            };
+      \node (Vspace) [abstract, rectangle split, rectangle split parts=2, left=of Section]
             {
               \textbf{Vspace}
               \nodepart{second}\texttt{addVspace(...);}
             };
-      \node (Graph) [abstract, rectangle split, rectangle split parts=2, left=of Vspace]
+      \node (Spacer) [abstract, rectangle split, rectangle split parts=2, opacity=0, below=of Section]
+            {
+            };
+      \node (Graph) [abstract, rectangle split, rectangle split parts=2, left=of Spacer]
             {
               \textbf{Graph}
               \nodepart{second}\texttt{addGraph(...);}
             };
-      \node (Table) [abstract, rectangle split, rectangle split parts=2, right=of Vspace, text height=]
+      \node (Table) [abstract, rectangle split, rectangle split parts=2, right=of Spacer, text height=]
             {
               \textbf{Table}
               \nodepart{second}\texttt{addTable(...);}
             };
-      \node (Series) [abstract, rectangle split, rectangle split parts=2, below=of Vspace]
+      \node (Series) [abstract, rectangle split, rectangle split parts=2, below=of Spacer]
             {
               \textbf{Series}
               \nodepart{second}\texttt{addSeries(...);}
@@ -738,6 +746,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
       \draw [line] (Series) to node { } (Graph);
       \draw [line] (Table) to node { } (Section);
       \draw [line] (Graph) to node { } (Section);
+      \draw [line] (Paragraph) to node { } (Section);
       \draw [line] (Vspace) to node { } (Section);
       \draw [line] (Section) to node { } (Page);
       \draw [line] (Page) to node { } (Report);
@@ -747,7 +756,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 
 
 \subsection{Syntax}
-\begin{frame}
+\begin{frame}[fragile,t]
   \frametitle{Reporting Syntax (1/2)}
   \begin{itemize}
   \myitem \texttt{report(\ldots)}: Create a report
@@ -763,15 +772,21 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
     \myitem You can think of a section as a matrix. As graphs and/or tables are added section, it fills up from left to right. Once you have added \texttt{cols} objects, a new row is started.
     \myitem \textbf{Options}: \texttt{cols}, \texttt{height}
     \end{itemize}
-  \myitem \texttt{addVspace(\ldots)}: Add a vertical space to the current \texttt{Section}
+  \myitem \texttt{addVspace(\ldots)}: Add a vertical space to the current \texttt{Section}.
     \begin{itemize}
-    \myitem \textbf{Options}: \texttt{hline}, \texttt{number}
+      \myitem If the row has been completely filled in, this adds space between this row and the next row. If not, this adds space at the end of the \texttt{Section} and closes it
+      \myitem \textbf{Options}: \texttt{hline}, \texttt{number}
+    \end{itemize}
+  \myitem \texttt{addParagraph(\ldots)}: Add text to the current \texttt{Section}
+    \begin{itemize}
+      \myitem To add anything other than \texttt{Paragraphs} to a \texttt{Section}, you must add a new \texttt{Section} to the page
+      \myitem \textbf{Options}: \texttt{balancedCols}, \texttt{cols}, \texttt{heading}, \texttt{index}, \texttt{text},
     \end{itemize}
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[fragile,t]
   \frametitle{Reporting Syntax (2/2)}
   \begin{itemize}
   \myitem \texttt{addGraph(\ldots)}: Add a graph to the current \texttt{Section}
@@ -790,7 +805,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[fragile,t]
   \frametitle{Output}
   To create a report:
   \begin{itemize}
@@ -813,7 +828,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 \subsection{Examples}
 
 \section{Putting it All Together}
-\begin{frame}[fragile=singleslide]
+\begin{frame}[fragile=singleslide,t]
   \frametitle{Create Report of IRFs from \texttt{example1.mod}}
   \begin{itemize}
   \myitem \texttt{example1.mod} is located in the Dynare \texttt{examples} directory
@@ -830,7 +845,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
   \end{block}
 \end{frame}
 
-\begin{frame}[fragile=singleslide]
+\begin{frame}[fragile=singleslide,t]
   \frametitle{Create Report of IRFs from \texttt{example1.mod}}
   \begin{block}{Populate Report (1/2)}
 \small{
@@ -853,7 +868,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 \end{frame}
 
 
-\begin{frame}[fragile=singleslide]
+\begin{frame}[fragile=singleslide,t]
   \frametitle{Create Report of IRFs from \texttt{example1.mod}}
   \begin{block}{Populate Report (2/2)}
 \small{
