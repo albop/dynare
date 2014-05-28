@@ -559,170 +559,71 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 \end{frame}
 
 
-
-
-
 \begin{frame}[fragile,t]
-  \frametitle{Referencing data from a \texttt{dseries}}
+  \frametitle{Arithmetic Operations on \texttt{dseries}}
   \begin{itemize}
-  \myitem For the following, let
+    \myitem The binary operators \texttt{+}, \texttt{-}, \texttt{*},
+    \texttt{/}, and \texttt{\string^} perform element-wise arithmetic operations on
+    \texttt{dseries}
+    \myitem They can be used with two \texttt{dseries} or one \texttt{dseries}
+    and a real number
+    \myitem Two \texttt{dseries} can have different date ranges. Non overlapping dates will be filled with \texttt{NaNs}
+    \myitem Take addition for example
     \begin{itemize}
-    \myitem \texttt{ts1=dseries([1;2;3], `1999y', \{`MyVar1'\}, \{`MyVar\_1'\})}
-    \myitem \texttt{ts2=dseries([4;5;6], `2000y', \{`MyVar2'\}, \{`MyVar\_2'\})}
-    \myitem \texttt{ts3=[ts1 ts2]}
-    \end{itemize}
-  \myitem To get \texttt{MyVar1} from \texttt{t3}, you have three options
-    \begin{itemize}
-      \myitem \texttt{ts3\{1\}}
-      \myitem \texttt{ts3.MyVar1}
-      \myitem \texttt{ts3\{`MyVar1'\}}
-    \end{itemize}
-  \myitem To select a subsample of MyVar2 from 2001 to 2002:
-    \begin{itemize}
-      \myitem \texttt{ts3\{2\}(dates(`2001y'):dates(`2002y'))}
-      \myitem \texttt{ts3.MyVar2(dates(`2001y'):dates(`2002y'))}
-      \myitem \texttt{ts3\{`MyVar2'\}(dates(`2001y'):dates(`2002y'))}
-    \end{itemize}
-  \myitem To see the data for both variables in 2000:
-    \begin{itemize}
-      \myitem \texttt{ts3(`2000y')}
-      \myitem \texttt{ts3\{[1 2]\}(`2000y')}
-      \myitem \texttt{ts3\{`MyVar1',`MyVar2'\}(`2000y')}
-      \myitem \texttt{ts3\{`MyVar@1,2@'\}(`2000y')}
-      \myitem \texttt{ts3\{`MyVar[1-2]'\}(`2000y')}
-    \end{itemize}
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile,t]
-  \frametitle{Getting info about \texttt{dseries}}
-  \begin{itemize}
-  \myitem \texttt{eq, ne}: returns boolean value of element-wise comparison; series must have same start dates and number of observations
-    \begin{itemize}
-    \myitem \texttt{ts1==ts3.MyVar1(dates(`1999y'):dates(`2001y')) \% [1 1 1]'}
-    \myitem \texttt{ts1$\thicksim$=ts1 \% [0 0 0]'}
-    \end{itemize}
-  \myitem \texttt{isempty}: returns true if series is empty
-    \begin{itemize}
-    \myitem \texttt{isempty(dseries()) \% 1}
-    \end{itemize}
-  \myitem \texttt{isequal}: returns true if the series are equal
-    \begin{itemize}
-    \myitem \texttt{isequal(ts1,ts1) \% 1}
-    \end{itemize}
-  \myitem \texttt{size}: returns number of observations by number of variables
-    \begin{itemize}
-    \myitem \texttt{ts3.size() \% [4 2]}
-    \end{itemize}
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile,t]
-  \frametitle{Working with \texttt{dseries}}
-  \begin{itemize}
-  \myitem \texttt{baxter\_king\_filter}: the Baxter and King (1999) band pass filter
-    \begin{itemize}
-    \myitem \texttt{ts1.baxter\_king\_filter(high freq, low freq, K)}
-    \end{itemize}
-  \myitem \texttt{hpcycle}: HP Filters the \texttt{dseries}, returning the business cycle component
-    \begin{itemize}
-    \myitem \texttt{ts1.hptrend(lambda) \% lambda = 1600 by default}
-    \end{itemize}
-  \myitem \texttt{hptrend}: HP Filters the \texttt{dseries}, returning the trend component
-    \begin{itemize}
-    \myitem \texttt{ts1.hptrend(lambda) \% lambda = 1600 by default}
-    \end{itemize}
-  \myitem \texttt{qdiff}: Quarterly difference; works on quarterly, monthly, and weekly series
-    \begin{itemize}
-    \myitem \texttt{ts1.qdiff()}
-    \end{itemize}
-  \myitem \texttt{qgrowth}: Quarterly growth rate: $\frac{ts_t-ts_{t-1}}{ts_{t-1}}$. Works on quarterly, monthly, and weekly series
-    \begin{itemize}
-    \myitem \texttt{ts1.qgrowth()}
-    \end{itemize}
-  \myitem \texttt{yidff}: Yearly difference; works on yearly, quarterly, monthly, and weekly series
-    \begin{itemize}
-    \myitem \texttt{ts1.ydiff()}
-    \end{itemize}
-  \myitem \texttt{ygrowth}: Annual growth rate: $\frac{ts_t-ts_{t-1}}{ts_{t-1}}$. Works on yearly ($t-1$), quarterly ($t-4$), monthly ($t-12$), and weekly ($t-52$) series
-    \begin{itemize}
-    \myitem \texttt{ts1.ygrowth()}
-    \end{itemize}
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile,t]
-  \frametitle{Operations on \texttt{dseries}}
-  \begin{itemize}
-  \myitem \texttt{abs}: The absolute value of each data point
-  \myitem \texttt{cumprod}/\texttt{cumsum}: Cumulative product/sum
-  \myitem \texttt{exp}/\texttt{log}: The exponential/log for each data point
-  \myitem \texttt{mrdivide}/\texttt{mtimes}: Division/Multiplication
-  \myitem \texttt{minus}/\texttt{plus}: Subtraction/Addition
-  \myitem \texttt{mpower}: Power
-    \begin{itemize}
-    \myitem \texttt{ts1-ts2}
-    \myitem \texttt{ts1-3}
-    \myitem \texttt{ts1-[1:3]'}
-    \end{itemize}
-  \myitem \texttt{lag}/\texttt{lead}: lag/lead the series
-    \begin{itemize}
-    \myitem \texttt{ts1(-1)}/\texttt{ts1(2)}
-    \myitem \texttt{ts1.lag()}/\texttt{ts1.lead(2)}
-    \end{itemize}
-  \myitem \texttt{uminus}: Equivalent to multiplying by $-1$.
-    \begin{itemize}
-    \myitem \texttt{-ts1}
-    \end{itemize}
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile,t]
-  \frametitle{Modifying \texttt{dates}}
-  \begin{itemize}
-  \myitem \texttt{align}: Makes both series cover the same time range by padding with \texttt{NaN}'s
-    \begin{itemize}
-    \myitem \texttt{[ts1,ts2]=align(ts1,ts2)}
-    \end{itemize}
-  \myitem \texttt{chain}:
-  \myitem \texttt{horzcat}: Join two or more \texttt{dseries}
-    \begin{itemize}
-    \myitem \texttt{ts3=[ts1 ts2]}
-    \end{itemize}
-  \myitem \texttt{insert}: Inserts variables from one \texttt{dseries} into another
-    \begin{itemize}
-    \myitem \texttt{ts1.insert(ts2, 2)}
-    \end{itemize}
-  \myitem \texttt{merge}: Merge two series
-  \myitem \texttt{pop}: remove the last variable from \texttt{dseries}
-  \myitem \texttt{plot}: plot a \texttt{dseries}
-  \myitem \texttt{rename}: Rename a variable in a dseries
-    \begin{itemize}
-    \myitem \texttt{ts1.rename(`MyVar1',`MyFirstVar')}
-    \end{itemize}
-  \myitem \texttt{save}: Save a \texttt{dseries} in either \texttt{.csv} (default), \texttt{.m}, or \texttt{.mat}
-  \myitem \texttt{set\_names}: Rename all variables in a \texttt{dseries}
-    \begin{itemize}
-    \myitem \texttt{ts3.set\_names(`NewName1',`NewName2')}
-    \end{itemize}
-  \myitem \texttt{tex\_rename}: Rename the \LaTeX\ name for a given variable
-    \begin{itemize}
-    \myitem \texttt{ts1.tex\_rename(`MyVar1',`MyVar\textbackslash\_1')}
-    \end{itemize}
-  \myitem \texttt{vertcat}: Add more observations to existing \texttt{dseries}
-    \begin{itemize}
-    \myitem \texttt{[ts1; dseries(4,`2002y',`MyVar1')]}
+      \myitem Let
+    \begin{alltt}
+>> ts0 = dseries(ones(2,2)*2, `2000W1', \{`MyVar1', `MyVar2'\});
+>> ts1 = dseries(ones(3,2)*3, `2000W2', \{`YrVar1', `YrVar2'\});
+>> ds = ts0.MyVar1;
+    \end{alltt}
+    \myitem \texttt{ts0+3} will add \texttt{3} to every element in \texttt{ts0}
+    \myitem \texttt{ts0+[3 4]} will add \texttt{3} to every element in \texttt{ts0.MyVar1} and \texttt{4} to every element in \texttt{ts0.MyVar2}
+    \myitem \texttt{ts0+ts1} will add \texttt{ts0.MyVar1} to \texttt{ts1.YrVar1} and \texttt{ts0.MyVar2} to \texttt{ts1.YrVar2}. Only \texttt{2000W2} will contain the value \texttt{5} for both variables. All other points will contain \texttt{NaN}
+    \myitem \texttt{ts0+ds} will add \texttt{ds} to \texttt{ts0.MyVar1} and \texttt{ts0.MyVar2}. All values will contain \texttt{4}
     \end{itemize}
   \end{itemize}
 \end{frame}
 
 
 
-\subsection{Examples}
+\begin{frame}[fragile,t]
+  \frametitle{Leads and Lags with \texttt{dseries} (1/2)}
+  \begin{itemize}
+    \myitem Let
+    \begin{alltt}
+  >> ts = dseries([1:4]');
+    \end{alltt}
+    \myitem Then
+    \begin{alltt}
+  >> ts.lead()                      >> ts.lag()
+
+  ans is a dseries object:          ans is a dseries object:
+
+     | lead(Variable_1,1)              | lag(Variable_1,1)
+  1Y | 2                            1Y | NaN
+  2Y | 3                            2Y | 1
+  3Y | 4                            3Y | 2
+  4Y | NaN                          4Y | 3
+    \end{alltt}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Leads and Lags with \texttt{dseries} (2/2)}
+  \begin{itemize}
+    \myitem You can lead/lag a \texttt{dseries} by more than one period
+    \begin{itemize}
+      \myitem \texttt{ts.lead(k)} where $k\in\mathbb{Z}$
+      \myitem \texttt{ts.lag(k)} where $k\in\mathbb{Z}$
+    \end{itemize}
+    \myitem A shorthand syntax is available as well
+    \begin{itemize}
+      \myitem Lead: \texttt{ts(k)} where $k\in\mathbb{Z}$
+      \myitem Lag: \texttt{ts(-k)} where $k\in\mathbb{Z}$
+    \end{itemize}
+  \end{itemize}
+\end{frame}
 
 
 
