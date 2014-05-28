@@ -166,7 +166,6 @@ elseif options_.solve_algo == 3
     end
 elseif options_.solve_algo == 10
     olmmcp = options_.lmmcp;
-    olmmcp.Display = 'iter';
     [x,fval,exitflag] = lmmcp(func,x,olmmcp.lb,olmmcp.ub,olmmcp,varargin{:});
     if exitflag == 1
         info = 0;
