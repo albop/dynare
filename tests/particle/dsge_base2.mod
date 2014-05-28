@@ -68,20 +68,20 @@ varobs y l i ;
 options_.particle.status = 1;
 options_.particle.initialization = 1;
 options_.particle.pruning = 0;
-options_.particle.number_of_particles = 1000 ;
+options_.particle.number_of_particles = 5000 ;
 options_.particle.resampling.status = 'systematic';
 
-//options_.particle.resampling.method1 = 'traditional' ;
+options_.particle.resampling.method1 = 'traditional' ;
 //options_.particle.resampling.method1 = 'residual' ;
-options_.particle.resampling.method1 = 'smooth' ;
+//options_.particle.resampling.method1 = 'smooth' ;
 
-options_.particle.reampling.method2 = 'kitagawa' ;
-//options_.particle.resampling.method2 = 'stratified' ;
+options_.particle.reampling.method2 = 'kitagawa' ;//'stratified' ;
 
-options_.particle.resampling.number_of_partitions = 1;
 options_.particle.resampling.neff_threshold = .5;
+options_.mode_check.neighbourhood_size = .2 ;
+options_.mode_check.number_of_points = 250;
 
-set_dynare_threads('local_state_space_iteration_2',3);
+//set_dynare_threads('local_state_space_iteration_2',3);
 
 options_.particle.algorithm = 'sequential_importance_particle_filter';
 //options_.particle.algorithm = 'auxiliary_particle_filter';
@@ -94,14 +94,12 @@ options_.particle.IS_approximation_method = 'cubature' ;
 //options_.particle.IS_approximation_method = 'unscented' ;
 
 //options_.particle.approximation_method = 'quadrature' ;
-options_.particle.approximation_method = 'cubature' ;
+//options_.particle.approximation_method = 'cubature' ;
 //options_.particle.approximation_method = 'unscented' ;
 //options_.particle.approximation_method = 'MonteCarlo' ;
 
 //options_.mh_posterior_mode_estimation=1 ;
 
 // online
-options_.particle.liu_west_delta = 0.9 ;
-options_.mode_check_node_number = 250 ;
 
-estimation(datafile=data_risky_perturb2,nograph,order=2,nobs=100,mh_replic=0,mode_compute=7,mode_check);
+estimation(datafile=data_risky_perturb3,nograph,order=2,nobs=100,mh_replic=0,mode_compute=7,mode_check);
