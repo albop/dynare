@@ -41,7 +41,7 @@ if strcmpi(o.orientation, 'landscape')
     fprintf(fid, ',landscape');
 end
 fprintf(fid, ']{geometry}\n');
-fprintf(fid, '\\usepackage{pdflscape, booktabs, pgfplots, colortbl, adjustbox}\n');
+fprintf(fid, '\\usepackage{pdflscape, booktabs, pgfplots, colortbl, adjustbox, multicol}\n');
 fprintf(fid, '\\pgfplotsset{compat=1.5.1}');
 fprintf(fid, ['\\makeatletter\n' ...
               '\\def\\blfootnote{\\gdef\\@thefnmark{}\\@footnotetext}\n' ...
@@ -71,9 +71,9 @@ fprintf(fid, '\\renewcommand{\\bottomfraction}{0.8}\n');
 fprintf(fid, '\\setlength{\\parindent}{0in}\n');
 fprintf(fid, '\\newlength\\sectionheight\n');
 fprintf(fid, '\\begin{document}\n');
-fprintf(fid, '\\pgfdeclarelayer{background}\n');
-fprintf(fid, '\\pgfdeclarelayer{foreground}\n');
-fprintf(fid, '\\pgfsetlayers{background,main,foreground}\n');
+fprintf(fid, '\\pgfdeclarelayer{background0}\n');
+fprintf(fid, '\\pgfdeclarelayer{background1}\n');
+fprintf(fid, '\\pgfsetlayers{background0,background1,main}\n');
 fprintf(fid, '\\centering\n');
 
 nps = length(o.pages);

@@ -1,5 +1,16 @@
-function s = getTexName(o)
-%function s = getTexName(o)
+function o = addParagraph(o, varargin)
+%function o = addParagraph(o, varargin)
+% Add a paragraph to the current section of the current page in the report
+%
+% INPUTS
+%   o          [report]  report object
+%   varargin             arguments to @section/addGraph.m
+%
+% OUTPUTS
+%   o          [report]  updated report object
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013-2014 Dynare Team
 %
@@ -18,12 +29,6 @@ function s = getTexName(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isempty(o.data)
-    % for the case when there is no data in the series
-    % e.g. graphVline was passed
-    s = '';
-else
-    assert(size(o.data,2) == 1);
-    s = o.data.tex{:};
-end
+o.pages{end}.sections{end} = ...
+    o.pages{end}.sections{end}.addParagraph(varargin{:});
 end

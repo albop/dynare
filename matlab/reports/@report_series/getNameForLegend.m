@@ -1,7 +1,7 @@
-function s = getTexName(o)
-%function s = getTexName(o)
+function s = getNameForLegend(o)
+%function s = getNameForLegend(o)
 
-% Copyright (C) 2013-2014 Dynare Team
+% Copyright (C) 2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -18,9 +18,11 @@ function s = getTexName(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isempty(o.data)
+if isempty(o.data) || ~o.graphShowInLegend
     % for the case when there is no data in the series
     % e.g. graphVline was passed
+    % or when the user does not want this series shown in
+    % the legend
     s = '';
 else
     assert(size(o.data,2) == 1);

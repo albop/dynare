@@ -31,12 +31,12 @@ function perfect_foresight_solver()
 
 global M_ options_ oo_
 
-if options_.stack_solve_algo < 0 || options_.stack_solve_algo > 6
-    error('PERFECT_FORESIGHT_SOLVER: stack_solve_algo must be between 0 and 6')
+if options_.stack_solve_algo < 0 || options_.stack_solve_algo > 7
+    error('PERFECT_FORESIGHT_SOLVER: stack_solve_algo must be between 0 and 7')
 end
 
 if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0 ...
-        && options_.stack_solve_algo ~= 6
+        && options_.stack_solve_algo ~= 6 && options_.stack_solve_algo ~= 7
     error('PERFECT_FORESIGHT_SOLVER: you must use stack_solve_algo=0 or stack_solve_algo=6 when not using block nor bytecode option')
 end
 
@@ -185,8 +185,37 @@ else
         else % General case
             if options_.stack_solve_algo == 0
                 sim1;
-            else % stack_solve_algo = 6
+            elseif options_.stack_solve_algo == 6
                 sim1_lbj;
+            elseif options_.stack_solve_algo == 7
+                periods = options_.periods;
+                if ~isfield(options_.lmmcp,'lb')
+                    [lb,ub,pfm.eq_index] = get_complementarity_conditions(M_);
+                    options_.lmmcp.lb = repmat(lb,periods,1);
+                    options_.lmmcp.ub = repmat(ub,periods,1);
+                end
+
+                y = oo_.endo_simul;
+                y0 = y(:,1);
+                yT = y(:,periods+2);
+                z = y(:,2:periods+1);
+                illi = M_.lead_lag_incidence';
+                [i_cols,~,i_cols_j] = find(illi(:));
+                illi = illi(:,2:3);
+                [i_cols_J1,~,i_cols_1] = find(illi(:));
+                i_cols_T = nonzeros(M_.lead_lag_incidence(1:2,:)');
+                [y,info] = dynare_solve(@perfect_foresight_problem,z(:),1, ...
+                                 str2func([M_.fname '_dynamic']),y0,yT, ...
+                                 oo_.exo_simul,M_.params,oo_.steady_state, ...
+                                 options_.periods,M_.endo_nbr,i_cols, ...
+                                 i_cols_J1, i_cols_1, i_cols_T, i_cols_j, ...
+                                 M_.NNZDerivatives(1));
+                oo_.endo_simul = [y0 reshape(y,M_.endo_nbr,periods) yT];
+                if info == 1
+                    oo_.deterministic_simulation.status = 0;
+                else
+                    oo_.deterministic_simulation.status = 1;
+                end;
             end
         end
     end

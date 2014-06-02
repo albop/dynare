@@ -35,18 +35,18 @@ function o = writeSeriesForTable(o, fid, dates, precision)
 %% Validate options passed to function
 assert(fid ~= -1);
 for i=1:length(dates)
-    assert(isa(dates{i}, 'dates'));
+    assert(isdates(dates{i}));
 end
 assert(isint(precision));
 
 %% Validate options provided by user
 assert(ischar(o.tableSubSectionHeader), '@report_series.writeSeriesForTable: tableSubSectionHeader must be a string');
 if isempty(o.tableSubSectionHeader)
-    assert(~isempty(o.data) && isa(o.data, 'dseries'), ...
+    assert(~isempty(o.data) && isdseries(o.data), ...
            '@report_series.writeSeriesForTable: must provide data as a dseries');
 
     if ~isempty(o.tableDataRhs)
-        assert(~isempty(o.tableDataRhs) && isa(o.tableDataRhs, 'dseries'), ...
+        assert(~isempty(o.tableDataRhs) && isdseries(o.tableDataRhs), ...
                '@report_series.writeSeriesForTable: must provide tableDataRhs as a dseries');
         assert(iscell(dates) && length(dates) == 2, ...
                '@report_series.writeSeriesForTable: must provide second range with tableDataRhs');

@@ -26,6 +26,7 @@ i_cols_1 = pm.i_cols_1;
 i_cols_j = pm.i_cols_j;
 icA = pm.icA;
 i_cols_T = pm.i_cols_T;
+eq_index = pm.eq_index;
 
 i_cols_p = i_cols(1:nyp);
 i_cols_s = i_cols(nyp+(1:ny));
@@ -92,15 +93,18 @@ for i = 1:order+1
                         % in first period we don't keep track of
                         % predetermined variables
                         i_cols_A = [i_cols_As - ny; i_cols_Af];
-                        A1(i_rows,i_cols_A) = A1(i_rows,i_cols_A) + weights(k)*jacobian(:,i_cols_1);  
+                        A1(i_rows,i_cols_A) = A1(i_rows,i_cols_A) + weights(k)*jacobian(eq_index,i_cols_1);  
                     else
                         i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
-                        A1(i_rows,i_cols_A) = A1(i_rows,i_cols_A) + weights(k)*jacobian(:,i_cols_j);  
+                        A1(i_rows,i_cols_A) = A1(i_rows,i_cols_A) + weights(k)*jacobian(eq_index,i_cols_j);  
                     end
                 else
                     d1 = dynamic_model(z,innovation,params,steady_state,i+1);
                 end
-                res(:,i,1) = res(:,i,1)+weights(k)*d1;
+                if any(isnan(d1))
+                    pause
+                end
+                res(:,i,1) = res(:,i,1)+weights(k)*d1(eq_index);
             end
             if nargout > 1
                 [ir,ic,v] = find(A1);
@@ -121,12 +125,15 @@ for i = 1:order+1
             if nargout > 1
                 [d1,jacobian] = dynamic_model(z,innovation,params,steady_state,i+1);
                 i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
-                [ir,ic,v] = find(jacobian(:,i_cols_j));
+                [ir,ic,v] = find(jacobian(eq_index,i_cols_j));
                 nzA{i,j} = [i_rows(ir),i_cols_A(ic), v]';
             else
                 d1 = dynamic_model(z,innovation,params,steady_state,i+1);
             end
-            res(:,i,j) = d1;
+            if any(isnan(d1))
+                pause
+            end
+            res(:,i,j) = d1(eq_index);
             if nargout > 1
                 i_cols_Af = i_cols_Af + ny;
             end
@@ -142,13 +149,16 @@ for i = 1:order+1
             if nargout > 1
                 [d1,jacobian] = dynamic_model(z,innovation,params,steady_state,i+1);
                 i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
-                [ir,ic,v] = find(jacobian(:,i_cols_j));
+                [ir,ic,v] = find(jacobian(eq_index,i_cols_j));
                 nzA{i,j} = [i_rows(ir),i_cols_A(ic),v]';
                 i_cols_Af = i_cols_Af + ny;
             else
                 d1 = dynamic_model(z,innovation,params,steady_state,i+1);
             end
-            res(:,i,j) = d1;
+            if any(isnan(d1))
+                pause
+            end
+            res(:,i,j) = d1(eq_index);
         end
         i_rows = i_rows + ny;
         if mod(j,nnodes) == 0
@@ -172,16 +182,19 @@ for j=1:world_nbr
             [d1,jacobian] = dynamic_model(Y(i_rows_y,j),x,params, ...
                                           steady_state,i+1);
             if i < periods
-                [ir,ic,v] = find(jacobian(:,i_cols_j));
+                [ir,ic,v] = find(jacobian(eq_index,i_cols_j));
             else
-                [ir,ic,v] = find(jacobian(:,i_cols_T));
+                [ir,ic,v] = find(jacobian(eq_index,i_cols_T));
             end
             nzA{i,j} = [offset_r+ir,offset_c+icA(ic), v]';
         else
             d1 = dynamic_model(Y(i_rows_y,j),x,params, ...
                                           steady_state,i+1);
         end
-        res(:,i,j) = d1;
+        if any(isnan(d1))
+            pause
+        end
+        res(:,i,j) = d1(eq_index);
         i_rows_y = i_rows_y + ny;
         offset_c = offset_c + world_nbr*ny;
         offset_r = offset_r + world_nbr*ny;

@@ -1,7 +1,17 @@
-function s = getTexName(o)
-%function s = getTexName(o)
+function display(o)
+%function display(o)
+% Display a Paragraph object
+%
+% INPUTS
+%   o   [paragraph] paragraph object
+%
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
 
-% Copyright (C) 2013-2014 Dynare Team
+% Copyright (C) 2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -18,12 +28,5 @@ function s = getTexName(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isempty(o.data)
-    % for the case when there is no data in the series
-    % e.g. graphVline was passed
-    s = '';
-else
-    assert(size(o.data,2) == 1);
-    s = o.data.tex{:};
-end
+display_reporting_object(o);
 end

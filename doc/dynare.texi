@@ -10965,6 +10965,7 @@ ans =
 
 @sp 1
 
+@anchor{tex_rename}
 @deftypefn{dseries} {@var{B} =} tex_rename (@var{A}, @var{name}, @var{newtexname})
 
 Redefines the tex name of variable @var{name} to @var{newtexname}
@@ -11037,13 +11038,15 @@ Computes yearly differences or growth rates.
 @node Reporting
 @chapter Reporting
 
-Dynare provides a simple interface for creating @LaTeX{} reports,
-comprised of @LaTeX{} tables and @code{PGFPLOTS/TikZ/PGF} graphs. You
-can use the report as created through Dynare or pick out the pieces
-(tables and graphs) you want for inclusion in your own paper. Though
-Dynare provides a subset of options available through @code{PGFPLOTS},
-you can easily modify the graphs created by Dynare using the options
-available in the @code{PGFPLOTS} manual.
+Dynare provides a simple interface for creating @LaTeX{} reports, comprised of
+@LaTeX{} tables and @code{PGFPLOTS/Ti}@i{k}@code{Z} graphs. You can use the
+report as created through Dynare or pick out the pieces (tables and graphs) you
+want for inclusion in your own paper. Though Dynare provides a subset of
+options available through @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can easily
+modify the graphs created by Dynare using the options available in the
+@code{PGFPLOTS/Ti}@i{k}@code{Z} manual. You can either do this manually or by
+passing the options to @ref{miscTikzAxisOptions}, @ref{miscTikzAxisOptions}, or
+@ref{graphMiscTikzAddPlotOptions}.
 
 Reports are created and modified by calling methods on class
 objects. The objects are hierarchical, with the following order (from
@@ -11159,7 +11162,8 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
+@anchor{addGraph}
+@defmethod Report addGraph data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -11189,8 +11193,12 @@ The height of the graph, in inches. Default: @code{4.5}
 Whether or not to display the major grid on the graph. Default:
 @code{true}
 
+@anchor{showLegend}
 @item showLegend, @code{BOOLEAN}
-Whether or not to display the legend. Default: @code{false}
+Whether or not to display the legend. NB: Unless you use the
+@ref{graphLegendName} option, the name displayed in the legend is the
+@code{tex} name associated with the @code{dseries}. You can modify this
+@code{tex} name by using @ref{tex_rename}. Default: @code{false}
 
 @item showLegendBox, @code{BOOLEAN}
 Whether or not to display a box around the legend. Default:
@@ -11204,6 +11212,24 @@ Orientation of the legend. Default: @code{`horizontal'}
 
 @item legendFontSize, @code{`tiny'} | @code{`scriptsize'} | @code{`footnotesize'} | @code{`small'} | @code{`normalsize'} | @code{`large'} | @code{`Large'} | @code{`LARGE'} | @code{`huge'} | @code{`Huge'}
 The font size for legend entries. Default: @code{tiny}
+
+@anchor{miscTikzAxisOptions}
+@item miscTikzAxisOptions, @code{STRING}
+If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
+option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{axis} environment command. Specifically to be used for desired
+@code{PGFPLOTS/Ti}@i{k}@code{Z} options that have not been incorporated into
+Dynare Reproting. Default: @code{empty}
+
+@anchor{miscTikzPictureOptions}
+@item miscTikzPictureOptions, @code{STRING}
+If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
+option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{tikzpicture} environment command. (@i{e.g.,} to scale the graph in the x
+and y dimensions, you can pass following to this option: @code{`xscale=2.5,
+yscale=0.5'}). Specifically to be used for desired
+@code{PGFPLOTS/Ti}@i{k}@code{Z} options that have not been incorporated into
+Dynare Reproting. Default: @code{empty}
 
 @anchor{seriesToUse}
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
@@ -11242,8 +11268,8 @@ The x-axis label. Default: @code{none}
 The y-axis label. Default: @code{none}
 
 @item xAxisTight, @code{BOOLEAN}
-Use a tight x axis. If false, uses pgfplots @code{enlarge x limits} to
-choose appropriate axis size. Default: @code{true}
+Use a tight x axis. If false, uses @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{enlarge x limits} to choose appropriate axis size. Default: @code{true}
 
 @item xrange, @code{dates}
 The boundary on the x-axis to display in the graph. Default: all
@@ -11269,8 +11295,8 @@ Where to anchor the x tick label. Default: @code{`south'}
 The amount to rotate the x tick labels by. Default: @code{0}
 
 @item yAxisTight, @code{BOOLEAN}
-Use a tight y axis. If false, uses pgfplots @code{enlarge y limits} to
-choose appropriate axis size. Default: @code{false}
+Use a tight y axis. If false, uses @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{enlarge y limits} to choose appropriate axis size. Default: @code{false}
 
 @item yrange, @code{NUMERICAL_VECTOR}
 The boundary on the y-axis to display in the graph, represented as a
@@ -11331,13 +11357,24 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
-Adds a @code{Series} to a @code{Graph} or a @code{Table}.
+@defmethod Report addSeries data, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
+Adds a @code{Series} to a @code{Graph} or a @code{Table}. NB: Options specific
+to graphs begin with `@code{graph}' while options specific to tables begin with
+`@code{table}'.
 @optionshead
 @table @code
 
 @item data, @code{dseries}
 @xref{data}.
+
+@item graphHline, @code{DOUBLE}
+Use this option to draw a horizontal line at the given value. Default:
+@code{empty}
+
+@anchor{graphLegendName}
+@item graphLegendName, @code{STRING}
+The name to display in the legend for this series. Will be displayed only if
+the @ref{data} option has been set. Default: the @code{tex} name of the series
 
 @item graphLineColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
 Color to use for the series in a graph. Default: @code{`black'}
@@ -11359,6 +11396,23 @@ The face color of the graph marker. Default: @code{graphLineColor}
 
 @item graphMarkerSize, @code{DOUBLE}
 The size of the graph marker. Default: @code{1}
+
+@anchor{graphMiscTikzAddPlotOptions}
+@item graphMiscTikzAddPlotOptions, @code{STRING}
+If you are comfortable with @code{PGFPLOTS/Ti}@i{k}@code{Z}, you can use this
+option to pass arguments directly to the @code{PGFPLOTS/Ti}@i{k}@code{Z}
+@code{addPlots} command. (@i{e.g.,} Instead of passing the marker options
+above, you can pass a string such as the following to this option:
+@code{`mark=halfcircle*,mark options=@{rotate=90,scale=3@}'}). Specifically to be
+used for desired @code{PGFPLOTS/Ti}@i{k}@code{Z} options that have not been
+incorporated into Dynare Reproting. Default: @code{empty}
+
+@item graphShowInLegend, @code{BOOLEAN}
+Whether or not to show this series in the legend, given that the
+@ref{showLegend} option was passed to @ref{addGraph}. Default: @code{true}
+
+@item graphVline, @code{dates}
+Use this option to draw a vertical line at a given date. Default: @code{empty}
 
 @item tableDataRhs, @code{dseries}
 A series to be added to the right of the current series. Usefull for
@@ -11406,9 +11460,36 @@ with it. It is equivalent to adding an empty series with a
 name. Default: @code{''}
 
 @item zeroTol, @code{DOUBLE}
-The zero tolerance. Anything smaller than @code{zeroTol} and larger
-than @code{-zeroTol} will be set to zero before being
-graphed. Default: @math{1e-6}
+The zero tolerance. Anything smaller than @code{zeroTol} and larger than
+@code{-zeroTol} will be set to zero before being graphed or written to the
+table. Default: @math{1e-6}
+
+@end table
+@end defmethod
+
+@defmethod Report addParagraph balancedCols, cols, heading, indent, text
+Adds a @code{Paragraph} to a @code{Section}. NB: The @code{Section} can only be
+comprised of @code{Paragraphs} and must only have 1 column.
+@optionshead
+@table @code
+
+@item balancedCols, @code{BOOLEAN}
+Determines whether the text is spread out evenly across the columns when the
+@code{Paragraph} has more than one column. Default: @code{true}
+
+@item cols, @code{INTEGER}
+The number of columns for the @code{Paragraph}. Default: @code{1}
+
+@item heading, @code{STRING}
+The heading for the Paragraph (like a section heading). The string must be
+correct @LaTeX{} code. Default: @code{empty}
+
+@item indent, @code{BOOLEAN}
+Whether or not to indent the paragraph. Default: @code{true}
+
+@item text, @code{STRING}
+The paragraph itself. The string must be correct @LaTeX{} code. Default:
+@code{empty}
 
 @end table
 @end defmethod
@@ -11468,16 +11549,16 @@ rep = rep.addSection(`cols', 2);
 rep = rep.addGraph(`title', `Graph (1,1)', `showLegend', true, ...
                    `xrange', dates(`2007q1'):dates(`2013q4'), ...
                    `shade', dates(`2012q2'):dates(`2013q4'));
-rep = rep.addSeries(`data', dsq@{`SERIES1'@}, `color', `b', ...
+rep = rep.addSeries(`data', dsq@{`SERIES1'@}, `graphLineColor', `blue', ...
                     `graphLineWidth', 1);
-rep = rep.addSeries(`data', dsq@{`SERIES2'@}, `color', `g', ...
+rep = rep.addSeries(`data', dsq@{`SERIES2'@}, `graphLineColor', `green', ...
                     `graphLineStyle', '--', `graphLineWidth', 1.5);
 rep = rep.addGraph(`title', `Graph (1,2)', `showLegend', true, ...
                    `xrange', dates(`2007q1'):dates(`2013q4'), ...
                    `shade', dates(`2012q2'):dates(`2013q4'));
-rep = rep.addSeries(`data', dsq@{`SERIES3'@}, `color', `b', ...
+rep = rep.addSeries(`data', dsq@{`SERIES3'@}, `graphLineColor', `blue', ...
                     `graphLineWidth', 1);
-rep = rep.addSeries(`data', dsq@{`SERIES4'@}, `color', `g', ...
+rep = rep.addSeries(`data', dsq@{`SERIES4'@}, `graphLineColor', `green', ...
                     `graphLineStyle', '--', `graphLineWidth', 1.5);
 
 % Section 2

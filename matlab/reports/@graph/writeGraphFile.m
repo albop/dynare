@@ -49,7 +49,11 @@ if fid == -1
     error(['@graph.writeGraphFile: ' msg]);
 end
 
-fprintf(fid, '\\begin{tikzpicture}[baseline]');
+fprintf(fid, '\\begin{tikzpicture}[baseline');
+if ~isempty(o.miscTikzPictureOptions)
+    fprintf(fid, ',%s', o.miscTikzPictureOptions);
+end
+fprintf(fid, ']');
 
 if isempty(o.xrange)
     dd = getMaxRange(o.series);
@@ -141,6 +145,7 @@ if isempty(o.yrange)
 else
     fprintf(fid, 'ymin=%f,\nymax=%f,\n',o.yrange(1),o.yrange(2));
 end
+fprintf(fid, 'xmin = 1,\nxmax = %d,\n', length(dd));
 
 if o.showLegend
     fprintf(fid, 'legend style={');
@@ -165,6 +170,10 @@ end
 if ~isempty(o.ylabel)
     fprintf(fid, 'ylabel=%s,\n', o.ylabel);
 end
+
+if ~isempty(o.miscTikzAxisOptions)
+    fprintf(fid, '%s', o.miscTikzAxisOptions);
+end
 fprintf(fid, ']\n');
 
 if o.showZeroline
@@ -174,7 +183,10 @@ end
 for i=1:ne
     o.series{i}.writeSeriesForGraph(fid, dd);
     if o.showLegend
-        fprintf(fid, '\\addlegendentry{%s}\n', o.series{i}.getTexName());
+        le = o.series{i}.getNameForLegend();
+        if ~isempty(le)
+            fprintf(fid, '\\addlegendentry{%s}\n', le);
+        end
     end
 end
 
@@ -186,18 +198,18 @@ if ~isempty(o.shade)
                         date2string(o.shade(1)) ' or ' date2string(o.shade(end)) ' is not in the date ' ...
                         'range of data selected.']);
     if x1 == 1
-        fprintf(fid,['\\begin{pgfonlayer}{background}\n\\fill[%s!%f]\n(axis ' ...
+        fprintf(fid,['\\begin{pgfonlayer}{background0}\n\\fill[%s!%f]\n(axis ' ...
                      'cs:\\pgfkeysvalueof{/pgfplots/xmin},\\pgfkeysvalueof{/pgfplots/ymin})\nrectangle (axis ' ...
                      'cs:%f,\\pgfkeysvalueof{/pgfplots/ymax});\n\\end{pgfonlayer}\n'], ...
                 o.shadeColor, o.shadeOpacity, x2);
     elseif x2 == dd.ndat
-        fprintf(fid,['\\begin{pgfonlayer}{background}\n\\fill[%s!%f]\n(axis ' ...
+        fprintf(fid,['\\begin{pgfonlayer}{background0}\n\\fill[%s!%f]\n(axis ' ...
                      'cs:%f,\\pgfkeysvalueof{/pgfplots/ymin})\nrectangle (axis ' ...
                      'cs:\\pgfkeysvalueof{/pgfplots/xmax},\\pgfkeysvalueof{/' ...
                      'pgfplots/ymax});\n\\end{pgfonlayer}\n'], ...
                 o.shadeColor, o.shadeOpacity, x1);
     else
-        fprintf(fid,['\\begin{pgfonlayer}{background}\n\\fill[%s!%f]\n(axis ' ...
+        fprintf(fid,['\\begin{pgfonlayer}{background0}\n\\fill[%s!%f]\n(axis ' ...
                      'cs:%f,\\pgfkeysvalueof{/pgfplots/ymin})\nrectangle (axis ' ...
                      'cs:%f,\\pgfkeysvalueof{/pgfplots/ymax});\n\\end{pgfonlayer}\n'], ...
                 o.shadeColor, o.shadeOpacity, x1, x2);

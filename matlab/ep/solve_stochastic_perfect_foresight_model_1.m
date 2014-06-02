@@ -84,7 +84,7 @@ end
 % The second row block is ny x nnodes
 % The third row block is ny x nnodes^2
 % and so on until size ny x nnodes^order
-world_nbr = 1+(nnodes-1)*order;
+world_nbr = pfm.world_nbr;
 Y = endo_simul(:,2:end-1);
 Y = repmat(Y,1,world_nbr); 
 pfm.y0 = endo_simul(:,1);
@@ -92,10 +92,9 @@ pfm.y0 = endo_simul(:,1);
 % The columns of A map the elements of Y such that
 % each block of Y with ny rows are unfolded column wise
 % number of blocks
-block_nbr = (order+(nnodes-1)*(order-1)*order/2+(periods-order)*world_nbr);
+block_nbr = pfm.block_nbr;
 % dimension of the problem
 dimension = ny*block_nbr;
-pfm.block_nbr = block_nbr;
 pfm.dimension = dimension;
 if order == 0
     i_upd_r = (1:ny*periods);
@@ -143,11 +142,13 @@ pfm.i_cols_T = i_cols_T;
 pfm.i_upd_r = i_upd_r;
 pfm.i_upd_y = i_upd_y;
 
-
-options_.solve_algo = 9;
 options_.steady.maxit = 100;
 y = repmat(steady_state,block_nbr,1);
+old_options = options_;
+options_.solve_algo = options_.ep.solve_algo;
+options_.steady.maxit = options_.ep.maxit;
 [y,info] = dynare_solve(@ep_problem_2,y,1,exo_simul,pfm);
+options_ = old_options;
 if info
     flag = 1;
     err = info;

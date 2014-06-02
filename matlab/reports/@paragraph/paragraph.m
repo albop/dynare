@@ -1,9 +1,8 @@
-function o = section(varargin)
-%function o = section(varargin)
+function o = paragraph(varargin)
+%function o = paragraph(varargin)
+% Instantiates a paragraph object
 
-% Section produces a latex minipage
-
-% Copyright (C) 2013-2014 Dynare Team
+% Copyright (C) 2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -21,18 +20,21 @@ function o = section(varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 o = struct;
-o.elements = {};
+
+o.balancedCols = false;
 o.cols = 1;
-o.height = '';
+o.heading = '';
+o.indent = true;
+o.text = '';
 
 if nargin == 1
-    assert(isa(varargin{1}, 'section'),['With one arg to Section constructor, ' ...
-                        'you must pass a section object']);
+    assert(isa(varargin{1}, 'paragraph'),['With one arg to Paragraph constructor, ' ...
+                        'you must pass a paragraph object']);
     o = varargin{1};
     return;
 elseif nargin > 1
     if round(nargin/2) ~= nargin/2
-        error(['@section.section: options must be supplied in name/value ' ...
+        error(['@paragraph.paragraph: options must be supplied in name/value ' ...
                'pairs.']);
     end
 
@@ -45,16 +47,17 @@ elseif nargin > 1
         if ~isempty(ind)
             o.(optNames{ind}) = pair{2};
         else
-            error('@section.section: %s is not a recognized option.', pair{1});
+            error('@paragraph.paragraph: %s is not a recognized option.', pair{1});
         end
     end
 end
 
-% Check options provided by user
-assert(isint(o.cols), '@section.section: cols must be an integer');
-assert(isempty(o.height) || ischar(o.height), ...
-       '@section.section: cols must be a string');
+assert(islogical(o.indent), '@paragraph.paragraph: indent must be either true or false');
+assert(islogical(o.balancedCols), '@paragraph.paragraph: balancedCols must be either true or false');
+assert(isint(o.cols), '@paragraph.paragraph: cols must be an integer');
+assert(ischar(o.text), '@paragraph.paragraph: text must be a string');
+assert(ischar(o.heading), '@paragraph.paragraph: heading must be a string');
 
-% Create section object
-o = class(o, 'section');
+% Create paragraph object
+o = class(o, 'paragraph');
 end

@@ -1,6 +1,6 @@
 \documentclass[10pt]{beamer}
 
-\usepackage{tikz}
+\usepackage{tikz, hyperref, alltt}
 \usetikzlibrary{positioning,shapes,shadows,arrows}
 \tikzstyle{abstract}=[rectangle, rounded corners, draw=black, anchor=north, fill=blue!10, text centered, minimum height={height("Gp")+2pt}, minimum width=3cm, font=\footnotesize]
 
@@ -32,9 +32,11 @@
 \setbeamertemplate{frametitle continuation}[from second]
 
 \title{Dynare Time Series \& Reporting}
-\author{Houtan Bastani}
+\author[Houtan Bastani]{Houtan Bastani\newline\href{mailto:houtan@dynare.org}{houtan@dynare.org}}
 \institute{CEPREMAP}
 \date{13 June 2014}
+
+\newcommand{\myitem}{\item[$\bullet$]}
 
 \begin{document}
 
@@ -56,11 +58,95 @@
 \begin{frame}[fragile,t]
   \frametitle{Overview}
   \begin{itemize}
-  \item Provide support for time series in Dynare
-  \item Introduced in Dynare 4.4
-  \item Currently only used for reporting
-  \item Use will increase with time (\textit{e.g.,} to be included in new estimation code)
-  \item NB: More complete information is included in the Dynare manual
+  \myitem Provide support for time series (\texttt{dseries})
+    \begin{itemize}
+    \myitem Based on an implementation for handling dates (\texttt{dates})
+    \end{itemize}
+  \myitem Beta version in Dynare 4.4. Mature version ready in Dynare 4.5
+  \myitem Currently only used for reporting, though use will increase with time
+    (\textit{e.g.,} to be included in new estimation code)
+  \myitem Compatible with all setups that are supported by Dynare
+    \begin{itemize}
+    \myitem Windows, Mac OS X, Linux
+    \myitem Matlab 7.5 (R2007b) or later, Octave
+    \end{itemize}
+  \myitem NB: More complete information is included in the Dynare manual
+  \end{itemize}
+\end{frame}
+
+
+\subsection{A Programming Note}
+\begin{frame}[fragile,t]
+  \frametitle{A Programming Note (1/2)}
+  \begin{itemize}
+  \myitem Time series and dates are implemented as Matlab/Octave classes
+  \myitem Inplace modification of instantiated objects not supported. Let me explain \dots
+    \begin{itemize}
+      \myitem A class is a template for defining objects, defining their member
+      variables and methods.
+      \begin{itemize}
+        \myitem \textit{e.g.,} The \texttt{dates} class defines 3 member
+        variables--\texttt{ndat}, \texttt{freq}, and \texttt{time}--and many
+        methods (analogous to functions)
+      \end{itemize}
+      \myitem An object is an instance of a specific class. For exemplary
+      purposes, imagine an object \texttt{X}, which is an instantiation of the
+      class ``Integer''. The object has value \texttt{1}:
+\begin{verbatim}
+>> X
+
+X =
+
+     1
+\end{verbatim}
+    \myitem You can call any method defined for the integer class on integer
+    object \texttt{X}. Imagine such a method is called
+    \texttt{multiplyByTwo()}.
+    \myitem In most object-oriented
+    languages, writing \texttt{X.multiplyByTwo();} will change the value
+    contained in \texttt{X} to \texttt{2/2}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
+  \frametitle{A Programming Note (2)}
+  \begin{itemize}
+    \item[] \begin{itemize}
+  \myitem But! For Matlab/Octave's implementation of classes this is not the
+    case as it does not support inplace modification
+\begin{verbatim}
+>> X.multiplyByTwo()
+
+ans =
+
+     2
+
+>> X
+
+X =
+
+     1
+\end{verbatim}
+  \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile,t]
+  \frametitle{A Programming Note (concluded)}
+  \begin{itemize}
+    \item[] \begin{itemize}
+    \myitem To get the desired change, you must overwrite \texttt{X}
+\begin{verbatim}
+>> X=X.multiplyByTwo()
+
+X =
+
+     2
+\end{verbatim}
+\myitem Keep this in mind when using Dynare dates, time series, and reporting
+  \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -69,10 +155,10 @@
 \begin{frame}[fragile,t]
   \frametitle{Syntax}
   \begin{itemize}
-  \item Two components of a time series:
+  \myitem Two components of a time series:
     \begin{itemize}
-    \item A time component. In Dynare: \texttt{dates}
-    \item A data component mapped to time. In Dynare: \texttt{dseries}
+    \myitem A time component. In Dynare: \texttt{dates}
+    \myitem A data component mapped to time. In Dynare: \texttt{dseries}
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -81,160 +167,222 @@
 \begin{frame}[fragile,t]
   \frametitle{\texttt{dates} Syntax}
   \begin{itemize}
-  \item The \texttt{dates} command creates an object that represents at least one date at a given frequency
+    \myitem The \texttt{dates} command creates an object that represents at least one date at a given frequency
+    \myitem A \texttt{dates} object contains 3 members (fields):
     \begin{itemize}
-    \item Yearly: \texttt{`Y', `y', 1}
-    \item Quarterly: \texttt{`Q', `q', 4}
-    \item Monthly: \texttt{`M', `m', 12}
-    \item Weekly: \texttt{`W', `w', 52}
+      \myitem{\textbf{\texttt{freq}}}: 1 (Annual), 4 (Quarterly), 12 (Monthly), 52 (Weekly)
+      \myitem{\textbf{\texttt{ndat}}}: The number of dates
+      \myitem{\textbf{\texttt{time}}}: An \texttt{ndat$\times$2} matrix; the 1\textsuperscript{st} col is the year and the 2\textsuperscript{nd} col is the period
     \end{itemize}
-  \item It has two slightly different syntaxes
-    \begin{itemize}
-    \item One for inclusion in \texttt{.m} files
-    \item One for inclusion in \texttt{.mod} files (simplified using the preprocessor)
-      \begin{itemize}
-        \item To prevent date translation, escape the date with `\texttt{\$}' (\textit{e.g.,} \texttt{\$2020y})
-      \end{itemize}
-    \end{itemize}
-  \item Minimal restrictions on dates. Can be
-    \begin{itemize}
-      \item Negative
-      \item Empty
-      \item Noncontiguous
-    \end{itemize}
-  \item Can index a \texttt{dates} object. If \texttt{t} is a \texttt{dates} object, then
-    \begin{itemize}
-    \item \texttt{t(1) \% refers to the first date}
-    \item \texttt{t(1:3) \% refers to the first three dates}
-    \item \texttt{t([1,4,5]) \% refers to the first, fourth, and fifth dates}
-    \end{itemize}
+    \myitem \texttt{dseries} members cannot be modified. Thus, this is not allowed:
+\begin{alltt}
+  >> dd.freq = 12;
+\end{alltt}
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Creating a new \texttt{dates} object}
+  \frametitle{Creating a new \texttt{dates} object in Matlab/Octave}
   \begin{itemize}
-  \item A single date:
-    \begin{itemize}
-    \item In a \texttt{.m} file: \texttt{t = dates(`1999y');}
-    \item In a \texttt{.mod} file: \texttt{t = 1999y;}
-    \end{itemize}
-  \item A date range:
-    \begin{itemize}
-    \item In a \texttt{.m} file: \texttt{dr = dates(`1999y'):dates(`2020y');}
-    \item In a \texttt{.mod} file: \texttt{dr = 1999y:2020y;}
-    \end{itemize}
-  \item In what follows, \texttt{t} and \texttt{dr} are as above. Operations that assign to \texttt{t} and \texttt{dr} keep the value thereafter.
+    \myitem{A single date}
+\begin{alltt}
+  >> t = dates(`1999y');
+\end{alltt}
+    \myitem{Multiple dates}
+\begin{alltt}
+  >> t = dates(`1999q1', `2020q2', `-190q3');
+\end{alltt}
+Notice that noncontiguous and negative dates are possible
+    \myitem{A date range}
+\begin{alltt}
+  >> dr = dates(`1999y'):dates(`2020y');
+\end{alltt}
+    \myitem Can also create \texttt{dates} programatically
+\begin{alltt}
+  >> t = dates(4, [1990; 1990; 1978], [1; 2; 3])
+  t = <dates: 1990Q1, 1990Q2, 1978Q3>
+\end{alltt}
+    \myitem Can specify an empty \texttt{dates}\dots
+\begin{alltt}
+  >> qq = dates(`Q');
+  >> qq = dates(4);
+\end{alltt}
+    \myitem \dots and use it to instantiate new \texttt{dates}
+\begin{alltt}
+  >> t = qq(1990, 1);
+  t = <dates: 1990Q1>
+\end{alltt}
+\begin{alltt}
+  >> t = qq([1990; 1990; 1978], [1; 2; 3])
+  t = <dates: 1990Q1, 1990Q2, 1978Q3>
+\end{alltt}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Creating a new \texttt{dates} object in a \texttt{.mod} file}
+  \begin{itemize}
+    \myitem The preprocessor allows for syntax simplification when
+    \texttt{dates} are in \texttt{.mod} files
+    \myitem{A single date} \texttt{t = 1999y;}
+\begin{alltt}
+  \(\Rightarrow\) t = dates(`1999y');
+\end{alltt}
+    \myitem{Multiple dates} \texttt{t = [1999q1 2020q2 1960q3];}
+\begin{alltt}
+  \(\Rightarrow\) t = [dates(`1999q1') dates(`2020q2') dates(`1960q3')];
+\end{alltt}
+    \myitem{A date range} \texttt{dr = 1999y:2020y;}
+\begin{alltt}
+  \(\Rightarrow\) dr = dates(`1999y'):dates(`2020y');
+\end{alltt}
+    \myitem NB: This can cause problems when dates are included in strings. \textit{e.g.,}
+\begin{alltt}
+  disp(`In 1999q1, ...')
+\end{alltt}
+would be transformed into
+\begin{alltt}
+  disp(`In dates(`1999q1'), ...')
+\end{alltt}
+      \myitem To fix this, simply escape any date that you don't want transformed by the preprocessor with a `\texttt{\$}'
+\begin{alltt}
+  disp(`In $1999q1, ...')
+\end{alltt}
+
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Modifying \texttt{dates}}
+  \frametitle{Collections and Ranges of \texttt{dates} in a \texttt{.mod} file}
   \begin{itemize}
-  \item \texttt{append}: appends a date to the date
-    \begin{itemize}
-    \item \texttt{t=t.append(dates(`1900y')); \% <dates: 1999Y, 1900Y>}
-    \end{itemize}
-  \item \texttt{horzcat}: horizontal concatenation
-    \begin{itemize}
-    \item \texttt{[t t]; \% <dates: 1999Y, 1900Y, 1999Y, 1900Y>};
-    \end{itemize}
-  \item \texttt{minus}: either the distance between two \texttt{dates} or lag one \texttt{dates}
-    \begin{itemize}
-    \item \texttt{t-t \% [0 0]'}
-    \item \texttt{t-[3 3]' \% <dates: 1996Y, 1897Y>}
-    \end{itemize}
-  \item \texttt{plus}: either combine two \texttt{dates} or forward one \texttt{dates}
-    \begin{itemize}
-    \item \texttt{t+t \% <dates: 1999Y, 1900Y, 1999Y, 1900Y>}
-    \item \texttt{t+[3 3]' \% <dates: 2002Y, 1903Y>}
-    \end{itemize}
-  \item \texttt{pop}: remove last element
-    \begin{itemize}
-    \item \texttt{t.pop(); \% <dates: 1999Y>}
-    \end{itemize}
-  \item \texttt{sort}: sort dates in ascending order
-    \begin{itemize}
-    \item \texttt{t.sort(); \% <dates: 1900Y, 1999Y>}
-    \end{itemize}
-  \item \texttt{uminus}: shifts dates back one period
-    \begin{itemize}
-    \item \texttt{-t; \% <dates: 1998Y, 1899Y>}
-    \end{itemize}
-  \item \texttt{unique}: removes repetitions (keeping last unique value)
-    \begin{itemize}
-    \item \texttt{t.append(dates(`1999y')).unique() \% <dates: 1900Y, 1999Y>}
-    \end{itemize}
-  \item \texttt{uplus}: shifts dates forward one period
-    \begin{itemize}
-    \item \texttt{++t; \% <dates: 2001Y, 1902Y>}
-    \end{itemize}
+    \myitem A collection of \texttt{dates}
+    \begin{alltt}
+  a = 1990Q1; b = 1957Q1; c = -52Q1;
+  d = [a b c];
+  \(\Rightarrow\) d = <dates: 1990Q1, 1957Q1, -52Q1>
+    \end{alltt}
+    \myitem A Range of \texttt{dates}
+    \begin{alltt}
+  a = 1990Q3:1991Q2
+  \(\Rightarrow\) a = <dates: 1990Q3, 1990Q4, 1991Q1, 1991Q2>
+    \end{alltt}
+    \myitem A set of regularly-spaced \texttt{dates}
+    \begin{alltt}
+  a = 1990Q3:2:1991Q2
+  \(\Rightarrow\) a = <dates: 1990Q3, 1991Q1, 1991Q3>
+    \end{alltt}
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Getting info about \texttt{dates}}
+  \frametitle{Comparing \texttt{dates}}
   \begin{itemize}
-  \item \texttt{char}: returns a single date as a string
-    \begin{itemize}
-    \item \texttt{t(1).char() \% 1999Y}
-    \end{itemize}
-  \item \texttt{double}: returns a floating point representation of the date
-    \begin{itemize}
-    \item \texttt{t.double() \% [1999 1900]'}
-    \end{itemize}
-  \item \texttt{freq}: returns the frequency
-    \begin{itemize}
-    \item \texttt{t.freq; \% 1}
-    \end{itemize}
-  \item \texttt{isequal}: returns true if the two arguments are equal
-    \begin{itemize}
-    \item \texttt{isequal(t,t) \% 1}
-    \end{itemize}
-  \item \texttt{length}: returns the number of dates
-    \begin{itemize}
-    \item \texttt{t.length() \% 2}
-    \end{itemize}
-  \item \texttt{max}: returns the maximum \texttt{dates} in the arguments
-    \begin{itemize}
-    \item \texttt{max(t,dr) \% <dates: 2020Y>}
-    \end{itemize}
-  \item \texttt{min}: returns the minimum \texttt{dates} in the arguments
-    \begin{itemize}
-    \item \texttt{min(t,dr) \% <dates: 1900Y>}
-    \end{itemize}
-  \item \texttt{eq, ge, gt, le, lt, ne}: returns boolean value of comparison
-    \begin{itemize}
-    \item \texttt{t==t \% [1 1]'}
-    \item \texttt{t>=dates(`1950y') \% [1 0]'}
-    \item \texttt{t$\thicksim$=dates(`1999y') \% [0 1]'}
-    \end{itemize}
+    \myitem The following comparison operators are supported: $==$, $\backsim=$, $<$, $\leq$, $>$, and $\geq$
+    \myitem Compared objects must have the same frequency
+    \myitem Compared objects must have the same number of elements (except for singletons)
+    \myitem Returns the result of an element-wise comparison
+    \myitem Let \texttt{a=[1999W1 2020W3]}, \texttt{b=1999W1}, and \texttt{c=[1888w1 2020w3]}. Then
+    \begin{alltt}
+  >> a == b              >> a > b              >> c < a
+
+  ans =                  ans =                 ans =
+
+       1                      0                     1
+       0                      1                     0
+    \end{alltt}
   \end{itemize}
 \end{frame}
+
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Arithmetic Operations on \texttt{dates}}
+  \begin{itemize}
+    \myitem The unary \texttt{+} and \texttt{-} operators
+    \begin{alltt}
+  >> a = dates(`1999q4');
+  >> +a \(\Rightarrow\) ans = 2000q1
+  >> -a \(\Rightarrow\) ans = 1999q3
+  >> ++-+a \(\Rightarrow\) ans = 2000q2
+    \end{alltt}
+    \myitem The binary \texttt{+} and \texttt{-} operators
+    \begin{itemize}
+      \myitem Objects must have the same frequency
+      \myitem Objects must have the same number of elements (except for singletons)
+      \myitem \texttt{1999q4 + 2} $\Rightarrow$ \texttt{ans = 2000q2}
+      \myitem \texttt{1999w4 + 2} $\Rightarrow$ \texttt{ans = 1999w6}
+      \myitem \texttt{1999m4 - 2} $\Rightarrow$ \texttt{ans = 1999m2}
+      \myitem \texttt{1999m4 - 1999m2} $\Rightarrow$ \texttt{ans = 2}
+      \myitem \texttt{1999m4 + 1999m2} $\Rightarrow$ \texttt{ans = <dates: 1999M4, 1999M2>}
+    \end{itemize}
+    \myitem The binary \texttt{*} operator
+    \begin{alltt}
+  >> a*3
+  ans = <dates: 1999Q4, 1999Q4, 1999Q4>
+    \end{alltt}
+  \end{itemize}
+\end{frame}
+
+
 
 \begin{frame}[fragile,t]
   \frametitle{Set Operations on \texttt{dates}}
   \begin{itemize}
-  \item \texttt{intersect}: returns the intersection of the arguments
-    \begin{itemize}
-    \item \texttt{intersect(t,dr) \% <dates: 1999Y>}
-    \end{itemize}
-  \item \texttt{isempty}: returns true if the argument is empty
-    \begin{itemize}
-    \item \texttt{isempty(t) \% 0}
-    \item \texttt{isempty(dates()) \% 1}
-    \end{itemize}
-  \item \texttt{setdiff}: returns dates present in first arg but not in second
-    \begin{itemize}
-    \item \texttt{setdiff(t,dr) \% <dates: 1900Y>}
-    \end{itemize}
-  \item \texttt{union}:
-    \begin{itemize}
-    \item \texttt{union(dr,t) \% <dates: 1900Y, 1999Y,  ..., 2019Y, 2020Y>}
-    \end{itemize}
+    \myitem Let \texttt{a = [1990Q1:1991Q1 1990Q1]; b = [1990Q3:1991Q3];}
+    \myitem \texttt{intersect}: returns the intersection of the arguments
+    \begin{alltt}
+  >> intersect(a, b)
+  ans = <dates: 1990Q3, 1990Q4, 1991Q1>
+    \end{alltt}
+    \myitem \texttt{setdiff}: returns dates present in first arg but not in second
+    \begin{alltt}
+  >> setdiff(a, b)
+  ans = <dates: 1900Y>
+    \end{alltt}
+    \myitem \texttt{union}: returns the union of two sets (repititions removed)
+    \begin{alltt}
+  union(a, b)
+  ans = <dates: 1990Q1, 1990Q2,  ..., 1991Q2, 1991Q3>
+    \end{alltt}
+    \myitem \texttt{unique()}: removes repititions from set (keeps last unique value)
+    \begin{alltt}
+  >> a.unique()
+  ans = <dates: 1990Q2, 1990Q3, 1990Q4, 1991Q1, 1990Q1>
+    \end{alltt}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Misc \texttt{dates} operations}
+  \begin{itemize}
+    \myitem Can index a \texttt{dates} object.
+    \begin{alltt}
+  >> a = dates(`2000y'):dates(`2009y');
+  >> a(1)
+  ans = <dates: 2000Y>
+  >> a(1:3)
+  ans = <dates: 2000Y, 2001Y, 2002Y>
+  >> a([1,4,5])
+  ans = <dates: 2000Y, 2003Y, 2004Y>
+    \end{alltt}
+    \myitem{\textbf{\texttt{pop()}}}: Remove last element
+    \begin{alltt}
+  >> a.pop()
+  ans = <dates: 2000Y, 2001Y,  ..., 2007Y, 2008Y>
+    \end{alltt}
+    \myitem{\textbf{\texttt{char()}}}: Return string representation
+    \begin{alltt}
+  >> a(1).char()
+  ans = 2000Y
+    \end{alltt}
+    \myitem More in the Dynare manual
   \end{itemize}
 \end{frame}
 
@@ -246,198 +394,236 @@
 \begin{frame}[fragile,t]
   \frametitle{\texttt{dseries} Syntax}
   \begin{itemize}
-  \item A \texttt{dseries} is composed of one or more individual series
-  \item All time series in a dseries must have the same frequency
-  \item A \texttt{dseries} runs from the earliest date to the latest date, with \texttt{NaN}'s inserted to pad the shorter series
+    \myitem A \texttt{dseries} is composed of one or more individual time series
+    \myitem All time series in a \texttt{dseries} must have the same frequency
+    \myitem A \texttt{dseries} runs from the earliest date to the latest date,
+    with \texttt{NaN}'s inserted to pad the shorter series
+    \myitem A \texttt{dseries} object contains 3 members:
+    \begin{itemize}
+      \myitem{\textbf{\texttt{data}}}: The data points
+      \myitem{\textbf{\texttt{dates}}}: The \texttt{dates} of the sample
+      \myitem{\textbf{\texttt{name}}}: Names of the variables
+      \myitem{\textbf{\texttt{nobs}}}: The number of observations
+      \myitem{\textbf{\texttt{vobs}}}: The number of variables
+      \myitem{\textbf{\texttt{tex}}}: \LaTeX\ names of the variables
+    \end{itemize}
+    \myitem \texttt{dseries} members cannot be modified
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Creating a new \texttt{dseries} object}
+  \frametitle{Creating a new \texttt{dseries} object (1/2)}
+  Load data directly
   \begin{itemize}
-  \item Load series from data file (\texttt{.csv, .xls}). Dates in first column, optional variable names in first row
-    \begin{itemize}
-    \item \texttt{ts=dseries(`data.csv');}
-    \end{itemize}
-  \item Load series from a Matlab/Octave file (\texttt{.m, .mat}). Must define the variables \texttt{INIT\_\_}, \texttt{NAMES\_\_}, and, optionally, \texttt{TEX\_\_}.
-    \begin{itemize}
-    \item \texttt{ts=dseries(`data.m');}
-    \end{itemize}
-  \item Load data directly. Here: one variable, `MyVar1', with three annual observations starting in 1999. Only first argument is required.
-    \begin{itemize}
-    \item \texttt{ts=dseries([1;2;3], `1999y', \{`MyVar1'\}, \{`MyVar\_1'\});}
-    \end{itemize}
-  \item Create an empty time series. Usefull for programatically creating a series.
-    \begin{itemize}
-    \item \texttt{ts=dseries();}
-    \item \texttt{ts=dseries(dates(`1999y'));}
-    \end{itemize}
+    \myitem Syntax:
+    \begin{alltt}
+  ts = dseries(DATA, INITIAL_PERIOD, NAMES, TEX_NAMES)
+    \end{alltt}
+    \myitem \textit{e.g.,} 2 variables, `MyVar1' and `MyVar2', with
+    3 annual observations starting in 1999:
+\small{
+    \begin{alltt}
+  >> ts = dseries([1 2;3 4;5 6], `1999y', ...
+                 \{`MyVar1', `MyVar2'\}, \{`MyVar\_1', 'MyVar\_2'\});
+
+  ts is a dseries object:
+
+        | MyVar1 | MyVar2
+  1999Y | 1      | 2
+  2000Y | 3      | 4
+  2001Y | 5      | 6
+    \end{alltt}}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile,t]
+  \frametitle{Creating a new \texttt{dseries} object (2/2)}
+  Load series from CSV/spreadsheet (\texttt{.csv, .xls}) or Matlab file (\texttt{.m, .mat})
+  \begin{itemize}
+    \myitem Syntax:
+    \begin{alltt}
+  >> ts = dseries(FILENAME);
+    \end{alltt}
+    \myitem File format (\texttt{.csv, .xls}): dates in first column (using the standard format:
+    199Q1 for quarterly data, 1990Y for annual data, \dots) and (optional)
+    variable names in the first row
+    \myitem File format (\texttt{.m, .mat}): must define the variables \texttt{INIT\_\_},
+    \texttt{NAMES\_\_}, and, optionally, \texttt{TEX\_\_}. More info in the
+    manual. Data are vectors.
+    \begin{alltt}
+      INIT__ = `1999q1’;
+      NAMES__ = \{`cons'\};
+      cons = randn(100,1);
+    \end{alltt}
+  \end{itemize}
+  Create an empty time series. Usefull for programatically creating a series.
+  \begin{itemize}
+    \myitem \texttt{ts=dseries();}
+    \myitem \texttt{ts=dseries(dates(`1999y'));}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Creating subsamples from a \texttt{dseries}}
+  \begin{itemize}
+    \myitem Let \texttt{ts} be a \texttt{dseries} with $N$ variables and 5
+    observations from \texttt{2000Y} to \texttt{2004Y}
+    \myitem To obtain a subsample from \texttt{2001Y} to \texttt{2003Y}
+    \begin{alltt}
+  ts(2001Y:2003Y)
+    \end{alltt}
+    \myitem Can also use integer indices
+    \begin{alltt}
+  start = find(ts.dates==2001Y);
+  ts(start:end);
+    \end{alltt}
+    \myitem NB: Integer indices cannot be used to extract a single observation
+    because of lag/lead notation (see below)
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Extracting variables from a \texttt{dseries}}
+  \begin{itemize}
+    \myitem Let
+    \begin{alltt}
+  >> ts = dseries(randn(5,6), `2000q1', ...
+                 \{`GDP_US', `GDP_FR', `GDP_JA', ...
+                  `CPI_US', `CPI_FR', `CPI_JA'\});
+    \end{alltt}
+    \myitem We can extract one variable using syntax like
+    \begin{alltt}
+  >> ts.GDP_US
+    \end{alltt}
+    \myitem To get all the \texttt{GDP} variables
+    \begin{alltt}
+  >> ts\{`GDP_US', `GDP_FR', `GDP_JA'\}
+    \end{alltt}
+    \myitem A shorter way to do the same thing
+    \begin{alltt}
+  >> ts\{`GDP_@US,FR,JA@'\}
+    \end{alltt}
+    \myitem To get \texttt{GDP} \& \texttt{CPI} (NB: max 2 implicit loops)
+    \begin{alltt}
+  >> ts\{`@GDP,CPI@_@US,FR,JA@'\}
+    \end{alltt}
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Referencing data from a \texttt{dseries}}
+  \frametitle{Applying methods to \texttt{dseries}}
   \begin{itemize}
-  \item For the following, let
-    \begin{itemize}
-    \item \texttt{ts1=dseries([1;2;3], `1999y', \{`MyVar1'\}, \{`MyVar\_1'\})}
-    \item \texttt{ts2=dseries([4;5;6], `2000y', \{`MyVar2'\}, \{`MyVar\_2'\})}
-    \item \texttt{ts3=[ts1 ts2]}
-    \end{itemize}
-  \item To get \texttt{MyVar1} from \texttt{t3}, you have three options
-    \begin{itemize}
-      \item \texttt{ts3\{1\}}
-      \item \texttt{ts3.MyVar1}
-      \item \texttt{ts3\{`MyVar1'\}}
-    \end{itemize}
-  \item To select a subsample of MyVar2 from 2001 to 2002:
-    \begin{itemize}
-      \item \texttt{ts3\{2\}(dates(`2001y'):dates(`2002y'))}
-      \item \texttt{ts3.MyVar2(dates(`2001y'):dates(`2002y'))}
-      \item \texttt{ts3\{`MyVar2'\}(dates(`2001y'):dates(`2002y'))}
-    \end{itemize}
-  \item To see the data for both variables in 2000:
-    \begin{itemize}
-      \item \texttt{ts3(`2000y')}
-      \item \texttt{ts3\{[1 2]\}(`2000y')}
-      \item \texttt{ts3\{`MyVar1',`MyVar2'\}(`2000y')}
-      \item \texttt{ts3\{`MyVar@1,2@'\}(`2000y')}
-      \item \texttt{ts3\{`MyVar[1-2]'\}(`2000y')}
-    \end{itemize}
+    \myitem Suppose \texttt{ts} is as above. Then, to apply a method
+    (\textit{e.g.,} \texttt{log()}) to \texttt{GDP}:
+    \begin{alltt}
+  ts\{`GDP_@US,FR,JA@'\}=ts\{`GDP_@US,FR,JA@'\}.log()
+    \end{alltt}
+    \myitem To apply a method to a subsample of all the variables:
+    \begin{alltt}
+  ts(2000Q2:2000Q4) = ts(2000Q2:2000Q4).log()
+    \end{alltt}
+    \myitem To apply a method to a subsample of some of the variables:
+    \begin{alltt}
+  ts(2000Q2:2000Q4)\{`GDP_@US,FR,JA@'\} = ...
+    ts(2000Q2:2000Q4)\{`GDP_@US,FR,JA@'\}.log()
+    \end{alltt}
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Getting info about \texttt{dseries}}
+  \frametitle{Merging \texttt{dseries}}
   \begin{itemize}
-  \item \texttt{eq, ne}: returns boolean value of element-wise comparison; series must have same start dates and number of observations
-    \begin{itemize}
-    \item \texttt{ts1==ts3.MyVar1(dates(`1999y'):dates(`2001y')) \% [1 1 1]'}
-    \item \texttt{ts1$\thicksim$=ts1 \% [0 0 0]'}
-    \end{itemize}
-  \item \texttt{isempty}: returns true if series is empty
-    \begin{itemize}
-    \item \texttt{isempty(dseries()) \% 1}
-    \end{itemize}
-  \item \texttt{isequal}: returns true if the series are equal
-    \begin{itemize}
-    \item \texttt{isequal(ts1,ts1) \% 1}
-    \end{itemize}
-  \item \texttt{size}: returns number of observations by number of variables
-    \begin{itemize}
-    \item \texttt{ts3.size() \% [4 2]}
-    \end{itemize}
+    \myitem Suppose that \verb+ts+ and \verb+ds+ are two \texttt{dseries} objects
+    with the same variables observed on different time ranges. These
+    \texttt{dseries} objects can be merged using the following syntax:
+\begin{verbatim}
+    vs = [ts; ds];
+\end{verbatim}
+\myitem Suppose that \verb+ts+ and \verb+ds+ are two \texttt{dseries} objects
+with different variables observed on the same or different time ranges. These
+\texttt{dseries} objects can be merged using the following syntax:
+\begin{verbatim}
+    vs = [ts, ds];
+\end{verbatim}
+If \verb+ts+ and \verb+ds+ are not defined over the same time range,
+the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
+\verb+ds.dates+, \verb+NaN+s will be added for the missing observations.
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Working with \texttt{dseries}}
+  \frametitle{Arithmetic Operations on \texttt{dseries}}
   \begin{itemize}
-  \item \texttt{baxter\_king\_filter}: the Baxter and King (1999) band pass filter
+    \myitem The binary operators \texttt{+}, \texttt{-}, \texttt{*},
+    \texttt{/}, and \texttt{\string^} perform element-wise arithmetic operations on
+    \texttt{dseries}
+    \myitem They can be used with two \texttt{dseries} or one \texttt{dseries}
+    and a real number
+    \myitem Two \texttt{dseries} can have different date ranges. Non overlapping dates will be filled with \texttt{NaNs}
+    \myitem Take addition for example
     \begin{itemize}
-    \item \texttt{ts1.baxter\_king\_filter(high freq, low freq, K)}
+      \myitem Let
+    \begin{alltt}
+>> ts0 = dseries(ones(2,2)*2, `2000W1', \{`MyVar1', `MyVar2'\});
+>> ts1 = dseries(ones(3,2)*3, `2000W2', \{`YrVar1', `YrVar2'\});
+>> ds = ts0.MyVar1;
+    \end{alltt}
+    \myitem \texttt{ts0+3} will add \texttt{3} to every element in \texttt{ts0}
+    \myitem \texttt{ts0+[3 4]} will add \texttt{3} to every element in \texttt{ts0.MyVar1} and \texttt{4} to every element in \texttt{ts0.MyVar2}
+    \myitem \texttt{ts0+ts1} will add \texttt{ts0.MyVar1} to \texttt{ts1.YrVar1} and \texttt{ts0.MyVar2} to \texttt{ts1.YrVar2}. Only \texttt{2000W2} will contain the value \texttt{5} for both variables. All other points will contain \texttt{NaN}
+    \myitem \texttt{ts0+ds} will add \texttt{ds} to \texttt{ts0.MyVar1} and \texttt{ts0.MyVar2}. All values will contain \texttt{4}
     \end{itemize}
-  \item \texttt{hpcycle}: HP Filters the \texttt{dseries}, returning the business cycle component
-    \begin{itemize}
-    \item \texttt{ts1.hptrend(lambda) \% lambda = 1600 by default}
-    \end{itemize}
-  \item \texttt{hptrend}: HP Filters the \texttt{dseries}, returning the trend component
-    \begin{itemize}
-    \item \texttt{ts1.hptrend(lambda) \% lambda = 1600 by default}
-    \end{itemize}
-  \item \texttt{qdiff}: Quarterly difference; works on quarterly, monthly, and weekly series
-    \begin{itemize}
-    \item \texttt{ts1.qdiff()}
-    \end{itemize}
-  \item \texttt{qgrowth}: Quarterly growth rate: $\frac{ts_t-ts_{t-1}}{ts_{t-1}}$. Works on quarterly, monthly, and weekly series
-    \begin{itemize}
-    \item \texttt{ts1.qgrowth()}
-    \end{itemize}
-  \item \texttt{yidff}: Yearly difference; works on yearly, quarterly, monthly, and weekly series
-    \begin{itemize}
-    \item \texttt{ts1.ydiff()}
-    \end{itemize}
-  \item \texttt{ygrowth}: Annual growth rate: $\frac{ts_t-ts_{t-1}}{ts_{t-1}}$. Works on yearly ($t-1$), quarterly ($t-4$), monthly ($t-12$), and weekly ($t-52$) series
-    \begin{itemize}
-    \item \texttt{ts1.ygrowth()}
-    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile,t]
+  \frametitle{Leads and Lags with \texttt{dseries} (1/2)}
+  \begin{itemize}
+    \myitem Let
+    \begin{alltt}
+  >> ts = dseries([1:4]');
+    \end{alltt}
+    \myitem Then
+    \begin{alltt}
+  >> ts.lead()                      >> ts.lag()
+
+  ans is a dseries object:          ans is a dseries object:
+
+     | lead(Variable_1,1)              | lag(Variable_1,1)
+  1Y | 2                            1Y | NaN
+  2Y | 3                            2Y | 1
+  3Y | 4                            3Y | 2
+  4Y | NaN                          4Y | 3
+    \end{alltt}
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile,t]
-  \frametitle{Operations on \texttt{dseries}}
+  \frametitle{Leads and Lags with \texttt{dseries} (2/2)}
   \begin{itemize}
-  \item \texttt{abs}: The absolute value of each data point
-  \item \texttt{cumprod}/\texttt{cumsum}: Cumulative product/sum
-  \item \texttt{exp}/\texttt{log}: The exponential/log for each data point
-  \item \texttt{mrdivide}/\texttt{mtimes}: Division/Multiplication
-  \item \texttt{minus}/\texttt{plus}: Subtraction/Addition
-  \item \texttt{mpower}: Power
+    \myitem You can lead/lag a \texttt{dseries} by more than one period
     \begin{itemize}
-    \item \texttt{ts1-ts2}
-    \item \texttt{ts1-3}
-    \item \texttt{ts1-[1:3]'}
+      \myitem \texttt{ts.lead(k)} where $k\in\mathbb{Z}$
+      \myitem \texttt{ts.lag(k)} where $k\in\mathbb{Z}$
     \end{itemize}
-  \item \texttt{lag}/\texttt{lead}: lag/lead the series
+    \myitem A shorthand syntax is available as well
     \begin{itemize}
-    \item \texttt{ts1(-1)}/\texttt{ts1(2)}
-    \item \texttt{ts1.lag()}/\texttt{ts1.lead(2)}
-    \end{itemize}
-  \item \texttt{uminus}: Equivalent to multiplying by $-1$.
-    \begin{itemize}
-    \item \texttt{-ts1}
+      \myitem Lead: \texttt{ts(k)} where $k\in\mathbb{Z}$
+      \myitem Lag: \texttt{ts(-k)} where $k\in\mathbb{Z}$
     \end{itemize}
   \end{itemize}
 \end{frame}
-
-
-\begin{frame}[fragile,t]
-  \frametitle{Modifying \texttt{dates}}
-  \begin{itemize}
-  \item \texttt{align}: Makes both series cover the same time range by padding with \texttt{NaN}'s
-    \begin{itemize}
-    \item \texttt{[ts1,ts2]=align(ts1,ts2)}
-    \end{itemize}
-  \item \texttt{chain}:
-  \item \texttt{horzcat}: Join two or more \texttt{dseries}
-    \begin{itemize}
-    \item \texttt{ts3=[ts1 ts2]}
-    \end{itemize}
-  \item \texttt{insert}: Inserts variables from one \texttt{dseries} into another
-    \begin{itemize}
-    \item \texttt{ts1.insert(ts2, 2)}
-    \end{itemize}
-  \item \texttt{merge}: Merge two series
-  \item \texttt{pop}: remove the last variable from \texttt{dseries}
-  \item \texttt{plot}: plot a \texttt{dseries}
-  \item \texttt{rename}: Rename a variable in a dseries
-    \begin{itemize}
-    \item \texttt{ts1.rename(`MyVar1',`MyFirstVar')}
-    \end{itemize}
-  \item \texttt{save}: Save a \texttt{dseries} in either \texttt{.csv} (default), \texttt{.m}, or \texttt{.mat}
-  \item \texttt{set\_names}: Rename all variables in a \texttt{dseries}
-    \begin{itemize}
-    \item \texttt{ts3.set\_names(`NewName1',`NewName2')}
-    \end{itemize}
-  \item \texttt{tex\_rename}: Rename the \LaTeX\ name for a given variable
-    \begin{itemize}
-    \item \texttt{ts1.tex\_rename(`MyVar1',`MyVar\textbackslash\_1')}
-    \end{itemize}
-  \item \texttt{vertcat}: Add more observations to existing \texttt{dseries}
-    \begin{itemize}
-    \item \texttt{[ts1; dseries(4,`2002y',`MyVar1')]}
-    \end{itemize}
-  \end{itemize}
-\end{frame}
-
-
-
-\subsection{Examples}
 
 
 
@@ -447,67 +633,68 @@
 %
 \section{Reporting}
 \subsection{Overview}
-\begin{frame}
+\begin{frame}[fragile,t]
   \frametitle{Overview}
   \begin{itemize}
-  \item Introduced in Dynare 4.4
-  \item Introduce reporting functionality to Dynare
+  \myitem Beta version in Dynare 4.4. Mature version ready in Dynare 4.5
+  \myitem Introduce reporting functionality to Dynare
       \begin{itemize}
-      \item Input: \texttt{dseries}
-      \item Output: \LaTeX\ report \& compiled \texttt{.pdf}
+      \myitem Input: \texttt{dseries}
+      \myitem Output: \LaTeX\ report \& compiled \texttt{.pdf}
       \end{itemize}
-    \item Graphs and Tables are modular
+    \myitem Graphs and Tables are modular
       \begin{itemize}
-      \item Can easily be included in another document
+      \item[$\Rightarrow$] Can easily be included in another document
       \end{itemize}
-    \item Graphs are produced in Ti$k$Z/PGFPlots (standard in a TeX distribution)
+    \myitem Graphs are produced in Ti$k$Z/PGFPlots (standard in a \TeX\ distribution)
       \begin{itemize}
-      \item Scales well
-      \item Formating follows that of enclosing document
+      \myitem Scales well
+      \myitem Formating follows that of enclosing document
       \end{itemize}
-    \item Dynare provides a subset of the many Ti$k$Z options
+    \myitem Dynare provides a subset of the many Ti$k$Z options
       \begin{itemize}
-      \item You can easily modify the Ti$k$Z graph if the option you want is not in Dynare
+      \myitem You can easily modify the Ti$k$Z graph if the option you want is not in Dynare
       \end{itemize}
-    \item Works with Matlab \& Octave
-    \item Works approximately 5 times faster than Iris reporting
-    \item NB: Must install a \LaTeX\ distribution to compile reports
+    \myitem Works with Matlab \& Octave
+    \myitem Works much faster than similar softawre
+    \myitem NB: Must install a \LaTeX\ distribution to compile reports
       \begin{itemize}
-      \item Windows: MiKTeX \url{http://miktex.org}
-      \item Mac OS X: MacTeX \url{http://tug.org/mactex}
-      \item Linux: TeX Live (from your package manager)
+      \myitem On Windows use MiKTeX: \url{http://miktex.org}
+      \myitem On Mac OS X use MacTeX: \url{http://tug.org/mactex}
+      \myitem On Linux use \TeX\ Live: available from your package manager
       \end{itemize}
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[fragile,t]
   \frametitle{How Reporting Works}
   \begin{itemize}
-  \item Reports are created command by command
+    \myitem Reports are created command by command
     \begin{itemize}
-    \item Hence the order of commands matters
+    \myitem Hence the order of commands matters
     \end{itemize}
-  \item All reporting commands act on the previously added object until an object of greater or equal hierarchy is added (see next slide)
+  \myitem All reporting commands act on the previously added object until an object of greater or equal hierarchy is added (see next slide)
     \begin{itemize}
-    \item \textit{e.g.,} Once you add a \texttt{Page} to your report with the \texttt{addPage()} command, every \texttt{Section} you add via the \texttt{addSection()} command will be placed on this page. Only when you add another \texttt{Page} will items go on a new page.
-    \item This will become more clear with an example
+    \myitem \textit{e.g.,} Once you add a \texttt{Page} to your report with the \texttt{addPage()} command, every \texttt{Section} you add via the \texttt{addSection()} command will be placed on this page. Only when you add another \texttt{Page} will items go on a new page.
+    \myitem This will become more clear with an example
     \end{itemize}
-  \item Options to reporting commands are passed in option name/value pairs
+  \myitem Options to reporting commands are passed in option name/value pairs
     \begin{itemize}
-    \item \textit{e.g.,} \texttt{addPage(`title', \{`Page Title', `Page Subtitle'\})}
+    \myitem \textit{e.g.,} \texttt{addPage(`title', \{`Page Title', `Page Subtitle'\})}
     \end{itemize}
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[fragile,t]
   \frametitle{Reporting Class Hierarchy}
   \begin{itemize}
-  \item Class names on the top half of the box, constructor names on the bottom
-  \item Arrows represent what the new object can be added to
+  \myitem Class names on the top half of the box, constructor names on the bottom
+  \myitem Arrows represent what the new object can be added to; objects in ellipses are treated a bit differently (explained below)
   \end{itemize}
   \begin{center}
+    \scriptsize{
     \begin{tikzpicture}[
         node distance = .45cm,
         auto,
@@ -528,22 +715,30 @@
               \textbf{Section}
               \nodepart{second}\texttt{addSection(...);}
             };
-      \node (Vspace) [abstract, rectangle split, rectangle split parts=2, below=of Section]
+      \node (Paragraph) [abstract, ellipse split, rectangle split parts=2, right=of Section]
+            {
+              \textbf{Paragraph}
+              \nodepart{lower}\texttt{addParagraph(...);}
+            };
+      \node (Vspace) [abstract, ellipse split, rectangle split parts=2, left=of Section]
             {
               \textbf{Vspace}
-              \nodepart{second}\texttt{addVspace(...);}
+              \nodepart{lower}\texttt{addVspace(...);}
             };
-      \node (Graph) [abstract, rectangle split, rectangle split parts=2, left=of Vspace]
+      \node (Spacer) [abstract, rectangle split, rectangle split parts=2, opacity=0, below=of Section]
+            {
+            };
+      \node (Graph) [abstract, rectangle split, rectangle split parts=2, left=of Spacer]
             {
               \textbf{Graph}
               \nodepart{second}\texttt{addGraph(...);}
             };
-      \node (Table) [abstract, rectangle split, rectangle split parts=2, right=of Vspace, text height=]
+      \node (Table) [abstract, rectangle split, rectangle split parts=2, right=of Spacer, text height=]
             {
               \textbf{Table}
               \nodepart{second}\texttt{addTable(...);}
             };
-      \node (Series) [abstract, rectangle split, rectangle split parts=2, below=of Vspace]
+      \node (Series) [abstract, rectangle split, rectangle split parts=2, below=of Spacer]
             {
               \textbf{Series}
               \nodepart{second}\texttt{addSeries(...);}
@@ -552,74 +747,122 @@
       \draw [line] (Series) to node { } (Graph);
       \draw [line] (Table) to node { } (Section);
       \draw [line] (Graph) to node { } (Section);
+      \draw [line] (Paragraph) to node { } (Section);
       \draw [line] (Vspace) to node { } (Section);
       \draw [line] (Section) to node { } (Page);
       \draw [line] (Page) to node { } (Report);
-    \end{tikzpicture}
+    \end{tikzpicture}}
   \end{center}
 \end{frame}
 
 
 \subsection{Syntax}
-\begin{frame}
-  \frametitle{Reporting Syntax}
+\begin{frame}[fragile,t]
+  \frametitle{Reporting Syntax (1/3)}
   \begin{itemize}
-  \item \texttt{report(\ldots)}: Create a report
+  \myitem \texttt{report(\ldots)}: Create a report
     \begin{itemize}
-    \item Options: \texttt{compiler}, \texttt{showDate}, \texttt{fileName}, \texttt{margin}, \texttt{marginUnit}, \texttt{orientation}, \texttt{paper}, \texttt{title}
+    \myitem \textbf{Options}: \texttt{compiler}, \texttt{showDate}, \texttt{fileName}, \texttt{margin}, \texttt{marginUnit}, \ldots
+    \begin{alltt}
+>> rep = report(`title', `Dynare Summer School 2014', ...
+                `fileName', `myDynareReport.tex');
+    \end{alltt}
     \end{itemize}
-  \item \texttt{addPage(\ldots)}: Add a page to the \texttt{Report}
+  \myitem \texttt{addPage(\ldots)}: Add a page to the \texttt{Report}
     \begin{itemize}
-    \item Options: \texttt{footnote}, \texttt{orientation}, \texttt{paper}, \texttt{title}, \texttt{titleFormat}
+    \myitem \textbf{Options}: \texttt{footnote}, \texttt{orientation}, \texttt{paper}, \texttt{title}, \texttt{titleFormat}
+    \begin{alltt}
+>> rep = rep.addPage(`title', \{`Page Title', `Page Subtitle'\}, ...
+                     `titleFormat', \{`\textbackslash{}large\textbackslash{}bfseries', `\textbackslash{}large'\});
+    \end{alltt}
     \end{itemize}
-  \item \texttt{addSection(\ldots)}: Add a section to the current \texttt{Page}
+  \myitem \texttt{addSection(\ldots)}: Add a section to the current \texttt{Page}
     \begin{itemize}
-    \item You can think of a section as a matrix. As graphs and/or tables are added section, it fills up from left to right. Once you have added \texttt{cols} objects, a new row is started.
-    \item Options: \texttt{cols}, \texttt{height}
+    \myitem You can think of a section as a matrix. As graphs and/or tables are added to a section, it fills up from left to right. Once you have added \texttt{cols} objects, a new row is started.
+    \myitem \textbf{Options}: \texttt{cols}, \texttt{height}
+    \begin{alltt}
+>> rep = rep.addSection(`cols', 3);
+    \end{alltt}
     \end{itemize}
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}
-  \frametitle{Reporting Syntax (continued)}
+\begin{frame}[fragile,t]
+  \frametitle{Reporting Syntax (2/3)}
   \begin{itemize}
-  \item \texttt{addGraph(\ldots)}: Add a graph to the current \texttt{Section}
+    \myitem \texttt{addVspace(\ldots)}: Add a vertical space to the current \texttt{Section}.
     \begin{itemize}
-    \item Options: \texttt{data}, \texttt{graphDirName}, \texttt{graphName}, \texttt{graphSize}, \texttt{height}, \texttt{showGrid}, \texttt{showLegend}, \texttt{showLegendBox}, \texttt{legendLocation}, \texttt{legendOrientation}, \texttt{legendFontSize}, \texttt{seriesToUse}, \texttt{shade}, \texttt{shadeColor}, \texttt{shadeOpacity}, \texttt{title}, \texttt{titleFormat}, \texttt{width}, \texttt{xlabel}, \texttt{ylabel}, \texttt{xAxisTight}, \texttt{xrange}, \texttt{xTicks}, \texttt{xTickLabels}, \texttt{xTickLabelAnchor}, \texttt{xTickLabelRotation}, \texttt{yAxisTight}, \texttt{yrange}, \texttt{showZeroLine}
+      \myitem If the row has been completely filled in, this adds space between this row and the next row. If not, this adds space at the end of the \texttt{Section} and closes it; in other words, in this situation if you want to add more graphs, you'd have to create a new \texttt{Section} first.
+      \myitem \textbf{Options}: \texttt{hline}, \texttt{number}
+      \begin{alltt}
+>> rep = rep.addVspace(`hline', 2, `number', 3);
+    \end{alltt}
     \end{itemize}
-  \item \texttt{addTable(\ldots)}: Add a table to the current \texttt{Section}
+    \myitem \texttt{addParagraph(\ldots)}: Add text to the current \texttt{Section}
     \begin{itemize}
-    \item Options: \texttt{data}, \texttt{showHlines}, \texttt{precision}, \texttt{range}, \texttt{seriesToUse}, \texttt{tableDirName}, \texttt{tableName}, \texttt{title}, \texttt{titleFormat}, \texttt{vlineAfter}, \texttt{vlineAfterEndOfPeriod}, \texttt{showVlines}
-    \end{itemize}
-  \item \texttt{addSeries(\ldots)}: Add a series to the current \texttt{Graph} or \texttt{Table}
-    \begin{itemize}
-    \item \texttt{data}, \texttt{graphLineStyle}, \texttt{graphLineWidth}, \texttt{graphMarker}, \texttt{graphMarkerEdgeColor}, \texttt{graphMarkerFaceColor}, \texttt{graphMarkerSize}, \texttt{tableDataRhs}, \texttt{tableRowColor}, \texttt{tableRowIndent}, \texttt{tableShowMarkers}, \texttt{tableAlignRight}, \texttt{tableMarkerLimit}, \texttt{tableNegColor}, \texttt{tablePosColor}, \texttt{tableSubSectionHeader}, \texttt{zeroTol}
-    \end{itemize}
-  \item Options: \texttt{addVspace(\ldots)}: Add a vertical space to the current \texttt{Section}
-    \begin{itemize}
-    \item \texttt{hline}, \texttt{number}
+      \myitem To add anything other than a paragraph (or multiple paragraphs) to a \texttt{Section}, you must add a new \texttt{Section} to the page
+      \myitem \textbf{Options}: \texttt{balancedCols}, \texttt{cols}, \texttt{heading}, \texttt{index}, \texttt{text}
+      \begin{alltt}
+>> rep = rep.addParagraph(`text', `Lorem ipsum\textbackslash{}ldots\textbackslash{}newline');
+      \end{alltt}
     \end{itemize}
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[fragile,t]
+  \frametitle{Reporting Syntax (3/3)}
+  \begin{itemize}
+    \myitem \texttt{addGraph(\ldots)}: Add a graph to the current \texttt{Section}
+    \begin{itemize}
+      \myitem \textbf{Options}: \texttt{data}, \texttt{graphDirName}, \texttt{graphName}, \texttt{graphSize}, \texttt{height}, \ldots
+      \begin{alltt}
+>> rep = rep.addGraph(`title', `Headline Inflation (y/y)', ...
+                      `xrange', prange, ...
+                      `shade', srange, ...
+                      `showZeroline', true);
+      \end{alltt}
+    \end{itemize}
+    \myitem \texttt{addTable(\ldots)}: Add a table to the current \texttt{Section}
+    \begin{itemize}
+      \myitem \textbf{Options}: \texttt{data}, \texttt{showHlines}, \texttt{precision}, \texttt{range}, \texttt{seriesToUse}, \ldots
+      \begin{alltt}
+>> rep = rep.addTable(`title', \{`Real GDP Growth',`subtitle 1'\}, ...
+                      `range', larange, ...
+                      `vlineAfter', dates(`2011y'));
+      \end{alltt}
+    \end{itemize}
+    \myitem \texttt{addSeries(\ldots)}: Add a series to the current \texttt{Graph} or \texttt{Table}
+    \begin{itemize}
+      \myitem \textbf{Options}: \texttt{data}, \texttt{graphHline}, \texttt{graphLegendName}, \texttt{graphLineColor}, \ldots
+      \begin{alltt}
+>> rep = rep.addSeries(`data', db\_q.LRPOIL\_WORLD, ...
+                       `graphLineColor', `blue', ...
+                       `graphLineWidth', 1.5, ...
+                       `graphMarker', `triangle*');
+      \end{alltt}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile,t]
   \frametitle{Output}
   To create a report:
   \begin{itemize}
-  \item \texttt{write()}: Writes the report to a \LaTeX\ file
-  \item \texttt{compile(\ldots)}: Compiles the report
+  \myitem \texttt{write()}: Writes the report to a \LaTeX\ file
+  \myitem \texttt{compile(\ldots)}: Compiles the report
     \begin{itemize}
-    \item Options: \texttt{compiler}
+    \myitem \textbf{Options}: \texttt{compiler}
     \end{itemize}
   \end{itemize}
   Report Output
   \begin{itemize}
-  \item Unless you pass the \texttt{fileName} option to \texttt{report(\ldots)}, the report will be located in your working directory with the name \texttt{report.tex}. The compiled version will be called \texttt{report.pdf}.
-  \item Unless you pass the \texttt{graphDirName} or \texttt{graphName} options to \texttt{addGraph(\ldots)}, your graphs will be in a subdirectory of your working directory called \texttt{tmpRepDir}. The default name will take the form \texttt{graph\_pg9\_sec1\_row1\_col5.tex}
-  \item The same holds for the tables (substituting `table' for `graph' above).
-  \item Thus you can easily modify these files and include them in another report.
+  \myitem Unless you pass the \texttt{fileName} option to \texttt{report(\ldots)}, the report will be located in your working directory with the name \texttt{report.tex}. The compiled version will be called \texttt{report.pdf}.
+  \myitem Unless you pass the \texttt{graphDirName} or \texttt{graphName} options to \texttt{addGraph(\ldots)}, your graphs will be in a subdirectory of your working directory called \texttt{tmpRepDir}. The default name will take the form \texttt{graph\_pg9\_sec1\_row1\_col5.tex}
+  \myitem The same holds for the tables (substituting `table' for `graph' above).
+  \myitem Thus you can easily modify these files and include them in another report.
   \end{itemize}
 \end{frame}
 
@@ -627,10 +870,11 @@
 \subsection{Examples}
 
 \section{Putting it All Together}
-\begin{frame}[fragile=singleslide]
+\begin{frame}[fragile=singleslide,t]
   \frametitle{Create Report of IRFs from \texttt{example1.mod}}
   \begin{itemize}
-  \item \texttt{example1.mod} is located in the Dynare \texttt{examples} directory
+  \myitem \texttt{example1.mod} is located in the Dynare \texttt{examples} directory
+  \myitem The lines below can be added at the end of that file.
   \end{itemize}
   \begin{block}{Create \texttt{dseries} from IRFs}
 \begin{verbatim}
@@ -643,9 +887,9 @@
   \end{block}
 \end{frame}
 
-\begin{frame}[fragile=singleslide]
+\begin{frame}[fragile=singleslide,t]
   \frametitle{Create Report of IRFs from \texttt{example1.mod}}
-  \begin{block}{Populate Report}
+  \begin{block}{Populate Report (1/2)}
 \small{
 \begin{verbatim}
 @#for shock in ["e", "u"]
@@ -660,8 +904,21 @@
                                `showGrid', false, ...
                                `showZeroLine', true);
 @#  endfor
+\end{verbatim}
+}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}[fragile=singleslide,t]
+  \frametitle{Create Report of IRFs from \texttt{example1.mod}}
+  \begin{block}{Populate Report (2/2)}
+\small{
+\begin{verbatim}
+    report = report.addVspace(`number', 2);
     report = report.addSection(`cols', 1);
-    report = report.addTable();
+    report = report.addTable(`range', 2022q1:2024q1, `precision', 5);
+
 @#  for var in endovars
       report = report.addSeries(`data', shock@{shock}.@{var});
 @#  endfor
@@ -669,16 +926,14 @@
 \end{verbatim}
 }
   \end{block}
-\end{frame}
 
-
-\begin{frame}[fragile=singleslide]
-  \frametitle{Create Report of IRFs from \texttt{example1.mod}}
   \begin{block}{Compile Report}
+\small{
 \begin{verbatim}
 report.write();
 report.compile();
 \end{verbatim}
+}
   \end{block}
 \end{frame}
 \end{document}

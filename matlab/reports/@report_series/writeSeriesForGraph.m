@@ -30,8 +30,14 @@ function o = writeSeriesForGraph(o, fid, xrange)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 %% Validate options provided by user
-assert(~isempty(o.data) && isa(o.data, 'dseries'), ['@report_series.writeSeriesForGraph: must ' ...
-                    'provide data as a dseries']);
+if isempty(o.graphVline) && isempty(o.graphHline)
+    assert(~isempty(o.data) && isdseries(o.data), ['@report_series.writeSeriesForGraph: must ' ...
+                        'provide data as a dseries']);
+end
+
+assert(ischar(o.graphMiscTikzAddPlotOptions), ['@report_series.writeSeriesForGraph: ' ...
+                    'graphMiscTikzAddPlotOptions file must be a string']);
+assert(islogical(o.graphShowInLegend), '@graph.graph: graphShowInLegend must be either true or false');
 
 % Line
 valid_graphLineColor = {'red', 'green', 'blue', 'cyan ', 'magenta', 'yellow', ...
@@ -61,11 +67,36 @@ assert(isfloat(o.graphMarkerSize) && o.graphMarkerSize > 0, ...
 assert(~(strcmp(o.graphLineStyle, 'none') && isempty(o.graphMarker)), ['@report_series.writeSeriesForGraph: ' ...
                     'you must provide at least one of graphLineStyle and graphMarker']);
 
-% Validate xrange
-
+% Validate graphVline
+assert(isempty(o.graphVline) || (isdates(o.graphVline) && o.graphVline.ndat == 1), ...
+    '@report_series.writeSeriesForGraph: graphVline must be a dates of size one');
+assert(isempty(o.graphHline) || isnumeric(o.graphHline), ...
+    '@report_series.writeSeriesForGraph: graphHline must a single numeric value');
 
 % Zero tolerance
 assert(isfloat(o.zeroTol), '@report_series.write: zeroTol must be a float');
+
+%% graphVline && graphHline
+if ~isempty(o.graphVline)
+    fprintf(fid, '%%Vertical Line\n\\begin{pgfonlayer}{background1}\n\\draw');
+    writeLineOptions(o, fid);
+    stringsdd = strings(xrange);
+    x = find(strcmpi(date2string(o.graphVline), stringsdd));
+    fprintf(fid, ['(axis cs:%d,\\pgfkeysvalueof{/pgfplots/ymin}) -- (axis ' ...
+        'cs:%d,\\pgfkeysvalueof{/pgfplots/ymax});\n\\end{pgfonlayer}\n'], ...
+        x, x);
+end
+if ~isempty(o.graphHline)
+    fprintf(fid, '%%Horizontal Line\n\\begin{pgfonlayer}{background1}\n\\addplot');
+    writeLineOptions(o, fid);
+    fprintf(fid, ['coordinates {(\\pgfkeysvalueof{/pgfplots/xmin},%f)' ...
+                  '(\\pgfkeysvalueof{/pgfplots/xmax},%f)};\n\\end{pgfonlayer}\n'], ...
+            o.graphHline, o.graphHline);
+end
+if ~isempty(o.graphVline) || ~isempty(o.graphHline)
+    % return since the code below assumes that o.data exists
+    return
+end
 
 %%
 if isempty(xrange) || all(xrange == o.data.dates)
@@ -74,18 +105,20 @@ else
     ds = o.data(xrange);
 end
 
-% if graphing data that is within zeroTol, set to zero, create report_series and
-% get line:
-thedata = ds.data;
-stz = bsxfun(@and, ...
-             bsxfun(@lt, thedata, o.zeroTol), ...
-             bsxfun(@gt, thedata, -o.zeroTol));
-if any(stz)
-    thedata(stz) = 0;
+thedata = setDataToZeroFromZeroTol(o, ds);
+fprintf(fid, '%%series %s\n\\addplot', o.data.name{:});
+writeLineOptions(o, fid);
+fprintf(fid,'\ntable[row sep=crcr]{\nx y\\\\\n');
+for i=1:ds.dates.ndat
+    fprintf(fid, '%d %f\\\\\n', i, thedata(i));
+end
+fprintf(fid,'};\n');
 end
 
-fprintf(fid, '%%series %s\n\\addplot[color=%s,%s,line width=%fpt,line join=round',...
-        o.data.name{:}, o.graphLineColor, o.graphLineStyle, o.graphLineWidth);
+function writeLineOptions(o, fid)
+fprintf(fid, '[color=%s,%s,line width=%fpt,line join=round',...
+    o.graphLineColor, o.graphLineStyle, o.graphLineWidth);
+
 if ~isempty(o.graphMarker)
     if isempty(o.graphMarkerEdgeColor)
         o.graphMarkerEdgeColor = o.graphLineColor;
@@ -94,11 +127,10 @@ if ~isempty(o.graphMarker)
         o.graphMarkerFaceColor = o.graphLineColor;
     end
     fprintf(fid, ',mark=%s,mark size=%f,every mark/.append style={draw=%s,fill=%s}',...
-            o.graphMarker,o.graphMarkerSize,o.graphMarkerEdgeColor,o.graphMarkerFaceColor);
+        o.graphMarker,o.graphMarkerSize,o.graphMarkerEdgeColor,o.graphMarkerFaceColor);
 end
-fprintf(fid,']\ntable[row sep=crcr]{\nx y\\\\\n');
-for i=1:ds.dates.ndat
-    fprintf(fid, '%d %f\\\\\n', i, thedata(i));
+if ~isempty(o.graphMiscTikzAddPlotOptions)
+    fprintf(fid, ',%s', o.graphMiscTikzAddPlotOptions);
 end
-fprintf(fid,'};\n');
+fprintf(fid,']');
 end

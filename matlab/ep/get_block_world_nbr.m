@@ -1,7 +1,6 @@
-function s = getTexName(o)
-%function s = getTexName(o)
+function [block_nbr,world_nbr] = get_block_world_nbr(algo,nnodes,order,periods)
 
-% Copyright (C) 2013-2014 Dynare Team
+% Copyright (C) 2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -18,12 +17,15 @@ function s = getTexName(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isempty(o.data)
-    % for the case when there is no data in the series
-    % e.g. graphVline was passed
-    s = '';
-else
-    assert(size(o.data,2) == 1);
-    s = o.data.tex{:};
-end
+
+switch algo
+  case 0
+    world_nbr = nnodes^order;
+    block_nbr = 1+(nnodes^(order+1)-nnodes)/(nnodes-1)+(periods-order)*world_nbr;
+  case 1
+    world_nbr = 1+(nnodes-1)*order;
+    block_nbr = (order+(nnodes-1)*(order-1)*order/2+(periods-order)* ...
+                 world_nbr);
+  otherwise
+    error('This case is not supposed to happen')
 end

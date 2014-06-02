@@ -72,6 +72,9 @@ o.xTickLabelAnchor = 'east';
 o.width = 6;
 o.height = 4.5;
 
+o.miscTikzPictureOptions = '';
+o.miscTikzAxisOptions = '';
+
 if nargin == 1
     assert(isa(varargin{1}, 'graph'),['@graph.graph: with one arg you ' ...
                         'must pass a graph object']);
@@ -87,7 +90,7 @@ elseif nargin > 1
 
     % overwrite default values
     for pair = reshape(varargin, 2, [])
-        ind = strmatch(lower(pair{1}), lower(optNames), 'exact');
+        ind = find(strcmpi(optNames, pair{1}));
         assert(isempty(ind) || length(ind) == 1);
         if ~isempty(ind)
             o.(optNames{ind}) = pair{2};
@@ -105,6 +108,8 @@ assert(iscellstr(o.title), '@graph.graph: title must be a cell array of string(s
 assert(ischar(o.titleFormat), '@graph.graph: titleFormat file must be a string');
 assert(ischar(o.xlabel), '@graph.graph: xlabel file must be a string');
 assert(ischar(o.ylabel), '@graph.graph: ylabel file must be a string');
+assert(ischar(o.miscTikzPictureOptions), '@graph.graph: miscTikzPictureOptions file must be a string');
+assert(ischar(o.miscTikzAxisOptions), '@graph.graph: miscTikzAxisOptions file must be a string');
 assert(ischar(o.graphName), '@graph.graph: graphName must be a string');
 assert(ischar(o.graphDirName), '@graph.graph: graphDirName must be a string');
 assert(islogical(o.showGrid), '@graph.graph: showGrid must be either true or false');
@@ -141,17 +146,17 @@ valid_legend_orientations = {'vertical', 'horizontal'};
 assert(any(strcmp(o.legendOrientation, valid_legend_orientations)), ...
        ['@graph.graph: legendOrientation must be one of ' strjoin(valid_legend_orientations, ' ')]);
 
-assert(isempty(o.shade) || (isa(o.shade, 'dates') && o.shade.ndat >= 2), ...
+assert(isempty(o.shade) || (isdates(o.shade) && o.shade.ndat >= 2), ...
        ['@graph.graph: shade is specified as a dates range, e.g. ' ...
         '''dates(''1999q1''):dates(''1999q3'')''.']);
-assert(isempty(o.xrange) || (isa(o.xrange, 'dates') && o.xrange.ndat >= 2), ...
+assert(isempty(o.xrange) || (isdates(o.xrange) && o.xrange.ndat >= 2), ...
        ['@graph.graph: xrange is specified as a dates range, e.g. ' ...
         '''dates(''1999q1''):dates(''1999q3'')''.']);
 assert(isempty(o.yrange) || (isfloat(o.yrange) && length(o.yrange) == 2 && ...
                              o.yrange(1) < o.yrange(2)), ...
        ['@graph.graph: yrange is specified an array with two float entries, ' ...
         'the lower bound and upper bound.']);
-assert(isempty(o.data) || isa(o.data, 'dseries'), ['@graph.graph: data must ' ...
+assert(isempty(o.data) || isdseries(o.data), ['@graph.graph: data must ' ...
                     'be a dseries']);
 assert(isempty(o.seriesToUse) || iscellstr(o.seriesToUse), ['@graph.graph: ' ...
                     'seriesToUse must be a cell array of string(s)']);

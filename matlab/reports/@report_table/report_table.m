@@ -65,7 +65,7 @@ elseif nargin > 1
 
     % overwrite default values
     for pair = reshape(varargin, 2, [])
-        ind = strmatch(lower(pair{1}), lower(optNames), 'exact');
+        ind = find(strcmpi(optNames, pair{1}));
         assert(isempty(ind) || length(ind) == 1);
         if ~isempty(ind)
             o.(optNames{ind}) = pair{2};
@@ -78,7 +78,7 @@ if ~iscell(o.range)
     o.range = {o.range};
 end
 
-if isa(o.vlineAfter, 'dates')
+if isdates(o.vlineAfter)
     o.vlineAfter = {o.vlineAfter};
 end
 
@@ -98,7 +98,7 @@ assert(isint(o.precision), '@report_table.report_table: precision must be an int
 assert(isempty(o.range) || length(o.range) <=2 && allCellsAreDatesRange(o.range), ...
        ['@report_table.report_table: range is specified as a dates range, e.g. ' ...
         '''dates(''1999q1''):dates(''1999q3'')''.']);
-assert(isempty(o.data) || isa(o.data, 'dseries'), ...
+assert(isempty(o.data) || isdseries(o.data), ...
        '@report_table.report_table: data must be a dseries');
 assert(isempty(o.seriesToUse) || iscellstr(o.seriesToUse), ...
        '@report_table.report_table: seriesToUse must be a cell array of string(s)');

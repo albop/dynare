@@ -164,6 +164,14 @@ elseif options_.solve_algo == 3
     else
         [x,info] = csolve(func,x,[],1e-6,500,varargin{:});
     end
+elseif options_.solve_algo == 10
+    olmmcp = options_.lmmcp;
+    [x,fval,exitflag] = lmmcp(func,x,olmmcp.lb,olmmcp.ub,olmmcp,varargin{:});
+    if exitflag == 1
+        info = 0;
+    else
+        info = 1;
+    end
 else
     error('DYNARE_SOLVE: option solve_algo must be one of [0,1,2,3,4,9]')
 end
