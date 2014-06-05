@@ -194,10 +194,6 @@ X =
   >> t = dates(`1999q1', `2020q2', `-190q3');
 \end{alltt}
 Notice that noncontiguous and negative dates are possible
-    \myitem{A date range}
-\begin{alltt}
-  >> dr = dates(`1999y'):dates(`2020y');
-\end{alltt}
     \myitem Can also create \texttt{dates} programatically
 \begin{alltt}
   >> t = dates(4, [1990; 1990; 1978], [1; 2; 3])
@@ -234,10 +230,6 @@ Notice that noncontiguous and negative dates are possible
     \myitem{Multiple dates} \texttt{t = [1999q1 2020q2 1960q3];}
 \begin{alltt}
   \(\Rightarrow\) t = [dates(`1999q1') dates(`2020q2') dates(`1960q3')];
-\end{alltt}
-    \myitem{A date range} \texttt{dr = 1999y:2020y;}
-\begin{alltt}
-  \(\Rightarrow\) dr = dates(`1999y'):dates(`2020y');
 \end{alltt}
     \myitem NB: This can cause problems when dates are included in strings. \textit{e.g.,}
 \begin{alltt}
@@ -398,7 +390,7 @@ would be transformed into
     \myitem All time series in a \texttt{dseries} must have the same frequency
     \myitem A \texttt{dseries} runs from the earliest date to the latest date,
     with \texttt{NaN}'s inserted to pad the shorter series
-    \myitem A \texttt{dseries} object contains 3 members:
+    \myitem A \texttt{dseries} object contains 6 members:
     \begin{itemize}
       \myitem{\textbf{\texttt{data}}}: The data points
       \myitem{\textbf{\texttt{dates}}}: The \texttt{dates} of the sample
