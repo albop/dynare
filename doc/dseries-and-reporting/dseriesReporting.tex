@@ -444,7 +444,7 @@ would be transformed into
     \texttt{NAMES\_\_}, and, optionally, \texttt{TEX\_\_}. More info in the
     manual. Data are vectors.
     \begin{alltt}
-      INIT__ = `1999q1’;
+      INIT__ = `1999q1';
       NAMES__ = \{`cons'\};
       cons = randn(100,1);
     \end{alltt}
@@ -811,8 +811,8 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
       \myitem \textbf{Options}: \texttt{data}, \texttt{graphDirName}, \texttt{graphName}, \texttt{graphSize}, \texttt{height}, \ldots
       \begin{alltt}
 >> rep = rep.addGraph(`title', `Headline Inflation (y/y)', ...
-                      `xrange', prange, ...
-                      `shade', srange, ...
+                      `xrange', dates(`2007q1'):dates(`2013q4'), ...
+                      `shade', dates(`2010q1'):dates(`2013q4'), ...
                       `showZeroline', true);
       \end{alltt}
     \end{itemize}
@@ -821,7 +821,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
       \myitem \textbf{Options}: \texttt{data}, \texttt{showHlines}, \texttt{precision}, \texttt{range}, \texttt{seriesToUse}, \ldots
       \begin{alltt}
 >> rep = rep.addTable(`title', \{`Real GDP Growth',`subtitle 1'\}, ...
-                      `range', larange, ...
+                      `range', dates(`2007y'):dates(`2014y'), ...
                       `vlineAfter', dates(`2011y'));
       \end{alltt}
     \end{itemize}
@@ -844,7 +844,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
   To create a report:
   \begin{itemize}
   \myitem \texttt{write()}: Writes the report to a \LaTeX\ file
-  \myitem \texttt{compile(\ldots)}: Compiles the report
+  \myitem \texttt{compile(\ldots)}: Compiles the report, creating a \texttt{.pdf} file
     \begin{itemize}
     \myitem \textbf{Options}: \texttt{compiler}
     \end{itemize}
