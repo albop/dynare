@@ -467,10 +467,10 @@ would be transformed into
     \begin{alltt}
   ts(2001Y:2003Y)
     \end{alltt}
-    \myitem Can also use integer indices
+    \myitem Can also use integer indices (in a roundabout way)
     \begin{alltt}
   start = find(ts.dates==2001Y);
-  ts(start:end);
+  ts(ts.dates(start:end));
     \end{alltt}
     \myitem NB: Integer indices cannot be used to extract a single observation
     because of lag/lead notation (see below)
