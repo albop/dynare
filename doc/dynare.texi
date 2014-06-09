@@ -11163,7 +11163,7 @@ command. Default: @code{`!'}
 @end defmethod
 
 @anchor{addGraph}
-@defmethod Report addGraph data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yrange, showZeroline
+@defmethod Report addGraph data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelZeroFill, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -11302,6 +11302,17 @@ Use a tight y axis. If false, uses @code{PGFPLOTS/Ti}@i{k}@code{Z}
 The boundary on the y-axis to display in the graph, represented as a
 @code{NUMERICAL_VECTOR} of size @math{2}, with the first entry less
 than the second entry. Default: all
+
+@item yTickLabelFixed, @code{BOOLEAN}
+Round the y tick labels to a fixed number of decimal places, given by
+@ref{yTickLabelPrecision}. Default: @code{true}
+
+@anchor{yTickLabelPrecision}
+@item yTickLabelPrecision, @code{INTEGER}
+The precision with which to report the yTickLabel. Default: @code{1}
+
+@item yTickLabelZeroFill, @code{BOOLEAN}
+Whether or not to fill missing precision spots with zeros. Default: @code{true}
 
 @item showZeroline, @code{BOOLEAN}
 Display a solid black line at @math{y = 0}. Default: @code{false}
