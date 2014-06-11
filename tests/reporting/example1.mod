@@ -50,10 +50,12 @@ end;
 
 stoch_simul;
 
+shocke = dseries();
+shocku = dseries();
 @#define endovars=["y", "c", "k", "a", "h", "b"]
 @#for var in endovars
-  shocke.@{var} = dseries(@{var}_e, 2014q3, '@{var}');
-  shocku.@{var} = dseries(@{var}_u, 2014q3, '@{var}');
+  shocke = [shocke dseries(@{var}_e, 2014q3, '@{var}')];
+  shocku = [shocku dseries(@{var}_u, 2014q3, '@{var}')];
 @#endfor
 
 r = report();
