@@ -177,7 +177,8 @@ MODFILES = \
 	loglinear/example4_loglinear.mod \
 	smoother2histval/fs2000_simul.mod \
 	smoother2histval/fs2000_smooth.mod \
-	smoother2histval/fs2000_smooth_stoch_simul.mod
+	smoother2histval/fs2000_smooth_stoch_simul.mod \
+	reporting/example1.mod
 
 XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value.mod
