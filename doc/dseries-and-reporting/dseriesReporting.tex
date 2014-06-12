@@ -859,39 +859,47 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 
 \section{Putting it All Together}
 \begin{frame}[fragile=singleslide,t]
-  \frametitle{Create Report of IRFs from \texttt{example1.mod}}
+  \frametitle{Create Report of IRFs from \texttt{example1.mod} (1/3)}
   \begin{itemize}
   \myitem \texttt{example1.mod} is located in the Dynare \texttt{examples} directory
   \myitem The lines below can be added at the end of that file.
   \end{itemize}
   \begin{block}{Create \texttt{dseries} from IRFs}
 \begin{verbatim}
+shocke = dseries();
+shocku = dseries();
 @#define endovars=["y", "c", "k", "a", "h", "b"]
 @#for var in endovars
-  shocke.@{var} = dseries(@{var}_e, 2014q3, `@{var}');
-  shocku.@{var} = dseries(@{var}_u, 2014q3, `@{var}');
+  shocke = [shocke dseries(@{var}_e, 2014q3, '@{var}')];
+  shocku = [shocku dseries(@{var}_u, 2014q3, '@{var}')];
 @#endfor
 \end{verbatim}
   \end{block}
 \end{frame}
 
 \begin{frame}[fragile=singleslide,t]
-  \frametitle{Create Report of IRFs from \texttt{example1.mod}}
-  \begin{block}{Populate Report (1/2)}
+  \frametitle{Create Report of IRFs from \texttt{example1.mod} (2/3)}
+  \begin{block}{Populate Report}
 \small{
 \begin{verbatim}
+r = report();
 @#for shock in ["e", "u"]
-    report = report.addPage(`title', {`Dseries \& Report Example', ...
-                                      `Shock to @{shock}'}, ...
-                            `titleFormat', {`\Large\bfseries', ...
-                                            `\large\bfseries'});
-    report = report.addSection(`cols', 2);
+    r = r.addPage(`title',{`Dseries/Report Example',`Shock @{shock}'},...
+                  `titleFormat', {`\Large\bfseries', `\large\bfseries'});
+    r = r.addSection(`cols', 2);
 @#  for var in endovars
-      report = report.addGraph(`data', shock@{shock}.@{var}, ...
-                               `title', `@{var}', ...
-                               `showGrid', false, ...
-                               `showZeroLine', true);
+      r = r.addGraph(`data', shock@{shock}.@{var}, `title', `@{var}', ...
+                     `showGrid', false, `yTickLabelPrecision', 2, ...
+                     `yTickLabelZeroFill', false);
+      r = r.addSeries(`graphHline', 0, `graphLineColor', `red');
 @#  endfor
+    r = r.addVspace(`number', 2);
+    r = r.addSection(`cols', 1);
+    r = r.addTable(`range', 2022q1:2024q1, `precision', 5);
+@#  for var in endovars
+      r = r.addSeries(`data', shock@{shock}.@{var});
+@#  endfor
+@#endfor
 \end{verbatim}
 }
   \end{block}
@@ -899,27 +907,29 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 
 
 \begin{frame}[fragile=singleslide,t]
-  \frametitle{Create Report of IRFs from \texttt{example1.mod}}
-  \begin{block}{Populate Report (2/2)}
-\small{
-\begin{verbatim}
-    report = report.addVspace(`number', 2);
-    report = report.addSection(`cols', 1);
-    report = report.addTable(`range', 2022q1:2024q1, `precision', 5);
-
-@#  for var in endovars
-      report = report.addSeries(`data', shock@{shock}.@{var});
-@#  endfor
-@#endfor
-\end{verbatim}
-}
-  \end{block}
-
+  \frametitle{Create Report of IRFs from \texttt{example1.mod} (3/3)}
   \begin{block}{Compile Report}
 \small{
 \begin{verbatim}
-report.write();
-report.compile();
+r.write();
+r.compile();
+\end{verbatim}
+}
+  \end{block}
+  \begin{block}{Output Files}
+\small{
+\begin{verbatim}
+>> ls report.*
+report.aux  report.log  report.pdf  report.synctex.gz  report.tex
+
+>> ls tmpRepDir/
+graph_pg1_sec1_row1_col1.tex  graph_pg2_sec1_row1_col1.tex
+graph_pg1_sec1_row1_col2.tex  graph_pg2_sec1_row1_col2.tex
+graph_pg1_sec1_row2_col1.tex  graph_pg2_sec1_row2_col1.tex
+graph_pg1_sec1_row2_col2.tex  graph_pg2_sec1_row2_col2.tex
+graph_pg1_sec1_row3_col1.tex  graph_pg2_sec1_row3_col1.tex
+graph_pg1_sec1_row3_col2.tex  graph_pg2_sec1_row3_col2.tex
+table_pg1_sec2_row1_col1.tex  table_pg2_sec2_row1_col1.tex
 \end{verbatim}
 }
   \end{block}
