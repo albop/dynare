@@ -10892,7 +10892,7 @@ ts1 is a dseries object:
 
 @deftypefn{dseries} {@var{C} =} remove (@var{A}, @var{B})
 
-Alias for the @code {pop} method with two arguments. Removes variable @var{B} from @dseries object @var{A}.
+Alias for the @code{pop} method with two arguments. Removes variable @var{B} from @dseries object @var{A}.
 
 @examplehead
 @example
