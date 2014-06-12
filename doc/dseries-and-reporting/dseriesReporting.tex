@@ -677,6 +677,12 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
 \end{frame}
 
 
+\tikzstyle{abstract}=[rectangle, draw=black, rounded corners, fill=blue!10, drop shadow,
+        text centered, anchor=north, text=black, text width=2.6cm]
+\tikzstyle{comment}=[rectangle, draw=black, rounded corners, fill=green!10, drop shadow,
+        text centered, anchor=north, text=black, text width=2.6cm]
+
+
 \begin{frame}[fragile,t]
   \frametitle{Reporting Class Hierarchy}
   \begin{itemize}
@@ -684,9 +690,9 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
   \myitem Arrows represent what the new object can be added to; objects in ellipses are treated a bit differently (explained below)
   \end{itemize}
   \begin{center}
-    \scriptsize{
+    \footnotesize{
     \begin{tikzpicture}[
-        node distance = .45cm,
+        node distance = .25cm,
         auto,
         line/.style={->, >=stealth'},
       ]
@@ -705,28 +711,28 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
               \textbf{Section}
               \nodepart{second}\texttt{addSection(...);}
             };
-      \node (Paragraph) [abstract, ellipse split, rectangle split parts=2, right=of Section]
-            {
-              \textbf{Paragraph}
-              \nodepart{lower}\texttt{addParagraph(...);}
-            };
-      \node (Vspace) [abstract, ellipse split, rectangle split parts=2, left=of Section]
-            {
-              \textbf{Vspace}
-              \nodepart{lower}\texttt{addVspace(...);}
-            };
-      \node (Spacer) [abstract, rectangle split, rectangle split parts=2, opacity=0, below=of Section]
+      \node (Spacer) [rectangle split, rectangle split parts=2, opacity=0, below=of Section]
             {
             };
-      \node (Graph) [abstract, rectangle split, rectangle split parts=2, left=of Spacer]
+      \node (Graph) [abstract, rectangle split, rectangle split parts=2, left=of Spacer, xshift=.25cm]
             {
               \textbf{Graph}
               \nodepart{second}\texttt{addGraph(...);}
             };
-      \node (Table) [abstract, rectangle split, rectangle split parts=2, right=of Spacer, text height=]
+      \node (Table) [abstract, rectangle split, rectangle split parts=2, right=of Spacer, xshift=-.25cm, text height=]
             {
               \textbf{Table}
               \nodepart{second}\texttt{addTable(...);}
+            };
+      \node (Vspace) [comment, rectangle split, rectangle split parts=2, left=of Graph]
+            {
+              \textbf{Vspace}
+              \nodepart{second}\texttt{addVspace(...);}
+            };
+      \node (Paragraph) [comment, rectangle split, rectangle split parts=2, right=of Table]
+            {
+              \textbf{Paragraph}
+              \nodepart{second}\texttt{addParagraph(...);}
             };
       \node (Series) [abstract, rectangle split, rectangle split parts=2, below=of Spacer]
             {
@@ -737,8 +743,8 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
       \draw [line] (Series) to node { } (Graph);
       \draw [line] (Table) to node { } (Section);
       \draw [line] (Graph) to node { } (Section);
-      \draw [line] (Paragraph) to node { } (Section);
-      \draw [line] (Vspace) to node { } (Section);
+      \draw [line] (Paragraph.north) to node { } (Section);
+      \draw [line] (Vspace.north) to node { } (Section);
       \draw [line] (Section) to node { } (Page);
       \draw [line] (Page) to node { } (Report);
     \end{tikzpicture}}
