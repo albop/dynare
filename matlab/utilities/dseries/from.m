@@ -86,6 +86,17 @@ end
 % Build the recursive expression.
 EXPRESSION = char([varargin{5:end}]);
 
+% Check that the expression is an assignment
+equal_id = strfind(EXPRESSION,'=');
+if isempty(equal_id)
+    error('dseries::from: Wrong syntax! The expression following the DO keyword must be an assignment (missing equal symbol).')
+end
+
+% Issue ann error message if the user attempts to do more than one assignment.
+if ~isequal(length(equal_id),1)
+    error('dseries::from: Not yet implemented! Only one assignment is allowed in the FROM-TO-DO statement.')
+end
+
 % Get all the variables involved in the recursive expression.
 variables = unique(regexpi(EXPRESSION, '\w*\(t\)|\w*\(t\-\d\)|\w*\(t\+\d\)|\w*\.\w*\(t\)|\w*\.\w*\(t\-\d\)|\w*\.\w*\(t\+\d\)','match'));
 
@@ -221,54 +232,50 @@ for i=1:number_of_variables
             error(msg)
         end
         if d2>var.dates(end)-leadlagtable{i,4}
-            msg = sprintf('dseries::from: Last date of the loop (%s) is inconsistent with %s''s range!\n',char(d2),current_variable);
-            msg = [msg, sprintf('               Last date should be less than or equal to %s.',char(var.dates(end)-leadlagtable{i,4}))];
-            error(msg)
+            % The first variable should be the assigned variable (will be tested later)
+            if ~isassignedvariable(leadlagtable{i,1},EXPRESSION)
+                msg = sprintf('dseries::from: Last date of the loop (%s) is inconsistent with %s''s range!\n',char(d2),current_variable);
+                msg = [msg, sprintf('               Last date should be less than or equal to %s.',char(var.dates(end)-leadlagtable{i,4}))];
+                error(msg)
+            else
+                var = [var; dseries(NaN((d2-var.dates(end)),1),var.dates(end)+1:d2,var.name)];
+            end
         end
         eval(sprintf('%s = var;',current_variable));
     end
 end
 
-% Check that the recursion is assigning something to a variable
-equal_id = strfind(EXPRESSION,'=');
-if isempty(equal_id)
-    error('dseries::from: Wrong syntax! The expression following the DO keyword must be an assignment (missing equal symbol).')
+% Get the name of the assigned variable (with time index)
+assignedvariablename = regexpi(EXPRESSION(1:equal_id-1), '\w*\(t\)|\w*\(t\-\d\)|\w*\(t\+\d\)|\w*\.\w*\(t\)|\w*\.\w*\(t\-\d\)|\w*\.\w*\(t\+\d\)','match');
+if isempty(assignedvariablename)
+    error('dseries::from: Wrong syntax! The expression following the DO keyword must be an assignment (missing variable before the equal symbol).')
 end
-if isequal(length(equal_id),1)
-    % Get the name of the assigned variable (with time index)
-    assignedvariablename = regexpi(EXPRESSION(1:equal_id-1), '\w*\(t\)|\w*\(t\-\d\)|\w*\(t\+\d\)|\w*\.\w*\(t\)|\w*\.\w*\(t\-\d\)|\w*\.\w*\(t\+\d\)','match');
-    if isempty(assignedvariablename)
-        error('dseries::from: Wrong syntax! The expression following the DO keyword must be an assignment (missing variable before the equal symbol).')
+if length(assignedvariablename)>1
+    error('dseries::from: No more than one variable can be assigned!')
+end
+% Check if the model is static
+start = regexpi(assignedvariablename{1},'\(t\)|\(t\-\d\)|\(t\+\d\)');
+index = assignedvariablename{1}(start:end);
+assignedvariablename = assignedvariablename{1}(1:start-1);
+indva = strmatch(assignedvariablename, leadlagtable(:,1));
+dynamicmodel = ~isempty(regexpi(EXPRESSION(equal_id:end), ...
+                                sprintf('%s\\(t\\)|%s\\(t\\-\\d\\)|%s\\(t\\+\\d\\)',assignedvariablename,assignedvariablename,assignedvariablename),'match'));
+% Check that the dynamic model for the endogenous variable is not forward looking.
+if dynamicmodel
+    indum = index2num(index);
+    if indum<leadlagtable{indva,4}
+        error('dseries::from: It is not possible to simulate a forward looking model!')
     end
-    if length(assignedvariablename)>1
-        error('dseries::from: No more than one variable can be assigned!')
+end
+% Check that the assigned variable does not depend on itself (the assigned variable can depend on its past level but not on the current level).
+if dynamicmodel
+    tmp = regexpi(EXPRESSION(equal_id+1:end), ...
+                  sprintf('%s\\(t\\)|%s\\(t\\-\\d\\)|%s\\(t\\+\\d\\)',assignedvariablename,assignedvariablename,assignedvariablename),'match');
+    tmp = cellfun(@extractindex, tmp);
+    tmp = cellfun(@index2num, tmp);
+    if ~all(tmp(:)<indum)
+        error(sprintf('dseries::from: On the righthand side, the endogenous variable, %s, must be indexed by %s at most.',assignedvariablename,num2index(indum-1)))
     end
-    % Check if the model is static
-    start = regexpi(assignedvariablename{1},'\(t\)|\(t\-\d\)|\(t\+\d\)');
-    index = assignedvariablename{1}(start:end);
-    assignedvariablename = assignedvariablename{1}(1:start-1);
-    indva = strmatch(assignedvariablename, leadlagtable(:,1));
-    dynamicmodel = ~isempty(regexpi(EXPRESSION(equal_id:end), ...
-                                    sprintf('%s\\(t\\)|%s\\(t\\-\\d\\)|%s\\(t\\+\\d\\)',assignedvariablename,assignedvariablename,assignedvariablename),'match'));
-    % Check that the dynamic model for the endogenous variable is not forward looking.
-    if dynamicmodel
-        indum = index2num(index);
-        if indum<leadlagtable{indva,4}
-            error('dseries::from: It is not possible to simulate a forward looking model!')
-        end
-    end
-    % Check that the assigned variable does not depend on itself (the assigned variable can depend on its past level but not on the current level).
-    if dynamicmodel
-        tmp = regexpi(EXPRESSION(equal_id+1:end), ...
-                      sprintf('%s\\(t\\)|%s\\(t\\-\\d\\)|%s\\(t\\+\\d\\)',assignedvariablename,assignedvariablename,assignedvariablename),'match');
-        tmp = cellfun(@extractindex, tmp);
-        tmp = cellfun(@index2num, tmp);
-        if ~all(tmp(:)<indum)
-            error(sprintf('dseries::from: On the righthand side, the endogenous variable, %s, must be indexed by %s at most.',assignedvariablename,num2index(indum-1)))
-        end
-    end
-else
-    error('dseries::from: Not yet implemented! Only one assignment is allowed in the FROM-TO-DO statement.')
 end
 
 % Put all the variables in a unique dseries object.
@@ -404,3 +411,14 @@ function id = num2index(i)
     else
         id = ['(t+' int2str(i) ')'];
     end
+
+function i = isassignedvariable(var,expr)
+    idv = strfind(expr,var);
+    idq = strfind(expr,'=');
+    if ~isempty(idv)
+        if idv(1)<idq
+            i = 1;
+            return
+        end
+    end
+    i = 0;
