@@ -681,7 +681,7 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
         text centered, anchor=north, text=black, text width=2.6cm]
 \tikzstyle{comment}=[rectangle, draw=black, rounded corners, fill=green!10, drop shadow,
         text centered, anchor=north, text=black, text width=2.6cm]
-
+\tikzstyle{line}=[-, thick]
 
 \begin{frame}[fragile,t]
   \frametitle{Reporting Class Hierarchy}
@@ -743,8 +743,8 @@ the time range of \verb+vs+ will be the union of \verb+ts.dates+ and
       \draw [line] (Series) to node { } (Graph);
       \draw [line] (Table) to node { } (Section);
       \draw [line] (Graph) to node { } (Section);
-      \draw [line] (Paragraph.north) to node { } (Section);
-      \draw [line] (Vspace.north) to node { } (Section);
+      \draw [line] (Paragraph.north) to node { } (Section.east);
+      \draw [line] (Vspace.north) to node { } (Section.west);
       \draw [line] (Section) to node { } (Page);
       \draw [line] (Page) to node { } (Report);
     \end{tikzpicture}}
