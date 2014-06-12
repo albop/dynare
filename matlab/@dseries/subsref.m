@@ -65,7 +65,7 @@ function B = subsref(A, S) % --*-- Unitary tests --*--
 switch S(1).type
   case '.'
     switch S(1).subs
-      case {'data','nobs','vobs','name','tex','freq','dates','init'}        % Public members.
+      case {'data','nobs','vobs','name','tex','dates'}        % Public members.
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
             error(['dseries::subsref: ' S(1).subs ' is not a method but a member!'])
         end
@@ -75,6 +75,15 @@ switch S(1).type
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
             S = shiftS(S,1);
         end
+      case 'init'
+        % Returns a dates object (first date).
+        B = A.dates(1);
+      case 'last'
+        % Returns a dates object (last date).
+        B = A.dates(end);
+      case 'freq'
+        % Returns an integer characterizing the data frequency (1, 4, 12 or 52)
+        B = A.dates.freq;
       case {'lag','lead','hptrend','hpcycle','chain'} % Methods with less than two arguments.
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
@@ -90,7 +99,7 @@ switch S(1).type
         else
             B = feval(S(1).subs,A);
         end
-      case {'cumsum','insert','pop','cumprod'} % Methods with less than three argument.
+      case {'cumsum','insert','pop','cumprod','remove'} % Methods with less than three argument.
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
                 B = feval(S(1).subs,A);
@@ -170,8 +179,6 @@ switch S(1).type
             B.tex  = deblank(A.tex(ndx,:));
             B.nobs = A.nobs;
             B.vobs = 1;
-            B.freq = A.freq;
-            B.init = A.init;
             B.dates = A.dates;
         else
             error('dseries::subsref: Unknown public method, public member or variable!')
@@ -227,29 +234,9 @@ switch S(1).type
         B.tex  = A.tex;
         B.nobs = length(tdx);
         B.vobs = A.vobs;
-        B.freq = A.freq;
-        B.init = A.init+(tdx(1)-1);
         B.dates = A.dates(tdx);
     elseif isvector(S(1).subs{1}) && all(isint(S(1).subs{1}))
-        % Extract a subsample using a vector of integers (observation index).
-        % Note that this does not work if S(1).subs is an integer scalar... In which case S(1).subs is interpreted as a lead/lag operator (as in the Dynare syntax).
-        % To extract one observation, a dates with one element input must be used.
-        if all(S(1).subs{1}>0) && all(S(1).subs{1}<=A.nobs)
-            if size(A.data,2)>1
-                S(1).subs = [S(1).subs, ':'];
-            end
-            B = dseries();
-            B.data = builtin('subsref', A.data, S(1));
-            B.nobs = size(B.data,1);
-            B.vobs = A.vobs;
-            B.freq = A.freq;
-            B.dates = A.dates(S(1).subs{1});
-            B.init = B.dates(1);
-            B.name = A.name;
-            B.tex  = A.tex;
-        else
-            error('dseries::subsref: Indices are out of bounds!')
-        end
+        error('dseries::subsref: It is not possible to select observations with a vector of integers. You have to index with a dates object instead!');
     else
         error('dseries::subsref: I have no idea of what you are trying to do!')
     end
@@ -267,8 +254,6 @@ switch S(1).type
         B.tex  = A.tex(idx);
         B.nobs = A.nobs;
         B.vobs = length(idx);
-        B.freq = A.freq;
-        B.init = A.init;
         B.dates = A.dates;
     else
         error('dseries::subsref: What the Hell are you tryin'' to do?!')
@@ -293,7 +278,7 @@ end
 %$ ts1 = dseries(A,[],A_name,[]);
 %$
 %$ % Call the tested method.
-%$ a = ts1(2:9);
+%$ a = ts1(ts1.dates(2:9));
 %$
 %$ % Expected results.
 %$ e.data = [transpose(2:9),2*transpose(2:9)];
@@ -653,7 +638,7 @@ end
 %@test:15
 %$ try
 %$     ds = dseries(transpose(1:5));
-%$     ts = ds(2:3);
+%$     ts = ds(ds.dates(2:3));
 %$     t(1) = 1;
 %$ catch
 %$     t(1) = 0;
@@ -670,7 +655,7 @@ end
 %@test:16
 %$ try
 %$     ds = dseries(transpose(1:5));
-%$     ts = ds(2:6);
+%$     ts = ds(ds.dates(2:6));
 %$     t(1) = 0;
 %$ catch
 %$     t(1) = 1;

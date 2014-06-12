@@ -40,10 +40,26 @@ function A = mpower(B,C) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isdseries(B) && isnumeric(C) && isreal(C) && isscalar(C)
+if isnumeric(B) && isvector(B) && length(B)>1
+    if ~isdseries(C)
+        error('dseries::mpower: Second input argument must be a dseries object!')
+    end
+    A = C;
+    A.data = bsxfun(@power,C.data,B);
+    return;
+end
+
+if isnumeric(C) && isvector(C) && length(C)>1
+    if ~isdseries(B)
+        error('dseries::mpower: First input argument must be a dseries object!')
+    end
+    A = B;
+    A.data = bsxfun(@power,B.data,C);
+    return
+end
+
+if isdseries(B) && isnumeric(C) && isreal(C) &&  isscalar(C)
     A = dseries();
-    A.freq = B.freq;
-    A.init = B.init;
     A.dates = B.dates;
     A.nobs = B.nobs;
     A.vobs = B.vobs;
@@ -58,10 +74,8 @@ if isdseries(B) && isnumeric(C) && isreal(C) && isscalar(C)
 end
 
 if isdseries(B) && isdseries(C)
-    if isequal(B.nobs,C.nobs) && isequal(B.vobs,C.vobs) && isequal(B.freq,C.freq)
+    if isequal(B.nobs,C.nobs) && isequal(B.vobs,C.vobs) && isequal(frequency(B),frequency(C))
         A = dseries();
-        A.freq = B.freq;
-        A.init = B.init;
         A.dates = B.dates;
         A.nobs = B.nobs;
         A.vobs = B.vobs;
@@ -134,3 +148,25 @@ error(['dseries::mpower: Wrong calling sequence!'])
 %$ end
 %$ T = all(t);
 %@eof:2
+
+%@test:3
+%$ % Define a dseries object
+%$ ts1=dseries([1 1;2 2;3 3], '1999y', {'MyVar1','MyVar2'});
+%$
+%$ % Use the power
+%$ try
+%$    ts2 = ts1^transpose(1:3);
+%$    t = 1;
+%$ catch
+%$    t = 0;
+%$ end
+%$
+%$ if t(1)
+%$    t(2) = dyn_assert(ts2.vobs,2);
+%$    t(3) = dyn_assert(ts2.nobs,3);
+%$    t(4) = dyn_assert(ts2.data,bsxfun(@power,ts1.data,transpose(1:3)),1e-15);
+%$    t(5) = dyn_assert(ts2.name,{'MyVar1';'MyVar2'});
+%$    t(6) = dyn_assert(ts2.tex,{'MyVar1';'MyVar2'});
+%$ end
+%$ T = all(t);
+%@eof:3

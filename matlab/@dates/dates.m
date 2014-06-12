@@ -60,10 +60,16 @@ function dd = dates(varargin) % --*-- Unitary tests --*--
 % GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
- % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-dd = struct('ndat', 0, 'freq', NaN(0), 'time', NaN(0,2));
-dd = class(dd,'dates');
+if nargin>0 && ischar(varargin{1}) && isequal(varargin{1},'initialize')
+    dd = struct('ndat', 0, 'freq', NaN(0), 'time', NaN(0,2));
+    dd = class(dd,'dates');
+    assignin('base','emptydatesobject',dd);
+    return
+end
+
+dd = evalin('base','emptydatesobject');
 
 switch nargin
   case 0
@@ -104,7 +110,7 @@ switch nargin
         dd = subsref(dd,S);
         return
     else
-        error(['dates::dates: Wrong calling sequence!'])
+        error('dates::dates: Wrong calling sequence!')
     end
     for i=2:dd.ndat
         if isdate(varargin{i})
@@ -112,10 +118,10 @@ switch nargin
             if isequal(date.freq,dd.freq)
                 dd.time(i,:) = date.time;
             else
-                 error(['dates::dates: Check that all the inputs have the same frequency (see input number ' str2num(i) ')!'])
+                 error(sprintf('dates::dates: Check that all the inputs have the same frequency (see input number %i)!',i))
             end
         else
-            error(['dates::dates: Input ' str2num(i) ' has to be a string date!'])
+            error(sprintf('dates::dates: Input %i has to be a string date!',i))
         end
     end
 end

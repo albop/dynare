@@ -103,7 +103,15 @@ for i = 1:xlen
         fprintf(fid,',');
     end
 end
-fprintf(fid, '},\nx tick label style={rotate=%f', o.xTickLabelRotation);
+fprintf(fid, '},\ny tick label style={\n/pgf/number format/.cd,\n');
+if o.yTickLabelFixed
+    fprintf(fid, 'fixed,\n');
+end
+if o.yTickLabelZeroFill
+    fprintf(fid, 'zerofill,\n');
+end
+fprintf(fid, 'precision=%d,\n/tikz/.cd\n},\n', o.yTickLabelPrecision);
+fprintf(fid, 'x tick label style={rotate=%f', o.xTickLabelRotation);
 if o.xTickLabelRotation ~= 0
     fprintf(fid, ',anchor=%s', o.xTickLabelAnchor);
 end
@@ -176,21 +184,8 @@ if ~isempty(o.miscTikzAxisOptions)
 end
 fprintf(fid, ']\n');
 
-if o.showZeroline
-    fprintf(fid, '%%zeroline\n\\addplot[black,line width=.5,forget plot] coordinates {(1,0)(%d,0)};\n',dd.ndat);
-end
-
-for i=1:ne
-    o.series{i}.writeSeriesForGraph(fid, dd);
-    if o.showLegend
-        le = o.series{i}.getNameForLegend();
-        if ~isempty(le)
-            fprintf(fid, '\\addlegendentry{%s}\n', le);
-        end
-    end
-end
-
 if ~isempty(o.shade)
+    fprintf(fid, '%%shading\n');
     stringsdd = strings(dd);
     x1 = find(strcmpi(date2string(o.shade(1)), stringsdd));
     x2 = find(strcmpi(date2string(o.shade(end)), stringsdd));
@@ -216,6 +211,19 @@ if ~isempty(o.shade)
     end
 end
 
+if o.showZeroline
+    fprintf(fid, '%%zeroline\n\\addplot[black,line width=.5,forget plot] coordinates {(1,0)(%d,0)};\n',dd.ndat);
+end
+
+for i=1:ne
+    o.series{i}.writeSeriesForGraph(fid, dd);
+    if o.showLegend
+        le = o.series{i}.getNameForLegend();
+        if ~isempty(le)
+            fprintf(fid, '\\addlegendentry{%s}\n', le);
+        end
+    end
+end
 fprintf(fid, '\\end{axis}\n\\end{tikzpicture}%%');
 if fclose(fid) == -1
     error('@graph.writeGraphFile: closing %s\n', o.filename);

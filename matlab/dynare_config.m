@@ -63,6 +63,7 @@ addpath([dynareroot '/utilities/tests/'])
 addpath([dynareroot '/utilities/dates/'])
 addpath([dynareroot '/utilities/dataset/'])
 addpath([dynareroot '/utilities/general/'])
+addpath([dynareroot '/utilities/dseries/'])
 addpath([dynareroot '/reports/'])
 
 % For functions that exist only under some Octave versions
@@ -248,5 +249,9 @@ if verbose
     disp([ message 'Markov Switching SBVAR.' ])
     skipline()
 end
+
+% Save empty dates and dseries objects (necessary if a mod file is not preprocessed).
+dates('initialize');
+dseries('initialize');
 
 cd(origin);
