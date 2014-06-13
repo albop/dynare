@@ -25,11 +25,12 @@ function b = isdate(str)  % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-%if length(str)>1
-    b = isquaterly(str) || isyearly(str) || ismonthly(str) || isweekly(str);
-    %else
-    %b = 0;
-    %end
+if isnumeric(str) && isscalar(str)
+    b = 1;
+    return
+end
+
+b = isquaterly(str) || isyearly(str) || ismonthly(str) || isweekly(str);
 
 %@test:1
 %$
