@@ -1,4 +1,4 @@
-function b = isdate(str)  % --*-- Unitary tests --*--
+function b = isstringdate(str)  % --*-- Unitary tests --*--
 
 % Tests if the input string can be interpreted as a date.
 %
@@ -25,16 +25,15 @@ function b = isdate(str)  % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isnumeric(str) && isscalar(str)
-    b = 1;
-    return
+if ischar(str)
+    b = isquaterly(str) || isyearly(str) || ismonthly(str) || isweekly(str);
+else
+    b = 0;
 end
-
-b = isstringdate(str);
 
 %@test:1
 %$
-%$ date_1 = 1950;
+%$ date_1 = '1950M2';
 %$ date_2 = '1950m2';
 %$ date_3 = '-1950m2';
 %$ date_4 = '1950m52';
@@ -43,13 +42,13 @@ b = isstringdate(str);
 %$ date_7 = '-1950a';
 %$ date_8 = '1950m ';
 %$
-%$ t(1) = dyn_assert(isdate(date_1),1);
-%$ t(2) = dyn_assert(isdate(date_2),1);
-%$ t(3) = dyn_assert(isdate(date_3),1);
-%$ t(4) = dyn_assert(isdate(date_4),0);
-%$ t(5) = dyn_assert(isdate(date_5),0);
-%$ t(6) = dyn_assert(isdate(date_6),1);
-%$ t(7) = dyn_assert(isdate(date_7),1);
-%$ t(8) = dyn_assert(isdate(date_8),0);
+%$ t(1) = dyn_assert(isstringdate(date_1),1);
+%$ t(2) = dyn_assert(isstringdate(date_2),1);
+%$ t(3) = dyn_assert(isstringdate(date_3),1);
+%$ t(4) = dyn_assert(isstringdate(date_4),0);
+%$ t(5) = dyn_assert(isstringdate(date_5),0);
+%$ t(6) = dyn_assert(isstringdate(date_6),1);
+%$ t(7) = dyn_assert(isstringdate(date_7),1);
+%$ t(8) = dyn_assert(isstringdate(date_8),0);
 %$ T = all(t);
 %@eof:1
