@@ -101,9 +101,6 @@ for i = 1:order+1
                 else
                     d1 = dynamic_model(z,innovation,params,steady_state,i+1);
                 end
-                if any(isnan(d1))
-                    pause
-                end
                 res(:,i,1) = res(:,i,1)+weights(k)*d1(eq_index);
             end
             if nargout > 1
@@ -130,9 +127,6 @@ for i = 1:order+1
             else
                 d1 = dynamic_model(z,innovation,params,steady_state,i+1);
             end
-            if any(isnan(d1))
-                pause
-            end
             res(:,i,j) = d1(eq_index);
             if nargout > 1
                 i_cols_Af = i_cols_Af + ny;
@@ -154,9 +148,6 @@ for i = 1:order+1
                 i_cols_Af = i_cols_Af + ny;
             else
                 d1 = dynamic_model(z,innovation,params,steady_state,i+1);
-            end
-            if any(isnan(d1))
-                pause
             end
             res(:,i,j) = d1(eq_index);
         end
@@ -190,9 +181,6 @@ for j=1:world_nbr
         else
             d1 = dynamic_model(Y(i_rows_y,j),x,params, ...
                                           steady_state,i+1);
-        end
-        if any(isnan(d1))
-            pause
         end
         res(:,i,j) = d1(eq_index);
         i_rows_y = i_rows_y + ny;
