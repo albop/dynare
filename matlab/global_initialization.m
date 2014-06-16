@@ -196,6 +196,8 @@ ep.stochastic.quadrature.pruned.status = 0;
 ep.stochastic.quadrature.pruned.relative = 1e-5;
 ep.stochastic.quadrature.pruned.level = 1e-5;
 ep.stochastic.hybrid_order = 0;
+% homotopic step in extended path simulations
+ep.stochastic.homotopic_steps = true;
 % Copy ep structure in options_ global structure
 options_.ep = ep;
 
