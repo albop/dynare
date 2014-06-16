@@ -1,4 +1,4 @@
-function [dataset_, xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_, fake] = dynare_estimation_init(var_list_, dname, gsa_flag, M_, options_, oo_, estim_params_, bayestopt_)
+function [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_, fake] = dynare_estimation_init(var_list_, dname, gsa_flag, M_, options_, oo_, estim_params_, bayestopt_)
 
 % function dynare_estimation_init(var_list_, gsa_flag)
 % preforms initialization tasks before estimation or
@@ -447,106 +447,8 @@ end
 k = find(isnan(bayestopt_.jscale));
 bayestopt_.jscale(k) = options_.mh_jscale;
 
-% Test if the dataset is declared.
-if isempty(options_.datafile) && isempty(options_.dataset) 
-    if gsa_flag
-        dataset_ = [];
-        return
-    else
-        error('datafile option is missing')
-    end
-end
-
-if ~isfield(options_,'nobs')
-    options_.nobs = [];
-end
-
-if isempty(options_.datafile) && ~isempty(options_.dataset.file)
-    datafile = options_.dataset.file;
-elseif ~isempty(options_.datafile) && isempty(options_.dataset.file)
-    datafile = options_.datafile;
-elseif isempty(options_.datafile) && ~isempty(options_.dataset.file)
-    error('You cannot use simultaneously the data command and the datafile option (in the estimation command)!')
-else
-    error('You have to specify the datafile!')
-end
-
-
-% Check extension.
-allowed_extensions = {'m','mat','csv','xls','xlsx'};
-datafile_extension = get_file_extension(datafile);
-if isempty(datafile_extension)
-    available_extensions = {}; j = 1;
-    for i=1:length(allowed_extensions)
-        if exist([datafile '.' allowed_extensions{i}])
-            available_extensions(j) = {allowed_extensions{i}};
-            j = j+1;
-        end
-    end
-    if isempty(available_extensions)
-        error(['I can''t find a datafile (with allowed extension)!'])
-    end
-    if length(available_extensions)>1
-        error(sprintf(['You did not specify an extension for the datafile, but more than one candidate ' ...
-                       'are available in the designed folder!\nPlease, add an extension to the datafile ' ...
-                       '(m, mat, csv, xls or xlsx are legal extensions).']));
-    end
-    datafile = [datafile '.' available_extensions{1}];
-end
-
-% Load the data in a dseries object.
-dataset = dseries(datafile);
-
-% Select a subset of the variables.
-dataset = dataset{options_.varobs{:}};
-
-% Apply log function if needed.
-if options_.loglinear && ~options_.logdata
-    dataset = dataset.log();
-end
-
-% Test if an initial period (different from its default value) is explicitely defined in the datafile.
-if isequal(dataset.init, dates(1))
-    dataset_default_initial_period = 1;
-else
-    dataset_default_initial_period = 0;
-end
-
-%  Test if an initial period (different from its default value) is explicitely defined in the mod file with the set_time command.
-if isequal(options_.initial_period, dates(1))
-    set_time_default_initial_period = 1;
-else
-    set_time_default_initial_period = 0;
-end
-
-if ~set_time_default_initial_period && dataset_default_initial_period
-    % Overwrite the initial period in dataset (it was set to default).
-    % Note that the update of freq and time members is auto-magically 
-    % done by dseries::subsasgn overload method.
-    dataset.init = options_.initial_period;
-end
-
-if set_time_default_initial_period && ~dataset_default_initial_period
-    % Overwrite the global initial period defined by set_time (it was set to default).
-    options_.initial_period = dataset.init;
-end
-
-if ~set_time_default_initial_period && ~dataset_default_initial_period
-    % Check if dataset.init and options_.initial_period are identical.
-    if  ~isequal(options_.initial_period, dataset.init)
-        error('dynare_estimation_init:: The date as defined by the set_time command is not consistent with the initial period in the database!')
-    end
-end
-
-
-if options_.initial_period>options_.dataset.first_obs
-    skipline()
-    error(['First observation (' format(options_.dataset.first_obs) ') must be greater than the initial period (' format(options_.initial_period)  ') as set by the set_time command']);
-end
-    
-dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,logged_data_flag,options_.prefilter,xls);
-
-options_.nobs = dataset_.info.ntobs;
+% Build the dataset
+[dataset_, dataset_info] = makedataset(options_);
 
 % setting steadystate_check_flag option
 if options_.diffuse_filter
@@ -554,6 +456,7 @@ if options_.diffuse_filter
 else
     steadystate_check_flag = 1;
 end
+
 % If the steady state of the observed variables is non zero, set noconstant equal 0 ()
 M = M_;
 nvx = estim_params_.nvx;

@@ -72,6 +72,6 @@ varobs gp_obs gy_obs;
 
 options_.solve_tolf = 1e-12;
 
-data(file=fsdat_simul,first_obs=1950Q3, nobs=192);
+data(file=fsdat_simul_dseries,first_obs=1950Q3, nobs=192);
 
 estimation(order=1,loglinear,mh_replic=2000,mh_nblocks=2,mh_jscale=0.8);
