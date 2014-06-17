@@ -128,7 +128,7 @@ options_ = set_default_option(options_,'datafile','');
 options_.mode_compute = 0;
 options_.plot_priors = 0;
 options_.smoother=1;
-[dataset_,xparam1,hh, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
+[dataset_,dataset_info,xparam1,hh, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
 options_ident.analytic_derivation_mode = options_.analytic_derivation_mode;
 if isempty(dataset_),
     dataset_.info.ntobs = periods;
@@ -269,7 +269,7 @@ if iload <=0,
         disp('Testing current parameter values')
     end
     [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point, info] = ...
-        identification_analysis(params,indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
+        identification_analysis(params,indx,indexo,options_ident,dataset_, dataset_info, prior_exist, name_tex,1);
     if info(1)~=0,
         skipline()
         disp('----------- ')
