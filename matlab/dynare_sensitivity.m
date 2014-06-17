@@ -84,7 +84,7 @@ if ~isempty(options_gsa.datafile) || isempty(bayestopt_) || options_gsa.rmse,
     options_.mode_compute = 0;
     options_.filtered_vars = 1;
     options_.plot_priors = 0;
-    [dataset_,xparam1,hh, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
+    [dataset_,dataset_info,xparam1,hh, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
     % computes a first linear solution to set up various variables
 else
     if isempty(options_.qz_criterium)
@@ -343,7 +343,7 @@ if options_gsa.rmse,
             end
             
         end
-        prior_posterior_statistics('gsa',dataset_);
+        prior_posterior_statistics('gsa',dataset_, dataset_info);
         if options_.bayesian_irf
             PosteriorIRF('gsa');
         end
@@ -366,7 +366,7 @@ if options_gsa.rmse,
     end
     clear a;
 %     filt_mc_(OutputDirectoryName,data_info);
-    filt_mc_(OutputDirectoryName,options_gsa,dataset_);
+    filt_mc_(OutputDirectoryName,options_gsa,dataset_,dataset_info);
 end
 options_.opt_gsa = options_gsa;
 
