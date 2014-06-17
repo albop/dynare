@@ -1,4 +1,4 @@
-function prior_posterior_statistics(type,dataset)
+function prior_posterior_statistics(type,dataset,dataset_info)
 
 % function prior_posterior_statistics(type,dataset)
 % Computes Monte Carlo filter smoother and forecasts
@@ -41,10 +41,10 @@ global options_ estim_params_ oo_ M_ bayestopt_
 localVars=[];
 
 Y = dataset.data;
-gend = dataset.info.ntobs;
-data_index = dataset.missing.aindex;
-missing_value = dataset.missing.state;
-bayestopt_.mean_varobs = dataset.descriptive.mean';
+gend = dataset.nobs;
+data_index = dataset_info.missing.aindex;
+missing_value = dataset_info.missing.state;
+bayestopt_.mean_varobs = dataset_info.descriptive.mean';
 
 nvx  = estim_params_.nvx;
 nvn  = estim_params_.nvn;
