@@ -23,17 +23,28 @@ function [DynareDataset, DatasetInfo] = makedataset(DynareOptions)
 %
 % See also dynare_estimation_init
 
-if isempty(DynareOptions.datafile) && isempty(DynareOptions.dataset.file)
+if isempty(DynareOptions.datafile) && isempty(DynareOptions.dataset.file) && isempty(DynareOptions.dataset.series)
     if gsa_flag
         DynareDataset = dseries();
         return
     else
-        error('datafile option is missing')
+        error('makedataset: datafile option is missing!')
     end
 end
 
 if isempty(DynareOptions.datafile) && ~isempty(DynareOptions.dataset.file)
     datafile = DynareOptions.dataset.file;
+    newdatainterface = 1;
+elseif isempty(DynareOptions.datafile) && ~isempty(DynareOptions.dataset.series)
+    try
+        dseriesobjectforuserdataset = evalin('base', DynareOptions.dataset.series);
+    catch
+        error(sprintf('makedataset: %s is unknown!', DynareOptions.dataset.series))
+    end
+    if ~isdseries(dseriesobjectforuserdataset)
+        error(sprintf('makedataset: %s has to be a dseries object!', DynareOptions.dataset.series))
+    end
+    datafile = [];
     newdatainterface = 1;
 elseif ~isempty(DynareOptions.datafile) && isempty(DynareOptions.dataset.file)
     datafile = DynareOptions.datafile;
@@ -45,29 +56,36 @@ else
 end
 
 % Check extension.
-allowed_extensions = {'m','mat','csv','xls','xlsx'};
-datafile_extension = get_file_extension(datafile);
-if isempty(datafile_extension)
-    available_extensions = {}; j = 1;
-    for i=1:length(allowed_extensions)
-        if exist([datafile '.' allowed_extensions{i}])
-            available_extensions(j) = {allowed_extensions{i}};
-            j = j+1;
+if ~isempty(datafile)
+    allowed_extensions = {'m','mat','csv','xls','xlsx'};
+    datafile_extension = get_file_extension(datafile);
+    if isempty(datafile_extension)
+        available_extensions = {}; j = 1;
+        for i=1:length(allowed_extensions)
+            if exist([datafile '.' allowed_extensions{i}])
+                available_extensions(j) = {allowed_extensions{i}};
+                j = j+1;
+            end
         end
+        if isempty(available_extensions)
+            error(['I can''t find a datafile (with allowed extension)!'])
+        end
+        if length(available_extensions)>1
+            error(sprintf(['You did not specify an extension for the datafile, but more than one candidate ' ...
+                           'are available in the designed folder!\nPlease, add an extension to the datafile ' ...
+                           '(m, mat, csv, xls or xlsx are legal extensions).']));
+        end
+        datafile = [datafile '.' available_extensions{1}];
     end
-    if isempty(available_extensions)
-        error(['I can''t find a datafile (with allowed extension)!'])
-    end
-    if length(available_extensions)>1
-        error(sprintf(['You did not specify an extension for the datafile, but more than one candidate ' ...
-                       'are available in the designed folder!\nPlease, add an extension to the datafile ' ...
-                       '(m, mat, csv, xls or xlsx are legal extensions).']));
-    end
-    datafile = [datafile '.' available_extensions{1}];
 end
 
 % Load the data in a dseries object.
-DynareDataset = dseries(datafile);
+if ~isempty(datafile)
+    DynareDataset = dseries(datafile);
+else
+    DynareDataset = dseriesobjectforuserdataset;
+    clear('dseriesobjectforuserdataset');
+end
 
 % Select a subset of the variables.
 DynareDataset = DynareDataset{DynareOptions.varobs{:}};
