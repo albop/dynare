@@ -312,7 +312,7 @@ if iload <=0,
                 kk=kk+1;
                 params = prior_draw();
                 [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point, info] = ...
-                    identification_analysis(params,indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
+                    identification_analysis(params,indx,indexo,options_ident,dataset_,dataset_info, prior_exist, name_tex,1);
             end
         end
         if info(1)
@@ -366,7 +366,7 @@ if iload <=0,
             params = prior_draw();
         end
         [dum1, ideJ, ideH, ideGP, dum2 , info] = ...
-            identification_analysis(params,indx,indexo,options_MC,dataset_, prior_exist, name_tex,0);
+            identification_analysis(params,indx,indexo,options_MC,dataset_, dataset_info, prior_exist, name_tex,0);
         if iteration==0 && info(1)==0,
             MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(size(ideH.siH,1)*nparam)/8));
             stoH = zeros([size(ideH.siH,1),nparam,MAX_tau]);
@@ -552,7 +552,7 @@ if SampleSize > 1,
                 disp(['Testing ',tittxt, '. Press ENTER']), pause(5),
                 if ~iload,
                     [idehess_min, idemoments_min, idemodel_min, idelre_min, derivatives_info_min] = ...
-                        identification_analysis(pdraws(jmin,:),indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
+                        identification_analysis(pdraws(jmin,:),indx,indexo,options_ident,dataset_, dataset_info, prior_exist, name_tex,1);
                     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_min', 'idemoments_min','idemodel_min', 'idelre_min', 'jmin', '-append');
                 end
                 disp_identification(pdraws(jmin,:), idemodel_min, idemoments_min, name,1);
@@ -567,7 +567,7 @@ if SampleSize > 1,
                     disp(['Testing ',tittxt, '. Press ENTER']), pause(5),
                     if ~iload,
                         [idehess_(j), idemoments_(j), idemodel_(j), idelre_(j), derivatives_info_(j)] = ...
-                            identification_analysis(pdraws(jcrit(j),:),indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
+                            identification_analysis(pdraws(jcrit(j),:),indx,indexo,options_ident,dataset_, dataset_info, prior_exist, name_tex,1);
                     end
                     disp_identification(pdraws(jcrit(j),:), idemodel_(j), idemoments_(j), name,1);
                     close all,
