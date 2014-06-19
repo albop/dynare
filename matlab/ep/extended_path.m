@@ -121,8 +121,6 @@ switch options_.ep.innovation_distribution
     error(['extended_path:: ' options_.ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
 
-% Initializes some variables.
-t  = 0;
 
 % Set waitbar (graphic or text  mode)
 hh = dyn_waitbar(0,'Please wait. Extended Path simulations...');
@@ -146,18 +144,30 @@ pfm.nnzA = M_.NNZDerivatives(1);
 if options_.ep.stochastic.order > 0
     [nodes,weights,nnodes] = setup_integration_nodes(options_.ep,pfm);
     pfm.nodes = nodes;
-    pfm.weights = weights;
+    pfm.weights = weights; 
     pfm.nnodes = nnodes;
+
+    % compute number of blocks
+    [block_nbr,pfm.world_nbr] = get_block_world_nbr(options_.ep.stochastic.algo,nnodes,options_.ep.ut.k,options_.ep.periods);
+else
+    block_nbr = options_.ep.periods
 end
 
-% compute number of blocks
-[block_nbr,pfm.world_nbr] = get_block_world_nbr(options_.ep.stochastic.algo,nnodes,options_.ep.ut.k,options_.ep.periods);
+
 % set boundaries if mcp
 [lb,ub,pfm.eq_index] = get_complementarity_conditions(M_);
 options_.lmmcp.lb = repmat(lb,block_nbr,1);
 options_.lmmcp.ub = repmat(ub,block_nbr,1);
 pfm.block_nbr = block_nbr;
 
+% storage for failed draws
+oo_.ep.failures.periods = [];
+oo_.ep.failures.previous_period = cell(0);
+oo_.ep.failures.shocks = cell(0);
+
+% Initializes some variables.
+t  = 0;
+tsimul = 1;
 % Main loop.
 while (t<sample_size)
     if ~mod(t,10)
@@ -337,7 +347,8 @@ while (t<sample_size)
             end% if info_convergence
         end
     end% while
-    if ~info_convergence% If exited from the while loop without achieving convergence, use an homotopic approach
+    if ~info_convergence && ep.homotopic_steps % If exited from the while loop without achieving
+                                               % convergence use an homotopic approach
         if ~do_not_check_stability_flag
             periods1 = ep.periods;
             pfm1.periods = periods1;
@@ -375,11 +386,18 @@ while (t<sample_size)
             end
         end
     end
-    % Save results of the perfect foresight model solver.
-    time_series(:,t) = endo_simul_1(:,2);
-    endo_simul_1(:,1:end-1) = endo_simul_1(:,2:end);
-    endo_simul_1(:,1) = time_series(:,t);
-    endo_simul_1(:,end) = oo_.steady_state;
+    if info_convergence
+        % Save results of the perfect foresight model solver.
+        time_series(:,tsimul) = endo_simul_1(:,2);
+        endo_simul_1(:,1:end-1) = endo_simul_1(:,2:end);
+        endo_simul_1(:,1) = time_series(:,tsimul);
+        endo_simul_1(:,end) = oo_.steady_state;
+        tsimul = tsimul+1;
+    else
+        oo_.ep.failures.periods = [oo_.ep.failures.periods t];
+        oo_.ep.failures.previous_period = [oo_.ep.failures.previous_period  endo_simul_1(:,1)];
+        oo_.ep.failures.shocks = [oo_.ep.failures.shocks  shocks];
+    end
 end% (while) loop over t
 
 dyn_waitbar_close(hh);
