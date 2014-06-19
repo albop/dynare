@@ -123,7 +123,8 @@ end
 
 if ~set_time_default_initial_period && ~dataset_default_initial_period
     % Check if dataset.init and options_.initial_period are identical.
-    if  ~isequal(DynareOptions.initial_period, DynareDataset.init)
+    if DynareOptions.initial_period>DynareDataset.init
+        %if  ~isequal(DynareOptions.initial_period, DynareDataset.init)
         error('The date as defined by the set_time command is not consistent with the initial period in the database!')
     end
 end
