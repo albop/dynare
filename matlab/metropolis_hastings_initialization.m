@@ -152,7 +152,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
         candidate = transpose(xparam1(:));%
         if all(candidate(:) > mh_bounds(:,1)) && all(candidate(:) < mh_bounds(:,2)) 
             ix2 = candidate;
-            ilogpo2 = - feval(TargetFun,ix2',dataset_,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+            ilogpo2 = - feval(TargetFun,ix2',dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_);
             disp('Estimation::mcmc: Initialization at the posterior mode.')
             skipline()
             fprintf(fidlog,['    Blck ' int2str(1) 'params:\n']);
