@@ -65,8 +65,9 @@ r = report();
     r = r.addSection('cols', 2);
 @#  for var in endovars
       r = r.addGraph('data', shock@{shock}.@{var}, 'title', '@{var}', ...
-                     'showGrid', false, 'yTickLabelPrecision', 2, 'yTickLabelZeroFill', false);
-      r = r.addSeries('graphHline', 0, 'graphLineColor', 'red');
+                     'showGrid', false, 'yTickLabelPrecision', 2, ...
+                     'yTickLabelZeroFill', false, ...
+                     'showZeroLine', true, 'zeroLineColor', 'red');
 @#  endfor
     r = r.addVspace('number', 2);
     r = r.addSection('cols', 1);
