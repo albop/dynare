@@ -1,4 +1,4 @@
-function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,Options,pfm,order,varargin)
+function [flag,endo_simul,err,y] = solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,Options,pfm,order,varargin)
 
 % Copyright (C) 2012-2013 Dynare Team
 %
@@ -63,7 +63,6 @@ if ~isempty(k)
 else
     error('there is no nodes equal to zero')
 end
-
 if hybrid_order > 0
     if hybrid_order == 2
         h_correction = 0.5*dr.ghs2(dr.inv_order_var);
@@ -97,7 +96,7 @@ block_nbr = pfm.block_nbr;
 dimension = ny*block_nbr;
 pfm.dimension = dimension;
 if order == 0
-    i_upd_r = (1:ny*periods);
+    i_upd_r = (1:ny*periods)';
     i_upd_y = i_upd_r + ny;
 else
     i_upd_r = zeros(dimension,1);
