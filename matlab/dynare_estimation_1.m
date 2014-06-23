@@ -818,7 +818,7 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
             if error_flag
                 error('Estimation::mcmc: I cannot compute the posterior statistics!')
             end
-            prior_posterior_statistics('posterior',dataset_);
+            prior_posterior_statistics('posterior',dataset_,dataset_info);
         end
         xparam = get_posterior_parameters('mean');
         M_ = set_all_parameters(xparam,estim_params_,M_);
