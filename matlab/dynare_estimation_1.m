@@ -83,6 +83,15 @@ end
 
 if options_.dsge_var
     check_dsge_var_model(M_, estim_params_, bayestopt_);
+    if dataset_info.missing.state
+        error('Estimation::DsgeVarLikelihood: I cannot estimate a DSGE-VAR model with missing observations!')
+    end
+    if options_.noconstant
+        var_sample_moments(options_.dsge_varlag, -1, dataset_);
+    else
+        % The steady state is non zero ==> a constant in the VAR is needed!
+        var_sample_moments(options_.dsge_varlag, 0, dataset_);
+    end
 end
 
 %check for calibrated covariances before updating parameters
@@ -153,25 +162,6 @@ end
 
 if ~isempty(estim_params_)
     M_ = set_all_parameters(xparam1,estim_params_,M_);
-end
-
-% compute sample moments if needed (bvar-dsge)
-if options_.dsge_var
-    if dataset_info.missing.state
-        error('I cannot estimate a DSGE-VAR model with missing observations!')
-    end
-    if options_.noconstant
-        evalin('base',...
-               ['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
-                'var_sample_moments(options_.first_obs,' ...
-                'options_.first_obs+options_.nobs-1,options_.dsge_varlag,-1,' ...
-                'options_.datafile, options_.varobs,options_.xls_sheet,options_.xls_range);'])
-    else% The steady state is non zero ==> a constant in the VAR is needed!
-        evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
-                       'var_sample_moments(options_.first_obs,' ...
-                       'options_.first_obs+options_.nobs-1,options_.dsge_varlag,0,' ...
-                       'options_.datafile, options_.varobs,options_.xls_sheet,options_.xls_range);'])
-    end
 end
 
 

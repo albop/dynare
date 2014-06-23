@@ -1,4 +1,4 @@
-function [DynareDataset, DatasetInfo] = makedataset(DynareOptions)
+function [DynareDataset, DatasetInfo] = makedataset(DynareOptions,initialconditions)
 
 % Initialize a dataset as a dseries object.
 %
@@ -22,6 +22,12 @@ function [DynareDataset, DatasetInfo] = makedataset(DynareOptions)
 %
 %
 % See also dynare_estimation_init
+
+if nargin<2
+    % If a the sample is to be used for the estimation of a VAR or DSGE-VAR model
+    % the second argument must be a strictly positive integer (the number of lags).
+    initialconditions = 0;
+end
 
 if isempty(DynareOptions.datafile) && isempty(DynareOptions.dataset.file) && isempty(DynareOptions.dataset.series)
     if gsa_flag
@@ -174,9 +180,17 @@ else
     end
 end
 
+% Add initial conditions if needed
+FIRSTOBS = firstobs-initialconditions;
+
 % Check that firstobs belongs to DynareDataset.dates
 if firstobs<DynareDataset.init
     error(sprintf('first_obs (%s) cannot be less than the first date in the dataset (%s)!',char(firstobs),char(DynareDataset.init)))
+end
+
+% Check that FIRSTOBS belongs to DynareDataset.dates
+if initialconditions && FIRSTOBS<DynareDataset.init
+    error(sprintf('first_obs (%s) - %i cannot be less than the first date in the dataset (%s)!\nReduce the number of lags in the VAR model or increase the value of first_obs.', char(firstobs), initialconditions, char(DynareDataset.init)));
 end
 
 % Check that lastobs belongs to DynareDataset.dates...
@@ -192,7 +206,7 @@ else
 end
 
 % Select a subsample.
-DynareDataset = DynareDataset(firstobs:lastobs);
+DynareDataset = DynareDataset(FIRSTOBS:lastobs);
 
 % Initialize DatasetInfo structure.
 DatasetInfo = struct('missing', struct('state', NaN, 'aindex', [], 'vindex', [], 'number_of_observations', NaN, 'no_more_missing_observations', NaN), ...
