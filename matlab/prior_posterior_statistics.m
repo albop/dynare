@@ -40,7 +40,7 @@ global options_ estim_params_ oo_ M_ bayestopt_
 
 localVars=[];
 
-Y = dataset.data;
+Y = transpose(dataset.data);
 gend = dataset.nobs;
 data_index = dataset_info.missing.aindex;
 missing_value = dataset_info.missing.state;
