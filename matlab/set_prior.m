@@ -96,7 +96,7 @@ if nvn
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.var_endo(:,8)]; %take generalized distribution into account
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.var_endo(:,9)]; %take generalized distribution into account
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.var_endo(:,10)];
-    bayestopt_.name = [ bayestopt_.name; options_.varobs{estim_params_.nvn_observable_correspondence}];
+    bayestopt_.name = [ bayestopt_.name; transpose(options_.varobs(estim_params_.nvn_observable_correspondence))];
 end
 if ncx
     xparam1 = [xparam1; estim_params_.corrx(:,3)];
