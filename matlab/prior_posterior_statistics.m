@@ -106,7 +106,7 @@ if horizon
     MAX_nforc2 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/ ...
                             8));
     IdObs    = bayestopt_.mfys;
-    
+
 end
 MAX_momentsno = min(B,ceil(MaxNumberOfBytes/(get_moments_size(options_)*8)));
 
@@ -232,7 +232,7 @@ else
                         'options_', options_, ...
                         'bayestopt_', bayestopt_, ...
                         'estim_params_', estim_params_, ...
-                        'oo_', oo_);    
+                        'oo_', oo_);
     % which files have to be copied to run remotely
     NamFileInput(1,:) = {'',[M_.fname '_static.m']};
     NamFileInput(2,:) = {'',[M_.fname '_dynamic.m']};
@@ -240,11 +240,10 @@ else
         NamFileInput(length(NamFileInput)+1,:)={'',[M_.fname '_steadystate.m']};
     end
     [fout] = masterParallel(options_.parallel, 1, B,NamFileInput,'prior_posterior_statistics_core', localVars,globalVars, options_.parallel_info);
-    
+
 end
 ifil = fout(end).ifil;
 
-% ??????????
 stock_gend=gend;
 stock_data=Y;
 save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
