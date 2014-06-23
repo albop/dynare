@@ -28,6 +28,10 @@ function ext = get_file_extension(file)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+% Clean-up path
+file = strrep(file, '../', '');
+file = strrep(file, './', '');
+
 remain = file;
 while ~isempty(remain)
     [ext, remain] = strtok(remain,'.');
