@@ -293,7 +293,7 @@ t2 = find(d2==tmp.dates);
 data = tmp.data;
 
 % Isolate the (potential) parameters in the expression to be evaluated
-[~, TMP314] = strsplit(expression,'([0-9]*\.[0-9]*|\w*)','DelimiterType','RegularExpression','CollapseDelimiters',false);
+TMP314 = regexp(expression, '([0-9]*\.[0-9]*|\w*)', 'match');
 % Here I remove the numbers (TMP314 -> TMP314159).
 TMP3141 = regexp(TMP314,'(([0-9]*\.[0-9]*)|([0-9]*))','match');
 TMP31415 = find(cellfun(@isempty,TMP3141));
