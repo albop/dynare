@@ -11239,7 +11239,7 @@ command. Default: @code{`!'}
 @end defmethod
 
 @anchor{addGraph}
-@defmethod Report addGraph data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
+@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -11247,6 +11247,12 @@ Adds a @code{Graph} to a @code{Section}.
 @item data, @code{dseries}
 The @code{dseries} that provides the data for the graph. Default:
 @code{none}
+
+@item axisShape, @code{`box'} | @code{`L'}
+The shape the axis should have. @code{`box'} means that there is an axis line
+to the left, right, bottom, and top of the graphed line(s). @code{`L'} means
+that there is an axis to the left and bottom of the graphed line(s). Default:
+@code{`box'}
 
 @item graphDirName, @code{STRING}
 The name of the folder in which to store this figure. Default:
