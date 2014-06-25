@@ -120,7 +120,7 @@ if ~loadSA,
         ys_mean=steady_(M_,options_,oo_);
     end
     %   eval(options_.datafile)
-    Y = dataset_.data;
+    Y = transpose(dataset_.data);
     gend = dataset_.nobs;
     data_index = dataset_info.missing.aindex;
     missing_value = dataset_info.missing.state;
