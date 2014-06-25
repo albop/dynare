@@ -76,7 +76,7 @@ end
 if nvn
     estim_params_.nvn_observable_correspondence=NaN(nvn,1); % stores number of corresponding observable
     if isequal(M_.H,0) %if no previously set measurement error, initialize H
-        nvarobs = size(options_.varobs,1);
+        nvarobs = length(options_.varobs);
         M_.H = zeros(nvarobs,nvarobs);
         M_.Correlation_matrix_ME = eye(nvarobs);
     end
