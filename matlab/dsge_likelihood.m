@@ -523,7 +523,7 @@ if analytic_derivation,
     DLIK = [];
     AHess = [];
     iv = DynareResults.dr.restrict_var_list;
-    if nargin<8 || isempty(derivatives_info)
+    if nargin<9 || isempty(derivatives_info)
         [A,B,nou,nou,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults);
         if ~isempty(EstimatedParameters.var_exo)
             indexo=EstimatedParameters.var_exo(:,1);
