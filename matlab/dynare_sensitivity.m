@@ -154,7 +154,7 @@ options_gsa = set_default_option(options_gsa,'namlagendo',[]);
 options_gsa = set_default_option(options_gsa,'namexo',[]);
 % RMSE mapping
 options_gsa = set_default_option(options_gsa,'lik_only',0);
-options_gsa = set_default_option(options_gsa,'var_rmse',options_.varobs);
+options_gsa = set_default_option(options_gsa,'var_rmse',char(options_.varobs));
 options_gsa = set_default_option(options_gsa,'pfilt_rmse',0.1);
 options_gsa = set_default_option(options_gsa,'istart_rmse',options_.presample+1);
 options_gsa = set_default_option(options_gsa,'alpha_rmse',0.001);
