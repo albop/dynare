@@ -11239,7 +11239,7 @@ command. Default: @code{`!'}
 @end defmethod
 
 @anchor{addGraph}
-@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
+@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, titleFormat, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
