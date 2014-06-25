@@ -11239,7 +11239,7 @@ command. Default: @code{`!'}
 @end defmethod
 
 @anchor{addGraph}
-@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, titleFormat, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
+@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, title, titleFontSize, titleFormat, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -11334,6 +11334,9 @@ The opacity of the shaded area, must be in @math{[0,100]}. Default: @code{20}
 @anchor{graph.title}
 @item title, @code{STRING} | @code{CELL_ARRAY_STRINGS}
 Same as @ref{title}, just for graphs.
+
+@item titleFontSize, @code{`tiny'} | @code{`scriptsize'} | @code{`footnotesize'} | @code{`small'} | @code{`normalsize'} | @code{`large'} | @code{`Large'} | @code{`LARGE'} | @code{`huge'} | @code{`Huge'}
+The font size for title. Default: @code{normalsize}
 
 @item titleFormat, @code{STRING}
 The format to use for @ref{graph.title,,the graph title}. Unlike
