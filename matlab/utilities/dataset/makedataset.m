@@ -1,4 +1,4 @@
-function [DynareDataset, DatasetInfo] = makedataset(DynareOptions,initialconditions)
+function [DynareDataset, DatasetInfo] = makedataset(DynareOptions, initialconditions, gsa_flag)
 
 % Initialize a dataset as a dseries object.
 %
@@ -23,7 +23,11 @@ function [DynareDataset, DatasetInfo] = makedataset(DynareOptions,initialconditi
 %
 % See also dynare_estimation_init
 
-if nargin<2
+if nargin<3
+    gsa_flag = 0;
+end
+
+if nargin<2 || isempty(initialconditions)
     % If a the sample is to be used for the estimation of a VAR or DSGE-VAR model
     % the second argument must be a strictly positive integer (the number of lags).
     initialconditions = 0;
@@ -32,6 +36,7 @@ end
 if isempty(DynareOptions.datafile) && isempty(DynareOptions.dataset.file) && isempty(DynareOptions.dataset.series)
     if gsa_flag
         DynareDataset = dseries();
+        DatasetInfo = [];
         return
     else
         error('makedataset: datafile option is missing!')

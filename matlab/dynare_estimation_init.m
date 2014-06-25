@@ -448,7 +448,7 @@ k = find(isnan(bayestopt_.jscale));
 bayestopt_.jscale(k) = options_.mh_jscale;
 
 % Build the dataset
-[dataset_, dataset_info] = makedataset(options_);
+[dataset_, dataset_info] = makedataset(options_, options_.dsge_var*options_.dsge_varlag, gsa_flag);
 
 % setting steadystate_check_flag option
 if options_.diffuse_filter
