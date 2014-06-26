@@ -1,4 +1,4 @@
-function [i,n,s,j] = describe_missing_data(data)   % --*-- Unitary tests --*--
+function [i,n,s,j] = describe_missing_data(data)
 % This function reads the dataset and determines the location of the missing observations (defined by NaNs)
 
 %@info:
