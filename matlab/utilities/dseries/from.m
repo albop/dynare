@@ -219,10 +219,10 @@ for i=1:number_of_variables
         end
         if i>1
             if ismember(var.name,variable_names)
-                error('dseries::from: All the dseries objects should contain variables with different names!')
-            else
-                variable_names(i) = {var.name{1}};
+                % Locally change variable name.
+                var = var.rename(var.name{1},get_random_string(20));
             end
+            variable_names(i) = {var.name{1}};
         else
             variable_names(i) = {var.name{1}};
         end
@@ -244,7 +244,7 @@ for i=1:number_of_variables
         eval(sprintf('%s = var;',current_variable));
     end
 end
-
+variable_names
 % Get the name of the assigned variable (with time index)
 assignedvariablename = regexpi(EXPRESSION(1:equal_id-1), '\w*\(t\)|\w*\(t\-\d\)|\w*\(t\+\d\)|\w*\.\w*\(t\)|\w*\.\w*\(t\-\d\)|\w*\.\w*\(t\+\d\)','match');
 if isempty(assignedvariablename)
