@@ -11324,9 +11324,9 @@ the @ref{data} option. If empty, use all series provided to
 The date range showing the portion of the graph that should be
 shaded. Default: @code{none}
 
-@item shadeColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
-The color to use in the shaded portion of the graph. Default:
-@code{`green'}
+@anchor{shadeColor}
+@item shadeColor, @code{STRING}
+The color to use in the shaded portion of the graph. All valid color strings defined for use by @code{PGFPLOTS/Ti}@i{k}@code{Z} are valid. A list of defined colors is: @code{`red'}, @code{`green'}, @code{`blue'}, @code{`cyan'}, @code{`magenta'}, @code{`yellow'}, @code{`black'}, @code{`gray'}, @code{`white'}, @code{`darkgray'}, @code{`lightgray'}, @code{`brown'}, @code{`lime'}, @code{`olive'}, @code{`orange'}, @code{`pink'}, @code{`purple'}, @code{`teal'}, and @code{`violet'}. Furthermore, You can use combinations of these colors. For example, if you wanted a color that is @math{20\%} green and @math{80\%} purple, you could pass the string @code{`green!20!purple'}. You can also use RGB colors, following the syntax: @code{`rgb,255:red,231;green,84;blue,121'} which corresponds to the RGB color @code{(231;84;121)}. More examples are available in the section 4.7.5 of the @code{PGFPLOTS/Ti}@i{k}@code{Z} manual, revision 1.10. Default: @code{`green'}
 
 @item shadeOpacity, @code{DOUBLE}
 The opacity of the shaded area, must be in @math{[0,100]}. Default: @code{20}
@@ -11406,9 +11406,10 @@ Whether or not to fill missing precision spots with zeros. Default: @code{true}
 @item showZeroline, @code{BOOLEAN}
 Display a solid black line at @math{y = 0}. Default: @code{false}
 
-@item zeroLineColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
+@item zeroLineColor, @code{STRING}
 The color to use for the zero line. Only used if @ref{showZeroLine} is
-true. Default: @code{`black'}
+true. See the explanation in @ref{shadeColor} for how to use colors with
+reports. Default: @code{`black'}
 
 @end table
 @end defmethod
@@ -11480,8 +11481,9 @@ Use this option to draw a horizontal line at the given value. Default:
 The name to display in the legend for this series. Will be displayed only if
 the @ref{data} option has been set. Default: the @code{tex} name of the series
 
-@item graphLineColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
-Color to use for the series in a graph. Default: @code{`black'}
+@item graphLineColor, @code{STRING}
+Color to use for the series in a graph. See the explanation in @ref{shadeColor}
+for how to use colors with reports. Default: @code{`black'}
 
 @item graphLineStyle, @code{`none'} | @code{`solid'} | @code{`dotted'} | @code{`densely dotted'} | @code{`loosely dotted'} | @code{`dashed'} | @code{`densely dashed'} | @code{`loosely dashed'} | @code{`dashdotted'} | @code{`densely dashdotted'} | @code{`loosely dashdotted'} | @code{`dashdotdotted'} | @code{`densely dashdotdotted'} | @code{`loosely dashdotdotted'}
 Line style for this series in a graph. Default: @code{`solid'}
@@ -11492,11 +11494,13 @@ Line width for this series in a graph. Default: @code{0.5}
 @item graphMarker, @code{`x'} | @code{`+'} | @code{`-'} | @code{`|'} | @code{`o'} | @code{`asterisk'} | @code{`star'} | @code{`10-pointed star'} | @code{`oplus'} | @code{`oplus*'} | @code{`otimes'} | @code{`otimes*'} | @code{`square'} | @code{`square*'} | @code{`triangle'} | @code{`triangle*'} | @code{`diamond'} | @code{`diamond*'} | @code{`halfdiamond*'} | @code{`halfsquare*'} | @code{`halfsquare right*'} | @code{`halfsquare left*'} | @code{`Mercedes star'} | @code{`Mercedes star flipped'} | @code{`halfcircle'} | @code{`halfcircle*'} | @code{`pentagon'} | @code{`pentagon star'}
 The Marker to use on this series in a graph. Default: @code{none}
 
-@item graphMarkerEdgeColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
-The edge color of the graph marker. Default: @code{graphLineColor}
+@item graphMarkerEdgeColor, @code{STRING}
+The edge color of the graph marker. See the explanation in @ref{shadeColor} for
+how to use colors with reports. Default: @code{graphLineColor}
 
-@item graphMarkerFaceColor, @code{`red'} | @code{`green'} | @code{`blue'} | @code{`cyan'} | @code{`magenta'} | @code{`yellow'} | @code{`black'} | @code{`gray'} | @code{`darkgray'} | @code{`lightgray'} | @code{`brown'} | @code{`lime'} | @code{`olive'} | @code{`orange'} | @code{`pink'} | @code{`purple'} | @code{`teal'} | @code{`violet'} | @code{`white'}
-The face color of the graph marker. Default: @code{graphLineColor}
+@item graphMarkerFaceColor, @code{STRING}
+The face color of the graph marker. See the explanation in @ref{shadeColor} for
+how to use colors with reports. Default: @code{graphLineColor}
 
 @item graphMarkerSize, @code{DOUBLE}
 The size of the graph marker. Default: @code{1}
