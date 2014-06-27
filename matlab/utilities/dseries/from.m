@@ -1,4 +1,4 @@
-function from(varargin)
+function from(varargin)   % --*-- Unitary tests --*--
 
 % Copyright (C) 2014 Dynare Team
 %
@@ -244,7 +244,7 @@ for i=1:number_of_variables
         eval(sprintf('%s = var;',current_variable));
     end
 end
-variable_names
+
 % Get the name of the assigned variable (with time index)
 assignedvariablename = regexpi(EXPRESSION(1:equal_id-1), '\w*\(t\)|\w*\(t\-\d\)|\w*\(t\+\d\)|\w*\.\w*\(t\)|\w*\.\w*\(t\-\d\)|\w*\.\w*\(t\+\d\)','match');
 if isempty(assignedvariablename)
@@ -422,3 +422,17 @@ function i = isassignedvariable(var,expr)
         end
     end
     i = 0;
+
+%@test:1
+%$ try
+%$     y = dseries(zeros(400,1),dates('1950Q1')) ;
+%$     v = dseries(randn(400,1),dates('1950Q1')) ;
+%$     u = dseries(randn(400,1),dates('1950Q1')) ;
+%$     from 1950Q2 to 2049Q4 do y(t) = (1+.01*u(t))*y(t-1) + v(t)
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:1
