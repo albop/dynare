@@ -436,3 +436,59 @@ function i = isassignedvariable(var,expr)
 %$
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ try
+%$     y = dseries(zeros(400,1),dates('1950Q1')) ;
+%$     v = dseries(randn(400,1),dates('1950Q1')) ;
+%$     u = dseries(randn(400,1),dates('1950Q1')) ;
+%$     from 1950Q2 to 2049Q3 do y(t) = (1+.01*u(t))*y(t+1) + v(t)
+%$     t(1) = 0;
+%$ catch
+%$     t(1) = 1;
+%$ end
+%$
+%$ T = all(t);
+%@eof:2
+
+%@test:3
+%$ try
+%$     y = dseries(zeros(400,1),dates('1950Q1')) ;
+%$     v = dseries(randn(400,1),dates('1950Q1')) ;
+%$     u = dseries(randn(400,1),dates('1950Q1')) ;
+%$     from 1950Q2 to 2049Q4 do y(t) = v(t) -.5*v(t-1);
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:3
+
+%@test:4
+%$ try
+%$     y = dseries(zeros(400,1),dates('1950Q1')) ;
+%$     v = dseries(randn(400,1),dates('1950Q1')) ;
+%$     u = dseries(randn(400,1),dates('1950Q1')) ;
+%$     from 1950Q2 to 2049Q4 do y(t) = 2*((v(t) -.5*v(t-1))>0)-1;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:4
+
+%@test:5
+%$ try
+%$     y = dseries(zeros(4000,1),dates('1950Q1')) ;
+%$     v = dseries(randn(4000,1),dates('1950Q1')) ;
+%$     u = dseries(randn(4000,1),dates('1950Q1')) ;
+%$     from 1950Q2 to 2949Q4 do y(t) = y(t-1)*(2*((v(t) -.5*v(t-1))>u(t))-1)+u(t); %plot(y)
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:5
