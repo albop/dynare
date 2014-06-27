@@ -10,7 +10,7 @@ function ts = dseries(varargin) % --*-- Unitary tests --*--
 %! @sp 2
 %! If @code{nargin==0} then an empty dseries object is created. The object can be populated with data subsequently using the overloaded subsref method.
 %! @sp 2
-%! If @code{nargin==1} and if the input argument is a @ref{dynDate} object, then a dseries object without data is created. This object can be populated with the overload subsref method.
+%! If @code{nargin==1} and if the input argument is a @ref{dates} object, then a dseries object without data is created. This object can be populated with the overload subsref method.
 %! @sp 2
 %! If @code{nargin==1} and if the input argument is a string for the name of a csv, m or mat file containing data, then a dseries object is created from these data.
 %! @sp 2
@@ -54,7 +54,7 @@ function ts = dseries(varargin) % --*-- Unitary tests --*--
 %! frequency is unspecified. @var{freq} is equal to 4 if data are on a quaterly basis. @var{freq} is equal to
 %! 12 if data are on a monthly basis. @var{freq} is equal to 52 if data are on a weekly basis.
 %! @item init
-%! @ref{dynDate} object, initial date of the dataset.
+%! @ref{dates} object, initial date of the dataset.
 %! @end table
 %! @end deftypefn
 %@eod:
@@ -153,6 +153,12 @@ switch nargin
         ts.dates = dates(1,1):dates(1,1)+(ts.nobs-1);
     end
   case {2,3,4}
+    if isequal(nargin,2) && ischar(varargin{1}) && isdates(varargin{2})
+        % Instantiate dseries object with a data file and force the initial date to be as given by the second input argument.
+        ds = dseries(varargin{1});
+        ts = dseries(ds.data, varargin{2}, ds.name, ds.tex);
+        return
+    end
     a = varargin{1};
     b = varargin{2};
     if nargin<4

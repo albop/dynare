@@ -1,4 +1,4 @@
-function from(varargin)
+function from(varargin)   % --*-- Unitary tests --*--
 
 % Copyright (C) 2014 Dynare Team
 %
@@ -219,10 +219,10 @@ for i=1:number_of_variables
         end
         if i>1
             if ismember(var.name,variable_names)
-                error('dseries::from: All the dseries objects should contain variables with different names!')
-            else
-                variable_names(i) = {var.name{1}};
+                % Locally change variable name.
+                var = var.rename(var.name{1},get_random_string(20));
             end
+            variable_names(i) = {var.name{1}};
         else
             variable_names(i) = {var.name{1}};
         end
@@ -422,3 +422,17 @@ function i = isassignedvariable(var,expr)
         end
     end
     i = 0;
+
+%@test:1
+%$ try
+%$     y = dseries(zeros(400,1),dates('1950Q1')) ;
+%$     v = dseries(randn(400,1),dates('1950Q1')) ;
+%$     u = dseries(randn(400,1),dates('1950Q1')) ;
+%$     from 1950Q2 to 2049Q4 do y(t) = (1+.01*u(t))*y(t-1) + v(t)
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:1

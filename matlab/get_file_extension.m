@@ -1,5 +1,16 @@
-function val = subsasgn(val, idx, rhs)
+function ext = get_file_extension(file)
 
+% returns the extension of a file.
+%
+% INPUTS 
+%  o file      string, name of the file
+%
+% OUTPUTS 
+%  o ext       string, extension.
+%
+% REMARKS 
+%  If the provided file name has no extension, the routine will return an empty array.
+    
 % Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
@@ -17,4 +28,15 @@ function val = subsasgn(val, idx, rhs)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-error('dynTimeIndex::subsasgn: Members of dynTimeIndex class are private!')
+% Clean-up path
+file = strrep(file, '../', '');
+file = strrep(file, './', '');
+
+remain = file;
+while ~isempty(remain)
+    [ext, remain] = strtok(remain,'.');
+end
+
+if strcmp(ext,file)
+    ext = [];
+end

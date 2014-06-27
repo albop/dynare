@@ -151,7 +151,7 @@ end
 %$
 %$ try
 %$     data = transpose(1:100);
-%$     ts = dseries(data,1950,{'A1'},{'A_1'});
+%$     ts = dseries(data,'1950Y',{'A1'},{'A_1'});
 %$     ts = ts.ydiff;
 %$     t(1) = 1;
 %$ catch

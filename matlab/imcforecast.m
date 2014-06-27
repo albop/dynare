@@ -102,30 +102,13 @@ if estimated_model
             error('imcforecast:: The dimension of the vector of parameters doesn''t match the number of estimated parameters!')
         end
     end
-
     set_parameters(xparam);
-
-    % Load and transform data.
-    transformation = [];
-    if options_.loglinear && ~options_.logdata
-        transformation = @log;
-    end
-    xls.sheet = options_.xls_sheet;
-    xls.range = options_.xls_range;
-    
-    if ~isfield(options_,'nobs')
-        options_.nobs = [];
-    end
-    
-    dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
-
-    data = dataset_.data;
-    data_index = dataset_.missing.aindex;
-    gend = options_.nobs;
-    missing_value = dataset_.missing.state;
-
+    [dataset_,dataset_info] = makedataset(options_);
+    data = transpose(dataset_.data);
+    data_index = dataset_info.missing.aindex;
+    gend = dataset_.nobs;
+    missing_value = dataset_info.missing.state;
     [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data,data_index,missing_value);
-
     trend = repmat(ys,1,options_cond_fcst.periods+1);
     for i=1:M_.endo_nbr
         j = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
@@ -134,7 +117,6 @@ if estimated_model
         end
     end
     trend = trend(oo_.dr.order_var,:);
-
     InitState(:,1) = atT(:,end);
 else
     InitState(:,1) = zeros(M_.endo_nbr,1);

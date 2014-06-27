@@ -1,6 +1,7 @@
-function val = subsasgn(val, idx, rhs)
+function m = nanmoments(data, n)
+% Compute centered marginal moments of order n (possibly with missing observations).
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,4 +18,8 @@ function val = subsasgn(val, idx, rhs)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-error('dynTimeIndex::subsasgn: Members of dynTimeIndex class are private!')
+if isanynan(data)
+    m = transpose(nanmean(bsxfun(@power,nandemean(data),n)));
+else
+    m = transpose(mean(bsxfun(@power,demean(data),n)));
+end

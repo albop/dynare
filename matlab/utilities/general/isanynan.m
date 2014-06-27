@@ -1,6 +1,7 @@
-function val = subsasgn(val, idx, rhs)
+function yes = isanynan(array)
+% Return one if the array contains at least one NaN, 0 otherwise.
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2011-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,4 +18,4 @@ function val = subsasgn(val, idx, rhs)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-error('dynTimeIndex::subsasgn: Members of dynTimeIndex class are private!')
+yes = any(isnan(array(:)));
