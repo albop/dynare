@@ -537,7 +537,7 @@ if SampleSize > 1,
                 disp(['Testing ',tittxt, '. Press ENTER']), pause(5),
                 if ~iload,
                     [idehess_max, idemoments_max, idemodel_max, idelre_max, derivatives_info_max] = ...
-                        identification_analysis(pdraws(jmax,:),indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
+                        identification_analysis(pdraws(jmax,:),indx,indexo,options_ident,dataset_,dataset_info, prior_exist, name_tex,1);
                     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_max', 'idemoments_max','idemodel_max', 'idelre_max', 'jmax', '-append');
                 end
                 disp_identification(pdraws(jmax,:), idemodel_max, idemoments_max, name,1);
