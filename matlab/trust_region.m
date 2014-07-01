@@ -175,23 +175,8 @@ while (niter < maxiter && ~info)
     % iterations, so we need scaling-independent tolerances wherever
     % possible.
 
-    % FIXME -- why tolf*n*xn? If abs (e) ~ abs(x) * eps is a vector
-    % of perturbations of x, then norm (fjac*e) <= eps*n*xn, i.e. by
-    % tolf ~ eps we demand as much accuracy as we can expect.
-    if (fn <= tolf*n*xn)
+    if (fn <= tolf)
         info = 1;
-        % The following tests done only after successful step.
-    elseif (ratio >= 1e-4)
-        % This one is classic. Note that we use scaled variables again,
-        % but compare to scaled step, so nothing bad.
-        if (sn <= tolx*xn)
-            info = 2;
-            % Again a classic one. It seems weird to use the same tolf
-            % for two different tests, but that's what M*b manual appears
-            % to say.
-        elseif (actred < tolf)
-            info = 3;
-        end
     end
 end
 
