@@ -112,8 +112,8 @@ if isequal(nargin,3) && isfreq(varargin{1})
     else
         dd.freq = varargin{1};
     end
-    if (isnumeric(varargin{2}) && isvector(varargin{2}) && isint(varargin{2}))
-        if isnumeric(varargin{3}) && isvector(varargin{3}) && isint(varargin{3})
+    if (isnumeric(varargin{2}) && isvector(varargin{2}) && all(isint(varargin{2})))
+        if isnumeric(varargin{3}) && isvector(varargin{3}) && all(isint(varargin{3}))
             if all(varargin{3}>=1) && all(varargin{3}<=dd.freq)
                 dd.time = [varargin{2}(:), varargin{3}(:)];
                 dd.ndat = size(dd.time,1);
@@ -287,3 +287,25 @@ error('dates::dates: Wrong calling sequence!')
 %$ end
 %$ T = all(t);
 %@eof:6
+
+%@test:7
+%$ try
+%$   B = dates(4,[1950; 1950], [1; 2]);
+%$   t = 1;
+%$ catch
+%$   t = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:7
+
+%@test:8
+%$ try
+%$   B = dates(4,[1950, 1950], [1, 2]);
+%$   t = 1;
+%$ catch
+%$   t = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:8
