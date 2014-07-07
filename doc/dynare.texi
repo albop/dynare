@@ -11239,7 +11239,7 @@ command. Default: @code{`!'}
 @end defmethod
 
 @anchor{addGraph}
-@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, tickFontSize, title, titleFontSize, titleFormat, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
+@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, tickFontSize, title, titleFontSize, titleFormat, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelScaled, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -11392,6 +11392,10 @@ Round the y tick labels to a fixed number of decimal places, given by
 @anchor{yTickLabelPrecision}
 @item yTickLabelPrecision, @code{INTEGER}
 The precision with which to report the yTickLabel. Default: @code{1}
+
+@item yTickLabelScaled, @code{BOOLEAN}
+Determines whether or not there is a common scaling factor for the y
+axis. Default: @code{true}
 
 @item yTickLabelZeroFill, @code{BOOLEAN}
 Whether or not to fill missing precision spots with zeros. Default: @code{true}
