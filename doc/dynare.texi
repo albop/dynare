@@ -11614,17 +11614,27 @@ Writes the @LaTeX{} representation of this @code{Report}, saving it to
 the file specified by @ref{filename}.
 @end defmethod
 
-@defmethod Report compile compiler
+@defmethod Report compile compiler, showOutput, showReport
 Compiles the report written by @ref{write} into a @code{pdf} file. If
 the report has not already been written (determined by the existence
 of the file specified by @ref{filename}, @ref{write} is called.
 optionshead
 @table @code
+
 @item compiler, @code{FILENAME}
 Like @ref{compiler}, except will not overwrite the value of
 @code{compiler} contained in the report object. Hence, passing the
 value here is useful for using different @LaTeX{} compilers or just
 for passing the value at the last minute.
+
+@item showOutput, @code{BOOLEAN}
+Print the compiler output to the screen. Useful for debugging your code as the
+@LaTeX{} compiler hangs if there is a problem. Default: @code{true}
+
+@item showReport, @code{BOOLEAN}
+Open the compiled report (works on Windows and OS X on Matlab). Default:
+@code{true}
+
 @end table
 @end defmethod
 
