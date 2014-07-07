@@ -11262,12 +11262,6 @@ The name of the folder in which to store this figure. Default:
 The name to use when saving this figure. Default: something of the
 form @code{graph_pg1_sec2_row1_col3.tex}
 
-@item graphSize, @code{NUMERICAL_VECTOR}
-The width and height to be passed to the third and fourth elements of
-the array passed to the @code{`Position'} option of Matlab's
-@code{figure} command, passed as a vector of size @math{2}. Default:
-Matlab sets width and height
-
 @item height, @code{DOUBLE}
 The height of the graph, in inches. Default: @code{4.5}
 
