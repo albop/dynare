@@ -45,7 +45,7 @@ if isnumeric(B) && (isscalar(B) ||  isvector(B))
         error('dseries::minus: Second input argument must be a dseries object!')
     end
     A = C;
-    A.data = bsxfun(@minus,C.data,B);
+    A.data = bsxfun(@minus,B,C.data);
     return;
 end
 
