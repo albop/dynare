@@ -290,3 +290,39 @@ A.data = bsxfun(@plus,B.data,C.data);
 %$
 %$ T = all(t);
 %@eof:7
+
+%@test:8
+%$ ts1 = dseries(ones(3,1));
+%$ ts2 = ts1+1;
+%$ ts3 = 1+ts1;
+%$ t(1) = isequal(ts2.data, 2*ones(3,1));
+%$ t(2) = isequal(ts3.data, 2*ones(3,1));
+%$ T = all(t);
+%@eof:8
+
+%@test:9
+%$ ts1 = dseries(ones(3,2));
+%$ ts2 = ts1+1;
+%$ ts3 = 1+ts1;
+%$ t(1) = isequal(ts2.data, 2*ones(3,2));
+%$ t(2) = isequal(ts3.data, 2*ones(3,2));
+%$ T = all(t);
+%@eof:9
+
+%@test:10
+%$ ts1 = dseries(ones(3,2));
+%$ ts2 = ts1+ones(3,1);
+%$ ts3 = ones(3,1)+ts1;
+%$ t(1) = isequal(ts2.data, 2*ones(3,2));
+%$ t(2) = isequal(ts3.data, 2*ones(3,2));
+%$ T = all(t);
+%@eof:10
+
+%@test:11
+%$ ts1 = dseries(ones(3,2));
+%$ ts2 = ts1+ones(1,2);
+%$ ts3 = ones(1,2)+ts1;
+%$ t(1) = isequal(ts2.data, 2*ones(3,2));
+%$ t(2) = isequal(ts3.data, 2*ones(3,2));
+%$ T = all(t);
+%@eof:11
