@@ -618,6 +618,9 @@ options_.gpu = 0;
 options_.convergence.geweke.taper_steps=[4 8 15];
 options_.convergence.geweke.geweke_interval=[0.2 0.5];
 
+% Options for lmmcp solver
+options_.lmmcp = [];
+
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
 % initialize persistent variables in dyn_first_order_solver()
@@ -625,6 +628,7 @@ dyn_first_order_solver();
 
 % Set dynare random generator and seed.
 set_dynare_seed('default');
+
 
 % Create directories
 [junk,junk]=mkdir(M_.fname);
