@@ -124,7 +124,7 @@ if estim_params_.ncx || any(nnz(tril(M_.Correlation_matrix,-1))) || isfield(esti
 end
 
 data = dataset_.data;
-rawdata = dataset_.data;
+rawdata = dataset_info.rawdata;
 data_index = dataset_info.missing.aindex;
 missing_value = dataset_info.missing.state;
 
