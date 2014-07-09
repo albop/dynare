@@ -239,3 +239,11 @@ DatasetInfo.descriptive.correlation = normalization_matrix*DatasetInfo.descripti
 
 % Compute autocorrelation function.
 DatasetInfo.descriptive.autocovariance = nanautocovariance(DynareDataset.data, DynareOptions.ar);
+
+% Save raw data.
+DatasetInfo.rawdata = DynareDataset.data;
+
+% Prefilter the data if needed (remove the mean).
+if isequal(DynareOptions.prefilter, 1)
+    DynareDataset = DynareDataset.detrend();
+end
