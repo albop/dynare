@@ -76,7 +76,7 @@ function [x,FVAL,EXITFLAG,OUTPUT,JACOB] = lmmcp(FUN,x,lb,ub,options,varargin)
 % downloaded from:
 % http://www.mathematik.uni-wuerzburg.de/~kanzow/software/LMMCP.zip
 %
-% copyright: Christian Kanzow and Stefania Petra
+% Written by Christian Kanzow and Stefania Petra
 %            Institute of Applied Mathematics and Statistics
 %            University of Wuerzburg
 %            Am Hubland
@@ -85,6 +85,17 @@ function [x,FVAL,EXITFLAG,OUTPUT,JACOB] = lmmcp(FUN,x,lb,ub,options,varargin)
 %
 %            e-mail: kanzow@mathematik.uni-wuerzburg.de
 %                    petra@mathematik.uni-wuerzburg.de
+%
+% Christian Kanzow sent a private message to Dynare Team on July 8, 2014,
+% confirming the free software status of lmmcp and granting unlimited
+% permission to use, copy, modifiy or redistribute the file.
+
+% Copyright (C) 2005 Christian Kanzow and Stefania Petra
+% Copyright (C) 2013 Christophe Gouel
+% Copyright (C) 2014 Dynare Team
+%
+% Unlimited permission is granted to everyone to use, copy, modify or
+% distribute this software.
 
 %% Initialization
 defaultopt = struct(...
