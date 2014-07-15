@@ -36,7 +36,7 @@ switch format
     fprintf(fid,'%% File created on %s.\n',datestr(now));
     fprintf(fid,'\n');
     fprintf(fid,'FREQ__ = %s;\n',num2str(frequency(A)));
-    fprintf(fid,'INIT__ = '' %s'';\n',date2string(firstdate(A)));
+    fprintf(fid,'INIT__ = ''%s'';\n',date2string(firstdate(A)));
     fprintf(fid,'\n');
     fprintf(fid,'NAMES__ = {');
     for i=1:A.vobs
