@@ -159,6 +159,12 @@ switch nargin
         ts = dseries(ds.data, varargin{2}, ds.name, ds.tex);
         return
     end
+    if isequal(nargin,2) && ischar(varargin{1}) && ischar(varargin{2}) && isdate(varargin{2})
+        % Instantiate dseries object with a data file and force the initial date to be as given by the second input argument.
+        ds = dseries(varargin{1});
+        ts = dseries(ds.data, dates(varargin{2}), ds.name, ds.tex);
+        return
+    end
     a = varargin{1};
     b = varargin{2};
     if nargin<4
