@@ -46,14 +46,16 @@ switch format
         end
     end
     fprintf(fid,'};\n');
-    fprintf(fid,'TEX__ = {');
-    for i=1:A.vobs
-        fprintf(fid,['''' A.tex{i}  '''']);
-        if i<A.vobs
-            fprintf(fid,'; ');
-        end
+    str = 'TEX__ = {';
+    for i=1:A.vobs-1
+        str = [str, '''%s''; '];
     end
-    fprintf(fid,'};\n');
+    str = [str, '''%s''};'];
+    str = sprintf(str, A.tex{:});
+    pattern = '(\w*)(\\\_)';
+    str = regexprep(str, pattern, '$1\\\\_');
+    fprintf(fid,str);
+    fprintf(fid,'\n\n');
     for v=1:A.vobs
         fprintf(fid,'%s = [\n', A.name{v});
         fprintf(fid,'%15.8g\n',A.data(1:end-1,v));
