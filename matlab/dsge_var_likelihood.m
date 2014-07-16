@@ -119,7 +119,7 @@ if dsge_prior_weight<(NumberOfParameters+NumberOfObservedVariables)/NumberOfObse
     exit_flag = 0;
     info = 51;
     info(2)=dsge_prior_weight;
-    info(3)=(NumberOfParameters+NumberOfObservedVariables)/DynareDataset.info.ntobs;
+    info(3)=(NumberOfParameters+NumberOfObservedVariables)/DynareDataset.nobs;
     return
 end
 
