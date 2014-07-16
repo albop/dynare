@@ -1,4 +1,4 @@
-function [DynareDataset, DatasetInfo] = makedataset(DynareOptions, initialconditions, gsa_flag)
+function [DynareDataset, DatasetInfo, newdatainterface] = makedataset(DynareOptions, initialconditions, gsa_flag)
 
 % Initialize a dataset as a dseries object.
 %
