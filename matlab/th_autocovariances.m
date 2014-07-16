@@ -57,7 +57,7 @@ else
     warning off MATLAB:dividebyzero
 end
 nar = options_.ar;
-Gamma_y = cell(nar+1,1);
+Gamma_y = cell(nar+2,1);
 if isempty(ivar)
     ivar = [1:endo_nbr]';
 end
