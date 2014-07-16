@@ -146,7 +146,13 @@ end
 
 dyn2vec;
 
-ts = dseries(transpose(oo_.endo_simul),options_.initial_period,cellstr(M_.endo_names));
+if isnan(options_.initial_period)
+    initial_period = dates(1,1);
+else
+    initial_period = options_.initial_period;
+end
+
+ts = dseries(transpose(oo_.endo_simul),initial_period,cellstr(M_.endo_names));
 assignin('base', 'Simulated_time_series', ts);
 
 end
