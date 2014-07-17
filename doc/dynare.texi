@@ -6364,6 +6364,15 @@ Variable set by the @code{conditional_forecast} command. Stores the names of the
 Variable set by the @code{conditional_forecast} command. Stores the position of the constrained endogenous variables in declaration order.
 @end defvr
 
+@defvr {MATLAB/Octave variable} forecasts.controlled_exo_variables
+Variable set by the @code{conditional_forecast} command. Stores the values of the controlled exogenous 
+variables underlying the conditional forecasts to achieve the constrained endogenous 
+variables. Fields are number of constrained periods by 1 vectors and are of the form:
+@example
+@code{forecasts.controlled_exo_variables.@var{FORECAST_MOMENT}.@var{SHOCK_NAME}}
+@end example
+@end defvr
+
 @defvr {MATLAB/Octave variable} forecasts.graphs
 Variable set by the @code{conditional_forecast} command. Stores the information for generating the conditional forecast plots.
 @end defvr
@@ -6403,8 +6412,12 @@ Describes the path of constrained endogenous, before calling
 shocks in @code{shocks}, see @code{conditional_forecast} for an
 example.
 
-The syntax of the block is the same than the deterministic shocks in
-the @code{shocks} blocks (@pxref{Shocks on exogenous variables}).
+The syntax of the block is the same as for the deterministic shocks in
+the @code{shocks} blocks (@pxref{Shocks on exogenous variables}). Note that you need to specify the full path for all constrained endogenous 
+variables between the first and last specified period. If an intermediate period 
+is not specified, a value of 0 is assumed. That is, if you specify only 
+values for periods 1 and 3, the values for period 2 will be 0. Currently, it is not 
+possible to have uncontrolled intermediate periods.
 
 
 @end deffn
