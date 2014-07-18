@@ -34,7 +34,7 @@ function [steady_state,params,check] = dyn_ramsey_static(x,M,options_,oo)
 
 params = M.params;
 check = 0;
-options_.steadystate.nocheck = 1;
+options_.steadystate.nocheck = 1; %disable checking because Lagrange multipliers are not accounted for in evaluate_steady_state_file
 % dyn_ramsey_static_1 is a subfunction
 nl_func = @(x) dyn_ramsey_static_1(x,M,options_,oo);
 
@@ -100,7 +100,7 @@ if options_.steadystate_flag
 end
 
 xx = zeros(endo_nbr,1);
-xx(1:length(x)) = x;
+xx(1:M.orig_endo_nbr) = x(1:M.orig_endo_nbr); %take care of steady state file that will also return multipliers
 % setting steady state of auxiliary variables
 % that depends on original endogenous variables
 if any([M.aux_vars.type] ~= 6)
