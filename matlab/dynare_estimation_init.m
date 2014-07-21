@@ -130,6 +130,12 @@ if ~isempty(estim_params_)
     [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
 end
 
+% Check if a _prior_restrictions.m file exists
+if exist([M_.fname '_prior_restrictions.m'])
+    options_.prior_restrictions.status = 1;
+    options_.prior_restrictions.routine = str2func([M_.fname '_prior_restrictions.m']);
+end
+
 % Check that the provided mode_file is compatible with the current estimation settings.
 if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
     number_of_estimated_parameters = length(xparam1);
