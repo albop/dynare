@@ -448,7 +448,7 @@ switch DynareOptions.lik_init
                                                         zeros(mmm,1), Pinf, Pstar, ...
                                                         kalman_tol, riccati_tol, DynareOptions.presample, ...
                                                         T,R,Q,H1,Z,mmm,pp,rr);
-        diffuse_periods = length(dlik);
+        diffuse_periods = size(dlik,1);
     end
     if isnan(dLIK),
         info = 45;
