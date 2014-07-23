@@ -37,6 +37,7 @@ if isempty(DynareOptions.datafile) && isempty(DynareOptions.dataset.file) && ise
     if gsa_flag
         DynareDataset = dseries();
         DatasetInfo = [];
+        newdatainterface=0;
         return
     else
         error('makedataset: datafile option is missing!')
