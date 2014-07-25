@@ -11199,7 +11199,7 @@ used.
 Below, you will see a list of methods available for the Report class and
 a clarifying example.
 
-@defmethod Report report compiler, showDate, fileName, margin, marginUnit, orientation, paper, title
+@defmethod Report report compiler, showDate, fileName, margin, marginUnit, orientation, paper, showOutput, title
 Instantiates a @code{Report} object.
 @optionshead
 @table @code
@@ -11233,6 +11233,12 @@ Paper orientation: Default: @code{`portrait'}
 @anchor{paper}
 @item paper, `a4' | `letter'
 Paper size. Default: @code{`a4'}
+
+@anchor{showOutput}
+@item showOutput, @code{BOOLEAN}
+Print report creation progress to screen. Shows you the page number as it is
+created and as it is written. This is useful to see where a potential error
+occurs in report creation. Default: @code{true}
 
 @item title, @code{STRING}
 Report Title. Default: @code{none}
@@ -11677,7 +11683,8 @@ for passing the value at the last minute.
 
 @item showOutput, @code{BOOLEAN}
 Print the compiler output to the screen. Useful for debugging your code as the
-@LaTeX{} compiler hangs if there is a problem. Default: @code{true}
+@LaTeX{} compiler hangs if there is a problem. Default: the value of
+@ref{showOutput}
 
 @item showReport, @code{BOOLEAN}
 Open the compiled report (works on Windows and OS X on Matlab). Default:
