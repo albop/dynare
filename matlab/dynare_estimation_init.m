@@ -133,7 +133,7 @@ end
 % Check if a _prior_restrictions.m file exists
 if exist([M_.fname '_prior_restrictions.m'])
     options_.prior_restrictions.status = 1;
-    options_.prior_restrictions.routine = str2func([M_.fname '_prior_restrictions.m']);
+    options_.prior_restrictions.routine = str2func([M_.fname '_prior_restrictions']);
 end
 
 % Check that the provided mode_file is compatible with the current estimation settings.
