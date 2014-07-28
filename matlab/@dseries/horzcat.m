@@ -68,41 +68,38 @@ function a = concatenate(b,c)
         a = dseries();
     end
     d_nobs_flag = 0;
-    if ~isequal(b.nobs,c.nobs)
+    if ~isequal(nobs(b),nobs(c))
         d_nobs_flag = 1;
-    else
-        a.nobs = b.nobs;
     end
     d_init_flag = 0;
     if ~isequal(firstdate(b),firstdate(c))
         d_init_flag = 1;
     end
-    a.vobs = b.vobs+c.vobs;
     a.name = vertcat(b.name,c.name);
     a.tex  = vertcat(b.tex,c.tex);
     if ~( d_nobs_flag(1) || d_init_flag(1) )
         a.data = [b.data,c.data];
         a.dates = b.dates;
     else
+        nobs_b = nobs(b);
+        nobs_c = nobs(c);
         if firstdate(b)<=firstdate(c)
             if firstdate(b)<firstdate(c)
-                c.data = [NaN(firstdate(c)-firstdate(b),c.vobs); c.data];
+                c.data = [NaN(firstdate(c)-firstdate(b), vobs(c)); c.data];
             end
         else
-            b_first_lines = firstdate(b)-firstdate(c);
-            b.data = [NaN(firstdate(b)-firstdate(c),b.vobs); b.data];
+            b.data = [NaN(firstdate(b)-firstdate(c), vobs(b)); b.data];
         end
-        b_last_date = firstdate(b)+b.nobs;
-        c_last_date = firstdate(c)+c.nobs;
+        b_last_date = firstdate(b)+nobs_b;
+        c_last_date = firstdate(c)+nobs_c;
         if b_last_date<c_last_date
-            b.data = [b.data; NaN(c_last_date-b_last_date,b.vobs)];
+            b.data = [b.data; NaN(c_last_date-b_last_date, vobs(b))];
         elseif b_last_date>c_last_date
-            c.data = [c.data; NaN(b_last_date-c_last_date,c.vobs)];
+            c.data = [c.data; NaN(b_last_date-c_last_date, vobs(c))];
         end
         a.data = [b.data, c.data];
         a.dates = unique([b.dates, c.dates]);
     end
-    a.nobs = size(a.data,1);
 
 %@test:1
 %$ % Define a data set.

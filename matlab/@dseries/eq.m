@@ -37,13 +37,13 @@ if ~(isdseries(A) && isdseries(B))
     error('dseries::eq: Both input arguments must be dseries objects!')
 end
 
-if ~isequal(A.nobs,B.nobs)
+if ~isequal(nobs(A), nobs(B))
     warning('dseries::eq: Both input arguments should have the same number of observations!')
     C = 0;
     return
 end
 
-if ~isequal(A.vobs,B.vobs)
+if ~isequal(vobs(A), vobs(B))
     warning('dseries::eq: Both input arguments should have the same number of observations!')
     C = 0;
     return

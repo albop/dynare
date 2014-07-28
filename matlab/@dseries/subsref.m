@@ -65,7 +65,7 @@ function B = subsref(A, S) % --*-- Unitary tests --*--
 switch S(1).type
   case '.'
     switch S(1).subs
-      case {'data','nobs','vobs','name','tex','dates'}        % Public members.
+      case {'data','name','tex','dates'}        % Public members.
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
             error(['dseries::subsref: ' S(1).subs ' is not a method but a member!'])
         end
@@ -75,6 +75,12 @@ switch S(1).type
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
             S = shiftS(S,1);
         end
+      case 'nobs'
+        % Returns the number of observations.
+        B = rows(A.data);
+      case 'vobs'
+        % Returns the number of variables.
+        B = columns(A.data);
       case 'init'
         % Returns a dates object (first date).
         B = A.dates(1);
@@ -177,8 +183,6 @@ switch S(1).type
             B.name = A.name(ndx);
             B.tex = A.tex(ndx);
             B.tex  = deblank(A.tex(ndx,:));
-            B.nobs = A.nobs;
-            B.vobs = 1;
             B.dates = A.dates;
         else
             error('dseries::subsref: Unknown public method, public member or variable!')
@@ -232,8 +236,6 @@ switch S(1).type
         B.data = A.data(tdx,:);
         B.name = A.name;
         B.tex  = A.tex;
-        B.nobs = length(tdx);
-        B.vobs = A.vobs;
         B.dates = A.dates(tdx);
     elseif isvector(S(1).subs{1}) && all(isint(S(1).subs{1}))
         error('dseries::subsref: It is not possible to select observations with a vector of integers. You have to index with a dates object instead!');
@@ -245,15 +247,13 @@ switch S(1).type
         B = extract(A,S(1).subs{:});
     elseif isequal(length(S(1).subs),1) && all(isint(S(1).subs{1}))
         idx = S(1).subs{1};
-        if max(idx)>A.vobs || min(idx)<1
+        if max(idx)>size(A.data,2) || min(idx)<1
             error('dseries::subsref: Indices are out of bounds!')
         end
         B = dseries();
         B.data = A.data(:,idx);
         B.name = A.name(idx);
         B.tex  = A.tex(idx);
-        B.nobs = A.nobs;
-        B.vobs = length(idx);
         B.dates = A.dates;
     else
         error('dseries::subsref: What the Hell are you tryin'' to do?!')

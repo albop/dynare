@@ -34,12 +34,12 @@ if ~isdseries(B)
     error('dseries::isequal: Both input arguments must be dseries objects!')
 end
 
-if ~isequal(A.nobs,B.nobs)
+if ~isequal(nobs(A), nobs(B))
     C = 0;
     return
 end
 
-if ~isequal(A.vobs,B.vobs)
+if ~isequal(vobs(A), vobs(B))
     C = 0;
     return
 end

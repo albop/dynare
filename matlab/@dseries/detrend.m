@@ -30,9 +30,9 @@ if isnumeric(model)
           case 0
             data = demean(data);
           otherwise
-            x = NaN(o.nobs, model+1);
-            x(:,1) = ones(o.nobs, 1);
-            x(:,2) = transpose(1:o.nobs);
+            x = NaN(nobs(o), model+1);
+            x(:,1) = ones(nobs(o), 1);
+            x(:,2) = transpose(1:nobs(o));
             for c=3:model+1
                 x(:,c) = x(:,c-1).*x(:,2);
             end

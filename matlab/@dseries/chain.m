@@ -17,7 +17,7 @@ function vs = chain(ts,us)  % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ts.vobs-us.vobs
+if vobs(ts)-vobs(us)
     error(['dseries::chain: dseries objects ' inputname(1) ' and ' inputname(2) ' must have the same number of variables!'])
 end
 
@@ -35,9 +35,8 @@ CumulatedGrowthFactors = cumprod(GrowthFactor);
 
 vs = ts;
 vs.data = [vs.data; bsxfun(@times,CumulatedGrowthFactors,vs.data(end,:))];
-vs.nobs = rows(vs.data);
 
-vs.dates = firstdate(vs):firstdate(vs)+vs.nobs;
+vs.dates = firstdate(vs):firstdate(vs)+nobs(vs);
 
 %@test:1
 %$ try

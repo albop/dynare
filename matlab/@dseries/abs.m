@@ -40,16 +40,15 @@ function A = abs(B) % --*-- Unitary tests --*--
 
 A = dseries();
 
-A.nobs = B.nobs;
-A.vobs = B.vobs;
+A.data = abs(B.data);
 A.dates = B.dates;
-A.name = cell(A.vobs,1);
-A.tex = cell(A.vobs,1);
-for i = 1:A.vobs
+
+A.name = cell(vobs(A), 1);
+A.tex = cell(vobs(A), 1);
+for i = 1:vobs(A)
     A.name(i) = {[ 'abs(' B.name{i} ')']};
     A.tex(i) = {[ '|' B.tex{i} '|']};
 end
-A.data = abs(B.data);
 
 %@test:1
 %$ % Define a datasets.

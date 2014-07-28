@@ -47,14 +47,14 @@ switch frequency(ts)
   case 4
     us.data(2:end,:) = ts.data(2:end,:)./ts.data(1:end-1,:) - 1;
     us.data(1,:) = NaN;
-    for i = 1:ts.vobs
+    for i = 1:vobs(ts)
         us.name(i) = {['qgrowth(' us.name{i} ')']};
         us.tex(i) = {['\delta ' us.tex{i}]};
     end
   case 12
     us.data(4:end,:) = ts.data(4:end,:)./ts.data(1:end-3,:) - 1;
     us.data(1:3,:) = NaN;
-    for i = 1:ts.vobs
+    for i = 1:vobs(ts)
         us.name(i) = {['qgrowth(' us.name{i} ')']};
         us.tex(i) = {['\delta_3 ' us.tex{i}]};
     end

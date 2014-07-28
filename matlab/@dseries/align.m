@@ -62,32 +62,28 @@ b_last = last;
 
 if firstdate(b)>init
     n = firstdate(b)-init;
-    b.data = [NaN(n,b.vobs); b.data];
-    b.nobs = b.nobs+n;
+    b.data = [NaN(n, vobs(b)); b.data];
     b_init = init;
 end
 
 if firstdate(a)>init
     n = firstdate(a)-init;
-    a.data = [NaN(n,a.vobs); a.data];
-    a.nobs = a.nobs+n;
+    a.data = [NaN(n, vobs(a)); a.data];
     a_init = init;
 end
 
 if lastdate(b)<last
     n = last-lastdate(b);
-    b.data = [b.data; NaN(n,b.vobs)];
-    b.nobs = b.nobs+n;
+    b.data = [b.data; NaN(n, vobs(b))];
 end
 
 if lastdate(a)<last
     n = last-lastdate(a);
-    a.data = [a.data; NaN(n,a.vobs)];
-    a.nobs = a.nobs+n;
+    a.data = [a.data; NaN(n, vobs(a))];
 end
 
-a.dates = a_init:a_init+(a.nobs-1);
-b.dates = b_init:b_init+(b.nobs-1);
+a.dates = a_init:a_init+(nobs(a)-1);
+b.dates = b_init:b_init+(nobs(b)-1);
 
 %@test:1
 %$ % Define a datasets.

@@ -58,18 +58,18 @@ if isnumeric(C) && (isscalar(C) || isvector(C))
     return
 end
 
-if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
+if ~isequal(vobs(B), vobs(C)) && ~(isequal(vobs(B), 1) || isequal(vobs(C), 1))
     error(['dseries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
 else
-    if B.vobs>C.vobs
-        idB = 1:B.vobs;
-        idC = ones(1,B.vobs);
-    elseif B.vobs<C.vobs
-        idB = ones(1,C.vobs);
-        idC = 1:C.vobs;
+    if vobs(B)>vobs(C)
+        idB = 1:vobs(B);
+        idC = ones(1,vobs(B));
+    elseif vobs(B)<vobs(C)
+        idB = ones(1,vobs(C));
+        idC = 1:vobs(C);
     else
-        idB = 1:B.vobs;
-        idC = 1:C.vobs;
+        idB = 1:vobs(B);
+        idC = 1:vobs(C);
     end
 end
 
@@ -77,7 +77,7 @@ if ~isequal(frequency(B),frequency(C))
     error(['dseries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (frequencies are different)!'])
 end
 
-if ~isequal(B.nobs,C.nobs) || ~isequal(firstdate(B),firstdate(C))
+if ~isequal(nobs(B), nobs(C)) || ~isequal(firstdate(B),firstdate(C))
     [B, C] = align(B, C);
 end
 
@@ -93,19 +93,16 @@ end
 
 A = dseries();
 
+A.data = bsxfun(@plus,B.data,C.data);
 A.dates = B.dates;
-%A.freq = B.freq;
-%A.init = B.init;
-A.nobs = max(B.nobs,C.nobs);
-A.vobs = max(B.vobs,C.vobs);
-A.name = cell(A.vobs,1);
-A.tex = cell(A.vobs,1);
-for i=1:A.vobs
+
+A_vobs = max(vobs(B), vobs(C));
+A.name = cell(A_vobs,1);
+A.tex = cell(A_vobs,1);
+for i=1:A_vobs
     A.name(i) = {['plus(' B.name{idB(i)} ',' C.name{idC(i)} ')']};
     A.tex(i) = {['(' B.tex{idB(i)} '+' C.tex{idC(i)} ')']};
 end
-A.data = bsxfun(@plus,B.data,C.data);
-%A.dates = A.init:A.init+(A.nobs-1);
 
 %@test:1
 %$ % Define a datasets.

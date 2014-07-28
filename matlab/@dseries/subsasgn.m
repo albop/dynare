@@ -83,11 +83,11 @@ switch length(S)
               end
               return
           end
-          if ~isequal(length(S(1).subs),B.vobs)
+          if ~isequal(length(S(1).subs),vobs(B))
               error('dseries::subsasgn: Wrong syntax!')
           end
           if ~isequal(S(1).subs(:),B.name)
-              for i = 1:B.vobs
+              for i = 1:vobs(B)
                   if ~isequal(S(1).subs{i},B.name{i})
                       % Rename a variable.
                       id = find(strcmp(S(1).subs{i},A.name));
@@ -106,13 +106,13 @@ switch length(S)
         case '.'
           if isequal(S(1).subs,'init') && isdates(B) && isequal(length(B),1)
               % Change the initial date (update dates member)
-              A.dates = B:B+(A.nobs-1);
+              A.dates = B:B+(nobs(A)-1);
               return
           elseif isequal(S(1).subs,'dates') && isdates(B)
               % Overwrite the dates member
               A.dates = B;
               return
-          elseif ismember(S(1).subs,{'nobs','vobs','data','name','tex'})
+          elseif ismember(S(1).subs,{'data','name','tex'})
               error(['dseries::subsasgn: You cannot overwrite ' S(1).subs ' member!'])
           elseif ~isequal(S(1).subs,B.name)
               % Single variable selection.
@@ -143,7 +143,7 @@ switch length(S)
                   if isempty(tdy)
                       error('dseries::subsasgn: Periods of the dseries objects on the left and right hand sides must intersect!')
                   end
-                  if ~isequal(A.vobs,B.vobs)
+                  if ~isequal(vobs(A), vobs(B))
                       error('dseries::subsasgn: Dimension error! The number of variables on the left and right hand side must match.')
                   end
                   A.data(tdx,:) = B.data(tdy,:);
@@ -166,28 +166,20 @@ switch length(S)
               if isnumeric(B)
                   if isequal(rows(B),1)
                       A.data = repmat(B,A.dates.ndat,1);
-                      A.nobs = rows(A.data);
-                      A.vobs = columns(A.data);
                   elseif isequal(rows(B),A.dates.ndat)
                       A.data = B;
-                      A.nobs = rows(A.data);
-                      A.vobs = columns(A.data);
                   else
                       error('dseries::subsasgn: Wrong syntax!')
                   end
                   if isempty(A.name)
-                      A.name = default_name(A.vobs);
+                      A.name = default_name(vobs(A));
                       A.tex = name2tex(A.name);
                   end
               elseif isdseries(B)
-                  if isequal(B.nobs,1)
+                  if isequal(nobs(B), 1)
                       A.data = repmat(B.data,A.dates.ndat,1);
-                      A.nobs = rows(A.data);
-                      A.vobs = columns(A.data);
-                  elseif isequal(B.nobs,A.dates.ndat)
+                  elseif isequal(nobs(B), A.dates.ndat)
                       A.data = B;
-                      A.nobs = rows(A.data);
-                      A.vobs = columns(A.data);
                   else
                       error('dseries::subsasgn: Wrong syntax!')
                   end
@@ -211,7 +203,7 @@ switch length(S)
         else
             sA = extract(A,S(1).subs);
         end
-        if (isdseries(B) && isequal(sA.vobs,B.vobs)) || (isnumeric(B) && isequal(sA.vobs,columns(B))) || (isnumeric(B) && isequal(columns(B),1))
+        if (isdseries(B) && isequal(vobs(sA), vobs(B))) || (isnumeric(B) && isequal(vobs(sA),columns(B))) || (isnumeric(B) && isequal(columns(B),1))
             if isdates(S(2).subs{1})
                 [junk, tdx] = intersect(sA.dates.time,S(2).subs{1}.time,'rows');
                 if isdseries(B)

@@ -39,15 +39,15 @@ switch format
     fprintf(fid,'INIT__ = ''%s'';\n',date2string(firstdate(A)));
     fprintf(fid,'\n');
     fprintf(fid,'NAMES__ = {');
-    for i=1:A.vobs
+    for i=1:vobs(A)
         fprintf(fid,[ '''' A.name{i}  '''']);
-        if i<A.vobs
+        if i<vobs(A)
             fprintf(fid,'; ');
         end
     end
     fprintf(fid,'};\n');
     str = 'TEX__ = {';
-    for i=1:A.vobs-1
+    for i=1:vobs(A)-1
         str = [str, '''%s''; '];
     end
     str = [str, '''%s''};'];
@@ -56,7 +56,7 @@ switch format
     str = regexprep(str, pattern, '$1\\\\_');
     fprintf(fid,str);
     fprintf(fid,'\n\n');
-    for v=1:A.vobs
+    for v=1:vobs(A)
         fprintf(fid,'%s = [\n', A.name{v});
         fprintf(fid,'%15.8g\n',A.data(1:end-1,v));
         fprintf(fid,'%15.8g];\n\n',A.data(end,v));
@@ -68,7 +68,7 @@ switch format
     NAMES__ = A.name;
     TEX__ = A.tex;
     str = [];
-    for v=1:A.vobs
+    for v=1:vobs(A)
         str = [str, A.name{v} ' = A.data(:,' num2str(v) ');' ];
     end
     eval(str);
@@ -83,7 +83,7 @@ switch format
     fid = fopen([basename, '.csv'],'w');
     fprintf(fid,',%s', A.name{:});
     fprintf(fid,'\n');
-    for t=1:A.nobs
+    for t=1:nobs(A)
         str = sprintf(', %15.8g',A.data(t,:));
         fprintf(fid, '%s%s\n',date2string(A.dates(t)),str);
     end

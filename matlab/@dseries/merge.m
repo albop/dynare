@@ -51,46 +51,45 @@ end
 A = dseries();
 [A.name, IBC, junk] = unique([B.name; C.name], 'last');
 tex = [B.tex; C.tex];
-A.tex = tex(IBC); 
-A.vobs=length(IBC);
+A.tex = tex(IBC);
 
-if B.nobs == 0
+if nobs(B) == 0
     A = C;
-elseif C.nobs == 0
+elseif nobs(C) == 0
     A = B;
 elseif firstdate(B) >= firstdate(C)
     diff = firstdate(B) - firstdate(C);
-    A.nobs = max(B.nobs + diff, C.nobs);
-    A.data = NaN(A.nobs, A.vobs);
-    Z1 = [NaN(diff,B.vobs);B.data];
-    if A.nobs > B.nobs + diff
-        Z1 = [Z1; NaN(A.nobs-(B.nobs + diff),B.vobs)];
+    A_nobs = max(nobs(B) + diff, nobs(C));
+    A.data = NaN(A_nobs, vobs(A));
+    Z1 = [NaN(diff, vobs(B));B.data];
+    if nobs(A) > nobs(B) + diff
+        Z1 = [Z1; NaN(nobs(A)-(nobs(B) + diff), vobs(B))];
     end;
     Z2 = C.data;
-    if A.nobs > C.nobs
-        Z2 = [Z2; NaN(A.nobs - C.nobs,C.vobs)];
+    if nobs(A) > nobs(C)
+        Z2 = [Z2; NaN(nobs(A) - nobs(C), vobs(C))];
     end;
     Z = [Z1 Z2];
     A.data = Z(:,IBC);
     A_init = firstdate(C);
 else
     diff = firstdate(C) - firstdate(B);
-    A.nobs = max(C.nobs + diff, B.nobs);
-    A.data = NaN(A.nobs, A.vobs);
-    Z1 = [NaN(diff,C.vobs);C.data];
-    if A.nobs > C.nobs + diff
-        Z1 = [Z1; NaN(A.nobs-(C.nobs + diff),C.vobs)];
-    end;
+    A_nobs = max(nobs(C) + diff, nobs(B));
+    A.data = NaN(A_nobs, vobs(A));
+    Z1 = [NaN(diff, vobs(C)); C.data];
+    if nobs(A) > nobs(C) + diff
+        Z1 = [Z1; NaN(nobs(A)-(nobs(C) + diff), vobs(C))];
+    end
     Z2 = B.data;
-    if A.nobs > B.nobs 
-        Z2 = [Z2; NaN(A.nobs - B.nobs,B.vobs)];
+    if nobs(A) > nobs(B)
+        Z2 = [Z2; NaN(nobs(A) - nobs(B), vobs(B))];
     end;
     Z = [Z2 Z1];
     A.data = Z(:,IBC);
     A_init = B.init;
 end
 
-A.dates = A_init:A_init+(A.nobs-1);
+A.dates = A_init:A_init+(nobs(A)-1);
 
 %@test:1
 %$ % Define a datasets.

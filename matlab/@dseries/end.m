@@ -18,4 +18,4 @@ function lastIndex = end(o, k, n)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(k==1 && n==1, 'dseries::end: Wrong indexing!');
-lastIndex = o.vobs;
+lastIndex = vobs(o);
