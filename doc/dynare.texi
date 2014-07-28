@@ -9745,12 +9745,6 @@ The Matlab/Octave @dseries class handles time series data. As any Matlab/Octave 
 @table @code
 @anchor{dseries class members}
 
-@item nobs
-A scalar integer, the number of observations.
-
-@item vobs
-A scalar integer, the number of variables.
-
 @item name
 A @code{nobs}*1 cell of strings or a @code{nobs}*p character array, the names of the variables.
 
@@ -9765,7 +9759,7 @@ A @code{nobs} by @code{vobs} array of doubles, the data.
 
 @end table
 
-@noindent @code{nobs}, @code{vobs}, @code{data}, @code{name}, @code{tex} are private members. The following constructors are available:
+@noindent @code{data}, @code{name}, @code{tex} are private members. The following constructors are available:
 
 @deftypefn  {dseries} dseries ()
 @deftypefnx {dseries} dseries (@var{INITIAL_DATE})
@@ -10797,6 +10791,24 @@ ans =
 
 @sp 1
 
+@deftypefn{dseries} {@var{B} =} nobs (@var{A})
+
+Returns the number of observations in @dseries object @var{A}.
+
+@examplehead
+@example
+>> ts0 = dseries(randn(10));
+>> ts0.nobs
+
+ans =
+
+    10
+@end example
+
+@end deftypefn
+
+@sp 1
+
 @deftypefn{dseries} {@var{h} =} plot (@var{A})
 @deftypefnx{dseries} {@var{h} =} plot (@var{A}, @var{B})
 @deftypefnx{dseries} {@var{h} =} plot (@var{A}[, ...])
@@ -11145,6 +11157,26 @@ ts2 is a dseries object:
 @end example
 
 @end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} vobs (@var{A})
+
+Returns the number of variables in @dseries object @var{A}.
+
+@examplehead
+@example
+>> ts0 = dseries(randn(10,2));
+>> ts0.vobs
+
+ans =
+
+    2
+@end example
+
+@end deftypefn
+
+@sp 1
 
 @deftypefn{dseries} {@var{B} =} ydiff (@var{A})
 @deftypefnx{dseries} {@var{B} =} ygrowth (@var{A})
