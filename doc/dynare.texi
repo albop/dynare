@@ -11322,7 +11322,7 @@ command. Default: @code{`!'}
 @end defmethod
 
 @anchor{addGraph}
-@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, tickFontSize, title, titleFontSize, titleFormat, width, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelScaled, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
+@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, tickFontSize, title, titleFontSize, titleFormat, width, writeCSV, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelScaled, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -11337,10 +11337,12 @@ to the left, right, bottom, and top of the graphed line(s). @code{`L'} means
 that there is an axis to the left and bottom of the graphed line(s). Default:
 @code{`box'}
 
+@anchor{graphDirName}
 @item graphDirName, @code{STRING}
 The name of the folder in which to store this figure. Default:
 @code{tmpRepDir}
 
+@anchor{graphName}
 @item graphName, @code{STRING}
 The name to use when saving this figure. Default: something of the
 form @code{graph_pg1_sec2_row1_col3.tex}
@@ -11425,6 +11427,12 @@ the title and subtitles. Default: @code{TikZ default}
 
 @item width, @code{DOUBLE}
 The width of the graph, in inches. Default: @code{6.0}
+
+@item writeCSV, @code{BOOLEAN}
+Whether or not to write a CSV file with only the plotted data. The file will be
+saved in the directory specified by @ref{graphDirName} with the same base name
+as specified by @ref{graphName} with the ending @code{.csv}. Default:
+@code{false}
 
 @item xlabel, @code{STRING}
 The x-axis label. Default: @code{none}
