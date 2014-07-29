@@ -43,7 +43,8 @@ notForOtherThree = {'BLT_', 'UNR_', 'UNR_BAR_', 'UNR_GAP_'};
 
 rep = rep.addTable('title', countryName, ...
                    'range', {trange, dates('2012a'):dates('2014a')}, ...
-                   'vlineAfter', {vline_after dates('2014q4')});
+                   'vlineAfter', {vline_after dates('2014q4')}, ...
+                   'writeCSV', true);
 
 
 
