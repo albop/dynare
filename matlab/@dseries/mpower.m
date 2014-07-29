@@ -65,7 +65,7 @@ if isdseries(B) && isnumeric(C) && isreal(C) &&  isscalar(C)
     A.name = cell(vobs(A),1);
     A.tex = cell(vobs(A),1);
     for i=1:vobs(A)
-        A.name(i) = {['power(' B.name{i} ',' num2str(C) ')']};
+        A.name(i) = {['power(' B.name{i} ';' num2str(C) ')']};
         A.tex(i) = {[B.tex{i} '^' num2str(C) ]};
     end
     return
@@ -79,7 +79,7 @@ if isdseries(B) && isdseries(C)
         A.name = cell(vobs(A),1);
         A.tex = cell(vobs(A),1);
         for i=1:vobs(A)
-            A.name(i) = {['power(' B.name{i} ',' C.name{i} ')']};
+            A.name(i) = {['power(' B.name{i} ';' C.name{i} ')']};
             A.tex(i) = {[B.tex{i} '^{' C.tex{i} '}']};
         end
     else
@@ -112,7 +112,7 @@ error(['dseries::mpower: Wrong calling sequence!'])
 %$    t(2) = dyn_assert(ts3.vobs,2);
 %$    t(3) = dyn_assert(ts3.nobs,10);
 %$    t(4) = dyn_assert(ts3.data,A.^B,1e-15);
-%$    t(5) = dyn_assert(ts3.name,{'power(A1,B1)';'power(A2,B2)'});
+%$    t(5) = dyn_assert(ts3.name,{'power(A1;B1)';'power(A2;B2)'});
 %$    t(6) = dyn_assert(ts3.tex,{'A1^{B1}';'A2^{B2}'});
 %$ end
 %$ T = all(t);
@@ -139,7 +139,7 @@ error(['dseries::mpower: Wrong calling sequence!'])
 %$    t(2) = dyn_assert(ts3.vobs,2);
 %$    t(3) = dyn_assert(ts3.nobs,10);
 %$    t(4) = dyn_assert(ts3.data,A.^2,1e-15);
-%$    t(5) = dyn_assert(ts3.name,{'power(A1,2)';'power(A2,2)'});
+%$    t(5) = dyn_assert(ts3.name,{'power(A1;2)';'power(A2;2)'});
 %$    t(6) = dyn_assert(ts3.tex,{'A1^2';'A2^2'});
 %$ end
 %$ T = all(t);

@@ -86,7 +86,7 @@ if isdseries(B) && isdseries(C)
     A.name = cell(A_vobs,1);
     A.tex = cell(A_vobs,1);
     for i=1:A_vobs
-        A.name(i) = {['divide(' B.name{idB(i)} ',' C.name{idC(i)} ')']};
+        A.name(i) = {['divide(' B.name{idB(i)} ';' C.name{idC(i)} ')']};
         A.tex(i) = {['(' B.tex{idB(i)} '/' C.tex{idC(i)} ')']};
     end
     A.data = bsxfun(@rdivide,B.data,C.data);
