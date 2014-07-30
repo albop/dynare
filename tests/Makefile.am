@@ -26,9 +26,9 @@ MODFILES = \
 	optimal_policy/nk_ramsey_expectation.mod \
 	optimal_policy/nk_ramsey_expectation_a.mod \
 	optimal_policy/mult_elimination_test.mod \
-    optimal_policy/Ramsey/ramsey_ex_initval.mod \
-    optimal_policy/Ramsey/ramsey_ex.mod \
-    optimal_policy/Ramsey/ramsey_ex_initval_AR2.mod \
+	optimal_policy/Ramsey/ramsey_ex_initval.mod \
+	optimal_policy/Ramsey/ramsey_ex.mod \
+	optimal_policy/Ramsey/ramsey_ex_initval_AR2.mod \
 	discretionary_policy/dennis_1.mod \
 	ramst_initval_file.mod \
 	ramst_normcdf_and_friends.mod \
@@ -186,7 +186,7 @@ MODFILES = \
 
 XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value.mod \
-    optimal_policy/Ramsey/ramsey_ex_wrong_ss_file.mod \
+	optimal_policy/Ramsey/ramsey_ex_wrong_ss_file.mod \
 
 # Dependencies
 example1_use_dll.m.trs: example1.m.trs
@@ -349,8 +349,8 @@ EXTRA_DIST = \
 	filter_step_ahead/fs2000_filter_step_ahead_ML_steadystate.m \
 	loglinear/results_exp.mat \
 	smoother2histval/fsdat_simul.m \
-    optimal_policy/Ramsey/find_c.m \
-    optimal_policy/Ramsey/oo_ramsey_policy_initval.mat \
+	optimal_policy/Ramsey/find_c.m \
+	optimal_policy/Ramsey/oo_ramsey_policy_initval.mat \
 
 TARGETS =
 
