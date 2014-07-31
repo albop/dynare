@@ -7,7 +7,9 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-SCRIPTS_DIR=$(dirname $0)
+SCRIPTS_DIR=$(pwd)/$(dirname $0)
 
 uncrustify -l CPP --replace -c ${SCRIPTS_DIR}/uncrustify.cfg $1
-emacs -batch $1 -l ${SCRIPTS_DIR}/indent-c++.el
+
+cd $(dirname $1)
+emacs -batch $(basename $1) -l ${SCRIPTS_DIR}/indent-c++.el
