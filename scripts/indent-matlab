@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Reindents the MATLAB source code file given in argument.
+
+if [ -z "$1" ]; then
+    echo "Give a filename in argument"
+    exit 1
+fi
+
+SCRIPTS_DIR=$(dirname $0)
+
+emacs -batch $1 -l ${SCRIPTS_DIR}/indent-matlab.el
