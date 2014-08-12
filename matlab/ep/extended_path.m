@@ -397,6 +397,8 @@ while (t<sample_size)
         oo_.ep.failures.periods = [oo_.ep.failures.periods t];
         oo_.ep.failures.previous_period = [oo_.ep.failures.previous_period  endo_simul_1(:,1)];
         oo_.ep.failures.shocks = [oo_.ep.failures.shocks  shocks];
+        endo_simul_1 = repmat(steady_state,1,periods1+2);
+        endo_simul_1(:,1) = time_series(:,tsimul-1);
     end
 end% (while) loop over t
 
