@@ -404,11 +404,16 @@ end% (while) loop over t
 
 dyn_waitbar_close(hh);
 
+if isnan(options_.initial_period)
+    initial_period = dates(1,1);
+else
+    initial_period = optins_.initial_period;
+end
 if nargout
-    ts = dseries(transpose([initial_conditions, time_series]),options_.initial_period,cellstr(M_.endo_names));
+    ts = dseries(transpose([initial_conditions, time_series]),initial_period,cellstr(M_.endo_names));
 else
     oo_.endo_simul = [initial_conditions, time_series];
-    ts = dseries(transpose(oo_.endo_simul),options_.initial_period,cellstr(M_.endo_names));
+    ts = dseries(transpose(oo_.endo_simul),initial_period,cellstr(M_.endo_names));
     dyn2vec;
 end
 
