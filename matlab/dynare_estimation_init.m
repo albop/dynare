@@ -435,7 +435,8 @@ if options_.analytic_derivation,
     if estim_params_.np,
         % check if steady state changes param values
         M=M_;
-        M.params(estim_params_.param_vals(:,1)) = M.params(estim_params_.param_vals(:,1))*1.01;
+        M.params(estim_params_.param_vals(:,1)) = xparam1(estim_params_.nvx+estim_params_.ncx+estim_params_.nvn+estim_params_.ncn+1:end); %set parameters
+        M.params(estim_params_.param_vals(:,1)) = M.params(estim_params_.param_vals(:,1))*1.01; %vary parameters
         if options_.diffuse_filter
             steadystate_check_flag = 0;
         else
