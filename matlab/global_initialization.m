@@ -220,7 +220,7 @@ particle.initial_state_prior_std = .1;
 % Set the default order of approximation of the model (perturbation).
 particle.perturbation = 2;
 % Set the default number of particles.
-particle.number_of_particles = 500;
+particle.number_of_particles = 5000;
 % Set the default approximation order (Smolyak)
 particle.smolyak_accuracy = 3;
 % By default we don't use pruning
