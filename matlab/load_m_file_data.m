@@ -97,14 +97,20 @@ if isempty(varlist0)
             continue
         end
         if list_of_variables(current_variable_index).global || list_of_variables(current_variable_index).persistent
+            % A variable cannot be a global or persistent variable.
             continue
         end
         if list_of_variables(current_variable_index).complex || ~strcmp(list_of_variables(current_variable_index).class,'double')
+            % A variable cannot be complex.
+            continue
+        end
+        if list_of_variables(current_variable_index).size(2)>1
+            % A variable must be passed as a column vector.
             continue
         end
         try
             eval(['data = [data, ' list_of_variables(current_variable_index).name '];'])
-            eval(['varlist = {varlist{:}, ''' list_of_variables(current_variable_index).name '''};']) 
+            eval(['varlist = {varlist{:}, ''' list_of_variables(current_variable_index).name '''};'])
         catch
             error(['load_m_file:: All the vectors (variables) in ' inputname(1) ' must have the same number of rows (observations)!'])
         end
