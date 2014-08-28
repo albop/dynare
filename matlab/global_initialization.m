@@ -236,7 +236,10 @@ particle.unscented.alpha = .01;
 particle.unscented.beta = 2;
 particle.unscented.kappa = 0;
 % Configuration of resampling in case of particles
-particle.resampling.status = 'systematic'; % 'none', 'generic', 'smoothed'
+particle.resampling.status.systematic = 1;
+particle.resampling.status.none = 0;
+particle.resampling.status.generic = 0;
+
 particle.resampling.neff_threshold = .5;
 % Choice of the resampling method
 particle.resampling.method1 = 'traditional' ;

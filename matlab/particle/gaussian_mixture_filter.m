@@ -202,13 +202,13 @@ for t=1:sample_size
         %estimate(t,:,1) = SampleWeights*StateParticles' ;
         % Resampling if needed of required 
         Neff = 1/sum(bsxfun(@power,SampleWeights,2)) ;
-        if (Neff<.5*sample_size && strcmpi(DynareOptions.particle.resampling.status,'generic')) || strcmpi(DynareOptions.particle.resampling.status,'systematic')
+        if (DynareOptions.particle.resampling.status.generic && Neff<.5*sample_size) || DynareOptions.particle.resampling.status.systematic
             ks = ks + 1 ;
             StateParticles = resample(StateParticles',SampleWeights,DynareOptions)' ; 
             StateVectorMean = mean(StateParticles,2) ;
             StateVectorVarianceSquareRoot = reduced_rank_cholesky( (StateParticles*StateParticles')/number_of_particles - StateVectorMean*(StateVectorMean') )';
             SampleWeights = 1/number_of_particles ;
-        elseif strcmpi(DynareOptions.particle.resampling.status,'none')
+        elseif DynareOptions.particle.resampling.status.none
             StateVectorMean = StateParticles*sampleWeights ;
             temp = sqrt(SampleWeights').*StateParticles ;
             StateVectorVarianceSquareRoot = reduced_rank_cholesky( temp*temp' - StateVectorMean*(StateVectorMean') )';

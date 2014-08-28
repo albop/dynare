@@ -5301,9 +5301,29 @@ variables. This is equivalent to manually listing all the observed
 variables after the @code{estimation} command.
 
 @item number_of_particles = @var{INTEGER}
+@anchor{number_of_particles}
 Number of particles used when evaluating the likelihood of a non linear state space model. Default: @code{1000}.
 
+@item resampling = @var{OPTION}
+@anchor{resampling}
+Determines if resampling of the particles is done. Possible values for @var{OPTION} are:
+
+@table @code
+
+@item none
+No resampling.
+
+@item systematic
+Resampling at each iteration, this is the default value.
+
+@item generic
+Resampling if and only if the effective sample size is below a certain level defined by @code{resampling_threshold*number_of_particles}.
+
 @end table
+
+
+@end table
+
 
 @customhead{Note}
 
