@@ -5300,6 +5300,9 @@ filtered variables and forecasts (when requested) on all the observed
 variables. This is equivalent to manually listing all the observed
 variables after the @code{estimation} command.
 
+@item number_of_particles = @var{INTEGER}
+Number of particles used when evaluating the likelihood of a non linear state space model. Default: @code{1000}.
+
 @end table
 
 @customhead{Note}
