@@ -239,8 +239,7 @@ particle.unscented.kappa = 0;
 particle.resampling.status.systematic = 1;
 particle.resampling.status.none = 0;
 particle.resampling.status.generic = 0;
-
-particle.resampling.neff_threshold = .5;
+particle.resampling.threshold = .5;
 % Choice of the resampling method
 particle.resampling.method1 = 'traditional' ;
 particle.resampling.method2 = 'kitagawa';

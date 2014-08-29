@@ -5317,10 +5317,13 @@ No resampling.
 Resampling at each iteration, this is the default value.
 
 @item generic
-Resampling if and only if the effective sample size is below a certain level defined by @code{resampling_threshold*number_of_particles}.
+Resampling if and only if the effective sample size is below a certain level defined by @ref{resampling_threshold}*@ref{number_of_particles}.
 
 @end table
 
+@item resampling_threshold = @var{DOUBLE}
+@anchor{resampling_threshold}
+A real number between zero and one. The resampling step is triggered as soon as the effective number of particles is less than this number times the total number of particles (as set by @ref{number_of_particles}). This option is effective if and only if option @ref{resampling} has value @code{generic}.
 
 @end table
 
