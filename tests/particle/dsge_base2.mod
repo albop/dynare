@@ -35,26 +35,39 @@ steady;
 //disp(oo_.mean) ;
 
 estimated_params;
-alp, uniform_pdf,,, 0.0001, 0.5;
+alp, uniform_pdf,,, 0.0001, 0.99;
 bet, uniform_pdf,,, 0.0001, 0.99;
 tet, uniform_pdf,,, 0.0001, 1;
 tau, uniform_pdf,,, 0.0001, 100;
 delt, uniform_pdf,,, 0.0001, 0.05;
-rho, uniform_pdf,,, 0.8, 0.99;
+rho, uniform_pdf,,, 0.0001, 0.99;
 stderr e_a, uniform_pdf,,, 0.00001, 0.1;
 stderr y, uniform_pdf,,, 0.00001, 0.1;
 stderr l, uniform_pdf,,, 0.00001, 0.1;
 stderr i, uniform_pdf,,, 0.00001, 0.1;
 end;
 
+//estimated_params_init;
+//alp, 0.4;
+//bet, 0.99;
+//tet, 0.357 ;
+//tau, 50;
+//delt, 0.02;
+//rho, 0.95 ;
+//stderr e_a, .035;
+//stderr y, .0175;//.00158;
+//stderr l, .00312;//.0011;
+//stderr i, .00465;//.000866;
+//end;
+
 estimated_params_init;
 alp, 0.4;
-bet, 0.97;
-tet, 0.357 ;
-tau, 50;
-delt, 0.02;
-rho, 0.9 ;
-stderr e_a, .035;
+bet, 0.98;
+tet, 0.3;
+tau, 30;
+delt, 0.01;
+rho, 0.85;
+stderr e_a, .03;
 stderr y, .0175;//.00158;
 stderr l, .00312;//.0011;
 stderr i, .00465;//.000866;
@@ -98,8 +111,10 @@ options_.particle.IS_approximation_method = 'cubature' ;
 //options_.particle.approximation_method = 'unscented' ;
 //options_.particle.approximation_method = 'MonteCarlo' ;
 
-//options_.mh_posterior_mode_estimation=1 ;
+options_.mh_posterior_mode_estimation=0 ;
 
 // online
+options_.particle.liu_west_delta = 0.99 ;
+options_.mode_check_node_number = 250 ;
 
-estimation(datafile=data_risky_perturb3,nograph,order=2,nobs=100,mh_replic=0,mode_compute=7,mode_check);
+estimation(datafile=data_risky_perturb3,order=1,nograph,nobs=100,mh_replic=0,mode_compute=11);
