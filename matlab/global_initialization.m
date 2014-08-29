@@ -240,9 +240,9 @@ particle.resampling.status.systematic = 1;
 particle.resampling.status.none = 0;
 particle.resampling.status.generic = 0;
 particle.resampling.threshold = .5;
-% Choice of the resampling method
-particle.resampling.method1 = 'traditional' ;
-particle.resampling.method2 = 'kitagawa';
+particle.resampling.method.kitagawa = 1;
+particle.resampling.method.smooth = 0;
+particle.resampling.method.stratified = 0;
 % Number of partitions for the smoothed resampling method
 particle.resampling.number_of_partitions = 200;
 % Configuration of the mixture filters

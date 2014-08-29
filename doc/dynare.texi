@@ -5325,6 +5325,11 @@ Resampling if and only if the effective sample size is below a certain level def
 @anchor{resampling_threshold}
 A real number between zero and one. The resampling step is triggered as soon as the effective number of particles is less than this number times the total number of particles (as set by @ref{number_of_particles}). This option is effective if and only if option @ref{resampling} has value @code{generic}.
 
+@item resampling_method = @var{OPTION}
+@anchor{resampling_method}
+Sets the resampling method. Possible values for @var{OPTION} are: @code{kitagawa}, @code{stratified} and @code{smooth}.
+
+
 @end table
 
 
