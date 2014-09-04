@@ -609,6 +609,7 @@ options_.risky_steadystate = 0;
 % endogenous prior
 options_.endogenous_prior = 0;
 options_.endogenous_prior_restrictions.irf={};
+options_.endogenous_prior_restrictions.moment={};
 
 % OSR Optimal Simple Rules
 options_.osr.tolf=1e-7;
