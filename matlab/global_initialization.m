@@ -225,8 +225,6 @@ particle.number_of_particles = 5000;
 particle.smolyak_accuracy = 3;
 % By default we don't use pruning
 particle.pruning = 0;
-% Set default algorithm
-particle.algorithm = 'sequential_importance_particle_filter';
 % Set the Gaussian approximation method for Importance sampling
 particle.IS_approximation_method = 'unscented';
 % Set the Gaussian approximation method for particles distributions
@@ -243,6 +241,11 @@ particle.resampling.threshold = .5;
 particle.resampling.method.kitagawa = 1;
 particle.resampling.method.smooth = 0;
 particle.resampling.method.stratified = 0;
+% Set default algorithm
+particle.filter_algorithm.sis = 1;
+particle.filter_algorithm.apf = 0;
+particle.filter_algorithm.gmf = 0;
+particle.filter_algorithm.cpf = 0;
 % Number of partitions for the smoothed resampling method
 particle.resampling.number_of_partitions = 200;
 % Configuration of the mixture filters

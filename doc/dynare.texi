@@ -5329,6 +5329,28 @@ A real number between zero and one. The resampling step is triggered as soon as 
 @anchor{resampling_method}
 Sets the resampling method. Possible values for @var{OPTION} are: @code{kitagawa}, @code{stratified} and @code{smooth}.
 
+@item filter_algorithm = @var{OPTION}
+@anchor{resampling}
+Sets the particle filter algorithm. Possible values for @var{OPTION} are:
+
+@table @code
+
+@item sis
+Sequential importance sampling algorithm, this is the default value.
+
+@item apf
+Auxiliary particle filter.
+
+@item gf
+Gaussian filter.
+
+@item gmf
+Gaussian mixture filter.
+
+@item cpf
+Conditional particle filter.
+
+@end table
 
 @end table
 

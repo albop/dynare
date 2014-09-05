@@ -71,6 +71,27 @@ end
 if ~options_.dsge_var
     if options_.particle.status
         objective_function = str2func('non_linear_dsge_likelihood');
+        if options_.particle.filter_algorithm.sis == 1
+            options_.particle.algorithm = 'sequential_importance_particle_filter';
+        else
+            if options_.particle.filter_algorithm.apf == 1
+                options_.particle.algorithm = 'auxiliary_particle_filter';
+            else
+                if options_.particle.filter_algorithm.gf == 1
+                    options_.particle.algorithm = 'gaussian_filter';
+                else
+                    if options_.particle.filter_algorithm.gmf == 1
+                        options_.particle.algorithm = 'gaussian_mixture_filter';
+                    else
+                        if options_.particle.filter_algorithm.cpf == 1
+                            options_.particle.algorithm = 'conditional_particle_filter';
+                        else
+                            error('Estimation: Unknown filter!')
+                        end
+                    end
+                end
+            end
+        end
     else
         objective_function = str2func('dsge_likelihood');
     end
