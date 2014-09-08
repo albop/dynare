@@ -5357,7 +5357,7 @@ Conditional particle filter.
 Sets the method for approximating the proposal distribution. Possible values for @var{OPTION} are: @code{cubature}, @code{montecarlo} and @code{unscented}. Default value is @code{cubature}.
 
 @item distribution_approximation = @var{OPTION}
-@anchor{proposal_approximation}
+@anchor{distribution_approximation}
 Sets the method for approximating the particle distribution. Possible values for @var{OPTION} are: @code{cubature}, @code{montecarlo} and @code{unscented}. Default value is @code{unscented}.
 
 
