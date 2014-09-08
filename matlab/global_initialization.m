@@ -244,6 +244,7 @@ particle.resampling.method.stratified = 0;
 % Set default algorithm
 particle.filter_algorithm.sis = 1;
 particle.filter_algorithm.apf = 0;
+particle.filter_algorithm.gf = 0;
 particle.filter_algorithm.gmf = 0;
 particle.filter_algorithm.cpf = 0;
 % Number of partitions for the smoothed resampling method
