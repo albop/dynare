@@ -249,7 +249,6 @@ particle.filter_algorithm.cpf = 0;
 particle.proposal_approximation.cubature = 1;
 particle.proposal_approximation.unscented = 0;
 particle.proposal_approximation.montecarlo = 0;
-particle.proposal_approximation.quadrature = 0;
 % Number of partitions for the smoothed resampling method
 particle.resampling.number_of_partitions = 200;
 % Configuration of the mixture filters
