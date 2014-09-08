@@ -5330,7 +5330,7 @@ A real number between zero and one. The resampling step is triggered as soon as 
 Sets the resampling method. Possible values for @var{OPTION} are: @code{kitagawa}, @code{stratified} and @code{smooth}.
 
 @item filter_algorithm = @var{OPTION}
-@anchor{resampling}
+@anchor{filter_algorithm}
 Sets the particle filter algorithm. Possible values for @var{OPTION} are:
 
 @table @code
@@ -5351,6 +5351,10 @@ Gaussian mixture filter.
 Conditional particle filter.
 
 @end table
+
+@item proposal_approximation = @var{OPTION}
+@anchor{proposal_approximation}
+Sets the method for approximating the proposal distribution. Possible values for @var{OPTION} are: @code{cubature}, @code{montecarlo} and @code{unscented}. Default value is @code{cubature}.
 
 @end table
 

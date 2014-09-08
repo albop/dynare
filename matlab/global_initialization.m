@@ -225,8 +225,6 @@ particle.number_of_particles = 5000;
 particle.smolyak_accuracy = 3;
 % By default we don't use pruning
 particle.pruning = 0;
-% Set the Gaussian approximation method for Importance sampling
-particle.IS_approximation_method = 'unscented';
 % Set the Gaussian approximation method for particles distributions
 particle.approximation_method = 'unscented';
 % Set unscented parameters alpha, beta and kappa for gaussian approximation
@@ -247,6 +245,11 @@ particle.filter_algorithm.apf = 0;
 particle.filter_algorithm.gf = 0;
 particle.filter_algorithm.gmf = 0;
 particle.filter_algorithm.cpf = 0;
+% Approximation of the proposal distribution
+particle.proposal_approximation.cubature = 1;
+particle.proposal_approximation.unscented = 0;
+particle.proposal_approximation.montecarlo = 0;
+particle.proposal_approximation.quadrature = 0;
 % Number of partitions for the smoothed resampling method
 particle.resampling.number_of_partitions = 200;
 % Configuration of the mixture filters
