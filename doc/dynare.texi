@@ -4592,15 +4592,15 @@ univariate convergence diagnostic.
 @table @code
 
 @item datafile = @var{FILENAME}
-@anchor{datafile}
-The datafile: a @file{.m} file, a @file{.mat} file, a @file{.csv}
-file, or a @file{.xls}/@file{.xlsx} file (under Octave, the
-@uref{http://octave.sourceforge.net/io/,io} from Octave-Forge is
-required for the @file{.csv}, @file{.xls} and @file{.xlsx} formats; in
-addition, for the @file{.xls} and @file{.xlsx} formats, the
-@uref{http://octave.sourceforge.net/java/,java} package is required,
-along with a @uref{http://www.java.com/download,Java Runtime
-Environment})
+@anchor{datafile} The datafile: a @file{.m} file, a @file{.mat} file, a
+@file{.csv} file, or a @file{.xls}/@file{.xlsx} file (under Octave, the
+@uref{http://octave.sourceforge.net/io/,io} from Octave-Forge is required for
+the @file{.csv}, @file{.xls} and @file{.xlsx} formats; in addition, for the
+@file{.xls} and @file{.xlsx} formats, the
+@uref{http://octave.sourceforge.net/java/,java} package is required, along with
+a @uref{http://www.java.com/download,Java Runtime Environment}). Note that the
+base name (ie without extension) of the datafile has to be different from the
+base name of the model file.
 
 @item xls_sheet = @var{NAME}
 @anchor{xls_sheet}
