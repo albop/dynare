@@ -188,7 +188,7 @@ MODFILES = \
 
 XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value.mod \
-	optimal_policy/Ramsey/ramsey_ex_wrong_ss_file.mod \
+	optimal_policy/Ramsey/ramsey_ex_wrong_ss_file.mod
 
 # Dependencies
 example1_use_dll.m.trs: example1.m.trs
@@ -352,7 +352,7 @@ EXTRA_DIST = \
 	loglinear/results_exp.mat \
 	smoother2histval/fsdat_simul.m \
 	optimal_policy/Ramsey/find_c.m \
-	optimal_policy/Ramsey/oo_ramsey_policy_initval.mat \
+	optimal_policy/Ramsey/oo_ramsey_policy_initval.mat 
 
 TARGETS =
 
