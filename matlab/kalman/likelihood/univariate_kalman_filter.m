@@ -111,7 +111,7 @@ smpl = last-start+1;
 % Initialize some variables.
 QQ   = R*Q*transpose(R);   % Variance of R times the vector of structural innovations.
 t    = start;              % Initialization of the time index.
-lik  = zeros(smpl,pp);     % Initialization of the matrix gathering the densities at each time and each obsrrvable
+lik  = zeros(smpl,pp);     % Initialization of the matrix gathering the densities at each time and each observable
 LIK  = Inf;                % Default value of the log likelihood.
 oldP = Inf;
 l2pi = log(2*pi);
