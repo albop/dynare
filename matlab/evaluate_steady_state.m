@@ -207,9 +207,16 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
                 disp(['STEADY:  numerical initial values or parameters incompatible with the following' ...
                       ' equations'])
                 disp(ii')
-                disp('Check whether your model in truly linear')
+                disp('Check whether your model is truly linear. Put "resid(1);" before "steady;" to see the problematic equations.\n')
             elseif isempty(ii) && max(abs(fvec)) > 1e-12
                 ys = ys_init-jacob\fvec;
+                resid = evaluate_static_model(ys,exo_ss,params,M,options);
+                if max(abs(resid)) > 1e-6
+                    check=1;
+                    fprintf('STEADY: No steady state for your model could be found\n')
+                    fprintf('STEADY: Check whether your model is truly linear. Put "resid(1);" before "steady;" to see the problematic equations.\n')
+                end
+
             else
                 ys = ys_init;
             end
@@ -225,7 +232,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
                             fprintf('STEADY:  Derivative of Equation %d with respect to Variable %s  (initial value of %s: %g) \n',infrow(ii),deblank(M.endo_names(orig_var_index,:)),deblank(M.endo_names(orig_var_index,:)),ys_init(infcol(ii)))
                         end
                     end
-                    disp('STEADY: Check whether your model in truly linear\n')
+                    fprintf('Check whether your model is truly linear. Put "resid(1);" before "steady;" to see the problematic equations.\n')
                 end
             end
         end
