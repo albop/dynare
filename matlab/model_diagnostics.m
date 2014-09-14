@@ -123,6 +123,12 @@ for b=1:nb
         fprintf('\nMODEL_DIAGNOSTICS: The Jacobian of the static model contains Inf or NaN. The problem arises from: \n\n')
         display_problematic_vars_Jacobian(infrow,infcol,M,dr.ys,'static','MODEL_DIAGNOSTICS: ')
     end
+    if any(any(~isreal(jacob)))
+        problem_dummy=1;
+        [imagrow,imagcol]=find(abs(imag(jacob))>1e-15);
+        fprintf('\nMODEL_DIAGNOSTICS: The Jacobian of the static model contains imaginary parts. The problem arises from: \n\n')
+        display_problematic_vars_Jacobian(imagrow,imagcol,M,dr.ys,'static','MODEL_DIAGNOSTICS: ')
+    end
     try
         rank_jacob = rank(jacob); %can sometimes fail
     catch
@@ -214,6 +220,12 @@ if any(any(isinf(jacobia_) | isnan(jacobia_)))
     [infrow,infcol]=find(isinf(jacobia_) | isnan(jacobia_));
     fprintf('\nMODEL_DIAGNOSTICS: The Jacobian of the dynamic model contains Inf or NaN. The problem arises from: \n\n')
     display_problematic_vars_Jacobian(infrow,infcol,M,dr.ys,'dynamic','MODEL_DIAGNOSTICS: ')
+end
+if any(any(~isreal(jacobia_)))
+    problem_dummy=1;
+    [imagrow,imagcol]=find(abs(imag(jacobia_))>1e-15);
+    fprintf('\nMODEL_DIAGNOSTICS: The Jacobian of the dynamic model contains imaginary parts. The problem arises from: \n\n')
+    display_problematic_vars_Jacobian(imagrow,imagcol,M,dr.ys,'dynamic','MODEL_DIAGNOSTICS: ')
 end
 if exist('hessian1','var')
     if any(any(isinf(hessian1) | isnan(hessian1)))

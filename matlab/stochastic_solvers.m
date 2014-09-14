@@ -134,6 +134,11 @@ if ~isreal(jacobia_)
     if max(max(abs(imag(jacobia_)))) < 1e-15
         jacobia_ = real(jacobia_);
     else
+        if options_.debug
+            [imagrow,imagcol]=find(abs(imag(jacobia_))>1e-15);
+            fprintf('\nMODEL_DIAGNOSTICS: The Jacobian of the dynamic model contains imaginary parts. The problem arises from: \n\n')
+            display_problematic_vars_Jacobian(imagrow,imagcol,M_,dr.ys,'dynamic','STOCHASTIC_SOLVER: ')
+        end
         info(1) = 6;
         info(2) = sum(sum(imag(jacobia_).^2));
         return
