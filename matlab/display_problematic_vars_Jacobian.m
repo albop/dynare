@@ -36,9 +36,13 @@ function []=display_problematic_vars_Jacobian(problemrow,problemcol,M_,x,type,ca
 if nargin<6
     caller_string='';
 end
-aux_vars_type = [M_.aux_vars.type];
-aux_eq_nbr = max(find(aux_vars_type == 6)); 
-if isempty(aux_eq_nbr)
+if ~isempty(M_.aux_vars)
+    aux_vars_type = [M_.aux_vars.type];
+    aux_eq_nbr = max(find(aux_vars_type == 6)); 
+    if isempty(aux_eq_nbr)
+        aux_eq_nbr=0;
+    end
+else
     aux_eq_nbr=0;
 end
 if strcmp(type,'dynamic')
@@ -84,6 +88,7 @@ if strcmp(type,'dynamic')
     fprintf('\n%s  The problem most often occurs, because a variable with\n',caller_string)
     fprintf('%s  exponent smaller than 1 has been initialized to 0. Taking the derivative\n',caller_string)
     fprintf('%s  and evaluating it at the steady state then results in a division by 0.\n',caller_string)
+    fprintf('%s  If you are using model-local variables (# operator), check their values as well.\n',caller_string)
 elseif strcmp(type,'static')
     for ii=1:length(problemrow)
         if problemcol(ii)<=M_.orig_endo_nbr
@@ -119,6 +124,7 @@ elseif strcmp(type,'static')
     fprintf('\n%s  The problem most often occurs, because a variable with\n',caller_string)
     fprintf('%s exponent smaller than 1 has been initialized to 0. Taking the derivative\n',caller_string)
     fprintf('%s and evaluating it at the steady state then results in a division by 0.\n',caller_string)
+    fprintf('%s  If you are using model-local variables (# operator), check their values as well.\n',caller_string)
 else
     error('Unknown Type')    
 end
