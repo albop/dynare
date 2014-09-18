@@ -4353,10 +4353,12 @@ Specifies a starting value for the posterior mode optimizer or the
 maximum likelihood estimation. If unset, defaults to the prior mean.
 
 @item @var{LOWER_BOUND}
-Specifies a lower bound for the parameter value in maximum likelihood estimation
+@anchor{lower_bound}
+Specifies a lower bound for the parameter value in maximum likelihood estimation and the lower bound for truncation of the prior distribution in Bayesian estimation. In case of Bayesian estimation, the untruncated prior distribution is simply truncated to the specified bounds without redistributing the truncated mass. As a consequence, the specified @ref{prior_mean} and @ref{prior_standard_error} still refer to the underlying untruncated distribution. Moreover, the truncated prior does not integrate to 1. Currently, Dynare does not consider this truncation in @ref{model_comparison}.
+If unset, defaults to minus infinity (ML) or the natural lower bound of the prior (Bayesian estimation). 
 
 @item @var{UPPER_BOUND}
-Specifies an upper bound for the parameter value in maximum likelihood estimation
+Same as @ref{lower_bound}, but specifying an upper bound instead.
 
 @item @var{PRIOR_SHAPE}
 A keyword specifying the shape of the prior density.
@@ -4368,10 +4370,10 @@ that @code{inv_gamma_pdf} is equivalent to
 @code{inv_gamma1_pdf}
 
 @item @var{PRIOR_MEAN}
-The mean of the prior distribution
+@anchor{prior_mean} The mean of the prior distribution
 
 @item @var{PRIOR_STANDARD_ERROR}
-The standard error of the prior distribution
+@anchor{prior_standard_error} The standard error of the prior distribution
 
 @item @var{PRIOR_3RD_PARAMETER}
 A third parameter of the prior used for generalized beta distribution,
@@ -5731,7 +5733,7 @@ estimates using a higher tapering are usually more reliable.
 
 @deffn Command model_comparison @var{FILENAME}[(@var{DOUBLE})]@dots{};
 @deffnx Command model_comparison (marginal_density = laplace | modifiedharmonicmean) @var{FILENAME}[(@var{DOUBLE})]@dots{};
-
+@anchor{model_comparison}
 @descriptionhead
 
 This command computes odds ratios and estimate a posterior density
@@ -5741,6 +5743,13 @@ as the @var{DOUBLE} values, otherwise a uniform prior over all models is assumed
 In contrast to frequentist econometrics, the models to be compared do not need to be nested. 
 However, as the computation of posterior odds ratios is a Bayesian technique, 
 the comparison of models estimated with maximum likelihood is not supported.
+It is important to keep in mind that model comparison of this type is only valid with proper priors. 
+If the prior does not integrate to 1 due to explicit truncation using 
+e.g. @ref{lower_bound} or because meaningful prior mass is implicitly truncated d
+ue to instability and indeterminacy of the model, the model comparison may be invalid.
+At the current stage, Dynare does not renormalize the prior accordingly and it is the 
+user's responsibility to make sure that model comparison is based on proper priors.
+
 
 @examplehead
 
