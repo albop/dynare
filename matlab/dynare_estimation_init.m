@@ -1,24 +1,37 @@
-function [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_, fake] = dynare_estimation_init(var_list_, dname, gsa_flag, M_, options_, oo_, estim_params_, bayestopt_)
+function [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, gsa_flag, M_, options_, oo_, estim_params_, bayestopt_)
 
 % function dynare_estimation_init(var_list_, gsa_flag)
 % preforms initialization tasks before estimation or
 % global sensitivity analysis
 %
 % INPUTS
-%   var_list_:  selected endogenous variables vector
-%   dname:      alternative directory name
-%   gsa_flag:   flag for GSA operation (optional)
-%
+%   var_list_:      selected endogenous variables vector
+%   dname:          alternative directory name
+%   gsa_flag:       flag for GSA operation (optional)
+%   M_:             structure storing the model information
+%   options_:       structure storing the options
+%   oo_:            structure storing the results
+%   estim_params_:  structure storing information about estimated
+%                   parameters
+%   bayestopt_:     structure storing information about priors
+
 % OUTPUTS
-%   data:    data after required transformation
-%   rawdata:  data as in the data file
-%   xparam1:    initial value of estimated parameters as returned by
-%               set_prior()
-%
+%   dataset_:       the dataset after required transformation
+%   dataset_info:   Various informations about the dataset (descriptive statistics and missing observations).
+%   xparam1:        initial value of estimated parameters as returned by
+%                   set_prior() or loaded from mode-file
+%   hh:             hessian matrix at the loaded mode (or empty matrix)
+%   M_:             structure storing the model information
+%   options_:       structure storing the options
+%   oo_:            structure storing the results
+%   estim_params_:  structure storing information about estimated
+%                   parameters
+%   bayestopt_:     structure storing information about priors
+% 
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2013 Dynare Team
+% Copyright (C) 2003-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
