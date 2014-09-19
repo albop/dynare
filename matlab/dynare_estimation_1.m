@@ -977,9 +977,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
     if options_.prefilter == 1
         yf = atT(bayestopt_.mf,:)+repmat(dataset_info.descriptive.mean',1,gend);
     elseif options_.loglinear == 1
-        gend
-        bayestopt_.mfys
-        ys
         yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+...
              trend_coeff*[1:gend];
     else
