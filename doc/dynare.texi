@@ -4353,9 +4353,17 @@ Specifies a starting value for the posterior mode optimizer or the
 maximum likelihood estimation. If unset, defaults to the prior mean.
 
 @item @var{LOWER_BOUND}
-@anchor{lower_bound}
-Specifies a lower bound for the parameter value in maximum likelihood estimation and the lower bound for truncation of the prior distribution in Bayesian estimation. In case of Bayesian estimation, the untruncated prior distribution is simply truncated to the specified bounds without redistributing the truncated mass. As a consequence, the specified @ref{prior_mean} and @ref{prior_standard_error} still refer to the underlying untruncated distribution. Moreover, the truncated prior does not integrate to 1. Currently, Dynare does not consider this truncation in @ref{model_comparison}.
-If unset, defaults to minus infinity (ML) or the natural lower bound of the prior (Bayesian estimation). 
+@anchor{lower_bound} Specifies a lower bound for the parameter value in maximum
+likelihood estimation. In a Bayesian estimation context, sets a lower bound
+only effective while maximizing the posterior kernel. This lower bound does not
+modify the shape of the prior density, and is only aimed at helping the
+optimizer in identifying the posterior mode (no consequences for the MCMC). For
+some prior densities (namely inverse gamma, gamma, uniform or beta) it is
+possible to shift the default lower bound (zero) on the left or the right using
+@ref{prior_3rd_parameter}. In this case the prior density is effectively
+modified (note that the truncated Gaussian density is not implemented in
+Dynare). If unset, defaults to minus infinity (ML) or the natural lower bound
+of the prior (Bayesian estimation).
 
 @item @var{UPPER_BOUND}
 Same as @ref{lower_bound}, but specifying an upper bound instead.
@@ -4376,10 +4384,12 @@ that @code{inv_gamma_pdf} is equivalent to
 @anchor{prior_standard_error} The standard error of the prior distribution
 
 @item @var{PRIOR_3RD_PARAMETER}
+@anchor{prior_3rd_parameter}
 A third parameter of the prior used for generalized beta distribution,
 generalized gamma and for the uniform distribution. Default: @code{0}
 
 @item @var{PRIOR_4TH_PARAMETER}
+@anchor{prior_4th_parameter}
 A fourth parameter of the prior used for generalized beta distribution
 and for the uniform distribution. Default: @code{1}
 
