@@ -314,9 +314,9 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     end
     parameter_names = bayestopt_.name;
     if options_.cova_compute || options_.mode_compute==5 || options_.mode_compute==6
-        save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
+        save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names','fval');
     else
-        save([M_.fname '_mode.mat'],'xparam1','parameter_names');
+        save([M_.fname '_mode.mat'],'xparam1','parameter_names','fval');
     end
 end
 
