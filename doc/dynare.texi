@@ -4359,7 +4359,7 @@ only effective while maximizing the posterior kernel. This lower bound does not
 modify the shape of the prior density, and is only aimed at helping the
 optimizer in identifying the posterior mode (no consequences for the MCMC). For
 some prior densities (namely inverse gamma, gamma, uniform or beta) it is
-possible to shift the default lower bound (zero) on the left or the right using
+possible to shift the support of the prior distributions to the left or the right using
 @ref{prior_3rd_parameter}. In this case the prior density is effectively
 modified (note that the truncated Gaussian density is not implemented in
 Dynare). If unset, defaults to minus infinity (ML) or the natural lower bound
