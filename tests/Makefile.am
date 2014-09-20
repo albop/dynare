@@ -166,6 +166,10 @@ MODFILES = \
 	kalman_filter_smoother/fs2000_smoother_only.mod \
 	kalman_filter_smoother/check_variable_dimensions/fs2000.mod \
 	kalman_filter_smoother/check_variable_dimensions/fs2000_ML.mod \
+	kalman/likelihood_from_dynare/fs2000_corr_ME.mod \
+	kalman/likelihood_from_dynare/fs2000_corr_ME_missing.mod \
+	kalman/likelihood_from_dynare/fs2000_uncorr_ME.mod \
+	kalman/likelihood_from_dynare/fs2000_uncorr_ME_missing.mod \
 	second_order/burnside_1.mod \
 	second_order/ds1.mod \
 	second_order/ds2.mod \
@@ -397,6 +401,9 @@ EXTRA_DIST = \
 	ms-sbvar/archive-files/specification_2v2c.dat \
 	recursive/data_ca1.m \
 	kalman_filter_smoother/fsdat_simul.m \
+	kalman/likelihood_from_dynare/fsdat_simul_corr_ME_missing.m \
+	kalman/likelihood_from_dynare/fsdat_simul_uncorr_ME.m \
+	kalman/likelihood_from_dynare/fsdat_simul_uncorr_ME_missing.m \
 	identification/kim/kim2_steadystate.m \
 	identification/as2007/as2007_steadystate.m \
 	estimation/fsdat_simul.m \
