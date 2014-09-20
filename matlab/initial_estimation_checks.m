@@ -122,6 +122,9 @@ else
     b=0;
     fval = 0;
 end
+if DynareOptions.debug
+    DynareResults.likelihood_at_initial_parameters=fval;
+end
 DynareOptions.analytic_derivation=ana_deriv;
 
 if DynareOptions.dsge_var || strcmp(func2str(objective_function),'non_linear_dsge_likelihood')
