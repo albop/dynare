@@ -1,4 +1,4 @@
-function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults] = dsge_likelihood(xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults,derivatives_info)
+function [fval,DLIK,Hess,exit_flag,SteadyState,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults] = dsge_likelihood(xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults,derivatives_info)
 % Evaluates the posterior kernel of a dsge model using the specified
 % kalman_algo; the resulting posterior includes the 2*pi constant of the
 % likelihood function
@@ -39,7 +39,7 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 %! Integer scalar, equal to zero if the routine return with a penalty (one otherwise).
 %! @item ys
 %! Vector of doubles, steady state level for the endogenous variables.
-%! @item trend_coeffs
+%! @item trend_coeff
 %! Matrix of doubles, coefficients of the deterministic trend in the measurement equation.
 %! @item info
 %! Integer scalar, error code.
@@ -136,16 +136,15 @@ global objective_function_penalty_base
 
 % Initialization of the returned variables and others...
 fval        = [];
-ys          = [];
+SteadyState = [];
 trend_coeff = [];
 exit_flag   = 1;
 info        = 0;
-singularity_flag = 0;
 DLIK        = [];
 Hess       = [];
 
 if DynareOptions.estimation_dll
-    [fval,exit_flag,ys,trend_coeff,info,params,H,Q] ...
+    [fval,exit_flag,SteadyState,trend_coeff,info,params,H,Q] ...
         = logposterior(xparam1,DynareDataset, DynareOptions,Model, ...
                           EstimatedParameters,BayesInfo,DynareResults);
     mexErrCheck('logposterior', exit_flag);
@@ -154,7 +153,7 @@ if DynareOptions.estimation_dll
         Model.H = H;
     end
     Model.Sigma_e = Q;
-    DynareResults.dr.ys = ys;
+    DynareResults.dr.ys = SteadyState;
     return
 end
 
@@ -315,7 +314,8 @@ if BayesInfo.with_trend
     end
     trend = repmat(constant,1,DynareDataset.nobs)+trend_coeff*[1:DynareDataset.nobs];
 else
-    trend = repmat(constant,1,DynareDataset.nobs);
+   trend_coeff = zeros(DynareDataset.vobs,1);
+   trend = repmat(constant,1,DynareDataset.nobs);
 end
 
 % Get needed informations for kalman filter routines.
