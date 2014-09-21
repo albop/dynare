@@ -1,7 +1,7 @@
 function [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, gsa_flag, M_, options_, oo_, estim_params_, bayestopt_)
 
 % function dynare_estimation_init(var_list_, gsa_flag)
-% preforms initialization tasks before estimation or
+% performs initialization tasks before estimation or
 % global sensitivity analysis
 %
 % INPUTS
