@@ -3663,8 +3663,12 @@ suppresses the plotting of IRFs. Default: @code{40}.
 The exogenous variables for which to compute IRFs. Default: all.
 
 @item relative_irf
-Requests the computation of normalized IRFs in percentage of the
-standard error of each shock.
+@anchor{relative_irf}
+
+Requests the computation of normalized IRFs. At first order, the normal shock vector of size one standard deviation is divided by the standard deviation of the current shock and multiplied by 100. The impulse responses are hence the responses to a unit shock of size 1 (as opposed to the regular shock size of one standard deviation), multiplied by 100. Thus, for a loglinearized model where the variables are measured in percent, the IRFs have the interpretation of the percent responses to a 100 percent shock. For example, a response of 400 of output to a TFP shock shows that output increases by 400 percent after a 100 percent TFP shock (you will see that TFP increases by 100 on impact). Given linearity at @code{ordeR=1}, it is straightforward to rescale the IRFs stored in @code{oo_.irfs} to any desired size.
+At higher order, the interpretation is different. The @code{relative_irf} option then triggers the generation of IRFs as the response to a 0.01 unit shock (corresponding to 1 percent for shocks measured in percent) and no multiplication with 100 is performed. That is, the normal shock vector of size one standard deviation is divided by the standard deviation of the current shock and divided by 100.
+For example, a response of 0.04 of log output (thus measured in percent of the steady state output level) to a TFP shock also measured in percent then shows that output increases by 4 percent after a 1 percent TFP shock (you will see that TFP increases by 0.01 on impact).
+
 
 @item irf_plot_threshold = @var{DOUBLE}
 @anchor{irf_plot_threshold}
@@ -5228,6 +5232,9 @@ Metropolis-Hastings. Default: diagnostics are computed and displayed
 distribution of IRFs. The length of the IRFs are controlled by the
 @code{irf} option. Results are stored in @code{oo_.PosteriorIRF.dsge}
 (see below for a description of this variable)
+
+@item relative_irf
+@xref{relative_irf}.
 
 @item dsge_var = @var{DOUBLE}
 @anchor{dsge_var} Triggers the estimation of a DSGE-VAR model, where the
