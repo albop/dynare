@@ -177,8 +177,12 @@ while fpar<B
     irf_shocks_indx = getIrfShocksIndx();
     for i=irf_shocks_indx
         if SS(i,i) > 1e-13
-            y=irf(dr,SS(M_.exo_names_orig_ord,i), options_.irf, options_.drop,options_.replic,options_.order);
-            if options_.relative_irf
+            if options_.order>1 && options_.relative_irf % normalize shock to 0.01 before IRF generation for GIRFs; multiply with 100 later
+                y=irf(dr,SS(M_.exo_names_orig_ord,i)./SS(i,i)/100, options_.irf, options_.drop,options_.replic,options_.order);
+            else
+                y=irf(dr,SS(M_.exo_names_orig_ord,i), options_.irf, options_.drop,options_.replic,options_.order);
+            end
+            if options_.relative_irf && options_.order==1 %multiply with 100 for backward compatibility
                 y = 100*y/SS(i,i);
             end
             for j = 1:nvar
