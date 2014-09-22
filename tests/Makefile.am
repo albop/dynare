@@ -18,6 +18,7 @@ MODFILES = \
 	example1_abs_sign.mod \
 	example1_macroif.mod \
 	t_sgu_ex1.mod \
+	irfs/example1_unit_std.mod \
 	optimal_policy/osr_example.mod \
 	optimal_policy/osr_example_objective_correctness.mod \
 	optimal_policy/osr_example_obj_corr_non_stat_vars.mod \
