@@ -2729,11 +2729,7 @@ add new variables one by one.
 
 @item maxit = @var{INTEGER}
 Determines the maximum number of iterations used in the non-linear solver. The
-default value of @code{maxit} is 10. The @code{maxit} option is shared with the
-@code{perfect_foresight_solver} and @code{simul} commands. So a change in
-@code{maxit} in a @code{steady} command will also be considered in the
-following @code{perfect_foresight_solver} and @code{simul} commands.
-
+default value of @code{maxit} is 50. 
 
 @item solve_algo = @var{INTEGER}
 @anchor{solve_algo}
@@ -3361,10 +3357,7 @@ order to setup the environment for the simulation.
 
 @item maxit = @var{INTEGER}
 Determines the maximum number of iterations used in the non-linear solver. The
-default value of @code{maxit} is 10. The @code{maxit} option is shared with the
-@code{steady} command. So a change in @code{maxit} in a
-@code{perfect_foresight_solver} command will also be considered in the
-following @code{steady} commands.
+default value of @code{maxit} is 50. 
 
 @item stack_solve_algo = @var{INTEGER}
 Algorithm used for computing the solution. Possible values are:
