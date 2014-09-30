@@ -98,6 +98,22 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
                 return;
             end
         end
+        if options.debug
+            [infrow]=find(isinf(ys_init));   
+            if ~isempty(infrow)     
+                fprintf('\nevaluate_steady_state: The initial values for the steady state of the following variables are Inf:\n');
+                for iter=1:length(infrow) 
+                    fprintf('%s\n',M.endo_names(infrow(iter),:));
+                end
+            end
+            [nanrow]=find(isnan(ys_init));   
+            if ~isempty(nanrow)     
+                fprintf('\nevaluate_steady_state: The initial values for the steady state of the following variables are NaN:\n');
+                for iter=1:length(nanrow) 
+                    fprintf('%s\n',M.endo_names(nanrow(iter),:));
+                end
+            end
+        end
         %either if no steady state file or steady state file without problems
         [ys,params,info] = dyn_ramsey_static(ys_init,M,options,oo);
         if info
