@@ -2066,7 +2066,9 @@ For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{initval} block (even though,
 theoretically, initial conditions are only necessary for lagged
 variables). If some variables, endogenous or exogenous, are not mentioned in the
-@code{initval} block, a zero value is assumed.
+@code{initval} block, a zero value is assumed. It is particularly important to keep 
+this in mind when specifying exogenous variables using @code{varexo} that are not allowed 
+to take on the value of zero, like e.g. TFP. 
 
 Note that if the @code{initval} block is immediately followed by a
 @code{steady} command, its semantics is changed. The @code{steady}
