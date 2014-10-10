@@ -69,6 +69,8 @@ if any(BayesInfo.pshape) % if Bayesian estimation
     end
 end
 
+%% display warning if some parameters are still NaN
+test_for_deep_parameters_calibration(Model);
     
 % Evaluate the likelihood.
 ana_deriv = DynareOptions.analytic_derivation;
