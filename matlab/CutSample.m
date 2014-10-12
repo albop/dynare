@@ -52,9 +52,9 @@ end
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
-FirstDraw = max(1,floor(options_.mh_drop*TotalNumberOfMhDraws));
+FirstDraw = max(1,floor(options_.mh_drop*TotalNumberOfMhDraws)+1);
 FirstMhFile = ceil(FirstDraw/MAX_nruns);
-FirstLine = FirstDraw-(FirstMhFile-1)*MAX_nruns+1;
+FirstLine = FirstDraw-(FirstMhFile-1)*MAX_nruns;
 record.KeepedDraws.FirstMhFile = FirstMhFile;
 record.KeepedDraws.FirstLine = FirstLine;
 if (TotalNumberOfMhFiles-1)-(FirstMhFile+1)+1 > 0
@@ -74,5 +74,5 @@ fprintf('Estimation::mcmc: Total number of MH draws per chain: %d.\n',TotalNumbe
 fprintf('Estimation::mcmc: Total number of generated MH files: %d.\n',TotalNumberOfMhFiles);
 fprintf('Estimation::mcmc: I''ll use mh-files %d to %d.\n',FirstMhFile,TotalNumberOfMhFiles);
 fprintf('Estimation::mcmc: In MH-file number %d I''ll start at line %d.\n',FirstMhFile,FirstLine);
-fprintf('Estimation::mcmc: Finally I keep %d draws per chain.\n',TotalNumberOfMhDraws-FirstDraw);
+fprintf('Estimation::mcmc: Finally I keep %d draws per chain.\n',TotalNumberOfMhDraws-FirstDraw+1);
 skipline()
