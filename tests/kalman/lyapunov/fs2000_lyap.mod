@@ -113,22 +113,27 @@ stderr e_m, inv_gamma_pdf, 0.008862, inf;
 end;
 
 varobs gp_obs gy_obs;
+
 options_.plot_priors=0;
-options_.lyapunov_fp = 0;
-options_.lyapunov_db = 0;
-options_.lyapunov_srs = 0;
-
-estimation(lyapunov=doubling,mode_compute=0,mode_file=fs2000_mode,order=1,datafile=fsdat_simul, nobs=192, loglinear, mh_replic=0, mh_nblocks=1, mh_jscale=0.8,nograph);
 
 options_.lyapunov_fp = 0;
 options_.lyapunov_db = 0;
 options_.lyapunov_srs = 0;
-estimation(lyapunov=square_root_solver,mode_compute=0,mode_file=fs2000_mode,order=1,datafile=fsdat_simul, nobs=192, loglinear, mh_replic=0, mh_nblocks=1, mh_jscale=0.8,nograph);
+
+estimation(lyapunov=doubling,order=1,datafile=fsdat_simul, nobs=192, loglinear, mh_replic=0, mh_nblocks=1, mh_jscale=0.8,nograph);
+
+
+if (isoctave && user_has_octave_forge_package('control')) || (~isoctave && user_has_matlab_license('control_toolbox'))
+    options_.lyapunov_fp = 0;
+    options_.lyapunov_db = 0;
+    options_.lyapunov_srs = 0;
+    estimation(lyapunov=square_root_solver,order=1,datafile=fsdat_simul, nobs=192, loglinear, mh_replic=0, mh_nblocks=1, mh_jscale=0.8,nograph);
+end
 
 options_.lyapunov_fp = 0;
 options_.lyapunov_db = 0;
 options_.lyapunov_srs = 0;
-estimation(lyapunov=fixed_point,mode_compute=0,mode_file=fs2000_mode,order=1,datafile=fsdat_simul, nobs=192, loglinear, mh_replic=0, mh_nblocks=1, mh_jscale=0.8,nograph);
+estimation(lyapunov=fixed_point,order=1,datafile=fsdat_simul, nobs=192, loglinear, mh_replic=0, mh_nblocks=1, mh_jscale=0.8,nograph);
 
 //**************** Do pure Lyapunov tests***********
 verbatim;
