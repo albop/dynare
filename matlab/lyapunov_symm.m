@@ -12,16 +12,17 @@ function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,met
 %   lyapunov_complex_threshold  [double]    scalar, complex block threshold for the upper triangular matrix T.
 %   method                      [integer]   Scalar, if method=0 [default] then U, T, n and k are not persistent.  
 %                                                      method=1 then U, T, n and k are declared as persistent 
-%                                                               variables and the schur decomposition is triggered.    
+%                                                               variables and the Schur decomposition is triggered.    
 %                                                      method=2 then U, T, n and k are declared as persistent 
-%                                                               variables and the schur decomposition is not performed.
+%                                                               variables and the Schur decomposition is not performed.
 %                                                      method=3 fixed point method
 % OUTPUTS
 %   x:      [double]    m*m solution matrix of the lyapunov equation, where m is the dimension of the stable subsystem.
 %   u:      [double]    Schur vectors associated with unit roots  
 %
 % ALGORITHM
-%   Uses reordered Schur decomposition
+%   Uses reordered Schur decomposition (Bartels-Stewart algorithm)
+%   [method<3] or a fixed point algorithm (method==4)
 %
 % SPECIAL REQUIREMENTS
 %   None

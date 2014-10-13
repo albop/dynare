@@ -5139,7 +5139,11 @@ Use the Univariate Diffuse Kalman Filter
 @end table
 @noindent
 Default value is @code{0}. In case of missing observations of single or all series, Dynare treats those missing values as unobserved states and uses the Kalman filter to infer their value (see e.g. @cite{Durbin and Koopman (2012), Ch. 4.10})
-
+This procedure has the advantage of being capable of dealing with observations where the forecast error variance matrix becomes singular for some variable(s).
+If this happens, the respective observation enters with a weight of zero in the log-likelihood, i.e. this observation for the respective variable(s) is dropped
+from the likelihood computations (for details see @cite{Durbin and Koopman (2012), Ch. 6.4 and 7.2.5}). If the use of a multivariate Kalman filter is specified and a
+singularity is encountered, Dynare by default automatically switches to the univariate Kalman filter for this parameter draw. This behavior can be changed via the
+@ref{use_univariate_filters_if_singularity_is_detected} option.
 
 @item kalman_tol = @var{DOUBLE}
 @anchor{kalman_tol} Numerical tolerance for determining the singularity of the covariance matrix of the prediction errors during the Kalman filter (minimum allowed reciprocal of the matrix condition number). Default value is @code{1e-10}
@@ -5273,6 +5277,7 @@ Use endogenous priors as in @cite{Christiano, Trabandt and Walentin
 (2011)}.
 
 @item use_univariate_filters_if_singularity_is_detected = @var{INTEGER}
+@anchor{use_univariate_filters_if_singularity_is_detected}
 Decide whether Dynare should automatically switch to univariate filter
 if a singularity is encountered in the likelihood computation (this is
 the behaviour if the option is equal to @code{1}). Alternatively, if
