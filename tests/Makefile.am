@@ -1,4 +1,4 @@
-MODFILES = \
+0;95;0cMODFILES = \
 	estimation/fs2000_mc4.mod \
 	estimation/fs2000_mc4_mf.mod \
 	estimation/fs2000_mc6.mod \
@@ -338,7 +338,6 @@ EXTRA_DIST = \
 	ms-sbvar/archive-files/specification_2v2c.dat \
 	recursive/data_ca1.m \
 	kalman/lyapunov/fsdat_simul.m \
-	kalman/lyapunov/fs2000_mode.mat \
 	kalman_filter_smoother/fsdat_simul.m \
 	kalman_filter_smoother/fs2000a_steadystate.m \
 	identification/kim/kim2_steadystate.m \
