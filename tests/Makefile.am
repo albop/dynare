@@ -1,4 +1,4 @@
-0;95;0cMODFILES = \
+MODFILES = \
 	estimation/fs2000_mc4.mod \
 	estimation/fs2000_mc4_mf.mod \
 	estimation/fs2000_mc6.mod \
