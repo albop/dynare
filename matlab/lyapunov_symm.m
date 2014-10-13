@@ -1,4 +1,4 @@
-function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,method, R, debug)
+function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,method, R, debug)  % --*-- Unitary tests --*--
 % Solves the Lyapunov equation x-a*x*a' = b, for b and x symmetric matrices.
 % If a has some unit roots, the function computes only the solution of the stable subsystem.
 %  
@@ -27,7 +27,7 @@ function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,met
 % SPECIAL REQUIREMENTS
 %   None
 
-% Copyright (C) 2006-2012 Dynare Team
+% Copyright (C) 2006-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -178,3 +178,116 @@ if i == 1
 end
 x = U(:,k+1:end)*x*U(:,k+1:end)';
 u = U(:,1:k);
+
+%@test:1
+%$ t = NaN(10,1);
+%$ lyapunov_complex_threshold = 1e-15;
+%$ qz_zero_threshold = 1e-6;
+%$ qz_criterium=1-qz_zero_threshold;
+%$ lyapunov_fixed_point_tol = 1e-10;
+%$ lyapunov_doubling_tol = 1e-16;
+%$
+%$ n_small=8;
+%$ m_small=10;
+%$ T_small=randn(n_small,n_small);
+%$ T_small=0.99*T_small/max(abs(eigs(T_small)));
+%$ tmp2=randn(m_small,m_small);
+%$ Q_small=tmp2*tmp2';
+%$ R_small=randn(n_small,m_small);
+%$ 
+%$ n_large=9;
+%$ m_large=11;
+%$ T_large=randn(n_large,n_large);
+%$ T_large=0.99*T_large/max(abs(eigs(T_large)));
+%$ tmp2=randn(m_large,m_large);
+%$ Q_large=tmp2*tmp2';
+%$ R_large=randn(n_large,m_large);
+%$ 
+%$ % DynareOptions.lyapunov_fp == 1
+%$ try
+%$    Pstar1_small = lyapunov_symm(T_small,R_small*Q_small*R_small',lyapunov_fixed_point_tol,lyapunov_fixed_point_tol,3, [], 0);
+%$    Pstar1_large = lyapunov_symm(T_large,R_large*Q_large*R_large',lyapunov_fixed_point_tol,lyapunov_fixed_point_tol,3, [], 0);
+%$    t(1) = 1;
+%$ catch
+%$    t(1) = 0;
+%$ end
+%$
+%$ % Dynareoptions.lyapunov_db == 1
+%$ try
+%$    Pstar2_small = disclyap_fast(T_small,R_small*Q_small*R_small',lyapunov_doubling_tol);
+%$    Pstar2_large = disclyap_fast(T_large,R_large*Q_large*R_large',lyapunov_doubling_tol);
+%$    t(2) = 1;
+%$ catch
+%$    t(2) = 0;
+%$ end
+%$
+%$ % Dynareoptions.lyapunov_srs == 1
+%$ if (isoctave && user_has_octave_forge_package('control')) || (~isoctave && user_has_matlab_license('control_toolbox'))
+%$     try
+%$        Pstar3_small = lyapunov_symm(T_small,Q_small,lyapunov_fixed_point_tol,lyapunov_complex_threshold,4,R_small,0);
+%$        Pstar3_large = lyapunov_symm(T_large,Q_large,lyapunov_fixed_point_tol,lyapunov_complex_threshold,4,R_large,0);
+%$        t(3) = 1;
+%$     catch
+%$        t(3) = 0;
+%$     end
+%$ else
+%$     t(3) = 1;
+%$ end
+%$
+%$ % Standard
+%$ try
+%$     Pstar4_small = lyapunov_symm(T_small,R_small*Q_small*R_small',qz_criterium, lyapunov_complex_threshold, [], [], 0);
+%$     Pstar4_large = lyapunov_symm(T_large,R_large*Q_large*R_large',qz_criterium, lyapunov_complex_threshold, [], [], 0);
+%$    t(4) = 1;
+%$ catch
+%$    t(4) = 0;
+%$ end
+%$
+%$ % Test the results.
+%$
+%$ if max(max(abs(Pstar1_small-Pstar2_small)))>1e-8
+%$    t(5) = 0;
+%$ else
+%$    t(5) = 1;
+%$ end
+%$
+%$ if (isoctave && user_has_octave_forge_package('control')) || (~isoctave && user_has_matlab_license('control_toolbox'))
+%$    if max(max(abs(Pstar1_small-Pstar3_small)))>1e-8
+%$       t(6) = 0;
+%$    else
+%$       t(6) = 1;
+%$    end
+%$ else
+%$    t(6) = 1;
+%$ end
+%$
+%$ if max(max(abs(Pstar1_small-Pstar4_small)))>1e-8
+%$    t(7) = 0;
+%$ else
+%$    t(7) = 1;
+%$ end
+%$
+%$ if max(max(abs(Pstar1_large-Pstar2_large)))>1e-8
+%$    t(8) = 0;
+%$ else
+%$    t(8) = 1;
+%$ end
+%$
+%$ if (isoctave && user_has_octave_forge_package('control')) || (~isoctave && user_has_matlab_license('control_toolbox'))
+%$    if max(max(abs(Pstar1_large-Pstar3_large)))>1e-8
+%$       t(9) = 0;
+%$    else
+%$       t(9) = 1;
+%$    end
+%$ else
+%$    t(9) = 1;
+%$ end
+%$
+%$ if max(max(abs(Pstar1_large-Pstar4_large)))>1e-8
+%$    t(10) = 0;
+%$ else
+%$    t(10) = 1;
+%$ end
+%$
+%$ T = all(t);
+%@eof:1
