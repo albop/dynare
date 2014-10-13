@@ -129,7 +129,7 @@ end;
 % and compute 2nd order mean correction on stationary variables (in case of
 % HP filtering, this mean correction is computed *before* filtering)
 if options_.order == 2 || options_.hp_filter == 0
-    [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
+    [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold,[],[],options_.debug);
     if options_.block == 0
         iky = inv_order_var(ivar);
     else
@@ -185,11 +185,11 @@ if options_.hp_filter == 0
         b1 = b1*cs;
         b2(:,exo_names_orig_ord) = ghu(iky,:);
         b2 = b2*cs;
-        vx  = lyapunov_symm(A,b1*b1',options_.qz_criterium,options_.lyapunov_complex_threshold,1);
+        vx  = lyapunov_symm(A,b1*b1',options_.qz_criterium,options_.lyapunov_complex_threshold,1,[],options_.debug);
         vv = diag(aa*vx*aa'+b2*b2');
         vv2 = 0;
         for i=1:M_.exo_nbr
-            vx1 = lyapunov_symm(A,b1(:,i)*b1(:,i)',options_.qz_criterium,options_.lyapunov_complex_threshold,2);
+            vx1 = lyapunov_symm(A,b1(:,i)*b1(:,i)',options_.qz_criterium,options_.lyapunov_complex_threshold,2,[],options_.debug);
             vx2 = abs(diag(aa*vx1*aa'+b2(:,i)*b2(:,i)'));
             Gamma_y{nar+2}(stationary_vars,i) = vx2;
             vv2 = vv2 +vx2;

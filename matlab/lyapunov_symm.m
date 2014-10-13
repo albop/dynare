@@ -1,4 +1,4 @@
-function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,method, R)
+function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,method, R, debug)
 % Solves the Lyapunov equation x-a*x*a' = b, for b and x symmetric matrices.
 % If a has some unit roots, the function computes only the solution of the stable subsystem.
 %  
@@ -43,7 +43,7 @@ function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,met
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-if nargin<5
+if nargin<5 || isempty(method)
     method = 0;
 end
 
@@ -53,7 +53,9 @@ if method == 3
         method = method1;
     end;
     tol = third_argument;
-%     fprintf('lyapunov_symm:: [method=%d] \n',method);
+    if debug
+        fprintf('lyapunov_symm:: [method=%d] \n',method);
+    end
     if method == 3
         %tol = 1e-10;
         it_fp = 0;
@@ -73,7 +75,9 @@ if method == 3
             %evol = max(sum(abs(X - X_old)')); %norm_inf
             it_fp = it_fp + 1;
         end;
-%         fprintf('lyapunov_symm:: lyapunov fixed_point iterations=%d norm=%g\n',it_fp,evol);
+        if debug
+            fprintf('lyapunov_symm:: lyapunov fixed_point iterations=%d norm=%g\n',it_fp,evol);
+        end
         if it_fp >= max_it_fp
             disp(['lyapunov_symm:: convergence not achieved in solution of Lyapunov equation after ' int2str(it_fp) ' iterations, switching method from 3 to 0']);
             method1 = 0;
