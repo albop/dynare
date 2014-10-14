@@ -43,8 +43,13 @@ function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,met
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 if nargin<5 || isempty(method)
     method = 0;
+end
+
+if nargin<7
+    debug = 0;
 end
 
 if method == 3
