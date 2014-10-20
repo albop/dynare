@@ -1,4 +1,4 @@
-function [fval,DLIK,Hess,exit_flag,SteadyState,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults] = dsge_likelihood(xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults,derivatives_info)
+function [fval,DLIK,Hess,exit_flag,SteadyState,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults] = dsge_likelihood(xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults,derivatives_info)
 % Evaluates the posterior kernel of a dsge model using the specified
 % kalman_algo; the resulting posterior includes the 2*pi constant of the
 % likelihood function
@@ -177,9 +177,9 @@ end
 %------------------------------------------------------------------------------
 
 % Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
-if ~isequal(DynareOptions.mode_compute,1) && any(xparam1<BayesInfo.lb)
-    k = find(xparam1<BayesInfo.lb);
-    fval = objective_function_penalty_base+sum((BayesInfo.lb(k)-xparam1(k)).^2);
+if ~isequal(DynareOptions.mode_compute,1) && any(xparam1<BoundsInfo.lb)
+    k = find(xparam1<BoundsInfo.lb);
+    fval = objective_function_penalty_base+sum((BoundsInfo.lb(k)-xparam1(k)).^2);
     exit_flag = 0;
     info = 41;
     if analytic_derivation,
@@ -189,9 +189,9 @@ if ~isequal(DynareOptions.mode_compute,1) && any(xparam1<BayesInfo.lb)
 end
 
 % Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
-if ~isequal(DynareOptions.mode_compute,1) && any(xparam1>BayesInfo.ub)
-    k = find(xparam1>BayesInfo.ub);
-    fval = objective_function_penalty_base+sum((xparam1(k)-BayesInfo.ub(k)).^2);
+if ~isequal(DynareOptions.mode_compute,1) && any(xparam1>BoundsInfo.ub)
+    k = find(xparam1>BoundsInfo.ub);
+    fval = objective_function_penalty_base+sum((xparam1(k)-BoundsInfo.ub(k)).^2);
     exit_flag = 0;
     info = 42;
     if analytic_derivation,
@@ -523,7 +523,7 @@ if analytic_derivation,
     DLIK = [];
     AHess = [];
     iv = DynareResults.dr.restrict_var_list;
-    if nargin<9 || isempty(derivatives_info)
+    if nargin<10 || isempty(derivatives_info)
         [A,B,nou,nou,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults);
         if ~isempty(EstimatedParameters.var_exo)
             indexo=EstimatedParameters.var_exo(:,1);

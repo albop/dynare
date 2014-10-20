@@ -1,4 +1,4 @@
-function [fval,ys,trend_coeff,exit_flag,info,Model,DynareOptions,BayesInfo,DynareResults] = non_linear_dsge_likelihood(xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+function [fval,ys,trend_coeff,exit_flag,info,Model,DynareOptions,BayesInfo,DynareResults] = non_linear_dsge_likelihood(xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults)
 % Evaluates the posterior kernel of a dsge model using a non linear filter.
 
 %@info:
@@ -143,18 +143,18 @@ end
 %------------------------------------------------------------------------------
 
 % Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
-if (DynareOptions.mode_compute~=1) && any(xparam1<BayesInfo.lb)
-    k = find(xparam1(:) < BayesInfo.lb);
-    fval = objective_function_penalty_base+sum((BayesInfo.lb(k)-xparam1(k)).^2);
+if (DynareOptions.mode_compute~=1) && any(xparam1<BoundsInfo.lb)
+    k = find(xparam1(:) < BoundsInfo.lb);
+    fval = objective_function_penalty_base+sum((BoundsInfo.lb(k)-xparam1(k)).^2);
     exit_flag = 0;
     info = 41;
     return
 end
 
 % Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
-if (DynareOptions.mode_compute~=1) && any(xparam1>BayesInfo.ub)
-    k = find(xparam1(:)>BayesInfo.ub);
-    fval = objective_function_penalty_base+sum((xparam1(k)-BayesInfo.ub(k)).^2);
+if (DynareOptions.mode_compute~=1) && any(xparam1>BoundsInfo.ub)
+    k = find(xparam1(:)>BoundsInfo.ub);
+    fval = objective_function_penalty_base+sum((xparam1(k)-BoundsInfo.ub(k)).^2);
     exit_flag = 0;
     info = 42;
     return

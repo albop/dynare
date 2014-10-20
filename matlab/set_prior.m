@@ -152,9 +152,6 @@ if np
     bayestopt_.name = [bayestopt_.name; cellstr(M_.param_names(estim_params_.param_vals(:,1),:))];
 end
 
-bayestopt_.ub = ub;
-bayestopt_.lb = lb;
-
 bayestopt_.p6 = NaN(size(bayestopt_.p1)) ;
 bayestopt_.p7 = bayestopt_.p6 ;
 

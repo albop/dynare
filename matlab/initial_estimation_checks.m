@@ -1,4 +1,4 @@
-function DynareResults = initial_estimation_checks(objective_function,xparam1,DynareDataset,DatasetInfo,Model,EstimatedParameters,DynareOptions,BayesInfo,DynareResults)
+function DynareResults = initial_estimation_checks(objective_function,xparam1,DynareDataset,DatasetInfo,Model,EstimatedParameters,DynareOptions,BayesInfo,BoundsInfo,DynareResults)
 % function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
 % Checks data (complex values, ML evaluation, initial values, BK conditions,..)
 %
@@ -75,7 +75,7 @@ test_for_deep_parameters_calibration(Model);
 % Evaluate the likelihood.
 ana_deriv = DynareOptions.analytic_derivation;
 DynareOptions.analytic_derivation=0;
-[fval,junk1,junk2,a,b,c,d] = feval(objective_function,xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+[fval,junk1,junk2,a,b,c,d] = feval(objective_function,xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults);
 DynareOptions.analytic_derivation=ana_deriv;
 
 if DynareOptions.dsge_var || strcmp(func2str(objective_function),'non_linear_dsge_likelihood')
