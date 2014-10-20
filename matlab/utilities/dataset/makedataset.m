@@ -93,7 +93,12 @@ end
 
 % Load the data in a dseries object.
 if ~isempty(datafile)
-    DynareDataset = dseries(datafile);
+    if ~( newdatainterface==0 && strcmp(datafile(end-1:end),'.m'))
+        DynareDataset = dseries(datafile);
+    else
+        % Load an m file with the old interface.
+        DynareDataset = load_m_file_data_legacy(datafile, DynareOptions.varobs);
+    end
 else
     DynareDataset = dseriesobjectforuserdataset;
     clear('dseriesobjectforuserdataset');
