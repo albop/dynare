@@ -18,7 +18,7 @@ function data  = load_m_file_data_legacy(datafile, varobs)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 cXDHdrXnqo5KwwVpTRuc6OprAW = datafile(1:end-2);
-[pathtocXDHdrXnqo5KwwVpTRuc6OprAW,cXDHdrXnqo5KwwVpTRuc6OprAW,junk] = fileparts(cXDHdrXnqo5KwwVpTRuc6OprAW)
+[pathtocXDHdrXnqo5KwwVpTRuc6OprAW,cXDHdrXnqo5KwwVpTRuc6OprAW,junk] = fileparts(cXDHdrXnqo5KwwVpTRuc6OprAW);
 
 OvMuQsJgjwzYG5Pni0TzU8Acb2YBJva = pwd();
 cd(pathtocXDHdrXnqo5KwwVpTRuc6OprAW);
