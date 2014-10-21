@@ -17,7 +17,14 @@ function data  = load_m_file_data_legacy(datafile, varobs)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-eval(datafile(1:end-2))
+cXDHdrXnqo5KwwVpTRuc6OprAW = datafile(1:end-2);
+[pathtocXDHdrXnqo5KwwVpTRuc6OprAW,cXDHdrXnqo5KwwVpTRuc6OprAW,junk] = fileparts(cXDHdrXnqo5KwwVpTRuc6OprAW)
+
+OvMuQsJgjwzYG5Pni0TzU8Acb2YBJva = pwd();
+cd(pathtocXDHdrXnqo5KwwVpTRuc6OprAW);
+eval(cXDHdrXnqo5KwwVpTRuc6OprAW);
+cd(OvMuQsJgjwzYG5Pni0TzU8Acb2YBJva);
+
 try
     data = dseries(eval(cellofstring4eval(varobs)),[],varobs);
 catch
