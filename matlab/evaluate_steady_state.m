@@ -244,7 +244,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 
     if check
         info(1)= 20;
-        resid = evaluate_static_model(ys_init,exo_ss,params,M,options);
+        resid = evaluate_static_model(ys,exo_ss,params,M,options);
         info(2) = resid'*resid ;
         if isnan(info(2))
             info(1)=22;
