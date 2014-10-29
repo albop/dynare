@@ -866,7 +866,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
     oo_.Smoother.TrendCoeffs = trend_coeff;
     oo_.Smoother.Variance = P;
     i_endo = bayestopt_.smoother_saved_var_list;
-    if options_.nk ~= 0
+    if options_.nk ~= 0 && ~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file))
         oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead, ...
                                              i_endo,:);
         if isfield(options_,'kalman_algo')
@@ -884,7 +884,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         i1 = dr.order_var(bayestopt_.smoother_var_list(i));
         eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = ' ...
                             'atT(i,:)'';']);
-        if options_.nk > 0
+        if options_.nk > 0 && ~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file))
             eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ...
                   ' = squeeze(aK(1,i,:));']);
         end
