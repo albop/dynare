@@ -77,6 +77,8 @@ H0 = 1e-4*eye(np);
 crit=options_.osr.tolf;
 nit=options_.osr.maxit;
 
+%extract unique entries of covariance
+i_var=unique(i_var);
 %% do initial checks
 [loss,vx,info,exit_flag]=osr_obj(t0,i_params,inv_order_var(i_var),weights(i_var,i_var));
 if info~=0
