@@ -204,7 +204,7 @@ if options.order == 1
         [junk,jacobia_] = feval([M.fname '_dynamic'],z(iyr0),exo_simul, ...
                             M.params, dr.ys, it_);
     end;
-elseif options.order == 2
+elseif options.order >= 2
     if (options.bytecode)
         [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_simul, ...
                             M.params, dr.ys, 1);
