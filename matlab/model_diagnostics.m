@@ -169,6 +169,18 @@ for b=1:nb
 end
     
 if singularity_problem 
+    try
+        options_check=options;
+        options_check.noprint=1;
+        [eigenvalues_] = check(M, options_check, oo);
+        if any((abs(eigenvalues_)-1)<1e-6)
+            fprintf('MODEL_DIAGNOSTICS:  The singularity seems to be (partly) caused by the presence of a unit root\n')
+            fprintf('MODEL_DIAGNOSTICS:  as the absolute value of one eigenvalue is in the range of +-1e-6 to 1.\n')
+            fprintf('MODEL_DIAGNOSTICS:  If the model is actually supposed to feature unit root behavior, such a warning is expected,\n')
+            fprintf('MODEL_DIAGNOSTICS:  but you should nevertheless check whether there is an additional singularity problem.\n')
+        end
+    catch
+    end
     fprintf('MODEL_DIAGNOSTICS:  The presence of a singularity problem typically indicates that there is one\n')
     fprintf('MODEL_DIAGNOSTICS:  redundant equation entered in the model block, while another non-redundant equation\n')
     fprintf('MODEL_DIAGNOSTICS:  is missing. The problem often derives from Walras Law.\n')
