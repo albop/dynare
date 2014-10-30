@@ -29,6 +29,7 @@ MODFILES = \
 	optimal_policy/Ramsey/ramsey_ex_initval.mod \
 	optimal_policy/Ramsey/ramsey_ex.mod \
 	optimal_policy/Ramsey/ramsey_ex_initval_AR2.mod \
+	optimal_policy/Ramsey/ramsey_ex_aux.mod \
 	discretionary_policy/dennis_1.mod \
 	ramst_initval_file.mod \
 	ramst_normcdf_and_friends.mod \
