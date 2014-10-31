@@ -258,20 +258,19 @@ Configure and make:
     - In the window that opens, click on the `Downloads` tab
     - In the tab that appears, click on the `Components` button
     - Next to `Command Line Tools`, click on `Install`
-- Download [MacOSX10.6.sdk.zip](http://www.jamesgeorge.org/uploads/MacOSX10.6.sdk.zip) and unzip it in `/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs`. Change the owner to be `root` and the group to be `wheel`
-
 - Install [Homebrew](http://mxcl.github.io/homebrew/) by following the instructions on the website
 - Tap [Homebrew Science](https://github.com/Homebrew/homebrew-science) by doing:
     - ```brew tap homebrew/science```
 - Install the following brews:
+    - ```brew install gcc```
     - ```brew install automake```
     - ```brew install gsl```
     - ```brew install bison```
     - ```brew install boost```
-    - ```brew install gfortran```
     - ```brew install libmatio --with-hdf5```
     - ```brew install slicot --with-default-integer-8```
-- **(Optional)** To compile Dynare mex files for use on Octave, first install Octave following the [Simple Installation Instructions](http://wiki.octave.org/Octave_for_MacOS_X#Simple_Installation_Instructions_3). Then, you will probably also want to install graphicsmagick via Homebrew with `brew install graphicsmagick`.
+- **(Optional)** To compile Dynare mex files for use on Octave:
+    - ```brew install octave```
 - **(Optional)** To compile Dynare's documentation, first install the latest version of [MacTeX](http://www.tug.org/mactex/). Then install `doxygen`, `latex2html` and `texi2html` via Homebrew with the following commands:
     - ```brew install doxygen```
     - ```brew install texinfo```
