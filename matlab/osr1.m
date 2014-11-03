@@ -97,6 +97,7 @@ end
 [f,p]=csminwel1('osr_obj',t0,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,i_params,...
                 inv_order_var(i_var),weights(i_var,i_var));
 osr_res.objective_function = f;
+M_.params(i_params)=p; %make sure optimal parameters are set (and not the last draw used in csminwel)
 for i=1:length(i_params)
     osr_res.optim_params.(deblank(M_.param_names(i_params(i),:))) = p(i);
 end
