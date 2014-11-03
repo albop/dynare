@@ -276,7 +276,7 @@ Configure and make:
     - ```brew install texi2html```
 - **(On OS X 10.7 Only)** Copy [FlexLexer.h](http://www.dynare.org/build/FlexLexer.h) into the `preprocessor` directory (there was an error in the `FlexLexer.h` file distributed with 10.7)
 - Ensure `/usr/local/bin` is at the beginning of your path:
-    - PATH=/usr/local/bin:$PATH
+    - ```PATH=/usr/local/bin:$PATH```
 - Finally, switch to the root dynare directory and compile dynare
     - `autoreconf -si`
     - `./configure --with-matlab=/Applications/MATLAB_R2014b.app MATLAB_VERSION=8.4
