@@ -279,6 +279,6 @@ Configure and make:
     - ```PATH=/usr/local/bin:$PATH```
 - Finally, switch to the root dynare directory and compile dynare
     - `autoreconf -si`
-    - `./configure --with-matlab=/Applications/MATLAB_R2014b.app MATLAB_VERSION=8.4
+    - `./configure --with-matlab=/Applications/MATLAB_R2014b.app MATLAB_VERSION=8.4`
     - `make`
     - `make pdf TEXI2DVI=/usr/local/Cellar/texinfo/5.2/bin/texi2dvi`, where you replace everything after the equal sign with the path to the `texi2dvi` installed by homebrew when you installed `texinfo`.
