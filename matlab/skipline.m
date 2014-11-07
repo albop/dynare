@@ -28,18 +28,14 @@ function skipline(n, fid)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.    
 
-if nargin<2
-    fid = 1;
+if nargin < 2
+	fid = 1;
+	if nargin < 1
+		n = 1;
+	end
 end
 
-if nargin<1
-    n = 1;
+for i=1:n
+	fprintf(fid,'\n');
 end
-    
-if ~nargin || isequal(n,1)
-    fprintf(fid,'\n');
-else
-    for i=1:n
-        fprintf(fid,'\n');
-    end
 end
