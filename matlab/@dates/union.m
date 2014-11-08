@@ -49,10 +49,10 @@ D = sort(unique(horzcat(varargin{:})));
 %$ e5 = union(d1,d2,d3,d2);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(isequal(e1,d1),1);
-%$ t(2) = dyn_assert(isequal(e2,d1+d2),1);
-%$ t(3) = dyn_assert(isequal(e3,d1+d2+d3),1);
-%$ t(4) = dyn_assert(isequal(e4,d1+d2+d3),1);
-%$ t(5) = dyn_assert(isequal(e5,d1+d2+d3),1);
+%$ t(1) = dassert(isequal(e1,d1),1);
+%$ t(2) = dassert(isequal(e2,d1+d2),1);
+%$ t(3) = dassert(isequal(e3,d1+d2+d3),1);
+%$ t(4) = dassert(isequal(e4,d1+d2+d3),1);
+%$ t(5) = dassert(isequal(e5,d1+d2+d3),1);
 %$ T = all(t);
 %@eof:1

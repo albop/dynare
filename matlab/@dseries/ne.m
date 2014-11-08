@@ -94,7 +94,7 @@ C = ne(A.data, B.data);
 %$ end
 %$
 %$ if length(t)>1
-%$    t(2) = dyn_assert(a,[ones(10,2), ones(10,1)]);
+%$    t(2) = dassert(a,[ones(10,2), ones(10,1)]);
 %$ end
 %$ T = all(t);
 %@eof:1

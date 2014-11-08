@@ -63,8 +63,8 @@ end
 %$ end
 %$
 %$ if t(1) 
-%$   t(2) = dyn_assert(isequal(e1,d3),1);
-%$   t(3) = dyn_assert(isequal(e2,dates('1950Q1','1950Q2','1950Q3','1950Q4','1950Q1','1950Q2','1950Q3','1950Q4')),1);
+%$   t(2) = dassert(isequal(e1,d3),1);
+%$   t(3) = dassert(isequal(e2,dates('1950Q1','1950Q2','1950Q3','1950Q4','1950Q1','1950Q2','1950Q3','1950Q4')),1);
 %$ end
 %$ T = all(t);
 %@eof:1
@@ -91,11 +91,11 @@ end
 %$ end
 %$
 %$ if t(1)
-%$   t(2) = dyn_assert(isequal(e1,f1),1);
-%$   t(3) = dyn_assert(isequal(e2,f2),1);
-%$   t(4) = dyn_assert(isequal(e3,f3),1);
-%$   t(5) = dyn_assert(isequal(e4,f4),1);
-%$   t(6) = dyn_assert(isequal(e5,f5),1);
+%$   t(2) = dassert(isequal(e1,f1),1);
+%$   t(3) = dassert(isequal(e2,f2),1);
+%$   t(4) = dassert(isequal(e3,f3),1);
+%$   t(5) = dassert(isequal(e4,f4),1);
+%$   t(6) = dassert(isequal(e5,f5),1);
 %$ end
 %$ T = all(t);
 %@eof:2
@@ -122,11 +122,11 @@ end
 %$ end
 %$
 %$ if t(1)
-%$   t(2) = dyn_assert(isequal(e1,f1),1);
-%$   t(3) = dyn_assert(isequal(e2,f2),1);
-%$   t(4) = dyn_assert(isequal(e3,f3),1);
-%$   t(5) = dyn_assert(isequal(e4,f4),1);
-%$   t(6) = dyn_assert(isequal(e5,f5),1);
+%$   t(2) = dassert(isequal(e1,f1),1);
+%$   t(3) = dassert(isequal(e2,f2),1);
+%$   t(4) = dassert(isequal(e3,f3),1);
+%$   t(5) = dassert(isequal(e4,f4),1);
+%$   t(6) = dassert(isequal(e5,f5),1);
 %$ end
 %$ T = all(t);
 %@eof:3

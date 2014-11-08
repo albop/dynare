@@ -61,9 +61,9 @@ end
 %$ t3 = d1~=d3;
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(t1,zeros(4,1));
-%$ t(2) = dyn_assert(t2,ones(4,1));
-%$ t(3) = dyn_assert(t3,[0; 1; 0; 1]);
+%$ t(1) = dassert(t1,zeros(4,1));
+%$ t(2) = dassert(t2,ones(4,1));
+%$ t(3) = dassert(t3,[0; 1; 0; 1]);
 %$ T = all(t);
 %@eof:1
 
@@ -79,9 +79,9 @@ end
 %$ t3 = d1~=d3;
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(t1,0);
-%$ t(2) = dyn_assert(t2,1);
-%$ t(3) = dyn_assert(t3,1);
+%$ t(1) = dassert(t1,0);
+%$ t(2) = dassert(t2,1);
+%$ t(3) = dassert(t3,1);
 %$ T = all(t);
 %@eof:2
 
@@ -96,7 +96,7 @@ end
 %$ t2 = d1~=d3;
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(t1,[1; 0; 1; 1]);
-%$ t(2) = dyn_assert(t2,ones(4,1));
+%$ t(1) = dassert(t1,[1; 0; 1; 1]);
+%$ t(2) = dassert(t2,ones(4,1));
 %$ T = all(t);
 %@eof:3

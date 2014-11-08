@@ -289,11 +289,11 @@ end
 %$ e.init = dates(1,2);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(a.data,e.data);
-%$ t(2) = dyn_assert(a.nobs,e.nobs);
-%$ t(3) = dyn_assert(a.vobs,e.vobs);
-%$ t(4) = dyn_assert(a.freq,e.freq);
-%$ t(5) = dyn_assert(isequal(a.init,e.init),1);
+%$ t(1) = dassert(a.data,e.data);
+%$ t(2) = dassert(a.nobs,e.nobs);
+%$ t(3) = dassert(a.vobs,e.vobs);
+%$ t(4) = dassert(a.freq,e.freq);
+%$ t(5) = dassert(isequal(a.init,e.init),1);
 %$ T = all(t);
 %@eof:1
 
@@ -319,11 +319,11 @@ end
 %$ e.init = dates(1,1);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(a.data,e.data);
-%$ t(2) = dyn_assert(isequal(a.init,e.init),1);
-%$ t(3) = dyn_assert(a.nobs,e.nobs);
-%$ t(4) = dyn_assert(a.vobs,e.vobs);
-%$ t(5) = dyn_assert(a.freq,e.freq);
+%$ t(1) = dassert(a.data,e.data);
+%$ t(2) = dassert(isequal(a.init,e.init),1);
+%$ t(3) = dassert(a.nobs,e.nobs);
+%$ t(4) = dassert(a.vobs,e.vobs);
+%$ t(5) = dassert(a.freq,e.freq);
 %$ T = all(t);
 %@eof:2
 
@@ -349,11 +349,11 @@ end
 %$ e.init = dates(1,1);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(a.data,e.data);
-%$ t(2) = dyn_assert(a.nobs,e.nobs);
-%$ t(3) = dyn_assert(a.vobs,e.vobs);
-%$ t(4) = dyn_assert(a.freq,e.freq);
-%$ t(5) = dyn_assert(isequal(a.init,e.init),1);
+%$ t(1) = dassert(a.data,e.data);
+%$ t(2) = dassert(a.nobs,e.nobs);
+%$ t(3) = dassert(a.vobs,e.vobs);
+%$ t(4) = dassert(a.freq,e.freq);
+%$ t(5) = dassert(isequal(a.init,e.init),1);
 %$ T = all(t);
 %@eof:3
 
@@ -372,10 +372,10 @@ end
 %$
 %$ % Check the results.
 %$ if length(t)>1
-%$     t(2) = dyn_assert(A.nobs,4);
-%$     t(3) = dyn_assert(A.vobs,4);
-%$     t(4) = dyn_assert(A.freq,4);
-%$     t(5) = dyn_assert(isequal(A.init,dates('1990Q1')),1);
+%$     t(2) = dassert(A.nobs,4);
+%$     t(3) = dassert(A.vobs,4);
+%$     t(4) = dassert(A.freq,4);
+%$     t(5) = dassert(isequal(A.init,dates('1990Q1')),1);
 %$ end
 %$ T = all(t);
 %@eof:4
@@ -401,11 +401,11 @@ end
 %$ e.freq = 1;
 %$ e.init = dates(1,1);
 %$
-%$ t(1) = dyn_assert(e.data,a.data);
-%$ t(2) = dyn_assert(e.nobs,a.nobs);
-%$ t(3) = dyn_assert(e.vobs,a.vobs);
-%$ t(4) = dyn_assert(e.name,a.name);
-%$ t(5) = dyn_assert(isequal(e.init,a.init),1);
+%$ t(1) = dassert(e.data,a.data);
+%$ t(2) = dassert(e.nobs,a.nobs);
+%$ t(3) = dassert(e.vobs,a.vobs);
+%$ t(4) = dassert(e.name,a.name);
+%$ t(5) = dassert(isequal(e.init,a.init),1);
 %$ T = all(t);
 %@eof:5
 
@@ -438,16 +438,16 @@ end
 %$ e2.init = dates(1,1);
 %$
 %$ % Check results.
-%$ t(1) = dyn_assert(e1.data,a.data);
-%$ t(2) = dyn_assert(e1.nobs,a.nobs);
-%$ t(3) = dyn_assert(e1.vobs,a.vobs);
-%$ t(4) = dyn_assert(e1.name,a.name);
-%$ t(5) = dyn_assert(isequal(e1.init,a.init),1);
-%$ t(6) = dyn_assert(e2.data,b.data);
-%$ t(7) = dyn_assert(e2.nobs,b.nobs);
-%$ t(8) = dyn_assert(e2.vobs,b.vobs);
-%$ t(9) = dyn_assert(e2.name,b.name);
-%$ t(10) = dyn_assert(isequal(e2.init,b.init),1);
+%$ t(1) = dassert(e1.data,a.data);
+%$ t(2) = dassert(e1.nobs,a.nobs);
+%$ t(3) = dassert(e1.vobs,a.vobs);
+%$ t(4) = dassert(e1.name,a.name);
+%$ t(5) = dassert(isequal(e1.init,a.init),1);
+%$ t(6) = dassert(e2.data,b.data);
+%$ t(7) = dassert(e2.nobs,b.nobs);
+%$ t(8) = dassert(e2.vobs,b.vobs);
+%$ t(9) = dassert(e2.name,b.name);
+%$ t(10) = dassert(isequal(e2.init,b.init),1);
 %$ T = all(t);
 %@eof:6
 
@@ -512,11 +512,11 @@ end
 %$ e.freq = 4;
 %$ e.init = dates('1971Q2');
 %$
-%$ t(1) = dyn_assert(e.data,a.data);
-%$ t(2) = dyn_assert(e.nobs,a.nobs);
-%$ t(3) = dyn_assert(e.vobs,a.vobs);
-%$ t(4) = dyn_assert(e.name,a.name);
-%$ t(5) = dyn_assert(isequal(e.init,a.init),1);
+%$ t(1) = dassert(e.data,a.data);
+%$ t(2) = dassert(e.nobs,a.nobs);
+%$ t(3) = dassert(e.vobs,a.vobs);
+%$ t(4) = dassert(e.name,a.name);
+%$ t(5) = dassert(isequal(e.init,a.init),1);
 %$ T = all(t);
 %@eof:9
 
@@ -536,10 +536,10 @@ end
 %$ D = ts1.size(2);
 %$ E = ts1.size;
 %$
-%$ t(1) = dyn_assert(B,[60, 3]);
-%$ t(2) = dyn_assert(E,[60, 3]);
-%$ t(3) = dyn_assert(C,60);
-%$ t(4) = dyn_assert(D,3);
+%$ t(1) = dassert(B,[60, 3]);
+%$ t(2) = dassert(E,[60, 3]);
+%$ t(3) = dassert(C,60);
+%$ t(4) = dassert(D,3);
 %$ T = all(t);
 %@eof:10
 
@@ -558,14 +558,14 @@ end
 %$ C = ts1{[1,3]};
 %$ D = ts1{'A1'};
 %$
-%$ t(1) = dyn_assert(B.name{1},'A1');
-%$ t(2) = dyn_assert(B.data,A(:,1));
-%$ t(3) = dyn_assert(C.name{1},'A1');
-%$ t(4) = dyn_assert(C.data(:,1),A(:,1));
-%$ t(5) = dyn_assert(C.name{2},'B1');
-%$ t(6) = dyn_assert(C.data(:,2),A(:,3));
-%$ t(7) = dyn_assert(D.name{1},'A1');
-%$ t(8) = dyn_assert(D.data,A(:,1));
+%$ t(1) = dassert(B.name{1},'A1');
+%$ t(2) = dassert(B.data,A(:,1));
+%$ t(3) = dassert(C.name{1},'A1');
+%$ t(4) = dassert(C.data(:,1),A(:,1));
+%$ t(5) = dassert(C.name{2},'B1');
+%$ t(6) = dassert(C.data(:,2),A(:,3));
+%$ t(7) = dassert(D.name{1},'A1');
+%$ t(8) = dassert(D.data,A(:,1));
 %$ T = all(t);
 %@eof:11
 

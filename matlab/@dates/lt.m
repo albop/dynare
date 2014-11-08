@@ -93,10 +93,10 @@ function c = lessthan(a,b)
 %$ i4 = (d5<d4);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(i1,1);
-%$ t(2) = dyn_assert(i2,0);
-%$ t(3) = dyn_assert(i3,1);
-%$ t(4) = dyn_assert(i4,1);
+%$ t(1) = dassert(i1,1);
+%$ t(2) = dassert(i2,0);
+%$ t(3) = dassert(i3,1);
+%$ t(4) = dassert(i4,1);
 %$ T = all(t);
 %@eof:1
 
@@ -112,11 +112,11 @@ function c = lessthan(a,b)
 %$ dd = dates(B1,B2,B3,B4);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(dates(B1)<dates(B2),1);
-%$ t(2) = dyn_assert(dates(B2)<dates(B1),0);
-%$ t(3) = dyn_assert(dates(B2)<dates(B1),0);
-%$ t(4) = dyn_assert(dd<dates(B5),ones(4,1));
-%$ t(5) = dyn_assert(dates(B5)<dd,zeros(4,1));
-%$ t(6) = dyn_assert(dates(B1)<dd,[0; ones(3,1)]);
+%$ t(1) = dassert(dates(B1)<dates(B2),1);
+%$ t(2) = dassert(dates(B2)<dates(B1),0);
+%$ t(3) = dassert(dates(B2)<dates(B1),0);
+%$ t(4) = dassert(dd<dates(B5),ones(4,1));
+%$ t(5) = dassert(dates(B5)<dd,zeros(4,1));
+%$ t(6) = dassert(dates(B1)<dd,[0; ones(3,1)]);
 %$ T = all(t);
 %@eof:2
