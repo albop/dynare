@@ -110,10 +110,10 @@ end
 %$ d = dates(B1,B2,B3,B4);
 %$ d = d.append(dates(B5));
 %$ f = d.pop();
-%$ t(1) = dassert(isequal(f,dates(B1,B2,B3,B4)),1);
+%$ t(1) = dassert(f,dates(B1,B2,B3,B4));
 %$ f = d.pop(B1);
-%$ t(2) = dassert(isequal(f,dates(B1,B2,B4,B5)),1);
+%$ t(2) = dassert(f,dates(B1,B2,B4,B5));
 %$ g = f.pop(1);
-%$ t(3) = dassert(isequal(g,dates(B2,B4,B5)),1);
+%$ t(3) = dassert(g,dates(B2,B4,B5));
 %$ T = all(t);
 %@eof:2

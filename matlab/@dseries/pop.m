@@ -107,7 +107,7 @@ ts.tex(id) = [];
 %$
 %$ if length(t)>1
 %$    t(2) = dassert(id,0);
-%$    t(2) = dassert(isequal(ts1,ts2),1);
+%$    t(2) = dassert(ts1,ts2);
 %$ end
 %$ T = all(t);
 %@eof:2

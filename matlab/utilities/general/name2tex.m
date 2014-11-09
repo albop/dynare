@@ -96,22 +96,22 @@ end
 %$ t17 = name2tex('_azert_uiop_qsdfg',1);
 %$ t18 = name2tex('_azert_uiop_qsdfg_',1);
 %$
-%$ t(1) = dassert(strcmp(t1,'\\_azert'),1);
-%$ t(2) = dassert(strcmp(t2,'azert\\_'),1);
-%$ t(3) = dassert(strcmp(t3,'\\_azert\\_'),1);
-%$ t(4) = dassert(strcmp(t4,'azert\\_uiop'),1);
-%$ t(5) = dassert(strcmp(t5,'azert\\_uiop\\_qsdfg'),1);
-%$ t(6) = dassert(strcmp(t6,'azert\\_uiop\\_qsdfg\\_'),1);
-%$ t(7) = dassert(strcmp(t7,'\\_azert\\_uiop\\_qsdfg'),1);
-%$ t(8) = dassert(strcmp(t8,'\\_azert\\_uiop\\_qsdfg\\_'),1);
-%$ t(9) = dassert(strcmp(t11,'\\_azert'),1);
-%$ t(10) = dassert(strcmp(t12,'azert\\_'),1);
-%$ t(11) = dassert(strcmp(t13,'\\_azert\\_'),1);
-%$ t(12) = dassert(strcmp(t14,'azert_{uiop}'),1);
-%$ t(13) = dassert(strcmp(t15,'azert\\_uiop_{qsdfg}'),1);
-%$ t(14) = dassert(strcmp(t16,'azert\\_uiop_{qsdfg\\_}'),1);
-%$ t(15) = dassert(strcmp(t17,'\\_azert\\_uiop_{qsdfg}'),1);
-%$ t(16) = dassert(strcmp(t18,'\\_azert\\_uiop_{qsdfg\\_}'),1);
+%$ t(1) = dassert(strcmp(t1,'\\_azert'),true);
+%$ t(2) = dassert(strcmp(t2,'azert\\_'),true);
+%$ t(3) = dassert(strcmp(t3,'\\_azert\\_'),true);
+%$ t(4) = dassert(strcmp(t4,'azert\\_uiop'),true);
+%$ t(5) = dassert(strcmp(t5,'azert\\_uiop\\_qsdfg'),true);
+%$ t(6) = dassert(strcmp(t6,'azert\\_uiop\\_qsdfg\\_'),true);
+%$ t(7) = dassert(strcmp(t7,'\\_azert\\_uiop\\_qsdfg'),true);
+%$ t(8) = dassert(strcmp(t8,'\\_azert\\_uiop\\_qsdfg\\_'),true);
+%$ t(9) = dassert(strcmp(t11,'\\_azert'),true);
+%$ t(10) = dassert(strcmp(t12,'azert\\_'),true);
+%$ t(11) = dassert(strcmp(t13,'\\_azert\\_'),true);
+%$ t(12) = dassert(strcmp(t14,'azert_{uiop}'),true);
+%$ t(13) = dassert(strcmp(t15,'azert\\_uiop_{qsdfg}'),true);
+%$ t(14) = dassert(strcmp(t16,'azert\\_uiop_{qsdfg\\_}'),true);
+%$ t(15) = dassert(strcmp(t17,'\\_azert\\_uiop_{qsdfg}'),true);
+%$ t(16) = dassert(strcmp(t18,'\\_azert\\_uiop_{qsdfg\\_}'),true);
 %$
 %$ T = all(t);
 %@eof:1

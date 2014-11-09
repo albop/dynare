@@ -109,7 +109,7 @@ end
 %$
 %$ % Check the results.
 %$ t(2) = dassert(freq,12);
-%$ t(3) = dassert(isa(init,'dates'),1);
+%$ t(3) = dassert(isa(init,'dates'),true);
 %$ t(4) = dassert(init.freq,12);
 %$ t(5) = dassert(init.time,[1938 11]);
 %$ t(6) = dassert(varlist,{'hagop';'bedros'});
@@ -143,7 +143,7 @@ end
 %$
 %$ % Check the results.
 %$ t(2) = dassert(freq,12);
-%$ t(3) = dassert(isa(init,'dates'),1);
+%$ t(3) = dassert(isa(init,'dates'),true);
 %$ t(4) = dassert(init.freq,12);
 %$ t(5) = dassert(init.time,[1938 11]);
 %$ t(6) = dassert(varlist,{'hagop';'bedros'});

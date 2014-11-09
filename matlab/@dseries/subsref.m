@@ -293,7 +293,7 @@ end
 %$ t(2) = dassert(a.nobs,e.nobs);
 %$ t(3) = dassert(a.vobs,e.vobs);
 %$ t(4) = dassert(a.freq,e.freq);
-%$ t(5) = dassert(isequal(a.init,e.init),1);
+%$ t(5) = dassert(a.init,e.init);
 %$ T = all(t);
 %@eof:1
 
@@ -320,7 +320,7 @@ end
 %$
 %$ % Check the results.
 %$ t(1) = dassert(a.data,e.data);
-%$ t(2) = dassert(isequal(a.init,e.init),1);
+%$ t(2) = dassert(a.init,e.init);
 %$ t(3) = dassert(a.nobs,e.nobs);
 %$ t(4) = dassert(a.vobs,e.vobs);
 %$ t(5) = dassert(a.freq,e.freq);
@@ -353,7 +353,7 @@ end
 %$ t(2) = dassert(a.nobs,e.nobs);
 %$ t(3) = dassert(a.vobs,e.vobs);
 %$ t(4) = dassert(a.freq,e.freq);
-%$ t(5) = dassert(isequal(a.init,e.init),1);
+%$ t(5) = dassert(a.init,e.init);
 %$ T = all(t);
 %@eof:3
 
@@ -375,7 +375,7 @@ end
 %$     t(2) = dassert(A.nobs,4);
 %$     t(3) = dassert(A.vobs,4);
 %$     t(4) = dassert(A.freq,4);
-%$     t(5) = dassert(isequal(A.init,dates('1990Q1')),1);
+%$     t(5) = dassert(A.init,dates('1990Q1'));
 %$ end
 %$ T = all(t);
 %@eof:4
@@ -405,7 +405,7 @@ end
 %$ t(2) = dassert(e.nobs,a.nobs);
 %$ t(3) = dassert(e.vobs,a.vobs);
 %$ t(4) = dassert(e.name,a.name);
-%$ t(5) = dassert(isequal(e.init,a.init),1);
+%$ t(5) = dassert(e.init,a.init);
 %$ T = all(t);
 %@eof:5
 
@@ -442,12 +442,12 @@ end
 %$ t(2) = dassert(e1.nobs,a.nobs);
 %$ t(3) = dassert(e1.vobs,a.vobs);
 %$ t(4) = dassert(e1.name,a.name);
-%$ t(5) = dassert(isequal(e1.init,a.init),1);
+%$ t(5) = dassert(e1.init,a.init);
 %$ t(6) = dassert(e2.data,b.data);
 %$ t(7) = dassert(e2.nobs,b.nobs);
 %$ t(8) = dassert(e2.vobs,b.vobs);
 %$ t(9) = dassert(e2.name,b.name);
-%$ t(10) = dassert(isequal(e2.init,b.init),1);
+%$ t(10) = dassert(e2.init,b.init);
 %$ T = all(t);
 %@eof:6
 
@@ -516,7 +516,7 @@ end
 %$ t(2) = dassert(e.nobs,a.nobs);
 %$ t(3) = dassert(e.vobs,a.vobs);
 %$ t(4) = dassert(e.name,a.name);
-%$ t(5) = dassert(isequal(e.init,a.init),1);
+%$ t(5) = dassert(e.init,a.init);
 %$ T = all(t);
 %@eof:9
 

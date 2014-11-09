@@ -775,8 +775,8 @@ end
 %$    t(5) = dassert(ts1.name{1},'A1');
 %$    t(6) = dassert(ts1.name{3},'A3');
 %$    t(7) = dassert(ts1.data,A,1e-15);
-%$    t(8) = dassert(isequal(ts1.init,dd),1);
-%$    t(9) = dassert(isequal(ts1.dates(1),dd),1);
+%$    t(8) = dassert(ts1.init,dd);
+%$    t(9) = dassert(ts1.dates(1),dd);
 %$ end
 %$ T = all(t);
 %@eof:19
@@ -807,8 +807,8 @@ end
 %$    t(5) = dassert(ts1.name{1},'A1');
 %$    t(6) = dassert(ts1.name{3},'A3');
 %$    t(7) = dassert(ts1.data,A,1e-15);
-%$    t(8) = dassert(isequal(ts1.init,dd),1);
-%$    t(9) = dassert(isequal(ts1.dates(1),dd),1);
+%$    t(8) = dassert(ts1.init,dd);
+%$    t(9) = dassert(ts1.dates(1),dd);
 %$ end
 %$ T = all(t);
 %@eof:20

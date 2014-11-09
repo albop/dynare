@@ -82,7 +82,7 @@ C.ndat = rows(time);
 %$ c2 = intersect(d1,d3);
 %$
 %$ % Check the results.
-%$ t(1) = dassert(isequal(c1,d2),1);
-%$ t(2) = dassert(isempty(c2),1);
+%$ t(1) = dassert(c1,d2);
+%$ t(2) = dassert(isempty(c2),true);
 %$ T = all(t);
 %@eof:1

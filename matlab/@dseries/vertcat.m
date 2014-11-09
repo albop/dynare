@@ -97,7 +97,7 @@ function d = vertcat_(b, c)
 %$
 %$ % Check the results.
 %$
-%$ t(1) = dassert(isequal(ts3.init,e.init),1);
+%$ t(1) = dassert(ts3.init,e.init);
 %$ t(2) = dassert(ts3.freq,e.freq);
 %$ t(3) = dassert(ts3.data,e.data);
 %$ t(4) = dassert(ts3.name,e.name);
@@ -133,7 +133,7 @@ function d = vertcat_(b, c)
 %$
 %$ % Check the results.
 %$
-%$ t(1) = dassert(isequal(ts4.init,e.init),1);
+%$ t(1) = dassert(ts4.init,e.init);
 %$ t(2) = dassert(ts4.freq,e.freq);
 %$ t(3) = dassert(ts4.data,e.data);
 %$ t(4) = dassert(ts4.name,e.name);

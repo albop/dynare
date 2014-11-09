@@ -290,8 +290,8 @@ end
 %$ end
 %$
 %$ if t(1) && t(2) && t(3)
-%$     t(4) = dassert(isequal(r1,r2),1);
-%$     t(5) = dassert(isequal(r1,r3),1);
+%$     t(4) = dassert(r1,r2);
+%$     t(5) = dassert(r1,r3);
 %$ end
 %$ T = all(t);
 %@eof:5
@@ -325,8 +325,8 @@ end
 %$ end
 %$
 %$ if t(1) && t(2) && t(3)
-%$     t(4) = dassert(isequal(r1,r2),1);
-%$     t(5) = dassert(isequal(r1,r3),1);
+%$     t(4) = dassert(r1,r2);
+%$     t(5) = dassert(r1,r3);
 %$ end
 %$ T = all(t);
 %@eof:6
