@@ -40,10 +40,10 @@ if ~isequal(A.freq,B.freq)
 end
 
 if isequal(A.ndat, B.ndat)
-    C = transpose(all(transpose(eq(A.time,B.time))));
+    C = logical(transpose(all(transpose(eq(A.time,B.time)))));
 else
     if isequal(A.ndat,1) || isequal(B.ndat,1)
-        C = transpose(all(transpose(bsxfun(@eq,A.time,B.time))));
+        C = logical(transpose(all(transpose(bsxfun(@eq,A.time,B.time)))));
     else
         C = false;
     end
