@@ -12,4 +12,4 @@
 	url = http://www.dynare.org/git/dmm.git
 [submodule "matlab/utilities/tests"]
 	path = matlab/utilities/tests
-	url = git@github.com:DynareTeam/m-unit-tests.git
+	url = https://github.com/DynareTeam/m-unit-tests.git
