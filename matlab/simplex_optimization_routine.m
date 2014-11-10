@@ -47,7 +47,7 @@ function [x,fval,exitflag] = simplex_optimization_routine(objective_function,x,o
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Set verbose mode
-verbose = 2;
+verbose = options.verbosity;
 
 % Set number of control variables.
 number_of_variables = length(x);
