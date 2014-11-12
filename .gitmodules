@@ -13,3 +13,6 @@
 [submodule "matlab/utilities/tests"]
 	path = matlab/utilities/tests
 	url = https://github.com/DynareTeam/m-unit-tests.git
+[submodule "matlab/particles"]
+	path = matlab/particles
+	url = https://github.com/DynareTeam/particles.git

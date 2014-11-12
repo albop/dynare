@@ -44,7 +44,6 @@ if ~nargin || nargin==1
     verbose = 1;
 end
 
-
 addpath([dynareroot '/distributions/'])
 addpath([dynareroot '/kalman/'])
 addpath([dynareroot '/kalman/likelihood'])
@@ -54,7 +53,7 @@ addpath([dynareroot '/ms-sbvar/'])
 addpath([dynareroot '/ms-sbvar/identification/'])
 addpath([dynareroot '../contrib/ms-sbvar/TZcode/MatlabFiles/'])
 addpath([dynareroot '/parallel/'])
-addpath([dynareroot '/particle/'])
+addpath([dynareroot '/particles/src'])
 addpath([dynareroot '/gsa/'])
 addpath([dynareroot '/ep/'])
 addpath([dynareroot '/lmmcp/'])
