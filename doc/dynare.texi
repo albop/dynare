@@ -10236,6 +10236,31 @@ Overloads the Matlab/Octave @code{exp} function for @dseries objects.
 
 @sp 1
 
+@deftypefn{dseries} {@var{l} =} exist (@var{A}, @var{varname})
+
+Tests if @var{variable} exists in @dseries object @var{A}. Returns 1 (true) iff @var{variable} exists in @var{A}.
+
+@exampleshead
+
+@example
+>> ts = dseries(randn(100,1));
+>> ts.exist('Variable_1')
+
+ans =
+
+     1
+
+>> ts.exist('Variable_2')
+
+ans =
+
+     0
+@end example
+
+@end deftypefn
+
+@sp 1
+
 @deftypefn{dseries} {@var{C} =} extract (@var{A}, @var{B}[, ...])
 
 Extracts some variables from a @dseries object @var{A} and returns a @dseries object @var{C}. The input arguments following @var{A} are strings representing the variables to be selected in the new @dseries object @var{C}. To simplify the creation of sub-objects, the @dseries class overloads the curly braces (@code{D = extract (A, B, C)} is equivalent to @code{D = A@{B,C@}}) and allows implicit loops (defined between a pair of @@ symbol, see examples below) or Matlab/Octave's regular expressions (introduced by square brackets).

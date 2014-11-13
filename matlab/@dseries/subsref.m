@@ -90,13 +90,13 @@ switch S(1).type
       case 'freq'
         % Returns an integer characterizing the data frequency (1, 4, 12 or 52)
         B = A.dates.freq;
-      case {'lag','lead','hptrend','hpcycle','chain','detrend'} % Methods with less than two arguments.
+      case {'lag','lead','hptrend','hpcycle','chain','detrend','exist'} % Methods with less than two arguments.
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
                 B = feval(S(1).subs,A);
                 S = shiftS(S,1);
             else
-                if length(S(2).subs{1})>1
+                if ~ischar(S(2).subs{1}) && length(S(2).subs{1})>1
                     error(['dseries::subsref: ' S(1).subs{1} ' method admits no more than one argument!'])
                 end
                 B = feval(S(1).subs,A,S(2).subs{1});
