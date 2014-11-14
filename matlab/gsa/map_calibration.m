@@ -87,7 +87,8 @@ end
 irestrictions=irestrictions(find(irestrictions));
 xmat=lpmat(irestrictions,:);
 skipline()
-save([OutputDirectoryName,filesep,fname_,'_',type,'_restrictions'],'xmat','mat_irf','mat_moment','irestrictions','indx_irf','indx_moment');
+endo_prior_restrictions=DynareOptions.endogenous_prior_restrictions;
+save([OutputDirectoryName,filesep,fname_,'_',type,'_restrictions'],'xmat','mat_irf','mat_moment','irestrictions','indx_irf','indx_moment','endo_prior_restrictions');
 
 if ~isempty(indx_irf),
     indx_irf = indx_irf(irestrictions,:);
@@ -122,7 +123,7 @@ if ~isempty(indx_irf),
         indx2 = find(indx_irf(:,ij)~=0);
         atitle=[DynareOptions.endogenous_prior_restrictions.irf{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.irf{ij,2}, '(', leg,')'];
         fprintf(['%4.1f%% of the prior support matches IRF ',atitle,' inside [%4.1f, %4.1f]\n'],length(indx1)/length(irestrictions)*100,DynareOptions.endogenous_prior_restrictions.irf{ij,4})
-        aname=[type '_irf_calib_',int2str(ij)];
+        aname=[type '_irf_calib_',endo_prior_restrictions.irf{ij,1},'_VS_',endo_prior_restrictions.irf{ij,2}];
         atitle=[type ' IRF Calib: Parameter(s) driving ',DynareOptions.endogenous_prior_restrictions.irf{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.irf{ij,2}, '(', leg,')'];
         [proba, dproba] = stab_map_1(xmat, indx1, indx2, aname, 0);
         indplot=find(proba<pvalue_ks);
@@ -167,7 +168,7 @@ if ~isempty(indx_moment)
         indx2 = find(indx_moment(:,ij)~=0);
         atitle=[DynareOptions.endogenous_prior_restrictions.moment{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.moment{ij,2}, '(', leg,')'];
         fprintf(['%4.1f%% of the prior support matches MOMENT ',atitle,' inside [%4.1f, %4.1f]\n'],length(indx1)/length(irestrictions)*100,DynareOptions.endogenous_prior_restrictions.moment{ij,4})
-        aname=[type '_moment_calib_',int2str(ij)];
+        aname=[type '_moment_calib_',DynareOptions.endogenous_prior_restrictions.moment(ij,1),'_VS_',DynareOptions.endogenous_prior_restrictions.moment(ij,2)];
         atitle=[type ' MOMENT Calib: Parameter(s) driving ',DynareOptions.endogenous_prior_restrictions.moment{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.moment{ij,2}, '(', leg,')'];
         [proba, dproba] = stab_map_1(xmat, indx1, indx2, aname, 0);
         indplot=find(proba<pvalue_ks);
