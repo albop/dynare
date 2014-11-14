@@ -1,5 +1,5 @@
-function hessian_mat = hessian(func,x,gstep,varargin)
-% function hessian_mat = hessian(func,x,gstep,varargin)
+function hessian_mat = hessian(func,x,gstep,varargin) % --*-- Unitary tests --*--
+
 % Computes second order partial derivatives
 %
 % INPUTS
@@ -90,3 +90,54 @@ for i=1:n
         xh_1(j)=x(j);
     end    
 end
+
+
+%@test:1
+%$ % Create a function.
+%$ fid = fopen('exfun.m','w+');
+%$ fprintf(fid,'function [f,g,H] = exfun(xvar)\\n');
+%$ fprintf(fid,'x = xvar(1);\\n');
+%$ fprintf(fid,'y = xvar(2);\\n');
+%$ fprintf(fid,'f = x^2* log(y);\\n');
+%$ fprintf(fid,'if nargout>1\\n');
+%$ fprintf(fid,'    g = zeros(2,1);\\n');
+%$ fprintf(fid,'    g(1) = 2*x*log(y);\\n');
+%$ fprintf(fid,'    g(2) = x*x/y;\\n');
+%$ fprintf(fid,'end\\n');
+%$ fprintf(fid,'if nargout>2\\n');
+%$ fprintf(fid,'    H = zeros(2,2);\\n');
+%$ fprintf(fid,'    H(1,1) = 2*log(y);\\n');
+%$ fprintf(fid,'    H(1,2) = 2*x/y;\\n');
+%$ fprintf(fid,'    H(2,1) = H(1,2);\\n');
+%$ fprintf(fid,'    H(2,2) = -x*x/(y*y);\\n');
+%$ fprintf(fid,'    H = H(:);\\n');
+%$ fprintf(fid,'end\\n');
+%$ fclose(fid);
+%$
+%$ rehash;
+%$
+%$ t = zeros(5,1);
+%$
+%$ % Evaluate the Hessian at (1,e)
+%$ try
+%$    H = hessian('exfun',[1; exp(1)],[1e-2; 1]);
+%$    t(1) = 1;
+%$ catch
+%$    t(1) = 0;
+%$ end
+%$
+%$ % Compute the true Hessian matrix
+%$ [f, g, Htrue] = exfun([1 exp(1)]);
+%$
+%$ % Delete exfun routine from disk.
+%$ delete('exfun.m');
+%$
+%$ % Compare the values in H and Htrue
+%$ if t(1)
+%$    t(2) = dassert(abs(H(1)-Htrue(1))<1e-6,true);
+%$    t(3) = dassert(abs(H(2)-Htrue(2))<1e-6,true);
+%$    t(4) = dassert(abs(H(3)-Htrue(3))<1e-6,true);
+%$    t(5) = dassert(abs(H(4)-Htrue(4))<1e-6,true);
+%$ end
+%$ T = all(t);
+%@eof:1
