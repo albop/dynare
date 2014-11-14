@@ -519,7 +519,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 end
             end
         end
-        [xparam1,fval,exitflag] = simplex_optimization_routine(objective_function,xparam1,simplexOptions,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_);
+        [xparam1,fval,exitflag] = simplex_optimization_routine(objective_function,xparam1,simplexOptions,bayestopt_.name,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_);
       case 9
         % Set defaults
         H0 = 1e-4*ones(nx,1);
