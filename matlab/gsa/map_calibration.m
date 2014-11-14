@@ -22,7 +22,7 @@ pnames = Model.param_names(EstimatedParameters.param_vals(:,1),:);
 pvalue_ks = DynareOptions.opt_gsa.pvalue_ks;
 indx_irf = [];
 indx_moment = [];
-
+DynareOptions.nodisplay = 1;
 skipline()
 disp('Sensitivity analysis for calibration criteria')
 
@@ -63,6 +63,7 @@ for ij=1:nbr_moment_restrictions,
 end
 
 irestrictions = [1:Nsam];
+h = dyn_waitbar(0,'Please wait...');
 for j=1:Nsam,
     Model = set_all_parameters(lpmat(j,:)',EstimatedParameters,Model);
     [Tt,Rr,SteadyState,info] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
@@ -83,7 +84,10 @@ for j=1:Nsam,
     else
         irestrictions(j)=0;
     end
+    dyn_waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
 end
+dyn_waitbar_close(h);
+
 irestrictions=irestrictions(find(irestrictions));
 xmat=lpmat(irestrictions,:);
 skipline()
