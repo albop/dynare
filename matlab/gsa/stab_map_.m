@@ -254,14 +254,13 @@ if fload==0,
     iunstable=[1:Nsam];
     iindeterm=zeros(1,Nsam);
     iwrong=zeros(1,Nsam);
+    inorestriction=zeros(1,Nsam);
+    irestriction=zeros(1,Nsam);
     for j=1:Nsam,
         M_ = set_all_parameters([lpmat0(j,:) lpmat(j,:)]',estim_params_,M_);
         %try stoch_simul([]);
         try
             [Tt,Rr,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_,'restrict');
-            if info(1)==0,
-                info=endogenous_prior_restrictions(Tt,Rr,M_,options_,oo_);
-            end
             infox(j,1)=info(1);
             if infox(j,1)==0 && ~exist('T'),
                 dr_=oo_.dr;
@@ -303,7 +302,6 @@ if fload==0,
         dr_ = oo_.dr;
         if isfield(dr_,'ghx'),
             egg(:,j) = sort(dr_.eigval);
-            iunstable(j)=0;
             if prepSA
                 jstab=jstab+1;
                 T(:,:,jstab) = [dr_.ghx dr_.ghu];
@@ -316,6 +314,15 @@ if fload==0,
                 nspred = dr_.nspred; %size(dr_.ghx,2);
                 nboth = dr_.nboth;
                 nfwrd = dr_.nfwrd;
+            end
+            info=endogenous_prior_restrictions(Tt,Rr,M_,options_,oo_);
+            infox(j,1)=info(1);
+            if info(1),
+                iwrong(j)=j;
+                inorestriction(j)=j;
+            else
+                iunstable(j)=0;
+                irestriction(j)=j;
             end
         else
             istable(j)=0;
@@ -348,10 +355,13 @@ if fload==0,
     else
         T=[];
     end
-    istable=istable(find(istable));  % stable params
-    iunstable=iunstable(find(iunstable));   % unstable params
+    istable=istable(find(istable));  % stable params ignoring restrictions
+    irestriction=irestriction(find(irestriction));  % stable params & restrictions OK
+    inorestriction=inorestriction(find(inorestriction));  % stable params violating restrictions
+    iunstable=iunstable(find(iunstable));   % violation of BK & restrictions & solution could not be found (whatever goes wrong)
     iindeterm=iindeterm(find(iindeterm));  % indeterminacy
     iwrong=iwrong(find(iwrong));  % dynare could not find solution
+    ixun=iunstable(find(~ismember(iunstable,[iindeterm,iwrong]))); % explosive roots
 
     %     % map stable samples
     %     istable=[1:Nsam];
@@ -395,22 +405,22 @@ if fload==0,
     if pprior,
         if ~prepSA
             save([OutputDirectoryName filesep fname_ '_prior.mat'], ...
-                'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
+                'bkpprior','lpmat','lpmat0','irestriction','iunstable','istable','iindeterm','iwrong','ixun', ...
                 'egg','yys','nspred','nboth','nfwrd','infox')
         else
             save([OutputDirectoryName filesep fname_ '_prior.mat'], ...
-                'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
+                'bkpprior','lpmat','lpmat0','irestriction','iunstable','istable','iindeterm','iwrong','ixun', ...
                 'egg','yys','T','nspred','nboth','nfwrd','infox')
         end
 
     else
         if ~prepSA
             save([OutputDirectoryName filesep fname_ '_mc.mat'], ...
-                'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
+                'lpmat','lpmat0','irestriction','iunstable','istable','iindeterm','iwrong','ixun', ...
                 'egg','yys','nspred','nboth','nfwrd','infox')
         else
             save([OutputDirectoryName filesep fname_ '_mc.mat'], ...
-                'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
+                'lpmat','lpmat0','irestriction','iunstable','istable','iindeterm','iwrong','ixun', ...
                 'egg','yys','T','nspred','nboth','nfwrd','infox')
         end
     end
@@ -420,7 +430,7 @@ else
     else
         filetoload=[OutputDirectoryName filesep fname_ '_mc.mat'];
     end
-    load(filetoload,'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd','infox')
+    load(filetoload,'lpmat','lpmat0','irestriction','iunstable','istable','iindeterm','iwrong','ixun','egg','yys','nspred','nboth','nfwrd','infox')
     Nsam = size(lpmat,1);
     if pprior==0,
         eval(['load ' options_.mode_file '.mat;']);
@@ -472,11 +482,13 @@ if pprior
     aindetname=[aname, '_indet']; aindettitle='Prior StabMap: Parameter driving indeterminacy';
     aunstablename=[aname, '_unst'];  aunstabletitle='Prior StabMap: Parameter driving explosiveness of solution';
     awronguniname=[aname, '_wrong']; awrongunititle='Prior StabMap: Parameter driving inability to find solution';
+    acalibuniname=[aname, '_calib']; acalibunititle='Prior StabMap: Parameter driving IRF/moment restrictions';
     % bivariate
     auname='prior_unacceptable'; autitle='Prior StabMap: non-existence of unique stable solution (Unacceptable)';
     aunstname='prior_unstable'; aunsttitle='Prior StabMap: explosiveness of solution';
     aindname='prior_indeterm'; aindtitle='Prior StabMap: Indeterminacy';
     awrongname='prior_wrong'; awrongtitle='Prior StabMap: inability to find solution';
+    acalibname='prior_calib'; acalibtitle='Prior StabMap: IRF/moment restrictions';
     asname='prior_stable'; astitle='Prior StabMap: unique Stable Saddle-Path';
 else
     % univariate
@@ -484,11 +496,13 @@ else
     aindetname=[aname, '_indet']; aindettitle='MC (around posterior mode) StabMap: Parameter driving indeterminacy';
     aunstablename=[aname, '_unst'];  aunstabletitle='MC (around posterior mode) StabMap: Parameter driving explosiveness of solution';
     awronguniname=[aname, '_wrong']; awrongunititle='MC (around posterior mode) StabMap: Parameter driving inability to find solution';
+    acalibuniname=[aname, '_calib']; acalibunititle='MC (around posterior mode) StabMap: Parameter driving IRF/moment restrictions';
     % bivariate
     auname='mc_unacceptable'; autitle='MC (around posterior mode) StabMap: non-existence of unique stable solution (Unacceptable)';
     aunstname='mc_unstable'; aunsttitle='MC (around posterior mode) StabMap: explosiveness of solution';
     aindname='mc_indeterm';  aindtitle='MC (around posterior mode) StabMap: Indeterminacy';
     awrongname='mc_wrong'; awrongtitle='MC (around posterior mode) StabMap: inability to find solution';
+    acalibname='mc_calib'; acalibtitle='MC (around posterior mode) StabMap: IRF/moment restrictions';
     asname='mc_stable'; astitle='MC (around posterior mode) StabMap: Unique Stable Saddle-Path';
 end
 delete([OutputDirectoryName,filesep,fname_,'_',aname,'_*.*']);
@@ -498,7 +512,7 @@ delete([OutputDirectoryName,filesep,fname_,'_',auname,'_corr_*.*']);
 delete([OutputDirectoryName,filesep,fname_,'_',aunstname,'_corr_*.*']);
 delete([OutputDirectoryName,filesep,fname_,'_',aindname,'_corr_*.*']);
 
-if length(iunstable)>0 ,
+if length(iunstable)>0 || length(iwrong)>0,
     fprintf(['%4.1f%% of the prior support gives unique saddle-path solution.\n'],length(istable)/Nsam*100)
     fprintf(['%4.1f%% of the prior support gives explosive dynamics.\n'],(length(iunstable)-length(iwrong)-length(iindeterm) )/Nsam*100)
     if ~isempty(iindeterm),
@@ -544,99 +558,182 @@ if length(iunstable)>0 ,
 
     end
     skipline()
-    if length(iunstable)<Nsam
+    if length(iunstable)<Nsam || length(istable)>1
         % Blanchard Kahn
-        [proba, dproba] = stab_map_1(lpmat, istable, iunstable, aname,0);
+        itot = [1:Nsam];
+        itmp = itot(find(~ismember(itot,istable)));
+        [proba, dproba] = stab_map_1(lpmat, istable, itmp, aname,0);
         %     indstab=find(dproba>ksstat);
         indstab=find(proba<pvalue_ks);
-        disp('Smirnov statistics in driving acceptable behaviour')
+        [tmp,jtmp] = sort(proba(indstab),2,'ascend');
+        indstab = indstab(jtmp);
+        disp('Smirnov statistics in driving unique solution')
         for j=1:length(indstab),
             disp([M_.param_names(estim_params_.param_vals(indstab(j),1),:),'   d-stat = ', num2str(dproba(indstab(j)),'%1.3f'),'   p-value = ', num2str(proba(indstab(j)),'%1.3f')])
         end
         skipline()
-        if ~isempty(indstab)
-            stab_map_1(lpmat, istable, iunstable, aname, 1, indstab, OutputDirectoryName,[],atitle);
+        indcorr1 = stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname);
+        indcorr2 = stab_map_2(lpmat(itmp,:),alpha2, pvalue_corr, auname);
+        indcorr = union(indcorr1(:), indcorr2(:));
+        indcorr = indcorr(~ismember(indcorr(:),indstab));
+        indstab = [indstab(:); indcorr(:)];
+        skipline()
+        if ~isempty(indstab) && ~options_.nograph
+%             stab_map_1(lpmat, istable, iunstable, aname, 1, indstab, OutputDirectoryName,[],atitle);
+            scatter_mcf(lpmat(istable,indstab),lpmat(itmp,indstab),cellstr(bayestopt_.name(indstab+nshock)), ...
+                '.', [fname_,'_',asname], OutputDirectoryName,atitle,[], options_, ...
+                'unique Stable Saddle-Path', 'NO unique Stable Saddle-Path')
         end
-        ixun=iunstable(find(~ismember(iunstable,[iindeterm,iwrong])));
+%         ixun=iunstable(find(~ismember(iunstable,[iindeterm,iwrong])));
         if ~isempty(iindeterm),
-            [proba, dproba] = stab_map_1(lpmat, [1:Nsam], iindeterm, aindetname ,0);
+            itmp = itot(find(~ismember(itot,iindeterm)));
+            [proba, dproba] = stab_map_1(lpmat, itmp, iindeterm, aindetname ,0);
             %         indindet=find(dproba>ksstat);
             indindet=find(proba<pvalue_ks);
+            [tmp,jtmp] = sort(proba(indindet),2,'ascend');
+            indindet = indindet(jtmp);
             disp('Smirnov statistics in driving indeterminacy')
             for j=1:length(indindet),
                 disp([M_.param_names(estim_params_.param_vals(indindet(j),1),:),'   d-stat = ', num2str(dproba(indindet(j)),'%1.3f'),'   p-value = ', num2str(proba(indindet(j)),'%1.3f')])
             end
             skipline()
+            indcorr1 = stab_map_2(lpmat(iindeterm,:),alpha2, pvalue_corr, aindname);
+            indcorr2 = stab_map_2(lpmat(itmp,:),alpha2, pvalue_corr, ['NOT_',aindname]);
+            indcorr = union(indcorr1(:), indcorr2(:));
+            indcorr = indcorr(~ismember(indcorr(:),indindet));
+            indindet = [indindet(:); indcorr(:)];
+            skipline()
             if ~isempty(indindet)
-                stab_map_1(lpmat, [1:Nsam], iindeterm, aindetname, 1, indindet, OutputDirectoryName,[],aindettitle);
+%                 stab_map_1(lpmat, itmp, iindeterm, aindetname, 1, indindet, OutputDirectoryName,[],aindettitle);
+                scatter_mcf(lpmat(itmp,indindet),lpmat(iindeterm,indindet),cellstr(bayestopt_.name(indindet+nshock)), ...
+                    '.', [fname_,'_',aindname], OutputDirectoryName,aindtitle,[], options_, ...
+                'NO indeterminacy', 'indeterminacy')
             end
         end
         
         if ~isempty(ixun),
-            [proba, dproba] = stab_map_1(lpmat, [1:Nsam], ixun, aunstablename,0);
+            itmp = itot(find(~ismember(itot,ixun)));
+            [proba, dproba] = stab_map_1(lpmat, itmp, ixun, aunstablename,0);
             %         indunst=find(dproba>ksstat);
             indunst=find(proba<pvalue_ks);
+            [tmp,jtmp] = sort(proba(indunst),2,'ascend');
+            indunst = indunst(jtmp);
             disp('Smirnov statistics in driving instability')
             for j=1:length(indunst),
                 disp([M_.param_names(estim_params_.param_vals(indunst(j),1),:),'   d-stat = ', num2str(dproba(indunst(j)),'%1.3f'),'   p-value = ', num2str(proba(indunst(j)),'%1.3f')])
             end
             skipline()
+            indcorr1 = stab_map_2(lpmat(ixun,:),alpha2, pvalue_corr, aunstname);
+            indcorr2 = stab_map_2(lpmat(itmp,:),alpha2, pvalue_corr, ['NOT_',aunstname]);
+            indcorr = union(indcorr1(:), indcorr2(:));
+            indcorr = indcorr(~ismember(indcorr(:),indunst));
+            indunst = [indunst(:); indcorr(:)];
+            skipline()
             if ~isempty(indunst)
-                stab_map_1(lpmat, [1:Nsam], ixun, aunstablename, 1, indunst, OutputDirectoryName,[],aunstabletitle);
+%                 stab_map_1(lpmat, itmp, ixun, aunstablename, 1, indunst, OutputDirectoryName,[],aunstabletitle);
+                scatter_mcf(lpmat(itmp,indunst),lpmat(ixun,indunst),cellstr(bayestopt_.name(indunst+nshock)), ...
+                    '.', [fname_,'_',aunstname], OutputDirectoryName,aunsttitle,[], options_, ...
+                'NO explosive solution', 'explosive solution')
             end
         end
         
+        inorestriction = istable(find(~ismember(istable,irestriction))); % what went wrong beyong prior restrictions
+        iwrong = iwrong(find(~ismember(iwrong,inorestriction))); % what went wrong beyong prior restrictions
         if ~isempty(iwrong),
-            [proba, dproba] = stab_map_1(lpmat, [1:Nsam], iwrong, awronguniname,0);
+            itmp = itot(find(~ismember(itot,iwrong)));
+            [proba, dproba] = stab_map_1(lpmat, itmp, iwrong, awronguniname,0);
             %         indwrong=find(dproba>ksstat);
             indwrong=find(proba<pvalue_ks);
+            [tmp,jtmp] = sort(proba(indwrong),2,'ascend');
+            indwrong = indwrong(jtmp);
             disp('Smirnov statistics in driving no solution')
             for j=1:length(indwrong),
                 disp([M_.param_names(estim_params_.param_vals(indwrong(j),1),:),'   d-stat = ', num2str(dproba(indwrong(j)),'%1.3f'),'   p-value = ', num2str(proba(indwrong(j)),'%1.3f')])
             end
             skipline()
+            indcorr1 = stab_map_2(lpmat(iwrong,:),alpha2, pvalue_corr, awrongname);
+            indcorr2 = stab_map_2(lpmat(itmp,:),alpha2, pvalue_corr, ['NOT_',awrongname]);
+            indcorr = union(indcorr1(:), indcorr2(:));
+            indcorr = indcorr(~ismember(indcorr(:),indwrong));
+            indwrong = [indwrong(:); indcorr(:)];
+            skipline()
             if ~isempty(indwrong)
-                stab_map_1(lpmat, [1:Nsam], iwrong, awronguniname, 1, indwrong, OutputDirectoryName,[],awrongunititle);
+%                 stab_map_1(lpmat, itmp, iwrong, awronguniname, 1, indwrong, OutputDirectoryName,[],awrongunititle);
+                scatter_mcf(lpmat(itmp,indunst),lpmat(ixun,indunst),cellstr(bayestopt_.name(indunst+nshock)), ...
+                    '.', [fname_,'_',awrongname], OutputDirectoryName,awrongtitle,[], options_, ...
+                'NO inability to fund a solution', 'inability to find a solution')
             end
         end
         
-        skipline()
-        disp('Starting bivariate analysis:')
-        
-        c0=corrcoef(lpmat(istable,:));
-        c00=tril(c0,-1);
-        
-        if length(istable)>10,
-            stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName,xparam1,astitle);
+        if ~isempty(irestriction),
+            [proba, dproba] = stab_map_1(lpmat, irestriction, inorestriction, awronguniname,0);
+            %         indwrong=find(dproba>ksstat);
+            indcalib=find(proba<pvalue_ks);
+            [tmp,jtmp] = sort(proba(indcalib),2,'ascend');
+            indcalib = indcalib(jtmp);
+            disp('Smirnov statistics in driving prior restrictions')
+            for j=1:length(indcalib),
+                disp([M_.param_names(estim_params_.param_vals(indcalib(j),1),:),'   d-stat = ', num2str(dproba(indcalib(j)),'%1.3f'),'   p-value = ', num2str(proba(indcalib(j)),'%1.3f')])
+            end
+            skipline()
+            indcorr1 = stab_map_2(lpmat(irestriction,:),alpha2, pvalue_corr, acalibname);
+            indcorr2 = stab_map_2(lpmat(inorestriction,:),alpha2, pvalue_corr, ['NOT_',acalibname]);
+            indcorr = union(indcorr1(:), indcorr2(:));
+            indcorr = indcorr(~ismember(indcorr(:),indcalib));
+            indcalib = [indcalib(:); indcorr(:)];
+            skipline()
+            if ~isempty(indcalib)
+%                 stab_map_1(lpmat, irestriction, inorestriction, acalibuniname, 1, indcalib, OutputDirectoryName,[],acalibunititle);
+                scatter_mcf(lpmat(irestriction,indcalib),lpmat(inorestriction,indcalib),cellstr(bayestopt_.name(indcalib+nshock)), ...
+                    '.', [fname_,'_',acalibname], OutputDirectoryName,acalibtitle,[], options_, ...
+                'prior IRF/moment calibration', 'NO prior IRF/moment calibration')
+            end
+            iok = irestriction(1);
+        else
+            iok = istable(1);
         end
-        if length(iunstable)>10,
-            stab_map_2(lpmat(iunstable,:),alpha2, pvalue_corr, auname, OutputDirectoryName,xparam1,autitle);
-        end
-        if length(iindeterm)>10,
-            stab_map_2(lpmat(iindeterm,:),alpha2, pvalue_corr, aindname, OutputDirectoryName,xparam1,aindtitle);
-        end
-        if length(ixun)>10,
-            stab_map_2(lpmat(ixun,:),alpha2, pvalue_corr, aunstname, OutputDirectoryName,xparam1,aunsttitle);
-        end
-        if length(iwrong)>10,
-            stab_map_2(lpmat(iwrong,:),alpha2, pvalue_corr, awrongname, OutputDirectoryName,xparam1,awrongtitle);
-        end
+%         skipline()
+%         disp('Starting bivariate analysis:')
+%         
+%         c0=corrcoef(lpmat(istable,:));
+%         c00=tril(c0,-1);
+%         
+%         if length(istable)>10,
+%             stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName,xparam1,astitle);
+%         end
+%         if length(iunstable)>10,
+%             stab_map_2(lpmat(iunstable,:),alpha2, pvalue_corr, auname, OutputDirectoryName,xparam1,autitle);
+%         end
+%         if length(iindeterm)>10,
+%             stab_map_2(lpmat(iindeterm,:),alpha2, pvalue_corr, aindname, OutputDirectoryName,xparam1,aindtitle);
+%         end
+%         if length(ixun)>10,
+%             stab_map_2(lpmat(ixun,:),alpha2, pvalue_corr, aunstname, OutputDirectoryName,xparam1,aunsttitle);
+%         end
+%         if length(iwrong)>10,
+%             stab_map_2(lpmat(iwrong,:),alpha2, pvalue_corr, awrongname, OutputDirectoryName,xparam1,awrongtitle);
+%         end
+%         if length(irestriction)>10,
+%             stab_map_2(lpmat(irestriction,:),alpha2, pvalue_corr, acalibname, OutputDirectoryName,xparam1,acalibtitle);
+%             iok = irestriction(1);
+%         else
+%             iok = istable(1);
+%         end
         
         x0=0.5.*(bounds.ub(1:nshock)-bounds.lb(1:nshock))+bounds.lb(1:nshock);
-        x0 = [x0; lpmat(istable(1),:)'];
-        if istable(end)~=Nsam
-            M_.params(estim_params_.param_vals(:,1)) = lpmat(istable(1),:)';
-            [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
-            %     stoch_simul([]);
-        end
+        x0 = [x0; lpmat(iok,:)'];
+        M_.params(estim_params_.param_vals(:,1)) = lpmat(iok,:)';
+        [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+        %     stoch_simul([]);
     else
         disp('All parameter values in the specified ranges are not acceptable!')
         x0=[];
     end
 else
-    disp('All parameter values in the specified ranges give unique saddle-path solution!')
-        x0=0.5.*(bounds.ub(1:nshock)-bounds.lb(1:nshock))+bounds.lb(1:nshock);
-        x0 = [x0; lpmat(istable(1),:)'];
+    disp('All parameter values in the specified ranges give unique saddle-path solution,')
+    disp('and match prior IRF/moment restriction(s) if any!')
+    x0=0.5.*(bounds.ub(1:nshock)-bounds.lb(1:nshock))+bounds.lb(1:nshock);
+    x0 = [x0; lpmat(istable(1),:)'];
 
 end
 
