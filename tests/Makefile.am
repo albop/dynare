@@ -121,6 +121,8 @@ MODFILES = \
 	identification/as2007/as2007.mod \
 	simul/example1.mod \
 	simul/Solow_no_varexo.mod \
+	simul/simul_ZLB_purely_forward.mod \
+	simul/simul_ZLB_purely_forward_no_solution.mod \
 	conditional_forecasts/fs2000_cal.mod \
 	conditional_forecasts/fs2000_est.mod \
 	recursive/ls2003.mod \
