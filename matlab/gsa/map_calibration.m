@@ -22,7 +22,7 @@ pnames = Model.param_names(EstimatedParameters.param_vals(:,1),:);
 pvalue_ks = DynareOptions.opt_gsa.pvalue_ks;
 indx_irf = [];
 indx_moment = [];
-
+DynareOptions.nodisplay = 1;
 skipline()
 disp('Sensitivity analysis for calibration criteria')
 
@@ -63,6 +63,7 @@ for ij=1:nbr_moment_restrictions,
 end
 
 irestrictions = [1:Nsam];
+h = dyn_waitbar(0,'Please wait...');
 for j=1:Nsam,
     Model = set_all_parameters(lpmat(j,:)',EstimatedParameters,Model);
     [Tt,Rr,SteadyState,info] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
@@ -83,11 +84,15 @@ for j=1:Nsam,
     else
         irestrictions(j)=0;
     end
+    dyn_waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
 end
+dyn_waitbar_close(h);
+
 irestrictions=irestrictions(find(irestrictions));
 xmat=lpmat(irestrictions,:);
 skipline()
-save([OutputDirectoryName,filesep,fname_,'_',type,'_restrictions'],'xmat','mat_irf','mat_moment','irestrictions','indx_irf','indx_moment');
+endo_prior_restrictions=DynareOptions.endogenous_prior_restrictions;
+save([OutputDirectoryName,filesep,fname_,'_',type,'_restrictions'],'xmat','mat_irf','mat_moment','irestrictions','indx_irf','indx_moment','endo_prior_restrictions');
 
 if ~isempty(indx_irf),
     indx_irf = indx_irf(irestrictions,:);
@@ -96,6 +101,13 @@ if ~isempty(indx_irf),
     ncol=nrow;
     if nrow*(nrow-1)>nbr_irf_restrictions,
         ncol=nrow-1;
+    end
+    % For single legend search which has maximum nbr of restrictions 
+    maxijv=0;
+    for ij=1:nbr_irf_restrictions
+        if length(DynareOptions.endogenous_prior_restrictions.irf{ij,3})>maxijv
+            maxij=ij;maxijv=length(DynareOptions.endogenous_prior_restrictions.irf{ij,3});
+        end
     end
     for ij=1:nbr_irf_restrictions,
         figure(h1),
@@ -115,14 +127,24 @@ if ~isempty(indx_irf),
         leg = num2str(DynareOptions.endogenous_prior_restrictions.irf{ij,3}(1));
         if size(mat_irf{ij},2)>1,
             leg = [leg,':' ,num2str(DynareOptions.endogenous_prior_restrictions.irf{ij,3}(end))];
-        end
-        title([DynareOptions.endogenous_prior_restrictions.irf{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.irf{ij,2}, '(', leg,')'],'interpreter','none'),
-        
+        end        
+        title([DynareOptions.endogenous_prior_restrictions.irf{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.irf{ij,2}, '(', leg,')'],'interpreter','none'),               
+        %set(legend_h,'Xlim',[0 1]);
+        if ij==maxij
+            leg1 = num2str(DynareOptions.endogenous_prior_restrictions.irf{ij,3}(:));
+            [legend_h,object_h,plot_h,text_strings]=legend(leg1);
+            Position=get(legend_h,'Position');Position(1:2)=[-0.055 0.95-Position(4)];
+            set(legend_h,'Position',Position);
+        end        
+        % hc = get(h,'Children');
+        %for i=2:2:length(hc)
+        %end
         indx1 = find(indx_irf(:,ij)==0);
         indx2 = find(indx_irf(:,ij)~=0);
         atitle=[DynareOptions.endogenous_prior_restrictions.irf{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.irf{ij,2}, '(', leg,')'];
         fprintf(['%4.1f%% of the prior support matches IRF ',atitle,' inside [%4.1f, %4.1f]\n'],length(indx1)/length(irestrictions)*100,DynareOptions.endogenous_prior_restrictions.irf{ij,4})
-        aname=[type '_irf_calib_',int2str(ij)];
+        % aname=[type '_irf_calib_',int2str(ij)];
+        aname=[type '_irf_calib_',endo_prior_restrictions.irf{ij,1},'_VS_',endo_prior_restrictions.irf{ij,2}];
         atitle=[type ' IRF Calib: Parameter(s) driving ',DynareOptions.endogenous_prior_restrictions.irf{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.irf{ij,2}, '(', leg,')'];
         [proba, dproba] = stab_map_1(xmat, indx1, indx2, aname, 0);
         indplot=find(proba<pvalue_ks);
@@ -142,6 +164,13 @@ if ~isempty(indx_moment)
     if nrow*(nrow-1)>nbr_moment_restrictions,
         ncol=nrow-1;
     end
+    % For single legend search which has maximum nbr of restrictions 
+    maxijv=0;
+    for ij=1:nbr_moment_restrictions
+        if length(DynareOptions.endogenous_prior_restrictions.moment{ij,3})>maxijv
+            maxij=ij;maxijv=length(DynareOptions.endogenous_prior_restrictions.moment{ij,3});
+        end
+    end    
     for ij=1:nbr_moment_restrictions,
         figure(h2),
         mat_moment{ij}=mat_moment{ij}(irestrictions,:);
@@ -162,12 +191,18 @@ if ~isempty(indx_moment)
             leg = [leg,':' ,num2str(DynareOptions.endogenous_prior_restrictions.moment{ij,3}(end))];
         end
         title([DynareOptions.endogenous_prior_restrictions.moment{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.moment{ij,2},'(',leg,')'],'interpreter','none'),
-        
+        if ij==maxij
+            leg1 = num2str(DynareOptions.endogenous_prior_restrictions.moment{ij,3}(:));
+            [legend_h,object_h,plot_h,text_strings]=legend(leg1);
+            Position=get(legend_h,'Position');Position(1:2)=[-0.055 0.95-Position(4)];
+            set(legend_h,'Position',Position);
+        end               
         indx1 = find(indx_moment(:,ij)==0);
         indx2 = find(indx_moment(:,ij)~=0);
         atitle=[DynareOptions.endogenous_prior_restrictions.moment{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.moment{ij,2}, '(', leg,')'];
         fprintf(['%4.1f%% of the prior support matches MOMENT ',atitle,' inside [%4.1f, %4.1f]\n'],length(indx1)/length(irestrictions)*100,DynareOptions.endogenous_prior_restrictions.moment{ij,4})
-        aname=[type '_moment_calib_',int2str(ij)];
+        % aname=[type '_moment_calib_',int2str(ij)];
+        aname=[type '_moment_calib_',DynareOptions.endogenous_prior_restrictions.moment(ij,1),'_VS_',DynareOptions.endogenous_prior_restrictions.moment(ij,2)];
         atitle=[type ' MOMENT Calib: Parameter(s) driving ',DynareOptions.endogenous_prior_restrictions.moment{ij,1},' vs ',DynareOptions.endogenous_prior_restrictions.moment{ij,2}, '(', leg,')'];
         [proba, dproba] = stab_map_1(xmat, indx1, indx2, aname, 0);
         indplot=find(proba<pvalue_ks);
