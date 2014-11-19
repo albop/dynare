@@ -243,7 +243,7 @@ end
 
 options_.opt_gsa = options_gsa;
 if ~isempty(options_gsa.moment_calibration) || ~isempty(options_gsa.irf_calibration),
-    map_calibration(OutputDirectoryName, M_, options_, oo_, estim_params_);
+    map_calibration(OutputDirectoryName, M_, options_, oo_, estim_params_,bayestopt_);
 end
 
 if options_gsa.identification,
