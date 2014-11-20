@@ -7154,7 +7154,7 @@ The threshold @math{pvalue} for significant Kolmogorov-Smirnov test (@i{i.e.} pl
 
 @item pvalue_corr = @var{DOUBLE}
 The threshold @math{pvalue} for significant correlation in filtered samples
-(@i{i.e.} plot bivariate samples when @math{pvalue<} @code{pvalue_corr}). Default: @code{0.001}
+(@i{i.e.} plot bivariate samples when @math{pvalue<} @code{pvalue_corr}). Default: @code{1e-5}
 
 @end table
 @customhead{Reduced Form Mapping Options}
@@ -7183,7 +7183,7 @@ are filtered. Default: @code{0.1}
 
 @item alpha2_redform = @var{DOUBLE}
 Critical value for correlations @math{\rho}  when reduced form entries
-are filtered. Default: @code{0.3}
+are filtered. Default: @code{1e-5}
 
 @item namendo = (@var{VARIABLE_NAME}@dots{})
 List of endogenous variables. `@code{:}' indicates all endogenous variables.
@@ -7230,7 +7230,7 @@ Critical value for Smirnov statistics @math{d}: plot parameters with
 
 @item alpha2_rmse = @var{DOUBLE}
 Critical value for correlation @math{\rho}: plot couples of parmaters with
-@math{\left|\rho\right|=} @code{alpha2_rmse}. Default: @code{1.0}
+@math{\left|\rho\right|=} @code{alpha2_rmse}. Default: @code{1e-5}
 
 @item datafile = @var{FILENAME}
 @xref{datafile}.
