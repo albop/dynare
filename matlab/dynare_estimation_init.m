@@ -457,8 +457,15 @@ if options_.analytic_derivation,
         [tmp1, params] = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);
         change_flag=any(find(params-M.params));
         if change_flag,
-            disp('The steadystate file changed the values for the following parameters: '),
-            disp(M.param_names(find(params-M.params),:))
+            skipline();
+            if any(isnan(params))
+                disp('After computing the steadystate, the following parameters are still NaN: '),
+                disp(M.param_names(isnan(params),:))
+            end
+            if any(find(params(~isnan(params))-M.params(~isnan(params))))
+                disp('The steadystate file changed the values for the following parameters: '),
+                disp(M.param_names(find(params(~isnan(params))-M.params(~isnan(params))),:))
+            end
             disp('The derivatives of jacobian and steady-state will be computed numerically'),
             disp('(re-set options_.analytic_derivation_mode= -2)'),
             options_.analytic_derivation_mode= -2;
