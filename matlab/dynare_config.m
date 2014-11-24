@@ -91,6 +91,11 @@ if isoctave
     addpath([dynareroot '/missing/ilu'])
 end
 
+% corrcoef with two outputs is missing in Octave (ticket #796)
+if isoctave && ~user_has_octave_forge_package('nan')
+    addpath([dynareroot '/missing/corrcoef'])
+end
+
 % strjoin is missing in older versions of MATLAB and in Octave < 3.8
 if (isoctave && octave_ver_less_than('3.8')) || ...
         (~isoctave && matlab_ver_less_than('8.1'))
