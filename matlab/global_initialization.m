@@ -480,6 +480,7 @@ simplex.maxiter = 5000;
 simplex.maxfcallfactor = 500;
 simplex.maxfcall = [];
 simplex.verbosity = 2;
+simplex.delta_factor=0.05;
 options_.simplex = simplex;
 
 % CMAES optimization routine.
