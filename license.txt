@@ -86,7 +86,7 @@ Copyright: 2007 Muthiah Annamalai <muthiah.annamalai@uta.edu>
 License: GPL-3+
 
 Files: matlab/missing/corrcoef/corrcoef.m matlab/missing/corrcoef/sumskipnan.m
- matlab/missing/corrcoef/flag_implicit_skip_nan.m
+ matlab/missing/corrcoef/flag_implicit_skip_nan.m matlab/missing/corrcoef/tcdf.m
 Copyright: 2000-2005,2008,2009,2011 by Alois Schloegl <alois.schloegl@gmail.com>
            2014 Dynare Team
 License: GPL-3+
