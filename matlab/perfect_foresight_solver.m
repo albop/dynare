@@ -54,11 +54,21 @@ end
 
 
 if isempty(oo_.endo_simul) || any(size(oo_.endo_simul) ~= [ M_.endo_nbr, M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead ])
-    error('PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
+    if options_.initval_file
+        fprintf('\nPERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Check whether your initval-file provides %d periods.\n',M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead)
+        error('PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size.')
+    else
+        error('PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
+    end
 end
 
 if isempty(oo_.exo_simul) || any(size(oo_.exo_simul) ~= [ M_.maximum_lag+options_.periods+M_.maximum_lead, M_.exo_nbr ])
-    error('PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
+    if options_.initval_file
+        fprintf('\nPERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Check whether your initval-file provides %d periods.\n',M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead)
+        error('PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size.')
+    else
+        error('PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
+    end
 end
 
 
