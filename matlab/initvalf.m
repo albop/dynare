@@ -64,6 +64,7 @@ switch (extension)
         load(basename);
     case { '.xls', '.xlsx' }
         [data_,names_v_]=xlsread(fullname); % Octave needs the extension explicitly
+        series_=0;
     otherwise
         error(['Unsupported extension for datafile: ' extension])
 end
@@ -81,16 +82,12 @@ for i_=1:size(M_.endo_names,1)
             oo_.endo_simul = [oo_.endo_simul; x_'];            
         end
     else
-        k_ = strmatch(upper(M_.endo_names(i_,:)),names_v_,'exact');
+        k_ = strmatch(deblank(M_.endo_names(i_,:)),names_v_,'exact');
         if isempty(k_)
-            error(['INITVAL_FILE: ' M_.endo_names(i_,:) ' not found'])
+            error(['INITVAL_FILE: ' deblank(M_.endo_names(i_,:)) ' not found'])
         end
         x_ = data_(:,k_);
-        if size(x_,2)>size(x_,1) %oo_.endo_simul must be collection of row vectors
-            oo_.endo_simul = [oo_.endo_simul; x_];
-        else %transpose if column vector
-            oo_.endo_simul = [oo_.endo_simul; x_'];            
-        end
+        oo_.endo_simul = [oo_.endo_simul; x_'];            
     end
 end
 
@@ -103,15 +100,11 @@ for i_=1:size(M_.exo_names,1)
             oo_.exo_simul = [oo_.exo_simul x_];            
         end
     else
-        k_ = strmatch(upper(M_.exo_names(i_,:)),names_v_,'exact');
+        k_ = strmatch(deblank(M_.exo_names(i_,:)),names_v_,'exact');
         if isempty(k_)
-            error(['INITVAL_FILE: ' M_.exo_names(i_,:) ' not found'])
+            error(['INITVAL_FILE: ' deblank(M_.exo_names(i_,:)) ' not found'])
         end
         x_ = data_(:,k_);
-        if size(x_,2)>size(x_,1) %oo_.endo_simul must be collection of row vectors
-            oo_.exo_simul = [oo_.exo_simul x_'];
-        else %if column vector
-            oo_.exo_simul = [oo_.exo_simul x_];            
-        end
+        oo_.exo_simul = [oo_.exo_simul x_];            
     end
 end
