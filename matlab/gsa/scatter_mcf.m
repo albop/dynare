@@ -87,7 +87,11 @@ end
 bf = 0.1;
 ffs = 0.05/(p-1);
 ffl = (1-2*bf-0.05)/p;
-fL = linspace(bf,1-bf+ffs,p+1);
+if p>1,
+    fL = linspace(bf,1-bf+ffs,p+1);
+else
+    fL = bf;
+end
 for i = 1:p
     for j = 1:p
         h = axes('position',[fL(i),fL(p+1-j),ffl,ffl]);
