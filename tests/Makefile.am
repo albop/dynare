@@ -33,7 +33,7 @@ MODFILES = \
 	optimal_policy/Ramsey/ramsey_ex_initval_AR2.mod \
 	optimal_policy/Ramsey/ramsey_ex_aux.mod \
 	discretionary_policy/dennis_1.mod \
-	ramst_initval_file.mod \
+	initval_file/ramst_initval_file.mod \
 	ramst_normcdf_and_friends.mod \
 	ramst_vec.mod \
 	example1_varexo_det.mod \
@@ -305,7 +305,10 @@ EXTRA_DIST = \
 	fs2000_ssfile_aux.m \
 	printMakeCheckMatlabErrMsg.m \
 	printMakeCheckOctaveErrMsg.m \
-	ramst_initval_file_data.m \
+	initval_file/ramst_initval_file_data.m \
+	initval_file/ramst_initval_file_data_col_vec_mat.mat \
+	initval_file/ramst_initval_file_data_row_vec_mat.mat \
+	initval_file/ramst_initval_file_excel.xls \
 	test.m \
 	AIM/data_ca1.m \
 	AIM/fs2000_b1L1L_AIM_steadystate.m \

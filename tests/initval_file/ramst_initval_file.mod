@@ -26,9 +26,22 @@ initval_file(filename = ramst_initval_file_data);
 
 steady;
 
-check;
+simul(periods=200);
+
+initval_file(filename = ramst_initval_file_data_row_vec_mat);
+
+steady;
 
 simul(periods=200);
 
-rplot c;
-rplot k;
+initval_file(filename = ramst_initval_file_data_col_vec_mat);
+
+steady;
+
+simul(periods=200);
+
+initval_file(filename = ramst_initval_file_excel);
+
+steady;
+
+simul(periods=200);
