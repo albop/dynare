@@ -2389,7 +2389,7 @@ The command accepts three file formats:
 
 @item
 M-file (extension @file{.m}): for each endogenous and exogenous
-variable, the file must contain a row vector of the same name.
+variable, the file must contain a row or column vector of the same name. Their length must be @code{periods+M_.maximum_lag+M_.maximum_lead} 
 
 @item
 MAT-file (extension @file{.mat}): same as for M-files.
