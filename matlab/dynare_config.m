@@ -63,7 +63,6 @@ addpath([dynareroot '/utilities/doc/'])
 addpath([dynareroot '/utilities/tests/src/'])
 addpath([dynareroot '/utilities/dataset/'])
 addpath([dynareroot '/utilities/general/'])
-addpath([dynareroot '/utilities/dseries/'])
 addpath([dynareroot '/reports/'])
 
 % For functions that exist only under some Octave versions
