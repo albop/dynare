@@ -19,5 +19,5 @@
 	branch = old-oop-syntax
 [submodule "matlab/modules/dseries"]
 	path = matlab/modules/dseries
-	url = git@github.com:DynareTeam/dseries.git
+	url = https://github.com/DynareTeam/dseries.git
 	branch = old-oop-style
