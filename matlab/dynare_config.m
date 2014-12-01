@@ -256,7 +256,7 @@ if verbose
 end
 
 % Save empty dates and dseries objects (necessary if a mod file is not preprocessed).
-dates('initialize');
+initialize_dates_toolbox;
 dseries('initialize');
 
 cd(origin);
