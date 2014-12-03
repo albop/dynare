@@ -173,7 +173,7 @@ if singularity_problem
         options_check=options;
         options_check.noprint=1;
         [eigenvalues_] = check(M, options_check, oo);
-        if any((abs(eigenvalues_)-1)<1e-6)
+        if any(abs(abs(eigenvalues_)-1)<1e-6)
             fprintf('MODEL_DIAGNOSTICS:  The singularity seems to be (partly) caused by the presence of a unit root\n')
             fprintf('MODEL_DIAGNOSTICS:  as the absolute value of one eigenvalue is in the range of +-1e-6 to 1.\n')
             fprintf('MODEL_DIAGNOSTICS:  If the model is actually supposed to feature unit root behavior, such a warning is expected,\n')
