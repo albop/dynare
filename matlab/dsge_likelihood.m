@@ -70,6 +70,8 @@ function [fval,DLIK,Hess,exit_flag,SteadyState,trend_coeff,info,Model,DynareOpti
 %! M_.params has been updated in the steadystate routine and has complex valued scalars.
 %! @item info==24
 %! M_.params has been updated in the steadystate routine and has some NaNs.
+%! @item info==26
+%! M_.params has been updated in the steadystate routine and has negative/0 values in loglinear model.
 %! @item info==30
 %! Ergodic variance can't be computed.
 %! @item info==41
@@ -266,7 +268,7 @@ if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) == 8 
         DLIK=ones(length(xparam1),1);
     end
     return
-elseif info(1) == 3 || info(1) == 4 || info(1)==6 || info(1) == 20 || info(1) == 21  || info(1) == 23
+elseif info(1) == 3 || info(1) == 4 || info(1)==6 || info(1) == 20 || info(1) == 21  || info(1) == 23 || info(1)==26
     fval = objective_function_penalty_base+info(2);
     info = info(1);
     exit_flag = 0;
