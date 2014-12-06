@@ -133,7 +133,12 @@ end
 sQ = chol(M_.Sigma_e,'lower');
 
 if ~estimated_model
-    InitState(:,1) = oo_.steady_state(oo_.dr.order_var)-ys(oo_.dr.order_var,:); %initial state in deviations from steady state
+    if isempty(M_.endo_histval)
+        y0 = ys;
+    else
+        y0 = M_.endo_histval;
+    end
+    InitState(:,1) = y0(oo_.dr.order_var)-ys(oo_.dr.order_var,:); %initial state in deviations from steady state
     trend = repmat(ys(oo_.dr.order_var,:),1,options_cond_fcst.periods+1); %trend needs to contain correct steady state
 end
 sQ = sqrt(M_.Sigma_e);
