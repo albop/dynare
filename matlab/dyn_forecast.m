@@ -64,7 +64,7 @@ switch task
         horizon = 5;
     end
     if isempty(M_.endo_histval)
-        y0 = repmat(oo_.steady_state,1,maximum_lag);
+        y0 = repmat(oo_.dr.ys,1,maximum_lag);
     else
         y0 = M_.endo_histval;
     end

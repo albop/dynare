@@ -2160,19 +2160,23 @@ commands (@code{stoch_simul}, @code{estimation}@dots{}).
 It is not necessary to declare @code{0} as initial value for exogenous
 stochastic variables, since it is the only possible value.
 
-This steady state will be used as the initial condition at all the
-periods preceeding the first simulation period for the two possible
+The subsequently computed steady state (not the initial values, use @xref{histval} or this) will be used as the initial condition at all the 
+periods preceeding the first simulation period for the three possible
 types of simulations in stochastic mode:
 
 @itemize
 
 @item
-in @code{stoch_simul}, if the @code{periods} options is specified
+in @xref{stoch_simul}, if the @code{periods} options is specified
 
 @item
-in @code{forecast} (in this case, note that it is still possible to
-modify some of these initial values with @code{histval})
+in @xref{forecast} as the initial point at which the forecasts are computed
+
+@item
+in @xref{conditional_forecast} as the initial point at which the conditional forecasts are computed
 @end itemize
+
+To start simulations at a particular set of starting values that are not a computed steady state, use @xref{histval}.
 
 @optionshead
 
@@ -2386,10 +2390,21 @@ before (except when a @code{steady} command doesn't follow an
 @customhead{In a stochastic simulation context}
 
 In the context of stochastic simulations, @code{histval} allows setting
-the starting point of those simulations in the state space (it does not
-affect the starting point for impulse response functions). As for the case of
+the starting point of those simulations in the state space. As for the case of
 perfect foresight simulations, all not explicitly specified variables are set to 0.
 Moreover, as only states enter the recursive policy functions, all values specified for control variables will be ignored.
+
+@itemize
+
+@item
+in @xref{stoch_simul}, if the @code{periods} options is specified. Note that this only affects the starting point for the simulation, but not for the impulse response functions.
+
+@item
+in @xref{forecast} as the initial point at which the forecasts are computed
+
+@item
+in @xref{conditional_forecast} as the initial point at which the conditional forecasts are computed
+@end itemize
 
 For @ref{Ramsey} policy, it also specifies the values of the endogenous states at 
 which the objective function of the planner is computed. Note that the initial values 
@@ -6247,7 +6262,7 @@ Fields are of the form:
 
 
 @deffn Command conditional_forecast (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
-
+@anchor{conditional_forecast}
 @descriptionhead
 
 This command computes forecasts on an estimated or calibrated model for a
