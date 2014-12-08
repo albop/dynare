@@ -201,7 +201,7 @@ end
 
 if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.mh_posterior_mode_estimation==0
     if options_.smoother == 1
-        [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
+        [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,gend,transpose(data),data_index,missing_value);
         oo_.Smoother.SteadyState = ys;
         oo_.Smoother.TrendCoeffs = trend_coeff;
         if options_.filter_covariance
