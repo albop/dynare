@@ -321,6 +321,8 @@ if isempty(estim_params_)% If estim_params_ is empty (e.g. when running the smoo
     estim_params_.ncx = 0;
     estim_params_.ncn = 0;
     estim_params_.np = 0;
+    bounds.lb = [];
+    bounds.ub = [];
 end
 
 % storing prior parameters in results
