@@ -2392,24 +2392,27 @@ before (except when a @code{steady} command doesn't follow an
 In the context of stochastic simulations, @code{histval} allows setting
 the starting point of those simulations in the state space. As for the case of
 perfect foresight simulations, all not explicitly specified variables are set to 0.
-Moreover, as only states enter the recursive policy functions, all values specified for control variables will be ignored.
+Moreover, as only states enter the recursive policy functions, all values specified for control variables will be ignored. This can be used
 
 @itemize
 
 @item
-in @xref{stoch_simul}, if the @code{periods} options is specified. Note that this only affects the starting point for the simulation, but not for the impulse response functions.
+in @ref{stoch_simul}, if the @code{periods} options is specified. Note that this only affects the starting point for the simulation, but not for the impulse response functions.
 
 @item
-in @xref{forecast} as the initial point at which the forecasts are computed
+in @ref{forecast} as the initial point at which the forecasts are computed
 
 @item
-in @xref{conditional_forecast} as the initial point at which the conditional forecasts are computed
-@end itemize
+in @ref{conditional_forecast} as the initial point at which the conditional forecasts are computed
 
-For @ref{Ramsey} policy, it also specifies the values of the endogenous states at 
+@item 
+in @ref{Ramsey} policy, where it also specifies the values of the endogenous states at 
 which the objective function of the planner is computed. Note that the initial values 
 of the Lagrange multipliers associated with the planner's problem cannot be set
 (@pxref{planner_objective_value}).
+
+@end itemize
+
 
 @examplehead
 
@@ -3603,7 +3606,7 @@ solution is computed using the @code{extended_path} command.
 
 @deffn Command stoch_simul [@var{VARIABLE_NAME}@dots{}];
 @deffnx Command stoch_simul (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
-
+@anchor{stoch_simul}
 @descriptionhead
 
 @code{stoch_simul} solves a stochastic (@i{i.e.} rational

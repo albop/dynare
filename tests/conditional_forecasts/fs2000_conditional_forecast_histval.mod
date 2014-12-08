@@ -1,11 +1,9 @@
-/* Mod file tests the correctness of the conditional_forecast command when used together with initval by
+/* Mod file tests the correctness of the conditional_forecast command when used together with histval by
  * - checking whether the unconditional forecast from the conditional_forecast-command 
  *      coincides with the one from the forecast command
  * - checking whether the conditional forecast coincides with the path of 
  *      capital derived when simulating the model with simult_ and the computed exogenous instruments
- * - initval should not play a role as initial conditions need to be set with histval; with initval
- *      the subsequently computed steady state is used
- */
+*/
 
 var m P c e W R k d n l gy_obs gp_obs y dA;
 varexo e_a e_m;
@@ -74,9 +72,12 @@ periods  1  2  3:5;
 values   1 1.04 0.98;
 end;
 
-%set capital to non-steady state value
-initval;
-k = 6; 
+%set capital to non-steady state value and all other states to steady state
+histval;
+k(0) = 6; 
+m(0)=1.01100000000000;
+P(0)=2.25815456051727;
+y(0)=0.580764879486831;
 end;
 
 conditional_forecast(periods=100,parameter_set=calibration,replic=10000, controlled_varexo=(e_m,e_a));
@@ -90,9 +91,9 @@ if max(abs(cond_forecast.forecasts.uncond.Mean.k(2:end)-oo_.forecast.Mean.k))>1e
     error('Unconditional Forecasts do not match')
 end
         
-%compare conditional forecasts; initval should not play a role as initial
-%conditions need to be set with histval; 
-initial_condition_states = oo_.dr.ys; 
+%compare conditional forecasts; histval here sets initval condition for capital different from steady state
+initial_condition_states = oo_.dr.ys;
+initial_condition_states(strmatch('k',M_.endo_names,'exact')) = 6;
 shock_matrix = zeros(options_cond_fcst_.periods ,M_.exo_nbr); %create shock matrix with found controlled shocks
 shock_matrix(1:5,strmatch('e_a',M_.exo_names,'exact')) = cond_forecast.forecasts.controlled_exo_variables.Mean.e_a; %set controlled shocks to their values
 shock_matrix(1:5,strmatch('e_m',M_.exo_names,'exact')) = cond_forecast.forecasts.controlled_exo_variables.Mean.e_m; %set controlled shocks to their values
