@@ -17,18 +17,20 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,de
 %   o trend_coeff   [double]  (n*1) vector, parameters specifying the slope of the trend associated to each observed variable.
 %   o aK            [double]  (K,n,T+K) array, k (k=1,...,K) steps ahead filtered (endogenous) variables.
 %   o T and R       [double]  Matrices defining the state equation (T is the (m*m) transition matrix).
-%    P:             3D array of one-step ahead forecast error variance
-%                   matrices
-%    PK:            4D array of k-step ahead forecast error variance
-%                   matrices (meaningless for periods 1:d)
-%    
+%   o P:            3D array of one-step ahead forecast error variance
+%                       matrices
+%   o PK:           4D array of k-step ahead forecast error variance
+%                       matrices (meaningless for periods 1:d)
+%   o decomp        4D array of shock decomposition of k-step ahead
+%                       filtered variables
+% 
 % ALGORITHM 
 %   Diffuse Kalman filter (Durbin and Koopman)       
 %
 % SPECIAL REQUIREMENTS
 %   None
 
-% Copyright (C) 2006-2012 Dynare Team
+% Copyright (C) 2006-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
