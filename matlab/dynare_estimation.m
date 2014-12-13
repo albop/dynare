@@ -1,4 +1,4 @@
-function dynare_estimation(var_list,dname)
+function oo_recursive_=dynare_estimation(var_list,dname)
 % function dynare_estimation(var_list)
 % runs the estimation of the model
 %
@@ -6,12 +6,12 @@ function dynare_estimation(var_list,dname)
 %   var_list:  selected endogenous variables vector
 %
 % OUTPUTS
-%   none
+%   oo_recursive_: cell array containing the results structures from recursive estimation
 %
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2013 Dynare Team
+% Copyright (C) 2003-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,7 +28,9 @@ function dynare_estimation(var_list,dname)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global options_ oo_ M_ oo_recursive_
+global options_ oo_ M_
+
+oo_recursive_={};
 
 % Test if the order of approximation is nonzero (the preprocessor tests if order is non negative).
 if isequal(options_.order,0)
