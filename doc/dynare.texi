@@ -839,7 +839,7 @@ details are given under the relevant computing tasks.
 
 The @code{M_}, @code{oo_}, and @code{options_} structures are saved in
 a file called @file{@var{FILENAME}_results.mat}. If they exist,
-@code{estim_params_}, @code{bayestopt_}, @code{dataset_}, and
+@code{estim_params_}, @code{bayestopt_}, @code{dataset_}, @code{oo_recursive_} and
 @code{estimation_info} are saved in the same file.
 
 @examplehead
@@ -865,6 +865,14 @@ during the computation.
 
 @defvr {MATLAB/Octave variable} oo_
 Structure containing the various results of the computations.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_recursive_
+@anchor{oo_recursive_}
+Cell array containing the @code{oo_} structures obtained when estimating the model 
+for the different samples when performing recursive estimation and forecasting. 
+The @code{oo_} structure obtained for the sample ranging to the @math{i}th observation 
+is saved in the @math{i}th field. The fields for non-estimated endpoints are empty.
 @end defvr
 
 
@@ -4630,7 +4638,7 @@ the file
 Runs a recursive estimation and forecast for samples of size ranging
 of @var{INTEGER1} to @var{INTEGER2}. Option @code{forecast} must
 also be specified. The forecasts are stored in the
-@code{RecursiveForecast} field of the results structure (@pxref{RecursiveForecast}).
+@code{RecursiveForecast} field of the results structure (@pxref{RecursiveForecast}). The respective results structures @code{oo_} are saved in @code{oo_recursive_} (@pxref{oo_recursive_}).
 
 @item first_obs = @var{INTEGER}
 @anchor{first_obs}
