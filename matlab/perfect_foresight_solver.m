@@ -53,7 +53,7 @@ if isoctave && options_.stack_solve_algo == 2
 end
 
 
-if isempty(oo_.endo_simul) || any(size(oo_.endo_simul) ~= [ M_.endo_nbr, M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead ])
+if isempty(oo_.endo_simul) || any(size(oo_.endo_simul) ~= [ M_.endo_nbr, M_.maximum_lag+options_.periods+M_.maximum_lead ])
     error('PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
 end
 
@@ -91,7 +91,7 @@ else
     exosim = oo_.exo_simul;
     exoinit = repmat(oo_.exo_steady_state',M_.maximum_lag+options_.periods+M_.maximum_lead,1);
     endosim = oo_.endo_simul;
-    endoinit = repmat(oo_.steady_state, 1,M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead);
+    endoinit = repmat(oo_.steady_state, 1,M_.maximum_lag+options_.periods+M_.maximum_lead);
 
     current_weight = 0; % Current weight of target point in convex combination
     step = 1;
