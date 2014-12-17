@@ -322,7 +322,10 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
               var = ((FLDV_ *) it_code->second)->get_pos();
               lag = ((FLDV_ *) it_code->second)->get_lead_lag();
 #ifdef DEBUG
-              mexPrintf("FLDV y[var=%d, lag=%d, it_=%d], y_size=%d evaluate=%d\n", var, lag, it_, y_size, evaluate);
+              if (evaluate)
+                mexPrintf("FLDV y[var=%d, lag=%d, it_=%d], y_size=%d evaluate=%d, ya[%d]=%f\n", var, lag, it_, y_size, evaluate, (it_+lag)*y_size+var, ya[(it_+lag)*y_size+var]);
+              else
+                mexPrintf("FLDV y[var=%d, lag=%d, it_=%d], y_size=%d evaluate=%d, y[%d]=%f\n", var, lag, it_, y_size, evaluate, (it_+lag)*y_size+var, y[(it_+lag)*y_size+var]);
 #endif
               if (evaluate)
                 Stack.push(ya[(it_+lag)*y_size+var]);
@@ -336,8 +339,8 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
               var = ((FLDV_ *) it_code->second)->get_pos();
               lag = ((FLDV_ *) it_code->second)->get_lead_lag();
 #ifdef DEBUG
-              mexPrintf("FLDV x[var=%d, lag=%d, it_=%d], nb_row_x=%d evaluate=%d\n", var, lag, it_, nb_row_x, evaluate);
-              tmp_out << " x[" << it_+lag << ", " << var << "](" << x[it_+lag+var*nb_row_x] << ")";
+              mexPrintf("FLDV x[var=%d, lag=%d, it_=%d], nb_row_x=%d evaluate=%d x[%d]=%f\n", var, lag, it_, nb_row_x, evaluate, it_+lag+var*nb_row_x, x[it_+lag+var*nb_row_x]);
+              //tmp_out << " x[" << it_+lag << ", " << var << "](" << x[it_+lag+var*nb_row_x] << ")";
 #endif
               Stack.push(x[it_+lag+var*nb_row_x]);
               break;
@@ -837,7 +840,7 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
             case oLess:
               Stack.push(double (v1 < v2));
 #ifdef DEBUG
-              tmp_out << " |" << v1 << "<" << v2 << "|";
+              mexPrintf("v1=%f v2=%f v1 < v2 = %f\n",v1,v2,double(v1 < v2));
 #endif
               break;
             case oGreater:

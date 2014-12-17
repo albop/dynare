@@ -32,6 +32,11 @@ function [flag,endo_simul,err] = solve_perfect_foresight_model(endo_simul,exo_si
         fprintf('\n') ;
     end
 
+    if pfm.use_bytecode
+        [flag, endo_simul]=bytecode(Y, exo_simul, pfm.params);
+        return;
+    end
+
     z = Y(find(pfm.lead_lag_incidence'));
     [d1,jacobian] = model_dynamic(z,exo_simul,pfm.params,pfm.steady_state,2);
 
