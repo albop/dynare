@@ -68,4 +68,5 @@ pfm.dynamic_model = str2func([DynareModel.fname,'_dynamic']);
 pfm.verbose = DynareOptions.ep.verbosity;
 pfm.maxit_ = DynareOptions.simul.maxit;
 pfm.tolerance = DynareOptions.dynatol.f;
+pfm.use_bytecode = DynareOptions.ep.use_bytecode ;
 
