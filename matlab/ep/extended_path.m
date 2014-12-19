@@ -204,7 +204,7 @@ while (t<sample_size)
     while 1
         if ~increase_periods
             if bytecode_flag && ~options_.ep.stochastic.order
-                [flag,tmp] = bytecode('dynamic',endo_simul_1,exo_simul_1);
+                [flag,tmp] = bytecode('dynamic',endo_simul_1,exo_simul_1, M_.params, endo_simul_1, options_.ep.periods);
             else
                 flag = 1;
             end
@@ -288,7 +288,7 @@ while (t<sample_size)
             end
             % Solve the perfect foresight model with an increased number of periods.
             if bytecode_flag && ~options_.ep.stochastic.order
-                [flag,tmp] = bytecode('dynamic',endo_simul_1,exo_simul_1);
+                [flag,tmp] = bytecode('dynamic',endo_simul_1,exo_simul_1, M_.params, endo_simul_1, options_.ep.periods);
             else
                 flag = 1;
             end
