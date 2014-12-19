@@ -1,4 +1,4 @@
-function sim1()
+function oo_ = sim1(options_, M_, oo_)
 % function sim1
 % Performs deterministic simulations with lead or lag on one period.
 % Uses sparse matrices.
@@ -29,8 +29,6 @@ function sim1()
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global M_ options_ oo_
 
 endogenous_terminal_period = options_.endogenous_terminal_period;
 vperiods = options_.periods*ones(1,options_.simul.maxit);

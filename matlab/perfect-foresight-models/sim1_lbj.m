@@ -1,4 +1,4 @@
-function sim1_lbj()
+function oo_ = sim1_lbj(options_, M_, oo_)
 % function sim1_lbj
 % performs deterministic simulations with lead or lag on one period
 % using the historical LBJ algorithm
@@ -32,8 +32,6 @@ function sim1_lbj()
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global M_ options_ oo_
 
 lead_lag_incidence = M_.lead_lag_incidence;
 
