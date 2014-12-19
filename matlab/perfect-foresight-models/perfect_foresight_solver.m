@@ -31,36 +31,7 @@ function perfect_foresight_solver()
 
 global M_ options_ oo_
 
-if options_.stack_solve_algo < 0 || options_.stack_solve_algo > 7
-    error('PERFECT_FORESIGHT_SOLVER: stack_solve_algo must be between 0 and 7')
-end
-
-if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0 ...
-        && options_.stack_solve_algo ~= 6 && options_.stack_solve_algo ~= 7
-    error('PERFECT_FORESIGHT_SOLVER: you must use stack_solve_algo=0 or stack_solve_algo=6 when not using block nor bytecode option')
-end
-
-if options_.block && ~options_.bytecode && options_.stack_solve_algo == 5
-    error('PERFECT_FORESIGHT_SOLVER: you can''t use stack_solve_algo = 5 without bytecode option')
-end
-
-if (options_.block || options_.bytecode) && options_.stack_solve_algo == 6
-    error('PERFECT_FORESIGHT_SOLVER: you can''t use stack_solve_algo = 6 with block or bytecode option')
-end
-
-if isoctave && options_.stack_solve_algo == 2
-    error('PERFECT_FORESIGHT_SOLVER: you can''t use stack_solve_algo = 2 under Octave')
-end
-
-
-if isempty(oo_.endo_simul) || any(size(oo_.endo_simul) ~= [ M_.endo_nbr, M_.maximum_lag+options_.periods+M_.maximum_lead ])
-    error('PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
-end
-
-if isempty(oo_.exo_simul) || any(size(oo_.exo_simul) ~= [ M_.maximum_lag+options_.periods+M_.maximum_lead, M_.exo_nbr ])
-    error('PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
-end
-
+check_input_arguments(options_, M_, oo_);
 
 if isempty(options_.scalv) || options_.scalv == 0
     options_.scalv = oo_.steady_state;
