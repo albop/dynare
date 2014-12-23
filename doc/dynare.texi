@@ -11702,7 +11702,7 @@ with the same base name as specified by @ref{tableName} with the ending
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
+@defmethod Report addSeries data, graphBar, graphBarColor, graphBarFillColor, graphBarWidth, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}. NB: Options specific
 to graphs begin with `@code{graph}' while options specific to tables begin with
 `@code{table}'.
@@ -11711,6 +11711,23 @@ to graphs begin with `@code{graph}' while options specific to tables begin with
 
 @item data, @code{dseries}
 @xref{data}.
+
+@anchor{graphBar}
+@item graphBar, @code{BOOLEAN}
+Whether or not to display this series as a bar graph as oppsed to the
+default of displaying it as a line graph. Default: @code{false}
+
+@item graphBarColor, @code{STRING}
+The outline color of each bar in the bar graph. Only active if
+@ref{graphBar} is passed. Default: @code{`black'}
+
+@item graphBarFillColor, @code{STRING}
+The fill color of each bar in the bar graph. Only active if
+@ref{graphBar} is passed. Default: @code{`black'}
+
+@item graphBarWidth, @code{DOUBLE}
+The width of each bar in the bar graph. Only active if @ref{graphBar}
+is passed. Default: @code{2}
 
 @item graphHline, @code{DOUBLE}
 Use this option to draw a horizontal line at the given value. Default:
