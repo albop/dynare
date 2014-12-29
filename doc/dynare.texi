@@ -11458,7 +11458,7 @@ command. Default: @code{`!'}
 @end defmethod
 
 @anchor{addGraph}
-@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, tickFontSize, title, titleFontSize, titleFormat, width, writeCSV, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelScaled, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
+@defmethod Report addGraph axisShape, data, graphDirName, graphName, graphSize, height, showGrid, showLegend, legendAt, showLegendBox, legendLocation, legendOrientation, legendFontSize, miscTikzAxisOptions, miscTikzPictureOptions, seriesToUse, shade, shadeColor, shadeOpacity, tickFontSize, title, titleFontSize, titleFormat, width, writeCSV, xlabel, ylabel, xAxisTight, xrange, xTicks, xTickLabels, xTickLabelAnchor, xTickLabelRotation, yAxisTight, yTickLabelFixed, yTickLabelPrecision, yTickLabelScaled, yTickLabelZeroFill, yrange, showZeroline, zeroLineColor
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -11497,10 +11497,16 @@ Whether or not to display the legend. NB: Unless you use the
 @code{tex} name associated with the @code{dseries}. You can modify this
 @code{tex} name by using @ref{tex_rename}. Default: @code{false}
 
+@item legendAt, @code{NUMERICAL_VECTOR}
+The coordinates for the legend location. If this option is passed, it
+overrides the @ref{legendLocation} option. Must be of size 2. Default:
+@code{empty}.
+
 @item showLegendBox, @code{BOOLEAN}
 Whether or not to display a box around the legend. Default:
 @code{false}
 
+@anchor{legendLocation}
 @item legendLocation, @code{`south west'} | @code{`south east'} | @code{`north west'} | @code{`north east'} | @code{`outer north east'}
 Where to place the legend in the graph. Default: @code{`south east'}
 
