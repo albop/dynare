@@ -727,7 +727,7 @@ cannot be named @file{test.mod}.
 
 @item noclearall
 By default, @code{dynare} will issue a @code{clear all} command to
-MATLAB or Octave, thereby deleting all workspace variables; this options
+MATLAB or Octave, thereby deleting all workspace variables; this option
 instructs @code{dynare} not to clear the workspace
 
 @item onlyclearglobals
