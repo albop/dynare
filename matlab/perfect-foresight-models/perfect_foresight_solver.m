@@ -70,6 +70,10 @@ else
 
     while (step > options_.dynatol.x)
 
+        if ~isequal(step,1)
+            options_.verbosity = 0;
+        end
+
         new_weight = current_weight + step; % Try this weight, and see if it succeeds
         if new_weight >= 1
             new_weight = 1; % Don't go beyond target point
