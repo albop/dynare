@@ -227,32 +227,11 @@ end
 % Define a vector of indices for the observed variables. Is this really usefull?...
 BayesInfo.mf = BayesInfo.mf1;
 
-% Define the deterministic linear trend of the measurement equation.
-if DynareOptions.noconstant
-    constant = zeros(DynareDataset.vobs,1);
-else
-    constant = SteadyState(BayesInfo.mfys);
-end
-
-% Define the deterministic linear trend of the measurement equation.
-if BayesInfo.with_trend
-    trend_coeff = zeros(DynareDataset.vobs,1);
-    t = DynareOptions.trend_coeffs;
-    for i=1:length(t)
-        if ~isempty(t{i})
-            trend_coeff(i) = evalin('base',t{i});
-        end
-    end
-    trend = repmat(constant,1,DynareDataset.nobs)+trend_coeff*[1:DynareDataset.nobs];
-else
-    trend = repmat(constant,1,DynareDataset.nobs);
-end
-
 % Get needed informations for kalman filter routines.
 start = DynareOptions.presample+1;
 np    = size(T,1);
 mf    = BayesInfo.mf;
-Y     = transpose(DynareDataset.data)-trend;
+Y     = transpose(DynareDataset.data);
 
 %------------------------------------------------------------------------------
 % 3. Initial condition of the Kalman filter
