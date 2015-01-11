@@ -124,11 +124,11 @@ Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 % set multipliers and auxiliary variables that
 % depends on multipliers to 0 to compute residuals
 if (options_.bytecode)
-   [chck, res, junk] = bytecode('static',xx,[oo.exo_simul oo.exo_det_simul], ...
+   [chck, res, junk] = bytecode('static',xx,[oo.exo_steady_state oo.exo_det_steady_state], ...
                params, 'evaluate');
    fJ = junk.g1;
 else
-   [res,fJ] = feval([fname '_static'],xx,[oo.exo_simul oo.exo_det_simul], ...
+   [res,fJ] = feval([fname '_static'],xx,[oo.exo_steady_state oo.exo_det_steady_state], ...
                params);
 end
 % index of multipliers and corresponding equations
@@ -162,10 +162,10 @@ end
 function result = check_static_model(ys,M,options_,oo)
 result = false;
 if (options_.bytecode)
-    [chck, res, junk] = bytecode('static',ys,[oo.exo_simul oo.exo_det_simul], ...
+    [chck, res, junk] = bytecode('static',ys,[oo.exo_steady_state oo.exo_det_steady_state], ...
                                  M.params, 'evaluate'); 
 else
-    res = feval([M.fname '_static'],ys,[oo.exo_simul oo.exo_det_simul], ...
+    res = feval([M.fname '_static'],ys,[oo.exo_steady_state oo.exo_det_steady_state], ...
                 M.params);
 end
 if norm(res) < options_.solve_tolf
