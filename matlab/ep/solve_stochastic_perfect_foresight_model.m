@@ -177,7 +177,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
             i_cols_f = i_cols_f + ny;
         end
         nzA = cell(periods,world_nbr);
-        parfor j=1:world_nbr
+        for j=1:world_nbr
             i_rows_y = find(lead_lag_incidence')+(order+1)*ny;
             offset_c = ny*(sum(nnodes.^(0:order-1),2)+j-1);
             offset_r = (j-1)*ny;
