@@ -40,6 +40,7 @@ lead_lag_incidence = M_.lead_lag_incidence;
 
 ny = M_.endo_nbr;
 
+maximum_lag = M_.maximum_lag;
 max_lag = M_.maximum_endo_lag;
 
 nyp = nnz(lead_lag_incidence(1,:)) ;
@@ -69,7 +70,7 @@ i_cols_T = nonzeros(lead_lag_incidence(1:2,:)');
 i_cols_0 = nonzeros(lead_lag_incidence(2,:)');
 i_cols_A0 = find(lead_lag_incidence(2,:)');
 i_cols_j = 1:nd;
-i_upd = M_.maximum_lag*ny+(1:periods*ny);
+i_upd = maximum_lag*ny+(1:periods*ny);
 
 Y = endo_simul(:);
 
@@ -80,7 +81,7 @@ fprintf('MODEL SIMULATION:\n');
 model_dynamic = str2func([M_.fname,'_dynamic']);
 z = Y(find(lead_lag_incidence'));
 [d1,jacobian] = model_dynamic(z,oo_.exo_simul, params, ...
-                              steady_state,M_.maximum_lag+1);
+                              steady_state,maximum_lag+1);
 
 A = sparse([],[],[],periods*ny,periods*ny,periods*nnz(jacobian));
 res = zeros(periods*ny,1);
@@ -95,16 +96,16 @@ for iter = 1:options_.simul.maxit
     
     i_rows = 1:ny;
     i_cols_A = find(lead_lag_incidence');
-    i_cols = i_cols_A+(M_.maximum_lag-1)*ny;
+    i_cols = i_cols_A+(maximum_lag-1)*ny;
 
-    for it = (M_.maximum_lag+1):(M_.maximum_lag+periods)
+    for it = (maximum_lag+1):(maximum_lag+periods)
 
         [d1,jacobian] = model_dynamic(Y(i_cols), exo_simul, params, steady_state,it);
-        if it == M_.maximum_lag+periods && it == M_.maximum_lag+1
+        if it == maximum_lag+periods && it == maximum_lag+1
             A(i_rows,i_cols_A0) = jacobian(:,i_cols_0);
-        elseif it == M_.maximum_lag+periods
+        elseif it == maximum_lag+periods
             A(i_rows,i_cols_A(i_cols_T)) = jacobian(:,i_cols_T);
-        elseif it == M_.maximum_lag+1
+        elseif it == maximum_lag+1
             A(i_rows,i_cols_A1) = jacobian(:,i_cols_1);
         else
             A(i_rows,i_cols_A) = jacobian(:,i_cols_j);
@@ -116,7 +117,7 @@ for iter = 1:options_.simul.maxit
             dr = max(abs(d1));
             if dr<azero
                 vperiods(iter) = it;
-                periods = it-M_.maximum_lag;
+                periods = it-maximum_lag;
                 break
             end
         end
@@ -124,7 +125,7 @@ for iter = 1:options_.simul.maxit
         i_rows = i_rows + ny;
         i_cols = i_cols + ny;
         
-        if it > M_.maximum_lag+1
+        if it > maximum_lag+1
             i_cols_A = i_cols_A + ny;
         end
     end
@@ -170,7 +171,7 @@ if stop
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
         oo_.deterministic_simulation.periods = vperiods(1:iter);
-        oo_.endo_simul = reshape(Y,ny,periods+M_.maximum_lag+M_.maximum_lead);
+        oo_.endo_simul = reshape(Y,ny,periods+maximum_lag+M_.maximum_lead);
         skipline();
         fprintf('\nSimulation terminated after %d iterations.\n',iter);
         fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
@@ -190,7 +191,7 @@ if stop
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
         oo_.deterministic_simulation.periods = vperiods(1:iter);
-        oo_.endo_simul = reshape(Y,ny,periods+M_.maximum_lag+M_.maximum_lead);
+        oo_.endo_simul = reshape(Y,ny,periods+maximum_lag+M_.maximum_lead);
     end
 elseif ~stop
     skipline();
