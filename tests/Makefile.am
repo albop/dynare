@@ -173,6 +173,9 @@ MODFILES = \
 	deterministic_simulations/rbc_det5.mod \
 	deterministic_simulations/rbc_det6.mod \
 	deterministic_simulations/homotopy.mod \
+	deterministic_simulations/rbc_det_exo_lag2a.mod \
+	deterministic_simulations/rbc_det_exo_lag2b.mod \
+	deterministic_simulations/rbc_det_exo_lag2c.mod \
 	walsh.mod \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
@@ -269,6 +272,11 @@ dsge-var/dsgevar_forward_estimated_lambda.o.trs: dsge-var/simul_hybrid.o.trs
 
 smoother2histval/fs2000_simul.m.trs: smoother2histval/fs2000_smooth.m.trs
 smoother2histval/fs2000_simul.o.trs: smoother2histval/fs2000_smooth.o.trs
+
+deterministic_simulations/rbc_det_exo_lag2b.m.trs: deterministic_simulations/rbc_det_exo_lag2a.m.trs
+deterministic_simulations/rbc_det_exo_lag2c.m.trs: deterministic_simulations/rbc_det_exo_lag2a.m.trs
+deterministic_simulations/rbc_det_exo_lag2b.o.trs: deterministic_simulations/rbc_det_exo_lag2a.o.trs
+deterministic_simulations/rbc_det_exo_lag2c.o.trs: deterministic_simulations/rbc_det_exo_lag2a.o.trs
 
 # Matlab TRS Files
 M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
