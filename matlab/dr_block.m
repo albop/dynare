@@ -1,4 +1,4 @@
-function [dr,info,M_,options_,oo_] = dr_block(dr,task,M_,options_,oo_)
+function [dr,info,M_,options_,oo_] = dr_block(dr,task,M_,options_,oo_,varargin)
 % function [dr,info,M_,options_,oo_] = dr_block(dr,task,M_,options_,oo_)
 % computes the reduced form solution of a rational expectation model (first
 % approximation of the stochastic model around the deterministic steady state). 
@@ -51,7 +51,11 @@ function [dr,info,M_,options_,oo_] = dr_block(dr,task,M_,options_,oo_)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 info = 0;
-verbose = options_.verbosity;
+verbose = 0;
+if nargin > 5
+  verbose = varargin{1};
+end
+%verbose = options_.verbosity;
 if options_.order > 1
     error('2nd and 3rd order approximation not implemented with block option')
 end
