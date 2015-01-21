@@ -137,6 +137,7 @@ apt-get build-dep dynare
 Alternatively, if you want to build everything, manually install the following packages:
 
 - `build-essential` (for gcc, g++ and make)
+- `gfortran`
 - `liboctave-dev` or `octave3.2-headers` (will install ATLAS)
 - `libboost-graph-dev`
 - `libgsl0-dev`
