@@ -11422,7 +11422,7 @@ Report Title. Default: @code{none}
 @end defmethod
 
 @anchor{addPage}
-@defmethod Report addPage footnote, orientation, paper, title, titleFormat
+@defmethod Report addPage footnote, orientation, paper, title, titleFormat, titleTruncate
 Adds a @code{Page} to the @code{Report}.
 @optionshead
 @table @code
@@ -11448,6 +11448,12 @@ A string representing the @LaTeX{} markup to use on @ref{title}. The
 number of cell array entries must be equal to that of the @ref{title}
 option if you do not want to use the default value for the title (and
 subtitles). Default: @code{\large\bfseries}
+
+@item titleTruncate, @code{INTEGER}
+Useful when automatically generating page titles that may become too
+long, @code{titleTruncate} can be used to truncate a title (and
+subsequent subtitles) when they pass the specified number of
+characters. Default: @code{off}
 
 @end table
 @end defmethod
