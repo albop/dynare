@@ -5295,7 +5295,15 @@ missing observations.
 
 @item endogenous_prior
 Use endogenous priors as in @cite{Christiano, Trabandt and Walentin
-(2011)}.
+(2011)}. 
+The procedure is motivated by sequential Bayesian learning.  Starting from independent initial priors on the parameters, 
+specified in the @code{estimated_params}-block, the standard deviations observed in a "pre-sample", 
+taken to be the actual sample, are used to update the initial priors. Thus, the product of the initial 
+priors and the pre-sample likelihood of the standard deviations of the observables is used as the new prior 
+(for more information, see the technical appendix of @cite{Christiano, Trabandt and Walentin (2011)}). 
+This procedure helps in cases where the regular posterior estimates, which minimize in-sample forecast 
+errors, result in a large overprediction 
+of model variable variances (a statistic that is not explicitly targeted, but often of particular interest to researchers).
 
 @item use_univariate_filters_if_singularity_is_detected = @var{INTEGER}
 @anchor{use_univariate_filters_if_singularity_is_detected}
