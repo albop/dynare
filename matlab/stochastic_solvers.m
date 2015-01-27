@@ -1,7 +1,7 @@
 function [dr,info] = stochastic_solvers(dr,task,M_,options_,oo_)
 % function [dr,info,M_,options_,oo_] = stochastic_solvers(dr,task,M_,options_,oo_)
-% computes the reduced form solution of a rational expectation model (first or second order
-% approximation of the stochastic model around the deterministic steady state). 
+% computes the reduced form solution of a rational expectations model (first, second or third 
+% order approximation of the stochastic model around the deterministic steady state). 
 %
 % INPUTS
 %   dr         [matlab structure] Decision rules for stochastic simulations.
