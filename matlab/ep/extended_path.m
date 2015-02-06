@@ -1,4 +1,4 @@
-function ts = extended_path(initial_conditions,sample_size)
+function [ts,results] = extended_path(initial_conditions,sample_size)
 % Stochastic simulation of a non linear DSGE model using the Extended Path method (Fair and Taylor 1983). A time
 % series of size T  is obtained by solving T perfect foresight models.
 %
@@ -32,24 +32,28 @@ function ts = extended_path(initial_conditions,sample_size)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 global M_ options_ oo_
 
-options_.verbosity = options_.ep.verbosity;
-verbosity = options_.ep.verbosity+options_.ep.debug;
+ep  = options_.ep;
+options_.verbosity = ep.verbosity;
+verbosity = ep.verbosity+ep.debug;
 
 % Set maximum number of iterations for the deterministic solver.
-options_.simul.maxit = options_.ep.maxit;
+options_.simul.maxit = ep.maxit;
 
 % Prepare a structure needed by the matlab implementation of the perfect foresight model solver
 pfm = setup_stochastic_perfect_foresight_model_solver(M_,options_,oo_);
 
+endo_nbr = M_.endo_nbr;
 exo_nbr = M_.exo_nbr;
-ep = options_.ep;
+maximum_lag = M_.maximum_lag;
+maximum_lead = M_.maximum_lead;
+epreplic_nbr = ep.replic_nbr;
 steady_state = oo_.steady_state;
 dynatol = options_.dynatol;
 
 % Set default initial conditions.
 if isempty(initial_conditions)
     if isempty(M_.endo_histval)
-        initial_conditions = oo_.steady_state;
+        initial_conditions = steady_state;
     else
         initial_conditions = M_.endo_histval;
     end
@@ -57,18 +61,19 @@ end
 
 
 % Set the number of periods for the perfect foresight model
-periods = options_.ep.periods;
+periods = ep.periods;
 pfm.periods = periods;
 pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
+pfm.block = options_.block;
 
 % keep a copy of pfm.i_upd
 i_upd = pfm.i_upd;
 
 % Set the algorithm for the perfect foresight solver
-options_.stack_solve_algo = options_.ep.stack_solve_algo;
+options_.stack_solve_algo = ep.stack_solve_algo;
 
 % Set check_stability flag
-do_not_check_stability_flag = ~options_.ep.check_stability;
+do_not_check_stability_flag = ~ep.check_stability;
 
 % Compute the first order reduced form if needed.
 %
@@ -76,7 +81,7 @@ do_not_check_stability_flag = ~options_.ep.check_stability;
 % all the globals in a mat file called linear_reduced_form.mat;
 
 dr = struct();
-if options_.ep.init
+if ep.init
     options_.order = 1;
     [dr,Info,M_,options_,oo_] = resol(1,M_,options_,oo_);
 end
@@ -85,12 +90,10 @@ end
 options_.minimal_solving_period = 100;%options_.ep.periods;
 
 % Initialize the exogenous variables.
-% !!!!!!!! Needs to fixed
-options_.periods = periods;
 make_ex_;
 
 % Initialize the endogenous variables.
-make_y_;
+%make_y_;
 
 % Initialize the output array.
 time_series = zeros(M_.endo_nbr,sample_size);
@@ -107,19 +110,36 @@ covariance_matrix_upper_cholesky = chol(covariance_matrix);
 %exo_nbr = effective_number_of_shocks;
 
 % Set seed.
-if options_.ep.set_dynare_seed_to_default
+if ep.set_dynare_seed_to_default
     set_dynare_seed('default');
 end
 
 % Set bytecode flag
-bytecode_flag = options_.ep.use_bytecode;
+bytecode_flag = ep.use_bytecode;
+% Set number of replications
+replic_nbr = ep.replic_nbr;
 
 % Simulate shocks.
-switch options_.ep.innovation_distribution
+switch ep.innovation_distribution
   case 'gaussian'
-    oo_.ep.shocks = transpose(transpose(covariance_matrix_upper_cholesky)*randn(effective_number_of_shocks,sample_size));
+    shocks = transpose(transpose(covariance_matrix_upper_cholesky)* ...
+                       randn(effective_number_of_shocks,sample_size*replic_nbr));
+  case 'calibrated'
+    replic_nbr = 1;
+    shocks = zeros(sample_size,effective_number_of_shocks);
+    for i = 1:length(M_.unanticipated_det_shocks)
+        k = M_.unanticipated_det_shocks(i).periods;
+        ivar = M_.unanticipated_det_shocks(i).exo_id;
+        v = M_.unanticipated_det_shocks(i).value;
+        if ~M_.unanticipated_det_shocks(i).multiplicative
+            shocks(k,ivar) = v;
+        else
+            socks(k,ivar) = shocks(k,ivar) * v;
+        end
+    end
+    shocks = shocks(:,positive_var_indx);
   otherwise
-    error(['extended_path:: ' options_.ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
+    error(['extended_path:: ' ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
 
 
@@ -128,7 +148,7 @@ hh = dyn_waitbar(0,'Please wait. Extended Path simulations...');
 set(hh,'Name','EP simulations.');
 
 % hybrid correction
-pfm.hybrid_order = options_.ep.stochastic.hybrid_order;
+pfm.hybrid_order = ep.stochastic.hybrid_order;
 if pfm.hybrid_order
     oo_.dr = set_state_space(oo_.dr,M_,options_);
     options = options_;
@@ -142,16 +162,16 @@ end
 pfm.nnzA = M_.NNZDerivatives(1);
 
 % setting up integration nodes if order > 0
-if options_.ep.stochastic.order > 0
+if ep.stochastic.order > 0
     [nodes,weights,nnodes] = setup_integration_nodes(options_.ep,pfm);
     pfm.nodes = nodes;
     pfm.weights = weights; 
     pfm.nnodes = nnodes;
 
     % compute number of blocks
-    [block_nbr,pfm.world_nbr] = get_block_world_nbr(options_.ep.stochastic.algo,nnodes,options_.ep.stochastic.order,options_.ep.periods);
+    [block_nbr,pfm.world_nbr] = get_block_world_nbr(ep.stochastic.algo,nnodes,ep.stochastic.order,ep.periods);
 else
-    block_nbr = options_.ep.periods
+    block_nbr = ep.periods;
 end
 
 
@@ -167,74 +187,54 @@ oo_.ep.failures.previous_period = cell(0);
 oo_.ep.failures.shocks = cell(0);
 
 % Initializes some variables.
-t  = 0;
+t  = 1;
 tsimul = 1;
+nx = length(oo_.exo_simul);
+for k = 1:replic_nbr
+    results{k} = zeros(endo_nbr,sample_size+1);
+    results{k}(:,1) = initial_conditions;
+end
 % Main loop.
-while (t<sample_size)
+while (t <= sample_size)
     if ~mod(t,10)
         dyn_waitbar(t/sample_size,hh,'Please wait. Extended Path simulations...');
     end
     % Set period index.
     t = t+1;
-    % Put shocks in oo_.exo_simul (second line).
-    exo_simul_1 = zeros(periods+2,exo_nbr);
-    exo_simul_1(2,positive_var_indx) = oo_.exo_simul(2,positive_var_indx) + oo_.ep.shocks(t,:);
-    if ep.init% Compute first order solution (Perturbation)...
-        initial_path = simult_(initial_conditions,dr,exo_simul_1(2:end,:),1);
-        endo_simul_1(:,1:end-1) = initial_path(:,1:end-1)*ep.init+endo_simul_1(:,1:end-1)*(1-ep.init);
+   
+    if replic_nbr > 1 && ep.parallel_1
+        parfor k = 1:replic_nbr
+            exo_simul = repmat(oo_.exo_steady_state',periods+2,1);
+            exo_simul(1:sample_size+3-t,:) = oo_.exo_simul(t:end,:);
+            exo_simul(2,positive_var_indx) = exo_simul(2+1,positive_var_indx) + ...
+                shocks((t-2)*replic_nbr+k,:);
+            initial_conditions = results{k}(:,t-1);
+            results{k}(:,t) = extended_path_core(periods,endo_nbr,exo_nbr,positive_var_indx, ...
+                                                 exo_simul,ep.init,initial_conditions,...
+                                                 maximum_lag,maximum_lead,steady_state, ...
+                                                 ep.verbosity,bytecode_flag,ep.stochastic.order,...
+                                                 M_.params,pfm,ep.stochastic.algo,ep.stock_solve_algo,...
+                                                 options_.lmmcp);
+        end
     else
-        if t==1
-            endo_simul_1 = repmat(steady_state,1,periods+2);
+        for k = 1:replic_nbr
+            exo_simul = repmat(oo_.exo_steady_state',periods+maximum_lag+ ...
+                            maximum_lead,1);
+            exo_simul(1:sample_size+maximum_lag+maximum_lead-t+1,:) = ...
+                oo_.exo_simul(t:end,:);
+            exo_simul(maximum_lag+1,positive_var_indx) = ...
+                exo_simul(maximum_lag+1,positive_var_indx) + shocks((t-2)*replic_nbr+k,:);
+            initial_conditions = results{k}(:,t-1);
+            results{k}(:,t) = extended_path_core(periods,endo_nbr,exo_nbr,positive_var_indx, ...
+                                                 exo_simul,ep.init,initial_conditions,...
+                                                 maximum_lag,maximum_lead,steady_state, ...
+                                                 ep.verbosity,bytecode_flag,ep.stochastic.order,...
+                                                 M_,pfm,ep.stochastic.algo,ep.stack_solve_algo,...
+                                                 options_.lmmcp);
         end
     end
-    % Solve a perfect foresight model.
-    % Keep a copy of endo_simul_1
-    endo_simul = endo_simul_1;
-    if verbosity
-        save ep_test_1 endo_simul_1 exo_simul_1
-    end
-    if bytecode_flag && ~options_.ep.stochastic.order
-        [flag,tmp] = bytecode('dynamic',endo_simul_1,exo_simul_1, M_.params, endo_simul_1, options_.ep.periods);
-    else
-        flag = 1;
-    end
-    if flag
-        if options_.ep.stochastic.order == 0
-            [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm);
-        else
-            switch(options_.ep.stochastic.algo)
-              case 0
-                [flag,tmp] = ...
-                    solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
-              case 1
-                [flag,tmp] = ...
-                    solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_,pfm,options_.ep.stochastic.order);
-            end
-        end
-    end
-    info_convergence = ~flag;
-    if verbosity
-        if info_convergence
-                disp(['Time: ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
-        else
-                disp(['Time: ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
-        end
-    end
-    endo_simul_1 = tmp;
-    if info_convergence
-        % Save results of the perfect foresight model solver.
-        time_series(:,tsimul) = endo_simul_1(:,2);
-        endo_simul_1(:,1:end-1) = endo_simul_1(:,2:end);
-        endo_simul_1(:,1) = time_series(:,tsimul);
-        endo_simul_1(:,end) = oo_.steady_state;
-        tsimul = tsimul+1;
-    else
-        oo_.ep.failures.periods = [oo_.ep.failures.periods t];
-        oo_.ep.failures.previous_period = [oo_.ep.failures.previous_period  endo_simul_1(:,1)];
-        oo_.ep.failures.shocks = [oo_.ep.failures.shocks  shocks];
-        endo_simul_1 = repmat(steady_state,1,periods+2);
-        endo_simul_1(:,1) = time_series(:,tsimul-1);
-    end
+            
+    
 end% (while) loop over t
 
 dyn_waitbar_close(hh);
@@ -242,14 +242,85 @@ dyn_waitbar_close(hh);
 if isnan(options_.initial_period)
     initial_period = dates(1,1);
 else
-    initial_period = optins_.initial_period;
+    initial_period = options_.initial_period;
 end
 if nargout
-    ts = dseries(transpose([initial_conditions, time_series]),initial_period,cellstr(M_.endo_names));
+    if ~isnan(results{1})
+        ts = dseries(transpose([results{1}]), ...
+                     initial_period,cellstr(M_.endo_names));
+    else
+        ts = NaN;
+    end
 else
-    oo_.endo_simul = [initial_conditions, time_series];
-    ts = dseries(transpose(oo_.endo_simul),initial_period,cellstr(M_.endo_names));
-    dyn2vec;
+    if ~isnan(results{1})
+        oo_.endo_simul = results{1};
+        ts = dseries(transpose(results{1}),initial_period, ...
+                     cellstr(M_.endo_names));
+    else
+        oo_.endo_simul = NaN;
+        ts = NaN;
+    end
 end
 
  assignin('base', 'Simulated_time_series', ts);
+ 
+ 
+function y = extended_path_core(periods,endo_nbr,exo_nbr,positive_var_indx, ...
+                                exo_simul,init,initial_conditions,...
+                                maximum_lag,maximum_lead,steady_state, ...
+                                verbosity,bytecode_flag,order,M,pfm,algo,stack_solve_algo,...
+                                olmmcp)
+    
+if init% Compute first order solution (Perturbation)...
+    endo_simul = simult_(initial_conditions,dr,exo_simul(2:end,:),1);
+else
+    endo_simul = [initial_conditions repmat(steady_state,1,periods+1)];
+end
+oo.endo_simul = endo_simul;
+oo_.endo_simul = endo_simul;
+% Solve a perfect foresight model.
+% Keep a copy of endo_simul_1
+if verbosity
+    save ep_test_1 endo_simul exo_simul
+end
+if bytecode_flag && ~ep.stochastic.order
+    [flag,tmp] = bytecode('dynamic',endo_simul,exo_simul, M_.params, endo_simul, ep.periods);
+else
+    flag = 1;
+end
+if flag
+    if order == 0
+        options.periods = periods;
+        options.block = pfm.block;
+        oo.endo_simul = endo_simul;
+        oo.exo_simul = exo_simul;
+        oo.steady_state = steady_state;
+        options.bytecode = bytecode_flag;
+        options.lmmcp = olmmcp;
+        options.stack_solve_algo = stack_solve_algo;
+        [tmp,flag] = perfect_foresight_solver_core(M,oo,options);
+    else
+        switch(algo)
+          case 0
+            [flag,tmp] = ...
+                solve_stochastic_perfect_foresight_model(endo_simul,exo_simul,pfm,ep.stochastic.quadrature.nodes,ep.stochastic.order);
+          case 1
+            [flag,tmp] = ...
+                solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,options_,pfm,ep.stochastic.order);
+        end
+    end
+end
+info_convergence = ~flag;
+if verbosity
+    if info_convergence
+        disp(['Time: ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
+    else
+        disp(['Time: ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
+    end
+end
+endo_simul = tmp;
+if info_convergence
+    y = endo_simul(:,2);
+else
+    y = NaN(size(endo_nbr,1));
+end

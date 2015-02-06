@@ -187,7 +187,11 @@ ep.innovation_distribution = 'gaussian';
 % Set flag for the seed
 ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
-ep.stack_solve_algo = 4;
+ep.stack_solve_algo = 7;
+% Number of replications
+ep.replic_nbr = 1;
+% Parallel execution of replications
+ep.parallel_1 = false;
 % Stochastic extended path related options.
 ep.stochastic.method = '';
 ep.stochastic.algo = 0;
