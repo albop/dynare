@@ -86,7 +86,7 @@ end
 
 % Effectively compute simulation, possibly with homotopy
 if options_.no_homotopy
-    simulation_core;
+    [oo_.endo_simul,oo_.deterministic_simulation.status] = perfect_foresight_solver_core(M_,oo_,options_);
 else
     exosim = oo_.exo_simul;
     exoinit = repmat(oo_.exo_steady_state',M_.maximum_lag+options_.periods+M_.maximum_lead,1);
@@ -114,7 +114,7 @@ else
 
         saved_endo_simul = oo_.endo_simul;
 
-        simulation_core;
+        [oo_.endo_simul,oo_.deterministic_simulation.status] = perfect_foresight_solver_core(M_,oo_,options_);
 
         if oo_.deterministic_simulation.status == 1
             current_weight = new_weight;
@@ -158,73 +158,3 @@ assignin('base', 'Simulated_time_series', ts);
 end
 
 
-function simulation_core()
-
-global M_ oo_ options_
-
-if(options_.block)
-    if(options_.bytecode)
-        [info, oo_.endo_simul] = bytecode('dynamic');
-        if info == 1
-            oo_.deterministic_simulation.status = 0;
-        else
-            oo_.deterministic_simulation.status = 1;
-        end
-        mexErrCheck('bytecode', info);
-    else
-        eval([M_.fname '_dynamic']);
-    end
-else
-    if(options_.bytecode)
-        [info, oo_.endo_simul]=bytecode('dynamic');
-        if info == 1
-            oo_.deterministic_simulation.status = 0;
-        else
-            oo_.deterministic_simulation.status = 1;
-        end;
-        mexErrCheck('bytecode', info);
-    else
-        if M_.maximum_endo_lead == 0 % Purely backward model
-            sim1_purely_backward;
-        elseif M_.maximum_endo_lag == 0 % Purely forward model
-            sim1_purely_forward;
-        else % General case
-            if options_.stack_solve_algo == 0
-                sim1;
-            elseif options_.stack_solve_algo == 6
-                sim1_lbj;
-            elseif options_.stack_solve_algo == 7
-                periods = options_.periods;
-                if ~isfield(options_.lmmcp,'lb')
-                    [lb,ub,pfm.eq_index] = get_complementarity_conditions(M_);
-                    options_.lmmcp.lb = repmat(lb,periods,1);
-                    options_.lmmcp.ub = repmat(ub,periods,1);
-                end
-
-                y = oo_.endo_simul;
-                y0 = y(:,1);
-                yT = y(:,periods+2);
-                z = y(:,2:periods+1);
-                illi = M_.lead_lag_incidence';
-                [i_cols,~,i_cols_j] = find(illi(:));
-                illi = illi(:,2:3);
-                [i_cols_J1,~,i_cols_1] = find(illi(:));
-                i_cols_T = nonzeros(M_.lead_lag_incidence(1:2,:)');
-                [y,info] = dynare_solve(@perfect_foresight_problem,z(:),1, ...
-                                 str2func([M_.fname '_dynamic']),y0,yT, ...
-                                 oo_.exo_simul,M_.params,oo_.steady_state, ...
-                                 options_.periods,M_.endo_nbr,i_cols, ...
-                                 i_cols_J1, i_cols_1, i_cols_T, i_cols_j, ...
-                                 M_.NNZDerivatives(1));
-                oo_.endo_simul = [y0 reshape(y,M_.endo_nbr,periods) yT];
-                if info == 1
-                    oo_.deterministic_simulation.status = 0;
-                else
-                    oo_.deterministic_simulation.status = 1;
-                end;
-            end
-        end
-    end
-end
-
-end
