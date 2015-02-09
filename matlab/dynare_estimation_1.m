@@ -12,7 +12,7 @@ function dynare_estimation_1(var_list_,dname)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2013 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -71,26 +71,18 @@ end
 if ~options_.dsge_var
     if options_.particle.status
         objective_function = str2func('non_linear_dsge_likelihood');
-        if options_.particle.filter_algorithm.sis == 1
+        if strcmpi(options_.particle.filter_algorithm, 'sis')
             options_.particle.algorithm = 'sequential_importance_particle_filter';
+        elseif strcmpi(options_.particle.filter_algorithm, 'apf')
+            options_.particle.algorithm = 'auxiliary_particle_filter';
+        elseif strcmpi(options_.particle.filter_algorithm, 'gf')
+            options_.particle.algorithm = 'gaussian_filter';
+        elseif strcmpi(options_.particle.filter_algorithm,  'gmf')
+            options_.particle.algorithm = 'gaussian_mixture_filter';
+        elseif strcmpi(options_.particle.filter_algorithm, 'cpf')
+            options_.particle.algorithm = 'conditional_particle_filter';
         else
-            if options_.particle.filter_algorithm.apf == 1
-                options_.particle.algorithm = 'auxiliary_particle_filter';
-            else
-                if options_.particle.filter_algorithm.gf == 1
-                    options_.particle.algorithm = 'gaussian_filter';
-                else
-                    if options_.particle.filter_algorithm.gmf == 1
-                        options_.particle.algorithm = 'gaussian_mixture_filter';
-                    else
-                        if options_.particle.filter_algorithm.cpf == 1
-                            options_.particle.algorithm = 'conditional_particle_filter';
-                        else
-                            error('Estimation: Unknown filter!')
-                        end
-                    end
-                end
-            end
+            error(['Estimation: Unknown filter ' options_.particle.filter_algorithm])
         end
     else
         objective_function = str2func('dsge_likelihood');
