@@ -1,6 +1,6 @@
 function info=stoch_simul(var_list)
 
-% Copyright (C) 2001-2013 Dynare Team
+% Copyright (C) 2001-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,8 +34,6 @@ if options_.linear
 end
 if options_.order == 1
     options_.replic = 1;
-elseif options_.order == 3
-    options_.k_order_solver = 1;
 end
 
 if isempty(options_.qz_criterium)

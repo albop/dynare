@@ -15,7 +15,7 @@ function y_=simult_(y0,dr,ex_,iorder)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2013 Dynare Team
+% Copyright (C) 2001-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,12 +40,6 @@ exo_nbr = M_.exo_nbr;
 
 y_ = zeros(size(y0,1),iter+M_.maximum_lag);
 y_(:,1) = y0;
-
-% stoch_simul sets k_order_solver=1 if order=3, but does so only locally, so we
-% have to do it here also
-if options_.order == 3
-    options_.k_order_solver = 1;
-end
 
 if ~options_.k_order_solver || (options_.k_order_solver && options_.pruning) %if k_order_pert is not used or if we do not use Dynare++ with k_order_pert
     if iorder==1
