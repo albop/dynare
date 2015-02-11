@@ -62,39 +62,40 @@ else
     else
         if M.maximum_endo_lead == 0 
             % Purely backward model
-            global oo_
+            global oo_ options_
             oo_ = oo;
+            options_ = options;
             sim1_purely_backward;
             endo_simul = oo_.endo_simul;
             if oo_.deterministic_simulation.status == 1
-                status = 1;
+                status = 0;
             end
         elseif M.maximum_endo_lag == 0 
             % Purely forward model
-            global oo_
+            global oo_ options_
             oo_ = oo;
+            options_ = options;
             sim1_purely_forward;
             endo_simul = oo_.endo_simul;
             if oo_.deterministic_simulation.status == 1
-                status = 1;
+                status = 0;
             end
         else 
             % General case
             if options.stack_solve_algo == 0
-                global oo_
-                oo_ = oo;
-                sim1;
-                endo_simul = oo_.endo_simul;
-                if oo_.deterministic_simulation.status == 1
-                    status = 1;
+                oo = sim1(M,options,oo);
+                endo_simul = oo.endo_simul;
+                if oo.deterministic_simulation.status == 1
+                    status = 0;
                 end
             elseif options.stack_solve_algo == 6
-                global oo_
+                global oo_ options_
                 oo_ = oo;
+                options_ = options;
                 sim1_lbj;
                 endo_simul = oo_.endo_simul;
                 if oo_.deterministic_simulation.status == 1
-                    status = 1;
+                    status = 0;
                 end
             elseif options.stack_solve_algo == 7
                 periods = options.periods;
