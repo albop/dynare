@@ -55,26 +55,39 @@ if options_.debug
     end
 end
 
-% Effectively compute simulation, possibly with homotopy
-if options_.no_homotopy
-    oo_ = simulation_core(options_, M_, oo_);
-else
+% Disable warnings if homotopy 
+if ~options_.no_homotopy
+    warning off all
+end
+
+oo_ = simulation_core(options_, M_, oo_);
+
+% If simulation failed try homotopy.
+if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
+    disp('Simulation of the perfect foresight model failed!')
+    skipline()
+    
     exosim = oo_.exo_simul;
     exoinit = repmat(oo_.exo_steady_state',M_.maximum_lag+options_.periods+M_.maximum_lead,1);
     endosim = oo_.endo_simul;
     endoinit = repmat(oo_.steady_state, 1,M_.maximum_lag+options_.periods+M_.maximum_lead);
 
     current_weight = 0; % Current weight of target point in convex combination
-    step = 1;
+    step = .5;
     success_counter = 0;
+    iteration = 0;
 
+    fprintf('Iter. \t | Lambda \t | status \t | Max. residual\n')
+    fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
     while (step > options_.dynatol.x)
 
         if ~isequal(step,1)
             options_.verbosity = 0;
         end
 
+        iteration = iteration+1;
         new_weight = current_weight + step; % Try this weight, and see if it succeeds
+
         if new_weight >= 1
             new_weight = 1; % Don't go beyond target point
             step = new_weight - current_weight;
@@ -89,32 +102,40 @@ else
 
         saved_endo_simul = oo_.endo_simul;
 
-        oo_ = simulation_core(options_, M_, oo_);
-
+        [oo_, me] = simulation_core(options_, M_, oo_);
+        
         if oo_.deterministic_simulation.status == 1
             current_weight = new_weight;
             if current_weight >= 1
+                fprintf('%i \t | %1.5f \t | %s \t | %e\n', iteration, new_weight, 'succeeded', me)
                 break
             end
             success_counter = success_counter + 1;
             if success_counter >= 3
                 success_counter = 0;
                 step = step * 2;
-                disp([ 'Homotopy step succeeded, doubling step size (completed ' sprintf('%.1f', current_weight*100) '%, step size ' sprintf('%.3g', step) ')' ])
+                fprintf('%i \t | %1.5f \t | %s \t | %e\n', iteration, new_weight, 'succeeded', me)
             else
-                disp([ 'Homotopy step succeeded (completed ' sprintf('%.1f', current_weight*100) '%, step size ' sprintf('%.3g', step) ')' ])
+                fprintf('%i \t | %1.5f \t | %s \t | %e\n', iteration, new_weight, 'succeeded', me)
             end
         else
             oo_.endo_simul = saved_endo_simul;
             success_counter = 0;
             step = step / 2;
-            disp([ 'Homotopy step failed, halving step size (completed ' sprintf('%.1f', current_weight*100) '%, step size ' sprintf('%.3g', step) ')' ])
+            fprintf('%i \t | %1.5f \t | %s \t | %e\n', iteration, new_weight, 'failed', me)
         end
     end
+    fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
+    skipline()
+end
+
+if ~options_.no_homotopy
+    warning off all
 end
 
 if oo_.deterministic_simulation.status == 1
     disp('Perfect foresight solution found.')
+    skipline()
 else
     warning('Failed to solve perfect foresight model')
 end
