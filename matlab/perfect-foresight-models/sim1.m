@@ -30,6 +30,8 @@ function oo_ = sim1(options_, M_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+verbose = options_.no_homotopy;    
+
 endogenous_terminal_period = options_.endogenous_terminal_period;
 vperiods = options_.periods*ones(1,options_.simul.maxit);
 azero = options_.dynatol.f/1e7;
@@ -72,9 +74,11 @@ i_upd = maximum_lag*ny+(1:periods*ny);
 
 Y = endo_simul(:);
 
-skipline()
-disp (['-----------------------------------------------------']) ;
-fprintf('MODEL SIMULATION:\n');
+if verbose
+    skipline()
+    disp (['-----------------------------------------------------']) ;
+    fprintf('MODEL SIMULATION:\n');
+end
 
 model_dynamic = str2func([M_.fname,'_dynamic']);
 z = Y(find(lead_lag_incidence'));
@@ -170,21 +174,25 @@ if stop
         oo_.deterministic_simulation.iterations = iter;
         oo_.deterministic_simulation.periods = vperiods(1:iter);
         oo_.endo_simul = reshape(Y,ny,periods+maximum_lag+M_.maximum_lead);
-        skipline();
-        fprintf('\nSimulation terminated after %d iterations.\n',iter);
-        fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
-        if ~isreal(res) || ~isreal(Y)
-            fprintf('WARNING: Simulation terminated with imaginary parts in the residuals or endogenous variables.\n');
-        else
-            fprintf('WARNING: Simulation terminated with NaN or Inf in the residuals or endogenous variables.\n');
+        if verbose
+            skipline();
+            fprintf('\nSimulation terminated after %d iterations.\n',iter);
+            fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
+            if ~isreal(res) || ~isreal(Y)
+                fprintf('WARNING: Simulation terminated with imaginary parts in the residuals or endogenous variables.\n');
+            else
+                fprintf('WARNING: Simulation terminated with NaN or Inf in the residuals or endogenous variables.\n');
+            end
+            fprintf('WARNING: There is most likely something wrong with your model. Try model_diagnostics.\n');
         end
-        fprintf('WARNING: There is most likely something wrong with your model. Try model_diagnostics.\n');
     else
-        skipline();
-        fprintf('\nSimulation concluded successfully after %d iterations.\n',iter);
-        fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
-        fprintf('Max. Abs. Error         : %16.13f\n',err);
-        fprintf('Convergency obtained!\n');
+        if verbose
+            skipline();
+            fprintf('\nSimulation concluded successfully after %d iterations.\n',iter);
+            fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
+            fprintf('Max. Abs. Error         : %16.13f\n',err);
+            fprintf('Convergency obtained!\n');
+        end
         oo_.deterministic_simulation.status = 1;% Convergency obtained.
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
@@ -192,15 +200,20 @@ if stop
         oo_.endo_simul = reshape(Y,ny,periods+maximum_lag+M_.maximum_lead);
     end
 elseif ~stop
-    skipline();
-    fprintf('\nSimulation terminated after %d iterations.\n',iter);
-    fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
-    fprintf('Max. Abs. Error         : %16.13f\n',err);
-    fprintf('WARNING : maximum number of iterations is reached (modify option maxit).\n') ;
+    if verbose
+        skipline();
+        fprintf('\nSimulation terminated after %d iterations.\n',iter);
+        fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
+        fprintf('Max. Abs. Error         : %16.13f\n',err);
+        fprintf('WARNING : maximum number of iterations is reached (modify option maxit).\n') ;
+    end
     oo_.deterministic_simulation.status = 0;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
     oo_.deterministic_simulation.periods = vperiods(1:iter);
     oo_.deterministic_simulation.iterations = options_.simul.maxit;
 end
-disp (['-----------------------------------------------------']) ;
-skipline();
+
+if verbose
+    disp (['-----------------------------------------------------']) ;
+    skipline();
+end
