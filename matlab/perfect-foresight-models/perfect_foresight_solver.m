@@ -55,6 +55,9 @@ if options_.debug
     end
 end
 
+initperiods = 1:M_.maximum_lag;
+lastperiods = (M_.maximum_endo_lag+options_.periods+1):(M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead);
+
 % Disable warnings if homotopy 
 if ~options_.no_homotopy
     warning off all
@@ -69,6 +72,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
     
     exosim = oo_.exo_simul;
     exoinit = repmat(oo_.exo_steady_state',M_.maximum_lag+options_.periods+M_.maximum_lead,1);
+    
     endosim = oo_.endo_simul;
     endoinit = repmat(oo_.steady_state, 1,M_.maximum_lag+options_.periods+M_.maximum_lead);
 
@@ -79,6 +83,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
 
     fprintf('Iter. \t | Lambda \t | status \t | Max. residual\n')
     fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
+    
     while (step > options_.dynatol.x)
 
         if ~isequal(step,1)
@@ -96,14 +101,23 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
         % Compute convex combination for exo path and initial/terminal endo conditions
         % But take care of not overwriting the computed part of oo_.endo_simul
         oo_.exo_simul = exosim*new_weight + exoinit*(1-new_weight);
-        endocombi = endosim*new_weight + endoinit*(1-new_weight);
-        oo_.endo_simul(:,1:M_.maximum_endo_lag) = endocombi(:,1:M_.maximum_endo_lag);
-        oo_.endo_simul(:,(end-M_.maximum_endo_lead):end) = endocombi(:,(end-M_.maximum_endo_lead):end);
-
+        
+        oo_.endo_simul(:,[initperiods, lastperiods]) = ...
+            new_weight*oo_.endo_simul(:,[initperiods, lastperiods])+(1-new_weight)*endoinit(:,[initperiods, lastperiods]);
+        
+        path_with_nans = any(any(isnan(oo_.endo_simul)));
+        path_with_cplx = any(any(~isreal(oo_.endo_simul)));
+        
+        if isequal(iteration,1) && (path_with_nans || path_with_cplx)
+            oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = endoinit(:,1:options_.periods);
+        elseif path_with_nans || path_with_cplx
+            oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = saved_endo_simul(:,1+M_.maximum_endo_lag:end-M_.maximum_endo_lead);
+        end
+        
         saved_endo_simul = oo_.endo_simul;
 
         [oo_, me] = simulation_core(options_, M_, oo_);
-        
+   
         if oo_.deterministic_simulation.status == 1
             current_weight = new_weight;
             if current_weight >= 1
