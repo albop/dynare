@@ -142,7 +142,7 @@ end
 
 dyn2vec;
 
-if isnan(options_.initial_period)
+if ~isdates(options_.initial_period) && isnan(options_.initial_period)
     initial_period = dates(1,1);
 else
     initial_period = options_.initial_period;
