@@ -169,7 +169,7 @@ end
 
 if stop
     if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y)) || ~isreal(res) || ~isreal(Y)
-        oo_.deterministic_simulation.status = 0;% NaN or Inf occurred
+        oo_.deterministic_simulation.status = false;% NaN or Inf occurred
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
         oo_.deterministic_simulation.periods = vperiods(1:iter);
@@ -193,7 +193,7 @@ if stop
             fprintf('Max. Abs. Error         : %16.13f\n',err);
             fprintf('Convergency obtained!\n');
         end
-        oo_.deterministic_simulation.status = 1;% Convergency obtained.
+        oo_.deterministic_simulation.status = true;% Convergency obtained.
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
         oo_.deterministic_simulation.periods = vperiods(1:iter);
@@ -207,7 +207,7 @@ elseif ~stop
         fprintf('Max. Abs. Error         : %16.13f\n',err);
         fprintf('WARNING : maximum number of iterations is reached (modify option maxit).\n') ;
     end
-    oo_.deterministic_simulation.status = 0;% more iterations are needed.
+    oo_.deterministic_simulation.status = false;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
     oo_.deterministic_simulation.periods = vperiods(1:iter);
     oo_.deterministic_simulation.iterations = options_.simul.maxit;
