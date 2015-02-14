@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2014 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -245,11 +245,7 @@ particle.resampling.method.kitagawa = 1;
 particle.resampling.method.smooth = 0;
 particle.resampling.method.stratified = 0;
 % Set default algorithm
-particle.filter_algorithm.sis = 1;
-particle.filter_algorithm.apf = 0;
-particle.filter_algorithm.gf = 0;
-particle.filter_algorithm.gmf = 0;
-particle.filter_algorithm.cpf = 0;
+particle.filter_algorithm = 'sis';
 % Approximation of the proposal distribution
 particle.proposal_approximation.cubature = 1;
 particle.proposal_approximation.unscented = 0;

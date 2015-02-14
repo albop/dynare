@@ -1,4 +1,4 @@
-function sim1_purely_backward()
+function oo_ = sim1_purely_backward(options_, M_, oo_)
 % Performs deterministic simulation of a purely backward model
 
 % Copyright (C) 2012-2014 Dynare Team
@@ -18,7 +18,6 @@ function sim1_purely_backward()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    global M_ options_ oo_
     if size(M_.lead_lag_incidence,1) > 1
         ny0 = nnz(M_.lead_lag_incidence(2,:)); % Number of variables at current period
         nyb = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at previous period
@@ -54,4 +53,3 @@ function sim1_purely_backward()
 
         oo_.endo_simul(:,it) = tmp(nyb+1:nyb+M_.endo_nbr);
     end
-    

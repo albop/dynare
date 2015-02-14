@@ -96,12 +96,6 @@ options_.mode_check.number_of_points = 250;
 
 //set_dynare_threads('local_state_space_iteration_2',3);
 
-options_.particle.algorithm = 'sequential_importance_particle_filter';
-//options_.particle.algorithm = 'auxiliary_particle_filter';
-//options_.particle.algorithm = 'gaussian_mixture_filter';
-//options_.particle.algorithm = 'conditional_particle_filter';
-//options_.particle.algorithm = 'gaussian_filter';
-
 //options_.particle.IS_approximation_method = 'quadrature' ;
 options_.particle.IS_approximation_method = 'cubature' ;
 //options_.particle.IS_approximation_method = 'unscented' ;
@@ -117,4 +111,4 @@ options_.mh_posterior_mode_estimation=0 ;
 options_.particle.liu_west_delta = 0.99 ;
 options_.mode_check_node_number = 250 ;
 
-estimation(datafile=data_risky_perturb3,order=1,nograph,nobs=100,mh_replic=0,mode_compute=11);
+estimation(datafile=data_risky_perturb3,order=1,nograph,nobs=100,mh_replic=0,mode_compute=11,filter_algorithm=sis);

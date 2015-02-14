@@ -1,4 +1,4 @@
-function sim1_purely_forward()
+function oo_ = sim1_purely_forward(options_, M_, oo_)
 % Performs deterministic simulation of a purely forward model
 
 % Copyright (C) 2012-2014 Dynare Team
@@ -17,8 +17,6 @@ function sim1_purely_forward()
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-    global M_ options_ oo_
 
     ny0 = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at current period
     iyf = find(M_.lead_lag_incidence(2,:)>0); % Indices of variables at next period
@@ -47,4 +45,3 @@ function sim1_purely_forward()
 
         oo_.endo_simul(:,it) = tmp(1:M_.endo_nbr);
     end
-    

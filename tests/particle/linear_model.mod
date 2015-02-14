@@ -56,7 +56,6 @@ varobs y, z;
 
 
 options_.particle.status = 1;
-options_.particle.algorithm = 'sequential_importance_particle_filter';
 options_.particle.initialization = 1;
 options_.particle.pruning = 0;
 options_.particle.number_of_particles = 20000;
@@ -71,4 +70,4 @@ options_.mode_check_neighbourhood_size = 0.05;
 set_dynare_threads('local_state_space_iteration_2',3);
 
 
-estimation(order=2,nobs=100,datafile=linear_model_data,mh_replic=0);
+estimation(order=2,nobs=100,datafile=linear_model_data,mh_replic=0,filter_algorithm=sis);
