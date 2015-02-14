@@ -299,7 +299,8 @@ if flag
         options.bytecode = bytecode_flag;
         options.lmmcp = olmmcp;
         options.stack_solve_algo = stack_solve_algo;
-        [tmp,flag] = perfect_foresight_solver_core(M,oo,options);
+        [tmp,flag] = perfect_foresight_solver_core(M,options,oo);
+        info_convergence = flag;
     else
         switch(algo)
           case 0
@@ -309,9 +310,9 @@ if flag
             [flag,tmp] = ...
                 solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,options_,pfm,ep.stochastic.order);
         end
+        info_convergence = ~flag;
     end
 end
-info_convergence = ~flag;
 if verbosity
     if info_convergence
         disp(['Time: ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
