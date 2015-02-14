@@ -39,7 +39,7 @@ else
             oo_ = sim1_purely_forward(options_, M_, oo_);
         else % General case
             if options_.stack_solve_algo == 0
-                oo_ = sim1(options_, M_, oo_);
+                oo_ = sim1(M_, options_, oo_);
             elseif options_.stack_solve_algo == 6
                 oo_ = sim1_lbj(options_, M_, oo_);
             elseif options_.stack_solve_algo == 7

@@ -1,4 +1,4 @@
-function oo_ = sim1(options_, M_, oo_)
+function oo_ = sim1(M, options, oo)
 % function sim1
 % Performs deterministic simulations with lead or lag on one period.
 % Uses sparse matrices.
@@ -31,7 +31,7 @@ function oo_ = sim1(options_, M_, oo_)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-verbose = options_.no_homotopy;    
+verbose = options.no_homotopy && ~ options.nodisplay;    
 
 endogenous_terminal_period = options.endogenous_terminal_period;
 vperiods = options.periods*ones(1,options.simul.maxit);
@@ -170,11 +170,11 @@ end
 
 if stop
     if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y)) || ~isreal(res) || ~isreal(Y)
-        oo_.deterministic_simulation.status = false;% NaN or Inf occurred
-        oo_.deterministic_simulation.error = err;
-        oo_.deterministic_simulation.iterations = iter;
-        oo_.deterministic_simulation.periods = vperiods(1:iter);
-        oo_.endo_simul = reshape(Y,ny,periods+maximum_lag+M_.maximum_lead);
+        oo.deterministic_simulation.status = false;% NaN or Inf occurred
+        oo.deterministic_simulation.error = err;
+        oo.deterministic_simulation.iterations = iter;
+        oo.deterministic_simulation.periods = vperiods(1:iter);
+        oo.endo_simul = reshape(Y,ny,periods+maximum_lag+M.maximum_lead);
         if verbose
             skipline();
             fprintf('\nSimulation terminated after %d iterations.\n',iter);
@@ -194,11 +194,11 @@ if stop
             fprintf('Max. Abs. Error         : %16.13f\n',err);
             fprintf('Convergency obtained!\n');
         end
-        oo_.deterministic_simulation.status = true;% Convergency obtained.
-        oo_.deterministic_simulation.error = err;
-        oo_.deterministic_simulation.iterations = iter;
-        oo_.deterministic_simulation.periods = vperiods(1:iter);
-        oo_.endo_simul = reshape(Y,ny,periods+maximum_lag+M_.maximum_lead);
+        oo.deterministic_simulation.status = true;% Convergency obtained.
+        oo.deterministic_simulation.error = err;
+        oo.deterministic_simulation.iterations = iter;
+        oo.deterministic_simulation.periods = vperiods(1:iter);
+        oo.endo_simul = reshape(Y,ny,periods+maximum_lag+M.maximum_lead);
     end
 elseif ~stop
     if verbose
@@ -208,10 +208,10 @@ elseif ~stop
         fprintf('Max. Abs. Error         : %16.13f\n',err);
         fprintf('WARNING : maximum number of iterations is reached (modify option maxit).\n') ;
     end
-    oo_.deterministic_simulation.status = false;% more iterations are needed.
-    oo_.deterministic_simulation.error = err;
-    oo_.deterministic_simulation.periods = vperiods(1:iter);
-    oo_.deterministic_simulation.iterations = options_.simul.maxit;
+    oo.deterministic_simulation.status = false;% more iterations are needed.
+    oo.deterministic_simulation.error = err;
+    oo.deterministic_simulation.periods = vperiods(1:iter);
+    oo.deterministic_simulation.iterations = options.simul.maxit;
 end
 
 if verbose
