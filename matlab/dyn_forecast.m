@@ -37,6 +37,8 @@ global options_ oo_ M_
 
 info = 0;
 
+make_ex_;
+
 maximum_lag = M_.maximum_lag;
 
 endo_names = M_.endo_names;
@@ -122,15 +124,15 @@ if ~isscalar(trend)
 end
 
 for i=1:n_var
-    eval(['oo_.forecast.Mean.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+1:end)'';']);
-    eval(['oo_.forecast.HPDinf.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+1:end)''-' ...
-          ' int_width(:,' int2str(i) ');']);
-    eval(['oo_.forecast.HPDsup.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+1:end)''+' ...
-          ' int_width(:,' int2str(i) ');']);
+    eval(['oo_.forecast.Mean.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+(1:horizon))'';']);
+    eval(['oo_.forecast.HPDinf.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+(1:horizon))''-' ...
+          ' int_width(1:horizon,' int2str(i) ');']);
+    eval(['oo_.forecast.HPDsup.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+(1:horizon))''+' ...
+          ' int_width(1:horizon,' int2str(i) ');']);
 end
 
 for i=1:M_.exo_det_nbr
-    eval(['oo_.forecast.Exogenous.' M_.exo_det_names(i,:) '= oo_.exo_det_simul(:,' int2str(i) ');']);
+    eval(['oo_.forecast.Exogenous.' M_.exo_det_names(i,:) '= oo_.exo_det_simul(maximum_lag+(1:horizon),' int2str(i) ');']);
 end
 
 if options_.nograph == 0
