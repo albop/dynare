@@ -1,6 +1,8 @@
 function [endo_simul,status, maxerror] = perfect_foresight_simulation_core(M_, options_, oo_)
-
+endo_simul = [];
 status = false;
+maxerror = [];
+
 if options_.block
     if options_.bytecode
         try
@@ -34,14 +36,22 @@ else
         mexErrCheck('bytecode', info);
     else
         if M_.maximum_endo_lead == 0 % Purely backward model
-            oo_ = sim1_purely_backward(options_, M_, oo_);
+            oo = sim1_purely_backward(options_, M_, oo_);
+            endo_simul = oo.endo_simul;
+            status = oo.deterministic_simulation.status;
         elseif M_.maximum_endo_lag == 0 % Purely forward model
-            oo_ = sim1_purely_forward(options_, M_, oo_);
+            oo = sim1_purely_forward(options_, M_, oo_);
+            endo_simul = oo.endo_simul;
+            status = oo.deterministic_simulation.status;
         else % General case
             if options_.stack_solve_algo == 0
-                oo_ = sim1(M_, options_, oo_);
+                oo = sim1(M_, options_, oo_);
+                endo_simul = oo.endo_simul;
+                status = oo.deterministic_simulation.status;
             elseif options_.stack_solve_algo == 6
-                oo_ = sim1_lbj(options_, M_, oo_);
+                oo = sim1_lbj(options_, M_, oo_);
+                endo_simul = oo.endo_simul;
+                status = oo.deterministic_simulation.status;
             elseif options_.stack_solve_algo == 7
                 periods = options_.periods;
                 if ~isfield(options_.lmmcp,'lb')
@@ -75,7 +85,7 @@ else
     end
 end
 
-if nargout>1
+if nargout > 2
     y0 = oo_.endo_simul(:,1);
     yT = oo_.endo_simul(:,options_.periods+2);
     yy  = oo_.endo_simul(:,2:options_.periods+1);
