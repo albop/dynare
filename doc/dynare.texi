@@ -1875,10 +1875,33 @@ end;
 
 @end deffn
 
-Dynare has the ability to output the list of model equations to a
-@LaTeX{} file, using the @code{write_latex_dynamic_model} command. The
-static model can also be written with the
-@code{write_latex_static_model} command.
+Dynare has the ability to output the original list of model equations
+to a @LaTeX{} file, using the @code{write_latex_original_model}
+command, the list of transformed model equations using the
+@code{write_latex_dynamic_model} command, and the list of static model
+equations using the @code{write_latex_static_model} command.
+
+@anchor{write_latex_original_model}
+
+@deffn Command write_latex_original_model ;
+
+@descriptionhead
+
+This command creates a @LaTeX{} file containing the model, as defined
+in the model block.
+
+If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
+will create a file called @file{@var{FILENAME}_dynamic.tex},
+containing the list of all the dynamic model equations.
+
+If @LaTeX{} names were given for variables and parameters
+(@pxref{Variable declarations}), then those will be used; otherwise,
+the plain text names will be used.
+
+Time subscripts (@code{t}, @code{t+1}, @code{t-1}, @dots{}) will be
+appended to the variable names, as @LaTeX{} subscripts.
+
+@end deffn
 
 @anchor{write_latex_dynamic_model}
 
