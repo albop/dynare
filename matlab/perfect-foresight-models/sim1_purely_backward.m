@@ -1,7 +1,7 @@
 function oo_ = sim1_purely_backward(options_, M_, oo_)
 % Performs deterministic simulation of a purely backward model
 
-% Copyright (C) 2012-2014 Dynare Team
+% Copyright (C) 2012-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
