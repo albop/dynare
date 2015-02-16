@@ -1,4 +1,5 @@
 function check_input_arguments(DynareOptions, DynareModel, DynareResults)
+%function check_input_arguments(DynareOptions, DynareModel, DynareResults)
 
 % Copyright (C) 2015 Dynare Team
 %
