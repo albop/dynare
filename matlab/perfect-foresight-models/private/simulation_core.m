@@ -33,7 +33,6 @@ if options_.block
         end
         mexErrCheck('bytecode', info);
     else
-        global oo_ options_
         eval([M_.fname '_dynamic']);
     end
 else
