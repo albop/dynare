@@ -15,7 +15,7 @@ if options_.block
         end
         mexErrCheck('bytecode', info);
     else
-        eval([M_.fname '_dynamic']);
+        oo_ = feval([M_.fname '_dynamic'], options_, M_, oo_);
     end
 else
     if options_.bytecode
