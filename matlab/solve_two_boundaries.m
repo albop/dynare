@@ -1,4 +1,4 @@
-function [y, oo]= solve_two_boundaries(fname, y, x, params, steady_state, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, M, oo)
+function [y, oo]= solve_two_boundaries(fname, y, x, params, steady_state, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo,options,M, oo)
 % Computes the deterministic simulation of a block of equation containing
 % both lead and lag variables using relaxation methods 
 %
@@ -81,7 +81,7 @@ Jacobian_Size=Blck_size*(y_kmin+y_kmax_l +periods);
 g1=spalloc( Blck_size*periods, Jacobian_Size, nze*periods);
 reduced = 0;
 while ~(cvg==1 || iter>maxit_),
-    [r, y, g1, g2, g3, b]=feval(fname, y, x, params, steady_state, periods, 0, y_kmin, Blck_size);
+    [r, y, g1, g2, g3, b]=feval(fname, y, x, params, steady_state, periods, 0, y_kmin, Blck_size,options.periods);
     preconditioner = 2;
     g1a=g1(:, y_kmin*Blck_size+1:(periods+y_kmin)*Blck_size);
     term1 = g1(:, 1:y_kmin_l*Blck_size)*reshape(y(1+y_kmin-y_kmin_l:y_kmin,y_index)',1,y_kmin_l*Blck_size)';
@@ -298,8 +298,7 @@ while ~(cvg==1 || iter>maxit_),
             g = (ra'*g1a)';
             f = 0.5*ra'*ra;
             p = -g1a\ra;
-            [yn,f,ra,check]=lnsrch1(ya,f,g,p,stpmax, ...
-                                    'lnsrch1_wrapper_two_boundaries',nn,nn,  fname, y, y_index, x, params, steady_state, periods, y_kmin, Blck_size);
+            [yn,f,ra,check]=lnsrch1(ya,f,g,p,stpmax,'lnsrch1_wrapper_two_boundaries',nn,nn,  fname, y, y_index,x, params, steady_state, periods, y_kmin, Blck_size,options.periods);
             dx = ya - yn;
             y(1+y_kmin:periods+y_kmin,y_index)=reshape(yn',length(y_index),periods)';
         end
