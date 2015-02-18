@@ -49,9 +49,13 @@ isf1 = [nyp+ny+1:nyf+nyp+ny+1] ;
 stop = 0 ;
 iz = [1:ny+nyp+nyf];
 
-disp (['-----------------------------------------------------']) ;
-disp (['MODEL SIMULATION :']) ;
-fprintf('\n') ;
+verbose = options_.verbosity;
+
+if verbose
+    printline(56)
+    disp(['MODEL SIMULATION :'])
+    skipline()
+end
 
 it_init = M_.maximum_lag+1 ;
 
@@ -98,16 +102,18 @@ for iter = 1:options_.simul.maxit
     end
     
     err = max(max(abs(c./options_.scalv')));
-    disp([num2str(iter) ' -     err = ' num2str(err)]) ;
-    disp(['     Time of iteration       :' num2str(etime(clock,h2))]) ;
+
+    if verbose
+        str = sprintf('Iter: %s,\t err. = %s, \t time = %s',num2str(iter),num2str(err), num2str(etime(clock,h2)));
+        disp(str);
+    end
     
     if err < options_.dynatol.f
         stop = 1 ;
-        fprintf('\n') ;
-        disp([' Total time of simulation        :' num2str(etime(clock,h1))]) ;
-        fprintf('\n') ;
-        disp([' Convergency obtained.']) ;
-        fprintf('\n') ;
+        if verbose
+            skipline()
+            disp(sprintf('Total time of simulation: %s', num2str(etime(clock,h1))))
+        end
         oo_.deterministic_simulation.status = 1;% Convergency obtained.
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
@@ -116,15 +122,21 @@ for iter = 1:options_.simul.maxit
 end
 
 if ~stop
-    fprintf('\n') ;
-    disp(['     Total time of simulation        :' num2str(etime(clock,h1))]) ;
-    fprintf('\n') ;
-    disp(['WARNING : maximum number of iterations is reached (modify options_.simul.maxit).']) ;
-    fprintf('\n') ;
+    if verbose
+        disp(sprintf('Total time of simulation: %s.', num2str(etime(clock,h1))))
+        disp('Maximum number of iterations is reached (modify option maxit).')
+    end
     oo_.deterministic_simulation.status = 0;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
     oo_.deterministic_simulation.errors = c/abs(err);    
     oo_.deterministic_simulation.iterations = options_.simul.maxit;
 end
-disp (['-----------------------------------------------------']) ;
 
+if verbose
+    if stop
+        printline(56)
+    else
+        printline(62)
+    end
+    skipline()
+end

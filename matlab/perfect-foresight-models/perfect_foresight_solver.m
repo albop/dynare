@@ -58,17 +58,20 @@ end
 initperiods = 1:M_.maximum_lag;
 lastperiods = (M_.maximum_endo_lag+options_.periods+1):(M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead);
 
-% Disable warnings if homotopy 
-if ~options_.no_homotopy
-    warning off all
-end
 
 oo_ = simulation_core(options_, M_, oo_);
 
 % If simulation failed try homotopy.
 if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
+    skipline()
     disp('Simulation of the perfect foresight model failed!')
     skipline()
+    
+    % Disable warnings if homotopy
+    warning off all
+    % Do not print anything
+    oldverbositylevel = options_.verbosity;
+    options_.verbosity = 0;
     
     exosim = oo_.exo_simul;
     exoinit = repmat(oo_.exo_steady_state',M_.maximum_lag+options_.periods+M_.maximum_lead,1);
@@ -141,10 +144,8 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
     end
     fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
     skipline()
-end
-
-if ~options_.no_homotopy
-    warning off all
+    options_.verbosity = oldverbositylevel;
+    warning on all
 end
 
 if oo_.deterministic_simulation.status == 1

@@ -30,7 +30,7 @@ function oo_ = sim1(options_, M_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-verbose = options_.no_homotopy;    
+verbose = options_.verbosity;
 
 endogenous_terminal_period = options_.endogenous_terminal_period;
 vperiods = options_.periods*ones(1,options_.simul.maxit);
@@ -76,8 +76,9 @@ Y = endo_simul(:);
 
 if verbose
     skipline()
-    disp (['-----------------------------------------------------']) ;
-    fprintf('MODEL SIMULATION:\n');
+    printline(56)
+    disp('MODEL SIMULATION:')
+    skipline()
 end
 
 model_dynamic = str2func([M_.fname,'_dynamic']);
@@ -144,6 +145,12 @@ for iter = 1:options_.simul.maxit
         end        
         skipline()
     end
+
+    if verbose
+        str = sprintf('Iter: %s,\t err. = %s, \t time = %s',num2str(iter),num2str(err), num2str(etime(clock,h2)));
+        disp(str);
+    end
+
     
     if err < options_.dynatol.f
         stop = 1 ;
@@ -175,23 +182,21 @@ if stop
         oo_.deterministic_simulation.periods = vperiods(1:iter);
         oo_.endo_simul = reshape(Y,ny,periods+maximum_lag+M_.maximum_lead);
         if verbose
-            skipline();
-            fprintf('\nSimulation terminated after %d iterations.\n',iter);
-            fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
+            skipline()
+            disp(sprintf('Total time of simulation: %s.', num2str(etime(clock,h1))))
             if ~isreal(res) || ~isreal(Y)
-                fprintf('WARNING: Simulation terminated with imaginary parts in the residuals or endogenous variables.\n');
+                disp('Simulation terminated with imaginary parts in the residuals or endogenous variables.')
             else
-                fprintf('WARNING: Simulation terminated with NaN or Inf in the residuals or endogenous variables.\n');
+                disp('Simulation terminated with NaN or Inf in the residuals or endogenous variables.')
             end
-            fprintf('WARNING: There is most likely something wrong with your model. Try model_diagnostics.\n');
+            disp('There is most likely something wrong with your model. Try model_diagnostics or another simulation method.')
+            printline(105)
         end
     else
         if verbose
             skipline();
-            fprintf('\nSimulation concluded successfully after %d iterations.\n',iter);
-            fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
-            fprintf('Max. Abs. Error         : %16.13f\n',err);
-            fprintf('Convergency obtained!\n');
+            disp(sprintf('Total time of simulation: %s', num2str(etime(clock,h1))))
+            printline(56)
         end
         oo_.deterministic_simulation.status = true;% Convergency obtained.
         oo_.deterministic_simulation.error = err;
@@ -202,10 +207,9 @@ if stop
 elseif ~stop
     if verbose
         skipline();
-        fprintf('\nSimulation terminated after %d iterations.\n',iter);
-        fprintf('Total time of simulation: %16.13f\n',etime(clock,h1));
-        fprintf('Max. Abs. Error         : %16.13f\n',err);
-        fprintf('WARNING : maximum number of iterations is reached (modify option maxit).\n') ;
+        disp(sprintf('Total time of simulation: %s.', num2str(etime(clock,h1))))
+        disp('Maximum number of iterations is reached (modify option maxit).')
+        printline(62)
     end
     oo_.deterministic_simulation.status = false;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
@@ -214,6 +218,5 @@ elseif ~stop
 end
 
 if verbose
-    disp (['-----------------------------------------------------']) ;
     skipline();
 end
