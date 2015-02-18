@@ -81,6 +81,13 @@ else
                                  options_.periods,M_.endo_nbr,i_cols, ...
                                  i_cols_J1, i_cols_1, i_cols_T, i_cols_j, ...
                                  M_.NNZDerivatives(1));
+                if all(imag(y)<.1*options_.dynatol.f)
+                    if ~isreal(y)
+                        y = real(y);
+                    end
+                else
+                    info = 1;
+                end
                 oo_.endo_simul = [y0 reshape(y,M_.endo_nbr,periods) yT];
                 if info == 1
                     oo_.deterministic_simulation.status = false;
