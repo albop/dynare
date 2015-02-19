@@ -16,7 +16,7 @@ function oo_ = sim1_lbj(options_, M_, oo_)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 1996-2012 Dynare Team
+% Copyright (C) 1996-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

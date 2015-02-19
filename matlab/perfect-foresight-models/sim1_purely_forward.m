@@ -1,7 +1,7 @@
 function oo_ = sim1_purely_forward(options_, M_, oo_)
 % Performs deterministic simulation of a purely forward model
 
-% Copyright (C) 2012-2014 Dynare Team
+% Copyright (C) 2012-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

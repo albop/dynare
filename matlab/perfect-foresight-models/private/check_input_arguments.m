@@ -1,6 +1,7 @@
 function check_input_arguments(DynareOptions, DynareModel, DynareResults)
+%function check_input_arguments(DynareOptions, DynareModel, DynareResults)
 
-% Copyright (C) 2014 Dynare Team
+% Copyright (C) 2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -43,6 +44,7 @@ if isempty(DynareResults.endo_simul) || any(size(DynareResults.endo_simul) ~= [ 
     error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
 end
 
-if isempty(DynareResults.exo_simul) || any(size(DynareResults.exo_simul) ~= [ DynareModel.maximum_lag+DynareOptions.periods+DynareModel.maximum_lead, DynareModel.exo_nbr ])
+if (DynareModel.exo_nbr > 0) && (isempty(DynareResults.exo_simul) || ...
+                                 any(size(DynareResults.exo_simul) ~= [ DynareModel.maximum_lag+DynareOptions.periods+DynareModel.maximum_lead, DynareModel.exo_nbr ]))
     error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
 end

@@ -13,7 +13,7 @@ function oo = sim1(M, options, oo)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 1996-2013 Dynare Team
+% Copyright (C) 1996-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

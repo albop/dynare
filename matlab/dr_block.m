@@ -33,7 +33,7 @@ function [dr,info,M_,options_,oo_] = dr_block(dr,task,M_,options_,oo_,varargin)
 %   none.
 %  
 
-% Copyright (C) 2010-2013 Dynare Team
+% Copyright (C) 2010-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -72,7 +72,7 @@ end;
 if (options_.bytecode)
     [chck, zz, data]= bytecode('dynamic','evaluate', z, zx, M_.params, dr.ys, 1, data);
 else
-    [r, data] = feval([M_.fname '_dynamic'], z', zx, M_.params, dr.ys, M_.maximum_lag+1, data);
+    [r, data] = feval([M_.fname '_dynamic'], options_, M_, oo_, z', zx, M_.params, dr.ys, M_.maximum_lag+1, data);
     chck = 0;
 end;
 mexErrCheck('bytecode', chck);

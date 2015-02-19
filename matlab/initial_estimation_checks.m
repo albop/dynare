@@ -19,7 +19,7 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2014 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
