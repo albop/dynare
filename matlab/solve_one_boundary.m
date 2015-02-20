@@ -55,7 +55,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, steady_state, ...
 %   none.
 %  
 
-% Copyright (C) 1996-2013 Dynare Team
+% Copyright (C) 1996-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
