@@ -111,7 +111,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
         path_with_nans = any(any(isnan(oo_.endo_simul)));
         path_with_cplx = any(any(~isreal(oo_.endo_simul)));
         
-        if isequal(iteration,1) && (path_with_nans || path_with_cplx)
+        if isequal(iteration,1)
             oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = endoinit(:,1:options_.periods);
         elseif path_with_nans || path_with_cplx
             oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = saved_endo_simul(:,1+M_.maximum_endo_lag:end-M_.maximum_endo_lead);
