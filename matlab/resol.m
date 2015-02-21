@@ -4,7 +4,7 @@ function [dr,info,M,options,oo] = resol(check_flag,M,options,oo)
 %! @deftypefn {Function File} {[@var{dr},@var{info},@var{M},@var{options},@var{oo}] =} resol (@var{check_flag},@var{M},@var{options},@var{oo})
 %! @anchor{resol}
 %! @sp 1
-%! Computes first and second order reduced form of the DSGE model.
+%! Computes the perturbation-based decisions rules of the DSGE model (orders 1 to 3).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
