@@ -31,7 +31,9 @@ if options_.block
             oo_.endo_simul = tmp;
             oo_.deterministic_simulation.status = true;
         end
-        mexErrCheck('bytecode', info);
+        if options_.no_homotopy
+            mexErrCheck('bytecode', info);
+        end
     else
         oo_ = feval([M_.fname '_dynamic'], options_, M_, oo_);
     end
@@ -47,8 +49,10 @@ else
         else
             oo_.endo_simul = tmp;
             oo_.deterministic_simulation.status = true;
-        end;
-        mexErrCheck('bytecode', info);
+        end
+        if options_.no_homotopy
+            mexErrCheck('bytecode', info);
+        end
     else
         if M_.maximum_endo_lead == 0 % Purely backward model
             oo_ = sim1_purely_backward(options_, M_, oo_);
@@ -113,11 +117,15 @@ if nargout>1
     if options_.block && ~options_.bytecode
         maxerror = oo_.deterministic_simulation.error;
     else
-        residuals = perfect_foresight_problem(yy(:),str2func([M_.fname '_dynamic']), y0, yT, ...
-                                              oo_.exo_simul,M_.params,oo_.steady_state, ...
-                                              options_.periods,M_.endo_nbr,i_cols, ...
-                                              i_cols_J1, i_cols_1, i_cols_T, i_cols_j, ...
-                                              M_.NNZDerivatives(1));
+        if options_.bytecode
+            [chck, residuals, junk]= bytecode('dynamic','evaluate', oo_.endo_simul, oo_.exo_simul, M_.params, oo_.steady_state, 1);
+        else
+            residuals = perfect_foresight_problem(yy(:),str2func([M_.fname '_dynamic']), y0, yT, ...
+                                                  oo_.exo_simul,M_.params,oo_.steady_state, ...
+                                                  options_.periods,M_.endo_nbr,i_cols, ...
+                                                  i_cols_J1, i_cols_1, i_cols_T, i_cols_j, ...
+                                                  M_.NNZDerivatives(1));
+        end
         maxerror = max(max(abs(residuals)));
     end
 end
