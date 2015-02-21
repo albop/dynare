@@ -137,7 +137,11 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
             oo_.endo_simul = saved_endo_simul;
             success_counter = 0;
             step = step / 2;
-            fprintf('%i \t | %1.5f \t | %s \t | %e\n', iteration, new_weight, 'failed', me)
+            if isreal(me)
+                fprintf('%i \t | %1.5f \t | %s \t | %e\n', iteration, new_weight, 'failed', me)
+            else
+                fprintf('%i \t | %1.5f \t | %s \t | %s\n', iteration, new_weight, 'failed', 'Complex')
+            end
         end
     end
     fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
