@@ -120,7 +120,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
         saved_endo_simul = oo_.endo_simul;
 
         [oo_, me] = simulation_core(options_, M_, oo_);
-   
+
         if oo_.deterministic_simulation.status == 1
             current_weight = new_weight;
             if current_weight >= 1
@@ -131,10 +131,8 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
             if success_counter >= 3
                 success_counter = 0;
                 step = step * 2;
-                fprintf('%i \t | %1.5f \t | %s \t | %e\n', iteration, new_weight, 'succeeded', me)
-            else
-                fprintf('%i \t | %1.5f \t | %s \t | %e\n', iteration, new_weight, 'succeeded', me)
             end
+            fprintf('%i \t | %1.5f \t | %s \t | %e\n', iteration, new_weight, 'succeeded', me)
         else
             oo_.endo_simul = saved_endo_simul;
             success_counter = 0;
