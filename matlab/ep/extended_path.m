@@ -89,12 +89,6 @@ end
 % Do not use a minimal number of perdiods for the perfect foresight solver (with bytecode and blocks)
 options_.minimal_solving_period = 100;%options_.ep.periods;
 
-% Initialize the exogenous variables.
-make_ex_;
-
-% Initialize the endogenous variables.
-%make_y_;
-
 % Initialize the output array.
 time_series = zeros(M_.endo_nbr,sample_size);
 
@@ -189,12 +183,13 @@ oo_.ep.failures.shocks = cell(0);
 % Initializes some variables.
 t  = 1;
 tsimul = 1;
-nx = length(oo_.exo_simul);
 for k = 1:replic_nbr
     results{k} = zeros(endo_nbr,sample_size+1);
     results{k}(:,1) = initial_conditions;
 end
-exo_simul_ = oo_.exo_simul;
+make_ex_;
+exo_simul_ = zeros(maximum_lag+sample_size+maximum_lead,exo_nbr);
+exo_simul_(1:size(oo_.exo_simul,1),1:size(oo_.exo_simul,2)) = oo_.exo_simul;
 % Main loop.
 while (t <= sample_size)
     if ~mod(t,10)
@@ -206,8 +201,8 @@ while (t <= sample_size)
     if replic_nbr > 1 && ep.parallel_1
         parfor k = 1:replic_nbr
             exo_simul = repmat(oo_.exo_steady_state',periods+2,1);
-            exo_simul(1:sample_size+3-t,:) = exo_simul_(t:end,:);
-            exo_simul(2,positive_var_indx) = exo_simul(2+1,positive_var_indx) + ...
+            %            exo_simul(1:sample_size+3-t,:) = exo_simul_(t:end,:);
+            exo_simul(2,positive_var_indx) = exo_simul_(M_.maximum_lag+t,positive_var_indx) + ...
                 shocks((t-2)*replic_nbr+k,:);
             initial_conditions = results{k}(:,t-1);
             results{k}(:,t) = extended_path_core(ep.periods,endo_nbr,exo_nbr,positive_var_indx, ...
@@ -221,10 +216,10 @@ while (t <= sample_size)
         for k = 1:replic_nbr
             exo_simul = repmat(oo_.exo_steady_state',periods+maximum_lag+ ...
                             maximum_lead,1);
-            exo_simul(1:sample_size+maximum_lag+maximum_lead-t+1,:) = ...
-                exo_simul_(t:end,:);
+            %            exo_simul(1:sample_size+maximum_lag+maximum_lead-t+1,:) = ...
+            %                exo_simul_(t:end,:);
             exo_simul(maximum_lag+1,positive_var_indx) = ...
-                exo_simul(maximum_lag+1,positive_var_indx) + shocks((t-2)*replic_nbr+k,:);
+                exo_simul_(maximum_lag+t,positive_var_indx) + shocks((t-2)*replic_nbr+k,:);
             initial_conditions = results{k}(:,t-1);
             results{k}(:,t) = extended_path_core(ep.periods,endo_nbr,exo_nbr,positive_var_indx, ...
                                                  exo_simul,ep.init,initial_conditions,...
