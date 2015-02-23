@@ -1,11 +1,11 @@
-function [opt_par_values,fval,exitflag,hessian_mat,options_,Scale]=dynare_minimize_objective(start_par_value,minimizer_algorithm,objective_function,options_,bounds,parameter_names,prior_information,Initial_Hessian,varargin)
-% function [opt_par_values,fval,exitflag,hessian_mat,Scale]=dynare_minimize_objective(start_par_value,minimizer_algorithm,objective_function,options_,bounds,parameter_names,prior_information,Initial_Hessian,varargin)
+function [opt_par_values,fval,exitflag,hessian_mat,options_,Scale]=dynare_minimize_objective(objective_function,start_par_value,minimizer_algorithm,options_,bounds,parameter_names,prior_information,Initial_Hessian,varargin)
+
 % Calls a minimizer
 %
 % INPUTS
+%   objective_function  [function handle]                   handle to the objective function
 %   start_par_value     [n_params by 1] vector of doubles   starting values for the parameters
 %   minimizer_algorithm [scalar double]                     code of the optimizer algorithm
-%   objective_function  [function handle]                   handle to the objective function                                      
 %   options_            [matlab structure]                  Dynare options structure
 %   bounds              [n_params by 2] vector of doubles   2 row vectors containing lower and upper bound for parameters
 %   parameter_names     [n_params by 1] cell array          strings containing the parameters names   
@@ -25,7 +25,7 @@ function [opt_par_values,fval,exitflag,hessian_mat,options_,Scale]=dynare_minimi
 %   none.
 %  
 % 
-% Copyright (C) 2014 Dynare Team
+% Copyright (C) 2014-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

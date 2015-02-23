@@ -12,7 +12,7 @@ function dynare_estimation_1(var_list_,dname)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2013 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -271,7 +271,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         end
     end
     
-    [xparam1, fval, exitflag, hh, options_, Scale] = dynare_minimize_objective(xparam1,options_.mode_compute,objective_function,options_,[bounds.lb bounds.ub],bayestopt_.name,bayestopt_,hh,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_);
+    [xparam1, fval, exitflag, hh, options_, Scale] = dynare_minimize_objective(objective_function,xparam1,options_.mode_compute,options_,[bounds.lb bounds.ub],bayestopt_.name,bayestopt_,hh,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_);
     fprintf('\nFinal value of minus the log posterior (or likelihood):%f \n', fval);
 
     if options_.mode_compute==5 && options_.analytic_derivation==-1 %reset options changed by newrat
