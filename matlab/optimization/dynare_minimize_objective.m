@@ -46,7 +46,7 @@ function [opt_par_values,fval,exitflag,hessian_mat,options_,Scale]=dynare_minimi
 %% set bounds and parameter names if not already set
 n_params=size(start_par_value,1);
 if isempty(bounds)
-    if minimizer_algorithm==10 
+    if minimizer_algorithm==10
         error('Algorithm 10 (simpsa) requires upper and lower bounds')
     else
         bounds=[-Inf(n_params,1) Inf(n_params,1)];

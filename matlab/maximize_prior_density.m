@@ -1,5 +1,5 @@
 function [xparams,lpd,hessian] = ...
-    maximize_prior_density(iparams, prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound,DynareOptions,DynareModel,EstimatedParams,DynareResults)
+    maximize_prior_density(iparams, prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound,DynareOptions,DynareModel,BayesInfo,EstimatedParams,DynareResults)
 % Maximizes the logged prior density using Chris Sims' optimization routine.
 % 
 % INPUTS 
@@ -15,7 +15,7 @@ function [xparams,lpd,hessian] = ...
 %   lpd           [double]  scalar, value of the logged prior density at the mode.
 %   hessian       [double]  matrix, Hessian matrix at the prior mode.
 
-% Copyright (C) 2009-2012 Dynare Team
+% Copyright (C) 2009-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,15 +32,10 @@ function [xparams,lpd,hessian] = ...
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-number_of_estimated_parameters = length(iparams);
-H0 = 1e-4*eye(number_of_estimated_parameters);
-crit = 1e-7;
-nit = 1000;
-gradient_method = 2;
-gradient_epsilon = 1e-6;
-
-[lpd,xparams,grad,hessian,itct,fcount,retcodehat] = ...
-    csminwel1('minus_logged_prior_density',iparams,H0,[],crit,nit,gradient_method, gradient_epsilon, ...
-              prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound,DynareOptions,DynareModel,EstimatedParams,DynareResults);
+[xparams, lpd, exitflag, hessian]=dynare_minimize_objective('minus_logged_prior_density', ...
+                                                  iparams, DynareOptions.mode_compute, DynareOptions, [prior_inf_bound, prior_sup_bound], ...
+                                                  BayesInfo.name, BayesInfo, [], ...
+                                                  prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound, ...
+                                                  DynareOptions,DynareModel,EstimatedParams,DynareResults);
 
 lpd = -lpd;
