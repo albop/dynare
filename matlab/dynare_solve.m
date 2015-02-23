@@ -35,7 +35,14 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
 
 global options_
 
-tolf = options_.solve_tolf ;
+% Set tolerance parameter depending the the caller function.
+stack = dbstack;
+if strcmp(stack(2).file,'simulation_core.m')
+    tolf = options_.dynatol.f;
+else
+    tolf = options_.solve_tolf;
+end
+
 info = 0;
 nn = size(x,1);
 
