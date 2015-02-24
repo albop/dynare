@@ -53,6 +53,7 @@ order = options_.order;
 options_.order = 1;
 
 [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
+
 if plt_flag
     plot_priors(bayestopt_,M_,estim_params_,options_)
 end
@@ -100,37 +101,37 @@ if size(M_.param_names,1)==size(M_.param_names_tex,1)% All the parameters have a
           case { 1 , 5 }
             LowerBound = bayestopt_.p3(i);
             UpperBound = bayestopt_.p4(i);
-            if ~isinf(bayestopt_.lb(i))
-                LowerBound=max(LowerBound,bayestopt_.lb(i));
+            if ~isinf(lb(i))
+                LowerBound=max(LowerBound,lb(i));
             end
-            if ~isinf(bayestopt_.ub(i))
-                UpperBound=min(UpperBound,bayestopt_.ub(i));
+            if ~isinf(ub(i))
+                UpperBound=min(UpperBound,ub(i));
             end
             case { 2 , 4 , 6 }
             LowerBound = bayestopt_.p3(i);
-            if ~isinf(bayestopt_.lb(i))
-                LowerBound=max(LowerBound,bayestopt_.lb(i));
+            if ~isinf(lb(i))
+                LowerBound=max(LowerBound,lb(i));
             end
-            if ~isinf(bayestopt_.ub(i))
-                UpperBound=bayestopt_.ub(i);
+            if ~isinf(ub(i))
+                UpperBound=ub(i);
             else
                 UpperBound = '$\infty$';
             end
           case 3
-            if isinf(bayestopt_.p3(i)) && isinf(bayestopt_.lb(i))
+            if isinf(bayestopt_.p3(i)) && isinf(lb(i))
                 LowerBound = '$-\infty$';
             else
                 LowerBound = bayestopt_.p3(i);
-                if ~isinf(bayestopt_.lb(i))
-                    LowerBound=max(LowerBound,bayestopt_.lb(i));
+                if ~isinf(lb(i))
+                    LowerBound=max(LowerBound,lb(i));
                 end
             end
-            if isinf(bayestopt_.p4(i)) && isinf(bayestopt_.ub(i))
+            if isinf(bayestopt_.p4(i)) && isinf(ub(i))
                 UpperBound = '$\infty$';
             else
                 UpperBound = bayestopt_.p4(i);
-                if ~isinf(bayestopt_.ub(i))
-                    UpperBound=min(UpperBound,bayestopt_.ub(i));
+                if ~isinf(ub(i))
+                    UpperBound=min(UpperBound,ub(i));
                 end
             end
           otherwise
@@ -206,7 +207,7 @@ if info==2% Prior optimization.
                                bayestopt_.p6, ...
                                bayestopt_.p7, ...
                                bayestopt_.p3, ...
-                               bayestopt_.p4,options_,M_,estim_params_,oo_);
+                               bayestopt_.p4,options_,M_,bayestopt_,estim_params_,oo_);
     % Display the results.
     skipline(2)
     disp('------------------')
