@@ -1,8 +1,5 @@
-function [PostMod,PostVar,Scale,PostMean] = ...
-    gmhmaxlik(ObjFun,xparam1,mh_bounds,options,iScale,info,MeanPar,VarCov,varargin)  
+function [PostMod,PostVar,Scale,PostMean] = gmhmaxlik_core(ObjFun,xparam1,mh_bounds,options,iScale,info,MeanPar,VarCov,varargin)  
 
-%function [PostMod,PostVar,Scale,PostMean] = ...
-%gmhmaxlik(ObjFun,xparam1,mh_bounds,num,iScale,info,MeanPar,VarCov,varargin)  
 % (Dirty) Global minimization routine of (minus) a likelihood (or posterior density) function. 
 % 
 % INPUTS 

@@ -103,6 +103,10 @@ options_.bvar_prior_omega = 1;
 options_.bvar_prior_flat = 0;
 options_.bvar_prior_train = 0;
 
+% Initialize the field that will contain the optimization algorigthm's options declared in the
+% estimation command (if anny).
+options_.optim_opt = [];
+
 % Optimization algorithm [6] gmhmaxlik
 gmhmaxlik.iterations = 3;
 gmhmaxlik.number = 20000;
