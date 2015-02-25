@@ -8369,6 +8369,7 @@ constructed as explained above.
 @subsection Macro directives
 
 @deffn {Macro directive} @@#include "@var{FILENAME}"
+@deffnx {Macro directive} @@#include @var{MACRO_VARIABLE}
 This directive simply includes the content of another file at the
 place where it is inserted. It is exactly equivalent to a copy/paste
 of the content of the included file. Note that it is possible to nest
@@ -8378,6 +8379,7 @@ includes (@i{i.e.} to include a file from an included file).
 
 @example
 @@#include "modelcomponent.mod"
+@@#include location_of_modfile
 @end example
 
 @end deffn
