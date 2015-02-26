@@ -78,7 +78,7 @@ switch minimizer_algorithm
     end
     % Set default optimization options for fmincon.
     optim_options = optimset('display','iter', 'LargeScale','off', 'MaxFunEvals',100000, 'TolFun',1e-8, 'TolX',1e-6);
-    if isfield(options_,'optim_opt')
+    if ~isempty(options_.optim_opt)
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
     if options_.analytic_derivation,
@@ -96,7 +96,7 @@ switch minimizer_algorithm
     end
     % Set default optimization options for fminunc.
     optim_options = optimset('display','iter','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
-    if isfield(options_,'optim_opt')
+    if ~isempty(options_.optim_opt)
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
     if options_.analytic_derivation,
@@ -117,7 +117,7 @@ switch minimizer_algorithm
     numgrad = options_.gradient_method;
     epsilon = options_.gradient_epsilon;
     % Change some options.
-    if isfield(options_,'optim_opt')
+    if ~isempty(options_.optim_opt)
         options_list = read_key_value_string(options_.optim_opt);
         for i=1:rows(options_list)
             switch options_list{i,1}
@@ -156,8 +156,7 @@ switch minimizer_algorithm
         newratflag = options_.newrat.hess; %default
     end
     nit=options_.newrat.maxiter;
-    
-    if isfield(options_,'optim_opt')
+    if ~isempty(options_.optim_opt)
         options_list = read_key_value_string(options_.optim_opt);
         for i=1:rows(options_list)
             switch options_list{i,1}
@@ -194,14 +193,14 @@ switch minimizer_algorithm
         error('Option mode_compute=7 requires the Optimization Toolbox')
     end
     optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
-    if isfield(options_,'optim_opt')
+    if ~isempty(options_.optim_opt)
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
     [opt_par_values,fval,exitflag] = fminsearch(objective_function,start_par_value,optim_options,varargin{:});
   case 8
     % Dynare implementation of the simplex algorithm.
     simplexOptions = options_.simplex;
-    if isfield(options_,'optim_opt')
+    if ~isempty(options_.optim_opt)
         options_list = read_key_value_string(options_.optim_opt);
         for i=1:rows(options_list)
             switch options_list{i,1}
@@ -228,7 +227,7 @@ switch minimizer_algorithm
     H0 = 1e-4*ones(n_params,1);
     cmaesOptions = options_.cmaes;
     % Modify defaults
-    if isfield(options_,'optim_opt')
+    if ~isempty(options_.optim_opt)
         options_list = read_key_value_string(options_.optim_opt);
         for i=1:rows(options_list)
             switch options_list{i,1}
@@ -252,7 +251,7 @@ switch minimizer_algorithm
     fval=BESTEVER.f;
   case 10
     simpsaOptions = options_.simpsa;
-    if isfield(options_,'optim_opt')
+    if ~isempty(options_.optim_opt)
         options_list = read_key_value_string(options_.optim_opt);
         for i=1:rows(options_list)
             switch options_list{i,1}
