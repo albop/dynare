@@ -44,7 +44,7 @@ for i=2:n
 end
 
 if nargout
-    varargout(1) = { sprintf('%s\n',S) };
+    varargout(1) = { sprintf('%s',S) };
 else
     fprintf(f,sprintf('%s\n',S))
 end
