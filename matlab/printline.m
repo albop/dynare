@@ -1,4 +1,4 @@
-function printline(n, s, fid)
+function varargout = printline(n, s, fid)
 % This function print a line formed by replicating a symbol s.
 %
 % INPUTS 
@@ -43,4 +43,8 @@ for i=2:n
     S = sprintf('%s%s',S,s);
 end
 
-fprintf(f,sprintf('%s\n',S))
+if nargout
+    varargout(1) = { sprintf('%s\n',S) };
+else
+    fprintf(f,sprintf('%s\n',S))
+end
