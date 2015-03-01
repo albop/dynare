@@ -49,20 +49,22 @@ old_steady_params=Model.params; %save initial parameters for check if steady sta
 % % check if steady state solves static model (except if diffuse_filter == 1)
 [DynareResults.steady_state, new_steady_params] = evaluate_steady_state(DynareResults.steady_state,Model,DynareOptions,DynareResults,DynareOptions.diffuse_filter==0);
 
-%check whether steady state file changes estimated parameters
-Model_par_varied=Model; %store Model structure
-Model_par_varied.params(EstimatedParameters.param_vals(:,1))=Model_par_varied.params(EstimatedParameters.param_vals(:,1))*1.01; %vary parameters
-[junk, new_steady_params_2] = evaluate_steady_state(DynareResults.steady_state,Model_par_varied,DynareOptions,DynareResults,DynareOptions.diffuse_filter==0);
+if ~isempty(EstimatedParameters.param_vals)
+    %check whether steady state file changes estimated parameters
+    Model_par_varied=Model; %store Model structure
+    Model_par_varied.params(EstimatedParameters.param_vals(:,1))=Model_par_varied.params(EstimatedParameters.param_vals(:,1))*1.01; %vary parameters
+    [junk, new_steady_params_2] = evaluate_steady_state(DynareResults.steady_state,Model_par_varied,DynareOptions,DynareResults,DynareOptions.diffuse_filter==0);
 
-changed_par_indices=find((old_steady_params(EstimatedParameters.param_vals(:,1))-new_steady_params(EstimatedParameters.param_vals(:,1))) ...
-        | (Model_par_varied.params(EstimatedParameters.param_vals(:,1))-new_steady_params_2(EstimatedParameters.param_vals(:,1))));
+    changed_par_indices=find((old_steady_params(EstimatedParameters.param_vals(:,1))-new_steady_params(EstimatedParameters.param_vals(:,1))) ...
+            | (Model_par_varied.params(EstimatedParameters.param_vals(:,1))-new_steady_params_2(EstimatedParameters.param_vals(:,1))));
 
-if ~isempty(changed_par_indices)
-    fprintf('\nThe steady state file internally changed the values of the following estimated parameters:\n')
-    disp(Model.param_names(changed_par_indices,:));
-    fprintf('This will override the parameter values drawn from the proposal density and may lead to wrong results.\n')
-    fprintf('Check whether this is really intended.\n')    
-    warning('The steady state file internally changes the values of the estimated parameters.')
+    if ~isempty(changed_par_indices)
+        fprintf('\nThe steady state file internally changed the values of the following estimated parameters:\n')
+        disp(Model.param_names(changed_par_indices,:));
+        fprintf('This will override the parameter values drawn from the proposal density and may lead to wrong results.\n')
+        fprintf('Check whether this is really intended.\n')    
+        warning('The steady state file internally changes the values of the estimated parameters.')
+    end
 end
 
 if any(BayesInfo.pshape) % if Bayesian estimation

@@ -235,7 +235,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     if options_.mode_compute==5
         %get whether analytical Hessian with non-analytical mode-finding is requested
         newratflag=[];
-        if isfield(options_,'optim_opt')
+        if ~isempty(options_.optim_opt)
             options_list = read_key_value_string(options_.optim_opt);
             for i=1:rows(options_list)
                 if strcmp(options_list{i,1},'Hessian')
