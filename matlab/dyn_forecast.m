@@ -75,7 +75,7 @@ switch task
     y0 = zeros(M.endo_nbr,maximum_lag);
     for i = 1:M.endo_nbr
         v_name = deblank(M.endo_names(i,:));
-        y0(i,:) = y_smoothed.(v_name)(end-maximum_lag+1:end)+oo.dr.ys(i);
+        y0(i,:) = y_smoothed.(v_name)(end-maximum_lag+1:end)+oo.dr.ys(i);  %does not need to be logged in loglinear case, because simult_ will subtract unlooged steady state
     end
     gend = options.nobs;
     if isfield(oo.Smoother,'TrendCoeffs')
@@ -122,6 +122,10 @@ end
 
 if ~isscalar(trend)
     yf(i_var_obs,:) = yf(i_var_obs,:) + trend;
+end
+
+if options.loglinear == 1
+    yf=yf-oo.dr.ys(i_var)*ones(1,horizon+1)+log(oo.dr.ys(i_var))*ones(1,horizon+1); %take care of logged steady state in this case; above the unlogged one was added
 end
 
 for i=1:n_var
