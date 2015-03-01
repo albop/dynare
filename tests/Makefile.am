@@ -85,6 +85,7 @@ MODFILES = \
 	arima/mod2b.mod \
 	arima/mod2c.mod \
 	data/mod1a.mod \
+	analytic_derivatives/fs2000_analytic_derivation.mod \
 	fs2000/fs2000.mod \
 	fs2000/fs2000a.mod \
 	fs2000/fs2000c.mod \
@@ -334,6 +335,7 @@ EXTRA_DIST = \
 	expectations/expectation_ss_old_steadystate.m \
 	steady_state/walsh1_old_ss_steadystate.m \
 	data/test.xls \
+	analytic_derivatives/fsdat_simul.m \
 	fs2000/fs2000a_steadystate.m \
 	fs2000/fsdat_simul.m \
 	k_order_perturbation/run_fs2000kplusplus.m \
