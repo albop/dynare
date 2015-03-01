@@ -92,12 +92,12 @@ switch task
             end
         end
         if ~isempty(trend_coeffs) 
-          trend = trend_coeffs*(gend+(1-M.maximum_lag:horizon)); 
+          trend = trend_coeffs*(options.first_obs+gend-1+(1-M.maximum_lag:horizon)); 
         end
     end
-    global bayestopt_
-    if isfield(bayestopt_,'mean_varobs')
-        trend = trend + repmat(bayestopt_.mean_varobs,1,horizon+M.maximum_lag);
+    if options.prefilter
+        global bayestopt_
+        trend = trend - repmat(mean(trend_coeffs*[options.first_obs:options.first_obs+gend-1],2),1,horizon+1); %subtract mean trend
     end
   otherwise
     error('Wrong flag value')
@@ -125,7 +125,14 @@ if ~isscalar(trend)
 end
 
 if options.loglinear == 1
-    yf=yf-oo.dr.ys(i_var)*ones(1,horizon+1)+log(oo.dr.ys(i_var))*ones(1,horizon+1); %take care of logged steady state in this case; above the unlogged one was added
+    yf=yf-oo.dr.ys(i_var)*ones(1,horizon+M.maximum_lag)+log(oo.dr.ys(i_var))*ones(1,horizon+M.maximum_lag); %take care of logged steady state in this case; above the unlogged one was added    
+    if options.prefilter == 1 %subtract steady state and add mean for observables
+        yf(i_var_obs,:)=yf(i_var_obs,:)-repmat(log(oo.dr.ys(i_var_obs)),1,horizon+M.maximum_lag)+ repmat(bayestopt_.mean_varobs,1,horizon+M.maximum_lag);
+    end
+else
+    if options.prefilter == 1 %subtract steady state and add mean for observables
+        yf(i_var_obs,:)=yf(i_var_obs,:)-repmat(oo.dr.ys(i_var_obs),1,horizon+M.maximum_lag)+ repmat(bayestopt_.mean_varobs,1,horizon+M.maximum_lag);
+    end    
 end
 
 for i=1:n_var
