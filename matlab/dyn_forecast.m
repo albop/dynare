@@ -1,5 +1,5 @@
-function [forecast,info] = dyn_forecast(var_list,M,options,oo,task)
-% function dyn_forecast(var_list,task)
+function [forecast,info] = dyn_forecast(var_list,M,options,oo,task,dataset_info)
+% function dyn_forecast(var_list,M,options,oo,task,dataset_info)
 %   computes mean forecast for a given value of the parameters
 %   computes also confidence band for the forecast    
 %
@@ -10,6 +10,8 @@ function [forecast,info] = dyn_forecast(var_list,M,options,oo,task)
 %   oo:          Dynare results structure
 %   task:        indicates how to initialize the forecast
 %                either 'simul' or 'smoother'
+%   dataset_info:   Various informations about the dataset (descriptive statistics and missing observations).
+
 % OUTPUTS
 %   nothing is returned but the procedure saves output
 %   in oo_.forecast.Mean
@@ -36,6 +38,12 @@ function [forecast,info] = dyn_forecast(var_list,M,options,oo,task)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if nargin<3 && options_.prefilter
+    error('The prefiltering option is not allow without providing a dataset')
+else
+    mean_varobs=dataset_info.descriptive.mean';
+end
+    
 info = 0;
 
 oo=make_ex_(M,options,oo);
@@ -96,7 +104,6 @@ switch task
         end
     end
     if options.prefilter
-        global bayestopt_
         trend = trend - repmat(mean(trend_coeffs*[options.first_obs:options.first_obs+gend-1],2),1,horizon+1); %subtract mean trend
     end
   otherwise
