@@ -83,7 +83,9 @@ do_not_check_stability_flag = ~ep.check_stability;
 dr = struct();
 if ep.init
     options_.order = 1;
-    [dr,Info,M_,options_,oo_] = resol(1,M_,options_,oo_);
+    oo_.dr=set_state_space(dr,M_,options_);
+    [dr,Info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+    oo_.dr = dr;
 end
 
 % Do not use a minimal number of perdiods for the perfect foresight solver (with bytecode and blocks)
@@ -268,7 +270,7 @@ function y = extended_path_core(periods,endo_nbr,exo_nbr,positive_var_indx, ...
                                 olmmcp,options,oo)
     
 if init% Compute first order solution (Perturbation)...
-    endo_simul = simult_(initial_conditions,dr,exo_simul(2:end,:),1);
+    endo_simul = simult_(initial_conditions,oo.dr,exo_simul(2:end,:),1);
 else
     endo_simul = [initial_conditions repmat(steady_state,1,periods+1)];
 end
@@ -295,6 +297,23 @@ if flag
         options.lmmcp = olmmcp;
         options.stack_solve_algo = stack_solve_algo;
         [tmp,flag] = perfect_foresight_solver_core(M,options,oo);
+        if ~flag && ~options.no_homotopy
+            exo_orig = oo.exo_simul;
+            endo_simul = repmat(steady_state,1,periods+1);
+            for i = 1:10
+                weight = i/10;
+                oo.endo_simul = [weight*initial_conditions + (1-weight)*steady_state ...
+                                 endo_simul];
+                oo.exo_simul = repmat((1-weight)*oo.exo_steady_state', ...
+                                      size(oo.exo_simul,1),1) + weight*exo_orig;
+                [tmp,flag] = perfect_foresight_solver_core(M,options,oo);
+                disp([i,flag])
+                if ~flag
+                    break
+                end
+                endo_simul = tmp(:,2:end);
+            end
+        end
         info_convergence = flag;
     else
         switch(algo)
