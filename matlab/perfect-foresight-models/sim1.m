@@ -30,7 +30,7 @@ function oo = sim1(M, options, oo)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-verbose = options_.verbosity;
+verbose = options.verbosity;
 
 endogenous_terminal_period = options.endogenous_terminal_period;
 vperiods = options.periods*ones(1,options.simul.maxit);
