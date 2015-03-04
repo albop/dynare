@@ -259,6 +259,31 @@ MODFILES = \
 	differentiate_forward_vars/RBC_differentiate_forward.mod \
 	TeX/fs2000_corr_ME.mod \
 	prior_posterior_function/fs2000_prior_posterior_function.mod
+	observation_trends_and_prefiltering/MCMC/Trend_loglin_no_prefilt_first_obs_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_loglin_prefilt_first_obs_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_loglinear_no_prefilter_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_loglinear_prefilter_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_no_prefilter_first_obs_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_no_prefilter_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_prefilter_first_obs_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_prefilter_MC.mod \
+	observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter.mod \
+	observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter_first_obs.mod \
+	observation_trends_and_prefiltering/ML/Trend_loglinear_prefilter.mod \
+	observation_trends_and_prefiltering/ML/Trend_loglinear_prefilter_first_obs.mod \
+	observation_trends_and_prefiltering/ML/Trend_no_prefilter.mod \
+	observation_trends_and_prefiltering/ML/Trend_no_prefilter_first_obs.mod \
+	observation_trends_and_prefiltering/ML/Trend_prefilter.mod \
+	observation_trends_and_prefiltering/ML/Trend_prefilter_first_obs.mod \
+	observation_trends_and_prefiltering/calib_smoother/Tr_no_prefilter_calib_smoother.mod \
+	observation_trends_and_prefiltering/calib_smoother/Tr_no_prefilt_first_obs_cal_smooth.mod \
+	observation_trends_and_prefiltering/calib_smoother/Tr_prefilter_calib_smoother.mod \
+	observation_trends_and_prefiltering/calib_smoother/Tr_prefilt_first_obs_cal_smooth.mod \
+	observation_trends_and_prefiltering/calib_smoother/Tr_no_prefilter_loglin_calib_smoother.mod \
+	observation_trends_and_prefiltering/calib_smoother/Tr_no_prefil_f_obs_loglin_cal_smoother.mod \
+	observation_trends_and_prefiltering/calib_smoother/Tr_prefilter_loglin_calib_smoother.mod \
+	observation_trends_and_prefiltering/calib_smoother/Tr_prefil_f_obs_loglin_cal_smoother.mod \
+	reporting/example1.mod
 
 XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value_xfail.mod \
