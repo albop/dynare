@@ -72,7 +72,7 @@ end;
 if (options_.bytecode)
     [chck, zz, data]= bytecode('dynamic','evaluate', z, zx, M_.params, dr.ys, 1, data);
 else
-    [r, data] = feval([M_.fname '_dynamic'], options_, M_, oo_, z', zx, M_.params, dr.ys, M_.maximum_lag+1, data);
+    [r, data] = feval([M_.fname '_dynamic'], z', zx, M_.params, dr.ys, M_.maximum_lag+1, data);
     chck = 0;
 end;
 mexErrCheck('bytecode', chck);
@@ -315,13 +315,17 @@ for i = 1:Size;
         dr.eigval = [dr.eigval ; data(i).eigval];
       case 6
       %% ------------------------------------------------------------------
-        %Solve Forward complete
+      %Solve Forward complete
+        if (maximum_lag > 0)
+            ghx = - jacob(: , n_pred + 1 : n_pred + n_static ...
+                        + n_pred + n_both) \ jacob(: , 1 : n_pred);
+        else
+            ghx = 0;
+        end;
         if maximum_lag > 0 && n_pred > 0
-            data(i).eigval = eig(- jacob(: , 1 : n_pred) / ...
-                                 jacob(: , (n_pred + n_static + 1 : n_pred + n_static + n_pred )));
+            data(i).eigval = -eig(ghx(n_static+1:end,:));
             data(i).rank = 0;
-            full_rank = (rcond(jacob(: , (n_pred + n_static + 1 : n_pred ...
-                                          + n_static + n_pred ))) > 1e-9);
+            full_rank = (rcond(ghx(n_static+1:end,:)) > 1e-9);
         else
             data(i).eigval = [];
             data(i).rank = 0;
@@ -330,11 +334,6 @@ for i = 1:Size;
         dr.eigval = [dr.eigval ; data(i).eigval];
         dr.full_rank = dr.full_rank && full_rank;
         if task ~= 1
-            if (maximum_lag > 0)
-                 ghx = - jacob(: , 1 : n_pred) / jacob(: , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
-            else
-                 ghx = 0;
-            end;
             if other_endo_nbr
                 fx = data(i).g1_o;
                 % retrieves the derivatives with respect to endogenous
