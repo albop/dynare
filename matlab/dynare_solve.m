@@ -75,7 +75,9 @@ if ~isempty(i)
     return;
 end
 
-if max(abs(fvec)) < tolf
+% this test doesn't check complementarity conditions and is not used for
+% mixed complementarity problems
+if (options_.solve_algo ~= 10) && (max(abs(fvec)) < tolf)
     return ;
 end
 

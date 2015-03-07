@@ -85,7 +85,6 @@ if ep.init
     options_.order = 1;
     oo_.dr=set_state_space(dr,M_,options_);
     [dr,Info,M_,options_,oo_] = resol(0,M_,options_,oo_);
-    oo_.dr = dr;
 end
 
 % Do not use a minimal number of perdiods for the perfect foresight solver (with bytecode and blocks)
