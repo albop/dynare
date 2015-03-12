@@ -177,10 +177,9 @@ switch minimizer_algorithm
         end
     end
     [opt_par_values,hessian_mat,gg,fval,invhess] = newrat(objective_function,start_par_value,analytic_grad,crit,nit,0,varargin{:});
+    %hessian_mat is the plain outer product gradient Hessian
     if options_.analytic_derivation %Hessian is already analytic one, reset option
         options_.analytic_derivation = ana_deriv;
-    elseif ~options_.analytic_derivation && newratflag ==0 %Analytic Hessian wanted, but not computed yet
-            hessian_mat = reshape(mr_hessian(0,opt_par_values,objective_function,1,crit,varargin{:}), n_params, n_params);
     end
   case 6
     [opt_par_values, hessian_mat, Scale, fval] = gmhmaxlik(objective_function, start_par_value, ...

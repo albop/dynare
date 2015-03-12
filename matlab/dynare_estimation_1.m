@@ -233,7 +233,7 @@ end
 if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     %prepare settings for newrat
     if options_.mode_compute==5
-        %get whether analytical Hessian with non-analytical mode-finding is requested
+        %get whether outer product Hessian is requested
         newratflag=[];
         if ~isempty(options_.optim_opt)
             options_list = read_key_value_string(options_.optim_opt);
@@ -246,19 +246,14 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         if options_.analytic_derivation,
             options_analytic_derivation_old = options_.analytic_derivation;
             options_.analytic_derivation = -1;
-            if ~isempty(newratflag) && newratflag~=0 %gradient explicitly specified
+            if ~isempty(newratflag) && newratflag~=0 %numerical hessian explicitly specified
                 error('newrat: analytic_derivation is incompatible with numerical Hessian.')
             else %use default
-                newratflag=0; %use analytical gradient
+                newratflag=0; %exclude DYNARE numerical hessian
             end
         elseif ~options_.analytic_derivation 
             if isempty(newratflag) 
-                newratflag=options_.newrat.hess; %use default gradient                
-            end
-            if newratflag==0 %Analytic Hessian wanted, but not automatically computed by newrat itself
-                if ~((options_.kalman_algo == 2) || (options_.kalman_algo == 4)) %kalman_algo not compatible
-                    error('Analytical Hessian with non-analytical mode-finding requires kalman_algo=2 or 4.')
-                end
+                newratflag=options_.newrat.hess; %use default numerical dynare hessian                
             end
         end
     end
@@ -281,11 +276,39 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 [junk1, junk2, hh] = feval(objective_function,xparam1, ...
                     dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_);
                 options_.analytic_derivation = ana_deriv_old;
-            elseif ~(isequal(options_.mode_compute,5) && newratflag==0), 
+            elseif ~(isequal(options_.mode_compute,5) && newratflag~=1), 
                 % with flag==0, we force to use the hessian from outer
                 % product gradient of optimizer 5
                 hh = reshape(hessian(objective_function,xparam1, ...
                     options_.gstep,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_),nx,nx);
+            elseif isequal(options_.mode_compute,5)
+                % other numerical hessian options available with optimizer 5
+                %
+                % if newratflag == 0
+                % compute outer product gradient of optimizer 5
+                %
+                % if newratflag == 2
+                % compute 'mixed' outer product gradient of optimizer 5
+                % with diagonal elements computed with numerical second order derivatives
+                %
+                % uses univariate filters, so to get max # of available
+                % densitities for outer product gradient
+                kalman_algo0 = options_.kalman_algo;
+                compute_hessian = 1;
+                if ~((options_.kalman_algo == 2) || (options_.kalman_algo == 4)),
+                    options_.kalman_algo=2;
+                    if options_.lik_init == 3,
+                        options_.kalman_algo=4;
+                    end
+                elseif newratflag==0, % hh already contains outer product gradient with univariate filter
+                    compute_hessian = 0;                                            
+                end
+                if compute_hessian,
+                    crit = options_.newrat.tolerance.f;
+                    newratflag = newratflag>0;
+                    hh = reshape(mr_hessian(0,xparam1,objective_function,newratflag,crit,dataset_, dataset_info, options_,M_,estim_params_,bayestopt_,bounds,oo_), nx, nx);
+                end
+                options_.kalman_algo = kalman_algo0;
             end
         end
     end
