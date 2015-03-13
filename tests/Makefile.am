@@ -441,7 +441,7 @@ check-octave: $(O_XFAIL_TRS_FILES) $(O_TRS_FILES)
 
 %.o.tls : %.m
 	TOP_TEST_DIR="$(PWD)"  FILESTEM="$*" \
-		$(OCTAVE) --no-init-file --silent --no-history run_o_script 2>&1
+		$(OCTAVE) --no-init-file --silent --no-history run_o_script.m 2>&1
 
 
 clean-local:
