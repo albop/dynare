@@ -337,7 +337,7 @@ EXTRA_DIST = \
 	fs2000_ssfile_aux.m \
 	printMakeCheckMatlabErrMsg.m \
 	printMakeCheckOctaveErrMsg.m \
-	test.m \
+	fataltest.m \
 	AIM/data_ca1.m \
 	AIM/fs2000_b1L1L_AIM_steadystate.m \
 	AIM/fs2000_b1L1L_steadystate.m \
