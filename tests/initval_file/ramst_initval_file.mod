@@ -26,26 +26,31 @@ initval_file(filename = ramst_initval_file_data);
 
 steady;
 
-simul(periods=200);
+perfect_foresight_setup(periods=200);
+perfect_foresight_solver;
 
 
 initval_file(filename = ramst_initval_file_data_row_vec_mat);
 
 steady;
 
-simul(periods=200);
+perfect_foresight_setup(periods=200);
+perfect_foresight_solver;
 
 
 initval_file(filename = ramst_initval_file_data_col_vec_mat);
 
 steady;
 
-simul(periods=200);
+perfect_foresight_setup(periods=200);
+perfect_foresight_solver;
 
 if ispc()
    disp('Test #4')
 
     initval_file(filename = ramst_initval_file_excel);
     steady;
-    simul(periods=200);
+    perfect_foresight_setup(periods=200);
+    perfect_foresight_solver;
+
 end
