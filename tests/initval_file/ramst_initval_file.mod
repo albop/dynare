@@ -23,34 +23,25 @@ c = aa*k^alph-delt*k;
 end;
 
 initval_file(filename = ramst_initval_file_data);
-
 steady;
-
 perfect_foresight_setup(periods=200);
 perfect_foresight_solver;
 
 
 initval_file(filename = ramst_initval_file_data_row_vec_mat);
-
 steady;
-
 perfect_foresight_setup(periods=200);
 perfect_foresight_solver;
 
 
 initval_file(filename = ramst_initval_file_data_col_vec_mat);
-
 steady;
-
 perfect_foresight_setup(periods=200);
 perfect_foresight_solver;
 
 if ispc()
-   disp('Test #4')
-
     initval_file(filename = ramst_initval_file_excel);
     steady;
     perfect_foresight_setup(periods=200);
     perfect_foresight_solver;
-
 end
