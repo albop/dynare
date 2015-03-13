@@ -22,7 +22,6 @@ k = ((delt+bet)/(1.0*aa*alph))^(1/(alph-1));
 c = aa*k^alph-delt*k;
 end;
 
-disp('Test #1')
 initval_file(filename = ramst_initval_file_data);
 
 steady;
@@ -30,15 +29,12 @@ steady;
 simul(periods=200);
 
 
-disp('Test #2')
 initval_file(filename = ramst_initval_file_data_row_vec_mat);
 
 steady;
 
 simul(periods=200);
 
-
-disp('Test #3')
 
 initval_file(filename = ramst_initval_file_data_col_vec_mat);
 
