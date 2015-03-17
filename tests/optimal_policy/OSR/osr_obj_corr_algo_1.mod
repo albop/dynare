@@ -28,7 +28,7 @@ options_.nograph=1;
 options_.nocorr=1;
 osr_params gammax0 gammac0 gamma_y_ gamma_inf_;
 
-
+if ~isoctave
 optim_weights;
 inflation 1;
 y 1;
@@ -106,4 +106,5 @@ if abs(oo_.osr.objective_function-oo_covar_single.osr.objective_function)>1e-8
 end
 if max(abs((cell2mat(struct2cell(oo_.osr.optim_params))-cell2mat(struct2cell(oo_covar_single.osr.optim_params)))./cell2mat(struct2cell(oo_.osr.optim_params))))>1e-4
     error('Parameters should be identical')
+end
 end
