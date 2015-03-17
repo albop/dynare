@@ -47,11 +47,7 @@ if isoctave
     warning('off', 'Octave:str-to-num');
     warning('off', 'Octave:array-as-scalar');
     warning('off', 'Octave:array-as-vector');
-    if octave_ver_less_than('3.6')
-        warning('off', 'Octave:string-concat');
-    else
-        warning('off', 'Octave:mixed-string-concat');
-    end
+    warning('off', 'Octave:mixed-string-concat');
     warning('off', 'Octave:variable-switch-label');
     warning('off', 'Octave:fortran-indexing');
 else
