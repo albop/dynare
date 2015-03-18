@@ -90,8 +90,8 @@ if isoctave
     addpath([dynareroot '/missing/ordeig'])
 end
 
-% ilu is missing in Octave
-if isoctave
+% ilu is missing in Octave < 4.0
+if isoctave && octave_ver_less_than('4.0')
     addpath([dynareroot '/missing/ilu'])
 end
 
