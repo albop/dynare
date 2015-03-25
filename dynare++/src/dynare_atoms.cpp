@@ -135,22 +135,19 @@ void DynareAtomValues::setValues(ogp::EvalTree& et) const
 
 	// set parameteres
 	for (unsigned int i = 0; i < atoms.get_params().size(); i++) {
-		try {
+        if (atoms.is_referenced(atoms.get_params()[i])) {
 			const ogp::DynamicAtoms::Tlagmap& lmap = atoms.lagmap(atoms.get_params()[i]);
 			for (ogp::DynamicAtoms::Tlagmap::const_iterator it = lmap.begin();
 				 it != lmap.end(); ++it) {
 				int t = (*it).second;
 				et.set_nulary(t, paramvals[i]);
 			}
-		} catch (const ogu::Exception& e) {
-			// ignore non-referenced parameters; there is no
-			// lagmap for them
 		}
 	}
 
 	// set endogenous
 	for (unsigned int outer_i = 0; outer_i < atoms.get_endovars().size(); outer_i++) {
-		try {
+        if (atoms.is_referenced(atoms.get_endovars()[outer_i])) {
 			const ogp::DynamicAtoms::Tlagmap& lmap = atoms.lagmap(atoms.get_endovars()[outer_i]);
 			for (ogp::DynamicAtoms::Tlagmap::const_iterator it = lmap.begin();
 				 it != lmap.end(); ++it) {
@@ -165,15 +162,12 @@ void DynareAtomValues::setValues(ogp::EvalTree& et) const
 				else
 					et.set_nulary(t, yyp[i-atoms.nstat()-atoms.npred()]);
 			}
-		} catch (const ogu::Exception& e) {
-			// ignore non-referenced endogenous variables; there is no
-			// lagmap for them
 		}
 	}
 
 	// set exogenous
 	for (unsigned int outer_i = 0; outer_i < atoms.get_exovars().size(); outer_i++) {
-		try {
+        if (atoms.is_referenced(atoms.get_exovars()[outer_i])) {
 			const ogp::DynamicAtoms::Tlagmap& lmap = atoms.lagmap(atoms.get_exovars()[outer_i]);
 			for (ogp::DynamicAtoms::Tlagmap::const_iterator it = lmap.begin();
 				 it != lmap.end(); ++it) {
@@ -184,8 +178,6 @@ void DynareAtomValues::setValues(ogp::EvalTree& et) const
 					et.set_nulary(t, xx[i]);
 				}
 			}
-		} catch (const ogu::Exception& e) {
-			// ignore non-referenced variables
 		}
 	}
 }
