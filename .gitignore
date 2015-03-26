@@ -97,6 +97,8 @@ mex/build/matlab/run_m2html.m
 # Preprocessor
 /preprocessor/dynare_m
 /preprocessor/dynare_m.exe
+/preprocessor/dynare_m64
+/preprocessor/dynare_m64.exe
 /preprocessor/DynareBison.cc
 /preprocessor/DynareBison.hh
 /preprocessor/FlexLexer.h

@@ -16,7 +16,7 @@ function dynare(fname, varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2014 Dynare Team
+% Copyright (C) 2001-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -145,7 +145,21 @@ if exist(fname(1:end-4),'dir') && exist([fname(1:end-4) filesep 'hooks'],'dir') 
     run([fname(1:end-4) filesep 'hooks/priorprocessing'])
 end
 
-command = ['"' dynareroot 'dynare_m" ' fname] ;
+if ispc
+    [junk, arch] = getenv('PROCESSOR_ARCHITECTURE');
+else
+    [junk, arch] = system('uname -m');
+end
+
+if isempty(strfind(arch, '64'))
+  arch_ext64 = '';
+  disp('Using 32-bit preprocessor');
+else
+  arch_ext64 = '64';
+  disp('Using 64-bit preprocessor');
+end
+
+command = ['"' dynareroot 'dynare_m' arch_ext64 '" ' fname] ;
 for i=2:nargin
     command = [command ' ' varargin{i-1}];
 end
