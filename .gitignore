@@ -97,8 +97,6 @@ mex/build/matlab/run_m2html.m
 # Preprocessor
 /preprocessor/dynare_m
 /preprocessor/dynare_m.exe
-/preprocessor/dynare_m64
-/preprocessor/dynare_m64.exe
 /preprocessor/DynareBison.cc
 /preprocessor/DynareBison.hh
 /preprocessor/FlexLexer.h
@@ -115,8 +113,7 @@ mex/build/matlab/run_m2html.m
 /preprocessor/doc/
 
 # MATLAB dir
-/matlab/dynare_m
-/matlab/dynare_m.exe
+/matlab/preprocessor*
 /matlab/dynare_version.m
 
 # DLL rules

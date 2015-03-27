@@ -152,14 +152,14 @@ else
 end
 
 if isempty(strfind(arch, '64'))
-  arch_ext64 = '';
+  arch_ext = '32';
   disp('Using 32-bit preprocessor');
 else
-  arch_ext64 = '64';
+  arch_ext = '64';
   disp('Using 64-bit preprocessor');
 end
 
-command = ['"' dynareroot 'dynare_m' arch_ext64 '" ' fname] ;
+command = ['"' dynareroot 'preprocessor' arch_ext filesep 'dynare_m" ' fname] ;
 for i=2:nargin
     command = [command ' ' varargin{i-1}];
 end
