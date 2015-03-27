@@ -58,7 +58,12 @@ Section "Dynare core (preprocessor and M-files)"
 
  SetOutPath $INSTDIR\matlab
  File /r ..\matlab\*.m
- File ..\matlab\dynare_m.exe
+
+ SetOutPath $INSTDIR\matlab\preprocessor32
+ File ..\matlab\preprocessor32\dynare_m.exe
+
+ SetOutPath $INSTDIR\matlab\preprocessor64
+ File ..\matlab\preprocessor64\dynare_m.exe
 
  SetOutPath $INSTDIR\contrib
  File /r ..\contrib\*.m
