@@ -146,7 +146,7 @@ if exist(fname(1:end-4),'dir') && exist([fname(1:end-4) filesep 'hooks'],'dir') 
 end
 
 if ispc
-    [junk, arch] = getenv('PROCESSOR_ARCHITECTURE');
+    arch = getenv('PROCESSOR_ARCHITECTURE');
 else
     [junk, arch] = system('uname -m');
 end
