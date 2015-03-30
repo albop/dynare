@@ -793,6 +793,15 @@ graph
 @item nointeractive
 Instructs Dynare to not request user input
 
+@item nopathchange
+By default Dynare will change Matlab/Octave's path if
+@file{dynare/matlab} directory is not on top and if Dynare's routines
+are overriden by routines provided in other toolboxes. If one wishes to
+override Dynare's routines, the @code{nopathchange} options can be
+used. Alternatively, the path can be temporarly modified by the user at
+the top of the @file{*.mod} file (using Matlab/Octave's @code{addpath}
+command).
+
 @item cygwin
 Tells Dynare that your MATLAB is configured for compiling MEX files with
 Cygwin (@pxref{Software requirements}). This option is only available

@@ -44,7 +44,22 @@ if strcmpi(fname,'help')
     return
 end
 
-% detect if MEX files are present; if not, use alternative M-files
+% Set default local options
+change_path_flag = true;
+
+% Filter out some options.
+if nargin>1
+    id = strfind(varargin,'nopathchange');
+    if ~isempty(id)
+        change_path_flag = false;
+        varargin(id{1}) = [];
+    end
+end
+
+% Check matlab path
+check_matlab_path(change_path_flag);
+
+% Detect if MEX files are present; if not, use alternative M-files
 dynareroot = dynare_config;
 
 warning_config()
@@ -160,8 +175,8 @@ else
 end
 
 command = ['"' dynareroot 'preprocessor' arch_ext filesep 'dynare_m" ' fname] ;
-for i=2:nargin
-    command = [command ' ' varargin{i-1}];
+for i=1:length(varargin)
+    command = [command ' ' varargin{i}];
 end
 
 [status, result] = system(command);
@@ -178,8 +193,8 @@ end
 
 % Save preprocessor result in logfile (if `no_log' option not present)
 no_log = 0;
-for i=2:nargin
-    no_log = no_log || strcmp(varargin{i-1}, 'nolog');
+for i=1:length(varargin)
+    no_log = no_log || strcmp(varargin{i}, 'nolog');
 end
 if ~no_log
     logname = [fname(1:end-4) '.log'];
