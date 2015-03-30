@@ -481,7 +481,7 @@ csminwel.maxiter=1000;
 options_.csminwel=csminwel;
 
 %newrat optimization routine
-newrat.hess=1; %analytic hessian
+newrat.hess=1; % dynare numerical hessian
 newrat.tolerance.f=1e-5;
 newrat.tolerance.f_analytic=1e-7;
 newrat.maxiter=1000;
