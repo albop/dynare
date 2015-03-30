@@ -4995,8 +4995,8 @@ Maximum number of iterations. Default: @code{1000}
 
 @item 'Hessian'
 Triggers three types of Hessian computations. @code{0}: outer product gradient; @code{1} default DYNARE Hessian routine; @code{2} 'mixed' outer product gradient, where diagonal elements are obtained using second order derivation formula and outer product is used for correlation structure. 
-Both @{0} and @{2} options require univariate filters, to ensure using maximum number of individual densities and a positive definite Hessian.
-Both @{0} and @{2} are quicker than default DYNARE numeric Hessian, but provide decent starting values for Metropolis for large models (option @{2} being more accurate than @{0}).
+Both @{0@} and @{2@} options require univariate filters, to ensure using maximum number of individual densities and a positive definite Hessian.
+Both @{0@} and @{2@} are quicker than default DYNARE numeric Hessian, but provide decent starting values for Metropolis for large models (option @{2@} being more accurate than @{0@}).
 Default: @code{1}.
 
 @item 'TolFun'
@@ -5585,7 +5585,7 @@ and end of the sample for which no forecasts can be made, e.g. entries (1,5,1) a
 the variables will be ordered in the order of declaration after the estimation 
 command (or in general declaration order if no variables are specified here). In case 
 of running the classical smoother, the variables will always be ordered in general 
-declaration order. If the @xref{selected_variables_only} option is specified with the classical smoother, 
+declaration order. If the @ref{selected_variables_only} option is specified with the classical smoother, 
 non-requested variables will be simply left out in this order.
 @end defvr
 
