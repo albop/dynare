@@ -793,6 +793,15 @@ graph
 @item nointeractive
 Instructs Dynare to not request user input
 
+@item nopathchange
+By default Dynare will change Matlab/Octave's path if
+@file{dynare/matlab} directory is not on top and if Dynare's routines
+are overriden by routines provided in other toolboxes. If one wishes to
+override Dynare's routines, the @code{nopathchange} options can be
+used. Alternatively, the path can be temporarly modified by the user at
+the top of the @file{*.mod} file (using Matlab/Octave's @code{addpath}
+command).
+
 @item cygwin
 Tells Dynare that your MATLAB is configured for compiling MEX files with
 Cygwin (@pxref{Software requirements}). This option is only available
@@ -2428,7 +2437,7 @@ The command accepts three file formats:
 
 @item
 M-file (extension @file{.m}): for each endogenous and exogenous
-variable, the file must contain a row vector of the same name.
+variable, the file must contain a row or column vector of the same name. Their length must be @code{periods+M_.maximum_lag+M_.maximum_lead} 
 
 @item
 MAT-file (extension @file{.mat}): same as for M-files.
@@ -4855,7 +4864,9 @@ Uses Chris Sims's @code{csminwel}
 
 @item 5
 Uses Marco Ratto's @code{newrat}. This value is not compatible with non
-linear filters or DSGE-VAR models
+linear filters or DSGE-VAR models.
+This is a slice optimizer: most iterations are a sequence of univariate optimization step, one for each estimated parameter or shock.
+Uses @code{csminwel} for line search in each step.
 
 @item 6
 Uses a Monte-Carlo based optimization routine (see
@@ -4971,6 +4982,25 @@ Stopping criteria. Default: @code{1e-7}
 
 @item 'InitialInverseHessian'
 Initial approximation for the inverse of the Hessian matrix of the posterior kernel (or likelihood). Obviously this approximation has to be a square, positive definite and symmetric matrix. Default: @code{'1e-4*eye(nx)'}, where @code{nx} is the number of parameters to be estimated.
+
+@end table
+
+@item 5
+Available options are:
+
+@table @code
+
+@item 'MaxIter'
+Maximum number of iterations. Default: @code{1000}
+
+@item 'Hessian'
+Triggers three types of Hessian computations. @code{0}: outer product gradient; @code{1} default DYNARE Hessian routine; @code{2} 'mixed' outer product gradient, where diagonal elements are obtained using second order derivation formula and outer product is used for correlation structure. 
+Both @{0@} and @{2@} options require univariate filters, to ensure using maximum number of individual densities and a positive definite Hessian.
+Both @{0@} and @{2@} are quicker than default DYNARE numeric Hessian, but provide decent starting values for Metropolis for large models (option @{2@} being more accurate than @{0@}).
+Default: @code{1}.
+
+@item 'TolFun'
+Stopping criteria. Default: @code{1e-5} for numerical derivatives @code{1e-7} for analytic derivatives.
 
 @end table
 
@@ -5555,7 +5585,7 @@ and end of the sample for which no forecasts can be made, e.g. entries (1,5,1) a
 the variables will be ordered in the order of declaration after the estimation 
 command (or in general declaration order if no variables are specified here). In case 
 of running the classical smoother, the variables will always be ordered in general 
-declaration order. If the @xref{selected_variables_only} option is specified with the classical smoother, 
+declaration order. If the @ref{selected_variables_only} option is specified with the classical smoother, 
 non-requested variables will be simply left out in this order.
 @end defvr
 

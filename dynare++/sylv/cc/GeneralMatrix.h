@@ -7,6 +7,8 @@
 
 #include "Vector.h"
 
+#include <algorithm>
+
 class GeneralMatrix;
 
 class ConstGeneralMatrix {
@@ -272,6 +274,40 @@ private:
 	static int md_length;
 };
 
+class SVDDecomp {
+protected:
+    /** Minimum of number of rows and columns of the decomposed
+     * matrix. */
+    const int minmn;
+    /** Singular values. */
+    Vector sigma;
+    /** Orthogonal matrix U. */
+    GeneralMatrix U;
+    /** Orthogonal matrix V^T. */
+    GeneralMatrix VT;
+    /** Convered flag. */
+    bool conv;
+public:
+    SVDDecomp(const GeneralMatrix& A)
+        : minmn(std::min<int>(A.numRows(), A.numCols())),
+          sigma(minmn),
+          U(A.numRows(), A.numRows()),
+          VT(A.numCols(), A.numCols()),
+          conv(false)
+        {construct(A);}
+    const GeneralMatrix& getU() const
+        {return U;}
+    const GeneralMatrix& getVT() const
+        {return VT;}
+    void solve(const GeneralMatrix& B, GeneralMatrix& X) const;
+    void solve(const Vector& b, Vector& x) const
+        {
+            GeneralMatrix xmat(x.base(), x.length(), 1);
+            solve(GeneralMatrix(b.base(), b.length(), 1), xmat);
+        }
+private:
+    void construct(const GeneralMatrix& A);
+};
 
 
 

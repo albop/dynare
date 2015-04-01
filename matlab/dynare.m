@@ -16,7 +16,7 @@ function dynare(fname, varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2014 Dynare Team
+% Copyright (C) 2001-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -44,7 +44,22 @@ if strcmpi(fname,'help')
     return
 end
 
-% detect if MEX files are present; if not, use alternative M-files
+% Set default local options
+change_path_flag = true;
+
+% Filter out some options.
+if nargin>1
+    id = strfind(varargin,'nopathchange');
+    if ~isempty(id)
+        change_path_flag = false;
+        varargin(id{1}) = [];
+    end
+end
+
+% Check matlab path
+check_matlab_path(change_path_flag);
+
+% Detect if MEX files are present; if not, use alternative M-files
 dynareroot = dynare_config;
 
 warning_config()
@@ -145,9 +160,23 @@ if exist(fname(1:end-4),'dir') && exist([fname(1:end-4) filesep 'hooks'],'dir') 
     run([fname(1:end-4) filesep 'hooks/priorprocessing'])
 end
 
-command = ['"' dynareroot 'dynare_m" ' fname] ;
-for i=2:nargin
-    command = [command ' ' varargin{i-1}];
+if ispc
+    arch = getenv('PROCESSOR_ARCHITECTURE');
+else
+    [junk, arch] = system('uname -m');
+end
+
+if isempty(strfind(arch, '64'))
+  arch_ext = '32';
+  disp('Using 32-bit preprocessor');
+else
+  arch_ext = '64';
+  disp('Using 64-bit preprocessor');
+end
+
+command = ['"' dynareroot 'preprocessor' arch_ext filesep 'dynare_m" ' fname] ;
+for i=1:length(varargin)
+    command = [command ' ' varargin{i}];
 end
 
 [status, result] = system(command);
@@ -164,8 +193,8 @@ end
 
 % Save preprocessor result in logfile (if `no_log' option not present)
 no_log = 0;
-for i=2:nargin
-    no_log = no_log || strcmp(varargin{i-1}, 'nolog');
+for i=1:length(varargin)
+    no_log = no_log || strcmp(varargin{i}, 'nolog');
 end
 if ~no_log
     logname = [fname(1:end-4) '.log'];

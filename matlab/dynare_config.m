@@ -35,6 +35,7 @@ function dynareroot = dynare_config(path_to_dynare,verbose)
 if nargin && ~isempty(path_to_dynare)
     addpath(path_to_dynare);
 end
+
 dynareroot = strrep(which('dynare'),'dynare.m','');
 
 origin = pwd();
@@ -43,7 +44,6 @@ cd([dynareroot '/..'])
 if ~nargin || nargin==1
     verbose = 1;
 end
-
 
 addpath([dynareroot '/distributions/'])
 addpath([dynareroot '/kalman/'])
@@ -90,8 +90,8 @@ if isoctave
     addpath([dynareroot '/missing/ordeig'])
 end
 
-% ilu is missing in Octave
-if isoctave
+% ilu is missing in Octave < 4.0
+if isoctave && octave_ver_less_than('4.0')
     addpath([dynareroot '/missing/ilu'])
 end
 
@@ -114,49 +114,7 @@ if (isoctave && ~user_has_octave_forge_package('statistics')) ...
 end
 
 % Add path to MEX files
-if isoctave
-    addpath([dynareroot '../mex/octave/']);
-else
-    % Add win32 specific paths for Dynare Windows package
-    if strcmp(computer, 'PCWIN')
-        mexpath = [dynareroot '../mex/matlab/win32-7.5-8.4'];
-        if exist(mexpath, 'dir')
-            addpath(mexpath)
-        end
-    end
-
-    % Add win64 specific paths for Dynare Windows package
-    if strcmp(computer, 'PCWIN64')
-        if matlab_ver_less_than('7.8')
-            mexpath = [dynareroot '../mex/matlab/win64-7.5-7.7'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        else
-            mexpath = [dynareroot '../mex/matlab/win64-7.8-8.4'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        end
-    end
-
-    if strcmp(computer, 'MACI')
-        mexpath = [dynareroot '../mex/matlab/osx32-7.5-7.11'];
-        if exist(mexpath, 'dir')
-            addpath(mexpath)
-        end
-    end
-
-    if strcmp(computer, 'MACI64')
-        mexpath = [dynareroot '../mex/matlab/osx64'];
-        if exist(mexpath, 'dir')
-            addpath(mexpath)
-        end
-    end
-
-    % Add generic MATLAB path (with higher priority than the previous ones)
-    addpath([dynareroot '../mex/matlab/']);
-end
+add_path_to_mex_files(dynareroot);
 
 %% Set mex routine names
 mex_status = cell(1,3);

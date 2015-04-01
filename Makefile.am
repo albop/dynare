@@ -35,17 +35,25 @@ EXTRA_DIST = \
 
 dist-hook:
 	rm -rf `find $(distdir)/matlab $(distdir)/examples -name *~`
-	rm -f $(distdir)/matlab/dynare_m$(EXEEXT) $(distdir)/matlab/dynare_version.m
+	rm -rf $(distdir)/matlab/preprocessor* $(distdir)/matlab/dynare_version.m
 	$(MKDIR_P) $(distdir)/mex/matlab $(distdir)/mex/octave
 	rm -rf `find $(distdir)/contrib -name '.git*'`
 
 install-exec-local:
 	$(MKDIR_P) $(DESTDIR)$(pkglibdir)/contrib/ms-sbvar/TZcode
+	cp -r contrib/ms-sbvar/TZcode/MatlabFiles $(DESTDIR)$(pkglibdir)/contrib/ms-sbvar/TZcode
 	cp -r examples $(DESTDIR)$(pkglibdir)
 	cp -r matlab $(DESTDIR)$(pkglibdir)
-	rm -f $(DESTDIR)$(pkglibdir)/matlab/dynare_m
-	cp preprocessor/dynare_m $(DESTDIR)$(pkglibdir)/matlab
-	cp -r contrib/ms-sbvar/TZcode/MatlabFiles $(DESTDIR)$(pkglibdir)/contrib/ms-sbvar/TZcode
+	rm -rf $(DESTDIR)$(pkglibdir)/matlab/preprocessor*
+	{ \
+	if [ -z "`file preprocessor/dynare_m | grep x86.64`" ]; then \
+	  ARCH="32"; \
+	else \
+	  ARCH="64"; \
+	fi; \
+	mkdir -p $(DESTDIR)$(pkglibdir)/matlab/preprocessor$$ARCH; \
+	cp preprocessor/dynare_m $(DESTDIR)$(pkglibdir)/matlab/preprocessor$$ARCH; \
+	}
 
 uninstall-local:
 	rm -f  $(DESTDIR)$(bindir)/dynare++

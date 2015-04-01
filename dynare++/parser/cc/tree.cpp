@@ -1,5 +1,6 @@
 // Copyright (C) 2005-2011, Ondra Kamenik
 
+
 #include "utils/cc/exception.h"
 
 #include "tree.h"
@@ -55,7 +56,7 @@ int OperationTree::add_unary(code_t code, int op)
 		 code == SQRT ||
 		 code == ERF))
 		return zero;
-	if (op == zero && code == LOG || op == nan)
+	if ((op == zero && code == LOG) || op == nan)
 		return nan;
 	if (op == zero && (code == EXP ||
 					   code == COS ||
@@ -86,39 +87,43 @@ int OperationTree::add_binary(code_t code, int op1, int op2)
 	if (op1 == nan || op2 == nan)
 		return nan;
 	// for plus
-	if (code == PLUS)
+	if (code == PLUS) {
 		if (op1 == zero && op2 == zero)
 			return zero;
 		else if (op1 == zero)
 			return op2;
 		else if (op2 == zero)
 			return op1;
+    }
 	// for minus
-	if (code == MINUS)
+	if (code == MINUS) {
 		if (op1 == zero && op2 == zero)
 			return zero;
 		else if (op1 == zero)
 			return add_unary(UMINUS, op2);
 		else if (op2 == zero)
 			return op1;
+    }
 	// for times
-	if (code == TIMES)
+	if (code == TIMES) {
 		if (op1 == zero || op2 == zero)
 			return zero;
 		else if (op1 == one)
 			return op2;
 		else if (op2 == one)
 			return op1;
+    }
 	// for divide
-	if (code == DIVIDE)
+	if (code == DIVIDE) {
 		if (op1 == op2)
 			return one;
 		else if (op1 == zero)
 			return zero;
 		else if (op2 == zero)
 			return nan;
+    }
 	// for power
-	if (code == POWER)
+	if (code == POWER) {
 		if (op1 == zero && op2 == zero)
 			return nan;
 		else if (op1 == zero)
@@ -129,6 +134,7 @@ int OperationTree::add_binary(code_t code, int op1, int op2)
 			return one;
 		else if (op2 == one)
 			return op1;
+    }
 
 	// order operands of commutative operations
 	if (code == TIMES || code == PLUS)

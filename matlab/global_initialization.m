@@ -363,7 +363,7 @@ estimation_info.structural_innovation_corr_prior_index = {};
 estimation_info.structural_innovation_corr_options_index = {};
 estimation_info.structural_innovation_corr.range_index = {};
 estimation_info.joint_parameter_prior_index = {};
-estimation_info.joint_parameter = cell2table(cell(0,11));
+estimation_info.joint_parameter = {'index','domain','interval','mean','median','mode','shape','shift','stdev','truncate','variance'};
 options_.initial_period = NaN; %dates(1,1);
 options_.dataset.file = [];
 options_.dataset.series = [];
@@ -481,7 +481,7 @@ csminwel.maxiter=1000;
 options_.csminwel=csminwel;
 
 %newrat optimization routine
-newrat.hess=1; %analytic hessian
+newrat.hess=1; % dynare numerical hessian
 newrat.tolerance.f=1e-5;
 newrat.tolerance.f_analytic=1e-7;
 newrat.maxiter=1000;

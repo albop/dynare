@@ -77,4 +77,4 @@ rplot Capital;
 
 O=load('rbc_det_exo_lag_2a_results');
 
-test(oo_.endo_simul(:,2:end),O.oo_.endo_simul);
+fataltest(oo_.endo_simul(:,2:end),O.oo_.endo_simul);

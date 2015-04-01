@@ -82,7 +82,7 @@ else
     [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 end
 
-if options_.loglinear %log steady state for correct display of decision rules and simulations
+if options_.loglinear && isfield(oo_.dr,'ys') %log steady state for correct display of decision rules and simulations
     oo_.dr.ys=log(oo_.dr.ys);
     oo_.steady_state=log(oo_.steady_state);
     options_old.logged_steady_state = 1;

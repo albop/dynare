@@ -41,6 +41,7 @@ gammac0 = 1.5;
 gamma_y_ = 8;
 gamma_inf_ = 3;
 
+if ~isoctave
 osr(opt_algo=7);
 %compute objective function manually
 objective=oo_.var(strmatch('y',M_.endo_names,'exact'),strmatch('y',M_.endo_names,'exact'))+oo_.var(strmatch('inflation',M_.endo_names,'exact'),strmatch('inflation',M_.endo_names,'exact'))+oo_.var(strmatch('dummy_var',M_.endo_names,'exact'),strmatch('dummy_var',M_.endo_names,'exact'));
@@ -106,4 +107,5 @@ if abs(oo_.osr.objective_function-oo_covar_single.osr.objective_function)>1e-8
 end
 if max(abs((cell2mat(struct2cell(oo_.osr.optim_params))-cell2mat(struct2cell(oo_covar_single.osr.optim_params)))./cell2mat(struct2cell(oo_.osr.optim_params))))>1e-4
     error('Parameters should be identical')
+end
 end

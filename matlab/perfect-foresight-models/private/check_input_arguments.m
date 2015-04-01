@@ -41,10 +41,22 @@ end
 
 
 if isempty(DynareResults.endo_simul) || any(size(DynareResults.endo_simul) ~= [ DynareModel.endo_nbr, DynareModel.maximum_lag+DynareOptions.periods+DynareModel.maximum_lead ])
-    error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
+    
+    if options_.initval_file
+        disp(sprintf('PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Check whether your initval-file provides %d periods.',M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead))
+        error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
+    else
+        error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
+    end
 end
 
-if (DynareModel.exo_nbr > 0) && (isempty(DynareResults.exo_simul) || ...
-                                 any(size(DynareResults.exo_simul) ~= [ DynareModel.maximum_lag+DynareOptions.periods+DynareModel.maximum_lead, DynareModel.exo_nbr ]))
+if (DynareModel.exo_nbr > 0) && ...
+        (isempty(DynareResults.exo_simul) || any(size(DynareResults.exo_simul) ~= [ DynareModel.maximum_lag+DynareOptions.periods+DynareModel.maximum_lead, DynareModel.exo_nbr ]))
+    if options_.initval_file
+        disp(sprintf('PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Check whether your initval-file provides %d periods.',M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead))
+        error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size.')
+    else
+        error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
+    end
     error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
 end
