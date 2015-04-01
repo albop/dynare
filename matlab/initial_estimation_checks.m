@@ -89,8 +89,14 @@ if any(BayesInfo.pshape) % if Bayesian estimation
     end
 end
 
-%% display warning if some parameters are still NaN
+% display warning if some parameters are still NaN
 test_for_deep_parameters_calibration(Model);
+
+[lnprior, junk1,junk2,info]= priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+if info
+    fprintf('The prior density evaluated at the initial values is Inf for the following parameters: %s\n',BayesInfo.name{info,1})
+    error('The initial value of the prior is -Inf')
+end
     
 % Evaluate the likelihood.
 ana_deriv = DynareOptions.analytic_derivation;
