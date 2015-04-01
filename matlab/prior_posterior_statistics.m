@@ -98,13 +98,13 @@ MAX_ninno = min(B,ceil(MaxNumberOfBytes/(exo_nbr*gend)/8));
 MAX_nerro = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8));
 
 if naK
-    MAX_naK   = min(B,ceil(MaxNumberOfBytes/(length(options_.varobs)* ...
-                                             length(options_.filter_step_ahead)*gend)/8));
+    MAX_naK   = min(B,ceil(MaxNumberOfBytes/(endo_nbr* ...
+                                             length(options_.filter_step_ahead)*(gend+max(options_.filter_step_ahead)))/8));
 end
 
 if horizon
-    MAX_nforc1 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*horizon)/8));
-    MAX_nforc2 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*horizon)/ ...
+    MAX_nforc1 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/8));
+    MAX_nforc2 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/ ...
                             8));
     IdObs    = bayestopt_.mfys;
 
