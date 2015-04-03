@@ -2331,7 +2331,7 @@ jump from t=200 to t=201.
 @end deffn
 
 @deffn Block histval ;
-
+@anchor{histval}
 @descriptionhead
 
 @customhead{In a deterministic perfect foresight context}
@@ -2370,6 +2370,10 @@ the starting point of those simulations in the state space (it does not
 affect the starting point for impulse response functions). As for the case of
 perfect foresight simulations, all not explicitly specified variables are set to 0.
 Moreover, as only states enter the recursive policy functions, all values specified for control variables will be ignored.
+
+For @ref{Ramsey} policy, it also specifies the values of the endogenous states at 
+which the objective function of the planner is computed. Note that the initial values 
+of the Lagrange multipliers associated with the planner's problem cannot be set, @xref{planner_objective_value}.
 
 @examplehead
 
@@ -6457,7 +6461,7 @@ new, expanded model.
 Alternatively, you can either solve for optimal policy under commitment
 with @code{ramsey_policy}, for optimal policy under discretion with
 @code{discretionary_policy} or for optimal simple rule with
-@code{osr}.
+@code{osr} (also implying commitment).
 
 
 @anchor{osr}
@@ -6647,7 +6651,7 @@ at the optimum, stored in fields of the form
 @descriptionhead
 
 This command computes the First Order Conditions for maximizing the policy maker objective function subject to the
-constraints provided by the equilibrium path of the economy.
+constraints provided by the equilibrium path of the private economy.
 
 The planner objective must be declared with the @code{planner_objective} command.
 
@@ -6677,6 +6681,7 @@ under optimal policy. Requires a @code{steady_state_model} block or a
 @end table
 
 @customhead{Steady state}
+@anchor{Ramsey steady state}
 
 Dynare takes advantage of the fact that the Lagrange multipliers appear
 linearly in the equations of the steady state of the model under optimal
@@ -6701,12 +6706,32 @@ instrument.
 
 @deffn Command ramsey_policy [@var{VARIABLE_NAME}@dots{}];
 @deffnx Command ramsey_policy (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
+@anchor{ramsey_policy}
 
 @descriptionhead
 
 This command computes the first order approximation of the policy that
-maximizes the policy maker objective function submitted to the
-constraints provided by the equilibrium path of the economy.
+maximizes the policy maker's objective function subject to the
+constraints provided by the equilibrium path of the private economy and under 
+commitment to this optimal policy. Following @cite{Woodford (1999)}, the Ramsey 
+policy is computed using a timeless perspective. That is, the government forgoes 
+its first-period advantage and does not exploit the preset privates sector expectations 
+(which are the source of the well-known time inconsistency that requires the 
+assumption of commitment). Rather, it acts as if the initial multipliers had 
+been set to 0 in the distant past, giving them time to converge to their steady 
+state value. Consequently, the optimal decision rules are computed around this steady state 
+of the endogenous variables and the Lagrange multipliers.
+
+This first order approximation to the optimal policy conducted by Dynare is not to be 
+confused with a naive linear quadratic approach to optimal policy that can lead to 
+spurious welfare rankings (see @cite{Kim and Kim (2003)}). In the latter, the optimal policy 
+would be computed subject to the first order approximated FOCs of the 
+private economy. In contrast, Dynare first computes the FOCs of the Ramsey planner's problem
+subject to the nonlinear constraints that are the FOCs of the private economy 
+and only then approximates these FOCs of planner's problem to first order. Thereby, the second
+order terms that are required for a second-order correct welfare evaluation are 
+preserved.
+
 
 The planner objective must be declared with the @code{planner_objective} command.
 
@@ -6730,36 +6755,34 @@ under optimal policy. Requires a @code{steady_state_model} block or a
 
 @end table
 
-Note that only first order approximation is available (@i{i.e.}
-@code{order=1} must be specified).
+Note that only a first order approximation of the optimal Ramsey policy is 
+available, leading to a second-order accurate welfare ranking 
+(@i{i.e.} @code{order=1} must be specified).
 
 @outputhead
 
-This command generates all the output variables of @code{stoch_simul}.
+This command generates all the output variables of @code{stoch_simul}. For specifying
+the initial values for the endogenous state variables (except for the Lagrange
+multipliers}, @xref{histval}
 
 @vindex oo_.planner_objective_value
+@anchor{planner_objective_value}
+
 In addition, it stores the value of planner objective function under
-Ramsey policy in @code{oo_.planner_objective_value}.
+Ramsey policy in @code{oo_.planner_objective_value}, given the initial values 
+of the endogenous state variables. If not specified with @code{histval}, they are 
+taken to be at their steady state values. The result is a 1 by 2 
+vector, where the first entry stores the value of the planner objective under 
+the timeless perspective to Ramsey policy, i.e. where the initial Lagrange
+multipliers associated with the planner's problem are set to their steady state
+values (@xref{ramsey_policy}). 
+In contrast, the second entry stores the value of the planner objective with 
+initial Lagrange multipliers of the planner's problem set to 0, i.e. it is assumed 
+that the planner succumbs to the temptation to exploit the preset private expecatations 
+in the first period (but not in later periods due to commitment).
 
 @customhead{Steady state}
-
-Dynare takes advantage of the fact that the Lagrange multipliers appear
-linearly in the equations of the steady state of the model under optimal
-policy. Nevertheless, it is in general very difficult to compute the
-steady state with simply a numerical guess in @code{initval} for the
-endogenous variables.
-
-It greatly facilitates the computation, if the user provides an
-analytical solution for the steady state (in @code{steady_state_model}
-block or in a @code{@dots{}_steadystate.m} file). In this case, it is
-necessary to provide a steady state solution CONDITIONAL on the value
-of the instruments in the optimal policy problem and declared with
-option @code{instruments}. Note that choosing the instruments is
-partly a matter of interpretation and you can choose instruments that
-are handy from a mathematical point of view but different from the
-instruments you would refer to in the analysis of the paper. A typical
-example is choosing inflation or nominal interest rate as an
-instrument.
+@xref{Ramsey steady state}
 
 
 @end deffn
@@ -12286,6 +12309,11 @@ simulation of dynamic models with forward variables through the use of
 a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602
 
 @item
+Kim, Jinill and Sunghyun Kim (2003): ``Spurious welfare reversals in 
+international business cycle models,'' @i{Journal of International
+Economics}, 60, 471--500
+
+@item
 Kim, Jinill, Sunghyun Kim, Ernst Schaumburg, and Christopher A. Sims
 (2008): ``Calculating and using second-order accurate solutions of
 discrete time dynamic equilibrium models,'' @i{Journal of Economic
@@ -12354,6 +12382,12 @@ the European Economic Association}, 1(5), 1123--1175
 Villemot, Sébastien (2011): ``Solving rational expectations models at
 first order: what Dynare does,'' @i{Dynare Working Papers}, 2,
 CEPREMAP
+
+@item
+Woodford, Michael (2011): ``Commentary: How Should Monetary Policy Be 
+Conducted in an Era of Price Stability?'' @i{Proceedings - Economic Policy Symposium - Jackson Hole}, 
+277-316
+
 
 @end itemize
 
