@@ -1,6 +1,6 @@
-function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag)
+function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag)
 
-% function [alphahat,epsilonhat,etahat,a,aK,PK,decomp] = DiffuseKalmanSmoother1(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag)
+% function [alphahat,epsilonhat,etahat,a,aK,PK,decomp] = DiffuseKalmanSmoother1(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag)
 % Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix 
 %
 % INPUTS
@@ -18,6 +18,7 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKal
 %    data_index                   [cell]      1*smpl cell of column vectors of indices.
 %    nk        number of forecasting periods
 %    kalman_tol   tolerance for reciprocal condition number
+%    diffuse_kalman_tol   tolerance for reciprocal condition number (for Finf) and the rank of Pinf
 %    decomp_flag  if true, compute filter decomposition
 %             
 % OUTPUTS
@@ -38,7 +39,7 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKal
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2011 Dynare Team
+% Copyright (C) 2004-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -80,7 +81,6 @@ Kstar           = zeros(mm,pp,smpl);
 P               = zeros(mm,mm,smpl+1);
 Pstar           = zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
 Pinf            = zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
-crit1       = 1.e-8;
 steady          = smpl;
 rr              = size(Q,1);
 QQ              = R*Q*transpose(R);
@@ -91,7 +91,7 @@ epsilonhat          = zeros(rr,smpl);
 r               = zeros(mm,smpl+1);
 
 t = 0;
-while rank(Pinf(:,:,t+1),crit1) && t<smpl
+while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
     t = t+1;
     di = data_index{t};
     if isempty(di)
@@ -103,8 +103,8 @@ while rank(Pinf(:,:,t+1),crit1) && t<smpl
         ZZ = Z(di,:);
         v(di,t)= Y(di,t) - ZZ*a(:,t);
         Finf = ZZ*Pinf(:,:,t)*ZZ';
-        if rcond(Finf) < kalman_tol
-            if ~all(abs(Finf(:)) < kalman_tol)
+        if rcond(Finf) < diffuse_kalman_tol
+            if ~all(abs(Finf(:)) < diffuse_kalman_tol)
                 % The univariate diffuse kalman filter should be used.
                 alphahat = Inf;
                 return
@@ -170,7 +170,7 @@ while notsteady && t<smpl
         F = ZZ*P(:,:,t)*ZZ' + H(di,di);
         if rcond(F) < kalman_tol
             alphahat = Inf;
-            return              
+            return
         end    
         iF(di,di,t)   = inv(F);
         PZI         = P(:,:,t)*ZZ'*iF(di,di,t);
