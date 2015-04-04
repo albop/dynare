@@ -450,7 +450,7 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         if ~options_.nodiagnostic && options_.mh_replic>0
             oo_= McMCDiagnostics(options_, estim_params_, M_,oo_);
         end
-        %% Here i discard first half of the draws:
+        %% Here I discard first mh_drop percent of the draws:
         CutSample(M_, options_, estim_params_);
         %% Estimation of the marginal density from the Mh draws:
         if options_.mh_replic
@@ -467,7 +467,7 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         else
             load([M_.fname '_results'],'oo_');
         end
-        error_flag = metropolis_draw(1);
+        [error_flag,junk,options_]= metropolis_draw(1,options_,estim_params_,M_);
         if options_.bayesian_irf
             if error_flag
                 error('Estimation::mcmc: I cannot compute the posterior IRFs!')

@@ -1,12 +1,14 @@
 function CutSample(M_, options_, estim_params_)
-
-% function CutSample()
-% Takes a subset from metropolis
+% function CutSample(M_, options_, estim_params_)
+% Takes a subset from metropolis draws by storing the required information
+% like the first MH-file to be loaded and the first line in that file to be
+% loaded into the record structure saved on harddisk into the
+% _mh_history-file
 %
 % INPUTS
-%   options_         [structure]
-%   estim_params_    [structure]
-%   M_               [structure]
+%   M_               [structure]    Dynare model structure
+%   options_         [structure]    Dynare options structure
+%   estim_params_    [structure]    Parameter structure
 %
 % OUTPUTS
 %    none
@@ -14,7 +16,7 @@ function CutSample(M_, options_, estim_params_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2012 Dynare Team
+% Copyright (C) 2005-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
