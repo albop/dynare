@@ -12614,6 +12614,38 @@ Baseline New Keynesian Model estimated in @cite{Fernández-Villaverde (2010)}. I
 @node Dynare misc commands
 @chapter Dynare misc commands
 
+@anchor{prior_posterior_function}
+@deffn {MATLAB/Octave command} @var{output_cell_name}=prior_posterior_function('@var{function_name_string}','@var{prior_posterior_selector}',@var{OPTIONS})
+Executes a user-defined function on parameter draws from the prior or posterior distribution. The function 
+provided using the @var{function_name_string} must have the following header
+@code{output_cell =FILENAME(xparam1,M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info)}. 
+It allows read-only access to all Dynare structures. The only output argument allowed is a 1 by n cell array, 
+which allows for storing any type of output/computations. Dynare returns the results of the 
+computations for all draws in a ndraws by n cell array named @var{output_cell_name}.
+
+@optionshead
+
+@table @code
+
+@item prior_posterior_selector 
+
+Available options are
+@table @code
+
+@item 'prior'
+Executes the user-defined function on draws from the prior
+
+@item 'posterior'
+Executes the user-defined function on draws from the posterior
+
+@end table
+
+@item prior_posterior_sampling_draws
+Number of draws used for sampling. Default: 500.
+
+@end table
+
+
 @anchor{internals}
 @deffn {MATLAB/Octave command} internals @var{FLAG} @var{ROUTINENAME}[.m]|@var{MODFILENAME}
 
