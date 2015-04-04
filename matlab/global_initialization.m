@@ -291,6 +291,9 @@ options_.xls_range = '';
 % Prior draws
 options_.prior_draws = 10000;
 
+% Prior posterior function sampling draws
+options_.prior_posterior_sampling_draws = 500;
+
 options_.forecast = 0;
 
 % Model

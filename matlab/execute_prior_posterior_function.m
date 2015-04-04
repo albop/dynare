@@ -48,11 +48,13 @@ end
 %Create function handle
 functionhandle=str2func(posterior_function_name);
 
+n_draws=options_.prior_posterior_sampling_draws;
 % Get informations about the _posterior_draws files.
 if strcmpi(type,'posterior')
     %% discard first mh_drop percent of the draws:
     CutSample(M_, options_, estim_params_);
     %% initialize metropolis draws
+    options_.sub_draws=n_draws; %set draws for sampling; changed value is not returned to base workspace
     [error_flag,junk,options_]= metropolis_draw(1,options_,estim_params_,M_);
     if error_flag
         error('EXECUTE_POSTERIOR_FUNCTION: The draws could not be initialized')
@@ -60,7 +62,6 @@ if strcmpi(type,'posterior')
     n_draws=options_.sub_draws;
 elseif strcmpi(type,'prior')
     prior_draw(1);
-    n_draws=options_.prior_draws;
 else
     error('EXECUTE_POSTERIOR_FUNCTION: Unknown type!')
 end
