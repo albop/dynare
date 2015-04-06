@@ -87,7 +87,18 @@ switch minimizer_algorithm
     [opt_par_values,fval,exitflag,output,lamdba,grad,hessian_mat] = ...
         fmincon(objective_function,start_par_value,[],[],[],[],bounds(:,1),bounds(:,2),[],optim_options,varargin{:});
   case 2
-    error('Optimization algorithm 1 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
+    if isoctave
+        error('Optimization algorithm 2 is not available under Octave')
+    elseif ~user_has_matlab_license('GADS_Toolbox')
+        error('Optimization algorithm 2 requires the Optimization Toolbox')
+    end
+    % Set default optimization options for fmincon.
+    optim_options = saoptimset('display','iter','TolFun',1e-8);
+    if ~isempty(options_.optim_opt)
+        eval(['optim_options = saoptimset(optim_options,' options_.optim_opt ');']);
+    end
+    func = @(x)objective_function(x,varargin{:});
+    [opt_par_values,fval,exitflag,output] = simulannealbnd(func,start_par_value,bounds(:,1),bounds(:,2),optim_options);
   case 3
     if isoctave && ~user_has_octave_forge_package('optim')
         error('Optimization algorithm 3 requires the optim package')
