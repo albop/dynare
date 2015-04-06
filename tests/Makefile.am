@@ -205,6 +205,7 @@ MODFILES = \
 	smoother2histval/fs2000_simul.mod \
 	smoother2histval/fs2000_smooth.mod \
 	smoother2histval/fs2000_smooth_stoch_simul.mod \
+	optimizers/fs2000.mod \
 	reporting/example1.mod
 
 XFAIL_MODFILES = ramst_xfail.mod \
@@ -394,7 +395,8 @@ EXTRA_DIST = \
 	loglinear/results_exp.mat \
 	smoother2histval/fsdat_simul.m \
 	optimal_policy/Ramsey/find_c.m \
-	optimal_policy/Ramsey/oo_ramsey_policy_initval.mat 
+	optimal_policy/Ramsey/oo_ramsey_policy_initval.mat \
+	optimizers/optimizer_function_wrapper.m
 
 TARGETS =
 
