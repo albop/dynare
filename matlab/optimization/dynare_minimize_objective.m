@@ -278,11 +278,29 @@ switch minimizer_algorithm
      options_.cova_compute = 0 ;
      [opt_par_values,stdh,lb_95,ub_95,med_param] = online_auxiliary_filter(start_par_value,varargin{:}) ;
   case 101
-    myoptions=soptions;
-    myoptions(2)=1e-6; %accuracy of argument
-    myoptions(3)=1e-6; %accuracy of function (see Solvopt p.29)
-    myoptions(5)= 1.0;
-    [opt_par_values,fval]=solvopt(start_par_value,objective_function,[],myoptions,varargin{:});
+    solveoptoptions = options_.solveopt;
+    if ~isempty(options_.optim_opt)
+        options_list = read_key_value_string(options_.optim_opt);
+        for i=1:rows(options_list)
+            switch options_list{i,1}
+              case 'TolX'
+                solveoptoptions.TolX = options_list{i,2};
+              case 'TolFun'
+                solveoptoptions.TolFun = options_list{i,2};
+              case 'MaxIter'
+                solveoptoptions.MaxIter = options_list{i,2};
+              case 'verbosity'
+                solveoptoptions.verbosity = options_list{i,2};
+              case 'SpaceDilation'
+                solveoptoptions.SpaceDilation = options_list{i,2};
+              case 'LBGradientStep'
+                solveoptoptions.LBGradientStep = options_list{i,2};
+              otherwise
+                warning(['solveopt: Unknown option (' options_list{i,1} ')!'])
+            end
+        end
+    end
+    [opt_par_values,fval]=solvopt(start_par_value,objective_function,[],[],[],solveoptoptions,varargin{:});
   case 102
     %simulating annealing
     LB = start_par_value - 1;

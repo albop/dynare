@@ -525,6 +525,17 @@ simpsa.MAX_FUN_EVALS = 20000;
 simpsa.DISPLAY = 'iter';
 options_.simpsa = simpsa;
 
+%solveopt optimizer
+solveopt.minimizer_indicator=-1; %use minimizer
+solveopt.TolX=1e-6; %accuracy of argument
+solveopt.TolFun=1e-6; %accuracy of function 
+solveopt.MaxIter=15000;
+solveopt.verbosity=1;
+solveopt.TolXConstraint=1.e-8;
+solveopt.SpaceDilation=2.5;
+solveopt.LBGradientStep=1.e-11;
+options_.solveopt=solveopt;
+
 % prior analysis
 options_.prior_mc = 20000;
 options_.prior_analysis_endo_var_list = [];
