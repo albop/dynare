@@ -39,16 +39,16 @@ License: public-domain
  Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
  pages 472-489
 
-Files: matlab/bfgsi1.m matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m
- matlab/numgrad3.m matlab/numgrad3_.m matlab/numgrad5.m
- matlab/numgrad5_.m matlab/csminwel1.m matlab/bvar_density.m
+Files: matlab/bfgsi1.m matlab/csolve.m matlab/optimization/csminit1.m matlab/optimization/numgrad2.m
+ matlab/optimization/numgrad3.m matlab/optimization/numgrad3_.m matlab/optimization/numgrad5.m
+ matlab/optimization/numgrad5_.m matlab/optimization/csminwel1.m matlab/bvar_density.m
  matlab/bvar_toolbox.m matlab/partial_information/PI_gensys.m matlab/qzswitch.m
  matlab/qzdiv.m
 Copyright: 1993-2009 Christopher Sims
            2006-2013 Dynare Team
 License: GPL-3+
 
-Files: matlab/cmaes.m
+Files: matlab/optimization/cmaes.m
 Copyright: 2001-2012 Nikolaus Hansen
            2012 Dynare Team
 License: GPL-3+
@@ -63,7 +63,7 @@ Copyright: 2008-2012 VZLU Prague, a.s.
            2014 Dynare Team
 License: GPL-3+
 
-Files: matlab/simpsa.m matlab/simpsaget.m matlab/simpsaset.m
+Files: matlab/optimization/simpsa.m matlab/optimization/simpsaget.m matlab/optimization/simpsaset.m
 Copyright: 2005 Henning Schmidt, FCC, henning@fcc.chalmers.se
            2006 Brecht Donckels, BIOMATH, brecht.donckels@ugent.be
            2013 Dynare Team
