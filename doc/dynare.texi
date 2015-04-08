@@ -5222,7 +5222,7 @@ singularity is encountered, Dynare by default automatically switches to the univ
 @anchor{kalman_tol} Numerical tolerance for determining the singularity of the covariance matrix of the prediction errors during the Kalman filter (minimum allowed reciprocal of the matrix condition number). Default value is @code{1e-10}
 
 @item diffuse_kalman_tol = @var{DOUBLE}
-@anchor{diffuse_kalman_tol} Numerical tolerance for determining the singularity of the covariance matrix of the prediction errors (@math{F_{\infty}}) and the rank of the covariance matrix of the state variables (@math{P_{\infty}}) during the Diffuse Kalman filter. Default value is @code{1e-8}
+@anchor{diffuse_kalman_tol} Numerical tolerance for determining the singularity of the covariance matrix of the prediction errors (@math{F_{\infty}}) and the rank of the covariance matrix of the non-stationary state variables (@math{P_{\infty}}) during the Diffuse Kalman filter. Default value is @code{1e-6}
 
 @item filter_covariance
 @anchor{filter_covariance} Saves the series of one step ahead error of
