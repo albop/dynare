@@ -43,7 +43,7 @@ alpha    = options_gsa_.alpha_rmse;
 % alpha2   = options_gsa_.alpha2_rmse;
 alpha2 = 0;
 pvalue   = options_gsa_.alpha2_rmse;
-istart   = options_gsa_.istart_rmse;
+istart   = max(2,options_gsa_.istart_rmse);
 alphaPC  = 0.5;
 
 fname_ = M_.fname;
@@ -255,28 +255,32 @@ if ~options_.opt_gsa.ppost && options_.opt_gsa.lik_only
     stab_map_1(x, ilik(1:nfilt), ilik(nfilt+1:end), anam, 1,[],OutDir);
     stab_map_2(x(ilik(1:nfilt),:),alpha2,pvalue,anam, OutDir);
 else
-    for i=1:size(vvarvecm,1),
-        [dum, ixx(:,i)]=sort(rmse_MC(:,i));
-        if options_.opt_gsa.ppost,
+    if options_.opt_gsa.ppost,
+        rmse_txt=rmse_pmean;
+        r2_txt=r2_pmean;
+    else
+        if options_.opt_gsa.pprior || ~exist('rmse_pmean'),
+            if exist('rmse_mode'),
+                rmse_txt=rmse_mode;
+                r2_txt=r2_mode;
+            else
+                rmse_txt=NaN(1,size(rmse_MC,2));
+                r2_txt=NaN(1,size(r2_MC,2));
+            end
+        else
             %nfilt0(i)=length(find(rmse_MC(:,i)<rmse_pmean(i)));
             rmse_txt=rmse_pmean;
             r2_txt=r2_pmean;
-        else
-            if options_.opt_gsa.pprior || ~exist('rmse_pmean'),
-                if exist('rmse_mode'),
-                    rmse_txt=rmse_mode;
-                    r2_txt=r2_mode;
-                else
-                    rmse_txt=NaN(1,size(rmse_MC,2));
-                    r2_txt=NaN(1,size(r2_MC,2));
-                end
-            else
-                %nfilt0(i)=length(find(rmse_MC(:,i)<rmse_pmean(i)));
-                rmse_txt=rmse_pmean;
-                r2_txt=r2_pmean;
-            end
         end
-        for j=1:npar+nshock,
+    end
+    for i=1:size(vvarvecm,1),
+        [dum, ixx(:,i)]=sort(rmse_MC(:,i));
+    end
+    PP=ones(npar+nshock,size(vvarvecm,1));
+    PPV=ones(size(vvarvecm,1),size(vvarvecm,1),npar+nshock);
+    SS=zeros(npar+nshock,size(vvarvecm,1));
+    for j=1:npar+nshock,
+        for i=1:size(vvarvecm,1),
             [H,P,KSSTAT] = smirnov(x(ixx(nfilt0(i)+1:end,i),j),x(ixx(1:nfilt0(i),i),j), alpha);
             [H1,P1,KSSTAT1] = smirnov(x(ixx(nfilt0(i)+1:end,i),j),x(ixx(1:nfilt0(i),i),j),alpha,1);
             [H2,P2,KSSTAT2] = smirnov(x(ixx(nfilt0(i)+1:end,i),j),x(ixx(1:nfilt0(i),i),j),alpha,-1);
@@ -288,6 +292,22 @@ else
                 SS(j,i)=0;
             end
             PP(j,i)=P;
+        end
+        for i=1:size(vvarvecm,1),
+            for l=1:size(vvarvecm,1),
+                if l~=i && PP(j,i)<alpha && PP(j,l)<alpha
+                    [H,P,KSSTAT] = smirnov(x(ixx(1:nfilt0(i),i),j),x(ixx(1:nfilt0(l),l),j), alpha);
+                    %[H1,P1,KSSTAT1] = smirnov(x(ixx(1:nfilt0(i),i),j),x(:,j), alpha);
+                    %                 PP(j,i)=min(P,PP(j,i));
+                    %                 PP(j,l)=min(P,PP(j,l));
+                    %if P<P1
+%                     if SS(j,i)*SS(j,l)
+                        PPV(i,l,j) = P;
+%                     end
+                elseif l==i
+                    PPV(i,l,j) = PP(j,i);
+                end
+            end
         end
     end
     if ~options_.nograph,
@@ -308,12 +328,17 @@ else
         end
         subplot(3,3,i-9*(ifig-1))
         h=cumplot(lnprior(ixx(1:nfilt0(i),i)));
-        set(h,'color','red')
-        hold on, cumplot(lnprior)
+        set(h,'color','blue','linewidth',2)
+        hold on, h=cumplot(lnprior);
+        set(h,'color','k','linewidth',1)
         h=cumplot(lnprior(ixx(nfilt0(i)+1:end,i)));
-        set(h,'color','green')
+        set(h,'color','red','linewidth',2)
         title(vvarvecm(i,:),'interpreter','none')
         if mod(i,9)==0 || i==size(vvarvecm,1)
+            if ~isoctave
+                annotation('textbox', [0.1,0,0.35,0.05],'String', 'Log-prior for BETTER R2','Color','Blue','horizontalalignment','center');
+                annotation('textbox', [0.55,0,0.35,0.05],'String', 'Log-prior for WORSE R2', 'Color','Red','horizontalalignment','center');
+            end
             if options_.opt_gsa.ppost
                 dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnprior',int2str(ifig)],options_);
             else
@@ -342,15 +367,20 @@ else
         end
         subplot(3,3,i-9*(ifig-1))
         h=cumplot(likelihood(ixx(1:nfilt0(i),i)));
-        set(h,'color','red')
+        set(h,'color','blue','linewidth',2)
         hold on, h=cumplot(likelihood);
+        set(h,'color','k','linewidth',1)
         h=cumplot(likelihood(ixx(nfilt0(i)+1:end,i)));
-        set(h,'color','green')
+        set(h,'color','red','linewidth',2)
         title(vvarvecm(i,:),'interpreter','none')
         if options_.opt_gsa.ppost==0,
             set(gca,'xlim',[min( likelihood(ixx(1:nfilt0(i),i)) ) max( likelihood(ixx(1:nfilt0(i),i)) )])
         end
         if mod(i,9)==0 || i==size(vvarvecm,1)
+            if ~isoctave
+                annotation('textbox', [0.1,0,0.35,0.05],'String', 'Log-likelihood for BETTER R2','Color','Blue','horizontalalignment','center');
+                annotation('textbox', [0.55,0,0.35,0.05],'String', 'Log-likelihood for WORSE R2', 'Color','Red','horizontalalignment','center');
+            end
             if options_.opt_gsa.ppost
                 dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnlik',int2str(ifig) ],options_);
             else
@@ -379,15 +409,20 @@ else
         end
         subplot(3,3,i-9*(ifig-1))
         h=cumplot(logpo2(ixx(1:nfilt0(i),i)));
-        set(h,'color','red')
+        set(h,'color','blue','linewidth',2)
         hold on, h=cumplot(logpo2);
+        set(h,'color','k','linewidth',1)
         h=cumplot(logpo2(ixx(nfilt0(i)+1:end,i)));
-        set(h,'color','green')
+        set(h,'color','red','linewidth',2)
         title(vvarvecm(i,:),'interpreter','none')
         if options_.opt_gsa.ppost==0,
             set(gca,'xlim',[min( logpo2(ixx(1:nfilt0(i),i)) ) max( logpo2(ixx(1:nfilt0(i),i)) )])
         end
         if mod(i,9)==0 || i==size(vvarvecm,1)
+            if ~isoctave
+                annotation('textbox', [0.1,0,0.35,0.05],'String', 'Log-posterior for BETTER R2','Color','Blue','horizontalalignment','center');
+                annotation('textbox', [0.55,0,0.35,0.05],'String', 'Log-posterior for WORSE R2', 'Color','Red','horizontalalignment','center');
+            end
             if options_.opt_gsa.ppost
                 dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnpost',int2str(ifig) ],options_);
             else
@@ -401,11 +436,12 @@ else
     end
     end
     
-    param_names='';
-    for j=1:npar+nshock,
-        param_names=char(param_names, bayestopt_.name{j});
-    end
-    param_names=param_names(2:end,:);
+    param_names=char(bayestopt_.name);
+%     param_names='';
+%     for j=1:npar+nshock,
+%         param_names=char(param_names, bayestopt_.name{j});
+%     end
+%     param_names=param_names(2:end,:);
     
     skipline()
     disp('RMSE over the MC sample:')
@@ -526,15 +562,94 @@ else
     a00=jet(size(vvarvecm,1));
     if options_.opt_gsa.ppost
         temp_name='RMSE Posterior Tradeoffs:';
+        atitle='RMSE Posterior Map:';
+        asname='rmse_post'; 
     else
         if options_.opt_gsa.pprior
             temp_name='RMSE Prior Tradeoffs:';
+            atitle='RMSE Prior Map:';
+            asname='rmse_prior'; 
         else
-            temp_name='RMSE MC Tradeoffs;';
+            temp_name='RMSE MC Tradeoffs:';
+            atitle='RMSE MC Map:';
+            asname='rmse_mc';
         end
     end
+    % now I plot by observed variables
+    options_mcf.pvalue_ks = alpha;
+    options_mcf.pvalue_corr = pvalue;
+    options_mcf.alpha2 = alpha2;
+    options_mcf.param_names = char(bayestopt_.name);
+    options_mcf.fname_ = fname_;
+    options_mcf.OutputDirectoryName = OutDir;
+    for iy=1:size(vvarvecm,1),
+        options_mcf.amcf_name = [asname '_' deblank(vvarvecm(iy,:)) '_map' ];
+        options_mcf.amcf_title = [atitle ' ' deblank(vvarvecm(iy,:))];
+        options_mcf.beha_title = ['better fit of ' deblank(vvarvecm(iy,:))];
+        options_mcf.nobeha_title = ['worse fit of ' deblank(vvarvecm(iy,:))];
+        options_mcf.title = ['the fit of ' deblank(vvarvecm(iy,:))];
+        mcf_analysis(x, ixx(1:nfilt0(iy),iy), ixx(nfilt0(iy)+1:end,iy), options_mcf, options_)
+    end
+    for iy=1:size(vvarvecm,1),
+        ipar = find(any(squeeze(PPV(iy,:,:))<alpha));
+        for ix=1:ceil(length(ipar)/5),
+        hh = dyn_figure(options_,'name',[temp_name,' observed variable ',deblank(vvarvecm(iy,:))]);
+        for j=1+5*(ix-1):min(length(ipar),5*ix),
+            subplot(2,3,j-5*(ix-1))
+            %h0=cumplot(x(:,nsnam(j)+nshock));
+            h0=cumplot(x(:,ipar(j)));
+            set(h0,'color',[0 0 0])
+            hold on,
+            iobs=find(squeeze(PPV(iy,:,ipar(j)))<alpha);
+            for i=1:size(vvarvecm,1),
+                %h0=cumplot(x(ixx(1:nfilt,np(i)),nsnam(j)+nshock));
+%                 h0=cumplot(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)));
+                if any(iobs==i) || i==iy,
+                    h0=cumplot(x(ixx(1:nfilt0(i),i),ipar(j)));
+                    if ~isoctave
+                        hcmenu = uicontextmenu;
+                        uimenu(hcmenu,'Label',deblank(vvarvecm(i,:)));
+                        set(h0,'uicontextmenu',hcmenu)
+                    end
+                else
+                    h0=cumplot(x(ixx(1:nfilt0(i),i),ipar(j))*NaN);
+                end
+                set(h0,'color',a00(i,:),'linewidth',2)
+            end
+            ydum=get(gca,'ylim');
+            %xdum=xparam1(nshock+nsnam(j));
+            if exist('xparam1')
+                xdum=xparam1(ipar(j));
+                h1=plot([xdum xdum],ydum);
+                set(h1,'color',[0.85 0.85 0.85],'linewidth',2)
+            end
+            xlabel('')
+            title([pnam{ipar(j)}],'interpreter','none')
+        end
+        %subplot(3,2,6)
+        if isoctave
+            legend(char('base',vvarvecm),'location','eastoutside');
+        else
+            h0=legend(char('base',vvarvecm),0);
+            set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
+        end
+        %h0=legend({'base',vnam{np}}',0);
+        %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
+        if options_.opt_gsa.ppost
+            dyn_saveas(hh,[ OutDir filesep fname_ '_rmse_post_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],options_);
+        else
+            if options_.opt_gsa.pprior
+                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_' deblank(vvarvecm(iy,:)) '_' int2str(ix) ],options_);
+            else
+                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],options_);
+            end
+        end
+        end
+    end
+    
+    % now I plot by individual parameters
     for ix=1:ceil(length(nsnam)/5),
-        hh = dyn_figure(options_,'name',[temp_name,' observed variables ',int2str(ix)]);
+        hh = dyn_figure(options_,'name',[temp_name,' estimated params and shocks ',int2str(ix)]);
         for j=1+5*(ix-1):min(size(snam2,1),5*ix),
             subplot(2,3,j-5*(ix-1))
             %h0=cumplot(x(:,nsnam(j)+nshock));
@@ -551,8 +666,13 @@ else
                     h0=cumplot(x(ixx(1:nfilt0(i),i),nsnam(j))*NaN);
                 else
                     h0=cumplot(x(ixx(1:nfilt0(i),i),nsnam(j)));
-            end
-                set(h0,'color',a00(i,:))
+                    if ~isoctave
+                        hcmenu = uicontextmenu;
+                        uimenu(hcmenu,'Label',deblank(vvarvecm(i,:)));
+                        set(h0,'uicontextmenu',hcmenu)
+                    end
+                end
+                set(h0,'color',a00(i,:),'linewidth',2)
             end
             ydum=get(gca,'ylim');
             %xdum=xparam1(nshock+nsnam(j));
@@ -574,74 +694,74 @@ else
         %h0=legend({'base',vnam{np}}',0);
         %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
         if options_.opt_gsa.ppost
-            dyn_saveas(hh,[ OutDir filesep fname_ '_rmse_post_' int2str(ix)],options_);
+            dyn_saveas(hh,[ OutDir filesep fname_ '_rmse_post_params_' int2str(ix)],options_);
         else
             if options_.opt_gsa.pprior
-                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_' int2str(ix) ],options_);
+                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_params_' int2str(ix) ],options_);
             else
-                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_' int2str(ix)],options_);
+                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_params_' int2str(ix)],options_);
             end
         end
     end
     end
     
-    for j=1:size(SP,2),
-        nsx(j)=length(find(SP(:,j)));
-    end
+%     for j=1:size(SP,2),
+%         nsx(j)=length(find(SP(:,j)));
+%     end
     
-    skipline(2)
-    disp('Sensitivity table (significance and direction):')
-    vav=char(zeros(1, size(param_names,2)+3 ));
-    ibl = 12-size(vvarvecm,2);
-    for j=1:size(vvarvecm,1),
-        vav = [vav, char(zeros(1,ibl)),vvarvecm(j,:)];
-    end
-    disp(vav)
-    for j=1:npar+nshock, %estim_params_.np,
-        %disp([param_names(j,:), sprintf('%8.5g',SP(j,:))])
-        disp([param_names(j,:),'   ', sprintf('%12.3g',PP(j,:))])
-        disp([char(zeros(1, size(param_names,2)+3 )),sprintf('    (%6g)',SS(j,:))])
-    end
+%     skipline(2)
+%     disp('Sensitivity table (significance and direction):')
+%     vav=char(zeros(1, size(param_names,2)+3 ));
+%     ibl = 12-size(vvarvecm,2);
+%     for j=1:size(vvarvecm,1),
+%         vav = [vav, char(zeros(1,ibl)),vvarvecm(j,:)];
+%     end
+%     disp(vav)
+%     for j=1:npar+nshock, %estim_params_.np,
+%         %disp([param_names(j,:), sprintf('%8.5g',SP(j,:))])
+%         disp([param_names(j,:),'   ', sprintf('%12.3g',PP(j,:))])
+%         disp([char(zeros(1, size(param_names,2)+3 )),sprintf('    (%6g)',SS(j,:))])
+%     end
     
     
-    skipline()
-    disp('Starting bivariate analysis:')
-    
-    for i=1:size(vvarvecm,1)
-        if options_.opt_gsa.ppost
-            fnam = ['rmse_post_',deblank(vvarvecm(i,:))];
-        else
-            if options_.opt_gsa.pprior
-                fnam = ['rmse_prior_',deblank(vvarvecm(i,:))];
-            else
-                fnam = ['rmse_mc_',deblank(vvarvecm(i,:))];
-            end
-        end
-        stab_map_2(x(ixx(1:nfilt0(i),i),:),alpha2,pvalue,fnam, OutDir,[],[temp_name ' observed variable ' deblank(vvarvecm(i,:))]);
-        
-        %     [pc,latent,explained] = pcacov(c0);
-        %     %figure, bar([explained cumsum(explained)])
-        %     ifig=0;
-        %     j2=0;
-        %     for j=1:npar+nshock,
-        %         i2=find(abs(pc(:,j))>alphaPC);
-        %         if ~isempty(i2),
-        %             j2=j2+1;
-        %             if mod(j2,12)==1,
-        %                 ifig=ifig+1;
-        %                 figure('name',['PCA of the filtered sample ',deblank(vvarvecm(i,:)),' ',num2str(ifig)]),
-        %             end
-        %             subplot(3,4,j2-(ifig-1)*12)
-        %             bar(pc(i2,j)),
-        %             set(gca,'xticklabel',bayestopt_.name(i2)),
-        %             set(gca,'xtick',[1:length(i2)])
-        %             title(['PC ',num2str(j),'. Explained ',num2str(explained(j)),'%'])
-        %         end
-        %         if (mod(j2,12)==0 | j==(npar+nshock)) & j2,
-        %             saveas(gcf,[fname_,'_SA_PCA_',deblank(vvarvecm(i,:)),'_',int2str(ifig)])
-        %         end
-        %     end
-        %     close all
-    end
+%     skipline()
+%     disp('Starting bivariate analysis:')
+%     
+%     for i=1:size(vvarvecm,1)
+%         if options_.opt_gsa.ppost
+%             fnam = ['rmse_post_',deblank(vvarvecm(i,:))];
+%         else
+%             if options_.opt_gsa.pprior
+%                 fnam = ['rmse_prior_',deblank(vvarvecm(i,:))];
+%             else
+%                 fnam = ['rmse_mc_',deblank(vvarvecm(i,:))];
+%             end
+%         end
+%         stab_map_2(x(ixx(1:nfilt0(i),i),:),alpha2,pvalue,fnam, OutDir,[],[temp_name ' observed variable ' deblank(vvarvecm(i,:))]);
+%         
+%         %     [pc,latent,explained] = pcacov(c0);
+%         %     %figure, bar([explained cumsum(explained)])
+%         %     ifig=0;
+%         %     j2=0;
+%         %     for j=1:npar+nshock,
+%         %         i2=find(abs(pc(:,j))>alphaPC);
+%         %         if ~isempty(i2),
+%         %             j2=j2+1;
+%         %             if mod(j2,12)==1,
+%         %                 ifig=ifig+1;
+%         %                 figure('name',['PCA of the filtered sample ',deblank(vvarvecm(i,:)),' ',num2str(ifig)]),
+%         %             end
+%         %             subplot(3,4,j2-(ifig-1)*12)
+%         %             bar(pc(i2,j)),
+%         %             set(gca,'xticklabel',bayestopt_.name(i2)),
+%         %             set(gca,'xtick',[1:length(i2)])
+%         %             title(['PC ',num2str(j),'. Explained ',num2str(explained(j)),'%'])
+%         %         end
+%         %         if (mod(j2,12)==0 | j==(npar+nshock)) & j2,
+%         %             saveas(gcf,[fname_,'_SA_PCA_',deblank(vvarvecm(i,:)),'_',int2str(ifig)])
+%         %         end
+%         %     end
+%         %     close all
+%     end
     
 end
