@@ -1,4 +1,4 @@
-function [dLIK,dlik,a,Pstar] = kalman_filter_d(Y, start, last, a, Pinf, Pstar, kalman_tol, riccati_tol, presample, T, R, Q, H, Z, mm, pp, rr)
+function [dLIK,dlik,a,Pstar] = kalman_filter_d(Y, start, last, a, Pinf, Pstar, kalman_tol, diffuse_kalman_tol, riccati_tol, presample, T, R, Q, H, Z, mm, pp, rr)
 % Computes the diffuse likelihood of a state space model.
 %
 % INPUTS 
@@ -59,14 +59,13 @@ dlik = zeros(smpl,1);      % Initialization of the vector gathering the densitie
 dLIK = Inf;                % Default value of the log likelihood.
 oldK = Inf;
 s    = 0;
-crit1=1.e-6;
 
-while rank(Pinf,crit1) && (t<=last)
+while rank(Pinf,diffuse_kalman_tol) && (t<=last)
     s = t-start+1;
     v = Y(:,t)-Z*a;
     Finf  = Z*Pinf*Z';
-    if rcond(Finf) < kalman_tol
-        if ~all(abs(Finf(:)) < kalman_tol)
+    if rcond(Finf) < diffuse_kalman_tol
+        if ~all(abs(Finf(:)) < diffuse_kalman_tol)
             % The univariate diffuse kalman filter should be used instead.
             return
         else
