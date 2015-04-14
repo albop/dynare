@@ -1,4 +1,4 @@
-function [dLIK, dlikk, a, Pstar, llik] = univariate_kalman_filter_d(data_index, number_of_observations, no_more_missing_observations, Y, start, last, a, Pinf, Pstar, kalman_tol, riccati_tol, presample, T, R, Q, H, Z, mm, pp, rr)
+function [dLIK, dlikk, a, Pstar, llik] = univariate_kalman_filter_d(data_index, number_of_observations, no_more_missing_observations, Y, start, last, a, Pinf, Pstar, kalman_tol, diffuse_kalman_tol, riccati_tol, presample, T, R, Q, H, Z, mm, pp, rr)
 % Computes the likelihood of a state space model (initialization with diffuse steps, univariate approach).
 
 %@info:
@@ -110,8 +110,7 @@ dLIK = Inf;                % Default value of the log likelihood.
 oldK = Inf;
 llik = zeros(smpl,pp);
 
-crit1 = 1.e-6;
-newRank = rank(Pinf,crit1);
+newRank = rank(Pinf,diffuse_kalman_tol);
 l2pi = log(2*pi);
 
 while newRank && (t<=last)
@@ -139,7 +138,7 @@ while newRank && (t<=last)
         end
     end
     if newRank
-        oldRank = rank(Pinf,crit1);
+        oldRank = rank(Pinf,diffuse_kalman_tol);
     else
         oldRank = 0;
     end
@@ -147,7 +146,7 @@ while newRank && (t<=last)
     Pstar = T*Pstar*T'+QQ;
     Pinf  = T*Pinf*T';
     if newRank
-        newRank = rank(Pinf,crit1);
+        newRank = rank(Pinf,diffuse_kalman_tol);
     end
     if oldRank ~= newRank
         disp('univariate_diffuse_kalman_filter:: T does influence the rank of Pinf!')
