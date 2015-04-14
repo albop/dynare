@@ -149,7 +149,7 @@ for plt = 1:nbplt,
                 y(i,2)  = (y(i,1)+lnprior-dy);
             end
         end
-        plot(z,-y);
+        fighandle=plot(z,-y);
         hold on
         yl=get(gca,'ylim');
         plot( [x(kk) x(kk)], yl, 'c', 'LineWidth', 1)
@@ -173,8 +173,9 @@ for plt = 1:nbplt,
         else
             axes('position',[0.3 0.01 0.42 0.05],'box','on'),
         end
-        plot([0.48 0.68],[0.5 0.5],'color',[0 0.5 0])
-        hold on, plot([0.04 0.24],[0.5 0.5],'b')
+        line_color=get(fighandle,'color');
+        plot([0.48 0.68],[0.5 0.5],'color',line_color{2})
+        hold on, plot([0.04 0.24],[0.5 0.5],'color',line_color{1})
         set(gca,'xlim',[0 1],'ylim',[0 1],'xtick',[],'ytick',[])
         text(0.25,0.5,'log-post')
         text(0.69,0.5,'log-lik kernel')

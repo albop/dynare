@@ -178,9 +178,6 @@ switch minimizer_algorithm
     end
     [opt_par_values,hessian_mat,gg,fval,invhess] = newrat(objective_function,start_par_value,analytic_grad,crit,nit,0,varargin{:});
     %hessian_mat is the plain outer product gradient Hessian
-    if options_.analytic_derivation %Hessian is already analytic one, reset option
-        options_.analytic_derivation = ana_deriv;
-    end
   case 6
     [opt_par_values, hessian_mat, Scale, fval] = gmhmaxlik(objective_function, start_par_value, ...
                                                       Initial_Hessian, options_.mh_jscale, bounds, prior_information.p2, options_.gmhmaxlik, options_.optim_opt, varargin{:});
