@@ -379,7 +379,6 @@ EXTRA_DIST = \
 	ms-sbvar/archive-files/specification_2v.dat \
 	ms-sbvar/archive-files/specification_2v2c.dat \
 	recursive/data_ca1.m \
-	recursive/data_ca1_xls.xlsx \
 	kalman_filter_smoother/fsdat_simul.m \
 	kalman_filter_smoother/fs2000a_steadystate.m \
 	identification/kim/kim2_steadystate.m \
