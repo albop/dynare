@@ -267,7 +267,11 @@ if fload==0,
         M_ = set_all_parameters([lpmat0(j,:) lpmat(j,:)]',estim_params_,M_);
         %try stoch_simul([]);
         try
-            [Tt,Rr,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_,'restrict');
+            if ~ isempty(options_.endogenous_prior_restrictions.moment)
+                [Tt,Rr,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
+            else
+                [Tt,Rr,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_,'restrict');
+            end
             infox(j,1)=info(1);
             if infox(j,1)==0 && ~exist('T'),
                 dr_=oo_.dr;
