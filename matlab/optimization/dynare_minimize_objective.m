@@ -87,18 +87,54 @@ switch minimizer_algorithm
     [opt_par_values,fval,exitflag,output,lamdba,grad,hessian_mat] = ...
         fmincon(objective_function,start_par_value,[],[],[],[],bounds(:,1),bounds(:,2),[],optim_options,varargin{:});
   case 2
-    if isoctave
-        error('Optimization algorithm 2 is not available under Octave')
-    elseif ~user_has_matlab_license('GADS_Toolbox')
-        error('Optimization algorithm 2 requires the Optimization Toolbox')
-    end
-    % Set default optimization options for fmincon.
-    optim_options = saoptimset('display','iter','TolFun',1e-8);
+    %simulating annealing
+    sa_options = options_.saopt;
     if ~isempty(options_.optim_opt)
-        eval(['optim_options = saoptimset(optim_options,' options_.optim_opt ');']);
+        options_list = read_key_value_string(options_.optim_opt);
+        for i=1:rows(options_list)
+            switch options_list{i,1}
+              case 'neps'
+                sa_options.neps = options_list{i,2};
+              case 'rt'
+                sa_options.rt = options_list{i,2};
+              case 'MaxIter'
+                sa_options.MaxIter = options_list{i,2};
+              case 'TolFun'
+                sa_options.TolFun = options_list{i,2};
+              case 'verbosity'
+                sa_options.verbosity = options_list{i,2};
+              case 'initial_temperature'
+                sa_options.initial_temperature = options_list{i,2};
+              case 'ns'
+                sa_options.ns = options_list{i,2};
+              case 'nt'
+                sa_options.nt = options_list{i,2};
+              case 'step_length_c'
+                sa_options.step_length_c = options_list{i,2};
+              case 'initial_step_length'
+                sa_options.initial_step_length = options_list{i,2};
+              otherwise
+                warning(['solveopt: Unknown option (' options_list{i,1} ')!'])
+            end
+        end
     end
-    func = @(x)objective_function(x,varargin{:});
-    [opt_par_values,fval,exitflag,output] = simulannealbnd(func,start_par_value,bounds(:,1),bounds(:,2),optim_options);
+    npar=length(start_par_value);
+    LB=bounds(:,1);
+    LB(isinf(LB))=-1e6;
+    UB=bounds(:,2);
+    UB(isinf(UB))=1e6;
+    fprintf('\nNumber of parameters= %d, initial temperatur= %4.3f \n', npar,sa_options.initial_temperature);
+    fprintf('rt=  %4.3f; TolFun=  %4.3f; ns=  %4.3f;\n',sa_options.rt,sa_options.TolFun,sa_options.ns);
+    fprintf('nt=  %4.3f; neps=  %4.3f; MaxIter=  %d\n',sa_options.nt,sa_options.neps,sa_options.MaxIter);
+    fprintf('Initial step length(vm): %4.3f; step_length_c: %4.3f\n', sa_options.initial_step_length,sa_options.step_length_c);
+    fprintf('%-20s  %-6s    %-6s    %-6s\n','Name:', 'LB;','Start;','UB;');
+    for pariter=1:npar
+        fprintf('%-20s  %6.4f;   %6.4f;  %6.4f;\n',parameter_names{pariter}, LB(pariter),start_par_value(pariter),UB(pariter));
+    end
+    sa_options.initial_step_length= sa_options.initial_step_length*ones(npar,1); %bring step length to correct vector size
+    sa_options.step_length_c= sa_options.step_length_c*ones(npar,1); %bring step_length_c to correct vector size
+    [opt_par_values, fval,exitflag, n_accepted_draws, n_total_draws, n_out_of_bounds_draws, t, vm] =...
+        simulated_annealing(objective_function,start_par_value,sa_options,LB,UB,varargin{:});
   case 3
     if isoctave && ~user_has_octave_forge_package('optim')
         error('Optimization algorithm 3 requires the optim package')
@@ -313,58 +349,18 @@ switch minimizer_algorithm
     end
     [opt_par_values,fval]=solvopt(start_par_value,objective_function,[],[],[],solveoptoptions,varargin{:});
   case 102
-    %simulating annealing
-    sa_options = options_.saopt;
+    if isoctave
+        error('Optimization algorithm 2 is not available under Octave')
+    elseif ~user_has_matlab_license('GADS_Toolbox')
+        error('Optimization algorithm 2 requires the Global Optimization Toolbox')
+    end
+    % Set default optimization options for fmincon.
+    optim_options = saoptimset('display','iter','TolFun',1e-8);
     if ~isempty(options_.optim_opt)
-        options_list = read_key_value_string(options_.optim_opt);
-        for i=1:rows(options_list)
-            switch options_list{i,1}
-              case 'neps'  
-                sa_options.neps = options_list{i,2};
-              case 'rt'
-                sa_options.rt = options_list{i,2};
-              case 'MaxIter'
-                sa_options.MaxIter = options_list{i,2};
-              case 'TolFun'
-                sa_options.TolFun = options_list{i,2};
-              case 'verbosity'
-                sa_options.verbosity = options_list{i,2};
-              case 'initial_temperature'
-                sa_options.initial_temperature = options_list{i,2};
-              case 'ns'
-                sa_options.ns = options_list{i,2};
-              case 'nt'
-                sa_options.nt = options_list{i,2};
-              case 'step_length_c'
-                sa_options.step_length_c = options_list{i,2};                  
-              case 'initial_step_length'
-                sa_options.initial_step_length = options_list{i,2};                  
-              otherwise
-                warning(['solveopt: Unknown option (' options_list{i,1} ')!'])
-            end
-        end
+        eval(['optim_options = saoptimset(optim_options,' options_.optim_opt ');']);
     end
-
-    npar=length(start_par_value);
-    LB=bounds(:,1);
-    LB(isinf(LB))=-1e6;
-    UB=bounds(:,2);
-    UB(isinf(UB))=1e6;
-
-    fprintf('\nNumber of parameters= %d, initial temperatur= %4.3f \n', npar,sa_options.initial_temperature);
-    fprintf('rt=  %4.3f; TolFun=  %4.3f; ns=  %4.3f;\n',sa_options.rt,sa_options.TolFun,sa_options.ns);
-    fprintf('nt=  %4.3f; neps=  %4.3f; MaxIter=  %d\n',sa_options.nt,sa_options.neps,sa_options.MaxIter);
-    fprintf('Initial step length(vm): %4.3f; step_length_c: %4.3f\n', sa_options.initial_step_length,sa_options.step_length_c);
-    fprintf('%-20s  %-6s    %-6s    %-6s\n','Name:', 'LB;','Start;','UB;');
-    for pariter=1:npar
-        fprintf('%-20s  %6.4f;   %6.4f;  %6.4f;\n',parameter_names{pariter}, LB(pariter),start_par_value(pariter),UB(pariter));
-    end
-    
-    sa_options.initial_step_length= sa_options.initial_step_length*ones(npar,1); %bring step length to correct vector size
-    sa_options.step_length_c= sa_options.step_length_c*ones(npar,1); %bring step_length_c to correct vector size
-    
-    [opt_par_values, fval,exitflag, n_accepted_draws, n_total_draws, n_out_of_bounds_draws, t, vm] =...
-        simulated_annealing(objective_function,start_par_value,sa_options,LB,UB,varargin{:});
+    func = @(x)objective_function(x,varargin{:});
+    [opt_par_values,fval,exitflag,output] = simulannealbnd(func,start_par_value,bounds(:,1),bounds(:,2),optim_options);
   otherwise
     if ischar(minimizer_algorithm)
         if exist(options_.mode_compute)
