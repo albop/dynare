@@ -99,7 +99,12 @@ y_obs,pie_obs(@{ilag}), -; //[ccf]
 @#endfor
 end;
 
-dynare_sensitivity(prior_range=0, nodisplay, graph_format=(fig,eps));
+if isoctave()
+  dynare_sensitivity(prior_range=0, nodisplay, graph_format=(eps));
+else
+  dynare_sensitivity(prior_range=0, nodisplay, graph_format=(fig));
+end
+
 /*
 estimation(datafile='data_ca1.m',first_obs=8,nobs=79,mh_nblocks=2, mode_file = ls2003a_mode,
   prefilter=1,mh_jscale=0.5,mh_replic=5000, mode_compute=0, mh_drop=0.6, bayesian_irf);
