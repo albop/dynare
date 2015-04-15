@@ -167,11 +167,13 @@ if ~isempty(indx_irf),
     iplot_indx = ones(size(plot_indx));
     
     indx_irf = indx_irf(irestrictions,:);
-    h1=dyn_figure(DynareOptions,'name',[type ' evaluation of irf restrictions']);
-    nrow=ceil(sqrt(nbr_irf_couples));
-    ncol=nrow;
-    if nrow*(nrow-1)>nbr_irf_couples,
-        ncol=nrow-1;
+    if ~DynareOptions.nograph,
+        h1=dyn_figure(DynareOptions,'name',[type ' evaluation of irf restrictions']);
+        nrow=ceil(sqrt(nbr_irf_couples));
+        ncol=nrow;
+        if nrow*(nrow-1)>nbr_irf_couples,
+            ncol=nrow-1;
+        end
     end
     for ij=1:nbr_irf_restrictions,
         mat_irf{ij}=mat_irf{ij}(irestrictions,:);
@@ -193,8 +195,8 @@ if ~isempty(indx_irf),
             aleg = [aleg,'-' ,num2str(endo_prior_restrictions.irf{ij,3}(end))];
             iplot_indx(ij)=0;
         end
-        if length(time_matrix{plot_indx(ij)})==1,
-            figure(h1),
+        if ~DynareOptions.nograph && length(time_matrix{plot_indx(ij)})==1,
+            set(0,'currentfigure',h1),
             subplot(nrow,ncol, plot_indx(ij)),
             hc = cumplot(mat_irf{ij}(:,ik));
             set(hc,'color','k','linewidth',2)
@@ -242,36 +244,38 @@ if ~isempty(indx_irf),
     end
     for ij=1:nbr_irf_couples,
         if length(time_matrix{ij})>1,
-            figure(h1);
-            subplot(nrow,ncol, ij)
-            itmp = (find(plot_indx==ij));
-            plot(time_matrix{ij},[max(irf_matrix{ij})' min(irf_matrix{ij})'],'k--','linewidth',2)
-            hold on,
-            plot(time_matrix{ij},irf_median{ij},'k','linewidth',2)
-            plot(time_matrix{ij},[irf_distrib{ij}],'k-')
-            a=axis;
-            tmp=[];
-            for ir=1:length(itmp),
-                for it=1:length(endo_prior_restrictions.irf{itmp(ir),3})
-                    temp_index = find(time_matrix{ij}==endo_prior_restrictions.irf{itmp(ir),3}(it));
-                    tmp(temp_index,:) = endo_prior_restrictions.irf{itmp(ir),4};
+            if ~DynareOptions.nograph,
+                figure(h1);
+                subplot(nrow,ncol, ij)
+                itmp = (find(plot_indx==ij));
+                plot(time_matrix{ij},[max(irf_matrix{ij})' min(irf_matrix{ij})'],'k--','linewidth',2)
+                hold on,
+                plot(time_matrix{ij},irf_median{ij},'k','linewidth',2)
+                plot(time_matrix{ij},[irf_distrib{ij}],'k-')
+                a=axis;
+                tmp=[];
+                for ir=1:length(itmp),
+                    for it=1:length(endo_prior_restrictions.irf{itmp(ir),3})
+                        temp_index = find(time_matrix{ij}==endo_prior_restrictions.irf{itmp(ir),3}(it));
+                        tmp(temp_index,:) = endo_prior_restrictions.irf{itmp(ir),4};
+                    end
                 end
+                %             tmp = cell2mat(endo_prior_restrictions.irf(itmp,4));
+                tmp(isinf(tmp(:,1)),1)=a(3);
+                tmp(isinf(tmp(:,2)),2)=a(4);
+                hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],[tmp(:,1); tmp(end:-1:1,2)],'b');
+                set(hp,'FaceAlpha',[0.5])
+                plot(a(1:2),[0 0],'r')
+                hold off,
+                axis([max(1,a(1)) a(2:4)])
+                box on,
+                set(gca,'xtick',sort(time_matrix{ij}))
+                itmp = min(itmp);
+                title([endo_prior_restrictions.irf{itmp,1},' vs ',endo_prior_restrictions.irf{itmp,2}],'interpreter','none'),
             end
-            %             tmp = cell2mat(endo_prior_restrictions.irf(itmp,4));
-            tmp(isinf(tmp(:,1)),1)=a(3);
-            tmp(isinf(tmp(:,2)),2)=a(4);
-            hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],[tmp(:,1); tmp(end:-1:1,2)],'b');
-            set(hp,'FaceAlpha',[0.5])
-            plot(a(1:2),[0 0],'r')
-            hold off,
-            axis([max(1,a(1)) a(2:4)])
-            box on,
-            set(gca,'xtick',sort(time_matrix{ij}))
-            itmp = min(itmp);
-            title([endo_prior_restrictions.irf{itmp,1},' vs ',endo_prior_restrictions.irf{itmp,2}],'interpreter','none'),
-            
             if any(iplot_indx.*plot_indx==ij),
                 % MCF of the couples with logical AND
+                itmp = min(find(plot_indx==ij));
                 indx1 = find(indx_irf_matrix(:,ij)==0);
                 indx2 = find(indx_irf_matrix(:,ij)~=0);
                 leg = num2str(time_matrix{ij}(1));
@@ -293,7 +297,9 @@ if ~isempty(indx_irf),
             end
         end
     end
-    dyn_saveas(h1,[OutputDirectoryName,filesep,fname_,'_',type,'_irf_restrictions'],DynareOptions);
+    if ~DynareOptions.nograph,
+        dyn_saveas(h1,[OutputDirectoryName,filesep,fname_,'_',type,'_irf_restrictions'],DynareOptions);
+    end
     
     skipline()
 end
@@ -353,11 +359,13 @@ if ~isempty(indx_moment)
     iplot_indx = ones(size(plot_indx));
     
     indx_moment = indx_moment(irestrictions,:);
-    h2=dyn_figure(DynareOptions,'name',[type ' evaluation of moment restrictions']);
-    nrow=ceil(sqrt(nbr_moment_couples));
-    ncol=nrow;
-    if nrow*(nrow-1)>nbr_moment_couples,
-        ncol=nrow-1;
+    if ~DynareOptions.nograph,
+        h2=dyn_figure(DynareOptions,'name',[type ' evaluation of moment restrictions']);
+        nrow=ceil(sqrt(nbr_moment_couples));
+        ncol=nrow;
+        if nrow*(nrow-1)>nbr_moment_couples,
+            ncol=nrow-1;
+        end
     end
     
     for ij=1:nbr_moment_restrictions,
@@ -425,35 +433,38 @@ if ~isempty(indx_moment)
     end
     for ij=1:nbr_moment_couples,
         if length(time_matrix{ij})>1,
-            figure(h2);
-            subplot(nrow,ncol, ij)
-            itmp = (find(plot_indx==ij));
-            plot(time_matrix{ij},[max(moment_matrix{ij})' min(moment_matrix{ij})'],'k--','linewidth',2)
-            hold on,
-            plot(time_matrix{ij},moment_median{ij},'k','linewidth',2)
-            plot(time_matrix{ij},[moment_distrib{ij}],'k-')
-            a=axis;
-            tmp=[];
-            for ir=1:length(itmp),
-                for it=1:length(endo_prior_restrictions.moment{itmp(ir),3})
-                    temp_index = find(time_matrix{ij}==endo_prior_restrictions.moment{itmp(ir),3}(it));
-                    tmp(temp_index,:) = endo_prior_restrictions.moment{itmp(ir),4};
+            if ~DynareOptions.nograph
+                itmp = (find(plot_indx==ij));
+                set(0,'currentfigure',h2);
+                subplot(nrow,ncol, ij)
+                plot(time_matrix{ij},[max(moment_matrix{ij})' min(moment_matrix{ij})'],'k--','linewidth',2)
+                hold on,
+                plot(time_matrix{ij},moment_median{ij},'k','linewidth',2)
+                plot(time_matrix{ij},[moment_distrib{ij}],'k-')
+                a=axis;
+                tmp=[];
+                for ir=1:length(itmp),
+                    for it=1:length(endo_prior_restrictions.moment{itmp(ir),3})
+                        temp_index = find(time_matrix{ij}==endo_prior_restrictions.moment{itmp(ir),3}(it));
+                        tmp(temp_index,:) = endo_prior_restrictions.moment{itmp(ir),4};
+                    end
                 end
+                %             tmp = cell2mat(endo_prior_restrictions.moment(itmp,4));
+                tmp(isinf(tmp(:,1)),1)=a(3);
+                tmp(isinf(tmp(:,2)),2)=a(4);
+                hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],[tmp(:,1); tmp(end:-1:1,2)],'b');
+                set(hp,'FaceAlpha',[0.5])
+                plot(a(1:2),[0 0],'r')
+                hold off,
+                axis(a)
+                box on,
+                set(gca,'xtick',sort(time_matrix{ij}))
+                itmp = min(itmp);
+                title([endo_prior_restrictions.moment{itmp,1},' vs ',endo_prior_restrictions.moment{itmp,2}],'interpreter','none'),
             end
-            %             tmp = cell2mat(endo_prior_restrictions.moment(itmp,4));
-            tmp(isinf(tmp(:,1)),1)=a(3);
-            tmp(isinf(tmp(:,2)),2)=a(4);
-            hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],[tmp(:,1); tmp(end:-1:1,2)],'b');
-            set(hp,'FaceAlpha',[0.5])
-            plot(a(1:2),[0 0],'r')
-            hold off,
-            axis(a)
-            box on,
-            set(gca,'xtick',sort(time_matrix{ij}))
-            itmp = min(itmp);
-            title([endo_prior_restrictions.moment{itmp,1},' vs ',endo_prior_restrictions.moment{itmp,2}],'interpreter','none'),
             if any(iplot_indx.*plot_indx==ij),
                 % MCF of the couples with logical AND
+                itmp = min(find(plot_indx==ij));
                 indx1 = find(indx_moment_matrix(:,ij)==0);
                 indx2 = find(indx_moment_matrix(:,ij)~=0);
                 leg = num2str(time_matrix{ij}(1));
@@ -475,7 +486,10 @@ if ~isempty(indx_moment)
             end
         end
     end
-    dyn_saveas(h2,[OutputDirectoryName,filesep,fname_,'_',type,'_moment_restrictions'],DynareOptions);
+    if ~DynareOptions.nograph,
+        dyn_saveas(h2,[OutputDirectoryName,filesep,fname_,'_',type,'_moment_restrictions'],DynareOptions);
+    end
+    
     skipline()
 end
 return
