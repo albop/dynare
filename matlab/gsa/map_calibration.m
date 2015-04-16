@@ -199,13 +199,15 @@ if ~isempty(indx_irf),
             set(0,'currentfigure',h1),
             subplot(nrow,ncol, plot_indx(ij)),
             hc = cumplot(mat_irf{ij}(:,ik));
-            set(hc,'color','k','linewidth',2)
-            hold all,
             a=axis;
+            delete(hc);
             x1val=max(endo_prior_restrictions.irf{ij,4}(1),a(1));
             x2val=min(endo_prior_restrictions.irf{ij,4}(2),a(2));
             hp = patch([x1val x2val x2val x1val],a([3 3 4 4]),'b');
-            set(hp,'FaceAlpha', 0.5)
+            hold all,
+            set(hp,'FaceColor', [0.7 0.8 1])
+            hc = cumplot(mat_irf{ij}(:,ik));
+            set(hc,'color','k','linewidth',2)
             hold off,
             %         hold off,
             title([endo_prior_restrictions.irf{ij,1},' vs ',endo_prior_restrictions.irf{ij,2}, '(', leg,')'],'interpreter','none'),
@@ -248,11 +250,9 @@ if ~isempty(indx_irf),
                 set(0,'currentfigure',h1);
                 subplot(nrow,ncol, ij)
                 itmp = (find(plot_indx==ij));
-                plot(time_matrix{ij},[max(irf_matrix{ij})' min(irf_matrix{ij})'],'k--','linewidth',2)
-                hold on,
-                plot(time_matrix{ij},irf_median{ij},'k','linewidth',2)
-                plot(time_matrix{ij},[irf_distrib{ij}],'k-')
+                htmp = plot(time_matrix{ij},[max(irf_matrix{ij})' min(irf_matrix{ij})'],'k--','linewidth',2);
                 a=axis;
+                delete(htmp);
                 tmp=[];
                 for ir=1:length(itmp),
                     for it=1:length(endo_prior_restrictions.irf{itmp(ir),3})
@@ -263,8 +263,12 @@ if ~isempty(indx_irf),
                 %             tmp = cell2mat(endo_prior_restrictions.irf(itmp,4));
                 tmp(isinf(tmp(:,1)),1)=a(3);
                 tmp(isinf(tmp(:,2)),2)=a(4);
-                hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],[tmp(:,1); tmp(end:-1:1,2)],'b');
-                set(hp,'FaceAlpha',[0.5])
+                hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],[tmp(:,1); tmp(end:-1:1,2)],'c');
+                set(hp,'FaceColor',[0.7 0.8 1])
+                hold on,
+                plot(time_matrix{ij},[max(irf_matrix{ij})' min(irf_matrix{ij})'],'k--','linewidth',2)
+                plot(time_matrix{ij},irf_median{ij},'k','linewidth',2)
+                plot(time_matrix{ij},[irf_distrib{ij}],'k-')
                 plot(a(1:2),[0 0],'r')
                 hold off,
                 axis([max(1,a(1)) a(2:4)])
@@ -392,14 +396,15 @@ if ~isempty(indx_moment)
             set(0,'currentfigure',h2);
             subplot(nrow,ncol,plot_indx(ij)),
             hc = cumplot(mat_moment{ij}(:,ik));
-            set(hc,'color','k','linewidth',2)
-            hold all,
+            a=axis; delete(hc),
             %     hist(mat_moment{ij}),
-            a=axis;
             x1val=max(endo_prior_restrictions.moment{ij,4}(1),a(1));
             x2val=min(endo_prior_restrictions.moment{ij,4}(2),a(2));
             hp = patch([x1val x2val x2val x1val],a([3 3 4 4]),'b');
-            set(hp,'FaceAlpha', 0.5)
+            set(hp,'FaceColor', [0.7 0.8 1])
+            hold all,
+            hc = cumplot(mat_moment{ij}(:,ik));
+            set(hc,'color','k','linewidth',2)
             hold off,
             title([endo_prior_restrictions.moment{ij,1},' vs ',endo_prior_restrictions.moment{ij,2},'(',leg,')'],'interpreter','none'),
             %         if ij==maxij
@@ -437,11 +442,9 @@ if ~isempty(indx_moment)
                 itmp = (find(plot_indx==ij));
                 set(0,'currentfigure',h2);
                 subplot(nrow,ncol, ij)
-                plot(time_matrix{ij},[max(moment_matrix{ij})' min(moment_matrix{ij})'],'k--','linewidth',2)
-                hold on,
-                plot(time_matrix{ij},moment_median{ij},'k','linewidth',2)
-                plot(time_matrix{ij},[moment_distrib{ij}],'k-')
+                htmp = plot(time_matrix{ij},[max(moment_matrix{ij})' min(moment_matrix{ij})'],'k--','linewidth',2);
                 a=axis;
+                delete(htmp);
                 tmp=[];
                 for ir=1:length(itmp),
                     for it=1:length(endo_prior_restrictions.moment{itmp(ir),3})
@@ -453,7 +456,11 @@ if ~isempty(indx_moment)
                 tmp(isinf(tmp(:,1)),1)=a(3);
                 tmp(isinf(tmp(:,2)),2)=a(4);
                 hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],[tmp(:,1); tmp(end:-1:1,2)],'b');
-                set(hp,'FaceAlpha',[0.5])
+                set(hp,'FaceColor',[0.7 0.8 1])
+                hold on,
+                plot(time_matrix{ij},[max(moment_matrix{ij})' min(moment_matrix{ij})'],'k--','linewidth',2)
+                plot(time_matrix{ij},moment_median{ij},'k','linewidth',2)
+                plot(time_matrix{ij},[moment_distrib{ij}],'k-')
                 plot(a(1:2),[0 0],'r')
                 hold off,
                 axis(a)
