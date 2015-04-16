@@ -91,7 +91,7 @@ else
     dynare_estimation_1(var_list,dname);
 end
 
-if options_.mode_compute && options_.analytic_derivation,
+if isnumeric(options_.mode_compute) && options_.mode_compute && options_.analytic_derivation,
     options_.analytic_derivation=analytic_derivation0;
 end
 

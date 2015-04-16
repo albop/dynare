@@ -525,6 +525,31 @@ simpsa.MAX_FUN_EVALS = 20000;
 simpsa.DISPLAY = 'iter';
 options_.simpsa = simpsa;
 
+%solveopt optimizer
+solveopt.minimizer_indicator=-1; %use minimizer
+solveopt.TolX=1e-6; %accuracy of argument
+solveopt.TolFun=1e-6; %accuracy of function 
+solveopt.MaxIter=15000;
+solveopt.verbosity=1;
+solveopt.TolXConstraint=1.e-8;
+solveopt.SpaceDilation=2.5;
+solveopt.LBGradientStep=1.e-11;
+options_.solveopt=solveopt;
+
+%simulated annealing
+options_.saopt.neps=10;
+options_.saopt.maximizer_indicator=0;
+options_.saopt.rt=0.10;
+options_.saopt.MaxIter=100000;
+options_.saopt.MaxIter=100000;
+options_.saopt.verbosity=1;
+options_.saopt.TolFun=1.0e-8;
+options_.saopt.initial_temperature=15;
+options_.saopt.ns=10;
+options_.saopt.nt=10;
+options_.saopt.step_length_c=0.1;
+options_.saopt.initial_step_length=1;
+
 % prior analysis
 options_.prior_mc = 20000;
 options_.prior_analysis_endo_var_list = [];
