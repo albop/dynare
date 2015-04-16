@@ -242,18 +242,39 @@ end
 if ~options_.opt_gsa.ppost && options_.opt_gsa.lik_only
     if options_.opt_gsa.pprior
         anam='rmse_prior_post';
+        atitle='RMSE prior: Log Posterior Kernel';
     else
         anam='rmse_mc_post';
+        atitle='RMSE MC: Log Posterior Kernel';
     end
-    stab_map_1(x, ipost(1:nfilt), ipost(nfilt+1:end), anam, 1,[],OutDir);
-    stab_map_2(x(ipost(1:nfilt),:),alpha2,pvalue,anam, OutDir);
+
+    options_mcf.pvalue_ks = alpha;
+    options_mcf.pvalue_corr = pvalue;
+    options_mcf.alpha2 = alpha2;
+    options_mcf.param_names = char(bayestopt_.name);
+    options_mcf.fname_ = fname_;
+    options_mcf.OutputDirectoryName = OutDir;
+    options_mcf.amcf_name = anam;
+    options_mcf.amcf_title = atitle;
+    options_mcf.title = atitle;
+    options_mcf.beha_title = 'better posterior kernel';
+    options_mcf.nobeha_title = 'worse posterior kernel';
+    mcf_analysis(x, ipost(1:nfilt), ipost(nfilt+1:end), options_mcf, options_);
+    
     if options_.opt_gsa.pprior
-        anam='rmse_prior_lik';
+        anam = 'rmse_prior_lik';
+        atitle = 'RMSE prior: Log Likelihood Kernel';
     else
         anam='rmse_mc_lik';
+        atitle = 'RMSE MC: Log Likelihood Kernel';
     end
-    stab_map_1(x, ilik(1:nfilt), ilik(nfilt+1:end), anam, 1,[],OutDir);
-    stab_map_2(x(ilik(1:nfilt),:),alpha2,pvalue,anam, OutDir);
+    options_mcf.amcf_name = anam;
+    options_mcf.amcf_title = atitle;
+    options_mcf.title = atitle;
+    options_mcf.beha_title = 'better likelihood';
+    options_mcf.nobeha_title = 'worse likelihood';
+    mcf_analysis(x, ilik(1:nfilt), ilik(nfilt+1:end), options_mcf, options_);
+
 else
     if options_.opt_gsa.ppost,
         rmse_txt=rmse_pmean;
