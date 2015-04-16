@@ -131,37 +131,3 @@ end;
 
 varobs gp_obs gy_obs;
 options_.plot_priors=0;
-
-estimation(mode_compute=2,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-
-if exist('fminunc','file')
-   estimation(mode_compute=3,datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-end
-
-estimation(mode_compute=4,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-estimation(mode_compute=5,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-
-if exist('fminsearch','file')
-   estimation(mode_compute=7,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-end
-
-estimation(mode_compute=8,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-estimation(mode_compute=9,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-estimation(mode_compute=10,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-estimation(mode_compute=101,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-
-if ~isoctave() && exist('simulannealbnd','file')
-   estimation(mode_compute=102,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-end
-
-estimation(mode_compute=optimizer_function_wrapper,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-estimation(mode_compute=6,mode_file=fs2000_mode,order=1, datafile='../fs2000/fsdat_simul', nobs=192, mh_replic=0, mh_nblocks=2, mh_jscale=0.8);
-
-/*
- * The following lines were used to generate the data file. If you want to
- * generate another random data file, comment the "estimation" line and uncomment
- * the following lines.
- */
-
-//stoch_simul(periods=200, order=1);
-//datatomfile('fs2000/fsdat_simul', char('gy_obs', 'gp_obs'));

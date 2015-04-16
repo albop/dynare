@@ -205,7 +205,18 @@ MODFILES = \
 	smoother2histval/fs2000_simul.mod \
 	smoother2histval/fs2000_smooth.mod \
 	smoother2histval/fs2000_smooth_stoch_simul.mod \
-	optimizers/fs2000.mod \
+	optimizers/fs2000_2.mod \
+	optimizers/fs2000_3.mod \
+	optimizers/fs2000_4.mod \
+	optimizers/fs2000_5.mod \
+	optimizers/fs2000_6.mod \
+	optimizers/fs2000_7.mod \
+	optimizers/fs2000_8.mod \
+	optimizers/fs2000_9.mod \
+	optimizers/fs2000_10.mod \
+	optimizers/fs2000_101.mod \
+	optimizers/fs2000_102.mod \
+	optimizers/fs2000_w.mod \
 	reporting/example1.mod
 
 XFAIL_MODFILES = ramst_xfail.mod \
@@ -396,7 +407,8 @@ EXTRA_DIST = \
 	smoother2histval/fsdat_simul.m \
 	optimal_policy/Ramsey/find_c.m \
 	optimal_policy/Ramsey/oo_ramsey_policy_initval.mat \
-	optimizers/optimizer_function_wrapper.m
+	optimizers/optimizer_function_wrapper.m \
+	optimizers/fs2000.common.inc
 
 TARGETS =
 
