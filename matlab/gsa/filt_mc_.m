@@ -588,7 +588,7 @@ else
         options_mcf.beha_title = ['better fit of ' deblank(vvarvecm(iy,:))];
         options_mcf.nobeha_title = ['worse fit of ' deblank(vvarvecm(iy,:))];
         options_mcf.title = ['the fit of ' deblank(vvarvecm(iy,:))];
-        mcf_analysis(x, ixx(1:nfilt0(iy),iy), ixx(nfilt0(iy)+1:end,iy), options_mcf, options_)
+        mcf_analysis(x, ixx(1:nfilt0(iy),iy), ixx(nfilt0(iy)+1:end,iy), options_mcf, options_);
     end
     for iy=1:size(vvarvecm,1),
         ipar = find(any(squeeze(PPV(iy,:,:))<alpha));
