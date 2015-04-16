@@ -245,7 +245,7 @@ if ~isempty(indx_irf),
     for ij=1:nbr_irf_couples,
         if length(time_matrix{ij})>1,
             if ~DynareOptions.nograph,
-                figure(h1);
+                set(0,'currentfigure',h1);
                 subplot(nrow,ncol, ij)
                 itmp = (find(plot_indx==ij));
                 plot(time_matrix{ij},[max(irf_matrix{ij})' min(irf_matrix{ij})'],'k--','linewidth',2)
@@ -388,8 +388,8 @@ if ~isempty(indx_moment)
             aleg = [aleg,'_' ,num2str(endo_prior_restrictions.moment{ij,3}(end))];
             iplot_indx(ij)=0;
         end
-        if length(time_matrix{plot_indx(ij)})==1,
-            figure(h2),
+        if ~DynareOptions.nograph && length(time_matrix{plot_indx(ij)})==1,
+            set(0,'currentfigure',h2);
             subplot(nrow,ncol,plot_indx(ij)),
             hc = cumplot(mat_moment{ij}(:,ik));
             set(hc,'color','k','linewidth',2)
