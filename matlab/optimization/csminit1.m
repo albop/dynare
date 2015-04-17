@@ -1,10 +1,24 @@
 function [fhat,xhat,fcount,retcode] = csminit1(fcn,x0,f0,g0,badg,H0,varargin)
-% [fhat,xhat,fcount,retcode] = csminit1(fcn,x0,f0,g0,badg,H0,...
-%                                       P1,P2,P3,P4,P5,P6,P7,P8)
-% retcodes: 0, normal step.  5, largest step still improves too fast.
-% 4,2 back and forth adjustment of stepsize didn't finish.  3, smallest
-% stepsize still improves too slow.  6, no improvement found.  1, zero
-% gradient.
+% [fhat,xhat,fcount,retcode] = csminit1(fcn,x0,f0,g0,badg,H0,varargin)
+% 
+% Inputs: 
+%   fcn:    [string]        string naming the objective function to be minimized
+%   x0:     [npar by 1]     initial value of the parameter vector
+%   g0:     [npar by 1]     initial value of the gradient vector
+%   H0:     [npar by npar]  initial value for the inverse Hessian.  Must be positive definite.
+%   varargin:               Optional additional inputs that get handed off to fcn each
+%                           time it is called.
+
+% Outputs:
+%   fhat:   [scalar]        function value at minimum
+%   xhat:   [npar by 1]     parameter vector at minimum
+%   fcount  [scalar]        function iteration count upon termination
+%   retcode    [scalar]    0: normal step
+%                           1: zero gradient.
+%                           5: largest step still improves too fast.
+%                           2,4: back and forth adjustment of stepsize didn't finish.  
+%                           3: smallest stepsize still improves too slow
+%                           6: no improvement found
 %---------------------
 % Modified 7/22/96 to omit variable-length P list, for efficiency and compilation.
 % Places where the number of P's need to be altered or the code could be returned to
@@ -15,12 +29,12 @@ function [fhat,xhat,fcount,retcode] = csminit1(fcn,x0,f0,g0,badg,H0,varargin)
 %
 % Fixed 7/19/93 to flip eigenvalues of H to get better performance when
 % it's not psd.
-
+% 
 % Original file downloaded from:
 % http://sims.princeton.edu/yftp/optimize/mfiles/csminit.m
-
+% 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2008-2011 Dynare Team
+% Copyright (C) 2008-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

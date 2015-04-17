@@ -1,13 +1,20 @@
 function H = bfgsi1(H0,dg,dx)
 % H = bfgsi1(H0,dg,dx)
-% dg is previous change in gradient; dx is previous change in x;
+% Update Inverse Hessian matrix
+% 
+% Inputs:
+%   H0  [npar by npar]  initial inverse Hessian matrix
+%   dg  [npar by 1]     previous change in gradient
+%   dx  [npar by 1]     previous change in x;
+% 
 % 6/8/93 version that updates inverse hessian instead of hessian
 % itself.
-
+% 
 % Original file downloaded from:
 % http://sims.princeton.edu/yftp/optimize/mfiles/bfgsi.m
-
+% 
 % Copyright (C) 1993-2009 Christopher Sims
+% Copyright (C) 2009-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -41,4 +48,4 @@ else
     disp(['|H*dg| = ' num2str(Hdg'*Hdg)])
     H=H0;
 end
-save H.dat H
+save('H.dat','H')

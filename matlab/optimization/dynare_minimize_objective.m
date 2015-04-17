@@ -190,8 +190,9 @@ switch minimizer_algorithm
         analytic_grad=[];
     end
     % Call csminwell.
-    [fval,opt_par_values,grad,hessian_mat,itct,fcount,exitflag] = ...
+    [fval,opt_par_values,grad,inverse_hessian_mat,itct,fcount,exitflag] = ...
         csminwel1(objective_function, start_par_value, H0, analytic_grad, crit, nit, numgrad, epsilon, varargin{:});
+    hessian_mat=inv(inverse_hessian_mat);
   case 5
     if options_.analytic_derivation==-1 %set outside as code for use of analytic derivation
         analytic_grad=1;
