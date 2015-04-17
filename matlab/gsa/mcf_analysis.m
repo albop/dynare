@@ -1,4 +1,4 @@
-function mcf_analysis(lpmat, ibeha, inobeha, options_mcf, DynareOptions)
+function indmcf = mcf_analysis(lpmat, ibeha, inobeha, options_mcf, DynareOptions)
 %
 % Written by Marco Ratto
 % Joint Research Centre, The European Commission,

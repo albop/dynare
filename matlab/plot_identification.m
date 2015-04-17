@@ -247,13 +247,30 @@ else
         hist(log10(idelre.cond))
         title('log10 of Condition number in the LRE model')
         dyn_saveas(hh,[IdentifDirectoryName '/' M_.fname '_ident_COND' ],options_);
+        options_mcf.pvalue_ks = 0.1;
+        options_mcf.pvalue_corr = 0.001;
+        options_mcf.alpha2 = 0;
+        options_mcf.param_names = name;
+        options_mcf.fname_ = M_.fname;
+        options_mcf.OutputDirectoryName = IdentifDirectoryName;
+        options_mcf.beha_title = 'LOW condition nbr';
+        options_mcf.nobeha_title = 'HIGH condition nbr';
+        options_mcf.amcf_name = 'MC_HighestCondNumberLRE';
+        options_mcf.amcf_title = 'MC Highest Condition Number LRE Model';
+        options_mcf.title = 'MC Highest Condition Number LRE Model';
         ncut=floor(SampleSize/10*9);
         [dum,is]=sort(idelre.cond);
-        [proba, dproba] = stab_map_1(params, is(1:ncut), is(ncut+1:end), 'MC_HighestCondNumberLRE', 1, [], IdentifDirectoryName, 0.1,'MC Highest Condition Number LRE Model');
+        mcf_analysis(params, is(1:ncut), is(ncut+1:end), options_mcf, options_);
+        options_mcf.amcf_name = 'MC_HighestCondNumberModel';
+        options_mcf.amcf_title = 'MC Highest Condition Number Model Solution';
+        options_mcf.title = 'MC Highest Condition Number Model Solution';
         [dum,is]=sort(idemodel.cond);
-        [proba, dproba] = stab_map_1(params, is(1:ncut), is(ncut+1:end), 'MC_HighestCondNumberModel', 1, [], IdentifDirectoryName, 0.1,'MC Highest Condition Number Model Solution');
+        mcf_analysis(params, is(1:ncut), is(ncut+1:end), options_mcf, options_);
+        options_mcf.amcf_name = 'MC_HighestCondNumberMoments';
+        options_mcf.amcf_title = 'MC Highest Condition Number Model Moments';
+        options_mcf.title = 'MC Highest Condition Number Model Moments';
         [dum,is]=sort(idemoments.cond);
-        [proba, dproba] = stab_map_1(params, is(1:ncut), is(ncut+1:end), 'MC_HighestCondNumberMoments', 1, [], IdentifDirectoryName, 0.1,'MC Highest Condition Number Model Moments');
+        mcf_analysis(params, is(1:ncut), is(ncut+1:end), options_mcf, options_);
 %         [proba, dproba] = stab_map_1(idemoments.Mco', is(1:ncut), is(ncut+1:end), 'HighestCondNumberMoments_vs_Mco', 1, [], IdentifDirectoryName);
 %         for j=1:nparam,
 % %             ibeh=find(idemoments.Mco(j,:)<0.9);
