@@ -243,13 +243,13 @@ Sensitivity and identification analysis
 
 * Performing sensitivity analysis::
 * Performing identification analysis::
-* IRF/moment calibration::
+* IRF/Moment calibration::
 * Types of analysis and output files::
 
 Types of analysis and output files
 * Sampling::
 * Stability Mapping::
-* IRF/moment restrictions::
+* IRF/Moment restrictions::
 * Reduced Form Mapping::
 * RMSE::
 * Screening Analysis::
@@ -6791,7 +6791,7 @@ that the planner succumbs to the temptation to exploit the preset private expeca
 in the first period (but not in later periods due to commitment).
 
 @customhead{Steady state}
-@xref{Ramsey steady state}
+@xref{Ramsey steady state}.
 
 
 @end deffn
@@ -6875,6 +6875,15 @@ The discussion of the methodologies and their application is described in
 With respect to the previous version of the toolbox, in order to work
 properly, the GSA toolbox no longer requires that the Dynare
 estimation environment is set up.
+
+
+@menu
+* Performing sensitivity analysis::
+* Performing identification analysis::
+* IRF/Moment calibration::
+* Types of analysis and output files::
+@end menu
+
 
 @node Performing sensitivity analysis
 @subsection Performing sensitivity analysis
@@ -7274,7 +7283,7 @@ where @code{<mod_file>.mod} is the name of the DYNARE model file.
 @menu
 * Sampling::
 * Stability Mapping::
-* IRF/moment restrictions::
+* IRF/Moment restrictions::
 * Reduced Form Mapping::
 * RMSE::
 * Screening Analysis::
