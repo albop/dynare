@@ -49,7 +49,7 @@ old_steady_params=Model.params; %save initial parameters for check if steady sta
 % % check if steady state solves static model (except if diffuse_filter == 1)
 [DynareResults.steady_state, new_steady_params] = evaluate_steady_state(DynareResults.steady_state,Model,DynareOptions,DynareResults,DynareOptions.diffuse_filter==0);
 
-if ~isempty(EstimatedParameters.param_vals)
+if isfield(EstimatedParameters,'param_vals') && ~isempty(EstimatedParameters.param_vals)
     %check whether steady state file changes estimated parameters
     Model_par_varied=Model; %store Model structure
     Model_par_varied.params(EstimatedParameters.param_vals(:,1))=Model_par_varied.params(EstimatedParameters.param_vals(:,1))*1.01; %vary parameters
