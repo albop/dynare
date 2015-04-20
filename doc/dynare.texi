@@ -7465,7 +7465,7 @@ The following files are stored in each directory (we stick with prior sample but
 of the shock matrix, in sample and out of sample fit of the ANOVA model;
 
 @item
-@code{<mod_file>_prior_<namendo>_vs_<namexo>_map_SE.fig}: for entries of the shock matrix it shows graphs of the estimated first order ANOVA terms @math{y = f(\theta_i)} for each deep parameter \math{\theta_i}; 
+@code{<mod_file>_prior_<namendo>_vs_<namexo>_map_SE.fig}: for entries of the shock matrix it shows graphs of the estimated first order ANOVA terms @math{y = f(\theta_i)} for each deep parameter @math{\theta_i}; 
 
 @item
 @code{<mod_file>_prior_<namendo>_vs_<namlagendo>.fig}: histogram and CDF plot of the MC sample of the individual entry
