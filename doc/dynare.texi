@@ -6765,7 +6765,7 @@ available, leading to a second-order accurate welfare ranking
 
 This command generates all the output variables of @code{stoch_simul}. For specifying
 the initial values for the endogenous state variables (except for the Lagrange
-multipliers}, @xref{histval}
+multipliers), @xref{histval}.
 
 @vindex oo_.planner_objective_value
 @anchor{planner_objective_value}
