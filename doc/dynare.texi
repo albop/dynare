@@ -2379,7 +2379,8 @@ Moreover, as only states enter the recursive policy functions, all values specif
 
 For @ref{Ramsey} policy, it also specifies the values of the endogenous states at 
 which the objective function of the planner is computed. Note that the initial values 
-of the Lagrange multipliers associated with the planner's problem cannot be set, @xref{planner_objective_value}.
+of the Lagrange multipliers associated with the planner's problem cannot be set
+(@pxref{planner_objective_value}).
 
 @examplehead
 
@@ -6771,7 +6772,7 @@ available, leading to a second-order accurate welfare ranking
 
 This command generates all the output variables of @code{stoch_simul}. For specifying
 the initial values for the endogenous state variables (except for the Lagrange
-multipliers), @xref{histval}.
+multipliers), @pxref{histval}.
 
 @vindex oo_.planner_objective_value
 @anchor{planner_objective_value}
@@ -6783,7 +6784,7 @@ taken to be at their steady state values. The result is a 1 by 2
 vector, where the first entry stores the value of the planner objective under 
 the timeless perspective to Ramsey policy, i.e. where the initial Lagrange
 multipliers associated with the planner's problem are set to their steady state
-values (@xref{ramsey_policy}). 
+values (@pxref{ramsey_policy}).
 In contrast, the second entry stores the value of the planner objective with 
 initial Lagrange multipliers of the planner's problem set to 0, i.e. it is assumed 
 that the planner succumbs to the temptation to exploit the preset private expecatations 
