@@ -53,10 +53,6 @@ if isempty(bounds)
     end
 end
 
-if isnumeric(minimizer_algorithm) && minimizer_algorithm==10 && any(any(isinf(bounds)))
-    error('Algorithm 10 (simpsa) requires finite upper and lower bounds')
-end
-
 if isempty(parameter_names)
     parameter_names=[repmat('parameter ',n_params,1),num2str((1:n_params)')];
 end
@@ -119,10 +115,7 @@ switch minimizer_algorithm
         end
     end
     npar=length(start_par_value);
-    LB=bounds(:,1);
-    LB(isinf(LB))=-1e6;
-    UB=bounds(:,2);
-    UB(isinf(UB))=1e6;
+    [LB, UB]=set_bounds_to_finite_values(bounds);
     fprintf('\nNumber of parameters= %d, initial temperatur= %4.3f \n', npar,sa_options.initial_temperature);
     fprintf('rt=  %4.3f; TolFun=  %4.3f; ns=  %4.3f;\n',sa_options.rt,sa_options.TolFun,sa_options.ns);
     fprintf('nt=  %4.3f; neps=  %4.3f; MaxIter=  %d\n',sa_options.nt,sa_options.neps,sa_options.MaxIter);
@@ -321,7 +314,8 @@ switch minimizer_algorithm
     end
     simpsaOptionsList = options2cell(simpsaOptions);
     simpsaOptions = simpsaset(simpsaOptionsList{:});
-    [opt_par_values, fval, exitflag] = simpsa(func2str(objective_function),start_par_value,bounds(:,1),bounds(:,2),simpsaOptions,varargin{:});
+    [LB, UB]=set_bounds_to_finite_values(bounds)
+    [opt_par_values, fval, exitflag] = simpsa(func2str(objective_function),start_par_value,LB,UB,simpsaOptions,varargin{:});
   case 11
      options_.cova_compute = 0 ;
      [opt_par_values,stdh,lb_95,ub_95,med_param] = online_auxiliary_filter(start_par_value,varargin{:}) ;
@@ -372,4 +366,13 @@ switch minimizer_algorithm
     else
         error(['Optimization algorithm ' int2str(minimizer_algorithm) ' is unknown!'])
     end
+end
+
+end
+
+function [LB, UB]=set_bounds_to_finite_values(bounds)
+    LB=bounds(:,1);
+    LB(isinf(LB))=-1e6;
+    UB=bounds(:,2);
+    UB(isinf(UB))=1e6;
 end
