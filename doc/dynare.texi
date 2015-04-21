@@ -7277,7 +7277,7 @@ Specify the parameter set to use. Default: @code{prior_mean}
 @subsection Types of analysis and output files
 
 The sensitivity analysis toolbox includes several types of analyses.
-Sensitivity analysis results are saved locally in @code{<mod_file>/GSA},
+Sensitivity analysis results are saved locally in @code{<mod_file>/gsa},
 where @code{<mod_file>.mod} is the name of the DYNARE model file.
 
 @menu
@@ -7416,7 +7416,7 @@ samples from multivariate normal or from posterior are used.
 When the option @code{threshold_redform} is not set, or it is empty (the default), this analysis estimates a multivariate
 smoothing spline ANOVA model (the 'mapping') for the selected entries in the transition matrix of the shock matrix of the reduce form first order solution of the model.
 This mapping is done either with prior samples or with MC samples with @code{neighborhood_width}.
-The unless @code{neighborhood_width} is set with MC samples, the  mapping of the reduced form solution forces the use of samples from
+Unless @code{neighborhood_width} is set with MC samples, the  mapping of the reduced form solution forces the use of samples from
 prior ranges or prior distributions, @i{i.e.}: @code{pprior=1} and @code{ppost=0}. It
 uses 250 samples to optimize smoothing parameters and 1000 samples to compute the
 fit. The rest of the sample is used for out-of-sample validation. One can also
@@ -7440,12 +7440,12 @@ the reduced form coefficients of the selected endogenous variables
 indicates the results for log-transformed entries;
 
 @item
-@code{<mod_file>_redform_GSA(_log).fig}: shows bar chart of all sensitivity
+@code{<mod_file>_redform_gsa(_log).fig}: shows bar chart of all sensitivity
 indices for each parameter: this allows one to notice parameters that
 have a minor effect for any of the reduced form coefficients.
 @end itemize
 
-Detailed results of the analyses are shown in the subfolder @code{<mod_file>/GSA/redform_prior} for prior samples and in @code{<mod_file>/GSA/redform_mc},
+Detailed results of the analyses are shown in the subfolder @code{<mod_file>/gsa/redform_prior} for prior samples and in @code{<mod_file>/gsa/redform_mc} for MC samples with option @code{neighborhood_width},
 where the detailed results of the estimation of the single functional relationships
 between parameters @math{\theta} and reduced form coefficient (denoted as @math{y} hereafter) are stored in separate directories
 named as:
@@ -7485,7 +7485,7 @@ Graphs for this log-transformed case, are stored in the same folder in files den
 
 When the option @code{threshold_redform} is set, the analysis is performed via Monte Carlo filtering, by displaying parameters that drive the individual entry @code{y} inside the range specified in @code{threshold_redform}. If no entry is found (or all entries are in the range), the MCF algorithm ignores the range specified in @code{threshold_redform} and performs the analysis splitting the MC sample of @code{y} into deciles. Setting @code{threshold_redform=[-inf inf]} triggers this approach for all @code{y}'s.
 
-Results are stored in subdirectories of @code{<mod_file>/GSA/redform_prior} named 
+Results are stored in subdirectories of @code{<mod_file>/gsa/redform_prior} named 
 @itemize
 @item
 @code{<mod_file>_prior_<namendo>_vs_<namlagendo>_threshold}: for the entries of the transition matrix;
@@ -7622,7 +7622,7 @@ those listed in @ref{Sampling Options}. The toolbox performs all the
 analyses required and displays results.
 
 The results of the screening analysis with Morris sampling design are stored
-in the subfolder @code{<mod_file>/GSA/SCREEN}. The data file @code{<mod_file>_prior} stores
+in the subfolder @code{<mod_file>/gsa/screen}. The data file @code{<mod_file>_prior} stores
 all the information of the analysis (Morris sample, reduced form coefficients,
 etc.).
 
