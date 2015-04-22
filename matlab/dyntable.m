@@ -1,7 +1,16 @@
-function dyntable(title,headers,labels,values,label_width,val_width, ...
-                  val_precis)
-
-% Copyright (C) 2002-2013 Dynare Team
+function dyntable(title,headers,labels,values,label_width,val_width,val_precis)
+% function dyntable(title,headers,labels,values,label_width,val_width,val_precis)
+% Inputs:
+%   title       [string]            Table title
+%   headers     [n by nchar]        character array of labels for header row
+%   labels      [n by nchar]        character array of labels for label column
+%   values      [matrix]            matrix of values to display
+%   label_width [scalar]            Width of the label
+%   val_width   [scalar]            Width of value column    
+%   val_precis  [integer]           precision of displayed values
+% 
+% 
+% Copyright (C) 2002-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -24,48 +33,46 @@ if options_.noprint
     return
 end
 
-%label_width = max(size(deblank(char(headers(1,:),labels)),2)+2, ...
-%                  label_width);
-label_width = max(size(deblank(char(headers(1,:),labels)),2))+2;
+%% get width of label column
+if ~isempty(label_width) 
+    label_width = max(size(deblank(char(headers(1,:),labels)),2)+2, ...
+                     label_width);
+else %use default length
+    label_width = max(size(deblank(char(headers(1,:),labels)),2))+2;
+end
+label_format_leftbound  = sprintf('%%-%ds',label_width);
 
-label_fmt = sprintf('%%-%ds',label_width);
-
+%% get width of label column
 if all(~isfinite(values))
     values_length = 4;
 else
     values_length = max(ceil(max(max(log10(abs(values(isfinite(values))))))),1)+val_precis+1;
 end
-if any(values) < 0
+if any(values) < 0 %add one character for minus sign
     values_length = values_length+1;
 end
-headers_length = max(size(deblank(headers(2:end,:)),2));
-%val_width = max(values_length,val_width);
-val_width = max(headers_length,values_length)+2;
-%header_fmt = sprintf('%%-%ds',val_width);
-val_fmt = sprintf('%%%d.%df',val_width,val_precis);
 
-headers_offset = 0;
-values_offset = 0;
-if headers_length > values_length
-    %    values_offset = ceil((val_width-values_length)/2);
+%% get width of header strings 
+headers_length = max(size(deblank(headers(2:end,:)),2));
+if ~isempty(val_width)
+    val_width = max(max(headers_length,values_length)+2,val_width);
+else
+    val_width = max(headers_length,values_length)+2;
 end
+value_format  = sprintf('%%%d.%df',val_width,val_precis);
+header_string_format  = sprintf('%%%ds',val_width);
 
 if length(title) > 0
-    disp(sprintf('\n\n%s\n',title));
+    fprintf('\n\n%s\n',title);
 end
+%Create and print header string
 if length(headers) > 0
-    hh = sprintf(label_fmt,headers(1,:));
+    hh = sprintf(label_format_leftbound ,deblank(headers(1,:)));
     for i=2:size(headers,1)
-        hla = size(deblank(headers(i,:)),2);
-        hlb = ceil((val_width - hla)/2);
-        hla = val_width - hla - hlb;
-        hh  = [hh char(32*ones(1,hlb)) deblank(headers(i,:)) ...
-              char(32*ones(1,hla))];
+        hh  = [hh sprintf(header_string_format,deblank(headers(i,:)))];
     end
     disp(hh);
 end
 for i=1:size(values,1)
-    disp([sprintf(label_fmt,deblank(labels(i,:))) char(32*ones(1,values_offset)) sprintf(val_fmt,values(i,:))]);
+    disp([sprintf(label_format_leftbound ,deblank(labels(i,:))) sprintf(value_format ,values(i,:))]);
 end
-
-% 10/30/02 MJ
