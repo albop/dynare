@@ -105,7 +105,7 @@ for i=1:nvar
     if order > 1
         x = x + dr.ghs2(ivar(i))/2;
     end
-    [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag);
+    [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
 end
 if flag
     disp(str)
@@ -115,7 +115,7 @@ if order > 1
     flag = 0;
     for i=1:nvar
         x = dr.ghs2(ivar(i))/2;
-        [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag);
+        [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
     end
     if flag
         disp(str)
@@ -134,7 +134,7 @@ for k=1:nx
     str = sprintf(label_format,str1);
     for i=1:nvar
         x = dr.ghx(ivar(i),k);
-        [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag);
+        [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
     end
     if flag
         disp(str)
@@ -148,7 +148,7 @@ for k=1:nu
     str = sprintf(label_format,M_.exo_names(k,:));
     for i=1:nvar
         x = dr.ghu(ivar(i),k);
-        [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag);
+        [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
     end
     if flag
         disp(str)
@@ -169,7 +169,7 @@ if order > 1
                 else
                     x = dr.ghxx(ivar(i),(k-1)*nx+j);
                 end
-                [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag);
+                [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
             end
             if flag
                 disp(str)
@@ -189,7 +189,7 @@ if order > 1
                 else
                     x = dr.ghuu(ivar(i),(k-1)*nu+j);
                 end
-                [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag);
+                [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
             end
             if flag
                 disp(str)
@@ -207,7 +207,7 @@ if order > 1
             str = sprintf(label_format,str1);
             for i=1:nvar
                 x = dr.ghxu(ivar(i),(k-1)*nu+j);
-                [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag);
+                [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
             end
             if flag
                 disp(str)
@@ -252,8 +252,8 @@ end
 error(sprintf('Could not find aux var: %s', M_.endo_names(aux_index, :)))
 end
 
-function [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag)
-    if abs(x) > 1e-6
+function [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_)
+    if abs(x) > options_.dr_display_tol
         flag = 1;
         str = [str sprintf(value_format_float,x)];
     else
