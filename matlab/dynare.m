@@ -94,6 +94,10 @@ if ~ischar(fname)
     error('DYNARE: argument of dynare must be a text string')
 end
 
+if ~isvarname(fname)
+    error('DYNARE: argument of dynare must conform to Matlab''s convention for naming functions, i.e. start with a letter and not contain special characters. Please rename your MOD-file.')
+end
+
 % Testing if file have extension
 % If no extension default .mod is added
 if isempty(strfind(fname,'.'))
