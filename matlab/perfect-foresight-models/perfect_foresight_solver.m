@@ -65,6 +65,7 @@ oo_ = simulation_core(options_, M_, oo_);
 if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
     skipline()
     disp('Simulation of the perfect foresight model failed!')
+    disp('Switching to a homotopy method...')
     skipline()
     
     % Disable warnings if homotopy
