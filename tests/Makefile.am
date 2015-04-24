@@ -90,15 +90,11 @@ MODFILES = \
 	fs2000/fs2000.mod \
 	fs2000/fs2000a.mod \
 	fs2000/fs2000c.mod \
-	fs2000/fs2000d.mod \
-	fs2000/fs2000e.mod \
-	fs2000/fs2000_cmaes.mod \
 	fs2000/fs2000_calib.mod \
 	fs2000/fs2000_calib_dseries.mod \
 	fs2000/fs2000_analytic_derivation.mod \
 	fs2000/fs2000_missing_data.mod \
 	fs2000/fs2000_sd.mod \
-	fs2000/fs2000_mode_compute_8.mod \
 	fs2000/fs2000_dseries_a.mod \
 	fs2000/fs2000_dseries_b.mod \
 	homotopy/homotopy1_test.mod \
@@ -210,10 +206,12 @@ MODFILES = \
 	optimizers/fs2000_2.mod \
 	optimizers/fs2000_3.mod \
 	optimizers/fs2000_4.mod \
+	optimizers/fs2000_4_with_optim.mod \
 	optimizers/fs2000_5.mod \
 	optimizers/fs2000_6.mod \
 	optimizers/fs2000_7.mod \
 	optimizers/fs2000_8.mod \
+	optimizers/fs2000_8_with_optim.mod \
 	optimizers/fs2000_9.mod \
 	optimizers/fs2000_10.mod \
 	optimizers/fs2000_101.mod \
