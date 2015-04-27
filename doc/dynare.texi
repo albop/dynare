@@ -4671,6 +4671,11 @@ a @uref{http://www.java.com/download,Java Runtime Environment}). Note that the
 base name (ie without extension) of the datafile has to be different from the
 base name of the model file.
 
+@item dirname = @var{FILENAME}
+Directory in which to store @code{estimation} output. To pass a
+subdirectory of a directory, you must quote the argument. Default:
+@code{<mod_file>}
+
 @item xls_sheet = @var{NAME}
 @anchor{xls_sheet}
 The name of the sheet with the data in an Excel file

@@ -33,6 +33,7 @@ global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_
 estim_params_ = [];
 bayestopt_ = [];
 options_.datafile = '';
+options_.dirname = M_.fname;
 options_.dataset = [];
 options_.verbosity = 1;
 options_.terminal_condition = 0;

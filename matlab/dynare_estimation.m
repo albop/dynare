@@ -56,7 +56,7 @@ nnobs = length(nobs);
 horizon = options_.forecast;
 
 if nargin<2 || ~exist(dname) || isempty(dname)
-    dname = M_.fname;
+    dname = options_.dirname;
 end
 
 M_.dname = dname;
