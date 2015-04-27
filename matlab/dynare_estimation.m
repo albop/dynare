@@ -1,9 +1,10 @@
 function oo_recursive_=dynare_estimation(var_list,dname)
-% function dynare_estimation(var_list)
+% function dynare_estimation(var_list, dname)
 % runs the estimation of the model
 %
 % INPUTS
 %   var_list:  selected endogenous variables vector
+%   dname:     alternative directory name
 %
 % OUTPUTS
 %   oo_recursive_: cell array containing the results structures from recursive estimation
@@ -11,7 +12,7 @@ function oo_recursive_=dynare_estimation(var_list,dname)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2014 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
