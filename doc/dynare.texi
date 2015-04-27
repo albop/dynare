@@ -12000,7 +12000,7 @@ with the same base name as specified by @ref{tableName} with the ending
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphBar, graphBarColor, graphBarFillColor, graphBarWidth, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
+@defmethod Report addSeries data, graphBar, graphBarColor, graphBarFillColor, graphBarWidth, graphFanShadeColor, graphFanShadeOpacity, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}. NB: Options specific
 to graphs begin with `@code{graph}' while options specific to tables begin with
 `@code{table}'.
@@ -12014,6 +12014,15 @@ to graphs begin with `@code{graph}' while options specific to tables begin with
 @item graphBar, @code{BOOLEAN}
 Whether or not to display this series as a bar graph as oppsed to the
 default of displaying it as a line graph. Default: @code{false}
+
+@anchor{graphFanShadeColor}
+@item graphFanShadeColor, @code{STRING}
+The shading color to use between a series and the previously-added
+series in a graph. Useful for making fan charts. Default: @code{empty}
+
+@item graphFanShadeOpacity, @code{INTEGER}
+The opacity of the color passed in @ref{graphFanShadeColor}. Default:
+@code{50}
 
 @item graphBarColor, @code{STRING}
 The outline color of each bar in the bar graph. Only active if
