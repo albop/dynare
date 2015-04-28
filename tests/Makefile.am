@@ -435,30 +435,50 @@ check-octave: $(O_XFAIL_TRS_FILES) $(O_TRS_FILES)
 	@echo 'Octave Tests Done'
 
 %.m.trs %.m.log: %.mod
-	DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
-		$(MATLAB)/bin/matlab -nosplash -nodisplay -logfile $*.m.log -r run_test_matlab
+	@echo "`tput bold``tput setaf 7`MATLAB: $(PWD)/$*... `tput sgr0`"
+	@DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
+	$(MATLAB)/bin/matlab -nosplash -nodisplay -r run_test_matlab > $*.m.log  2> /dev/null
+	@if grep -q ":test-result: PASS" $*.m.trs; then \
+	echo "`tput bold``tput setaf 2`MATLAB: $(PWD)/$* PASSED!" ; \
+	else \
+	echo "`tput bold``tput setaf 1`MATLAB: $(PWD)/$* FAILED!" ; \
+	fi
 
 %.m.trs %.m.log : %.m
-	DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" \
-		$(MATLAB)/bin/matlab -nosplash -nodisplay -logfile $*.m.log -r $*
+	@echo "`tput bold``tput setaf 7`MATLAB: $(PWD)/$*... `tput sgr0`"
+	@DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" \
+		$(MATLAB)/bin/matlab -nosplash -nodisplay -r $* > $*.m.log 2> /dev/null 
+	@echo "`tput bold`MATLAB: $(PWD)/$* Done!"
 
 %.o.trs %.o.log: %.mod
-	DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
+	@echo "`tput bold``tput setaf 7`OCTAVE: $(PWD)/$*... `tput sgr0`"
+	@DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
 		$(OCTAVE) --no-init-file --silent --no-history run_test_octave.m > $*.o.log 2>&1
+	@if grep -q ":test-result: PASS" $*.o.trs; then \
+	echo "`tput bold``tput setaf 2`OCTAVE: $(PWD)/$* PASSED!" ; \
+	else \
+	echo "`tput bold``tput setaf 1`OCTAVE: $(PWD)/$* FAILED!" ; \
+	fi
 
 %.o.trs %.o.log : %.m
-	DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" \
+	@echo "`tput bold``tput setaf 7`OCTAVE: $(PWD)/$*... `tput sgr0`"
+	@DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" \
 		$(OCTAVE) --no-init-file --silent --no-history $< > $*.o.log 2>&1
+	@echo "`tput bold`OCTAVE: $(PWD)/$* Done!"
 
 %.m.tls : %.m
-	TOP_TEST_DIR="$(PWD)"  FILESTEM="$*" \
-		$(MATLAB)/bin/matlab -nosplash -nodisplay -r run_m_script
-	touch $*.m.tls
+	@echo "`tput bold``tput setaf 7`MATLAB: $(PWD)/$*... `tput sgr0`"
+	@TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
+		$(MATLAB)/bin/matlab -nosplash -nodisplay -r run_m_script 2> /dev/null
+	@touch $*.m.tls
+	@echo "`tput bold`MATLAB: $(PWD)/$* Done!"
 
 %.o.tls : %.m
-	TOP_TEST_DIR="$(PWD)"  FILESTEM="$*" \
+	@echo "`tput bold``tput setaf 7`OCTAVE: $(PWD)/$*... `tput sgr0`"
+	@TOP_TEST_DIR="$(PWD)"  FILESTEM="$*" \
 		$(OCTAVE) --no-init-file --silent --no-history run_o_script.m 2>&1
-
+	@touch $*.o.tls
+	@echo "`tput bold`OCTAVE: $(PWD)/$* Done!"
 
 clean-local:
 	rm -f $(M_TRS_FILES) \
