@@ -28,7 +28,7 @@ function check_valid_ver(ver)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-test_ver = splitver(ver);
+test_ver = strsplit(ver, {'.', '-'});
 errmsg = 'check_valid_ver: the desired version must be in the proper format';
 assert (length(test_ver) == 3 && ...
     ~isempty(str2double(test_ver{1})) && ...
