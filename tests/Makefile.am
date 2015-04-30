@@ -435,50 +435,50 @@ check-octave: $(O_XFAIL_TRS_FILES) $(O_TRS_FILES)
 	@echo 'Octave Tests Done'
 
 %.m.trs %.m.log: %.mod
-	@echo "`tput bold``tput setaf 7`MATLAB: $(PWD)/$*... `tput sgr0`"
+	@echo "`tput bold``tput setaf 3`MATLAB: $(PWD)/$*... `tput sgr0`"
 	@DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
 	$(MATLAB)/bin/matlab -nosplash -nodisplay -r run_test_matlab > $*.m.log  2> /dev/null
 	@if grep -q ":test-result: PASS" $*.m.trs; then \
-	echo "`tput bold``tput setaf 2`MATLAB: $(PWD)/$* PASSED!" ; \
+	echo "`tput bold``tput setaf 2`MATLAB: $(PWD)/$* PASSED!`tput sgr0`" ; \
 	else \
-	echo "`tput bold``tput setaf 1`MATLAB: $(PWD)/$* FAILED!" ; \
+	echo "`tput bold``tput setaf 1`MATLAB: $(PWD)/$* FAILED!`tput sgr0`" ; \
 	fi
 
 %.m.trs %.m.log : %.m
-	@echo "`tput bold``tput setaf 7`MATLAB: $(PWD)/$*... `tput sgr0`"
+	@echo "`tput bold``tput setaf 3`MATLAB: $(PWD)/$*... `tput sgr0`"
 	@DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" \
 		$(MATLAB)/bin/matlab -nosplash -nodisplay -r $* > $*.m.log 2> /dev/null 
-	@echo "`tput bold`MATLAB: $(PWD)/$* Done!"
+	@echo "`tput bold``tput setaf 3`MATLAB: $(PWD)/$* Done!`tput sgr0`"
 
 %.o.trs %.o.log: %.mod
-	@echo "`tput bold``tput setaf 7`OCTAVE: $(PWD)/$*... `tput sgr0`"
+	@echo "`tput bold``tput setaf 3`OCTAVE: $(PWD)/$*... `tput sgr0`"
 	@DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
 		$(OCTAVE) --no-init-file --silent --no-history run_test_octave.m > $*.o.log 2>&1
 	@if grep -q ":test-result: PASS" $*.o.trs; then \
-	echo "`tput bold``tput setaf 2`OCTAVE: $(PWD)/$* PASSED!" ; \
+	echo "`tput bold``tput setaf 2`OCTAVE: $(PWD)/$* PASSED!`tput sgr0`" ; \
 	else \
-	echo "`tput bold``tput setaf 1`OCTAVE: $(PWD)/$* FAILED!" ; \
+	echo "`tput bold``tput setaf 1`OCTAVE: $(PWD)/$* FAILED!`tput sgr0`" ; \
 	fi
 
 %.o.trs %.o.log : %.m
-	@echo "`tput bold``tput setaf 7`OCTAVE: $(PWD)/$*... `tput sgr0`"
+	@echo "`tput bold``tput setaf 3`OCTAVE: $(PWD)/$*... `tput sgr0`"
 	@DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" \
 		$(OCTAVE) --no-init-file --silent --no-history $< > $*.o.log 2>&1
-	@echo "`tput bold`OCTAVE: $(PWD)/$* Done!"
+	@echo "`tput bold``tput setaf 3`OCTAVE: $(PWD)/$* Done!`tput sgr0`"
 
 %.m.tls : %.m
-	@echo "`tput bold``tput setaf 7`MATLAB: $(PWD)/$*... `tput sgr0`"
+	@echo "`tput bold``tput setaf 3`MATLAB: $(PWD)/$*... `tput sgr0`"
 	@TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
 		$(MATLAB)/bin/matlab -nosplash -nodisplay -r run_m_script 2> /dev/null
 	@touch $*.m.tls
-	@echo "`tput bold`MATLAB: $(PWD)/$* Done!"
+	@echo "`tput bold`MATLAB`tput setaf 3`: $(PWD)/$* Done!`tput sgr0`"
 
 %.o.tls : %.m
-	@echo "`tput bold``tput setaf 7`OCTAVE: $(PWD)/$*... `tput sgr0`"
+	@echo "`tput bold``tput setaf 3`OCTAVE: $(PWD)/$*... `tput sgr0`"
 	@TOP_TEST_DIR="$(PWD)"  FILESTEM="$*" \
 		$(OCTAVE) --no-init-file --silent --no-history run_o_script.m 2>&1
 	@touch $*.o.tls
-	@echo "`tput bold`OCTAVE: $(PWD)/$* Done!"
+	@echo "`tput bold``tput setaf 3`OCTAVE: $(PWD)/$* Done!`tput sgr0`"
 
 clean-local:
 	rm -f $(M_TRS_FILES) \
