@@ -1,13 +1,13 @@
-function oo_ = convert_oo_(oo_, ver)
-%function oo_ = convert_oo_(oo_, ver)
-% Converts oo_ from oo_.dynare_version to ver
+function tf = ver_greater_than_equal(ver1, ver2)
+%function tf = ver_greater_than_equal(ver1, ver2)
+% ver1 >= ver2 ? 1 : 0;
 %
 % INPUTS
-%    oo_    [struct]    dynare output struct
-%    ver    [string]    desired oo_ output version
+%    ver1    [string]    software version number
+%    ver2    [string]    software version number
 %
 % OUTPUTS
-%    oo_    [struct]    dynare output struct
+%    tf      [bool]      true if ver1 > ver2
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -29,19 +29,5 @@ function oo_ = convert_oo_(oo_, ver)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-check_valid_ver(ver);
-
-if isfield(oo_, 'dynare_version')
-    ver_orig = oo_.dynare_version;
-else
-    ver_orig = '4.4.3';
-end
-
-if strcmp(ver_orig, ver)
-    return;
-end
-
-if ver_less_than(ver_orig, '4.5.0') && ver_greater_than_equal(ver, '4.5.0')
-    oo_.exo_simul = oo_.exo_simul';
-end
+tf = ver_greater_than(ver1, ver2) || strcmp(ver1, ver2);
 end
