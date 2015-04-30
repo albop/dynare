@@ -444,6 +444,9 @@ check-octave: $(O_XFAIL_TRS_FILES) $(O_TRS_FILES)
 	echo "`tput bold``tput setaf 1`MATLAB: $(PWD)/$* FAILED!`tput sgr0`" ; \
 	fi
 
+%.m.drs %.m.log: %.m.trs
+	@cat $*.m.log
+
 %.m.trs %.m.log : %.m
 	@echo "`tput bold``tput setaf 3`MATLAB: $(PWD)/$*... `tput sgr0`"
 	@DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" \
@@ -459,6 +462,9 @@ check-octave: $(O_XFAIL_TRS_FILES) $(O_TRS_FILES)
 	else \
 	echo "`tput bold``tput setaf 1`OCTAVE: $(PWD)/$* FAILED!`tput sgr0`" ; \
 	fi
+
+%.o.drs %.o.log: %.mod %.o.trs
+	@cat $*.o.log
 
 %.o.trs %.o.log : %.m
 	@echo "`tput bold``tput setaf 3`OCTAVE: $(PWD)/$*... `tput sgr0`"
