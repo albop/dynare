@@ -416,7 +416,14 @@ options_.recursive_estimation_restart = 0;
 options_.MCMC_jumping_covariance='hessian';
 options_.use_calibration_initialization = 0;
 options_.endo_vars_for_moment_computations_in_estimation=[];
+
+% Tailored Random Block Metropolis-Hastings
 options_.TaRB.use_TaRB = 0;
+options_.TaRB.mode_compute=4;
+options_.TaRB.new_block_probability=0.25; %probability that next parameter belongs to new block
+
+% Run optimizer silently
+options_.silent_optimizer=0;
 
 % Prior restrictions
 options_.prior_restrictions.status = 0;

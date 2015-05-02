@@ -73,6 +73,9 @@ switch minimizer_algorithm
     if ~isempty(options_.optim_opt)
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
+    if options_.silent_optimizer
+        optim_options = optimset(optim_options,'display','off');
+    end
     if options_.analytic_derivation,
         optim_options = optimset(optim_options,'GradObj','on','TolX',1e-7);
     end
@@ -110,6 +113,9 @@ switch minimizer_algorithm
             end
         end
     end
+    if options_.silent_optimizer
+        sa_options.verbosity = 0;
+    end
     npar=length(start_par_value);
     [LB, UB]=set_bounds_to_finite_values(bounds, options_.huge_number);
     if sa_options.verbosity
@@ -139,6 +145,9 @@ switch minimizer_algorithm
     end
     if options_.analytic_derivation,
         optim_options = optimset(optim_options,'GradObj','on');
+    end
+    if options_.silent_optimizer
+        optim_options = optimset(optim_options,'display','off');
     end
     if ~isoctave
         [opt_par_values,fval,exitflag] = fminunc(objective_function,start_par_value,optim_options,varargin{:});
@@ -180,6 +189,10 @@ switch minimizer_algorithm
             end
         end
     end
+    if options_.silent_optimizer
+        Save_files = 0; 
+        Verbose = 0;
+    end    
     % Set flag for analytical gradient.
     if options_.analytic_derivation
         analytic_grad=1;
@@ -227,6 +240,10 @@ switch minimizer_algorithm
             end
         end
     end
+    if options_.silent_optimizer
+        Save_files = 0; 
+        Verbose = 0;
+    end    
     [opt_par_values,hessian_mat,gg,fval,invhess] = newrat(objective_function,start_par_value,analytic_grad,crit,nit,0,Verbose, Save_files,varargin{:});
     %hessian_mat is the plain outer product gradient Hessian
   case 6
@@ -242,6 +259,9 @@ switch minimizer_algorithm
     optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
     if ~isempty(options_.optim_opt)
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+    end
+    if options_.silent_optimizer
+        optim_options = optimset(optim_options,'display','off');
     end
     if ~isoctave
         [opt_par_values,fval,exitflag] = fminsearch(objective_function,start_par_value,optim_options,varargin{:});
@@ -276,6 +296,9 @@ switch minimizer_algorithm
             end
         end
     end
+    if options_.silent_optimizer
+        simplexOptions.verbose = options_list{i,2};
+    end    
     [opt_par_values,fval,exitflag] = simplex_optimization_routine(objective_function,start_par_value,simplexOptions,parameter_names,varargin{:});
   case 9
     % Set defaults
@@ -310,6 +333,13 @@ switch minimizer_algorithm
             end
         end
     end
+    if options_.silent_optimizer
+        cmaesOptions.DispFinal  = 'off';   % display messages like initial and final message';
+        cmaesOptions.DispModulo = '0';   % [0:Inf], disp messages after every i-th iteration';
+        cmaesOptions.SaveVariables='off';
+        cmaesOptions.LogModulo = '0';    % [0:Inf] if >1 record data less frequently after gen=100';
+        cmaesOptions.LogTime   = '0';    % [0:100] max. percentage of time for recording data';
+    end    
     warning('off','CMAES:NonfinitenessRange');
     warning('off','CMAES:InitialSigma');
     [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),start_par_value,H0,cmaesOptions,varargin{:});
@@ -347,6 +377,9 @@ switch minimizer_algorithm
             end
         end
     end
+    if options_.silent_optimizer
+        simpsaOptions.DISPLAY = 'none';
+    end
     simpsaOptionsList = options2cell(simpsaOptions);
     simpsaOptions = simpsaset(simpsaOptionsList{:});
     [LB, UB]=set_bounds_to_finite_values(bounds, options_.huge_number);
@@ -377,6 +410,9 @@ switch minimizer_algorithm
             end
         end
     end
+    if options_.silent_optimizer
+        solveoptoptions.verbosity = 0;
+    end
     [opt_par_values,fval]=solvopt(start_par_value,objective_function,[],[],[],solveoptoptions,varargin{:});
   case 102
     if isoctave
@@ -388,6 +424,9 @@ switch minimizer_algorithm
     optim_options = saoptimset('display','iter','TolFun',1e-8);
     if ~isempty(options_.optim_opt)
         eval(['optim_options = saoptimset(optim_options,' options_.optim_opt ');']);
+    end
+    if options_.silent_optimizer
+        optim_options = optimset(optim_options,'display','off');
     end
     func = @(x)objective_function(x,varargin{:});
     [opt_par_values,fval,exitflag,output] = simulannealbnd(func,start_par_value,bounds(:,1),bounds(:,2),optim_options);
