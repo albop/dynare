@@ -86,14 +86,14 @@ if nblck == 1 % Brooks and Gelman tests need more than one block
         fprintf('\nCONVERGENCE DIAGNOSTICS: Invalid option for geweke_interval. Using the default of [0.2 0.5].\n')
         options_.convergence.geweke.geweke_interval=[0.2 0.5];
     end
-    first_obs_begin_sample = max(1,ceil(options_.mh_drop*options_.mh_replic));
-    last_obs_begin_sample = first_obs_begin_sample+round(options_.convergence.geweke.geweke_interval(1)*options_.mh_replic*(1-options_.mh_drop));
-    first_obs_end_sample = first_obs_begin_sample+round(options_.convergence.geweke.geweke_interval(2)*options_.mh_replic*(1-options_.mh_drop));
+    first_obs_begin_sample = max(1,ceil(options_.mh_drop*NumberOfDraws));
+    last_obs_begin_sample = first_obs_begin_sample+round(options_.convergence.geweke.geweke_interval(1)*NumberOfDraws*(1-options_.mh_drop));
+    first_obs_end_sample = first_obs_begin_sample+round(options_.convergence.geweke.geweke_interval(2)*NumberOfDraws*(1-options_.mh_drop));
     param_name=[];
     for jj=1:npar
         param_name = strvcat(param_name,get_the_name(jj,options_.TeX,M_,estim_params_,options_));
     end
-    fprintf('\nGeweke (1992) Convergence Tests, based on means of draws %d to %d vs %d to %d.\n',first_obs_begin_sample,last_obs_begin_sample,first_obs_end_sample,options_.mh_replic);
+    fprintf('\nGeweke (1992) Convergence Tests, based on means of draws %d to %d vs %d to %d.\n',first_obs_begin_sample,last_obs_begin_sample,first_obs_end_sample,NumberOfDraws);
     fprintf('p-values are for Chi2-test for equality of means.\n');    
     Geweke_header={'Parameter', 'Post. Mean', 'Post. Std', 'p-val No Taper'};
     print_string=['%',num2str(size(param_name,2)+3),'s \t %12.3f \t %12.3f \t %12.3f'];
