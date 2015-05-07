@@ -328,7 +328,7 @@ mm = length(T);
 pp = DynareDataset.vobs;
 rr = length(Q);
 kalman_tol = DynareOptions.kalman_tol;
-diffuse_kalman_tol = DynareOptions.kalman_tol;
+diffuse_kalman_tol = DynareOptions.diffuse_kalman_tol;
 riccati_tol = DynareOptions.riccati_tol;
 Y = transpose(DynareDataset.data)-trend;
 
