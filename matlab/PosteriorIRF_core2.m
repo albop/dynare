@@ -1,17 +1,28 @@
-function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam, ThisMatlab)
+function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam,ThisMatlab)
+% function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam, ThisMatlab)
 % Generates the Posterior IRFs plot from the IRFs generated in
 % PosteriorIRF_core1
+% 
 % PARALLEL CONTEXT
-% Perform in parallel execution a portion of the PosteriorIRF.m code.
-% See also the comment in random_walk_metropolis_hastings_core.m funtion.
+% Performs in parallel execution a portion of the PosteriorIRF.m code.
+% For more information, see the comment in random_walk_metropolis_hastings_core.m 
+% function.
 %
 % INPUTS
-%   See the comment in random_walk_metropolis_hastings_core.m funtion.
+%   o myimput            [struc]     The mandatory variables for local/remote
+%                                    parallel computing obtained from random_walk_metropolis_hastings.m
+%                                    function.
+%   o fblck and nblck    [integer]   The Metropolis-Hastings chains.
+%   o whoiam             [integer]   In concurrent programming a modality to refer to the differents thread running in parallel is needed.
+%                                    The integer whoaim is the integer that
+%                                    allows us to distinguish between them. Then it is the index number of this CPU among all CPUs in the
+%                                    cluster.
+%   o ThisMatlab         [integer]   Allows us to distinguish between the
+%                                    'main' matlab, the slave matlab worker, local matlab, remote matlab,
+%                                     ... Then it is the index number of this slave machine in the cluster.
 %
 % OUTPUTS
-% o myoutput  [struc]
-%  Contained:
-%  OutputFileName (i.e. the figures without the file .txt).
+% o myoutput             [struc]    Contained: OutputFileName (i.e. the figures without the file .txt).
 %
 % ALGORITHM
 %   Portion of PosteriorIRF.m function code. Specifically the last 'for' cycle.
@@ -19,7 +30,7 @@ function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam, ThisMatlab)
 % SPECIAL REQUIREMENTS.
 %   None.
 %
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -100,13 +111,9 @@ for i=fpar:npar,
             set(0,'CurrentFigure',hh)
             subplot(nn,nn,subplotnum);
             if ~MAX_nirfs_dsgevar
-                h1 = area(1:options_.irf,HPDIRF(:,2,j,i));
-                set(h1,'FaceColor',[.9 .9 .9]);
-                set(h1,'BaseValue',min(HPDIRF(:,1,j,i)));
+                h1 = area(1:options_.irf,HPDIRF(:,2,j,i),'FaceColor',[.9 .9 .9],'BaseValue',min(HPDIRF(:,1,j,i))); %grey below HPDIsup and minimum of HPDIinf
                 hold on
-                h2 = area(1:options_.irf,HPDIRF(:,1,j,i),'FaceColor',[1 1 1],'BaseValue',min(HPDIRF(:,1,j,i)));
-                set(h2,'FaceColor',[1 1 1]);
-                set(h2,'BaseValue',min(HPDIRF(:,1,j,i)));
+                h2 = area(1:options_.irf,HPDIRF(:,1,j,i),'FaceColor',[1 1 1],'BaseValue',min(HPDIRF(:,1,j,i))); %white below HPDIinf and minimum of HPDIinf
                 plot(1:options_.irf,MeanIRF(:,j,i),'-k','linewidth',3)
                 % plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
                 box on
@@ -114,18 +121,14 @@ for i=fpar:npar,
                 xlim([1 options_.irf]);
                 hold off
             else
-                h1 = area(1:options_.irf,HPDIRF(:,2,j,i));
-                set(h1,'FaceColor',[.9 .9 .9]);
-                set(h1,'BaseValue',min([min(HPDIRF(:,1,j,i)),min(HPDIRFdsgevar(:,1,j,i))]));
-                hold on;
-                h2 = area(1:options_.irf,HPDIRF(:,1,j,i));
-                set(h2,'FaceColor',[1 1 1]);
-                set(h2,'BaseValue',min([min(HPDIRF(:,1,j,i)),min(HPDIRFdsgevar(:,1,j,i))]));
+                h1 = area(1:options_.irf,HPDIRF(:,2,j,i),'FaceColor',[.9 .9 .9],'BaseValue',min([min(HPDIRF(:,1,j,i)),min(HPDIRFdsgevar(:,1,j,i))])); %grey below HPDIsup and minimum of HPDIinf and HPDIRFdsgevar
+                hold on
+                h2 = area(1:options_.irf,HPDIRF(:,1,j,i),'FaceColor',[1 1 1],'BaseValue',min([min(HPDIRF(:,1,j,i)),min(HPDIRFdsgevar(:,1,j,i))])); %white below HPDIinf and minimum of  HPDIinf and HPDIRFdsgevar
                 plot(1:options_.irf,MeanIRF(:,j,i),'-k','linewidth',3)
-                % plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
                 plot(1:options_.irf,MeanIRFdsgevar(:,j,i),'--k','linewidth',2)
                 plot(1:options_.irf,HPDIRFdsgevar(:,1,j,i),'--k','linewidth',1)
                 plot(1:options_.irf,HPDIRFdsgevar(:,2,j,i),'--k','linewidth',1)
+                % plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
                 box on
                 axis tight
                 xlim([1 options_.irf]);
@@ -155,7 +158,5 @@ for i=fpar:npar,
         dyn_waitbar((i-fpar+1)/(npar-fpar+1),[],waitbarString);
     end
 end% loop over exo_var
-
-
 
 myoutput.OutputFileName = OutputFileName;
