@@ -240,7 +240,13 @@ switch minimizer_algorithm
     if ~isempty(options_.optim_opt)
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
-    [opt_par_values,fval,exitflag] = fminsearch(objective_function,start_par_value,optim_options,varargin{:});
+    if ~isoctave
+        [opt_par_values,fval,exitflag] = fminsearch(objective_function,start_par_value,optim_options,varargin{:});
+    else
+        % Under Octave, use a wrapper, since fminsearch() does not have a 4th arg
+        func = @(x) objective_function(x,varargin{:});
+        [opt_par_values,fval,exitflag] = fminsearch(func,start_par_value,optim_options);
+    end
   case 8
     % Dynare implementation of the simplex algorithm.
     simplexOptions = options_.simplex;
