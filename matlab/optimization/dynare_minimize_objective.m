@@ -115,7 +115,7 @@ switch minimizer_algorithm
         end
     end
     npar=length(start_par_value);
-    [LB, UB]=set_bounds_to_finite_values(bounds);
+    [LB, UB]=set_bounds_to_finite_values(bounds, options_.huge_number);
     fprintf('\nNumber of parameters= %d, initial temperatur= %4.3f \n', npar,sa_options.initial_temperature);
     fprintf('rt=  %4.3f; TolFun=  %4.3f; ns=  %4.3f;\n',sa_options.rt,sa_options.TolFun,sa_options.ns);
     fprintf('nt=  %4.3f; neps=  %4.3f; MaxIter=  %d\n',sa_options.nt,sa_options.neps,sa_options.MaxIter);
@@ -314,7 +314,7 @@ switch minimizer_algorithm
     end
     simpsaOptionsList = options2cell(simpsaOptions);
     simpsaOptions = simpsaset(simpsaOptionsList{:});
-    [LB, UB]=set_bounds_to_finite_values(bounds)
+    [LB, UB]=set_bounds_to_finite_values(bounds, options_.huge_number);
     [opt_par_values, fval, exitflag] = simpsa(func2str(objective_function),start_par_value,LB,UB,simpsaOptions,varargin{:});
   case 11
      options_.cova_compute = 0 ;
@@ -370,9 +370,9 @@ end
 
 end
 
-function [LB, UB]=set_bounds_to_finite_values(bounds)
+function [LB, UB]=set_bounds_to_finite_values(bounds, huge_number)
     LB=bounds(:,1);
-    LB(isinf(LB))=-1e6;
+    LB(isinf(LB))=-huge_number;
     UB=bounds(:,2);
-    UB(isinf(UB))=1e6;
+    UB(isinf(UB))=huge_number;
 end

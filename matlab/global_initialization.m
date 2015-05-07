@@ -66,6 +66,8 @@ options_.mode_check.symmetric_plots = 1;
 options_.mode_check.number_of_points = 20;
 options_.mode_check.nolik = 0;
 
+options_.huge_number = 1e7;
+
 % Default number of threads for parallelized mex files.
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
 options_.threads.kronecker.sparse_hessian_times_B_kronecker_C = 1;
