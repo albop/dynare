@@ -3,28 +3,38 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 % This is the most important function for the management of DYNARE parallel
 % computing.
 % It is the top-level function called on the master computer when parallelizing a task.
-
-% This function has two main computational strategies for managing the matlab worker (slave process).
+% 
+% This function has two main computational strategies for managing the
+% matlab worker (slave process):
+% 
 % 0 Simple Close/Open Stategy:
-% In this case the new Matlab instances (slave process) are open when
-% necessary and then closed. This can happen many times during the
-% simulation of a model.
-
+%   In this case the new Matlab instances (slave process) are open when
+%   necessary and then closed. This can happen many times during the
+%   simulation of a model.
+% 
 % 1 Always Open Strategy:
-% In this case we have a more sophisticated management of slave processes,
-% which are no longer closed at the end of each job. The slave processes
-% wait for a new job (if it exists). If a slave does not receive a new job after a
-% fixed time it is destroyed. This solution removes the computational
-% time necessary to Open/Close new Matlab instances.
-
+%   In this case we have a more sophisticated management of slave processes,
+%   which are no longer closed at the end of each job. The slave processes
+%   wait for a new job (if it exists). If a slave does not receive a new job after a
+%   fixed time it is destroyed. This solution removes the computational
+%   time necessary to Open/Close new Matlab instances.
+% 
 % The first (point 0) is the default Strategy
 % i.e.(Parallel_info.leaveSlaveOpen=0). This value can be changed by the
 % user in xxx.mod file or it is changed by the programmer if it is necessary to
 % reduce the overall computational time. See for example the
 % prior_posterior_statistics.m.
-
+% 
 % The number of parallelized threads will be equal to (nBlock-fBlock+1).
 %
+% Treatment of global variables:
+%   Global variables used within the called function (e.g.
+%   objective_function_penalty_base) are wrapped and passed by storing their 
+%   values at the start of the parallel computation in a file via
+%   storeGlobalVars.m. This file is then loaded in the separate,
+%   independent slave Matlab sessions. By keeping them separate, no
+%   interaction via global variables can take place. 
+% 
 % INPUTS
 %  o Parallel [struct vector]   copy of options_.parallel
 %  o fBlock [int]               index number of the first thread
@@ -53,7 +63,7 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 %                              the number of CPUs declared in "Parallel", if
 %                              the number of required threads is lower)
 
-% Copyright (C) 2009-2013 Dynare Team
+% Copyright (C) 2009-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -126,7 +136,7 @@ if isHybridMatlabOctave || isoctave
         end
     end
     
-    if exist('fGlobalVar') && ~isempty(fGlobalVar),
+    if exist('fGlobalVar','var') && ~isempty(fGlobalVar),
     fInputNames = fieldnames(fGlobalVar);
     for j=1:length(fInputNames),
         TargetVar = fGlobalVar.(fInputNames{j});
@@ -161,7 +171,7 @@ switch Strategy
         save([fname,'_input.mat'],'fInputVar','Parallel','-append')
         
     case 1
-        if exist('fGlobalVar'),
+        if exist('fGlobalVar','var'),
             save(['temp_input.mat'],'fInputVar','fGlobalVar')
         else
             save(['temp_input.mat'],'fInputVar')
@@ -540,7 +550,6 @@ else
         'Renderer','Painters', ...
         'Resize','off');
     
-    vspace = 0.1;
     ncol = ceil(totCPU/10);
     hspace = 0.9/ncol;
     hstatus(1) = axes('position',[0.05/ncol 0.92 0.9/ncol 0.03], ...
@@ -883,7 +892,3 @@ switch Strategy
             end
         end
 end
-
-
-
-
