@@ -4864,10 +4864,11 @@ compute the smoothed value of the variables of a model with calibrated parameter
 
 @item 1
 Uses @code{fmincon} optimization routine (available under MATLAB if
-the optimization toolbox is installed; not available under Octave)
+the Optimization Toolbox is installed; not available under Octave)
 
 @item 2
-Value no longer used
+Uses the continuous simulated annealing global optimization algorithm 
+described in @cite{Corana et al. (1987)} and @cite{Goffe et al. (1994)}.
 
 @item 3
 Uses @code{fminunc} optimization routine (available under MATLAB if
@@ -4901,11 +4902,20 @@ routine (generally more efficient than the MATLAB or Octave implementation
 available with @code{mode_compute=7})
 
 @item 9
-Uses the CMA-ES (Covariance Matrix Adaptation Evolution Strategy) algorithm, an evolutionary algorithm for difficult non-linear non-convex optimization
+Uses the CMA-ES (Covariance Matrix Adaptation Evolution Strategy) algorithm of 
+@cite{Hansen and Kern (2004)}, an evolutionary algorithm for difficult non-linear non-convex optimization
 
 @item 10
 Uses the simpsa algorithm, based on the combination of the non-linear simplex and simulated annealing algorithms and proposed by
 @cite{Cardoso, Salcedo and Feyo de Azevedo (1996)}.
+
+@item 101
+Uses the SolveOpt algorithm for local nonlinear optimization problems proposed by
+@cite{Kuntsevich and Kappel (1997)}.
+
+@item 102
+Uses @code{simulannealbnd} optimization routine (available under MATLAB if
+the Global Optimization Toolbox is installed; not available under Octave)
 
 @item @var{FUNCTION_NAME}
 It is also possible to give a @var{FUNCTION_NAME} to this option,
@@ -4977,12 +4987,53 @@ A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the o
 @table @code
 
 @item 1, 3, 7
-Available options are given in the documentation of the MATLAB optimization toolbox or in Octave's documentation.
+Available options are given in the documentation of the MATLAB Optimization Toolbox or in Octave's documentation.
+
+@item 2
+Available options are:
+
+@table @code
+
+@item 'initial_step_length'
+Initial step length. Default: @code{1}
+
+@item 'initial_temperature'
+Initial temperature. Default: @code{15}
+
+@item 'MaxIter'
+Maximum number of function evaluations. Default: @code{100000}
+
+@item 'neps'
+Number of final function values used to decide upon termination. Default: @code{10}
+
+@item 'ns'
+Number of cycles. Default: @code{10}
+
+@item 'nt'
+Number of iterations before temperature reduction. Default: @code{10}
+
+@item 'step_length_c'
+Step length adjustment. Default: @code{0.1}
+
+@item 'TolFun'
+Stopping criteria. Default: @code{1e-8}
+
+@item 'rt'
+Temperature reduction factor. Default: @code{0.1}
+
+@item 'verbosity'
+Controls verbosity of display during optimization, ranging from 0 (silent) to 3 
+(each function evaluation). Default: @code{1}
+
+@end table
 
 @item 4
 Available options are:
 
 @table @code
+
+@item 'InitialInverseHessian'
+Initial approximation for the inverse of the Hessian matrix of the posterior kernel (or likelihood). Obviously this approximation has to be a square, positive definite and symmetric matrix. Default: @code{'1e-4*eye(nx)'}, where @code{nx} is the number of parameters to be estimated.
 
 @item 'MaxIter'
 Maximum number of iterations. Default: @code{1000}
@@ -4996,9 +5047,6 @@ Size of the perturbation used to compute numerically the gradient of the objecti
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-7}
 
-@item 'InitialInverseHessian'
-Initial approximation for the inverse of the Hessian matrix of the posterior kernel (or likelihood). Obviously this approximation has to be a square, positive definite and symmetric matrix. Default: @code{'1e-4*eye(nx)'}, where @code{nx} is the number of parameters to be estimated.
-
 @end table
 
 @item 5
@@ -5006,14 +5054,14 @@ Available options are:
 
 @table @code
 
-@item 'MaxIter'
-Maximum number of iterations. Default: @code{1000}
-
 @item 'Hessian'
 Triggers three types of Hessian computations. @code{0}: outer product gradient; @code{1} default DYNARE Hessian routine; @code{2} 'mixed' outer product gradient, where diagonal elements are obtained using second order derivation formula and outer product is used for correlation structure. 
 Both @{0@} and @{2@} options require univariate filters, to ensure using maximum number of individual densities and a positive definite Hessian.
 Both @{0@} and @{2@} are quicker than default DYNARE numeric Hessian, but provide decent starting values for Metropolis for large models (option @{2@} being more accurate than @{0@}).
 Default: @code{1}.
+
+@item 'MaxIter'
+Maximum number of iterations. Default: @code{1000}
 
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-5} for numerical derivatives @code{1e-7} for analytic derivatives.
@@ -5025,8 +5073,14 @@ Available options are:
 
 @table @code
 
-@item 'NumberOfMh'
-Number of MCMC run sequentially. Default: @code{3}
+@item 'AcceptanceRateTarget'
+A real number between zero and one. The scale parameter of the jumping distribution is adjusted so that the effective acceptance rate matches the value of option @code{'AcceptanceRateTarget'}. Default: @code{1.0/3.0}
+
+@item 'InitialCovarianceMatrix'
+Initial covariance matrix of the jumping distribution. Default is @code{'previous'} if option @code{mode_file} is used, @code{'prior'} otherwise.
+
+@item 'nclimb'
+Number of iterations in the last MCMC (climbing mode).
 
 @item 'ncov-mh'
 Number of iterations used for updating the covariance matrix of the jumping distribution. Default: @code{20000}
@@ -5034,14 +5088,8 @@ Number of iterations used for updating the covariance matrix of the jumping dist
 @item 'nscale-mh'
 Maximum number of iterations used for adjusting the scale parameter of the jumping distribution.  @code{200000}
 
-@item 'nclimb'
-Number of iterations in the last MCMC (climbing mode).
-
-@item 'InitialCovarianceMatrix'
-Initial covariance matrix of the jumping distribution. Default is @code{'previous'} if option @code{mode_file} is used, @code{'prior'} otherwise.
-
-@item 'AcceptanceRateTarget'
-A real number between zero and one. The scale parameter of the jumping distribution is adjusted so that the effective acceptance rate matches the value of option @code{'AcceptanceRateTarget'}. Default: @code{1.0/3.0}
+@item 'NumberOfMh'
+Number of MCMC run sequentially. Default: @code{3}
 
 @end table
 
@@ -5049,6 +5097,9 @@ A real number between zero and one. The scale parameter of the jumping distribut
 Available options are:
 
 @table @code
+
+@item 'InitialSimplexSize'
+Initial size of the simplex, expressed as percentage deviation from the provided initial guess in each direction. Default: @code{.05}
 
 @item 'MaxIter'
 Maximum number of iterations. Default: @code{5000}
@@ -5064,10 +5115,6 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
-
-@item 'InitialSimplexSize'
-
-Initial size of the simplex, expressed as percentage deviation from the provided initial guess in each direction. Default: @code{.05}
 
 @end table
 
@@ -5095,6 +5142,9 @@ Available options are:
 
 @table @code
 
+@item 'EndTemperature'
+Terminal condition w.r.t the temperature. When the temperature reaches @code{EndTemperature}, the temperature is set to zero and the algorithm falls back into a standard simplex algorithm. Default: @code{.1}
+
 @item 'MaxIter'
 Maximum number of iterations. Default: @code{5000}
 
@@ -5107,10 +5157,32 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
 
-@item 'EndTemperature'
-Terminal condition w.r.t the temperature. When the temperature reaches @code{EndTemperature}, the temperature is set to zero and the algorithm falls back into a standard simplex algorithm. Default: @code{.1}
+@end table
+
+@item 101
+Available options are:
+
+@table @code
+
+@item 'LBGradientStep'
+Lower bound for the stepsize used for the difference approximation of gradients. Default: @code{1e-11}
+
+@item 'MaxIter'
+Maximum number of iterations. Default: @code{15000}
+
+@item 'SpaceDilation'
+Coefficient of space dilation. Default: @code{2.5}
+
+@item 'TolFun'
+Tolerance parameter (w.r.t the objective function). Default: @code{1e-6}
+
+@item 'TolX'
+Tolerance parameter (w.r.t the instruments). Default: @code{1e-6}
 
 @end table
+
+@item 102
+Available options are given in the documentation of the MATLAB Global Optimization Toolbox.
 
 @end table
 
@@ -12443,6 +12515,11 @@ with an Application to a Non-Linear Phillips Curve,'' @i{Computational
 Economics}, 17, 125--139
 
 @item
+Corona, Angelo,  M. Marchesi, Claudio Martini, and Sandro Ridella (1987):
+``Minimizing multimodal functions of continuous variables with the ``simulated annealing'' algorithm'',
+@i{ACM Transactions on Mathematical Software}, 13(3), 262--280
+
+@item
 Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
 ``Introducing financial frictions and unemployment into a small open
 economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
@@ -12490,6 +12567,16 @@ International Meeting on Bayesian Statistics, pp. 169--194, Oxford University Pr
 Geweke, John (1999): ``Using simulation methods for Bayesian econometric models:
 Inference, development and communication,'' @i{Econometric Reviews}, 18(1), 1--73
 
+@item 
+Goffe, William L., Gary D. Ferrier, and John Rogers (1994): ``Global Optimization 
+of Statistical Functions with Simulated Annealing,'' @i{Journal of Econometrics}, 60(1/2), 
+65--100
+
+@item
+Hansen, Nikolaus and Stefan Kern (2004): ``Evaluating the CMA Evolution Strategy 
+on Multimodal Test Functions''. In: @i{Eighth International Conference on Parallel 
+Problem Solving from Nature PPSN VIII, Proceedings}, Berlin: Springer, 282--291 
+
 @item
 Ireland, Peter (2004): ``A Method for Taking Models to the Data,''
 @i{Journal of Economic Dynamics and Control}, 28, 1205--26
@@ -12527,6 +12614,11 @@ Koop, Gary (2003), @i{Bayesian Econometrics}, John Wiley & Sons
 Koopman, S. J. and J. Durbin (2003): ``Filtering and Smoothing of
 State Vector for Diffuse State Space Models,'' @i{Journal of Time
 Series Analysis}, 24(1), 85--98
+
+@item 
+Kuntsevich, Alexei V. and  Franz Kappel (1997): ``SolvOpt - The solver 
+for local nonlinear optimization problems (version 1.1, Matlab, C, FORTRAN)'', 
+University of Graz, Graz, Austria
 
 @item
 Laffargue, Jean-Pierre (1990): ``Résolution d'un modèle
