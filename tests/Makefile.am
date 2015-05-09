@@ -182,6 +182,7 @@ MODFILES = \
 	deterministic_simulations/rbc_det_exo_lag_2a.mod \
 	deterministic_simulations/rbc_det_exo_lag_2b.mod \
 	deterministic_simulations/rbc_det_exo_lag_2c.mod \
+	deterministic_simulations/sim_several_leads_lags.mod \
 	walsh.mod \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
