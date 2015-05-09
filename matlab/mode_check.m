@@ -1,8 +1,8 @@
-function mode_check(fun,x,hessian,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults)
+function mode_check(fun,x,hessian_mat,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults)
 % Checks the estimated ML mode or Posterior mode.
 
 %@info:
-%! @deftypefn {Function File} mode_check (@var{fun}, @var{x}, @var{hessian}, @var{DynareDataset}, @var{DynareOptions}, @var{Model}, @var{EstimatedParameters}, @var{BayesInfo}, @var{DynareResults})
+%! @deftypefn {Function File} mode_check (@var{fun}, @var{x}, @var{hessian_mat}, @var{DynareDataset}, @var{DynareOptions}, @var{Model}, @var{EstimatedParameters}, @var{BayesInfo}, @var{DynareResults})
 %! @anchor{mode_check}
 %! @sp 1
 %! Checks the estimated ML mode or Posterior mode by plotting sections of the likelihood/posterior kernel.
@@ -58,13 +58,13 @@ function mode_check(fun,x,hessian,DynareDataset,DatasetInfo,DynareOptions,Model,
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 TeX = DynareOptions.TeX;
-if ~isempty(hessian);
-    [ s_min, k ] = min(diag(hessian));
+if ~isempty(hessian_mat);
+    [ s_min, k ] = min(diag(hessian_mat));
 end
 
 fval = feval(fun,x,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults);
 
-if ~isempty(hessian);
+if ~isempty(hessian_mat);
     skipline()
     disp('MODE CHECK')
     skipline()
