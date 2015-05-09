@@ -319,9 +319,11 @@ DynareOptions.warning_for_steadystate = 0;
 LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,start,DynareOptions);
 set_dynare_random_generator_state(s1,s2);
 if imag(LIK)
+    info = 46;
     likelihood = objective_function_penalty_base;
     exit_flag  = 0;
 elseif isnan(LIK)
+    info = 45;
     likelihood = objective_function_penalty_base;
     exit_flag  = 0;
 else
@@ -333,3 +335,17 @@ DynareOptions.warning_for_steadystate = 1;
 % ------------------------------------------------------------------------------
 lnprior = priordens(xparam1(:),BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
 fval    = (likelihood-lnprior);
+
+if isnan(fval)
+    info = 47;
+    fval = objective_function_penalty_base + 100;
+    exit_flag = 0;
+    return
+end
+
+if imag(fval)~=0
+    info = 48;
+    fval = objective_function_penalty_base + 100;
+    exit_flag = 0;
+    return
+end
