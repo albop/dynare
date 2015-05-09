@@ -1,21 +1,23 @@
 function [nvar,vartan,CorrFileNumber] = dsge_simulated_theoretical_correlation(SampleSize,nar,M_,options_,oo_,type)
+% function [nvar,vartan,CorrFileNumber] = dsge_simulated_theoretical_correlation(SampleSize,nar,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the endogenous
-% variables second order moments.
+% variables' second order moments.
 %
 % INPUTS
-%   SampleSize   [integer]
-%   nar          [integer]
-%   M_           [structure]
-%   options_     [structure]
-%   oo_          [structure]
-%   type         [string]
+%   SampleSize   [integer]          scalar, number of simulations.
+%   nar          [integer]          maximum number of autocorrelations to
+%                                   consider
+%   M_           [structure]        Dynare structure describing the model.
+%   options_     [structure]        Dynare structure defining global options
+%   oo_          [structure]        Dynare structure where the results are saved.
+%   type         [string]           'prior' or 'posterior'
 %
 % OUTPUTS
-%   nvar           [integer]
-%   vartan         [char]
-%   CorrFileNumber [integer]
-
-% Copyright (C) 2007-2012 Dynare Team
+%   nvar           [integer]        nvar is the number of stationary variables.
+%   vartan         [char]           array of characters (with nvar rows).
+%   CorrFileNumber [integer]        scalar, number of prior or posterior data files (for correlation).
+ 
+% Copyright (C) 2007-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -47,6 +49,13 @@ else
     error()
 end
 NumberOfDrawsFiles = length(DrawsFiles);
+
+%delete old stale files before creating new ones
+if posterior
+    delete_stale_file([M_.dname '/metropolis/' M_.fname '_PosteriorCorrelations*']);
+else
+    delete_stale_file([M_.dname '/prior/moments/' M_.fname '_PriorCorrelations*']);
+end
 
 % Set varlist (vartan)
 if ~posterior
