@@ -7,7 +7,7 @@
 * in period 400 the level of productivity,  after an  initial one percent shock,  
 * is still  0.67\% above its steady state level.  
 *
-* Written by Stéphane Adjemian. For more information, see 
+* Written by StÃ©phane Adjemian. For more information, see 
 * http://gitlab.ithaca.fr/Dynare/differentiate-forward-variables
 */
 var Capital, Output, Labour, Consumption, Efficiency, efficiency, ExpectedTerm;
@@ -32,25 +32,25 @@ sigma   =  0.010;
 
 model(differentiate_forward_vars);
 
-  // Eq. n°1:
+  // Eq. nÂ°1:
   efficiency = rho*efficiency(-1) + sigma*EfficiencyInnovation;
 
-  // Eq. n°2:
+  // Eq. nÂ°2:
   Efficiency = effstar*exp(efficiency);
 
-  // Eq. n°3:
+  // Eq. nÂ°3:
   Output = Efficiency*(alpha*(Capital(-1)^psi)+(1-alpha)*(Labour^psi))^(1/psi);
 
-  // Eq. n°4:
+  // Eq. nÂ°4:
   Consumption + Capital - Output - (1-delta)*Capital(-1);
 
-  // Eq. n°5:
+  // Eq. nÂ°5:
   ((1-theta)/theta)*(Consumption/(1-Labour)) - (1-alpha)*(Output/Labour)^(1-psi);
 
-  // Eq. n°6:
+  // Eq. nÂ°6:
   (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - ExpectedTerm(1);
 
-  // Eq. n°7:
+  // Eq. nÂ°7:
   ExpectedTerm = beta*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital(-1))^(1-psi))+1-delta);
 
 end;
