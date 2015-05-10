@@ -851,6 +851,11 @@ Allows Dynare to issue a warning and continue processing when
 @item there are more endogenous variables than equations
 @item an undeclared symbol is assigned in @code{initval} or @code{endval}
 @end enumerate
+
+@item fast
+Only useful with model option @code{use_dll}. Don't recompile the MEX
+files when running again the same model file and the lists of variables
+and the equations haven't changed.
 @end table
 
 @outputhead
