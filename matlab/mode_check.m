@@ -68,7 +68,7 @@ if ~isempty(hessian_mat);
     skipline()
     disp('MODE CHECK')
     skipline()
-    disp(sprintf('Fval obtained by the minimization routine: %f', fval))
+    fprintf('Fval obtained by the minimization routine (minus the posterior/likelihood)): %f', fval);
     skipline()
     if s_min<eps
         disp(sprintf('Most negative variance %f for parameter %d (%s = %f)', s_min, k , BayesInfo.name{k}, x(k)))
