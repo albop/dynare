@@ -69,11 +69,11 @@ for j= 1:nvar
 % $$$       hold on
 % $$$       obs = 10;
 % $$$   end
-    plot([NaN(obs,1); yf.(vn)]);
+    plot([NaN(obs,1); yf.(vn)],'b-');
     hold on
-    plot([NaN(obs,1); hpdinf.(vn)]);
+    plot([NaN(obs,1); hpdinf.(vn)],'b-');
     hold on
-    plot([NaN(obs,1); hpdsup.(vn)]);
+    plot([NaN(obs,1); hpdsup.(vn)],'b-');
     title(vn,'Interpreter','none');
     xlim([1 obs+length(hpdsup.(vn))])
     hold off
