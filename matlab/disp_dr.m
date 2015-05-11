@@ -92,7 +92,7 @@ disp('POLICY AND TRANSITION FUNCTIONS')
 % variable names
 str = char(32*ones(1,var_name_width)); 
 for i=1:nvar
-    str = [str sprintf(header_label_format,M_.endo_names(k1(ivar(i)),:))];
+    str = [str sprintf(header_label_format,deblank(M_.endo_names(k1(ivar(i)),:)))];
 end
 disp(str);
 %
