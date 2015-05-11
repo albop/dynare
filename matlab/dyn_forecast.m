@@ -136,5 +136,5 @@ for i=1:M_.exo_det_nbr
 end
 
 if options_.nograph == 0
-    forecast_graphs(var_list);
+    forecast_graphs(var_list,M_, oo_,options_)
 end

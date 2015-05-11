@@ -1,4 +1,12 @@
-function forecast_graphs(var_list)
+function forecast_graphs(var_list,M_, oo_,options_)
+% function forecast_graphs(var_list)
+% Plots the classical forecasts created by dyn_forecast.m
+% 
+% Inputs:
+%   o var_list              character array with variable names
+%   o M_                    model structure
+%   o oo_                   outputs structure
+%   o options_              options structure
 
 % Copyright (C) 2008-2013 Dynare Team
 %
@@ -16,8 +24,6 @@ function forecast_graphs(var_list)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global M_ oo_ options_
 
 nc = 4;
 nr = 3;
