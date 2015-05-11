@@ -855,7 +855,10 @@ Allows Dynare to issue a warning and continue processing when
 @item fast
 Only useful with model option @code{use_dll}. Don't recompile the MEX
 files when running again the same model file and the lists of variables
-and the equations haven't changed.
+and the equations haven't changed. We use a 32 bit checksum, stored in
+@code{<model filename>/checksum}. There is a very small probability that
+the preprocessor misses a change in the model. In case of doubt, re-run
+without the @code{fast} option.
 @end table
 
 @outputhead
