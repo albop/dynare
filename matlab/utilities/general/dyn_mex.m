@@ -37,9 +37,11 @@ Dmex = dir([basename '_dynamic.' mexext]);
 
 % compile only if date of C file is greater than date of mex file
 % and force is not True
-if (Dmex.datenum > Dc.datenum) && ~force
-    disp('Mex files are newer than the source: not recompiled')
-    return
+if ~isempty(Dmex)
+    if (Dmex.datenum > Dc.datenum) && ~force
+        disp('Mex files are newer than the source: not recompiled')
+        return
+    end
 end
 
 if ~exist('OCTAVE_VERSION')
