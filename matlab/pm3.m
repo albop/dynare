@@ -254,6 +254,7 @@ if options_.TeX,
             fprintf(fidTeX,'\\centering \n');
             fprintf(fidTeX,['\\includegraphics[scale=0.5]{%s/Output/%s_' name3 '_%s}\n'],M_.dname,M_.fname,deblank(tit3(i,:)));
             fprintf(fidTeX,'\\label{Fig:%s:%s}\n',name3,deblank(tit3(i,:)));
+            fprintf(fidTeX,'\\caption{%s}\n',tit1);
             fprintf(fidTeX,'\\end{figure}\n');
             fprintf(fidTeX,' \n');
             subplotnum = 0;
