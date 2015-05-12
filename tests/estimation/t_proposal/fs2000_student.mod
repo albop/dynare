@@ -117,4 +117,4 @@ varobs gp_obs gy_obs;
 options_.proposal_distribution='rand_multivariate_student';
 options_.student_degrees_of_freedom=5;
 
-estimation(order=1, datafile='../fsdat_simul',nobs=192, loglinear, mh_replic=50000, mh_nblocks=2, mh_jscale=0.8,mode_compute=4);
+estimation(order=1, datafile='../fsdat_simul',nobs=192, loglinear, mh_replic=2002, mh_nblocks=2, mh_jscale=0.8,mode_compute=4);
