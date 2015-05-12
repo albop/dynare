@@ -8,7 +8,7 @@ function forecast_graphs(var_list,M_, oo_,options_)
 %   o oo_                   outputs structure
 %   o options_              options structure
 
-% Copyright (C) 2008-2013 Dynare Team
+% Copyright (C) 2008-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,6 +30,7 @@ nr = 3;
 exo_nbr = M_.exo_nbr;
 endo_names = M_.endo_names;
 fname = M_.fname;
+dname = M_.dname;
 yf = oo_.forecast.Mean;
 hpdinf = oo_.forecast.HPDinf;
 hpdsup = oo_.forecast.HPDsup;
@@ -40,18 +41,18 @@ i_var = [];
 for i = 1:size(var_list)
     tmp = strmatch(var_list(i,:),endo_names,'exact');
     if isempty(tmp)
-        error([var_list(i,:) ' isn''t and endogenous variable'])
+        error([var_list(i,:) ' isn''t an endogenous variable'])
     end
     i_var = [i_var; tmp];
 end
 nvar = length(i_var);
 
-% create subdirectory <fname>/graphs if id doesn't exist
-if ~exist(fname, 'dir')
-    mkdir('.',fname);
+% create subdirectory <dname>/graphs if id doesn't exist
+if ~exist(dname, 'dir')
+    mkdir('.',dname);
 end
-if ~exist([fname '/graphs'])
-    mkdir(fname,'graphs');
+if ~exist([dname '/graphs'],'dir')
+    mkdir(dname,'graphs');
 end
 
 m = 1;
@@ -59,7 +60,7 @@ n_fig = 1;
 hh=dyn_figure(options_,'Name','Forecasts (I)');
 for j= 1:nvar
     if m > nc*nr; 
-        dyn_saveas(hh,[ fname '/graphs/forcst' int2str(n_fig)],options_);
+        dyn_saveas(hh,[ dname '/graphs/forcst' int2str(n_fig)],options_);
         
         n_fig =n_fig+1;
         eval(['hh=dyn_figure(options_,''Name'',''Forecasts (' int2str(n_fig) ')'');']);
@@ -87,5 +88,5 @@ for j= 1:nvar
 end
 
 if m > 1
-    dyn_saveas(hh,[fname '/graphs/forcst' int2str(n_fig)],options_);
+    dyn_saveas(hh,[dname '/graphs/forcst' int2str(n_fig)],options_);
 end
