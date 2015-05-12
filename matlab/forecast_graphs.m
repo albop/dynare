@@ -35,7 +35,7 @@ yf = oo_.forecast.Mean;
 hpdinf = oo_.forecast.HPDinf;
 hpdsup = oo_.forecast.HPDsup;
 if isempty(var_list)
-    varlist = endo_names(1:M_.orig_endo_nbr,:);
+    var_list = endo_names(1:M_.orig_endo_nbr,:);
 end
 i_var = [];
 for i = 1:size(var_list)
