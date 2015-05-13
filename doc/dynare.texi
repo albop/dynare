@@ -3861,6 +3861,11 @@ steady states. @code{stoch_simul} will display the moments, decision rules,
 and impulse responses for the log-linearized variables. The decision rules saved
 in @code{oo_.dr} and the simulated variables will also be the ones for the log-linear variables.
 
+@item dr_display_tol = @var{DOUBLE}
+Tolerance for the suppression of small terms in the display of decision rules. Rows where all terms are 
+smaller than @code{dr_display_tol} are not displayed. 
+Default value: @code{1e-6}.
+
 @end table
 
 @outputhead
@@ -4982,6 +4987,10 @@ Number of points around the posterior mode where the posterior kernel is evaluat
 @anchor{prior_trunc} Probability of extreme values of the prior
 density that is ignored when computing bounds for the
 parameters. Default: @code{1e-32}
+
+@item huge_number  = @var{DOUBLE}
+@anchor{huge_number} Value for replacing infinite values in the definition of (prior) bounds 
+when finite values are required for computational reasons. Default: @code{1e7}
 
 @item load_mh_file
 @anchor{load_mh_file} Tells Dynare to add to previous
@@ -6645,6 +6654,10 @@ Specifies the optimizer for minimizing the objective function. The same solvers 
 
 @item optim = (@var{NAME}, @var{VALUE}, ...)
 A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the optimization routines. The set of available options depends on the selected optimization routine (i.e. on the value of option @ref{opt_algo}). @xref{optim}.
+
+@item huge_number = @var{DOUBLE}
+Value for replacing the infinite bounds on parameters by finite numbers. Used by some optimizers for numerical reasons (@pxref{huge_number}).
+Users need to make sure that the optimal parameters are not larger than this value. Default: @code{1e7}
 
 @end table
 
