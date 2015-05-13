@@ -9,8 +9,9 @@ crit = 1e-7;
 numgrad = 2; 
 epsilon = 1e-6; 
 analytic_grad=[];
-
+Verbose=1;
+Save_files=1;
 %call optimizer
 [fval,opt_par_values,grad,hessian_mat,itct,fcount,exitflag] = ...
-    csminwel1(objective_function_handle, start_par_value, H0, analytic_grad, crit, nit, numgrad, epsilon, varargin{:});
+    csminwel1(objective_function_handle, start_par_value, H0, analytic_grad, crit, nit, numgrad, epsilon, Verbose,Save_files, varargin{:});
 end

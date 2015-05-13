@@ -1,13 +1,15 @@
-function H = bfgsi1(H0,dg,dx)
-% H = bfgsi1(H0,dg,dx)
+function H = bfgsi1(H0,dg,dx,Verbose,Save_files)
+% H = bfgsi1(H0,dg,dx,Verbose,Save_files)
 % Update Inverse Hessian matrix
 % 
 % Inputs:
 %   H0  [npar by npar]  initial inverse Hessian matrix
 %   dg  [npar by 1]     previous change in gradient
 %   dx  [npar by 1]     previous change in x;
+%   Verbose [scalar]    Indicator for silent mode
+%   Save_files [scalar] Indicator whether to save files  
 % 
-% 6/8/93 version that updates inverse hessian instead of hessian
+% 6/8/93 version that updates inverse Hessian instead of Hessian
 % itself.
 % 
 % Original file downloaded from:
@@ -42,10 +44,12 @@ dgdx = dg'*dx;
 if (abs(dgdx) >1e-12)
     H = H0 + (1+(dg'*Hdg)/dgdx)*(dx*dx')/dgdx - (dx*Hdg'+Hdg*dx')/dgdx;
 else
-    disp('bfgs update failed.')
-    disp(['|dg| = ' num2str(sqrt(dg'*dg)) '|dx| = ' num2str(sqrt(dx'*dx))]);
-    disp(['dg''*dx = ' num2str(dgdx)])
-    disp(['|H*dg| = ' num2str(Hdg'*Hdg)])
+    disp_verbose('bfgs update failed.',Verbose)
+    disp_verbose(['|dg| = ' num2str(sqrt(dg'*dg)) '|dx| = ' num2str(sqrt(dx'*dx))],Verbose);
+    disp_verbose(['dg''*dx = ' num2str(dgdx)],Verbose)
+    disp_verbose(['|H*dg| = ' num2str(Hdg'*Hdg)],Verbose)
     H=H0;
 end
-save('H.dat','H')
+if Save_files
+    save('H.dat','H')
+end

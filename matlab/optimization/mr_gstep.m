@@ -1,4 +1,4 @@
-function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,varargin)
+function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,Verbose,Save_files,varargin)
 % function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,varargin)
 %
 % Gibbs type step in optimisation
@@ -69,14 +69,19 @@ while i<n
         gg(i)=(f1(i)'-f_1(i)')./(2.*h1(i));
         hh(i) = 1/max(1.e-9,abs( (f1(i)+f_1(i)-2*f0)./(h1(i)*h1(i)) ));
         if gg(i)*(hh(i)*gg(i))/2 > htol
-            [f0 x fc retcode] = csminit1(func0,x,f0,gg,0,diag(hh),varargin{:});
+            [f0 x fc retcode] = csminit1(func0,x,f0,gg,0,diag(hh),Verbose,varargin{:});
             ig(i)=1;
-            fprintf(['Done for param %s = %8.4f\n'],varargin{6}.name{i},x(i))
+            if Verbose
+                fprintf(['Done for param %s = %8.4f\n'],varargin{6}.name{i},x(i))
+            end
         end
         xh1=x;
     end
+    if Save_files
+        save gstep.mat x h1 f0
+    end
+end
+if Save_files
     save gstep.mat x h1 f0
 end
-
-save gstep.mat x h1 f0
 

@@ -487,6 +487,9 @@ options_.homotopy_force_continue = 0;
 %csminwel optimization routine
 csminwel.tolerance.f=1e-7;
 csminwel.maxiter=1000;
+csminwel.verbosity=1;
+csminwel.Save_files=1;
+
 options_.csminwel=csminwel;
 
 %newrat optimization routine
@@ -494,6 +497,9 @@ newrat.hess=1; % dynare numerical hessian
 newrat.tolerance.f=1e-5;
 newrat.tolerance.f_analytic=1e-7;
 newrat.maxiter=1000;
+newrat.verbosity=1;
+newrat.Save_files=1;
+
 options_.newrat=newrat;
 
 % Simplex optimization routine (variation on Nelder Mead algorithm).

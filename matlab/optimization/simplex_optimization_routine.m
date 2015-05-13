@@ -507,12 +507,12 @@ fval = fv(1);
 exitflag = 1;
 
 if func_count>= max_func_calls
-    disp('Maximum number of objective function calls has been exceeded!')
+    disp_verbose('Maximum number of objective function calls has been exceeded!',verbose)
     exitflag = 0;
 end
 
 if iter_count>= max_iterations
-    disp('Maximum number of iterations has been exceeded!')
+    disp_verbose('Maximum number of iterations has been exceeded!',verbose)
     exitflag = 0;
 end
 
