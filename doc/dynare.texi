@@ -5255,6 +5255,32 @@ deprecated and will be removed in a future release of Dynare.
 @anchor{dsge_varlag} The number of lags used to estimate a DSGE-VAR
 model. Default: @code{4}.
 
+
+@item use_tarb
+Instructs Dynare to use the Tailored randomized block (TaRB) Metropolis-Hastings algorithm 
+proposed by @cite{Chib and Ramamurthy 2010} instead of the standard Random-Walk Metropolis-Hastings. 
+In this algorithm, at each iteration the estimated parameters are randomly assigned to different 
+blocks. For each of these blocks a mode-finding step is conducted. The inverse Hessian at this mode 
+is then used as the covariance of the proposal density for a Random-Walk Metropolis-Hastings step. 
+If the numerical Hessian is not positive definite, the generalized Cholesky decomposition of 
+@cite{Schnabel and Eskow 1990} is used, but without pivoting. The TaRB-MH algorithm massively reduces 
+the autocorrelation in the MH draws and thus reduces the number of draws required to 
+representatively sample from the posterior. However, this comes at a computational costs as the 
+algorithm takes more time to run.
+
+@item tarb_new_block_probability = @var{DOUBLE}
+Specifies the probability of the next parameter belonging to a new block when the random blocking in the TaRB 
+Metropolis-Hastings algorithm is conducted. The higher this number, the smaller is the average block size and the 
+more random blocks are formed during each parameter sweep. Default: @code{0.25}. 
+
+@item tarb_mode_compute = @var{INTEGER}
+Specifies the mode-finder run in every iteration for every block of the 
+TaRB Metropolis-Hastings algorithm. @pxref{mode_compute}. Default: @code{4}. 
+
+@item tarb_optim = @var{INTEGER}
+Specifies the options for the mode-finder used in the TaRB 
+Metropolis-Hastings algorithm. @pxref{optim}. 
+
 @item moments_varendo
 @anchor{moments_varendo} Triggers the computation of the posterior
 distribution of the theoretical moments of the endogenous
@@ -12561,6 +12587,17 @@ computational and graphical statistics}, 7, pp. 434--455
 Cardoso, Margarida F., R. L. Salcedo and S. Feyo de Azevedo (1996): ``The simplex simulated annealing approach to continuous non-linear optimization,'' @i{Computers chem. Engng}, 20(9), 1065-1080
 
 @item
+Chib, Siddhartha and Srikanth Ramamurthy (2010):
+``Tailored randomized block MCMC methods with application to DSGE models,'' 
+@i{Journal of Econometrics}, 155, 19--38
+
+@item
+Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
+``Introducing financial frictions and unemployment into a small open
+economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
+1999--2041
+
+@item
 Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''
 
 @item
@@ -12578,12 +12615,6 @@ Economics}, 17, 125--139
 Corona, Angelo,  M. Marchesi, Claudio Martini, and Sandro Ridella (1987):
 ``Minimizing multimodal functions of continuous variables with the ``simulated annealing'' algorithm'',
 @i{ACM Transactions on Mathematical Software}, 13(3), 262--280
-
-@item
-Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
-``Introducing financial frictions and unemployment into a small open
-economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
-1999--2041
 
 @item
 Del Negro, Marco and Franck Schorfheide (2004): ``Priors from General Equilibrium Models for VARS'',
@@ -12723,6 +12754,10 @@ Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
 General Equilibrium Models Using a Second-Order Approximation to the
 Policy Function,'' @i{Journal of Economic Dynamics and Control},
 28(4), 755--775
+
+@item
+Schnabel, Robert B. and Elizabeth Eskow (1990): ``A new modified Cholesky algorithm,'' 
+@i{SIAM Journal of Scientific and Statistical Computing}, 11, 1136--1158
 
 @item
 Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): ``Methods for
