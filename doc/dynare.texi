@@ -5079,6 +5079,12 @@ Size of the perturbation used to compute numerically the gradient of the objecti
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-7}
 
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
+@item 'SaveFiles'
+Controls saving of intermediate results during optimization. Set to 0 to shut off saving. Default: @code{1}
+
 @end table
 
 @item 5
@@ -5097,6 +5103,12 @@ Maximum number of iterations. Default: @code{1000}
 
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-5} for numerical derivatives @code{1e-7} for analytic derivatives.
+
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
+@item 'SaveFiles'
+Controls saving of intermediate results during optimization. Set to 0 to shut off saving. Default: @code{1}
 
 @end table
 
@@ -5148,6 +5160,9 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
 
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
 @end table
 
 @item 9
@@ -5166,6 +5181,12 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-7}
 
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-7}
+
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
+@item 'SaveFiles'
+Controls saving of intermediate results during optimization. Set to 0 to shut off saving. Default: @code{1}
 
 @end table
 
@@ -5189,6 +5210,9 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
 
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
 @end table
 
 @item 101
@@ -5210,6 +5234,9 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-6}
 
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-6}
+
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
 
 @end table
 
