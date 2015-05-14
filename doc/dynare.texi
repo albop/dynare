@@ -4949,6 +4949,11 @@ value of that function as the posterior mode.
 @noindent
 Default value is @code{4}.
 
+@item silent_optimizer
+@anchor{silent_optimizer}
+Instructs Dynare to run mode computing/optimization silently without displaying results or 
+saving files in between. Useful when running loops.
+
 @item mcmc_jumping_covariance = hessian|prior_variance|identity_matrix|@var{FILENAME}
 Tells Dynare which covariance to use for the proposal density of the MCMC sampler. @code{mcmc_jumping_covariance} can be one of the following:
 
@@ -6665,6 +6670,9 @@ Specifies the optimizer for minimizing the objective function. The same solvers 
 
 @item optim = (@var{NAME}, @var{VALUE}, ...)
 A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the optimization routines. The set of available options depends on the selected optimization routine (i.e. on the value of option @ref{opt_algo}). @xref{optim}.
+
+@item silent_optimizer
+@pxref{silent_optimizer}
 
 @item huge_number = @var{DOUBLE}
 Value for replacing the infinite bounds on parameters by finite numbers. Used by some optimizers for numerical reasons (@pxref{huge_number}).
