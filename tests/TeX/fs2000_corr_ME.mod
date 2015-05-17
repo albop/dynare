@@ -128,6 +128,7 @@ stoch_simul(order=1,irf=20,graph_format=eps);
 write_latex_original_model;
 write_latex_static_model;
 write_latex_dynamic_model;
+write_latex_parameter_table;
 write_latex_definitions;
 
 estimated_params;
