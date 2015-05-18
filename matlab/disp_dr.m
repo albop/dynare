@@ -1,5 +1,5 @@
-
 function disp_dr(dr,order,var_list)
+% function disp_dr(dr,order,var_list)
 % Display the decision rules
 %
 % INPUTS
@@ -7,8 +7,8 @@ function disp_dr(dr,order,var_list)
 %    order [int]:            order of approximation
 %    var_list [char array]:  list of endogenous variables for which the
 %                            decision rules should be printed
-
-% Copyright (C) 2001-2012 Dynare Team
+% 
+% Copyright (C) 2001-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,44 +55,67 @@ for i=1:nvar
     end
 end
 
+% get length of display strings
+header_label_length=16; %default
+for ii=1:length(ivar)
+    header_label_length=max(header_label_length,length(deblank(M_.endo_names(k1(ivar(ii)),:)))+2);
+end
+header_label_format  = sprintf('%%%ds',header_label_length);
+value_format_float  = sprintf('%%%d.6f',header_label_length);
+value_format_zero  = sprintf('%%%dd',header_label_length);
+
+% account for additional characters introduced by auxiliary variables
+if ~isempty(M_.aux_vars)
+    aux_vars_type = [M_.aux_vars.type];
+    if any(aux_vars_type==4)
+        aux_var_additional_characters=14;
+    else
+        aux_var_additional_characters=3;
+    end
+else
+    aux_var_additional_characters=0;
+end
+
+var_name_width=max([max(size(deblank(M_.endo_names(k1(ivar),:)),2)),max(size(deblank(M_.exo_names),2))]);
+
+%deal with covariances
+if order > 1
+    var_name_width=max(2*(var_name_width+aux_var_additional_characters)+2,20); %account for covariances, separated by comma    
+else
+    var_name_width=max(var_name_width+aux_var_additional_characters,20);
+end
+label_format  = sprintf('%%-%ds',var_name_width);
+
+
+%% start displayimg
 disp('POLICY AND TRANSITION FUNCTIONS')
 % variable names
-str = '                        ';
+str = char(32*ones(1,var_name_width)); 
 for i=1:nvar
-    str = [str sprintf('%16s',M_.endo_names(k1(ivar(i)),:))];
+    str = [str sprintf(header_label_format,deblank(M_.endo_names(k1(ivar(i)),:)))];
 end
 disp(str);
 %
 % constant
 %
-str = 'Constant            ';
+str=sprintf(label_format,'Constant');
 flag = 0;
 for i=1:nvar
     x = dr.ys(k1(ivar(i)));
     if order > 1
         x = x + dr.ghs2(ivar(i))/2;
     end
-    if abs(x) > 1e-6
-        flag = 1;
-        str = [str sprintf('%16.6f',x)];
-    else
-        str = [str '               0'];
-    end
+    [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
 end
 if flag
     disp(str)
 end
 if order > 1
-    str = '(correction)        ';
+    str = sprintf(label_format,'(correction)');
     flag = 0;
     for i=1:nvar
         x = dr.ghs2(ivar(i))/2;
-        if abs(x) > 1e-6
-            flag = 1;
-            str = [str sprintf('%16.6f',x)];
-        else
-            str = [str '               0'];
-        end
+        [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
     end
     if flag
         disp(str)
@@ -108,15 +131,10 @@ for k=1:nx
     else
         str1 = subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2);
     end
-    str = sprintf('%-20s',str1);
+    str = sprintf(label_format,str1);
     for i=1:nvar
         x = dr.ghx(ivar(i),k);
-        if abs(x) > 1e-6
-            flag = 1;
-            str = [str sprintf('%16.6f',x)];
-        else
-            str = [str '               0'];
-        end
+        [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
     end
     if flag
         disp(str)
@@ -127,15 +145,10 @@ end
 %
 for k=1:nu
     flag = 0;
-    str = sprintf('%-20s',M_.exo_names(k,:));
+    str = sprintf(label_format,M_.exo_names(k,:));
     for i=1:nvar
         x = dr.ghu(ivar(i),k);
-        if abs(x) > 1e-6
-            flag = 1;
-            str = [str sprintf('%16.6f',x)];
-        else
-            str = [str '               0'];
-        end
+        [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
     end
     if flag
         disp(str)
@@ -149,19 +162,14 @@ if order > 1
             flag = 0;
             str1 = sprintf('%s,%s',subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2), ...
                            subst_auxvar(k1(klag(j,1)),klag(j,2)-M_.maximum_lag-2));
-            str = sprintf('%-20s',str1);
+            str = sprintf(label_format,str1);
             for i=1:nvar
                 if k == j
                     x = dr.ghxx(ivar(i),(k-1)*nx+j)/2;
                 else
                     x = dr.ghxx(ivar(i),(k-1)*nx+j);
                 end
-                if abs(x) > 1e-6
-                    flag = 1;
-                    str = [str sprintf('%16.6f',x)];
-                else
-                    str = [str '               0'];
-                end
+                [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
             end
             if flag
                 disp(str)
@@ -174,19 +182,14 @@ if order > 1
     for k = 1:nu
         for j = 1:k
             flag = 0;
-            str = sprintf('%-20s',[M_.exo_names(k,:) ',' M_.exo_names(j,:)] );
+            str = sprintf(label_format,[deblank(M_.exo_names(k,:)) ',' deblank(M_.exo_names(j,:))] );
             for i=1:nvar
                 if k == j
                     x = dr.ghuu(ivar(i),(k-1)*nu+j)/2;
                 else
                     x = dr.ghuu(ivar(i),(k-1)*nu+j);
                 end
-                if abs(x) > 1e-6
-                    flag = 1;
-                    str = [str sprintf('%16.6f',x)];
-                else
-                    str = [str '               0'];
-                end
+                [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
             end
             if flag
                 disp(str)
@@ -200,16 +203,11 @@ if order > 1
         for j = 1:nu
             flag = 0;
             str1 = sprintf('%s,%s',subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2), ...
-                           M_.exo_names(j,:));
-            str = sprintf('%-20s',str1);
+                           deblank(M_.exo_names(j,:)));
+            str = sprintf(label_format,str1);
             for i=1:nvar
                 x = dr.ghxu(ivar(i),(k-1)*nu+j);
-                if abs(x) > 1e-6
-                    flag = 1;
-                    str = [str sprintf('%16.6f',x)];
-                else
-                    str = [str '               0'];
-                end
+                [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_);
             end
             if flag
                 disp(str)
@@ -252,4 +250,13 @@ for i = 1:length(M_.aux_vars)
     end
 end
 error(sprintf('Could not find aux var: %s', M_.endo_names(aux_index, :)))
+end
+
+function [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_)
+    if abs(x) > options_.dr_display_tol
+        flag = 1;
+        str = [str sprintf(value_format_float,x)];
+    else
+        str = [str sprintf(value_format_zero,0)];
+    end
 end

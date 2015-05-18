@@ -1,7 +1,27 @@
 function oo_ = ...
     conditional_variance_decomposition_mc_analysis(NumberOfSimulations, type, dname, fname, Steps, exonames, exo, var_list, endogenous_variable_index, mh_conf_sig, oo_)
 % This function analyses the (posterior or prior) distribution of the
-% endogenous conditional variance decomposition.
+% endogenous variables' conditional variance decomposition.
+%
+% INPUTS
+%   NumberOfSimulations     [integer]           scalar, number of simulations.
+%   type                    [string]            'prior' or 'posterior'
+%   dname                   [string]            directory name where to save
+%   fname                   [string]            name of the mod-file
+%   Steps                   [integers]          horizons at which to conduct decomposition
+%   exonames                [string]            (n_exo*char_length) character array with names of exogenous variables        
+%   exo                     [string]            name of current exogenous
+%                                               variable
+%   var_list                [string]            (n_endo*char_length) character array with name
+%                                               of endogenous variables
+%   endogenous_variable_index [integer]         index of the current
+%                                               endogenous variable
+%   mh_conf_sig             [double]            2 by 1 vector with upper
+%                                               and lower bound of HPD intervals
+%   oo_                     [structure]         Dynare structure where the results are saved.
+%
+% OUTPUTS
+%   oo_          [structure]        Dynare structure where the results are saved.
 
 % Copyright (C) 2009-2013 Dynare Team
 %

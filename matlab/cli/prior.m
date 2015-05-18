@@ -28,6 +28,18 @@ function varargout = prior(varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if isempty(varargin) || ( isequal(length(varargin), 1) && isequal(varargin{1},'help'))
+    skipline()
+    disp('Possible options are:')
+    disp(' + table       Prints a table describing the priors.')
+    disp(' + moments     Computes and displays moments of the endogenous variables at the prior mode.')
+    disp(' + optimize    Optimizes the prior density (starting from a random initial guess).')
+    disp(' + simulate    Computes the effective prior mass (using a Monte-Carlo).')
+    disp(' + plot        Plots the marginal prior densities.')
+    skipline()
+    return
+end
+
 global options_ M_ estim_params_ bayestopt_ oo_ objective_function_penalty_base
 
 donesomething = false;

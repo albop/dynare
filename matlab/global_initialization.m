@@ -33,6 +33,7 @@ global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_
 estim_params_ = [];
 bayestopt_ = [];
 options_.datafile = '';
+options_.dirname = M_.fname;
 options_.dataset = [];
 options_.verbosity = 1;
 options_.terminal_condition = 0;
@@ -55,6 +56,7 @@ options_.qz_zero_threshold = 1e-6;
 options_.lyapunov_complex_threshold = 1e-15;
 options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);
+options_.dr_display_tol=1e-6;
 
 options_.dp.maxit = 3000;
 options_.steady.maxit = 50;
@@ -65,6 +67,8 @@ options_.mode_check.neighbourhood_size = .5;
 options_.mode_check.symmetric_plots = 1;
 options_.mode_check.number_of_points = 20;
 options_.mode_check.nolik = 0;
+
+options_.huge_number = 1e7;
 
 % Default number of threads for parallelized mex files.
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
@@ -409,6 +413,7 @@ options_.recursive_estimation_restart = 0;
 options_.MCMC_jumping_covariance='hessian';
 options_.use_calibration_initialization = 0;
 options_.endo_vars_for_moment_computations_in_estimation=[];
+options_.TaRB.use_TaRB = 0;
 
 % Prior restrictions
 options_.prior_restrictions.status = 0;
@@ -524,6 +529,30 @@ simpsa.MAX_TIME = 2500;
 simpsa.MAX_FUN_EVALS = 20000;
 simpsa.DISPLAY = 'iter';
 options_.simpsa = simpsa;
+
+%solveopt optimizer
+solveopt.minimizer_indicator=-1; %use minimizer
+solveopt.TolX=1e-6; %accuracy of argument
+solveopt.TolFun=1e-6; %accuracy of function 
+solveopt.MaxIter=15000;
+solveopt.verbosity=1;
+solveopt.TolXConstraint=1.e-8;
+solveopt.SpaceDilation=2.5;
+solveopt.LBGradientStep=1.e-11;
+options_.solveopt=solveopt;
+
+%simulated annealing
+options_.saopt.neps=10;
+options_.saopt.maximizer_indicator=0;
+options_.saopt.rt=0.10;
+options_.saopt.MaxIter=100000;
+options_.saopt.verbosity=1;
+options_.saopt.TolFun=1.0e-8;
+options_.saopt.initial_temperature=15;
+options_.saopt.ns=10;
+options_.saopt.nt=10;
+options_.saopt.step_length_c=0.1;
+options_.saopt.initial_step_length=1;
 
 % prior analysis
 options_.prior_mc = 20000;

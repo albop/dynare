@@ -96,6 +96,10 @@ end
 
 % Testing if file have extension
 % If no extension default .mod is added
+dot_location=(strfind(fname,'.'));
+if length(dot_location)>1
+    error('DYNARE: Periods in filenames are only allowed for .mod or .dyn extensions')
+end
 if isempty(strfind(fname,'.'))
     fnamelength = length(fname);
     fname1 = [fname '.dyn'];
@@ -106,9 +110,10 @@ if isempty(strfind(fname,'.'))
     fname = fname1;
     % Checking file extension
 else
-    if ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.MOD') ...
+    if dot_location~=length(fname)-3 ... %if the file name has fewer than 4 characters and there is a period
+        || ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.MOD') ...
             && ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.DYN')
-        error('DYNARE: argument must be a filename with .mod or .dyn extension')
+        error('DYNARE: argument must be a filename with .mod or .dyn extension and must not include any other periods')
     end;
     fnamelength = length(fname) - 4;
 end;
@@ -153,6 +158,10 @@ if ~exist(fname,'file') || isequal(fname,'dir')
         fprintf('\nCurrent folder is %s, and does not contain any mod files.\n\n',pwd)
     end
     error(['dynare:: can''t open ' fname])
+end
+
+if ~isvarname(fname(1:end-4))
+    error('DYNARE: argument of dynare must conform to Matlab''s convention for naming functions, i.e. start with a letter and not contain special characters. Please rename your MOD-file.')
 end
 
 % pre-dynare-preprocessor-hook

@@ -1,7 +1,7 @@
 function [ ix2, ilogpo2, ModelName, MetropolisFolder, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
     metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_)
-%function [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = 
-%    metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds, dataset_,dataset_info,,options_,M_,estim_params_,bayestopt_,oo_)
+%function [ ix2, ilogpo2, ModelName, MetropolisFolder, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
+%     metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_)
 % Metropolis-Hastings initialization.
 % 
 % INPUTS 
@@ -11,6 +11,7 @@ function [ ix2, ilogpo2, ModelName, MetropolisFolder, fblck, fline, npar, nblck,
 %   o vv         [double]   (p*p) matrix, posterior covariance matrix (at the mode).
 %   o mh_bounds  [double]   (p*2) matrix defining lower and upper bounds for the parameters. 
 %   o dataset_              data structure
+%   o dataset_info          dataset info structure
 %   o options_              options structure
 %   o M_                    model structure
 %   o estim_params_         estimated parameters structure
@@ -18,12 +19,25 @@ function [ ix2, ilogpo2, ModelName, MetropolisFolder, fblck, fline, npar, nblck,
 %   o oo_                   outputs structure
 %  
 % OUTPUTS 
-%   None  
+%   o ix2                   [double]   (nblck*npar) vector of starting points for different chains
+%   o ilogpo2               [double]   (nblck*1) vector of initial posterior values for different chains
+%   o ModelName             [string]    name of the mod-file
+%   o MetropolisFolder      [string]    path to the Metropolis subfolder
+%   o fblck                 [scalar]    number of the first MH chain to be run (not equal to 1 in case of recovery)   
+%   o fline                 [double]   (nblck*1) vector of first draw in each chain (not equal to 1 in case of recovery)   
+%   o npar                  [scalar]    number of parameters estimated
+%   o nblck                 [scalar]    Number of MCM chains requested   
+%   o nruns                 [double]   (nblck*1) number of draws in each chain 
+%   o NewFile               [scalar]    (nblck*1) vector storing the number
+%                                       of the first MH-file to created for each chain when saving additional
+%                                       draws
+%   o MAX_nruns             [scalar]    maximum number of draws in each MH-file on the harddisk
+%   o d                     [double]   (p*p) matrix, Cholesky decomposition of the posterior covariance matrix (at the mode).
 %
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,6 +54,7 @@ function [ ix2, ilogpo2, ModelName, MetropolisFolder, fblck, fline, npar, nblck,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+%Initialize outputs
 ix2 = [];
 ilogpo2 = [];
 ModelName = []; 
@@ -68,7 +83,7 @@ MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 d = chol(vv);
 
 if ~options_.load_mh_file && ~options_.mh_recover
-    % Here we start a new metropolis-hastings, previous draws are discarded.
+    % Here we start a new Metropolis-Hastings, previous draws are discarded.
     if nblck > 1
         disp('Estimation::mcmc: Multiple chains mode.')
     else
@@ -80,7 +95,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
         delete([BaseName '_mh*_blck*.mat']);
         disp('Estimation::mcmc: Old mh-files successfully erased!')
     end
-    % Delete old metropolis log file.
+    % Delete old Metropolis log file.
     file = dir([ MetropolisFolder '/metropolis.log']);
     if length(file)
         delete([ MetropolisFolder '/metropolis.log']);
@@ -128,11 +143,11 @@ if ~options_.load_mh_file && ~options_.mh_recover
                 if init_iter > 100 && validate == 0
                     disp(['Estimation::mcmc: I couldn''t get a valid initial value in 100 trials.'])
                     if options_.nointeractive
-                        disp(['Estimation::mcmc: I reduce mh_init_scale by ten percent:'])
+                        disp(['Estimation::mcmc: I reduce mh_init_scale by 10 percent:'])
                         options_.mh_init_scale = .9*options_.mh_init_scale;
                         disp(sprintf('Estimation::mcmc: Parameter mh_init_scale is now equal to %f.',options_.mh_init_scale))
                     else
-                        disp(['Estimation::mcmc: You should Reduce mh_init_scale...'])
+                        disp(['Estimation::mcmc: You should reduce mh_init_scale...'])
                         disp(sprintf('Estimation::mcmc: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
                         options_.mh_init_scale = input('Estimation::mcmc: Enter a new value...  ');
                     end
@@ -217,7 +232,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
     fclose(fidlog);
 elseif options_.load_mh_file && ~options_.mh_recover
     % Here we consider previous mh files (previous mh did not crash).
-    disp('Estimation::mcmc: I am loading past metropolis-hastings simulations...')
+    disp('Estimation::mcmc: I am loading past Metropolis-Hastings simulations...')
     load_last_mh_history_file(MetropolisFolder, ModelName);
     mh_files = dir([ MetropolisFolder filesep ModelName '_mh*.mat']);
     if ~length(mh_files)
@@ -238,7 +253,7 @@ elseif options_.load_mh_file && ~options_.mh_recover
         nblck = past_number_of_blocks;
         options_.mh_nblck = nblck;
     end
-    % I read the last line of the last mh-file for initialization of the new metropolis-hastings simulations:
+    % I read the last line of the last mh-file for initialization of the new Metropolis-Hastings simulations:
     LastFileNumber = record.LastFileNumber;
     LastLineNumber = record.LastLineNumber;
     if LastLineNumber < MAX_nruns
@@ -252,7 +267,7 @@ elseif options_.load_mh_file && ~options_.mh_recover
     ix2 = record.LastParameters;
     fblck = 1;
     NumberOfPreviousSimulations = sum(record.MhDraws(:,1),1);
-    fprintf('Estimation::mcmc: I am writting a new mh-history file... ');
+    fprintf('Estimation::mcmc: I am writing a new mh-history file... ');
     record.MhDraws = [record.MhDraws;zeros(1,3)];
     NumberOfDrawsWrittenInThePastLastFile = MAX_nruns - LastLineNumber;
     NumberOfDrawsToBeSaved = nruns(1) - NumberOfDrawsWrittenInThePastLastFile;
@@ -318,7 +333,7 @@ elseif options_.mh_recover
         disp('Estimation::mcmc: It appears that you don''t need to use the mh_recover option!')
         disp('                  You have to edit the mod file and remove the mh_recover option') 
         disp('                  in the estimation command')
-        error()
+        error('Estimation::mcmc: mh_recover option not required!')
     end
     % I count the number of saved mh files per block.
     NumberOfMhFilesPerBlock = zeros(nblck,1);
@@ -339,7 +354,7 @@ elseif options_.mh_recover
     end
     % How many mh-files are saved in this block?
     NumberOfSavedMhFilesInTheCrashedBlck = NumberOfMhFilesPerBlock(fblck);
-    % Correct the number of saved mh files if the crashed metropolis was not the first session (so
+    % Correct the number of saved mh files if the crashed Metropolis was not the first session (so
     % that NumberOfSavedMhFilesInTheCrashedBlck is the number of saved mh files in the crashed chain 
     % of the current session).  
     if OldMh

@@ -261,14 +261,14 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     [xparam1, fval, exitflag, hh, options_, Scale] = dynare_minimize_objective(objective_function,xparam1,options_.mode_compute,options_,[bounds.lb bounds.ub],bayestopt_.name,bayestopt_,hh,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_);
     fprintf('\nFinal value of minus the log posterior (or likelihood):%f \n', fval);
 
-    if options_.mode_compute==5 && options_.analytic_derivation==-1 %reset options changed by newrat
+    if isnumeric(options_.mode_compute) && options_.mode_compute==5 && options_.analytic_derivation==-1 %reset options changed by newrat
             options_.analytic_derivation = options_analytic_derivation_old; %reset      
-    elseif options_.mode_compute==6 %save scaling factor
+    elseif isnumeric(options_.mode_compute) && options_.mode_compute==6 %save scaling factor
         save([M_.fname '_optimal_mh_scale_parameter.mat'],'Scale');
         options_.mh_jscale = Scale;
         bayestopt_.jscale = ones(length(xparam1),1)*Scale;
     end       
-    if ~isequal(options_.mode_compute,6) %always already computes covariance matrix
+    if ~isnumeric(options_.mode_compute) || ~isequal(options_.mode_compute,6) %always already computes covariance matrix
         if options_.cova_compute == 1 %user did not request covariance not to be computed
             if options_.analytic_derivation && strcmp(func2str(objective_function),'dsge_likelihood'),
                 ana_deriv_old = options_.analytic_derivation;
@@ -276,12 +276,12 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 [junk1, junk2, hh] = feval(objective_function,xparam1, ...
                     dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_);
                 options_.analytic_derivation = ana_deriv_old;
-            elseif ~(isequal(options_.mode_compute,5) && newratflag~=1), 
+            elseif ~isnumeric(options_.mode_compute) || ~(isequal(options_.mode_compute,5) && newratflag~=1), 
                 % with flag==0, we force to use the hessian from outer
                 % product gradient of optimizer 5
                 hh = reshape(hessian(objective_function,xparam1, ...
                     options_.gstep,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_),nx,nx);
-            elseif isequal(options_.mode_compute,5)
+            elseif isnumeric(options_.mode_compute) && isequal(options_.mode_compute,5)
                 % other numerical hessian options available with optimizer 5
                 %
                 % if newratflag == 0

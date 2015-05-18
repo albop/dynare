@@ -1,13 +1,14 @@
 function trace_plot(options_,M_,estim_params_,type,blck,name1,name2)
-% This function build trace plot for the metropolis hastings draws.
-% 
+% This function builds trace plot for the Metropolis-Hastings draws.
 %
 % INPUTS 
 %
 %   options_        [structure]    Dynare structure.
 %   M_              [structure]    Dynare structure (related to model definition).
 %   estim_params_   [structure]    Dynare structure (related to estimation).
-%   type            [string]       'DeepParameter', 'MeasurementError' (for measurement equation error) or 'StructuralShock' (for structural shock).
+%   type            [string]       'DeepParameter', 'MeasurementError' (for measurement equation error),
+%                                  'StructuralShock' (for structural shock)
+%                                  or 'PosteriorDensity (for posterior density)'
 %   blck            [integer]      Number of the mh chain.
 %   name1           [string]       Object name.
 %   name2           [string]       Object name. 
@@ -17,7 +18,7 @@ function trace_plot(options_,M_,estim_params_,type,blck,name1,name2)
 %        
 % SPECIAL REQUIREMENTS
 
-% Copyright (C) 2003-2013 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,10 +36,15 @@ function trace_plot(options_,M_,estim_params_,type,blck,name1,name2)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Cet the column index:
-if nargin<7    
-    column = name2index(options_, M_, estim_params_, type, name1);
+if strcmpi(type,'PosteriorDensity')
+    column=0;
+    name1='';
 else
-    column = name2index(options_, M_, estim_params_, type, name1, name2);
+    if nargin<7    
+        column = name2index(options_, M_, estim_params_, type, name1);
+    else
+        column = name2index(options_, M_, estim_params_, type, name1, name2);
+    end
 end
 
 if isempty(column)
@@ -75,6 +81,8 @@ elseif strcmpi(type,'MeasurementError')
     else
         TYPE = 'the correlation between measurement errors ';
     end
+elseif strcmpi(type,'PosteriorDensity')
+    TYPE='the posterior density';
 end
 
 if nargin<7
@@ -111,9 +119,15 @@ legend({'MCMC draw';[num2str(N) ' period moving average']},'Location','NorthWest
 if ~exist(M_.fname, 'dir')
     mkdir('.',M_.fname);
 end
-if ~exist([M_.fname filesep 'graphs'])
+if ~exist([M_.fname filesep 'graphs'],'dir')
     mkdir(M_.fname,'graphs');
 end
-plot_name=get_the_name(column,0,M_,estim_params_,options_);
+
+%get name for plot
+if strcmpi(type,'PosteriorDensity')
+    plot_name='Posterior';
+else
+    plot_name=get_the_name(column,0,M_,estim_params_,options_);
+end
 dyn_saveas(hh,[M_.fname, filesep, 'graphs', filesep, 'TracePlot_' plot_name],options_)
 

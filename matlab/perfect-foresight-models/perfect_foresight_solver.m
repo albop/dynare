@@ -65,9 +65,11 @@ oo_ = simulation_core(options_, M_, oo_);
 if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
     skipline()
     disp('Simulation of the perfect foresight model failed!')
+    disp('Switching to a homotopy method...')
     skipline()
     
     % Disable warnings if homotopy
+    warning_old_state = warning;
     warning off all
     % Do not print anything
     oldverbositylevel = options_.verbosity;
@@ -147,7 +149,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
     fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
     skipline()
     options_.verbosity = oldverbositylevel;
-    warning on all
+    warning(warning_old_state);
 end
 
 if oo_.deterministic_simulation.status == 1

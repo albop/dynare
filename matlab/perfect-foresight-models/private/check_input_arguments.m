@@ -1,5 +1,7 @@
 function check_input_arguments(DynareOptions, DynareModel, DynareResults)
 %function check_input_arguments(DynareOptions, DynareModel, DynareResults)
+%Conducts checks for inconsistent/missing inputs to deterministic
+%simulations
 
 % Copyright (C) 2015 Dynare Team
 %
@@ -42,8 +44,8 @@ end
 
 if isempty(DynareResults.endo_simul) || any(size(DynareResults.endo_simul) ~= [ DynareModel.endo_nbr, DynareModel.maximum_lag+DynareOptions.periods+DynareModel.maximum_lead ])
     
-    if options_.initval_file
-        disp(sprintf('PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Check whether your initval-file provides %d periods.',M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead))
+    if DynareOptions.initval_file
+        fprintf('PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Check whether your initval-file provides %d periods.',DynareModel.maximum_endo_lag+DynareOptions.periods+DynareModel.maximum_endo_lead)
         error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
     else
         error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.endo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
@@ -52,11 +54,10 @@ end
 
 if (DynareModel.exo_nbr > 0) && ...
         (isempty(DynareResults.exo_simul) || any(size(DynareResults.exo_simul) ~= [ DynareModel.maximum_lag+DynareOptions.periods+DynareModel.maximum_lead, DynareModel.exo_nbr ]))
-    if options_.initval_file
-        disp(sprintf('PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Check whether your initval-file provides %d periods.',M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead))
+    if DynareOptions.initval_file
+        fprintf('PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Check whether your initval-file provides %d periods.',DynareModel.maximum_endo_lag+DynareOptions.periods+DynareModel.maximum_endo_lead)
         error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size.')
     else
         error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
     end
-    error('perfect_foresight_solver:ArgCheck','PERFECT_FORESIGHT_SOLVER: ''oo_.exo_simul'' has wrong size. Did you run ''perfect_foresight_setup'' ?')
 end

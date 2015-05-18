@@ -241,13 +241,19 @@ Stochastic solution and simulation
 
 Sensitivity and identification analysis
 
+* Performing sensitivity analysis::
+* Performing identification analysis::
+* IRF/Moment calibration::
+* Types of analysis and output files::
+
+Types of analysis and output files
 * Sampling::
 * Stability Mapping::
+* IRF/Moment restrictions::
 * Reduced Form Mapping::
 * RMSE::
 * Screening Analysis::
 * Identification Analysis::
-* Performing Sensitivity and Identification Analysis::
 
 Macro-processing language
 
@@ -845,6 +851,14 @@ Allows Dynare to issue a warning and continue processing when
 @item there are more endogenous variables than equations
 @item an undeclared symbol is assigned in @code{initval} or @code{endval}
 @end enumerate
+
+@item fast
+Only useful with model option @code{use_dll}. Don't recompile the MEX
+files when running again the same model file and the lists of variables
+and the equations haven't changed. We use a 32 bit checksum, stored in
+@code{<model filename>/checksum}. There is a very small probability that
+the preprocessor misses a change in the model. In case of doubt, re-run
+without the @code{fast} option.
 @end table
 
 @outputhead
@@ -2331,7 +2345,7 @@ jump from t=200 to t=201.
 @end deffn
 
 @deffn Block histval ;
-
+@anchor{histval}
 @descriptionhead
 
 @customhead{In a deterministic perfect foresight context}
@@ -2370,6 +2384,11 @@ the starting point of those simulations in the state space (it does not
 affect the starting point for impulse response functions). As for the case of
 perfect foresight simulations, all not explicitly specified variables are set to 0.
 Moreover, as only states enter the recursive policy functions, all values specified for control variables will be ignored.
+
+For @ref{Ramsey} policy, it also specifies the values of the endogenous states at 
+which the objective function of the planner is computed. Note that the initial values 
+of the Lagrange multipliers associated with the planner's problem cannot be set
+(@pxref{planner_objective_value}).
 
 @examplehead
 
@@ -4660,6 +4679,11 @@ a @uref{http://www.java.com/download,Java Runtime Environment}). Note that the
 base name (ie without extension) of the datafile has to be different from the
 base name of the model file.
 
+@item dirname = @var{FILENAME}
+Directory in which to store @code{estimation} output. To pass a
+subdirectory of a directory, you must quote the argument. Default:
+@code{<mod_file>}
+
 @item xls_sheet = @var{NAME}
 @anchor{xls_sheet}
 The name of the sheet with the data in an Excel file
@@ -4848,10 +4872,11 @@ compute the smoothed value of the variables of a model with calibrated parameter
 
 @item 1
 Uses @code{fmincon} optimization routine (available under MATLAB if
-the optimization toolbox is installed; not available under Octave)
+the Optimization Toolbox is installed; not available under Octave)
 
 @item 2
-Value no longer used
+Uses the continuous simulated annealing global optimization algorithm 
+described in @cite{Corana et al. (1987)} and @cite{Goffe et al. (1994)}.
 
 @item 3
 Uses @code{fminunc} optimization routine (available under MATLAB if
@@ -4885,11 +4910,20 @@ routine (generally more efficient than the MATLAB or Octave implementation
 available with @code{mode_compute=7})
 
 @item 9
-Uses the CMA-ES (Covariance Matrix Adaptation Evolution Strategy) algorithm, an evolutionary algorithm for difficult non-linear non-convex optimization
+Uses the CMA-ES (Covariance Matrix Adaptation Evolution Strategy) algorithm of 
+@cite{Hansen and Kern (2004)}, an evolutionary algorithm for difficult non-linear non-convex optimization
 
 @item 10
 Uses the simpsa algorithm, based on the combination of the non-linear simplex and simulated annealing algorithms and proposed by
 @cite{Cardoso, Salcedo and Feyo de Azevedo (1996)}.
+
+@item 101
+Uses the SolveOpt algorithm for local nonlinear optimization problems proposed by
+@cite{Kuntsevich and Kappel (1997)}.
+
+@item 102
+Uses @code{simulannealbnd} optimization routine (available under MATLAB if
+the Global Optimization Toolbox is installed; not available under Octave)
 
 @item @var{FUNCTION_NAME}
 It is also possible to give a @var{FUNCTION_NAME} to this option,
@@ -4961,12 +4995,53 @@ A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the o
 @table @code
 
 @item 1, 3, 7
-Available options are given in the documentation of the MATLAB optimization toolbox or in Octave's documentation.
+Available options are given in the documentation of the MATLAB Optimization Toolbox or in Octave's documentation.
+
+@item 2
+Available options are:
+
+@table @code
+
+@item 'initial_step_length'
+Initial step length. Default: @code{1}
+
+@item 'initial_temperature'
+Initial temperature. Default: @code{15}
+
+@item 'MaxIter'
+Maximum number of function evaluations. Default: @code{100000}
+
+@item 'neps'
+Number of final function values used to decide upon termination. Default: @code{10}
+
+@item 'ns'
+Number of cycles. Default: @code{10}
+
+@item 'nt'
+Number of iterations before temperature reduction. Default: @code{10}
+
+@item 'step_length_c'
+Step length adjustment. Default: @code{0.1}
+
+@item 'TolFun'
+Stopping criteria. Default: @code{1e-8}
+
+@item 'rt'
+Temperature reduction factor. Default: @code{0.1}
+
+@item 'verbosity'
+Controls verbosity of display during optimization, ranging from 0 (silent) to 3 
+(each function evaluation). Default: @code{1}
+
+@end table
 
 @item 4
 Available options are:
 
 @table @code
+
+@item 'InitialInverseHessian'
+Initial approximation for the inverse of the Hessian matrix of the posterior kernel (or likelihood). Obviously this approximation has to be a square, positive definite and symmetric matrix. Default: @code{'1e-4*eye(nx)'}, where @code{nx} is the number of parameters to be estimated.
 
 @item 'MaxIter'
 Maximum number of iterations. Default: @code{1000}
@@ -4980,9 +5055,6 @@ Size of the perturbation used to compute numerically the gradient of the objecti
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-7}
 
-@item 'InitialInverseHessian'
-Initial approximation for the inverse of the Hessian matrix of the posterior kernel (or likelihood). Obviously this approximation has to be a square, positive definite and symmetric matrix. Default: @code{'1e-4*eye(nx)'}, where @code{nx} is the number of parameters to be estimated.
-
 @end table
 
 @item 5
@@ -4990,14 +5062,14 @@ Available options are:
 
 @table @code
 
-@item 'MaxIter'
-Maximum number of iterations. Default: @code{1000}
-
 @item 'Hessian'
 Triggers three types of Hessian computations. @code{0}: outer product gradient; @code{1} default DYNARE Hessian routine; @code{2} 'mixed' outer product gradient, where diagonal elements are obtained using second order derivation formula and outer product is used for correlation structure. 
 Both @{0@} and @{2@} options require univariate filters, to ensure using maximum number of individual densities and a positive definite Hessian.
 Both @{0@} and @{2@} are quicker than default DYNARE numeric Hessian, but provide decent starting values for Metropolis for large models (option @{2@} being more accurate than @{0@}).
 Default: @code{1}.
+
+@item 'MaxIter'
+Maximum number of iterations. Default: @code{1000}
 
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-5} for numerical derivatives @code{1e-7} for analytic derivatives.
@@ -5009,8 +5081,14 @@ Available options are:
 
 @table @code
 
-@item 'NumberOfMh'
-Number of MCMC run sequentially. Default: @code{3}
+@item 'AcceptanceRateTarget'
+A real number between zero and one. The scale parameter of the jumping distribution is adjusted so that the effective acceptance rate matches the value of option @code{'AcceptanceRateTarget'}. Default: @code{1.0/3.0}
+
+@item 'InitialCovarianceMatrix'
+Initial covariance matrix of the jumping distribution. Default is @code{'previous'} if option @code{mode_file} is used, @code{'prior'} otherwise.
+
+@item 'nclimb'
+Number of iterations in the last MCMC (climbing mode).
 
 @item 'ncov-mh'
 Number of iterations used for updating the covariance matrix of the jumping distribution. Default: @code{20000}
@@ -5018,14 +5096,8 @@ Number of iterations used for updating the covariance matrix of the jumping dist
 @item 'nscale-mh'
 Maximum number of iterations used for adjusting the scale parameter of the jumping distribution.  @code{200000}
 
-@item 'nclimb'
-Number of iterations in the last MCMC (climbing mode).
-
-@item 'InitialCovarianceMatrix'
-Initial covariance matrix of the jumping distribution. Default is @code{'previous'} if option @code{mode_file} is used, @code{'prior'} otherwise.
-
-@item 'AcceptanceRateTarget'
-A real number between zero and one. The scale parameter of the jumping distribution is adjusted so that the effective acceptance rate matches the value of option @code{'AcceptanceRateTarget'}. Default: @code{1.0/3.0}
+@item 'NumberOfMh'
+Number of MCMC run sequentially. Default: @code{3}
 
 @end table
 
@@ -5033,6 +5105,9 @@ A real number between zero and one. The scale parameter of the jumping distribut
 Available options are:
 
 @table @code
+
+@item 'InitialSimplexSize'
+Initial size of the simplex, expressed as percentage deviation from the provided initial guess in each direction. Default: @code{.05}
 
 @item 'MaxIter'
 Maximum number of iterations. Default: @code{5000}
@@ -5048,10 +5123,6 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
-
-@item 'InitialSimplexSize'
-
-Initial size of the simplex, expressed as percentage deviation from the provided initial guess in each direction. Default: @code{.05}
 
 @end table
 
@@ -5079,6 +5150,9 @@ Available options are:
 
 @table @code
 
+@item 'EndTemperature'
+Terminal condition w.r.t the temperature. When the temperature reaches @code{EndTemperature}, the temperature is set to zero and the algorithm falls back into a standard simplex algorithm. Default: @code{.1}
+
 @item 'MaxIter'
 Maximum number of iterations. Default: @code{5000}
 
@@ -5091,10 +5165,32 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
 
-@item 'EndTemperature'
-Terminal condition w.r.t the temperature. When the temperature reaches @code{EndTemperature}, the temperature is set to zero and the algorithm falls back into a standard simplex algorithm. Default: @code{.1}
+@end table
+
+@item 101
+Available options are:
+
+@table @code
+
+@item 'LBGradientStep'
+Lower bound for the stepsize used for the difference approximation of gradients. Default: @code{1e-11}
+
+@item 'MaxIter'
+Maximum number of iterations. Default: @code{15000}
+
+@item 'SpaceDilation'
+Coefficient of space dilation. Default: @code{2.5}
+
+@item 'TolFun'
+Tolerance parameter (w.r.t the objective function). Default: @code{1e-6}
+
+@item 'TolX'
+Tolerance parameter (w.r.t the instruments). Default: @code{1e-6}
 
 @end table
+
+@item 102
+Available options are given in the documentation of the MATLAB Global Optimization Toolbox.
 
 @end table
 
@@ -6459,7 +6555,7 @@ new, expanded model.
 Alternatively, you can either solve for optimal policy under commitment
 with @code{ramsey_policy}, for optimal policy under discretion with
 @code{discretionary_policy} or for optimal simple rule with
-@code{osr}.
+@code{osr} (also implying commitment).
 
 
 @anchor{osr}
@@ -6649,7 +6745,7 @@ at the optimum, stored in fields of the form
 @descriptionhead
 
 This command computes the First Order Conditions for maximizing the policy maker objective function subject to the
-constraints provided by the equilibrium path of the economy.
+constraints provided by the equilibrium path of the private economy.
 
 The planner objective must be declared with the @code{planner_objective} command.
 
@@ -6679,6 +6775,7 @@ under optimal policy. Requires a @code{steady_state_model} block or a
 @end table
 
 @customhead{Steady state}
+@anchor{Ramsey steady state}
 
 Dynare takes advantage of the fact that the Lagrange multipliers appear
 linearly in the equations of the steady state of the model under optimal
@@ -6703,12 +6800,32 @@ instrument.
 
 @deffn Command ramsey_policy [@var{VARIABLE_NAME}@dots{}];
 @deffnx Command ramsey_policy (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
+@anchor{ramsey_policy}
 
 @descriptionhead
 
 This command computes the first order approximation of the policy that
-maximizes the policy maker objective function submitted to the
-constraints provided by the equilibrium path of the economy.
+maximizes the policy maker's objective function subject to the
+constraints provided by the equilibrium path of the private economy and under 
+commitment to this optimal policy. Following @cite{Woodford (1999)}, the Ramsey 
+policy is computed using a timeless perspective. That is, the government forgoes 
+its first-period advantage and does not exploit the preset privates sector expectations 
+(which are the source of the well-known time inconsistency that requires the 
+assumption of commitment). Rather, it acts as if the initial multipliers had 
+been set to 0 in the distant past, giving them time to converge to their steady 
+state value. Consequently, the optimal decision rules are computed around this steady state 
+of the endogenous variables and the Lagrange multipliers.
+
+This first order approximation to the optimal policy conducted by Dynare is not to be 
+confused with a naive linear quadratic approach to optimal policy that can lead to 
+spurious welfare rankings (see @cite{Kim and Kim (2003)}). In the latter, the optimal policy 
+would be computed subject to the first order approximated FOCs of the 
+private economy. In contrast, Dynare first computes the FOCs of the Ramsey planner's problem
+subject to the nonlinear constraints that are the FOCs of the private economy 
+and only then approximates these FOCs of planner's problem to first order. Thereby, the second
+order terms that are required for a second-order correct welfare evaluation are 
+preserved.
+
 
 The planner objective must be declared with the @code{planner_objective} command.
 
@@ -6732,36 +6849,34 @@ under optimal policy. Requires a @code{steady_state_model} block or a
 
 @end table
 
-Note that only first order approximation is available (@i{i.e.}
-@code{order=1} must be specified).
+Note that only a first order approximation of the optimal Ramsey policy is 
+available, leading to a second-order accurate welfare ranking 
+(@i{i.e.} @code{order=1} must be specified).
 
 @outputhead
 
-This command generates all the output variables of @code{stoch_simul}.
+This command generates all the output variables of @code{stoch_simul}. For specifying
+the initial values for the endogenous state variables (except for the Lagrange
+multipliers), @pxref{histval}.
 
 @vindex oo_.planner_objective_value
+@anchor{planner_objective_value}
+
 In addition, it stores the value of planner objective function under
-Ramsey policy in @code{oo_.planner_objective_value}.
+Ramsey policy in @code{oo_.planner_objective_value}, given the initial values 
+of the endogenous state variables. If not specified with @code{histval}, they are 
+taken to be at their steady state values. The result is a 1 by 2 
+vector, where the first entry stores the value of the planner objective under 
+the timeless perspective to Ramsey policy, i.e. where the initial Lagrange
+multipliers associated with the planner's problem are set to their steady state
+values (@pxref{ramsey_policy}).
+In contrast, the second entry stores the value of the planner objective with 
+initial Lagrange multipliers of the planner's problem set to 0, i.e. it is assumed 
+that the planner succumbs to the temptation to exploit the preset private expecatations 
+in the first period (but not in later periods due to commitment).
 
 @customhead{Steady state}
-
-Dynare takes advantage of the fact that the Lagrange multipliers appear
-linearly in the equations of the steady state of the model under optimal
-policy. Nevertheless, it is in general very difficult to compute the
-steady state with simply a numerical guess in @code{initval} for the
-endogenous variables.
-
-It greatly facilitates the computation, if the user provides an
-analytical solution for the steady state (in @code{steady_state_model}
-block or in a @code{@dots{}_steadystate.m} file). In this case, it is
-necessary to provide a steady state solution CONDITIONAL on the value
-of the instruments in the optimal policy problem and declared with
-option @code{instruments}. Note that choosing the instruments is
-partly a matter of interpretation and you can choose instruments that
-are handy from a mathematical point of view but different from the
-instruments you would refer to in the analysis of the paper. A typical
-example is choosing inflation or nominal interest rate as an
-instrument.
+@xref{Ramsey steady state}.
 
 
 @end deffn
@@ -6846,311 +6961,17 @@ With respect to the previous version of the toolbox, in order to work
 properly, the GSA toolbox no longer requires that the Dynare
 estimation environment is set up.
 
-Sensitivity analysis results are saved locally in @code{<mod_file>/GSA},
-where @code{<mod_file>.mod} is the name of the DYNARE model file.
 
 @menu
-* Sampling::
-* Stability Mapping::
-* Reduced Form Mapping::
-* RMSE::
-* Screening Analysis::
-* Identification Analysis::
-* Performing Sensitivity and Identification Analysis::
+* Performing sensitivity analysis::
+* Performing identification analysis::
+* IRF/Moment calibration::
+* Types of analysis and output files::
 @end menu
 
-@node Sampling
-@subsection Sampling
 
-The following binary files are produced:
-@itemize
-@item
-@code{<mod_file>_prior.mat}: this file stores information about the analyses
-performed sampling from the prior ranges, @i{i.e.} @code{pprior=1} and @code{ppost=0};
-
-@item
-@code{<mod_file>_mc.mat}: this file stores information about the analyses performed
-sampling from multivariate normal, @i{i.e.} @code{pprior=0} and @code{ppost=0};
-
-@item
-@code{<mod_file>_post.mat}: this file stores information about analyses performed
-using the Metropolis posterior sample, @i{i.e.} @code{ppost=1}.
-@end itemize
-
-@node Stability Mapping
-@subsection Stability Mapping
-
-Figure files produced are of the form @code{<mod_file>_prior_*.fig} and store results
-for stability mapping from prior Monte-Carlo samples:
-@itemize
-@item
-@code{<mod_file>_prior_stab_SA_*.fig}: plots of the Smirnov test analyses
-confronting the cdf of the sample fulfilling Blanchard-Kahn conditions
-with the cdf of the rest of the sample;
-
-@item
-@code{<mod_file>_prior_stab_indet_SA_*.fig}: plots of the Smirnov test
-analyses confronting the cdf of the sample producing indeterminacy
-with the cdf of the original prior sample;
-
-@item
-@code{<mod_file>_prior_stab_unst_SA_*.fig}: plots of the Smirnov test
-analyses confronting the cdf of the sample producing unstable (explosive
-roots) behavior with the cdf of the original prior sample;
-
-@item
-@code{<mod_file>_prior_stable_corr_*.fig}: plots of bivariate projections
-of the sample fulfilling Blanchard-Kahn conditions;
-
-@item
-@code{<mod_file>_prior_indeterm_corr_*.fig}: plots of bivariate projections
-of the sample producing indeterminacy;
-
-@item
-@code{<mod_file>_prior_unstable_corr_*.fig}: plots of bivariate projections
-of the sample producing instability;
-
-@item
-@code{<mod_file>_prior_unacceptable_corr_*.fig}: plots of bivariate projections
-of the sample producing unacceptable solutions, @i{i.e.} either
-instability or indeterminacy or the solution could not be found (@i{e.g.}
-the steady state solution could not be found by the solver).
-@end itemize
-
-Similar conventions apply for @code{<mod_file>_mc_*.fig} files, obtained when
-samples from multivariate normal are used.
-
-@node Reduced Form Mapping
-@subsection Reduced Form Mapping
-
-The mapping of the reduced form solution forces the use of samples from
-prior ranges or prior distributions, @i{i.e.}: @code{pprior=1} and @code{ppost=0}. It
-uses 250 samples to optimize smoothing parameters and 1000 samples to compute the
-fit. The rest of the sample is used for out-of-sample validation. One can also
-load a previously estimated mapping with a new Monte-Carlo sample, to look at the
-forecast for the new Monte-Carlo sample.
-
-The following synthetic figures are produced:
-@itemize
-@item
-@code{<mod_file>_redform_<endo name>_vs_lags_*.fig}: shows bar charts
-of the sensitivity indices for the ten most important parameters driving
-the reduced form coefficients of the selected endogenous variables
-(@code{namendo}) versus lagged endogenous variables (@code{namlagendo}); suffix
-@code{log} indicates the results for log-transformed entries;
-
-@item
-@code{<mod_file>_redform_<endo name>_vs_shocks_*.fig}: shows bar charts
-of the sensitivity indices for the ten most important parameters driving
-the reduced form coefficients of the selected endogenous variables
-(@code{namendo}) versus exogenous variables (@code{namexo}); suffix @code{log}
-indicates the results for log-transformed entries;
-
-@item
-@code{<mod_file>_redform_GSA(_log).fig}: shows bar chart of all sensitivity
-indices for each parameter: this allows one to notice parameters that
-have a minor effect for any of the reduced form coefficients.
-@end itemize
-
-Detailed results of the analyses are shown in the subfolder @code{<mod_file>/GSA/redform_stab},
-where the detailed results of the estimation of the single functional relationships
-between parameters @math{\theta} and reduced form coefficient are stored in separate directories
-named as:
-
-@itemize
-@item
-@code{<namendo>_vs_<namlagendo>}: for the entries of the transition matrix;
-
-@item
-@code{<namendo>_vs_<namexo>}: for entries of the matrix of the shocks.
-@end itemize
-Moreover, analyses for log-transformed entries are denoted with the following
-suffixes (@math{y} denotes the generic reduced form coefficient):
-@itemize
-@item
-@code{log}: @math{y^* = \log(y)};
-@item
-@code{minuslog}: @math{y^* = \log(-y)};
-@item
-@code{logsquared}: @math{y^* = \log(y^2)} for symmetric fat tails;
-@item
-@code{logskew}: @math{y^* = \log(|y + \lambda|)} for asymmetric fat tails.
-@end itemize
-The optimal type of transformation is automatically selected without the
-need of user intervention.
-
-@node RMSE
-@subsection RMSE
-
-The RMSE analysis can be performed with different types of sampling options:
-@enumerate
-@item
-When @code{pprior=1} and @code{ppost=0}, the toolbox analyzes the RMSEs for
-the Monte-Carlo sample obtained by sampling parameters from their prior distributions
-(or prior ranges): this analysis provides some hints about
-what parameter drives the fit of which observed series, prior to the full
-estimation;
-
-@item
-When @code{pprior=0} and @code{ppost=0}, the toolbox analyzes the RMSEs for
-a multivariate normal Monte-Carlo sample, with covariance matrix based on
-the inverse Hessian at the optimum: this analysis is useful when maximum likelihood
-estimation is done (@i{i.e.} no Bayesian estimation);
-
-@item
-When @code{ppost=1} the toolbox analyzes the RMSEs for the posterior sample
-obtained by Dynare's Metropolis procedure.
-@end enumerate
-
-The use of cases 2 and 3 requires an estimation step beforehand. To
-facilitate the sensitivity analysis after estimation, the @code{dynare_sensitivity}
-command also allows you to indicate some options of the @code{estimation}
-command. These are:
-@itemize @bullet
-@item @code{datafile}
-@item @code{nobs}
-@item @code{first_obs}
-@item @code{prefilter}
-@item @code{presample}
-@item @code{nograph}
-@item @code{nodisplay}
-@item @code{graph_format}
-@item @code{conf_sig}
-@item @code{loglinear}
-@item @code{mode_file}
-@end itemize
-
-Binary files produced my RMSE analysis are:
-@itemize
-@item
-@code{<mod_file>_prior_*.mat}: these files store the filtered and smoothed
-    variables for the prior Monte-Carlo sample, generated when doing RMSE analysis
-    (@code{pprior=1} and @code{ppost=0});
-@item
-@code{<mode_file>_mc_*.mat}: these files store the filtered and smoothed variables
-    for the multivariate normal Monte-Carlo sample, generated when doing
-    RMSE analysis (@code{pprior=0} and @code{ppost=0}).
-@end itemize
-
-Figure files @code{<mod_file>_rmse_*.fig} store results for the RMSE analysis.
-
-@itemize
-@item
-@code{<mod_file>_rmse_prior*.fig}: save results for the analysis using prior
-Monte-Carlo samples;
-
-@item
-@code{<mod_file>_rmse_mc*.fig}: save results for the analysis using multivariate
-normal Monte-Carlo samples;
-
-@item
-@code{<mod_file>_rmse_post*.fig}: save results for the analysis using Metropolis
-posterior samples.
-@end itemize
-
-The following types of figures are saved (we show prior sample to fix ideas,
-but the same conventions are used for multivariate normal and posterior):
-
-@itemize
-@item
-@code{<mod_file>_rmse_prior_*.fig}: for each parameter, plots the cdfs
-corresponding to the best 10% RMSEs of each observed series;
-
-@item
-@code{<mod_file>_rmse_prior_dens_*.fig}: for each parameter, plots the
-pdfs corresponding to the best 10% RMESs of each observed series;
-
-@item
-@code{<mod_file>_rmse_prior_<name of observedseries>_corr_*.fig}: for
-each observed series plots the bi-dimensional projections of samples
-with the best 10% RMSEs, when the correlation is significant;
-
-@item
-@code{<mod_file>_rmse_prior_lnlik*.fig}: for each observed series, plots
-in red the cdf of the log-likelihood corresponding to the best 10%
-RMSEs, in green the cdf of the rest of the sample and in blue the
-cdf of the full sample; this allows one to see the presence of some
-idiosyncratic behavior;
-
-@item
-@code{<mod_file>_rmse_prior_lnpost*.fig}: for each observed series, plots
-in red the cdf of the log-posterior corresponding to the best 10% RMSEs,
-in green the cdf of the rest of the sample and in blue the cdf of the full
-sample; this allows one to see idiosyncratic behavior;
-
-@item
-@code{<mod_file>_rmse_prior_lnprior*.fig}: for each observed series, plots
-in red the cdf of the log-prior corresponding to the best 10% RMSEs,
-in green the cdf of the rest of the sample and in blue the cdf of the full
-sample; this allows one to see idiosyncratic behavior;
-
-@item
-@code{<mod_file>_rmse_prior_lik_SA_*.fig}: when @code{lik_only=1}, this shows
-the Smirnov tests for the filtering of the best 10% log-likelihood values;
-
-@item
-@code{<mod_file>_rmse_prior_post_SA_*.fig}: when @code{lik_only=1}, this shows
-the Smirnov test for the filtering of the best 10% log-posterior values.
-@end itemize
-
-@node Screening Analysis
-@subsection Screening Analysis
-
-Screening analysis does not require any additional options with respect to
-those listed in @ref{Sampling Options}. The toolbox performs all the
-analyses required and displays results.
-
-The results of the screening analysis with Morris sampling design are stored
-in the subfolder @code{<mod_file>/GSA/SCREEN}. The data file @code{<mod_file>_prior} stores
-all the information of the analysis (Morris sample, reduced form coefficients,
-etc.).
-
-Screening analysis merely concerns reduced form coefficients. Similar
-synthetic bar charts as for the reduced form analysis with Monte-Carlo samples are
-saved:
-@itemize
-@item
-@code{<mod_file>_redform_<endo name>_vs_lags_*.fig}: shows bar charts
-of the elementary effect tests for the ten most important parameters
-driving the reduced form coefficients of the selected endogenous variables
-(@code{namendo}) versus lagged endogenous variables (@code{namlagendo});
-
-@item
-@code{<mod_file>_redform_<endo name>_vs_shocks_*.fig}: shows bar charts
-of the elementary effect tests for the ten most important parameters
-driving the reduced form coefficients of the selected endogenous variables
-(@code{namendo}) versus exogenous variables (@code{namexo});
-
-@item
-@code{<mod_file>_redform_screen.fig}: shows bar chart of all elementary
-effect tests for each parameter: this allows one to identify parameters that
-have a minor effect for any of the reduced form coefficients.
-@end itemize
-
-@node Identification Analysis
-@subsection Identification Analysis
-
-Setting the option @code{identification=1}, an identification analysis based on
-theoretical moments is performed. Sensitivity plots are provided that allow
-to infer which parameters are most likely to be less identifiable.
-
-Prerequisite for properly running all the identification routines, is the keyword
-@code{identification}; in the Dynare model file. This keyword triggers
-the computation of analytic derivatives of the model with respect to estimated
-parameters and shocks. This is required for option @code{morris=2},
-which implements @cite{Iskrev (2010)} identification analysis.
-
-For example, the placing @code{identification; dynare_sensitivity(identification=1, morris=2);}
-in the Dynare model file trigger identification analysis using analytic derivatives
-@cite{Iskrev (2010)}, jointly with the mapping of the acceptable region.
-
-The identification analysis with derivatives can also be triggered by the
-commands @code{identification;} This does not do the mapping of
-acceptable regions for the model and uses the standard random sampler of Dynare.
-It completely offsets any use of the sensitivity analysis toolbox.
-
-@node Performing Sensitivity and Identification Analysis
-@subsection Performing Sensitivity and Identification Analysis
+@node Performing sensitivity analysis
+@subsection Performing sensitivity analysis
 
 @deffn Command dynare_sensitivity ;
 @deffnx Command dynare_sensitivity (@var{OPTIONS}@dots{});
@@ -7383,6 +7204,80 @@ Maximum number of lags for moments in identification analysis. Default: @code{1}
 
 @end deffn
 
+@node IRF/Moment calibration
+@subsection IRF/Moment calibration
+
+IRF and moment calibration can be defined in @code{irf_calibration} and @code{moment_calibration} blocks:
+
+@deffn Block irf_calibration;
+@deffnx Block irf_calibration(@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+This block allows defining IRF calibration criteria and is terminated by @code{end;}. 
+To set IRF sign restrictions, the following syntax is used
+@example
+@var{VARIABLE_NAME}(@var{INTEGER}),@var{EXOGENOUS_NAME}, -;
+@var{VARIABLE_NAME}(@var{INTEGER}:@var{INTEGER}),@var{EXOGENOUS_NAME}, +;
+@end example
+To set IRF restrictions with specific intervals, the following syntax is used
+@example
+@var{VARIABLE_NAME}(@var{INTEGER}),@var{EXOGENOUS_NAME}, [@var{DOUBLE} @var{DOUBLE}];
+@var{VARIABLE_NAME}(@var{INTEGER}:@var{INTEGER}),@var{EXOGENOUS_NAME}, [@var{DOUBLE} @var{DOUBLE}];
+@end example
+
+When @code{(@var{INTEGER}:@var{INTEGER})} is used, the restriction is considered to be fulfilled by a logical OR.
+A list of restrictions must always be fulfilled with logical AND.
+
+@examplehead
+
+@example
+irf_calibration;
+y(1:4), e_ys, [ -50 50]; //[first year response with logical OR]
+@@#for ilag in 21:40
+R_obs(@@@{ilag@}), e_ys, [0 6]; //[response from 5th to 10th years with logical AND]
+@@#endfor
+end;
+@end example
+
+@end deffn
+
+@deffn Block moment_calibration;
+@deffnx Block moment_calibration(@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+This block allows defining moment calibration criteria. This block is terminated by @code{end;}, and contains lines of the
+form:
+@example
+@var{VARIABLE_NAME1},@var{VARIABLE_NAME2}(+/-@var{INTEGER}), [@var{DOUBLE} @var{DOUBLE}];
+@var{VARIABLE_NAME1},@var{VARIABLE_NAME2}(+/-@var{INTEGER}), +/-;
+@var{VARIABLE_NAME1},@var{VARIABLE_NAME2}(+/-(@var{INTEGER}:@var{INTEGER})), [@var{DOUBLE} @var{DOUBLE}];
+@var{VARIABLE_NAME1},@var{VARIABLE_NAME2}((-@var{INTEGER}:+@var{INTEGER})), [@var{DOUBLE} @var{DOUBLE}];
+@end example
+
+When @code{(@var{INTEGER}:@var{INTEGER})} is used, the restriction is considered to be fulfilled by a logical OR.
+A list of restrictions must always be fulfilled with logical AND.
+
+@examplehead
+
+@example
+moment_calibration;
+y_obs,y_obs, [0.5 1.5]; //[unconditional variance]
+y_obs,y_obs(-(1:4)), +; //[sign restriction for first year acf with logical OR]
+@@#for ilag in -2:2
+y_obs,R_obs(@@@{ilag@}), -; //[-2:2 ccf with logical AND]
+@@#endfor
+@@#for ilag in -4:4
+y_obs,pie_obs(@@@{ilag@}), -; //[-4_4 ccf with logical AND]
+@@#endfor
+end;
+@end example
+
+@end deffn
+@node Performing identification analysis
+@subsection Performing identification analysis
+
 @deffn Command identification ;
 @deffnx Command identification (@var{OPTIONS}@dots{});
 
@@ -7462,6 +7357,404 @@ Specify the parameter set to use. Default: @code{prior_mean}
 @end table
 
 @end deffn
+
+@node Types of analysis and output files
+@subsection Types of analysis and output files
+
+The sensitivity analysis toolbox includes several types of analyses.
+Sensitivity analysis results are saved locally in @code{<mod_file>/gsa},
+where @code{<mod_file>.mod} is the name of the DYNARE model file.
+
+@menu
+* Sampling::
+* Stability Mapping::
+* IRF/Moment restrictions::
+* Reduced Form Mapping::
+* RMSE::
+* Screening Analysis::
+* Identification Analysis::
+@end menu
+
+@node Sampling
+@subsubsection Sampling
+
+The following binary files are produced:
+@itemize
+@item
+@code{<mod_file>_prior.mat}: this file stores information about the analyses
+performed sampling from the prior, @i{i.e.} @code{pprior=1} and @code{ppost=0};
+
+@item
+@code{<mod_file>_mc.mat}: this file stores information about the analyses performed
+sampling from multivariate normal, @i{i.e.} @code{pprior=0} and @code{ppost=0};
+
+@item
+@code{<mod_file>_post.mat}: this file stores information about analyses performed
+using the Metropolis posterior sample, @i{i.e.} @code{ppost=1}.
+@end itemize
+
+@node Stability Mapping
+@subsubsection Stability Mapping
+
+Figure files produced are of the form @code{<mod_file>_prior_*.fig} and store results
+for stability mapping from prior Monte-Carlo samples:
+@itemize
+@item
+@code{<mod_file>_prior_stable.fig}: plots of the Smirnov test and the correlation analyses
+confronting the cdf of the sample fulfilling Blanchard-Kahn conditions (blue color)
+with the cdf of the rest of the sample (red color), @i{i.e.} either
+instability or indeterminacy or the solution could not be found (@i{e.g.}
+the steady state solution could not be found by the solver);
+
+@item
+@code{<mod_file>_prior_indeterm.fig}: plots of the Smirnov test and the correlation
+analyses confronting the cdf of the sample producing indeterminacy (red color)
+with the cdf of the rest of the sample (blue color);
+
+@item
+@code{<mod_file>_prior_unstable.fig}: plots of the Smirnov test and the correlation
+analyses confronting the cdf of the sample producing explosive roots (red color) 
+with the cdf of the rest of the sample (blue color);
+
+@item
+@code{<mod_file>_prior_wrong.fig}: plots of the Smirnov test and the correlation
+analyses confronting the cdf of the sample where the solution could not be found (@i{e.g.}
+the steady state solution could not be found by the solver - red color) 
+with the cdf of the rest of the sample (blue color);
+
+@item
+@code{<mod_file>_prior_calib.fig}: plots of the Smirnov test and the correlation
+analyses splitting the sample fulfilling Blanchard-Kahn conditions, 
+by confronting the cdf of the sample where IRF/moment restrictions are matched (blue color)
+with the cdf where IRF/moment restrictions are NOT matched (red color);
+
+@end itemize
+
+Similar conventions apply for @code{<mod_file>_mc_*.fig} files, obtained when
+samples from multivariate normal are used.
+
+@node IRF/Moment restrictions
+@subsubsection IRF/Moment restrictions
+
+The following binary files are produced:
+@itemize
+@item
+@code{<mod_file>_prior_restrictions.mat}: this file stores information about the IRF/moment restriction analysis
+performed sampling from the prior ranges, @i{i.e.} @code{pprior=1} and @code{ppost=0};
+
+@item
+@code{<mod_file>_mc_restrictions.mat}: this file stores information about the IRF/moment restriction analysis performed
+sampling from multivariate normal, @i{i.e.} @code{pprior=0} and @code{ppost=0};
+
+@item
+@code{<mod_file>_post_restrictions.mat}: this file stores information about IRF/moment restriction analysis performed
+using the Metropolis posterior sample, @i{i.e.} @code{ppost=1}.
+@end itemize
+
+Figure files produced are of the form @code{<mod_file>_prior_irf_calib_*.fig} and @code{<mod_file>_prior_moment_calib_*.fig} and store results
+for mapping restrictions from prior Monte-Carlo samples:
+@itemize
+@item
+@code{<mod_file>_prior_irf_calib_<ENDO_NAME>_vs_<EXO_NAME>_<PERIOD>.fig}: plots of the Smirnov test and the correlation
+analyses splitting the sample fulfilling Blanchard-Kahn conditions,
+by confronting the cdf of the sample where the individual IRF restriction 
+@code{<ENDO_NAME>} vs. @code{<EXO_NAME>} at period(s) @code{<PERIOD>} is matched (blue color)
+with the cdf where the IRF restriction is NOT matched (red color)
+
+@item
+@code{<mod_file>_prior_irf_calib_<ENDO_NAME>_vs_<EXO_NAME>_ALL.fig}: plots of the Smirnov test and the correlation
+analyses splitting the sample fulfilling Blanchard-Kahn conditions,
+by confronting the cdf of the sample where ALL the individual IRF restrictions for the same couple
+@code{<ENDO_NAME>} vs. @code{<EXO_NAME>} are matched (blue color)
+with the cdf where the IRF restriction is NOT matched (red color)
+
+@item
+@code{<mod_file>_prior_irf_restrictions.fig}: plots visual information on the IRF restrictions 
+compared to the actual Monte Carlo realization from prior sample.
+
+@item
+@code{<mod_file>_prior_moment_calib_<ENDO_NAME1>_vs_<ENDO_NAME2>_<LAG>.fig}: plots of the Smirnov test and the correlation
+analyses splitting the sample fulfilling Blanchard-Kahn conditions,
+by confronting the cdf of the sample where the individual acf/ccf moment restriction 
+@code{<ENDO_NAME1>} vs. @code{<ENDO_NAME2>} at lag(s) @code{<LAG>} is matched (blue color)
+with the cdf where the IRF restriction is NOT matched (red color)
+
+@item
+@code{<mod_file>_prior_moment_calib_<ENDO_NAME>_vs_<EXO_NAME>_ALL.fig}: plots of the Smirnov test and the correlation
+analyses splitting the sample fulfilling Blanchard-Kahn conditions,
+by confronting the cdf of the sample where ALL the individual acf/ccf moment restrictions for the same couple
+@code{<ENDO_NAME1>} vs. @code{<ENDO_NAME2>} are matched (blue color)
+with the cdf where the IRF restriction is NOT matched (red color)
+
+@item
+@code{<mod_file>_prior_moment_restrictions.fig}: plots visual information on the moment restrictions 
+compared to the actual Monte Carlo realization from prior sample.
+
+@end itemize
+
+Similar conventions apply for @code{<mod_file>_mc_*.fig} and @code{<mod_file>_post_*.fig} files, obtained when
+samples from multivariate normal or from posterior are used.
+
+@node Reduced Form Mapping
+@subsubsection Reduced Form Mapping
+
+When the option @code{threshold_redform} is not set, or it is empty (the default), this analysis estimates a multivariate
+smoothing spline ANOVA model (the 'mapping') for the selected entries in the transition matrix of the shock matrix of the reduce form first order solution of the model.
+This mapping is done either with prior samples or with MC samples with @code{neighborhood_width}.
+Unless @code{neighborhood_width} is set with MC samples, the  mapping of the reduced form solution forces the use of samples from
+prior ranges or prior distributions, @i{i.e.}: @code{pprior=1} and @code{ppost=0}. It
+uses 250 samples to optimize smoothing parameters and 1000 samples to compute the
+fit. The rest of the sample is used for out-of-sample validation. One can also
+load a previously estimated mapping with a new Monte-Carlo sample, to look at the
+forecast for the new Monte-Carlo sample.
+
+The following synthetic figures are produced:
+@itemize
+@item
+@code{<mod_file>_redform_<endo name>_vs_lags_*.fig}: shows bar charts
+of the sensitivity indices for the ten most important parameters driving
+the reduced form coefficients of the selected endogenous variables
+(@code{namendo}) versus lagged endogenous variables (@code{namlagendo}); suffix
+@code{log} indicates the results for log-transformed entries;
+
+@item
+@code{<mod_file>_redform_<endo name>_vs_shocks_*.fig}: shows bar charts
+of the sensitivity indices for the ten most important parameters driving
+the reduced form coefficients of the selected endogenous variables
+(@code{namendo}) versus exogenous variables (@code{namexo}); suffix @code{log}
+indicates the results for log-transformed entries;
+
+@item
+@code{<mod_file>_redform_gsa(_log).fig}: shows bar chart of all sensitivity
+indices for each parameter: this allows one to notice parameters that
+have a minor effect for any of the reduced form coefficients.
+@end itemize
+
+Detailed results of the analyses are shown in the subfolder @code{<mod_file>/gsa/redform_prior} for prior samples and in @code{<mod_file>/gsa/redform_mc} for MC samples with option @code{neighborhood_width},
+where the detailed results of the estimation of the single functional relationships
+between parameters @math{\theta} and reduced form coefficient (denoted as @math{y} hereafter) are stored in separate directories
+named as:
+
+@itemize
+@item
+@code{<namendo>_vs_<namlagendo>}: for the entries of the transition matrix;
+
+@item
+@code{<namendo>_vs_<namexo>}: for entries of the matrix of the shocks.
+@end itemize
+
+The following files are stored in each directory (we stick with prior sample but similar convetins are used for MC samples):
+@itemize
+@item
+@code{<mod_file>_prior_<namendo>_vs_<namexo>.fig}: histogram and CDF plot of the MC sample of the individual entry
+of the shock matrix, in sample and out of sample fit of the ANOVA model;
+
+@item
+@code{<mod_file>_prior_<namendo>_vs_<namexo>_map_SE.fig}: for entries of the shock matrix it shows graphs of the estimated first order ANOVA terms @math{y = f(\theta_i)} for each deep parameter @math{\theta_i}; 
+
+@item
+@code{<mod_file>_prior_<namendo>_vs_<namlagendo>.fig}: histogram and CDF plot of the MC sample of the individual entry
+of the transition matrix, in sample and out of sample fit of the ANOVA model;
+
+@item
+@code{<mod_file>_prior_<namendo>_vs_<namlagendo>_map_SE.fig}: for entries of the transition matrix it shows graphs of the estimated first order ANOVA terms @math{y = f(\theta_i)} for each deep parameter @math{\theta_i}; 
+
+@item
+@code{<mod_file>_prior_<namendo>_vs_<namexo>_map.mat}, @code{<mod_file>_<namendo>_vs_<namlagendo>_map.mat}: these files store info in the estimation; 
+
+@end itemize
+
+When option @code{logtrans_redform} is set, the ANOVA estimation is performed using a log-transformation of each @code{y}.
+The ANOVA mapping is then transformed back onto the original scale, to allow comparability with the baseline estimation.
+Graphs for this log-transformed case, are stored in the same folder in files denoted with the @code{_log} suffix.
+
+When the option @code{threshold_redform} is set, the analysis is performed via Monte Carlo filtering, by displaying parameters that drive the individual entry @code{y} inside the range specified in @code{threshold_redform}. If no entry is found (or all entries are in the range), the MCF algorithm ignores the range specified in @code{threshold_redform} and performs the analysis splitting the MC sample of @code{y} into deciles. Setting @code{threshold_redform=[-inf inf]} triggers this approach for all @code{y}'s.
+
+Results are stored in subdirectories of @code{<mod_file>/gsa/redform_prior} named 
+@itemize
+@item
+@code{<mod_file>_prior_<namendo>_vs_<namlagendo>_threshold}: for the entries of the transition matrix;
+
+@item
+@code{<mod_file>_prior_<namendo>_vs_<namexo>_threshold}: for entries of the matrix of the shocks.
+@end itemize
+
+The files saved are named
+@itemize
+@item
+@code{<mod_file>_prior_<namendo>_vs_<namexo>_threshold.fig},@code{<mod_file>_<namendo>_vs_<namlagendo>_threshold.fig}: graphical outputs; 
+@item
+@code{<mod_file>_prior_<namendo>_vs_<namexo>_threshold.mat},@code{<mod_file>_<namendo>_vs_<namlagendo>_threshold.mat}: info on the analysis; 
+
+@end itemize
+
+@node RMSE
+@subsubsection RMSE
+
+The RMSE analysis can be performed with different types of sampling options:
+@enumerate
+@item
+When @code{pprior=1} and @code{ppost=0}, the toolbox analyzes the RMSEs for
+the Monte-Carlo sample obtained by sampling parameters from their prior distributions
+(or prior ranges): this analysis provides some hints about
+what parameter drives the fit of which observed series, prior to the full
+estimation;
+
+@item
+When @code{pprior=0} and @code{ppost=0}, the toolbox analyzes the RMSEs for
+a multivariate normal Monte-Carlo sample, with covariance matrix based on
+the inverse Hessian at the optimum: this analysis is useful when maximum likelihood
+estimation is done (@i{i.e.} no Bayesian estimation);
+
+@item
+When @code{ppost=1} the toolbox analyzes the RMSEs for the posterior sample
+obtained by Dynare's Metropolis procedure.
+@end enumerate
+
+The use of cases 2 and 3 requires an estimation step beforehand. To
+facilitate the sensitivity analysis after estimation, the @code{dynare_sensitivity}
+command also allows you to indicate some options of the @code{estimation}
+command. These are:
+@itemize @bullet
+@item @code{datafile}
+@item @code{nobs}
+@item @code{first_obs}
+@item @code{prefilter}
+@item @code{presample}
+@item @code{nograph}
+@item @code{nodisplay}
+@item @code{graph_format}
+@item @code{conf_sig}
+@item @code{loglinear}
+@item @code{mode_file}
+@end itemize
+
+Binary files produced my RMSE analysis are:
+@itemize
+@item
+@code{<mod_file>_prior_*.mat}: these files store the filtered and smoothed
+    variables for the prior Monte-Carlo sample, generated when doing RMSE analysis
+    (@code{pprior=1} and @code{ppost=0});
+@item
+@code{<mode_file>_mc_*.mat}: these files store the filtered and smoothed variables
+    for the multivariate normal Monte-Carlo sample, generated when doing
+    RMSE analysis (@code{pprior=0} and @code{ppost=0}).
+@end itemize
+
+Figure files @code{<mod_file>_rmse_*.fig} store results for the RMSE analysis.
+
+@itemize
+@item
+@code{<mod_file>_rmse_prior*.fig}: save results for the analysis using prior
+Monte-Carlo samples;
+
+@item
+@code{<mod_file>_rmse_mc*.fig}: save results for the analysis using multivariate
+normal Monte-Carlo samples;
+
+@item
+@code{<mod_file>_rmse_post*.fig}: save results for the analysis using Metropolis
+posterior samples.
+@end itemize
+
+The following types of figures are saved (we show prior sample to fix ideas,
+but the same conventions are used for multivariate normal and posterior):
+
+@itemize
+@item
+@code{<mod_file>_rmse_prior_params_*.fig}: for each parameter, plots the cdfs 
+corresponding to the best 10% RMSEs of each observed series (only those cdfs below the significance threshold @code{alpha_rmse});
+
+@item
+@code{<mod_file>_rmse_prior_<var_obs>_*.fig}: if a parameter significantly affects the fit of @code{var_obs}, all possible trade-off's with other observables for same parameter are plotted;
+
+@item
+@code{<mod_file>_rmse_prior_<var_obs>_map.fig}: plots the MCF analysis of parameters significantly driving the fit the observed series @code{var_obs};
+
+@item
+@code{<mod_file>_rmse_prior_lnlik*.fig}: for each observed series, plots
+in BLUE the cdf of the log-likelihood corresponding to the best 10%
+RMSEs, in RED the cdf of the rest of the sample and in BLACK the
+cdf of the full sample; this allows one to see the presence of some
+idiosyncratic behavior;
+
+@item
+@code{<mod_file>_rmse_prior_lnpost*.fig}: for each observed series, plots
+in BLUE the cdf of the log-posterior corresponding to the best 10% RMSEs,
+in RED the cdf of the rest of the sample and in BLACK the cdf of the full
+sample; this allows one to see idiosyncratic behavior;
+
+@item
+@code{<mod_file>_rmse_prior_lnprior*.fig}: for each observed series, plots
+in BLUE the cdf of the log-prior corresponding to the best 10% RMSEs,
+in RED the cdf of the rest of the sample and in BLACK the cdf of the full
+sample; this allows one to see idiosyncratic behavior;
+
+@item
+@code{<mod_file>_rmse_prior_lik.fig}: when @code{lik_only=1}, this shows
+the MCF tests for the filtering of the best 10% log-likelihood values;
+
+@item
+@code{<mod_file>_rmse_prior_post.fig}: when @code{lik_only=1}, this shows
+the MCF tests for the filtering of the best 10% log-posterior values.
+@end itemize
+
+@node Screening Analysis
+@subsubsection Screening Analysis
+
+Screening analysis does not require any additional options with respect to
+those listed in @ref{Sampling Options}. The toolbox performs all the
+analyses required and displays results.
+
+The results of the screening analysis with Morris sampling design are stored
+in the subfolder @code{<mod_file>/gsa/screen}. The data file @code{<mod_file>_prior} stores
+all the information of the analysis (Morris sample, reduced form coefficients,
+etc.).
+
+Screening analysis merely concerns reduced form coefficients. Similar
+synthetic bar charts as for the reduced form analysis with Monte-Carlo samples are
+saved:
+@itemize
+@item
+@code{<mod_file>_redform_<endo name>_vs_lags_*.fig}: shows bar charts
+of the elementary effect tests for the ten most important parameters
+driving the reduced form coefficients of the selected endogenous variables
+(@code{namendo}) versus lagged endogenous variables (@code{namlagendo});
+
+@item
+@code{<mod_file>_redform_<endo name>_vs_shocks_*.fig}: shows bar charts
+of the elementary effect tests for the ten most important parameters
+driving the reduced form coefficients of the selected endogenous variables
+(@code{namendo}) versus exogenous variables (@code{namexo});
+
+@item
+@code{<mod_file>_redform_screen.fig}: shows bar chart of all elementary
+effect tests for each parameter: this allows one to identify parameters that
+have a minor effect for any of the reduced form coefficients.
+@end itemize
+
+@node Identification Analysis
+@subsubsection Identification Analysis
+
+Setting the option @code{identification=1}, an identification analysis based on
+theoretical moments is performed. Sensitivity plots are provided that allow
+to infer which parameters are most likely to be less identifiable.
+
+Prerequisite for properly running all the identification routines, is the keyword
+@code{identification}; in the Dynare model file. This keyword triggers
+the computation of analytic derivatives of the model with respect to estimated
+parameters and shocks. This is required for option @code{morris=2},
+which implements @cite{Iskrev (2010)} identification analysis.
+
+For example, the placing @code{identification; dynare_sensitivity(identification=1, morris=2);}
+in the Dynare model file trigger identification analysis using analytic derivatives
+@cite{Iskrev (2010)}, jointly with the mapping of the acceptable region.
+
+The identification analysis with derivatives can also be triggered by the
+commands @code{identification;} This does not do the mapping of
+acceptable regions for the model and uses the standard random sampler of Dynare.
+It completely offsets any use of the sensitivity analysis toolbox.
+
 
 @node Markov-switching SBVAR
 @section Markov-switching SBVAR
@@ -11787,7 +12080,7 @@ with the same base name as specified by @ref{tableName} with the ending
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphBar, graphBarColor, graphBarFillColor, graphBarWidth, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
+@defmethod Report addSeries data, graphBar, graphBarColor, graphBarFillColor, graphBarWidth, graphFanShadeColor, graphFanShadeOpacity, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}. NB: Options specific
 to graphs begin with `@code{graph}' while options specific to tables begin with
 `@code{table}'.
@@ -11801,6 +12094,15 @@ to graphs begin with `@code{graph}' while options specific to tables begin with
 @item graphBar, @code{BOOLEAN}
 Whether or not to display this series as a bar graph as oppsed to the
 default of displaying it as a line graph. Default: @code{false}
+
+@anchor{graphFanShadeColor}
+@item graphFanShadeColor, @code{STRING}
+The shading color to use between a series and the previously-added
+series in a graph. Useful for making fan charts. Default: @code{empty}
+
+@item graphFanShadeOpacity, @code{INTEGER}
+The opacity of the color passed in @ref{graphFanShadeColor}. Default:
+@code{50}
 
 @item graphBarColor, @code{STRING}
 The outline color of each bar in the bar graph. Only active if
@@ -12221,6 +12523,11 @@ with an Application to a Non-Linear Phillips Curve,'' @i{Computational
 Economics}, 17, 125--139
 
 @item
+Corona, Angelo,  M. Marchesi, Claudio Martini, and Sandro Ridella (1987):
+``Minimizing multimodal functions of continuous variables with the ``simulated annealing'' algorithm'',
+@i{ACM Transactions on Mathematical Software}, 13(3), 262--280
+
+@item
 Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
 ``Introducing financial frictions and unemployment into a small open
 economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
@@ -12268,6 +12575,16 @@ International Meeting on Bayesian Statistics, pp. 169--194, Oxford University Pr
 Geweke, John (1999): ``Using simulation methods for Bayesian econometric models:
 Inference, development and communication,'' @i{Econometric Reviews}, 18(1), 1--73
 
+@item 
+Goffe, William L., Gary D. Ferrier, and John Rogers (1994): ``Global Optimization 
+of Statistical Functions with Simulated Annealing,'' @i{Journal of Econometrics}, 60(1/2), 
+65--100
+
+@item
+Hansen, Nikolaus and Stefan Kern (2004): ``Evaluating the CMA Evolution Strategy 
+on Multimodal Test Functions''. In: @i{Eighth International Conference on Parallel 
+Problem Solving from Nature PPSN VIII, Proceedings}, Berlin: Springer, 282--291 
+
 @item
 Ireland, Peter (2004): ``A Method for Taking Models to the Data,''
 @i{Journal of Economic Dynamics and Control}, 28, 1205--26
@@ -12288,6 +12605,11 @@ simulation of dynamic models with forward variables through the use of
 a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602
 
 @item
+Kim, Jinill and Sunghyun Kim (2003): ``Spurious welfare reversals in 
+international business cycle models,'' @i{Journal of International
+Economics}, 60, 471--500
+
+@item
 Kim, Jinill, Sunghyun Kim, Ernst Schaumburg, and Christopher A. Sims
 (2008): ``Calculating and using second-order accurate solutions of
 discrete time dynamic equilibrium models,'' @i{Journal of Economic
@@ -12300,6 +12622,11 @@ Koop, Gary (2003), @i{Bayesian Econometrics}, John Wiley & Sons
 Koopman, S. J. and J. Durbin (2003): ``Filtering and Smoothing of
 State Vector for Diffuse State Space Models,'' @i{Journal of Time
 Series Analysis}, 24(1), 85--98
+
+@item 
+Kuntsevich, Alexei V. and  Franz Kappel (1997): ``SolvOpt - The solver 
+for local nonlinear optimization problems (version 1.1, Matlab, C, FORTRAN)'', 
+University of Graz, Graz, Austria
 
 @item
 Laffargue, Jean-Pierre (1990): ``Résolution d'un modèle
@@ -12356,6 +12683,12 @@ the European Economic Association}, 1(5), 1123--1175
 Villemot, Sébastien (2011): ``Solving rational expectations models at
 first order: what Dynare does,'' @i{Dynare Working Papers}, 2,
 CEPREMAP
+
+@item
+Woodford, Michael (2011): ``Commentary: How Should Monetary Policy Be 
+Conducted in an Era of Price Stability?'' @i{Proceedings - Economic Policy Symposium - Jackson Hole}, 
+277-316
+
 
 @end itemize
 

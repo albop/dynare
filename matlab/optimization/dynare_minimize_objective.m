@@ -46,15 +46,11 @@ function [opt_par_values,fval,exitflag,hessian_mat,options_,Scale]=dynare_minimi
 %% set bounds and parameter names if not already set
 n_params=size(start_par_value,1);
 if isempty(bounds)
-    if minimizer_algorithm==10
+    if isnumeric(minimizer_algorithm) && minimizer_algorithm==10
         error('Algorithm 10 (simpsa) requires upper and lower bounds')
     else
         bounds=[-Inf(n_params,1) Inf(n_params,1)];
     end
-end
-
-if minimizer_algorithm==10 && any(any(isinf(bounds)))
-    error('Algorithm 10 (simpsa) requires finite upper and lower bounds')
 end
 
 if isempty(parameter_names)
@@ -87,7 +83,51 @@ switch minimizer_algorithm
     [opt_par_values,fval,exitflag,output,lamdba,grad,hessian_mat] = ...
         fmincon(objective_function,start_par_value,[],[],[],[],bounds(:,1),bounds(:,2),[],optim_options,varargin{:});
   case 2
-    error('Optimization algorithm 1 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
+    %simulating annealing
+    sa_options = options_.saopt;
+    if ~isempty(options_.optim_opt)
+        options_list = read_key_value_string(options_.optim_opt);
+        for i=1:rows(options_list)
+            switch options_list{i,1}
+              case 'neps'
+                sa_options.neps = options_list{i,2};
+              case 'rt'
+                sa_options.rt = options_list{i,2};
+              case 'MaxIter'
+                sa_options.MaxIter = options_list{i,2};
+              case 'TolFun'
+                sa_options.TolFun = options_list{i,2};
+              case 'verbosity'
+                sa_options.verbosity = options_list{i,2};
+              case 'initial_temperature'
+                sa_options.initial_temperature = options_list{i,2};
+              case 'ns'
+                sa_options.ns = options_list{i,2};
+              case 'nt'
+                sa_options.nt = options_list{i,2};
+              case 'step_length_c'
+                sa_options.step_length_c = options_list{i,2};
+              case 'initial_step_length'
+                sa_options.initial_step_length = options_list{i,2};
+              otherwise
+                warning(['solveopt: Unknown option (' options_list{i,1} ')!'])
+            end
+        end
+    end
+    npar=length(start_par_value);
+    [LB, UB]=set_bounds_to_finite_values(bounds, options_.huge_number);
+    fprintf('\nNumber of parameters= %d, initial temperatur= %4.3f \n', npar,sa_options.initial_temperature);
+    fprintf('rt=  %4.3f; TolFun=  %4.3f; ns=  %4.3f;\n',sa_options.rt,sa_options.TolFun,sa_options.ns);
+    fprintf('nt=  %4.3f; neps=  %4.3f; MaxIter=  %d\n',sa_options.nt,sa_options.neps,sa_options.MaxIter);
+    fprintf('Initial step length(vm): %4.3f; step_length_c: %4.3f\n', sa_options.initial_step_length,sa_options.step_length_c);
+    fprintf('%-20s  %-6s    %-6s    %-6s\n','Name:', 'LB;','Start;','UB;');
+    for pariter=1:npar
+        fprintf('%-20s  %6.4f;   %6.4f;  %6.4f;\n',parameter_names{pariter}, LB(pariter),start_par_value(pariter),UB(pariter));
+    end
+    sa_options.initial_step_length= sa_options.initial_step_length*ones(npar,1); %bring step length to correct vector size
+    sa_options.step_length_c= sa_options.step_length_c*ones(npar,1); %bring step_length_c to correct vector size
+    [opt_par_values, fval,exitflag, n_accepted_draws, n_total_draws, n_out_of_bounds_draws, t, vm] =...
+        simulated_annealing(objective_function,start_par_value,sa_options,LB,UB,varargin{:});
   case 3
     if isoctave && ~user_has_octave_forge_package('optim')
         error('Optimization algorithm 3 requires the optim package')
@@ -143,8 +183,9 @@ switch minimizer_algorithm
         analytic_grad=[];
     end
     % Call csminwell.
-    [fval,opt_par_values,grad,hessian_mat,itct,fcount,exitflag] = ...
+    [fval,opt_par_values,grad,inverse_hessian_mat,itct,fcount,exitflag] = ...
         csminwel1(objective_function, start_par_value, H0, analytic_grad, crit, nit, numgrad, epsilon, varargin{:});
+    hessian_mat=inv(inverse_hessian_mat);
   case 5
     if options_.analytic_derivation==-1 %set outside as code for use of analytic derivation
         analytic_grad=1;
@@ -192,7 +233,13 @@ switch minimizer_algorithm
     if ~isempty(options_.optim_opt)
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
-    [opt_par_values,fval,exitflag] = fminsearch(objective_function,start_par_value,optim_options,varargin{:});
+    if ~isoctave
+        [opt_par_values,fval,exitflag] = fminsearch(objective_function,start_par_value,optim_options,varargin{:});
+    else
+        % Under Octave, use a wrapper, since fminsearch() does not have a 4th arg
+        func = @(x) objective_function(x,varargin{:});
+        [opt_par_values,fval,exitflag] = fminsearch(func,start_par_value,optim_options);
+    end
   case 8
     % Dynare implementation of the simplex algorithm.
     simplexOptions = options_.simplex;
@@ -273,50 +320,48 @@ switch minimizer_algorithm
     end
     simpsaOptionsList = options2cell(simpsaOptions);
     simpsaOptions = simpsaset(simpsaOptionsList{:});
-    [opt_par_values, fval, exitflag] = simpsa(func2str(objective_function),start_par_value,bounds(:,1),bounds(:,2),simpsaOptions,varargin{:});
+    [LB, UB]=set_bounds_to_finite_values(bounds, options_.huge_number);
+    [opt_par_values, fval, exitflag] = simpsa(func2str(objective_function),start_par_value,LB,UB,simpsaOptions,varargin{:});
   case 11
      options_.cova_compute = 0 ;
      [opt_par_values,stdh,lb_95,ub_95,med_param] = online_auxiliary_filter(start_par_value,varargin{:}) ;
   case 101
-    myoptions=soptions;
-    myoptions(2)=1e-6; %accuracy of argument
-    myoptions(3)=1e-6; %accuracy of function (see Solvopt p.29)
-    myoptions(5)= 1.0;
-    [opt_par_values,fval]=solvopt(start_par_value,objective_function,[],myoptions,varargin{:});
+    solveoptoptions = options_.solveopt;
+    if ~isempty(options_.optim_opt)
+        options_list = read_key_value_string(options_.optim_opt);
+        for i=1:rows(options_list)
+            switch options_list{i,1}
+              case 'TolX'
+                solveoptoptions.TolX = options_list{i,2};
+              case 'TolFun'
+                solveoptoptions.TolFun = options_list{i,2};
+              case 'MaxIter'
+                solveoptoptions.MaxIter = options_list{i,2};
+              case 'verbosity'
+                solveoptoptions.verbosity = options_list{i,2};
+              case 'SpaceDilation'
+                solveoptoptions.SpaceDilation = options_list{i,2};
+              case 'LBGradientStep'
+                solveoptoptions.LBGradientStep = options_list{i,2};
+              otherwise
+                warning(['solveopt: Unknown option (' options_list{i,1} ')!'])
+            end
+        end
+    end
+    [opt_par_values,fval]=solvopt(start_par_value,objective_function,[],[],[],solveoptoptions,varargin{:});
   case 102
-    %simulating annealing
-    LB = start_par_value - 1;
-    UB = start_par_value + 1;
-    neps=10;
-    %  Set input parameters.
-    maxy=0;
-    epsilon=1.0e-9;
-    rt_=.10;
-    t=15.0;
-    ns=10;
-    nt=10;
-    maxevl=100000000;
-    idisp =1;
-    npar=length(start_par_value);
-
-    disp(['size of param',num2str(length(start_par_value))])
-    c=.1*ones(npar,1);
-    %*  Set input values of the input/output parameters.*
-
-    vm=1*ones(npar,1);
-    disp(['number of parameters= ' num2str(npar) 'max= '  num2str(maxy) 't=  ' num2str(t)]);
-    disp(['rt_=  '  num2str(rt_) 'eps=  '  num2str(epsilon) 'ns=  '  num2str(ns)]);
-    disp(['nt=  '  num2str(nt) 'neps= '   num2str(neps) 'maxevl=  '  num2str(maxevl)]);
-    disp '  ';
-    disp '  ';
-    disp(['starting values(x)  ' num2str(start_par_value')]);
-    disp(['initial step length(vm)  '  num2str(vm')]);
-    disp(['lower bound(lb)', 'initial conditions', 'upper bound(ub)' ]);
-    disp([LB start_par_value UB]);
-    disp(['c vector   ' num2str(c')]);
-
-    [opt_par_values, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(objective_function,xparstart_par_valueam1,maxy,rt_,epsilon,ns,nt ...
-                                                          ,neps,maxevl,LB,UB,c,idisp ,t,vm,varargin{:});
+    if isoctave
+        error('Optimization algorithm 2 is not available under Octave')
+    elseif ~user_has_matlab_license('GADS_Toolbox')
+        error('Optimization algorithm 2 requires the Global Optimization Toolbox')
+    end
+    % Set default optimization options for fmincon.
+    optim_options = saoptimset('display','iter','TolFun',1e-8);
+    if ~isempty(options_.optim_opt)
+        eval(['optim_options = saoptimset(optim_options,' options_.optim_opt ');']);
+    end
+    func = @(x)objective_function(x,varargin{:});
+    [opt_par_values,fval,exitflag,output] = simulannealbnd(func,start_par_value,bounds(:,1),bounds(:,2),optim_options);
   otherwise
     if ischar(minimizer_algorithm)
         if exist(options_.mode_compute)
@@ -327,4 +372,13 @@ switch minimizer_algorithm
     else
         error(['Optimization algorithm ' int2str(minimizer_algorithm) ' is unknown!'])
     end
+end
+
+end
+
+function [LB, UB]=set_bounds_to_finite_values(bounds, huge_number)
+    LB=bounds(:,1);
+    LB(isinf(LB))=-huge_number;
+    UB=bounds(:,2);
+    UB(isinf(UB))=huge_number;
 end

@@ -1,25 +1,25 @@
 function myoutput = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,whoiam, ThisMatlab)
-% PARALLEL CONTEXT
-% This function contain the most computationally intensive portion of code in
-% random_walk_metropolis_hastings (the 'for xxx = fblck:nblck' loop). The branches in 'for'
-% cycle and are completely independent than suitable to be executed in parallel way.
+% function myoutput = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,whoiam, ThisMatlab)
+% Contains the most computationally intensive portion of code in
+% random_walk_metropolis_hastings (the 'for xxx = fblck:nblck' loop). The branches in  that 'for'
+% cycle are completely independent to be suitable for parallel execution.
 %
 % INPUTS
 %   o myimput            [struc]     The mandatory variables for local/remote
 %                                    parallel computing obtained from random_walk_metropolis_hastings.m
 %                                    function.
 %   o fblck and nblck    [integer]   The Metropolis-Hastings chains.
-%   o whoiam             [integer]   In concurrent programming a modality to refer to the differents thread running in parallel is needed.
+%   o whoiam             [integer]   In concurrent programming a modality to refer to the different threads running in parallel is needed.
 %                                    The integer whoaim is the integer that
 %                                    allows us to distinguish between them. Then it is the index number of this CPU among all CPUs in the
 %                                    cluster.
 %   o ThisMatlab         [integer]   Allows us to distinguish between the
-%                                    'main' matlab, the slave matlab worker, local matlab, remote matlab,
+%                                    'main' Matlab, the slave Matlab worker, local Matlab, remote Matlab,
 %                                     ... Then it is the index number of this slave machine in the cluster.
 % OUTPUTS
 %   o myoutput  [struc]
-%               If executed without parallel is the original output of 'for b =
-%               fblck:nblck' otherwise a portion of it computed on a specific core or
+%               If executed without parallel, this is the original output of 'for b =
+%               fblck:nblck'. Otherwise, it's a portion of it computed on a specific core or
 %               remote machine. In this case:
 %                               record;
 %                               irun;
@@ -31,23 +31,12 @@ function myoutput = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,wh
 %
 % SPECIAL REQUIREMENTS.
 %   None.
-
+% 
 % PARALLEL CONTEXT
-% The most computationally intensive part of this function may be executed
-% in parallel. The code sutable to be executed in parallel on multi core or cluster machine,
-% is removed from this function and placed in random_walk_metropolis_hastings_core.m funtion.
-% Then the DYNARE parallel package contain a set of pairs matlab functios that can be executed in
-% parallel and called name_function.m and name_function_core.m.
-% In addition in the parallel package we have second set of functions used
-% to manage the parallel computation.
-%
-% This function was the first function to be parallelized, later other
-% functions have been parallelized using the same methodology.
-% Then the comments write here can be used for all the other pairs of
-% parallel functions and also for management funtions.
+% See the comments in the random_walk_metropolis_hastings.m funtion.
 
 
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -74,11 +63,9 @@ end
 TargetFun=myinputs.TargetFun;
 ProposalFun=myinputs.ProposalFun;
 xparam1=myinputs.xparam1;
-vv=myinputs.vv;
 mh_bounds=myinputs.mh_bounds;
-ix2=myinputs.ix2;
-ilogpo2=myinputs.ilogpo2;
-ModelName=myinputs.ModelName;
+last_draw=myinputs.ix2;
+last_posterior=myinputs.ilogpo2;
 fline=myinputs.fline;
 npar=myinputs.npar;
 nruns=myinputs.nruns;
@@ -94,11 +81,9 @@ estim_params_ = myinputs.estim_params_;
 options_ = myinputs.options_;
 M_ = myinputs.M_;
 oo_ = myinputs.oo_;
-varargin=myinputs.varargin;
 
 % Necessary only for remote computing!
 if whoiam
-    Parallel=myinputs.Parallel;
     % initialize persistent variables in priordens()
     priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, bayestopt_.p3,bayestopt_.p4,1);
 end
@@ -116,53 +101,51 @@ elseif strcmpi(ProposalFun,'rand_multivariate_student')
 end
 
 %
-% NOW i run the (nblck-fblck+1) metropolis-hastings chains
+% Now I run the (nblck-fblck+1) Metropolis-Hastings chains
 %
 
 proposal_covariance_Cholesky_decomposition = d*diag(bayestopt_.jscale);
 
-jloop=0;
+block_iter=0;
 
-JSUM = 0;
-for b = fblck:nblck,
-    jloop=jloop+1;
+for curr_block = fblck:nblck,
+    block_iter=block_iter+1;
     try
-        % This will not work if the master uses a random generator not
+        % This will not work if the master uses a random number generator not
         % available in the slave (different Matlab version or
-        % Matlab/Octave cluster). Therefor the trap.
+        % Matlab/Octave cluster). Therefore the trap.
         %
-        % This set the random generator type (the seed is useless but
-        % needed by the function)
+        % Set the random number generator type (the seed is useless but needed by the function)
         set_dynare_seed(options_.DynareRandomStreams.algo, options_.DynareRandomStreams.seed);
-        % This set the state 
-        set_dynare_random_generator_state(record.InitialSeeds(b).Unifor, record.InitialSeeds(b).Normal);
+        % Set the state of the RNG
+        set_dynare_random_generator_state(record.InitialSeeds(curr_block).Unifor, record.InitialSeeds(curr_block).Normal);
     catch
-        % If the state set by master is incompatible with the slave, we
-        % only reseed 
-        set_dynare_seed(options_.DynareRandomStreams.seed+b);
+        % If the state set by master is incompatible with the slave, we only reseed 
+        set_dynare_seed(options_.DynareRandomStreams.seed+curr_block);
     end
-    if (options_.load_mh_file~=0) && (fline(b)>1) && OpenOldFile(b)
-        load([BaseName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'])
-        x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
-        logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
-        OpenOldFile(b) = 0;
+    if (options_.load_mh_file~=0) && (fline(curr_block)>1) && OpenOldFile(curr_block) %load previous draws and likelihood
+        load([BaseName '_mh' int2str(NewFile(curr_block)) '_blck' int2str(curr_block) '.mat'])
+        x2 = [x2;zeros(InitSizeArray(curr_block)-fline(curr_block)+1,npar)];
+        logpo2 = [logpo2;zeros(InitSizeArray(curr_block)-fline(curr_block)+1,1)];
+        OpenOldFile(curr_block) = 0;
     else
-        x2 = zeros(InitSizeArray(b),npar);
-        logpo2 = zeros(InitSizeArray(b),1);
+        x2 = zeros(InitSizeArray(curr_block),npar);
+        logpo2 = zeros(InitSizeArray(curr_block),1);
     end
+    %Prepare waiting bars
     if whoiam
-        prc0=(b-fblck)/(nblck-fblck+1)*(isoctave || options_.console_mode);
-        hh = dyn_waitbar({prc0,whoiam,options_.parallel(ThisMatlab)},['MH (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
+        prc0=(curr_block-fblck)/(nblck-fblck+1)*(isoctave || options_.console_mode);
+        hh = dyn_waitbar({prc0,whoiam,options_.parallel(ThisMatlab)},['MH (' int2str(curr_block) '/' int2str(options_.mh_nblck) ')...']);
     else
-        hh = dyn_waitbar(0,['Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
+        hh = dyn_waitbar(0,['Metropolis-Hastings (' int2str(curr_block) '/' int2str(options_.mh_nblck) ')...']);
         set(hh,'Name','Metropolis-Hastings');
     end
-    isux = 0;
-    jsux = 0;
-    irun = fline(b);
-    j = 1;
-    while j <= nruns(b)
-        par = feval(ProposalFun, ix2(b,:), proposal_covariance_Cholesky_decomposition, n);
+    accepted_draws_this_chain = 0;
+    accepted_draws_this_file = 0;
+    draw_index_current_file = fline(curr_block); %get location of first draw in current block
+    draw_iter = 1;
+    while draw_iter <= nruns(curr_block)
+        par = feval(ProposalFun, last_draw(curr_block,:), proposal_covariance_Cholesky_decomposition, n);
         if all( par(:) > mh_bounds.lb ) && all( par(:) < mh_bounds.ub )
             try
                 logpost = - feval(TargetFun, par(:),dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,mh_bounds,oo_);
@@ -172,29 +155,29 @@ for b = fblck:nblck,
         else
             logpost = -inf;
         end
-        if (logpost > -inf) && (log(rand) < logpost-ilogpo2(b))
-            x2(irun,:) = par;
-            ix2(b,:) = par;
-            logpo2(irun) = logpost;
-            ilogpo2(b) = logpost;
-            isux = isux + 1;
-            jsux = jsux + 1;
+        if (logpost > -inf) && (log(rand) < logpost-last_posterior(curr_block))
+            x2(draw_index_current_file,:) = par;
+            last_draw(curr_block,:) = par;
+            logpo2(draw_index_current_file) = logpost;
+            last_posterior(curr_block) = logpost;
+            accepted_draws_this_chain = accepted_draws_this_chain + 1;
+            accepted_draws_this_file = accepted_draws_this_file + 1;
         else
-            x2(irun,:) = ix2(b,:);
-            logpo2(irun) = ilogpo2(b);
+            x2(draw_index_current_file,:) = last_draw(curr_block,:);
+            logpo2(draw_index_current_file) = last_posterior(curr_block);
         end
-        prtfrc = j/nruns(b);
-        if (mod(j, 3)==0 && ~whoiam) || (mod(j,50)==0 && whoiam)
-            dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('Current acceptance ratio %4.3f', isux/j)]);
+        prtfrc = draw_iter/nruns(curr_block);
+        if (mod(draw_iter, 3)==0 && ~whoiam) || (mod(draw_iter,50)==0 && whoiam)
+            dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(curr_block) '/' int2str(options_.mh_nblck) ') ' sprintf('Current acceptance ratio %4.3f', accepted_draws_this_chain/draw_iter)]);
         end
-        if (irun == InitSizeArray(b)) || (j == nruns(b)) % Now I save the simulations
-            save([BaseName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
+        if (draw_index_current_file == InitSizeArray(curr_block)) || (draw_iter == nruns(curr_block)) % Now I save the simulations, either because the current file is full or the chain is done
+            save([BaseName '_mh' int2str(NewFile(curr_block)) '_blck' int2str(curr_block) '.mat'],'x2','logpo2');
             fidlog = fopen([MetropolisFolder '/metropolis.log'],'a');
             fprintf(fidlog,['\n']);
-            fprintf(fidlog,['%% Mh' int2str(NewFile(b)) 'Blck' int2str(b) ' (' datestr(now,0) ')\n']);
+            fprintf(fidlog,['%% Mh' int2str(NewFile(curr_block)) 'Blck' int2str(curr_block) ' (' datestr(now,0) ')\n']);
             fprintf(fidlog,' \n');
             fprintf(fidlog,['  Number of simulations.: ' int2str(length(logpo2)) '\n']);
-            fprintf(fidlog,['  Acceptance ratio......: ' num2str(jsux/length(logpo2)) '\n']);
+            fprintf(fidlog,['  Acceptance ratio......: ' num2str(accepted_draws_this_file/length(logpo2)) '\n']);
             fprintf(fidlog,['  Posterior mean........:\n']);
             for i=1:length(x2(1,:))
                 fprintf(fidlog,['    params:' int2str(i) ': ' num2str(mean(x2(:,i))) '\n']);
@@ -212,32 +195,32 @@ for b = fblck:nblck,
             fprintf(fidlog,['    log2po:' num2str(max(logpo2)) '\n']);
             fprintf(fidlog,' \n');
             fclose(fidlog);
-            jsux = 0;
-            if j == nruns(b) % I record the last draw...
-                record.LastParameters(b,:) = x2(end,:);
-                record.LastLogPost(b) = logpo2(end);
+            accepted_draws_this_file = 0;
+            if draw_iter == nruns(curr_block) % I record the last draw...
+                record.LastParameters(curr_block,:) = x2(end,:);
+                record.LastLogPost(curr_block) = logpo2(end);
             end
-            % size of next file in chain b
-            InitSizeArray(b) = min(nruns(b)-j,MAX_nruns);
+            % size of next file in chain curr_block
+            InitSizeArray(curr_block) = min(nruns(curr_block)-draw_iter,MAX_nruns);
             % initialization of next file if necessary
-            if InitSizeArray(b)
-                x2 = zeros(InitSizeArray(b),npar);
-                logpo2 = zeros(InitSizeArray(b),1);
-                NewFile(b) = NewFile(b) + 1;
-                irun = 0;
+            if InitSizeArray(curr_block)
+                x2 = zeros(InitSizeArray(curr_block),npar);
+                logpo2 = zeros(InitSizeArray(curr_block),1);
+                NewFile(curr_block) = NewFile(curr_block) + 1;
+                draw_index_current_file = 0;
             end
         end
-        j=j+1;
-        irun = irun + 1;
+        draw_iter=draw_iter+1;
+        draw_index_current_file = draw_index_current_file + 1;
     end% End of the simulations for one mh-block.
-    record.AcceptanceRatio(b) = isux/j;
+    record.AcceptanceRatio(curr_block) = accepted_draws_this_chain/draw_iter;
     dyn_waitbar_close(hh);
-    [record.LastSeeds(b).Unifor, record.LastSeeds(b).Normal] = get_dynare_random_generator_state();
-    OutputFileName(jloop,:) = {[MetropolisFolder,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
+    [record.LastSeeds(curr_block).Unifor, record.LastSeeds(curr_block).Normal] = get_dynare_random_generator_state();
+    OutputFileName(block_iter,:) = {[MetropolisFolder,filesep], [ModelName '_mh*_blck' int2str(curr_block) '.mat']};
 end% End of the loop over the mh-blocks.
 
 
 myoutput.record = record;
-myoutput.irun = irun;
+myoutput.irun = draw_index_current_file;
 myoutput.NewFile = NewFile;
 myoutput.OutputFileName = OutputFileName;
