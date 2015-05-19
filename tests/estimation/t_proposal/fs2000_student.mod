@@ -17,7 +17,7 @@
  */
 
 /*
- * Copyright (C) 2004-2010 Dynare Team
+ * Copyright (C) 2004-2015 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -114,7 +114,4 @@ end;
 
 varobs gp_obs gy_obs;
 
-options_.proposal_distribution='rand_multivariate_student';
-options_.student_degrees_of_freedom=5;
-
-estimation(order=1, datafile='../fsdat_simul',nobs=192, loglinear, mh_replic=2002, mh_nblocks=2, mh_jscale=0.8,mode_compute=4);
+estimation(order=1, datafile='../fsdat_simul',nobs=192, loglinear, mh_replic=2002, mh_nblocks=2, mh_jscale=0.8,mode_compute=4, proposal_distribution=rand_multivariate_studuuent, student_degrees_of_freedom=5);
