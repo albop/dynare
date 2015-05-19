@@ -1,12 +1,12 @@
-@#include "../Trend_model_prefilter_common.inc"
+@#include "../Trend_exp_model_prefilter_common.inc" 
         
-estimation(order=1,datafile='../AR1_trend_data_with_constant',mh_replic=2000,mode_compute=4,
-    first_obs=1,smoother,prefilter=1,
-    mh_nblocks=1,mh_jscale=1e-4,
+estimation(order=1,datafile='../Exp_AR1_trend_data_with_constant',mh_replic=2000,
+    mode_compute=4,first_obs=1000,loglinear,smoother,forecast=100,prefilter=1,
+    mcmc_jumping_covariance='MCMC_jump_covar_prefilter',
     filtered_vars, filter_step_ahead = [1,2,4],
-    mcmc_jumping_covariance='MCMC_jump_covar_prefilter',forecast=100) P_obs Y_obs junk2;
-
-load('../AR1_trend_data_with_constant');
+    mh_nblocks=1,mh_jscale=1e-4) P_obs Y_obs junk2;
+    
+load('../Exp_AR1_trend_data_with_constant');
 @#include "../Trend_load_data_common.inc" 
 
 loaded_par=load('../orig_params_prefilter');
