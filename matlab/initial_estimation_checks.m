@@ -44,8 +44,8 @@ if DynareDataset.vobs>length(find(diag(Model.Sigma_e)))+EstimatedParameters.nvn
     error(['initial_estimation_checks:: Estimation can''t take place because too many shocks have been calibrated with a zero variance!'])
 end
 
-if ~strcmpi(DynareOptions.proposal_distribution, 'rand_multivariate_student') || ...
-        ~strcmpi(DynareOptions.proposal_distribution, 'rand_multivariate_studuuent')
+if ~(strcmpi(DynareOptions.proposal_distribution, 'rand_multivariate_student') || ...
+     strcmpi(DynareOptions.proposal_distribution, 'rand_multivariate_normal'))
     error(['initial_estimation_checks:: the proposal_distribution option to estimation takes either ' ...
         'rand_multivariate_student or rand_multivariate_normal as options']);
 end
