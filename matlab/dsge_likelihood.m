@@ -70,6 +70,8 @@ function [fval,DLIK,Hess,exit_flag,SteadyState,trend_coeff,info,Model,DynareOpti
 %! M_.params has been updated in the steadystate routine and has complex valued scalars.
 %! @item info==24
 %! M_.params has been updated in the steadystate routine and has some NaNs.
+%! @item info==26
+%! M_.params has been updated in the steadystate routine and has negative/0 values in loglinear model.
 %! @item info==30
 %! Ergodic variance can't be computed.
 %! @item info==41
@@ -266,7 +268,7 @@ if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) == 8 
         DLIK=ones(length(xparam1),1);
     end
     return
-elseif info(1) == 3 || info(1) == 4 || info(1)==6 || info(1) == 20 || info(1) == 21  || info(1) == 23
+elseif info(1) == 3 || info(1) == 4 || info(1)==6 || info(1) == 20 || info(1) == 21  || info(1) == 23 || info(1)==26
     fval = objective_function_penalty_base+info(2);
     info = info(1);
     exit_flag = 0;
@@ -326,6 +328,7 @@ mm = length(T);
 pp = DynareDataset.vobs;
 rr = length(Q);
 kalman_tol = DynareOptions.kalman_tol;
+diffuse_kalman_tol = DynareOptions.diffuse_kalman_tol;
 riccati_tol = DynareOptions.riccati_tol;
 Y = transpose(DynareDataset.data)-trend;
 
@@ -403,13 +406,13 @@ switch DynareOptions.lik_init
         if no_missing_data_flag
             [dLIK,dlik,a,Pstar] = kalman_filter_d(Y, 1, size(Y,2), ...
                                                        zeros(mm,1), Pinf, Pstar, ...
-                                                       kalman_tol, riccati_tol, DynareOptions.presample, ...
+                                                       kalman_tol, diffuse_kalman_tol, riccati_tol, DynareOptions.presample, ...
                                                        T,R,Q,H,Z,mm,pp,rr);
         else
             [dLIK,dlik,a,Pstar] = missing_observations_kalman_filter_d(DatasetInfo.missing.aindex,DatasetInfo.missing.number_of_observations,DatasetInfo.missing.no_more_missing_observations, ...
                                                               Y, 1, size(Y,2), ...
                                                               zeros(mm,1), Pinf, Pstar, ...
-                                                              kalman_tol, riccati_tol, DynareOptions.presample, ...
+                                                              kalman_tol, diffuse_kalman_tol, riccati_tol, DynareOptions.presample, ...
                                                               T,R,Q,H,Z,mm,pp,rr);
         end
         diffuse_periods = length(dlik);
@@ -446,7 +449,7 @@ switch DynareOptions.lik_init
                                                         DatasetInfo.missing.no_more_missing_observations, ...
                                                         Y, 1, size(Y,2), ...
                                                         zeros(mmm,1), Pinf, Pstar, ...
-                                                        kalman_tol, riccati_tol, DynareOptions.presample, ...
+                                                        kalman_tol, diffuse_kalman_tol, riccati_tol, DynareOptions.presample, ...
                                                         T,R,Q,H1,Z,mmm,pp,rr);
         diffuse_periods = size(dlik,1);
     end
@@ -629,7 +632,7 @@ if analytic_derivation,
         analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP,asy_Hess};
     else
         analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP,D2T,D2Yss,D2Om,D2H,D2P};
-        clear DT DYss DOm DH DP D2T D2Yss D2Om D2H D2P,
+        clear DT DYss DOm DP D2T D2Yss D2Om D2H D2P,
     end
 else
     analytic_deriv_info={0};

@@ -69,7 +69,7 @@ i_cols_A1 = find(lead_lag_incidence(2:3,:)');
 i_cols_T = nonzeros(lead_lag_incidence(1:2,:)');
 i_cols_0 = nonzeros(lead_lag_incidence(2,:)');
 i_cols_A0 = find(lead_lag_incidence(2,:)');
-i_cols_j = 1:nd;
+i_cols_j = (1:nd)';
 i_upd = maximum_lag*ny+(1:periods*ny);
 
 Y = endo_simul(:);
@@ -86,7 +86,6 @@ z = Y(find(lead_lag_incidence'));
 [d1,jacobian] = model_dynamic(z,oo.exo_simul, params, ...
                               steady_state,maximum_lag+1);
 
-A = sparse([],[],[],periods*ny,periods*ny,periods*nnz(jacobian));
 res = zeros(periods*ny,1);
 
 o_periods = periods;
@@ -94,26 +93,32 @@ o_periods = periods;
 ZERO = zeros(length(i_upd),1);
 
 h1 = clock ;
-for iter = 1:options.simul.maxit
+iA = zeros(periods*M_.NNZDerivatives(1),3);
+for iter = 1:options_.simul.maxit
     h2 = clock ;
     
-    i_rows = 1:ny;
+    i_rows = (1:ny)';
     i_cols_A = find(lead_lag_incidence');
     i_cols = i_cols_A+(maximum_lag-1)*ny;
-
+    m = 0;
     for it = (maximum_lag+1):(maximum_lag+periods)
-
-        [d1,jacobian] = model_dynamic(Y(i_cols), exo_simul, params, steady_state,it);
+        [d1,jacobian] = model_dynamic(Y(i_cols), exo_simul, params, ...
+                                      steady_state,it);
         if it == maximum_lag+periods && it == maximum_lag+1
-            A(i_rows,i_cols_A0) = jacobian(:,i_cols_0);
+            [r,c,v] = find(jacobian(:,i_cols_0));
+            iA((1:length(v))+m,:) = [i_rows(r),i_cols_A0(c),v];
         elseif it == maximum_lag+periods
-            A(i_rows,i_cols_A(i_cols_T)) = jacobian(:,i_cols_T);
+            [r,c,v] = find(jacobian(:,i_cols_T));
+            iA((1:length(v))+m,:) = [i_rows(r),i_cols_A(i_cols_T(c)),v];
         elseif it == maximum_lag+1
-            A(i_rows,i_cols_A1) = jacobian(:,i_cols_1);
+            [r,c,v] = find(jacobian(:,i_cols_1));
+            iA((1:length(v))+m,:) = [i_rows(r),i_cols_A1(c),v];
         else
-            A(i_rows,i_cols_A) = jacobian(:,i_cols_j);
+            [r,c,v] = find(jacobian(:,i_cols_j));
+            iA((1:length(v))+m,:) = [i_rows(r),i_cols_A(c),v];
         end
-
+        m = m + length(v);
+        
         res(i_rows) = d1;
         
         if endogenous_terminal_period && iter>1
@@ -156,6 +161,9 @@ for iter = 1:options.simul.maxit
         stop = 1 ;
         break
     end
+
+    iA = iA(1:m,:);
+    A = sparse(iA(:,1),iA(:,2),iA(:,3),periods*ny,periods*ny);
 
     if endogenous_terminal_period && iter>1
         dy = ZERO;

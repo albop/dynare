@@ -1,8 +1,24 @@
 function oo_ = covariance_mc_analysis(NumberOfSimulations,type,dname,fname,vartan,nvar,var1,var2,mh_conf_sig,oo_)
 % This function analyses the (posterior or prior) distribution of the
-% endogenous variables covariance matrix.
+% endogenous variables' covariance matrix.
+% 
+% INPUTS
+%   NumberOfSimulations     [integer]           scalar, number of simulations.
+%   type                    [string]            'prior' or 'posterior'
+%   dname                   [string]            directory name where to save
+%   fname                   [string]            name of the mod-file
+%   vartan                  [char]              array of characters (with nvar rows).
+%   nvar                    [integer]           nvar is the number of stationary variables.
+%   var1                    [string]            name of the first variable
+%   var2                    [string]            name of the second variable
+%   mh_conf_sig             [double]            2 by 1 vector with upper
+%                                               and lower bound of HPD intervals
+%   oo_                     [structure]         Dynare structure where the results are saved.
+%
+% OUTPUTS
+%   oo_                     [structure]        Dynare structure where the results are saved.
 
-% Copyright (C) 2008-2013 Dynare Team
+% Copyright (C) 2008-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

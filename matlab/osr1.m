@@ -73,9 +73,6 @@ t0 = M_.params(i_params);
 
 inv_order_var = oo_.dr.inv_order_var;
 
-H0 = 1e-4*eye(np);
-crit=options_.osr.tolf;
-nit=options_.osr.maxit;
 
 %extract unique entries of covariance
 i_var=unique(i_var);
@@ -93,19 +90,24 @@ if isinf(loss)
    error('OSR: Initial likelihood is infinite')
 end
 
+
+if isequal(options_.osr.opt_algo,5)
+    error('OSR: OSR does not support opt_algo=5.')
+elseif isequal(options_.osr.opt_algo,6)
+    error('OSR: OSR does not support opt_algo=6.')
+elseif isequal(options_.osr.opt_algo,10)
+    error('OSR: OSR does not support opt_algo=10.')    
+else
 %%do actual optimization
-[f,p]=csminwel1('osr_obj',t0,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,i_params,...
+[p, f, exitflag] = dynare_minimize_objective(str2func('osr_obj'),t0,options_.osr.opt_algo,options_,[],cellstr(M_.param_names(i_params,:)),[],[], i_params,...
                 inv_order_var(i_var),weights(i_var,i_var));
+end
+
 osr_res.objective_function = f;
 M_.params(i_params)=p; %make sure optimal parameters are set (and not the last draw used in csminwel)
 for i=1:length(i_params)
     osr_res.optim_params.(deblank(M_.param_names(i_params(i),:))) = p(i);
 end
-
-%  options = optimset('fminunc');
-%  options = optimset('display','iter');
-%  [p,f]=fminunc(@osr_obj,t0,options,i_params,...
-%               inv_order_var(i_var),weights(i_var,i_var));
 
 skipline()
 disp('OPTIMAL VALUE OF THE PARAMETERS:')

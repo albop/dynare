@@ -36,3 +36,5 @@ rho.options(init=1);
 beta.options(init=0.2);
 std(u).options(init=3);
 corr(y,c).options(init=.02);
+
+[alpha , beta , rho].prior(shape=beta, mean=[2 3 4], variance=[[1 2 3],[2 3 4]]);

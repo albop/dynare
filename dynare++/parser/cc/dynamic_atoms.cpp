@@ -341,6 +341,12 @@ int DynamicAtoms::index(const char* name, int ll) const
 	return -1;
 }
 
+bool DynamicAtoms::is_referenced(const char* name) const
+{
+	Tvarmap::const_iterator it = vars.find(name);
+	return it != vars.end();
+}
+
 const DynamicAtoms::Tlagmap& DynamicAtoms::lagmap(const char* name) const
 {
 	Tvarmap::const_iterator it = vars.find(name);

@@ -41,15 +41,14 @@ void StaticAtoms::import_atoms(const DynamicAtoms& da, OperationTree& otree, Tin
 		register_name(name);
 		int tnew = otree.add_nulary();
 		assign(name, tnew);
-		try {
-			const DynamicAtoms::Tlagmap& lmap = da.lagmap(name);
+        if (da.is_referenced(name)) {
+            const DynamicAtoms::Tlagmap& lmap = da.lagmap(name);
 			for (DynamicAtoms::Tlagmap::const_iterator it = lmap.begin();
 				 it != lmap.end(); ++it) {
 				int told = (*it).second;
 				tmap.insert(Tintintmap::value_type(told, tnew));
 			}
-		} catch (const ogu::Exception& e) {
-		}
+        }
 	}
 }
 

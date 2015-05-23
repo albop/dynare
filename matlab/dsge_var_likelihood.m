@@ -239,9 +239,37 @@ else% Evaluation of the likelihood of the dsge-var model when the dsge prior wei
     lik = .5*lik;% Minus likelihood
 end
 
+if isnan(lik)
+    info = 45;
+    fval = objective_function_penalty_base + 100;
+    exit_flag = 0;
+    return
+end
+
+if imag(lik)~=0
+    info = 46;
+    fval = objective_function_penalty_base + 100;
+    exit_flag = 0;
+    return
+end
+
 % Add the (logged) prior density for the dsge-parameters.
 lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
 fval = (lik-lnprior);
+
+if isnan(fval)
+    info = 47;
+    fval = objective_function_penalty_base + 100;
+    exit_flag = 0;
+    return
+end
+
+if imag(fval)~=0
+    info = 48;
+    fval = objective_function_penalty_base + 100;
+    exit_flag = 0;
+    return
+end
 
 if (nargout == 8)
     if isinf(dsge_prior_weight)

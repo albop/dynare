@@ -58,7 +58,12 @@ Section "Dynare core (preprocessor and M-files)"
 
  SetOutPath $INSTDIR\matlab
  File /r ..\matlab\*.m
- File ..\matlab\dynare_m.exe
+
+ SetOutPath $INSTDIR\matlab\preprocessor32
+ File ..\matlab\preprocessor32\dynare_m.exe
+
+ SetOutPath $INSTDIR\matlab\preprocessor64
+ File ..\matlab\preprocessor64\dynare_m.exe
 
  SetOutPath $INSTDIR\contrib
  File /r ..\contrib\*.m
@@ -83,9 +88,9 @@ SectionEnd
 
 SectionGroup "MEX files for MATLAB"
 
-Section "MEX files for MATLAB 32-bit, version 7.5 to 8.4 (R2007b to R2014b)"
- SetOutPath $INSTDIR\mex\matlab\win32-7.5-8.4
- File ..\mex\matlab\win32-7.5-8.4\*.mexw32
+Section "MEX files for MATLAB 32-bit, version 7.5 to 8.5 (R2007b to R2015a)"
+ SetOutPath $INSTDIR\mex\matlab\win32-7.5-8.5
+ File ..\mex\matlab\win32-7.5-8.5\*.mexw32
 SectionEnd
 
 Section "MEX files for MATLAB 64-bit, version 7.5 to 7.7 (R2007b to R2008b)"
@@ -93,9 +98,9 @@ Section "MEX files for MATLAB 64-bit, version 7.5 to 7.7 (R2007b to R2008b)"
  File ..\mex\matlab\win64-7.5-7.7\*.mexw64
 SectionEnd
 
-Section "MEX files for MATLAB 64-bit, version 7.8 to 8.4 (R2009a to R2014b)"
- SetOutPath $INSTDIR\mex\matlab\win64-7.8-8.4
- File ..\mex\matlab\win64-7.8-8.4\*.mexw64
+Section "MEX files for MATLAB 64-bit, version 7.8 to 8.5 (R2009a to R2015a)"
+ SetOutPath $INSTDIR\mex\matlab\win64-7.8-8.5
+ File ..\mex\matlab\win64-7.8-8.5\*.mexw64
 SectionEnd
 
 SectionGroupEnd

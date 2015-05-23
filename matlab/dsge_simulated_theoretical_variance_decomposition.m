@@ -1,5 +1,7 @@
 function [nvar,vartan,NumberOfDecompFiles] = ...
     dsge_simulated_theoretical_variance_decomposition(SampleSize,M_,options_,oo_,type)
+% function [nvar,vartan,NumberOfDecompFiles] = ...
+%     dsge_simulated_theoretical_variance_decomposition(SampleSize,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the variance
 % decomposition of the observed endogenous variables.
 %
@@ -16,7 +18,7 @@ function [nvar,vartan,NumberOfDecompFiles] = ...
 %   vartan            [char]     array of characters (with nvar rows).
 %   CovarFileNumber   [integer]  scalar, number of prior or posterior data files (for covariance).
 
-% Copyright (C) 2007-2012 Dynare Team
+% Copyright (C) 2007-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -47,7 +49,13 @@ else
     disp('dsge_simulated_theoretical_variance_decomposition:: Unknown type!')
     error()
 end
-NumberOfDrawsFiles = length(DrawsFiles);
+
+%delete old stale files before creating new ones
+if posterior
+    delete_stale_file([M_.dname '/metropolis/' M_.fname '_PosteriorVarianceDecomposition*']);
+else
+    delete_stale_file([M_.dname '/prior/moments/' M_.fname '_PosteriorVarianceDecomposition*']);
+end
 
 % Set varlist (vartan)
 if ~posterior

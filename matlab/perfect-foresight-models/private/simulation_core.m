@@ -75,9 +75,9 @@ else
                 yT = y(:,periods+2);
                 z = y(:,2:periods+1);
                 illi = M_.lead_lag_incidence';
-                [i_cols,~,i_cols_j] = find(illi(:));
+                [i_cols,junk,i_cols_j] = find(illi(:));
                 illi = illi(:,2:3);
-                [i_cols_J1,~,i_cols_1] = find(illi(:));
+                [i_cols_J1,junk,i_cols_1] = find(illi(:));
                 i_cols_T = nonzeros(M_.lead_lag_incidence(1:2,:)');
                 [y,info] = dynare_solve(@perfect_foresight_problem,z(:),1, ...
                                  str2func([M_.fname '_dynamic']),y0,yT, ...
@@ -109,9 +109,9 @@ if nargout>1
     yy  = oo_.endo_simul(:,2:options_.periods+1);
     if ~exist('illi')
         illi = M_.lead_lag_incidence';
-        [i_cols,~,i_cols_j] = find(illi(:));
+        [i_cols,junk,i_cols_j] = find(illi(:));
         illi = illi(:,2:3);
-        [i_cols_J1,~,i_cols_1] = find(illi(:));
+        [i_cols_J1,junk,i_cols_1] = find(illi(:));
         i_cols_T = nonzeros(M_.lead_lag_incidence(1:2,:)');
     end
     if options_.block && ~options_.bytecode

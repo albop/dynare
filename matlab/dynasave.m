@@ -35,6 +35,10 @@ if size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
 end
 
+if ~isfield(oo_,'endo_simul') || isempty(oo_.endo_simul)
+    error('dynasave:: The results structure does not contain simulated series. Maybe the periods option has not been set.')
+end
+
 n = size(var_list,1);
 ivar=zeros(n,1);
 for i=1:n
