@@ -117,8 +117,7 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
         end
         [ys,check] = dynare_solve('restricted_steadystate',...
                                   ys(indv),...
-                                  options.jacobian_flag, ...
-                                  exo_ss,indv);
+                                  options, exo_ss,indv);
     end
 
     

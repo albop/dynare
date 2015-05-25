@@ -146,7 +146,7 @@ y = repmat(steady_state,block_nbr,1);
 old_options = options_;
 options_.solve_algo = options_.ep.solve_algo;
 options_.steady.maxit = options_.ep.maxit;
-[y,info] = dynare_solve(@ep_problem_2,y,1,exo_simul,pfm);
+[y,info] = dynare_solve(@ep_problem_2,y,options_,exo_simul,pfm);
 options_ = old_options;
 if info
     flag = 1;

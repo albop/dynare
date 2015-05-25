@@ -50,9 +50,11 @@ elseif options_.steadystate_flag
                                    M.endo_names,'exact')];
     end
     if inst_nbr == 1
-        inst_val = csolve(nl_func,ys_init(k_inst),'',options_.solve_tolf,100); %solve for instrument, using univariate solver, starting at initial value for instrument
+        %solve for instrument, using univariate solver, starting at initial value for instrument
+        inst_val = csolve(nl_func,ys_init(k_inst),'',options_.solve_tolf,100); 
     else
-        [inst_val,info1] = dynare_solve(nl_func,ys_init(k_inst),0); %solve for instrument, using multivariate solver, starting at initial value for instrument
+        %solve for instrument, using multivariate solver, starting at initial value for instrument
+        [inst_val,info1] = dynare_solve(nl_func,ys_init(k_inst),options_); 
     end
     ys_init(k_inst) = inst_val;
     exo_ss = [oo.exo_steady_state oo.exo_det_steady_state];
@@ -61,7 +63,7 @@ elseif options_.steadystate_flag
 else
     n_var = M.orig_endo_nbr;
     xx = oo.steady_state(1:n_var);
-    [xx,check] = dynare_solve(nl_func,xx,0);
+    [xx,check] = dynare_solve(nl_func,xx,options_);
     [junk,junk,steady_state] = nl_func(xx);
 end
 
