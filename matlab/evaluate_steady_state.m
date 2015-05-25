@@ -193,8 +193,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
             % non linear model
             [ys,check] = dynare_solve([M.fname '_static'],...
                                       ys_init,...
-                                      options.jacobian_flag, ...
-                                      exo_ss, params);
+                                      options, exo_ss, params);
         else
             % linear model
             fh_static = str2func([M.fname '_static']);
