@@ -118,10 +118,12 @@ replic_nbr = ep.replic_nbr;
 switch ep.innovation_distribution
   case 'gaussian'
     shocks = transpose(transpose(covariance_matrix_upper_cholesky)* ...
-                       randn(effective_number_of_shocks,sample_size*replic_nbr));
+                       randn(effective_number_of_shocks,sample_size* ...
+                             replic_nbr));
+    shocks(:,positive_var_indx) = shocks;
   case 'calibrated'
     replic_nbr = 1;
-    shocks = zeros(sample_size,effective_number_of_shocks);
+    shocks = zeros(sample_size,M_.exo_nbr);
     for i = 1:length(M_.unanticipated_det_shocks)
         k = M_.unanticipated_det_shocks(i).periods;
         ivar = M_.unanticipated_det_shocks(i).exo_id;
@@ -132,7 +134,6 @@ switch ep.innovation_distribution
             socks(k,ivar) = shocks(k,ivar) * v;
         end
     end
-    shocks = shocks(:,positive_var_indx);
   otherwise
     error(['extended_path:: ' ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
@@ -203,7 +204,7 @@ while (t <= sample_size)
         parfor k = 1:replic_nbr
             exo_simul = repmat(oo_.exo_steady_state',periods+2,1);
             %            exo_simul(1:sample_size+3-t,:) = exo_simul_(t:end,:);
-            exo_simul(2,positive_var_indx) = exo_simul_(M_.maximum_lag+t,positive_var_indx) + ...
+            exo_simul(2,:) = exo_simul_(M_.maximum_lag+t,:) + ...
                 shocks((t-2)*replic_nbr+k,:);
             initial_conditions = results{k}(:,t-1);
             results{k}(:,t) = extended_path_core(ep.periods,endo_nbr,exo_nbr,positive_var_indx, ...
@@ -219,8 +220,8 @@ while (t <= sample_size)
                             maximum_lead,1);
             %            exo_simul(1:sample_size+maximum_lag+maximum_lead-t+1,:) = ...
             %                exo_simul_(t:end,:);
-            exo_simul(maximum_lag+1,positive_var_indx) = ...
-                exo_simul_(maximum_lag+t,positive_var_indx) + shocks((t-2)*replic_nbr+k,:);
+            exo_simul(maximum_lag+1,:) = ...
+                exo_simul_(maximum_lag+t,:) + shocks((t-2)*replic_nbr+k,:);
             initial_conditions = results{k}(:,t-1);
             results{k}(:,t) = extended_path_core(ep.periods,endo_nbr,exo_nbr,positive_var_indx, ...
                                                  exo_simul,ep.init,initial_conditions,...

@@ -93,8 +93,8 @@ o_periods = periods;
 ZERO = zeros(length(i_upd),1);
 
 h1 = clock ;
-iA = zeros(periods*M_.NNZDerivatives(1),3);
-for iter = 1:options_.simul.maxit
+iA = zeros(periods*M.NNZDerivatives(1),3);
+for iter = 1:options.simul.maxit
     h2 = clock ;
     
     i_rows = (1:ny)';
