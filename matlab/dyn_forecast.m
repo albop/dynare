@@ -39,8 +39,8 @@ function [forecast,info] = dyn_forecast(var_list,M,options,oo,task,dataset_info)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if nargin<3 && options_.prefilter
-    error('The prefiltering option is not allow without providing a dataset')
-else
+    error('The prefiltering option is not allowed without providing a dataset')
+elseif nargin==3 
     mean_varobs=dataset_info.descriptive.mean';
 end
     
