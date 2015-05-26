@@ -53,8 +53,12 @@ elseif options_.steadystate_flag
         %solve for instrument, using univariate solver, starting at initial value for instrument
         inst_val = csolve(nl_func,ys_init(k_inst),'',options_.solve_tolf,100); 
     else
-        %solve for instrument, using multivariate solver, starting at initial value for instrument
-        [inst_val,info1] = dynare_solve(nl_func,ys_init(k_inst),options_); 
+        %solve for instrument, using multivariate solver, starting at
+        %initial value for instrument
+        opt = options_;
+        opt.jacobian_flag = 0;
+        [inst_val,info1] = dynare_solve(nl_func,ys_init(k_inst), ...
+                                        opt);
     end
     ys_init(k_inst) = inst_val;
     exo_ss = [oo.exo_steady_state oo.exo_det_steady_state];
@@ -63,7 +67,9 @@ elseif options_.steadystate_flag
 else
     n_var = M.orig_endo_nbr;
     xx = oo.steady_state(1:n_var);
-    [xx,check] = dynare_solve(nl_func,xx,options_);
+    opt = options_;
+    opt.jacobian_flag = 0;
+    [xx,check] = dynare_solve(nl_func,xx,opt);
     [junk,junk,steady_state] = nl_func(xx);
 end
 
