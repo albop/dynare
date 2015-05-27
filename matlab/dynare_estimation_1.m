@@ -33,11 +33,11 @@ global M_ options_ oo_ estim_params_ bayestopt_ dataset_ dataset_info
 
 % Set particle filter flag.
 if options_.order > 1
-    if options_.particle.status && options_.order==2
+    if options_.particle.status && options_.order==2  
         skipline()
         disp('Estimation using a non linear filter!')
         skipline()
-        if ~options_.nointeractive && ismember(options_.mode_compute,[1,3,4]) % Known gradient-based optimizers
+        if ~options_.nointeractive && ismember(options_.mode_compute,[1,3,4]) && ~strcmpi(options_.particle.filter_algorithm,'gf')% Known gradient-based optimizers
             disp('You are using a gradient-based mode-finder. Particle filtering introduces discontinuities in the') 
             disp('objective function w.r.t the parameters. Thus, should use a non-gradient based optimizer.')
             fprintf('\nPlease choose a mode-finder:\n')
