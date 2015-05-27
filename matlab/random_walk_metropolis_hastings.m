@@ -1,14 +1,17 @@
 function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_)
-%function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_)
-% Random walk Metropolis-Hastings algorithm. 
+% function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_)
+% Random Walk Metropolis-Hastings algorithm. 
 % 
 % INPUTS 
 %   o TargetFun  [char]     string specifying the name of the objective
 %                           function (posterior kernel).
+%   o ProposalFun  [char]   string specifying the name of the proposal
+%                           density
 %   o xparam1    [double]   (p*1) vector of parameters to be estimated (initial values).
 %   o vv         [double]   (p*p) matrix, posterior covariance matrix (at the mode).
 %   o mh_bounds  [double]   (p*2) matrix defining lower and upper bounds for the parameters. 
 %   o dataset_              data structure
+%   o dataset_info          dataset info structure
 %   o options_              options structure
 %   o M_                    model structure
 %   o estim_params_         estimated parameters structure
@@ -16,27 +19,27 @@ function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 %   o oo_                   outputs structure
 %
 % ALGORITHM 
-%   Metropolis-Hastings.       
+%   Random-Walk Metropolis-Hastings.       
 %
 % SPECIAL REQUIREMENTS
 %   None.
 %
 % PARALLEL CONTEXT
 % The most computationally intensive part of this function may be executed
-% in parallel. The code sutable to be executed in
-% parallel on multi core or cluster machine (in general a 'for' cycle),
-% is removed from this function and placed in random_walk_metropolis_hastings_core.m funtion.
-% Then the DYNARE parallel package contain a set of pairs matlab functions that can be executed in
-% parallel and called name_function.m and name_function_core.m. 
-% In addition in parallel package we have second set of functions used
-% to manage the parallel computation.
+% in parallel. The code suitable to be executed in
+% parallel on multi core or cluster machine (in general a 'for' cycle)
+% has been removed from this function and been placed in the random_walk_metropolis_hastings_core.m funtion.
+% 
+% The DYNARE parallel packages comprise a i) set of pairs of Matlab functions that can be executed in
+% parallel and called name_function.m and name_function_core.m and ii) a second set of functions used
+% to manage the parallel computations.
 %
-% This function was the first function to be parallelized, later other
+% This function was the first function to be parallelized. Later, other
 % functions have been parallelized using the same methodology.
 % Then the comments write here can be used for all the other pairs of
-% parallel functions and also for management funtions.
+% parallel functions and also for management functions.
 
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -54,7 +57,7 @@ function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-% In Metropolis, we set penalty to Inf to as to reject all parameter sets triggering error in target density computation
+% In Metropolis, we set penalty to Inf so as to reject all parameter sets triggering an error during target density computation
 global objective_function_penalty_base
 objective_function_penalty_base = Inf;
 
@@ -73,16 +76,16 @@ load_last_mh_history_file(MetropolisFolder, ModelName);
 % First run in serial mode, and then comment the follow line.
 %   save('recordSerial.mat','-struct', 'record');
 
-% For parllel runs after serial runs with the abobe line active.
+% For parallel runs after serial runs with the abobe line active.
 %   TempRecord=load('recordSerial.mat');
 %   record.Seeds=TempRecord.Seeds;
 
 
 
 % Snapshot of the current state of computing. It necessary for the parallel
-% execution (i.e. to execute in a corretct way portion of code remotely or
-% on many core). The mandatory variables for local/remote parallel
-% computing are stored in localVars struct.
+% execution (i.e. to execute in a corretct way a portion of code remotely or
+% on many cores). The mandatory variables for local/remote parallel
+% computing are stored in the localVars struct.
 
 localVars =   struct('TargetFun', TargetFun, ...
                      'ProposalFun', ProposalFun, ...
@@ -110,9 +113,8 @@ localVars =   struct('TargetFun', TargetFun, ...
                      'varargin',[]);
 
 
-% The user don't want to use parallel computing, or want to compute a
-% single chain. In this cases Random walk Metropolis-Hastings algorithm is
-% computed sequentially.
+% User doesn't want to use parallel computing, or wants to compute a
+% single chain compute Random walk Metropolis-Hastings algorithm sequentially.
 
 if isnumeric(options_.parallel) || (nblck-fblck)==0,
     fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
@@ -152,6 +154,7 @@ NewFile = fout(1).NewFile;
 
 update_last_mh_history_file(MetropolisFolder, ModelName, record);
 
+% Provide diagnostic output
 skipline()
 disp(['Estimation::mcmc: Number of mh files: ' int2str(NewFile(1)) ' per block.'])
 disp(['Estimation::mcmc: Total number of generated files: ' int2str(NewFile(1)*nblck) '.'])

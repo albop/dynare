@@ -4,7 +4,7 @@ function [dr,info,M,options,oo] = resol(check_flag,M,options,oo)
 %! @deftypefn {Function File} {[@var{dr},@var{info},@var{M},@var{options},@var{oo}] =} resol (@var{check_flag},@var{M},@var{options},@var{oo})
 %! @anchor{resol}
 %! @sp 1
-%! Computes first and second order reduced form of the DSGE model.
+%! Computes the perturbation-based decisions rules of the DSGE model (orders 1 to 3).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
@@ -111,23 +111,27 @@ if options.loglinear
     % Find variables with non positive steady state.
     idx = find(dr.ys<1e-9);
     if length(idx)
-        variables_with_non_positive_steady_state = M.endo_names(idx,:);
-        skipline()
-        fprintf('You are attempting to simulate/estimate a loglinear approximation of a model, but\n')
-        fprintf('the steady state level of the following variables is not strictly positive:\n')
-        for var_iter=1:length(idx)
-            fprintf(' - %s (%s)\n',deblank(variables_with_non_positive_steady_state(var_iter,:)), num2str(dr.ys(idx(var_iter))))
+        if options.debug
+            variables_with_non_positive_steady_state = M.endo_names(idx,:);
+            skipline()
+            fprintf('You are attempting to simulate/estimate a loglinear approximation of a model, but\n')
+            fprintf('the steady state level of the following variables is not strictly positive:\n')
+            for var_iter=1:length(idx)
+                fprintf(' - %s (%s)\n',deblank(variables_with_non_positive_steady_state(var_iter,:)), num2str(dr.ys(idx(var_iter))))
+            end
+            if isestimation()
+                fprintf('You should check that the priors and/or bounds over the deep parameters are such\n')
+                fprintf('that the steady state levels of all the variables are strictly positive, or consider\n')
+                fprintf('a linearization of the model instead of a log linearization.\n')
+            else
+                fprintf('You should check that the calibration of the deep parameters is such that the\n')
+                fprintf('steady state levels of all the variables are strictly positive, or consider\n')
+                fprintf('a linearization of the model instead of a log linearization.\n')
+            end
         end
-        if isestimation()
-            fprintf('You should check that the priors and/or bounds over the deep parameters are such\n')
-            fprintf('that the steady state levels of all the variables are strictly positive, or consider\n')
-            fprintf('a linearization of the model instead of a log linearization.\n')
-        else
-            fprintf('You should check that the calibration of the deep parameters is such that the\n')
-            fprintf('steady state levels of all the variables are strictly positive, or consider\n')
-            fprintf('a linearization of the model instead of a log linearization.\n')
-        end
-        error('stoch_simul::resol: The loglinearization of the model cannot be performed, because the steady state is not strictly positive!')
+        info(1)=26;
+        info(2)=sum(dr.ys(dr.ys<1e-9).^2);
+        return
     end
 end
 

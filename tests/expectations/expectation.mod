@@ -35,6 +35,8 @@ e = 0;
 u = 0;
 end;
 
+write_latex_original_model;
+
 shocks;
 var e; stderr 0.009;
 var u; stderr 0.009;

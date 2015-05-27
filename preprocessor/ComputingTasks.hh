@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 Dynare Team
+ * Copyright (C) 2003-2015 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -150,10 +150,8 @@ class RplotStatement : public Statement
 {
 private:
   const SymbolList symbol_list;
-  const OptionsList options_list;
 public:
-  RplotStatement(const SymbolList &symbol_list_arg,
-                 const OptionsList &options_list_arg);
+  RplotStatement(const SymbolList &symbol_list_arg);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
@@ -509,6 +507,15 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
+class WriteLatexOriginalModelStatement : public Statement
+{
+private:
+  const DynamicModel &original_model;
+public:
+  WriteLatexOriginalModelStatement(const DynamicModel &original_model_arg);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
 class ShockDecompositionStatement : public Statement
 {
 private:
@@ -669,6 +676,22 @@ public:
                            const SymbolTable &symbol_table_arg);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
+
+class JointPriorStatement : public Statement
+{
+private:
+  const vector<string> joint_parameters;
+  const PriorDistributions prior_shape;
+  const OptionsList options_list;
+public:
+  JointPriorStatement(const vector<string> joint_parameters_arg,
+                      const PriorDistributions &prior_shape_arg,
+                      const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+  void writeOutputHelper(ostream &output, const string &field, const string &lhs_field) const;
+};
+
 
 class BasicPriorStatement : public Statement
 {

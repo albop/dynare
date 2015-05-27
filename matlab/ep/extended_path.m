@@ -14,7 +14,7 @@ function ts = extended_path(initial_conditions,sample_size)
 %
 % SPECIAL REQUIREMENTS
 
-% Copyright (C) 2009-2013 Dynare Team
+% Copyright (C) 2009-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -42,7 +42,6 @@ options_.simul.maxit = options_.ep.maxit;
 pfm = setup_stochastic_perfect_foresight_model_solver(M_,options_,oo_);
 
 exo_nbr = M_.exo_nbr;
-periods = options_.periods;
 ep = options_.ep;
 steady_state = oo_.steady_state;
 dynatol = options_.dynatol;
@@ -86,6 +85,8 @@ end
 options_.minimal_solving_period = 100;%options_.ep.periods;
 
 % Initialize the exogenous variables.
+% !!!!!!!! Needs to fixed
+options_.periods = periods;
 make_ex_;
 
 % Initialize the endogenous variables.
@@ -116,7 +117,7 @@ bytecode_flag = options_.ep.use_bytecode;
 % Simulate shocks.
 switch options_.ep.innovation_distribution
   case 'gaussian'
-      oo_.ep.shocks = transpose(transpose(covariance_matrix_upper_cholesky)*randn(effective_number_of_shocks,sample_size));
+    oo_.ep.shocks = transpose(transpose(covariance_matrix_upper_cholesky)*randn(effective_number_of_shocks,sample_size));
   otherwise
     error(['extended_path:: ' options_.ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
@@ -148,7 +149,7 @@ if options_.ep.stochastic.order > 0
     pfm.nnodes = nnodes;
 
     % compute number of blocks
-    [block_nbr,pfm.world_nbr] = get_block_world_nbr(options_.ep.stochastic.algo,nnodes,options_.ep.ut.k,options_.ep.periods);
+    [block_nbr,pfm.world_nbr] = get_block_world_nbr(options_.ep.stochastic.algo,nnodes,options_.ep.stochastic.order,options_.ep.periods);
 else
     block_nbr = options_.ep.periods
 end
@@ -175,217 +176,51 @@ while (t<sample_size)
     end
     % Set period index.
     t = t+1;
-    shocks = oo_.ep.shocks(t,:);
-    % Put it in oo_.exo_simul (second line).
-    oo_.exo_simul(2,positive_var_indx) = shocks;
-    periods1 = periods;
-    exo_simul_1 = zeros(periods1+2,exo_nbr);
-    exo_simul_1(2,:) = oo_.exo_simul(2,:);
-    pfm1 = pfm;
-    info_convergence = 0;
+    % Put shocks in oo_.exo_simul (second line).
+    exo_simul_1 = zeros(periods+2,exo_nbr);
+    exo_simul_1(2,positive_var_indx) = oo_.exo_simul(2,positive_var_indx) + oo_.ep.shocks(t,:);
     if ep.init% Compute first order solution (Perturbation)...
-        ex = zeros(size(endo_simul_1,2),size(exo_simul_1,2));
-        ex(1:size(exo_simul_1,1),:) = exo_simul_1;
-        exo_simul_1 = ex;
         initial_path = simult_(initial_conditions,dr,exo_simul_1(2:end,:),1);
         endo_simul_1(:,1:end-1) = initial_path(:,1:end-1)*ep.init+endo_simul_1(:,1:end-1)*(1-ep.init);
     else
         if t==1
-            endo_simul_1 = repmat(steady_state,1,periods1+2);
+            endo_simul_1 = repmat(steady_state,1,periods+2);
         end
     end
     % Solve a perfect foresight model.
-    increase_periods = 0;
     % Keep a copy of endo_simul_1
     endo_simul = endo_simul_1;
     if verbosity
         save ep_test_1 endo_simul_1 exo_simul_1
     end
-    while 1
-        if ~increase_periods
-            if bytecode_flag && ~options_.ep.stochastic.order
-                [flag,tmp] = bytecode('dynamic',endo_simul_1,exo_simul_1);
-            else
-                flag = 1;
-            end
-            if flag
-                if options_.ep.stochastic.order == 0
-                    [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
-                else
-                    switch(options_.ep.stochastic.algo)
-                        case 0
-                        [flag,tmp] = ...
-                            solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
-                        case 1
-                          [flag,tmp] = ...
-                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_,pfm1,options_.ep.stochastic.order);
-                    end
-                end
-            end
-            info_convergence = ~flag;
-        end
-        if verbosity
-            if info_convergence
-                if t<10
-                    disp(['Time:    ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
-                elseif t<100
-                    disp(['Time:   ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
-                elseif t<1000
-                    disp(['Time:  ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
-                else
-                    disp(['Time: ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
-                end
-            else
-                if t<10
-                    disp(['Time:    ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
-                elseif t<100
-                    disp(['Time:   ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
-                elseif t<1000
-                    disp(['Time:  ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
-                else
-                    disp(['Time: ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
-                end
-            end
-        end
-        if do_not_check_stability_flag
-            % Exit from the while loop.
-            endo_simul_1 = tmp;
-            break
+    if bytecode_flag && ~options_.ep.stochastic.order
+        [flag,tmp] = bytecode('dynamic',endo_simul_1,exo_simul_1, M_.params, endo_simul_1, options_.ep.periods);
+    else
+        flag = 1;
+    end
+    if flag
+        if options_.ep.stochastic.order == 0
+            [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm);
         else
-            % Test if periods is big enough.
-            % Increase the number of periods.
-            periods1 = periods1 + ep.step;
-            pfm1.periods = periods1;
-            pfm1.i_upd = pfm1.ny+(1:pfm1.periods*pfm1.ny);
-            % Increment the counter.
-            increase_periods = increase_periods + 1;
-            if verbosity
-                if t<10
-                    disp(['Time:    ' int2str(t)  '. I increase the number of periods to ' int2str(periods1) '.'])
-                elseif t<100
-                    disp(['Time:   ' int2str(t) '. I increase the number of periods to ' int2str(periods1) '.'])
-                elseif t<1000
-                    disp(['Time:  ' int2str(t)  '. I increase the number of periods to ' int2str(periods1) '.'])
-                else
-                    disp(['Time: ' int2str(t)  '. I increase the number of periods to ' int2str(periods1) '.'])
-                end
-            end
-            if info_convergence
-                % If the previous call to the perfect foresight model solver exited
-                % announcing that the routine converged, adapt the size of endo_simul_1
-                % and exo_simul_1.
-                endo_simul_1 = [ tmp , repmat(steady_state,1,ep.step) ];
-                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,exo_nbr)];
-                tmp_old = tmp;
-            else
-                % If the previous call to the perfect foresight model solver exited
-                % announcing that the routine did not converge, then tmp=1... Maybe
-                % should change that, because in some circonstances it may usefull
-                % to know where the routine did stop, even if convergence was not
-                % achieved.
-                endo_simul_1 = [ endo_simul_1 , repmat(steady_state,1,ep.step) ];
-                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,exo_nbr)];
-            end
-            % Solve the perfect foresight model with an increased number of periods.
-            if bytecode_flag && ~options_.ep.stochastic.order
-                [flag,tmp] = bytecode('dynamic',endo_simul_1,exo_simul_1);
-            else
-                flag = 1;
-            end
-            if flag
-                if options_.ep.stochastic.order == 0
-                    [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
-                else
-                    switch(options_.ep.stochastic.algo)
-                        case 0
-                        [flag,tmp] = ...
-                            solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
-                        case 1
-                          [flag,tmp] = ...
-                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_,pfm1,options_.ep.stochastic.order);
-                    end
-                end
-            end
-            info_convergence = ~flag;
-            if info_convergence
-                % If the solver achieved convergence, check that simulated paths did not
-                % change during the first periods.
-                % Compute the maximum deviation between old path and new path over the
-                % first periods
-                delta = max(max(abs(tmp(:,2)-tmp_old(:,2))));
-                if delta < dynatol.x
-                    % If the maximum deviation is close enough to zero, reset the number
-                    % of periods to ep.periods
-                    periods1 = ep.periods;
-                    pfm1.periods = periods1;
-                    pfm1.i_upd = pfm1.ny+(1:pfm1.periods*pfm1.ny);
-                    % Cut exo_simul_1 and endo_simul_1 consistently with the resetted
-                    % number of periods and exit from the while loop.
-                    exo_simul_1 = exo_simul_1(1:(periods1+2),:);
-                    endo_simul_1 = endo_simul_1(:,1:(periods1+2));
-                    break
-                end
-            else
-                % The solver did not converge... Try to solve the model again with a bigger
-                % number of periods, except if the number of periods has been increased more
-                % than 10 times.
-                if increase_periods==10;
-                    if verbosity
-                        if t<10
-                            disp(['Time:    ' int2str(t)  '. Even with ' int2str(periods1) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                        elseif t<100
-                            disp(['Time:   ' int2str(t)  '. Even with ' int2str(periods1) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                        elseif t<1000
-                            disp(['Time:  ' int2str(t)  '. Even with ' int2str(periods1) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                        else
-                            disp(['Time: ' int2str(t)  '. Even with ' int2str(periods1) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                        end
-                    end
-                    % Exit from the while loop.
-                    break
-                end
-            end% if info_convergence
-        end
-    end% while
-    if ~info_convergence && ep.homotopic_steps % If exited from the while loop without achieving
-                                               % convergence use an homotopic approach
-        if ~do_not_check_stability_flag
-            periods1 = ep.periods;
-            pfm1.periods = periods1;
-            pfm1.i_upd = i_upd;
-            exo_simul_1 = exo_simul_1(1:(periods1+2),:);
-            endo_simul_1 = endo_simul_1(:,1:(periods1+2));
-        end
-        [INFO,tmp] = homotopic_steps(endo_simul,exo_simul_1,.5,.01,pfm1);
-        if isstruct(INFO)
-            info_convergence = INFO.convergence;
-        else
-            info_convergence = 0;
-        end
-        if ~info_convergence
-            [INFO,tmp] = homotopic_steps(endo_simul,exo_simul_1,0,.01,pfm1);
-            if isstruct(INFO)
-                info_convergence = INFO.convergence;
-            else
-                info_convergence = 0;
-            end
-            if ~info_convergence
-                disp('Homotopy:: No convergence of the perfect foresight model solver!')
-                error('I am not able to simulate this model!');
-            else
-                endo_simul_1 = tmp;
-                if verbosity && info_convergence
-                    disp('Homotopy:: Convergence of the perfect foresight model solver!')
-                end
-            end
-        else
-            info_convergence = 1;
-            endo_simul_1 = tmp;
-            if verbosity && info_convergence
-                disp('Homotopy:: Convergence of the perfect foresight model solver!')
+            switch(options_.ep.stochastic.algo)
+              case 0
+                [flag,tmp] = ...
+                    solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
+              case 1
+                [flag,tmp] = ...
+                    solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,options_,pfm,options_.ep.stochastic.order);
             end
         end
     end
+    info_convergence = ~flag;
+    if verbosity
+        if info_convergence
+                disp(['Time: ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
+        else
+                disp(['Time: ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
+        end
+    end
+    endo_simul_1 = tmp;
     if info_convergence
         % Save results of the perfect foresight model solver.
         time_series(:,tsimul) = endo_simul_1(:,2);
@@ -397,7 +232,7 @@ while (t<sample_size)
         oo_.ep.failures.periods = [oo_.ep.failures.periods t];
         oo_.ep.failures.previous_period = [oo_.ep.failures.previous_period  endo_simul_1(:,1)];
         oo_.ep.failures.shocks = [oo_.ep.failures.shocks  shocks];
-        endo_simul_1 = repmat(steady_state,1,periods1+2);
+        endo_simul_1 = repmat(steady_state,1,periods+2);
         endo_simul_1(:,1) = time_series(:,tsimul-1);
     end
 end% (while) loop over t

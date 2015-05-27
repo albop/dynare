@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Dynare
-Upstream-Contact: Dynare Team, whose members in 2014 are:
+Upstream-Contact: Dynare Team, whose members in 2015 are:
                   Stéphane Adjemian <stephane.adjemian@univ-lemans.fr>
                   Houtan Bastani <houtan@dynare.org>
                   Michel Juillard <michel.juillard@mjui.fr>
@@ -14,7 +14,7 @@ Upstream-Contact: Dynare Team, whose members in 2014 are:
 Source: http://www.dynare.org
 
 Files: *
-Copyright: 1996-2014 Dynare Team
+Copyright: 1996-2015 Dynare Team
 License: GPL-3+
 
 Files: matlab/AIM/SP*
@@ -39,18 +39,31 @@ License: public-domain
  Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
  pages 472-489
 
-Files: matlab/bfgsi1.m matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m
- matlab/numgrad3.m matlab/numgrad3_.m matlab/numgrad5.m
- matlab/numgrad5_.m matlab/csminwel1.m matlab/bvar_density.m
+Files: matlab/bfgsi1.m matlab/csolve.m matlab/optimization/csminit1.m matlab/optimization/numgrad2.m
+ matlab/optimization/numgrad3.m matlab/optimization/numgrad3_.m matlab/optimization/numgrad5.m
+ matlab/optimization/numgrad5_.m matlab/optimization/csminwel1.m matlab/bvar_density.m
  matlab/bvar_toolbox.m matlab/partial_information/PI_gensys.m matlab/qzswitch.m
  matlab/qzdiv.m
 Copyright: 1993-2009 Christopher Sims
            2006-2013 Dynare Team
 License: GPL-3+
 
-Files: matlab/cmaes.m
+Files: matlab/optimization/cmaes.m
 Copyright: 2001-2012 Nikolaus Hansen
            2012 Dynare Team
+License: GPL-3+
+
+Files: matlab/optimization/solvopt.m
+Copyright: 1997-2008 Alexei Kuntsevich and Franz Kappel 
+           2008-2015 Giovanni Lombardo
+           2015 Dynare Team
+License: GPL-3+
+
+Files: matlab/optimization/simulated_annealing.m
+Copyright: 1995 E.G.Tsionas 
+           1995-2002 Thomas Werner 
+           2002-2015 Giovanni Lombardo
+           2015 Dynare Team
 License: GPL-3+
 
 Files: matlab/endogenous_prior.m
@@ -63,7 +76,7 @@ Copyright: 2008-2012 VZLU Prague, a.s.
            2014 Dynare Team
 License: GPL-3+
 
-Files: matlab/simpsa.m matlab/simpsaget.m matlab/simpsaset.m
+Files: matlab/optimization/simpsa.m matlab/optimization/simpsaget.m matlab/optimization/simpsaset.m
 Copyright: 2005 Henning Schmidt, FCC, henning@fcc.chalmers.se
            2006 Brecht Donckels, BIOMATH, brecht.donckels@ugent.be
            2013 Dynare Team
@@ -126,7 +139,7 @@ License: permissive
  distribute this software.
 
 Files: doc/dynare.texi doc/*.tex doc/*.svg doc/*.dia doc/*.pdf doc/*.bib
-Copyright: 1996-2014 Dynare Team
+Copyright: 1996-2015 Dynare Team
 License: GFDL-NIV-1.3+
 
 Files: doc/userguide/*.tex doc/userguide/*.bib doc/userguide/*.pdf

@@ -14,7 +14,7 @@ function [steady_state,params,check] = dyn_ramsey_static(ys_init,M,options_,oo)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2014 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -50,9 +50,15 @@ elseif options_.steadystate_flag
                                    M.endo_names,'exact')];
     end
     if inst_nbr == 1
-        inst_val = csolve(nl_func,ys_init(k_inst),'',options_.solve_tolf,100); %solve for instrument, using univariate solver, starting at initial value for instrument
+        %solve for instrument, using univariate solver, starting at initial value for instrument
+        inst_val = csolve(nl_func,ys_init(k_inst),'',options_.solve_tolf,100); 
     else
-        [inst_val,info1] = dynare_solve(nl_func,ys_init(k_inst),0); %solve for instrument, using multivariate solver, starting at initial value for instrument
+        %solve for instrument, using multivariate solver, starting at
+        %initial value for instrument
+        opt = options_;
+        opt.jacobian_flag = 0;
+        [inst_val,info1] = dynare_solve(nl_func,ys_init(k_inst), ...
+                                        opt);
     end
     ys_init(k_inst) = inst_val;
     exo_ss = [oo.exo_steady_state oo.exo_det_steady_state];
@@ -61,7 +67,9 @@ elseif options_.steadystate_flag
 else
     n_var = M.orig_endo_nbr;
     xx = oo.steady_state(1:n_var);
-    [xx,check] = dynare_solve(nl_func,xx,0);
+    opt = options_;
+    opt.jacobian_flag = 0;
+    [xx,check] = dynare_solve(nl_func,xx,opt);
     [junk,junk,steady_state] = nl_func(xx);
 end
 
@@ -124,11 +132,11 @@ Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 % set multipliers and auxiliary variables that
 % depends on multipliers to 0 to compute residuals
 if (options_.bytecode)
-   [chck, res, junk] = bytecode('static',xx,[oo.exo_simul oo.exo_det_simul], ...
+   [chck, res, junk] = bytecode('static',xx,[oo.exo_steady_state oo.exo_det_steady_state], ...
                params, 'evaluate');
    fJ = junk.g1;
 else
-   [res,fJ] = feval([fname '_static'],xx,[oo.exo_simul oo.exo_det_simul], ...
+   [res,fJ] = feval([fname '_static'],xx,[oo.exo_steady_state oo.exo_det_steady_state], ...
                params);
 end
 % index of multipliers and corresponding equations
@@ -162,10 +170,10 @@ end
 function result = check_static_model(ys,M,options_,oo)
 result = false;
 if (options_.bytecode)
-    [chck, res, junk] = bytecode('static',ys,[oo.exo_simul oo.exo_det_simul], ...
+    [chck, res, junk] = bytecode('static',ys,[oo.exo_steady_state oo.exo_det_steady_state], ...
                                  M.params, 'evaluate'); 
 else
-    res = feval([M.fname '_static'],ys,[oo.exo_simul oo.exo_det_simul], ...
+    res = feval([M.fname '_static'],ys,[oo.exo_steady_state oo.exo_det_steady_state], ...
                 M.params);
 end
 if norm(res) < options_.solve_tolf

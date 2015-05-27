@@ -1,10 +1,13 @@
 function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
     dsge_simulated_theoretical_conditional_variance_decomposition(SampleSize,Steps,M_,options_,oo_,type)
+% function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
+%     dsge_simulated_theoretical_conditional_variance_decomposition(SampleSize,Steps,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the conditional variance
 % decomposition of the endogenous variables (or a subset of the endogenous variables).
 %
 % INPUTS
 %   SampleSize   [integer]       scalar, number of simulations.
+%   Steps        [integers]      horizons at which to conduct decomposition
 %   M_           [structure]     Dynare structure describing the model.
 %   options_     [structure]     Dynare structure defining global options.
 %   oo_          [structure]     Dynare structure where the results are saved.
@@ -16,7 +19,7 @@ function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
 %   vartan                           [char]     array of characters (with nvar rows).
 %   NumberOfConditionalDecompFiles   [integer]  scalar, number of prior or posterior data files (for covariance).
 
-% Copyright (C) 2009-2012 Dynare Team
+% Copyright (C) 2009-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -45,6 +48,13 @@ elseif strcmpi(type,'prior')
 else
     disp('dsge_simulated_theoretical_conditional_variance_decomposition:: Unknown type!')
     error()
+end
+
+%delete old stale files before creating new ones
+if posterior
+    delete_stale_file([M_.dname '/metropolis/' M_.fname '_PosteriorConditionalVarianceDecomposition*'])
+else
+    delete_stale_file([M_.dname '/prior/moments/' M_.fname '_PriorConditionalVarianceDecomposition*'])
 end
 
 % Set varlist (vartan)

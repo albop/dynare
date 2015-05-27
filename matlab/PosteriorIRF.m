@@ -16,7 +16,7 @@ function PosteriorIRF(type)
 % functions associated with it(the _core1 and _core2).
 % See also the comments random_walk_metropolis_hastings.m funtion.
 
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -93,8 +93,15 @@ elseif strcmpi(type,'gsa')
 else
     MhDirectoryName = CheckPath('prior',M_.dname);
 end
-delete([MhDirectoryName filesep M_.fname '_IRF_DSGEs*.mat']);
-delete([MhDirectoryName filesep M_.fname '_IRF_BVARDSGEs*.mat']);
+
+%delete old stale files before creating new ones
+delete_stale_file([MhDirectoryName filesep M_.fname '_IRF_DSGEs*.mat']);
+delete_stale_file([MhDirectoryName filesep M_.fname '_IRF_BVARDSGEs*.mat']);
+delete_stale_file([MhDirectoryName filesep M_.fname '_irf_dsge*.mat']);
+delete_stale_file([MhDirectoryName filesep M_.fname '_irf_bvardsge*.mat']);
+delete_stale_file([MhDirectoryName filesep M_.fname '_param_irf*.mat']);
+
+
 if strcmpi(type,'posterior')
     B = options_.sub_draws;
     options_.B = B;
@@ -112,16 +119,7 @@ else% type = 'prior'
     B = options_.prior_draws;
     options_.B = B;
 end
-try
-    delete([MhDirectoryName filesep M_.fname '_irf_dsge*.mat'])
-catch
-    disp('No _IRFs (dsge) files to be deleted!')
-end
-try
-    delete([MhDirectoryName filesep M_.fname '_irf_bvardsge*.mat'])
-catch
-    disp('No _IRFs (bvar-dsge) files to be deleted!')
-end
+
 irun = 0;
 IRUN = 0;
 irun2 = 0;

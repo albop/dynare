@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2014 Dynare Team
+ * Copyright (C) 2006-2015 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -24,6 +24,8 @@ using namespace std;
 
 #include <ostream>
 #include <ctime>
+#include <iostream>
+#include <sstream>
 
 #include "SymbolTable.hh"
 #include "NumericalConstants.hh"
@@ -36,6 +38,11 @@ using namespace std;
 #include "ConfigFile.hh"
 #include "WarningConsolidation.hh"
 #include "ExtendedPreprocessorTypes.hh"
+
+// for checksum computation
+#ifndef PRIVATE_BUFFER_SIZE
+#define PRIVATE_BUFFER_SIZE 1024
+#endif
 
 //! The abstract representation of a "mod" file
 class ModFile
@@ -51,6 +58,8 @@ public:
   NumericalConstants num_constants;
   //! Expressions outside model block
   DataTree expressions_tree;
+  //! Original model, as declared in the "model" block, that won't be modified by the preprocessor
+  DynamicModel original_model;
   //! Dynamic model, as declared in the "model" block
   DynamicModel dynamic_model;
   //! A copy of Dynamic model, for testing trends declared by user
@@ -136,7 +145,8 @@ public:
     \param cygwin Should the MEX command of use_dll be adapted for Cygwin?
     \param msvc Should the MEX command of use_dll be adapted for MSVC?
   */
-  void writeOutputFiles(const string &basename, bool clear_all, bool no_log, bool no_warn, bool console, bool nograph, bool nointeractive, const ConfigFile &config_file
+  void writeOutputFiles(const string &basename, bool clear_all, bool clear_global, bool no_log, bool no_warn,
+			bool console, bool nograph, bool nointeractive, const ConfigFile &config_file, bool check_model_changes
 #if defined(_WIN32) || defined(__CYGWIN32__)
                         , bool cygwin, bool msvc
 #endif
@@ -151,6 +161,8 @@ public:
   //! Writes Cpp output files only => No further Matlab processing
   void writeCCOutputFiles(const string &basename) const;
   void writeModelCC(const string &basename) const;
+
+  void computeChecksum();
 };
 
 #endif // ! MOD_FILE_HH

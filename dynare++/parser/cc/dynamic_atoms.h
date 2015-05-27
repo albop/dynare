@@ -182,6 +182,9 @@ namespace ogp {
 		/** Return index of the variable described by the variable
 		 * name and lag/lead. If it doesn't exist, return -1. */
 		int index(const char* name, int ll) const;
+		/** Return true if a variable is referenced, i.e. it has lag
+		 * map. */
+		bool is_referenced(const char* name) const;
 		/** Return the lag map for the variable name. */
 		const Tlagmap& lagmap(const char* name) const;
 		/** Return the variable name for the tree index. It throws an

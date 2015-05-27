@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2014 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,6 +33,7 @@ global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_
 estim_params_ = [];
 bayestopt_ = [];
 options_.datafile = '';
+options_.dirname = M_.fname;
 options_.dataset = [];
 options_.verbosity = 1;
 options_.terminal_condition = 0;
@@ -55,6 +56,7 @@ options_.qz_zero_threshold = 1e-6;
 options_.lyapunov_complex_threshold = 1e-15;
 options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);
+options_.dr_display_tol=1e-6;
 
 options_.dp.maxit = 3000;
 options_.steady.maxit = 50;
@@ -65,6 +67,8 @@ options_.mode_check.neighbourhood_size = .5;
 options_.mode_check.symmetric_plots = 1;
 options_.mode_check.number_of_points = 20;
 options_.mode_check.nolik = 0;
+
+options_.huge_number = 1e7;
 
 % Default number of threads for parallelized mex files.
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
@@ -102,6 +106,10 @@ options_.bvar_prior_mu = 2;
 options_.bvar_prior_omega = 1;
 options_.bvar_prior_flat = 0;
 options_.bvar_prior_train = 0;
+
+% Initialize the field that will contain the optimization algorigthm's options declared in the
+% estimation command (if anny).
+options_.optim_opt = [];
 
 % Optimization algorithm [6] gmhmaxlik
 gmhmaxlik.iterations = 3;
@@ -241,11 +249,7 @@ particle.resampling.method.kitagawa = 1;
 particle.resampling.method.smooth = 0;
 particle.resampling.method.stratified = 0;
 % Set default algorithm
-particle.filter_algorithm.sis = 1;
-particle.filter_algorithm.apf = 0;
-particle.filter_algorithm.gf = 0;
-particle.filter_algorithm.gmf = 0;
-particle.filter_algorithm.cpf = 0;
+particle.filter_algorithm = 'sis';
 % Approximation of the proposal distribution
 particle.proposal_approximation.cubature = 1;
 particle.proposal_approximation.unscented = 0;
@@ -362,6 +366,8 @@ estimation_info.measurement_error_corr.range_index = {};
 estimation_info.structural_innovation_corr_prior_index = {};
 estimation_info.structural_innovation_corr_options_index = {};
 estimation_info.structural_innovation_corr.range_index = {};
+estimation_info.joint_parameter_prior_index = {};
+estimation_info.joint_parameter = {'index','domain','interval','mean','median','mode','shape','shift','stdev','truncate','variance'};
 options_.initial_period = NaN; %dates(1,1);
 options_.dataset.file = [];
 options_.dataset.series = [];
@@ -385,6 +391,7 @@ options_.nobs = NaN;
 options_.kalman_algo = 0;
 options_.fast_kalman = 0;
 options_.kalman_tol = 1e-10;
+options_.diffuse_kalman_tol = 1e-6;
 options_.use_univariate_filters_if_singularity_is_detected = 1;
 options_.riccati_tol = 1e-6;
 options_.lik_algo = 1;
@@ -406,6 +413,7 @@ options_.recursive_estimation_restart = 0;
 options_.MCMC_jumping_covariance='hessian';
 options_.use_calibration_initialization = 0;
 options_.endo_vars_for_moment_computations_in_estimation=[];
+options_.TaRB.use_TaRB = 0;
 
 % Prior restrictions
 options_.prior_restrictions.status = 0;
@@ -426,8 +434,8 @@ options_.student_degrees_of_freedom = 3;
 options_.posterior_max_subsample_draws = 1200;
 options_.sub_draws = [];
 options_.use_mh_covariance_matrix = 0;
-options_.gradient_method = 2;
-options_.gradient_epsilon = 1e-6;
+options_.gradient_method = 2; %used by csminwel and newrat
+options_.gradient_epsilon = 1e-6; %used by csminwel and newrat
 options_.posterior_sampling_method = 'random_walk_metropolis_hastings';
 options_.proposal_distribution = 'rand_multivariate_normal';
 options_.student_degrees_of_freedom = 3;
@@ -473,6 +481,18 @@ options_.homotopy_mode = 0;
 options_.homotopy_steps = 1;
 options_.homotopy_force_continue = 0;
 
+%csminwel optimization routine
+csminwel.tolerance.f=1e-7;
+csminwel.maxiter=1000;
+options_.csminwel=csminwel;
+
+%newrat optimization routine
+newrat.hess=1; % dynare numerical hessian
+newrat.tolerance.f=1e-5;
+newrat.tolerance.f_analytic=1e-7;
+newrat.maxiter=1000;
+options_.newrat=newrat;
+
 % Simplex optimization routine (variation on Nelder Mead algorithm).
 simplex.tolerance.x = 1e-4;
 simplex.tolerance.f = 1e-4;
@@ -509,6 +529,30 @@ simpsa.MAX_TIME = 2500;
 simpsa.MAX_FUN_EVALS = 20000;
 simpsa.DISPLAY = 'iter';
 options_.simpsa = simpsa;
+
+%solveopt optimizer
+solveopt.minimizer_indicator=-1; %use minimizer
+solveopt.TolX=1e-6; %accuracy of argument
+solveopt.TolFun=1e-6; %accuracy of function 
+solveopt.MaxIter=15000;
+solveopt.verbosity=1;
+solveopt.TolXConstraint=1.e-8;
+solveopt.SpaceDilation=2.5;
+solveopt.LBGradientStep=1.e-11;
+options_.solveopt=solveopt;
+
+%simulated annealing
+options_.saopt.neps=10;
+options_.saopt.maximizer_indicator=0;
+options_.saopt.rt=0.10;
+options_.saopt.MaxIter=100000;
+options_.saopt.verbosity=1;
+options_.saopt.TolFun=1.0e-8;
+options_.saopt.initial_temperature=15;
+options_.saopt.ns=10;
+options_.saopt.nt=10;
+options_.saopt.step_length_c=0.1;
+options_.saopt.initial_step_length=1;
 
 % prior analysis
 options_.prior_mc = 20000;
@@ -627,8 +671,7 @@ options_.endogenous_prior_restrictions.irf={};
 options_.endogenous_prior_restrictions.moment={};
 
 % OSR Optimal Simple Rules
-options_.osr.tolf=1e-7;
-options_.osr.maxit=1000;
+options_.osr.opt_algo=4;
 
 % use GPU
 options_.gpu = 0;

@@ -55,7 +55,7 @@ else
         load(filetoload,'lpmat','lpmat0','istable','iunstable','iindeterm','iwrong' ,'infox')
         lpmat = [lpmat0 lpmat];
         type = 'mc';
-    end        
+    end
 end
 [Nsam, np] = size(lpmat);
 npar = size(pnames,1);
@@ -65,58 +65,91 @@ nbr_irf_restrictions = size(DynareOptions.endogenous_prior_restrictions.irf,1);
 nbr_moment_restrictions = size(DynareOptions.endogenous_prior_restrictions.moment,1);
 
 if init
-mat_irf=cell(nbr_irf_restrictions,1);
-for ij=1:nbr_irf_restrictions,
-    mat_irf{ij}=NaN(Nsam,length(DynareOptions.endogenous_prior_restrictions.irf{ij,3}));
-end
-
-mat_moment=cell(nbr_moment_restrictions,1);
-for ij=1:nbr_moment_restrictions,
-    mat_moment{ij}=NaN(Nsam,length(DynareOptions.endogenous_prior_restrictions.moment{ij,3}));
-end
-
-irestrictions = [1:Nsam];
-h = dyn_waitbar(0,'Please wait...');
-for j=1:Nsam,
-    Model = set_all_parameters(lpmat(j,:)',EstimatedParameters,Model);
-    [Tt,Rr,SteadyState,info] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
-    if info(1)==0,
-        [info, info_irf, info_moment, data_irf, data_moment]=endogenous_prior_restrictions(Tt,Rr,Model,DynareOptions,DynareResults);
-        if ~isempty(info_irf)
-            for ij=1:nbr_irf_restrictions,
-                mat_irf{ij}(j,:)=data_irf{ij}(:,2)';
-            end
-            indx_irf(j,:)=info_irf(:,1);
-        end
-        if ~isempty(info_moment)
-            for ij=1:nbr_moment_restrictions,
-                mat_moment{ij}(j,:)=data_moment{ij}(:,2)';
-            end
-            indx_moment(j,:)=info_moment(:,1);
-        end
-    else
-        irestrictions(j)=0;
+    mat_irf=cell(nbr_irf_restrictions,1);
+    for ij=1:nbr_irf_restrictions,
+        mat_irf{ij}=NaN(Nsam,length(DynareOptions.endogenous_prior_restrictions.irf{ij,3}));
     end
-    dyn_waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
-end
-dyn_waitbar_close(h);
-
-irestrictions=irestrictions(find(irestrictions));
-xmat=lpmat(irestrictions,:);
-skipline()
-endo_prior_restrictions=DynareOptions.endogenous_prior_restrictions;
-save([OutputDirectoryName,filesep,fname_,'_',type,'_restrictions'],'xmat','mat_irf','mat_moment','irestrictions','indx_irf','indx_moment','endo_prior_restrictions');
-else
-load([OutputDirectoryName,filesep,fname_,'_',type,'_restrictions'],'xmat','mat_irf','mat_moment','irestrictions','indx_irf','indx_moment','endo_prior_restrictions');
-end    
-if ~isempty(indx_irf),
     
-    % For single legend search which has maximum nbr of restrictions 
+    mat_moment=cell(nbr_moment_restrictions,1);
+    for ij=1:nbr_moment_restrictions,
+        mat_moment{ij}=NaN(Nsam,length(DynareOptions.endogenous_prior_restrictions.moment{ij,3}));
+    end
+    
+    irestrictions = [1:Nsam];
+    h = dyn_waitbar(0,'Please wait...');
+    for j=1:Nsam,
+        Model = set_all_parameters(lpmat(j,:)',EstimatedParameters,Model);
+        if nbr_moment_restrictions,
+            [Tt,Rr,SteadyState,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults);
+        else
+            [Tt,Rr,SteadyState,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
+        end
+        if info(1)==0,
+            [info, info_irf, info_moment, data_irf, data_moment]=endogenous_prior_restrictions(Tt,Rr,Model,DynareOptions,DynareResults);
+            if ~isempty(info_irf)
+                for ij=1:nbr_irf_restrictions,
+                    mat_irf{ij}(j,:)=data_irf{ij}(:,2)';
+                end
+                indx_irf(j,:)=info_irf(:,1);
+            end
+            if ~isempty(info_moment)
+                for ij=1:nbr_moment_restrictions,
+                    mat_moment{ij}(j,:)=data_moment{ij}(:,2)';
+                end
+                indx_moment(j,:)=info_moment(:,1);
+            end
+        else
+            irestrictions(j)=0;
+        end
+        dyn_waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
+    end
+    dyn_waitbar_close(h);
+    
+    irestrictions=irestrictions(find(irestrictions));
+    xmat=lpmat(irestrictions,:);
+    skipline()
+    endo_prior_restrictions=DynareOptions.endogenous_prior_restrictions;
+    save([OutputDirectoryName,filesep,fname_,'_',type,'_restrictions'],'xmat','mat_irf','mat_moment','irestrictions','indx_irf','indx_moment','endo_prior_restrictions');
+else
+    load([OutputDirectoryName,filesep,fname_,'_',type,'_restrictions'],'xmat','mat_irf','mat_moment','irestrictions','indx_irf','indx_moment','endo_prior_restrictions');
+end
+if ~isempty(indx_irf),
+    skipline()
+    disp('Deleting old IRF calibration plots ...')
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_irf_calib*.eps']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_irf_calib*.fig']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_irf_calib*.pdf']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_irf_restrictions.eps']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_irf_restrictions.fig']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_irf_restrictions.pdf']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    disp('done !')
+    skipline()
+  
+    % For single legend search which has maximum nbr of restrictions
     all_irf_couples = cellstr([char(endo_prior_restrictions.irf(:,1)) char(endo_prior_restrictions.irf(:,2))]);
     irf_couples = unique(all_irf_couples);
     nbr_irf_couples = size(irf_couples,1);
     plot_indx = NaN(nbr_irf_couples,1);
     time_matrix=cell(nbr_irf_couples,1);
+    indx_irf_matrix=zeros(length(irestrictions),nbr_irf_couples);
     irf_matrix=cell(nbr_irf_couples,1);
     irf_mean=cell(nbr_irf_couples,1);
     irf_median=cell(nbr_irf_couples,1);
@@ -131,17 +164,21 @@ if ~isempty(indx_irf),
         plot_indx(ij) = find(strcmp(irf_couples,all_irf_couples(ij,:)));
         time_matrix{plot_indx(ij)} = [time_matrix{plot_indx(ij)} endo_prior_restrictions.irf{ij,3}];
     end
+    iplot_indx = ones(size(plot_indx));
     
     indx_irf = indx_irf(irestrictions,:);
-    h1=dyn_figure(DynareOptions,'name',[type ' evaluation of irf restrictions']);
-    nrow=ceil(sqrt(nbr_irf_couples));
-    ncol=nrow;
-    if nrow*(nrow-1)>nbr_irf_couples,
-        ncol=nrow-1;
+    if ~DynareOptions.nograph,
+        h1=dyn_figure(DynareOptions,'name',[type ' evaluation of irf restrictions']);
+        nrow=ceil(sqrt(nbr_irf_couples));
+        ncol=nrow;
+        if nrow*(nrow-1)>nbr_irf_couples,
+            ncol=nrow-1;
+        end
     end
     for ij=1:nbr_irf_restrictions,
         mat_irf{ij}=mat_irf{ij}(irestrictions,:);
         irf_matrix{plot_indx(ij)} = [irf_matrix{plot_indx(ij)} mat_irf{ij}];
+        indx_irf_matrix(:,plot_indx(ij)) = indx_irf_matrix(:,plot_indx(ij)) + indx_irf(:,ij);
         for ik=1:size(mat_irf{ij},2),
             [Mean,Median,Var,HPD,Distrib] = ...
                 posterior_moments(mat_irf{ij}(:,ik),0,DynareOptions.mh_conf_sig);
@@ -156,18 +193,21 @@ if ~isempty(indx_irf),
         if size(mat_irf{ij},2)>1,
             leg = [leg,':' ,num2str(endo_prior_restrictions.irf{ij,3}(end))];
             aleg = [aleg,'-' ,num2str(endo_prior_restrictions.irf{ij,3}(end))];
-        end        
-        if length(time_matrix{plot_indx(ij)})==1,
-            figure(h1),
+            iplot_indx(ij)=0;
+        end
+        if ~DynareOptions.nograph && length(time_matrix{plot_indx(ij)})==1,
+            set(0,'currentfigure',h1),
             subplot(nrow,ncol, plot_indx(ij)),
             hc = cumplot(mat_irf{ij}(:,ik));
-            set(hc,'color','k','linewidth',2)
-            hold all,
             a=axis;
+            delete(hc);
             x1val=max(endo_prior_restrictions.irf{ij,4}(1),a(1));
             x2val=min(endo_prior_restrictions.irf{ij,4}(2),a(2));
             hp = patch([x1val x2val x2val x1val],a([3 3 4 4]),'b');
-            set(hp,'FaceAlpha', 0.5)
+            hold all,
+            set(hp,'FaceColor', [0.7 0.8 1])
+            hc = cumplot(mat_irf{ij}(:,ik));
+            set(hc,'color','k','linewidth',2)
             hold off,
             %         hold off,
             title([endo_prior_restrictions.irf{ij,1},' vs ',endo_prior_restrictions.irf{ij,2}, '(', leg,')'],'interpreter','none'),
@@ -185,75 +225,133 @@ if ~isempty(indx_irf),
         indx1 = find(indx_irf(:,ij)==0);
         indx2 = find(indx_irf(:,ij)~=0);
         atitle0=[endo_prior_restrictions.irf{ij,1},' vs ',endo_prior_restrictions.irf{ij,2}, '(', leg,')'];
-        fprintf(['%4.1f%% of the prior support matches IRF ',atitle0,' inside [%4.1f, %4.1f]\n'],length(indx1)/length(irestrictions)*100,endo_prior_restrictions.irf{ij,4})
+        fprintf(['%4.1f%% of the ',type,' support matches IRF ',atitle0,' inside [%4.1f, %4.1f]\n'],length(indx1)/length(irestrictions)*100,endo_prior_restrictions.irf{ij,4})
         % aname=[type '_irf_calib_',int2str(ij)];
         aname=[type '_irf_calib_',endo_prior_restrictions.irf{ij,1},'_vs_',endo_prior_restrictions.irf{ij,2},'_',aleg];
         atitle=[type ' IRF Calib: Parameter(s) driving ',endo_prior_restrictions.irf{ij,1},' vs ',endo_prior_restrictions.irf{ij,2}, '(', leg,')'];
         options_mcf.amcf_name = aname;
         options_mcf.amcf_title = atitle;
-        options_mcf.beha_title = 'IRF prior restriction';
-        options_mcf.nobeha_title = 'NO IRF prior restriction';
+        options_mcf.beha_title = 'IRF restriction';
+        options_mcf.nobeha_title = 'NO IRF restriction';
         options_mcf.title = atitle0;
         if ~isempty(indx1) && ~isempty(indx2)
             mcf_analysis(xmat(:,nshock+1:end), indx1, indx2, options_mcf, DynareOptions);
         end
-
-%         [proba, dproba] = stab_map_1(xmat, indx1, indx2, aname, 0);
-%         indplot=find(proba<pvalue_ks);
-%         if ~isempty(indplot)
-%             stab_map_1(xmat, indx1, indx2, aname, 1, indplot, OutputDirectoryName,[],atitle);
-%         end
+        
+        %         [proba, dproba] = stab_map_1(xmat, indx1, indx2, aname, 0);
+        %         indplot=find(proba<pvalue_ks);
+        %         if ~isempty(indplot)
+        %             stab_map_1(xmat, indx1, indx2, aname, 1, indplot, OutputDirectoryName,[],atitle);
+        %         end
     end
-    figure(h1);
     for ij=1:nbr_irf_couples,
         if length(time_matrix{ij})>1,
-            subplot(nrow,ncol, ij)
-            itmp = (find(plot_indx==ij));
-            plot(time_matrix{ij},[max(irf_matrix{ij})' min(irf_matrix{ij})'],'k--','linewidth',2)
-            hold on,
-            plot(time_matrix{ij},irf_median{ij},'k','linewidth',2)
-            plot(time_matrix{ij},[irf_distrib{ij}],'k-')
-            a=axis;
-            tmp=[];
-            for ir=1:length(itmp),
-                for it=1:length(endo_prior_restrictions.irf{itmp(ir),3})
-                temp_index = find(time_matrix{ij}==endo_prior_restrictions.irf{itmp(ir),3}(it));
-                tmp(temp_index,:) = endo_prior_restrictions.irf{itmp(ir),4};
+            if ~DynareOptions.nograph,
+                set(0,'currentfigure',h1);
+                subplot(nrow,ncol, ij)
+                itmp = (find(plot_indx==ij));
+                htmp = plot(time_matrix{ij},[max(irf_matrix{ij})' min(irf_matrix{ij})'],'k--','linewidth',2);
+                a=axis;
+                delete(htmp);
+                tmp=[];
+                for ir=1:length(itmp),
+                    for it=1:length(endo_prior_restrictions.irf{itmp(ir),3})
+                        temp_index = find(time_matrix{ij}==endo_prior_restrictions.irf{itmp(ir),3}(it));
+                        tmp(temp_index,:) = endo_prior_restrictions.irf{itmp(ir),4};
+                    end
+                end
+                %             tmp = cell2mat(endo_prior_restrictions.irf(itmp,4));
+                tmp(isinf(tmp(:,1)),1)=a(3);
+                tmp(isinf(tmp(:,2)),2)=a(4);
+                hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],[tmp(:,1); tmp(end:-1:1,2)],'c');
+                set(hp,'FaceColor',[0.7 0.8 1])
+                hold on,
+                plot(time_matrix{ij},[max(irf_matrix{ij})' min(irf_matrix{ij})'],'k--','linewidth',2)
+                plot(time_matrix{ij},irf_median{ij},'k','linewidth',2)
+                plot(time_matrix{ij},[irf_distrib{ij}],'k-')
+                plot(a(1:2),[0 0],'r')
+                hold off,
+                axis([max(1,a(1)) a(2:4)])
+                box on,
+                set(gca,'xtick',sort(time_matrix{ij}))
+                itmp = min(itmp);
+                title([endo_prior_restrictions.irf{itmp,1},' vs ',endo_prior_restrictions.irf{itmp,2}],'interpreter','none'),
+            end
+            if any(iplot_indx.*plot_indx==ij),
+                % MCF of the couples with logical AND
+                itmp = min(find(plot_indx==ij));
+                indx1 = find(indx_irf_matrix(:,ij)==0);
+                indx2 = find(indx_irf_matrix(:,ij)~=0);
+                leg = num2str(time_matrix{ij}(1));
+                leg = [leg '...' num2str(time_matrix{ij}(end))];
+                aleg = 'ALL';
+                atitle0=[endo_prior_restrictions.irf{itmp,1},' vs ',endo_prior_restrictions.irf{itmp,2}, '(', leg,')'];
+                fprintf(['%4.1f%% of the ',type,' support matches IRF restrictions ',atitle0,'\n'],length(indx1)/length(irestrictions)*100)
+                % aname=[type '_irf_calib_',int2str(ij)];
+                aname=[type '_irf_calib_',endo_prior_restrictions.irf{itmp,1},'_vs_',endo_prior_restrictions.irf{itmp,2},'_',aleg];
+                atitle=[type ' IRF Calib: Parameter(s) driving ',endo_prior_restrictions.irf{itmp,1},' vs ',endo_prior_restrictions.irf{itmp,2}, '(', leg,')'];
+                options_mcf.amcf_name = aname;
+                options_mcf.amcf_title = atitle;
+                options_mcf.beha_title = 'IRF restriction';
+                options_mcf.nobeha_title = 'NO IRF restriction';
+                options_mcf.title = atitle0;
+                if ~isempty(indx1) && ~isempty(indx2)
+                    mcf_analysis(xmat(:,nshock+1:end), indx1, indx2, options_mcf, DynareOptions);
                 end
             end
-%             tmp = cell2mat(endo_prior_restrictions.irf(itmp,4));
-            tmp(isinf(tmp(:,1)),1)=a(3);
-            tmp(isinf(tmp(:,2)),2)=a(4);
-            hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],tmp(:),'b');
-            set(hp,'FaceAlpha',[0.5])
-            plot(a(1:2),[0 0],'r')
-            hold off,
-            axis([max(1,a(1)) a(2:4)])
-            box on,
-            set(gca,'xtick',sort(time_matrix{ij}))
-            itmp = min(itmp);
-            title([endo_prior_restrictions.irf{itmp,1},' vs ',endo_prior_restrictions.irf{itmp,2}],'interpreter','none'),
         end
     end
-    dyn_saveas(h1,[OutputDirectoryName,filesep,fname_,'_',type,'_irf_restrictions'],DynareOptions);
-
+    if ~DynareOptions.nograph,
+        dyn_saveas(h1,[OutputDirectoryName,filesep,fname_,'_',type,'_irf_restrictions'],DynareOptions);
+    end
+    
     skipline()
 end
 
 if ~isempty(indx_moment)
+    skipline()
+    disp('Deleting old MOMENT calibration plots ...')
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_moment_calib*.eps']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_moment_calib*.fig']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_moment_calib*.pdf']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_moment_restrictions.eps']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_moment_restrictions.fig']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    a=dir([OutputDirectoryName,filesep,fname_,'_',type,'_moment_restrictions.pdf']);
+    for j=1:length(a),
+        delete([OutputDirectoryName,filesep,a(j).name]);
+    end
+    disp('done !')
+    skipline()
+    
     options_mcf.param_names = char(BayesInfo.name);
     all_moment_couples = cellstr([char(endo_prior_restrictions.moment(:,1)) char(endo_prior_restrictions.moment(:,2))]);
     moment_couples = unique(all_moment_couples);
     nbr_moment_couples = size(moment_couples,1);
     plot_indx = NaN(nbr_moment_couples,1);
     time_matrix=cell(nbr_moment_couples,1);
+    indx_moment_matrix=zeros(length(irestrictions),nbr_moment_couples);
     moment_matrix=cell(nbr_moment_couples,1);
     moment_mean=cell(nbr_moment_couples,1);
     moment_median=cell(nbr_moment_couples,1);
     moment_var=cell(nbr_moment_couples,1);
     moment_HPD=cell(nbr_moment_couples,1);
     moment_distrib=cell(nbr_moment_couples,1);
-    % For single legend search which has maximum nbr of restrictions 
+    % For single legend search which has maximum nbr of restrictions
     maxijv=0;
     for ij=1:nbr_moment_restrictions
         if length(endo_prior_restrictions.moment{ij,3})>maxijv
@@ -262,18 +360,22 @@ if ~isempty(indx_moment)
         plot_indx(ij) = find(strcmp(moment_couples,all_moment_couples(ij,:)));
         time_matrix{plot_indx(ij)} = [time_matrix{plot_indx(ij)} endo_prior_restrictions.moment{ij,3}];
     end
+    iplot_indx = ones(size(plot_indx));
     
     indx_moment = indx_moment(irestrictions,:);
-    h2=dyn_figure(DynareOptions,'name',[type ' evaluation of moment restrictions']);
-    nrow=ceil(sqrt(nbr_moment_couples));
-    ncol=nrow;
-    if nrow*(nrow-1)>nbr_moment_couples,
-        ncol=nrow-1;
+    if ~DynareOptions.nograph,
+        h2=dyn_figure(DynareOptions,'name',[type ' evaluation of moment restrictions']);
+        nrow=ceil(sqrt(nbr_moment_couples));
+        ncol=nrow;
+        if nrow*(nrow-1)>nbr_moment_couples,
+            ncol=nrow-1;
+        end
     end
     
     for ij=1:nbr_moment_restrictions,
         mat_moment{ij}=mat_moment{ij}(irestrictions,:);
         moment_matrix{plot_indx(ij)} = [moment_matrix{plot_indx(ij)} mat_moment{ij}];
+        indx_moment_matrix(:,plot_indx(ij)) = indx_moment_matrix(:,plot_indx(ij)) + indx_moment(:,ij);
         for ik=1:size(mat_moment{ij},2),
             [Mean,Median,Var,HPD,Distrib] = ...
                 posterior_moments(mat_moment{ij}(:,ik),0,DynareOptions.mh_conf_sig);
@@ -288,82 +390,113 @@ if ~isempty(indx_moment)
         if size(mat_moment{ij},2)>1,
             leg = [leg,':' ,num2str(endo_prior_restrictions.moment{ij,3}(end))];
             aleg = [aleg,'_' ,num2str(endo_prior_restrictions.moment{ij,3}(end))];
+            iplot_indx(ij)=0;
         end
-        if length(time_matrix{plot_indx(ij)})==1,
-            figure(h2),
+        if ~DynareOptions.nograph && length(time_matrix{plot_indx(ij)})==1,
+            set(0,'currentfigure',h2);
             subplot(nrow,ncol,plot_indx(ij)),
             hc = cumplot(mat_moment{ij}(:,ik));
-            set(hc,'color','k','linewidth',2)
-            hold all,
+            a=axis; delete(hc),
             %     hist(mat_moment{ij}),
-            a=axis;
             x1val=max(endo_prior_restrictions.moment{ij,4}(1),a(1));
             x2val=min(endo_prior_restrictions.moment{ij,4}(2),a(2));
             hp = patch([x1val x2val x2val x1val],a([3 3 4 4]),'b');
-            set(hp,'FaceAlpha', 0.5)
+            set(hp,'FaceColor', [0.7 0.8 1])
+            hold all,
+            hc = cumplot(mat_moment{ij}(:,ik));
+            set(hc,'color','k','linewidth',2)
             hold off,
             title([endo_prior_restrictions.moment{ij,1},' vs ',endo_prior_restrictions.moment{ij,2},'(',leg,')'],'interpreter','none'),
-%         if ij==maxij
-%             leg1 = num2str(endo_prior_restrictions.moment{ij,3}(:));
-%             [legend_h,object_h,plot_h,text_strings]=legend(leg1);
-%             Position=get(legend_h,'Position');Position(1:2)=[-0.055 0.95-Position(4)];
-%             set(legend_h,'Position',Position);
-%         end
+            %         if ij==maxij
+            %             leg1 = num2str(endo_prior_restrictions.moment{ij,3}(:));
+            %             [legend_h,object_h,plot_h,text_strings]=legend(leg1);
+            %             Position=get(legend_h,'Position');Position(1:2)=[-0.055 0.95-Position(4)];
+            %             set(legend_h,'Position',Position);
+            %         end
         end
         indx1 = find(indx_moment(:,ij)==0);
         indx2 = find(indx_moment(:,ij)~=0);
         atitle0=[endo_prior_restrictions.moment{ij,1},' vs ',endo_prior_restrictions.moment{ij,2}, '(', leg,')'];
-        fprintf(['%4.1f%% of the prior support matches MOMENT ',atitle0,' inside [%4.1f, %4.1f]\n'],length(indx1)/length(irestrictions)*100,endo_prior_restrictions.moment{ij,4})
+        fprintf(['%4.1f%% of the ',type,' support matches MOMENT ',atitle0,' inside [%4.1f, %4.1f]\n'],length(indx1)/length(irestrictions)*100,endo_prior_restrictions.moment{ij,4})
         % aname=[type '_moment_calib_',int2str(ij)];
         aname=[type '_moment_calib_',endo_prior_restrictions.moment{ij,1},'_vs_',endo_prior_restrictions.moment{ij,2},'_',aleg];
         atitle=[type ' MOMENT Calib: Parameter(s) driving ',endo_prior_restrictions.moment{ij,1},' vs ',endo_prior_restrictions.moment{ij,2}, '(', leg,')'];
         options_mcf.amcf_name = aname;
         options_mcf.amcf_title = atitle;
-        options_mcf.beha_title = 'moment prior restriction';
-        options_mcf.nobeha_title = 'NO moment prior restriction';
+        options_mcf.beha_title = 'moment restriction';
+        options_mcf.nobeha_title = 'NO moment restriction';
         options_mcf.title = atitle0;
         if ~isempty(indx1) && ~isempty(indx2)
             mcf_analysis(xmat, indx1, indx2, options_mcf, DynareOptions);
         end
         
-%         [proba, dproba] = stab_map_1(xmat, indx1, indx2, aname, 0);
-%         indplot=find(proba<pvalue_ks);
-%         if ~isempty(indplot)
-%             stab_map_1(xmat, indx1, indx2, aname, 1, indplot, OutputDirectoryName,[],atitle);
-%         end
+        %         [proba, dproba] = stab_map_1(xmat, indx1, indx2, aname, 0);
+        %         indplot=find(proba<pvalue_ks);
+        %         if ~isempty(indplot)
+        %             stab_map_1(xmat, indx1, indx2, aname, 1, indplot, OutputDirectoryName,[],atitle);
+        %         end
     end
-    figure(h2);
     for ij=1:nbr_moment_couples,
         if length(time_matrix{ij})>1,
-            subplot(nrow,ncol, ij)
-            itmp = (find(plot_indx==ij));
-            plot(time_matrix{ij},[max(moment_matrix{ij})' min(moment_matrix{ij})'],'k--','linewidth',2)
-            hold on,
-            plot(time_matrix{ij},moment_median{ij},'k','linewidth',2)
-            plot(time_matrix{ij},[moment_distrib{ij}],'k-')
-            a=axis;
-            tmp=[];
-            for ir=1:length(itmp),
-                for it=1:length(endo_prior_restrictions.moment{itmp(ir),3})
-                temp_index = find(time_matrix{ij}==endo_prior_restrictions.moment{itmp(ir),3}(it));
-                tmp(temp_index,:) = endo_prior_restrictions.moment{itmp(ir),4};
+            if ~DynareOptions.nograph
+                itmp = (find(plot_indx==ij));
+                set(0,'currentfigure',h2);
+                subplot(nrow,ncol, ij)
+                htmp = plot(time_matrix{ij},[max(moment_matrix{ij})' min(moment_matrix{ij})'],'k--','linewidth',2);
+                a=axis;
+                delete(htmp);
+                tmp=[];
+                for ir=1:length(itmp),
+                    for it=1:length(endo_prior_restrictions.moment{itmp(ir),3})
+                        temp_index = find(time_matrix{ij}==endo_prior_restrictions.moment{itmp(ir),3}(it));
+                        tmp(temp_index,:) = endo_prior_restrictions.moment{itmp(ir),4};
+                    end
+                end
+                %             tmp = cell2mat(endo_prior_restrictions.moment(itmp,4));
+                tmp(isinf(tmp(:,1)),1)=a(3);
+                tmp(isinf(tmp(:,2)),2)=a(4);
+                hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],[tmp(:,1); tmp(end:-1:1,2)],'b');
+                set(hp,'FaceColor',[0.7 0.8 1])
+                hold on,
+                plot(time_matrix{ij},[max(moment_matrix{ij})' min(moment_matrix{ij})'],'k--','linewidth',2)
+                plot(time_matrix{ij},moment_median{ij},'k','linewidth',2)
+                plot(time_matrix{ij},[moment_distrib{ij}],'k-')
+                plot(a(1:2),[0 0],'r')
+                hold off,
+                axis(a)
+                box on,
+                set(gca,'xtick',sort(time_matrix{ij}))
+                itmp = min(itmp);
+                title([endo_prior_restrictions.moment{itmp,1},' vs ',endo_prior_restrictions.moment{itmp,2}],'interpreter','none'),
+            end
+            if any(iplot_indx.*plot_indx==ij),
+                % MCF of the couples with logical AND
+                itmp = min(find(plot_indx==ij));
+                indx1 = find(indx_moment_matrix(:,ij)==0);
+                indx2 = find(indx_moment_matrix(:,ij)~=0);
+                leg = num2str(time_matrix{ij}(1));
+                leg = [leg '...' num2str(time_matrix{ij}(end))];
+                aleg = 'ALL';
+                atitle0=[endo_prior_restrictions.moment{itmp,1},' vs ',endo_prior_restrictions.moment{itmp,2}, '(', leg,')'];
+                fprintf(['%4.1f%% of the ',type,' support matches MOMENT restrictions ',atitle0,'\n'],length(indx1)/length(irestrictions)*100)
+                % aname=[type '_moment_calib_',int2str(ij)];
+                aname=[type '_moment_calib_',endo_prior_restrictions.moment{itmp,1},'_vs_',endo_prior_restrictions.moment{itmp,2},'_',aleg];
+                atitle=[type ' MOMENT Calib: Parameter(s) driving ',endo_prior_restrictions.moment{itmp,1},' vs ',endo_prior_restrictions.moment{itmp,2}, '(', leg,')'];
+                options_mcf.amcf_name = aname;
+                options_mcf.amcf_title = atitle;
+                options_mcf.beha_title = 'moment restriction';
+                options_mcf.nobeha_title = 'NO moment restriction';
+                options_mcf.title = atitle0;
+                if ~isempty(indx1) && ~isempty(indx2)
+                    mcf_analysis(xmat, indx1, indx2, options_mcf, DynareOptions);
                 end
             end
-%             tmp = cell2mat(endo_prior_restrictions.moment(itmp,4));
-            tmp(isinf(tmp(:,1)),1)=a(3);
-            tmp(isinf(tmp(:,2)),2)=a(4);
-            hp = patch([time_matrix{ij} time_matrix{ij}(end:-1:1)],tmp(:),'b');
-            set(hp,'FaceAlpha',[0.5])
-            plot(a(1:2),[0 0],'r')
-            hold off,
-            axis(a)
-            box on,
-            set(gca,'xtick',sort(time_matrix{ij}))
-            itmp = min(itmp);
-            title([endo_prior_restrictions.moment{itmp,1},' vs ',endo_prior_restrictions.moment{itmp,2}],'interpreter','none'),
         end
     end
-    dyn_saveas(h2,[OutputDirectoryName,filesep,fname_,'_',type,'_moment_restrictions'],DynareOptions);
+    if ~DynareOptions.nograph,
+        dyn_saveas(h2,[OutputDirectoryName,filesep,fname_,'_',type,'_moment_restrictions'],DynareOptions);
+    end
+    
     skipline()
 end
 return

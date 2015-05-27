@@ -1,4 +1,4 @@
-function mcf_analysis(lpmat, ibeha, inobeha, options_mcf, DynareOptions)
+function indmcf = mcf_analysis(lpmat, ibeha, inobeha, options_mcf, DynareOptions)
 %
 % Written by Marco Ratto
 % Joint Research Centre, The European Commission,
@@ -53,7 +53,7 @@ if length(ibeha)>10 && length(inobeha)>10,
     indcorr = indcorr(~ismember(indcorr(:),indmcf));
     indmcf = [indmcf(:); indcorr(:)];
 end
-if ~isempty(indmcf)
+if ~isempty(indmcf) && ~DynareOptions.nograph,
     skipline()
     scatter_mcf(lpmat(ibeha,indmcf),lpmat(inobeha,indmcf), param_names(indmcf,:), ...
         '.', [fname_,'_',amcf_name], OutputDirectoryName, amcf_title,[], DynareOptions, ...

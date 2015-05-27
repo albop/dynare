@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 Dynare Team
+ * Copyright (C) 2003-2015 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -187,6 +187,10 @@ DynamicModel::computeTemporaryTermsOrdered()
             it->second->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
           for (derivative_t::const_iterator it = derivative_other_endo[block].begin(); it != derivative_other_endo[block].end(); it++)
             it->second->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
+          for (derivative_t::const_iterator it = derivative_exo[block].begin(); it != derivative_exo[block].end(); it++)
+            it->second->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
+          for (derivative_t::const_iterator it = derivative_exo_det[block].begin(); it != derivative_exo_det[block].end(); it++)
+            it->second->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
           v_temporary_terms_inuse[block] = temporary_terms_in_use;
         }
       computeTemporaryTermsMapping();
@@ -257,8 +261,6 @@ DynamicModel::writeModelEquationsOrdered_M(const string &dynamic_basename) const
         {
           int lag = it->first.first;
           unsigned int var = it->first.second.first;
-          //int eqr = getBlockInitialEquationID(block, eq);
-          //int varr = getBlockInitialVariableID(block, var);
           if (var != prev_var || lag != prev_lag)
             {
               prev_var = var;
@@ -276,8 +278,6 @@ DynamicModel::writeModelEquationsOrdered_M(const string &dynamic_basename) const
         {
           int lag = it->first.first;
           unsigned int var = it->first.second.first;
-          //int eqr = getBlockInitialEquationID(block, eq);
-          //int varr = getBlockInitialVariableID(block, var);
           if (var != prev_var || lag != prev_lag)
             {
               prev_var = var;
@@ -295,8 +295,6 @@ DynamicModel::writeModelEquationsOrdered_M(const string &dynamic_basename) const
         {
           int lag = it->first.first;
           unsigned int var = it->first.second.first;
-          //int eqr = getBlockInitialEquationID(block, eq);
-          //int varr = getBlockInitialVariableID(block, var);
           if (var != prev_var || lag != prev_lag)
             {
               prev_var = var;
@@ -314,8 +312,6 @@ DynamicModel::writeModelEquationsOrdered_M(const string &dynamic_basename) const
         {
           int lag = it->first.first;
           unsigned int var = it->first.second.first;
-          //int eqr = getBlockInitialEquationID(block, eq);
-          //int varr = getBlockInitialVariableID(block, var);
           if (var != prev_var || lag != prev_lag)
             {
               prev_var = var;
@@ -342,7 +338,7 @@ DynamicModel::writeModelEquationsOrdered_M(const string &dynamic_basename) const
       else if (simulation_type == SOLVE_BACKWARD_SIMPLE || simulation_type == SOLVE_FORWARD_SIMPLE)
         output << "function [residual, y, g1, g2, g3, varargout] = " << dynamic_basename << "_" << block+1 << "(y, x, params, steady_state, it_, jacobian_eval)\n";
       else
-        output << "function [residual, y, g1, g2, g3, b, varargout] = " << dynamic_basename << "_" << block+1 << "(y, x, params, steady_state, periods, jacobian_eval, y_kmin, y_size)\n";
+        output << "function [residual, y, g1, g2, g3, b, varargout] = " << dynamic_basename << "_" << block+1 << "(y, x, params, steady_state, periods, jacobian_eval, y_kmin, y_size, Periods)\n";
       BlockType block_type;
       if (simulation_type == SOLVE_TWO_BOUNDARIES_COMPLETE || simulation_type == SOLVE_TWO_BOUNDARIES_SIMPLE)
         block_type = SIMULTAN;
@@ -364,7 +360,6 @@ DynamicModel::writeModelEquationsOrdered_M(const string &dynamic_basename) const
              << "  % //                     Simulation type "
              << BlockSim(simulation_type) << "  //" << endl
              << "  % ////////////////////////////////////////////////////////////////////////" << endl;
-      output << "  global options_ oo_;" << endl;
       //The Temporary terms
       if (simulation_type == EVALUATE_BACKWARD || simulation_type == EVALUATE_FORWARD)
         {
@@ -385,9 +380,9 @@ DynamicModel::writeModelEquationsOrdered_M(const string &dynamic_basename) const
           output << "  else\n";
           if (simulation_type == SOLVE_TWO_BOUNDARIES_COMPLETE || simulation_type == SOLVE_TWO_BOUNDARIES_SIMPLE)
             {
-              output << "    g1 = spalloc(" << block_mfs << "*options_.periods, "
-                     << block_mfs << "*(options_.periods+" << max_leadlag_block[block].first+max_leadlag_block[block].second+1 << ")"
-                     << ", " << nze << "*options_.periods);\n";
+              output << "    g1 = spalloc(" << block_mfs << "*Periods, "
+                     << block_mfs << "*(Periods+" << max_leadlag_block[block].first+max_leadlag_block[block].second+1 << ")"
+                     << ", " << nze << "*Periods);\n";
             }
           else
             {
@@ -825,7 +820,6 @@ DynamicModel::writeModelEquationsCode(string &file_name, const string &bin_basen
   //Temporary variables declaration
   FDIMT_ fdimt(temporary_terms.size());
   fdimt.write(code_file, instruction_number);
-  int other_endo_size = 0;
 
   vector<unsigned int> exo, exo_det, other_endo;
 
@@ -868,6 +862,7 @@ DynamicModel::writeModelEquationsCode(string &file_name, const string &bin_basen
   prev_lag = -999999999;
   int prev_type = -1;
   int count_col_exo = 0;
+  int count_col_det_exo = 0;
 
   for (map<pair< pair<int, int>, pair<int, int> >, expr_t>::const_iterator it = first_derivatives_reordered_exo.begin();
        it != first_derivatives_reordered_exo.end(); it++)
@@ -880,7 +875,10 @@ DynamicModel::writeModelEquationsCode(string &file_name, const string &bin_basen
           prev_var = var;
           prev_lag = lag;
           prev_type = type;
-          count_col_exo++;
+          if (type == eExogenous)
+            count_col_exo++;
+          else if (type == eExogenousDet)
+            count_col_det_exo++;
         }
     }
   
@@ -892,13 +890,15 @@ DynamicModel::writeModelEquationsCode(string &file_name, const string &bin_basen
                            equation_reordered,
                            false,
                            symbol_table.endo_nbr(),
-                           0,
-                           0,
+                           max_endo_lag,
+                           max_endo_lead,
                            u_count_int,
                            count_col_endo,
                            symbol_table.exo_det_nbr(),
+                           count_col_det_exo,
+                           symbol_table.exo_nbr(),
                            count_col_exo,
-                           other_endo_size,
+                           0,
                            0,
                            exo_det,
                            exo,
@@ -1098,9 +1098,8 @@ DynamicModel::writeModelEquationsCode_Block(string &file_name, const string &bin
       unsigned int block_size = getBlockSize(block);
       unsigned int block_mfs = getBlockMfs(block);
       unsigned int block_recursive = block_size - block_mfs;
-      unsigned int block_exo_det_size = exo_det_block[block].size();
-      unsigned int block_other_endo_size = other_endo_block[block].size();
       int block_max_lag = max_leadlag_block[block].first;
+      int block_max_lead = max_leadlag_block[block].second;
 
       if (simulation_type == SOLVE_TWO_BOUNDARIES_SIMPLE || simulation_type == SOLVE_TWO_BOUNDARIES_COMPLETE
           || simulation_type == SOLVE_BACKWARD_COMPLETE || simulation_type == SOLVE_FORWARD_COMPLETE)
@@ -1135,19 +1134,36 @@ DynamicModel::writeModelEquationsCode_Block(string &file_name, const string &bin
               count_col_endo++;
             }
         }
+      unsigned int count_col_det_exo = 0;
       vector<unsigned int> exo_det;
       for (lag_var_t::const_iterator it = exo_det_block[block].begin(); it != exo_det_block[block].end(); it++)
-        exo_det.push_back(it->first);
+        for (var_t::const_iterator it1 = it->second.begin(); it1 != it->second.end(); it1++)
+          {
+            count_col_det_exo++;
+            if (find (exo_det.begin(), exo_det.end(), *it1) == exo_det.end())
+              exo_det.push_back(*it1);
+          }
+            
+      unsigned int count_col_exo = 0;
       vector<unsigned int> exo;
       for (lag_var_t::const_iterator it = exo_block[block].begin(); it != exo_block[block].end(); it++)
-        exo.push_back(it->first);
+        for (var_t::const_iterator it1 = it->second.begin(); it1 != it->second.end(); it1++)
+          {
+            count_col_exo++;
+            if (find (exo.begin(), exo.end(), *it1) == exo.end())
+              exo.push_back(*it1);
+          }
+          
       vector<unsigned int> other_endo;
       unsigned int count_col_other_endo = 0;
       for (lag_var_t::const_iterator it = other_endo_block[block].begin(); it != other_endo_block[block].end(); it++)
-        {
-          other_endo.push_back(it->first);
-          count_col_other_endo += it->second.size();
-        }
+        for (var_t::const_iterator it1 = it->second.begin(); it1 != it->second.end(); it1++)
+          {
+            count_col_other_endo++;
+            if (find (other_endo.begin(), other_endo.end(), *it1) == other_endo.end())
+                other_endo.push_back(*it1);
+          }
+          
       FBEGINBLOCK_ fbeginblock(block_mfs,
                                simulation_type,
                                getBlockFirstEquation(block),
@@ -1157,19 +1173,21 @@ DynamicModel::writeModelEquationsCode_Block(string &file_name, const string &bin
                                blocks_linear[block],
                                symbol_table.endo_nbr(),
                                block_max_lag,
-                               block_max_lag,
+                               block_max_lead,
                                u_count_int,
                                count_col_endo,
-                               block_exo_det_size,
+                               exo_det.size(),
+                               count_col_det_exo,
+                               exo.size(),
                                getBlockExoColSize(block),
-                               block_other_endo_size,
+                               other_endo.size(),
                                count_col_other_endo,
                                exo_det,
                                exo,
                                other_endo
                                );
       fbeginblock.write(code_file, instruction_number);
-
+      
       // The equations
       for (i = 0; i < (int) block_size; i++)
         {
@@ -1412,7 +1430,7 @@ DynamicModel::writeModelEquationsCode_Block(string &file_name, const string &bin
         }
       prev_var = -1;
       prev_lag = -999999999;
-      int count_col_exo = 0;
+      count_col_exo = 0;
       for (map<pair<int, pair<int, int> >, expr_t>::const_iterator it = tmp_exo_derivative.begin(); it != tmp_exo_derivative.end(); it++)
         {
           int lag = it->first.first;
@@ -1766,8 +1784,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
   int Nb_SGE = 0;
   bool open_par = false;
 
-  mDynamicModelFile << "function [varargout] = " << dynamic_basename << "(varargin)\n";
-  mDynamicModelFile << "  global oo_ options_ M_ ;\n";
+  mDynamicModelFile << "function [varargout] = " << dynamic_basename << "(options_, M_, oo_, varargin)\n";
   mDynamicModelFile << "  g2=[];g3=[];\n";
   //Temporary variables declaration
   OK = true;
@@ -1782,7 +1799,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
       (*it)->writeOutput(tmp_output, oMatlabStaticModelSparse, temporary_terms);
     }
   if (tmp_output.str().length() > 0)
-    mDynamicModelFile << "  global " << tmp_output.str() << " M_ ;\n";
+    mDynamicModelFile << "  global " << tmp_output.str() << ";\n";
 
   mDynamicModelFile << "  T_init=zeros(1,options_.periods+M_.maximum_lag+M_.maximum_lead);\n";
   tmp_output.str("");
@@ -1859,7 +1876,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
           break;
         case SOLVE_TWO_BOUNDARIES_COMPLETE:
         case SOLVE_TWO_BOUNDARIES_SIMPLE:
-          mDynamicModelFile << "    [r, y, dr(" << count_call << ").g1, dr(" << count_call << ").g2, dr(" << count_call << ").g3, b, dr(" << count_call << ").g1_x, dr(" << count_call << ").g1_xd, dr(" << count_call << ").g1_o]=" << dynamic_basename << "_" <<  block + 1 << "(y, x, params, steady_state, it_-" << max_lag << ", 1, " << max_lag << ", " << block_recursive << ");\n";
+          mDynamicModelFile << "    [r, y, dr(" << count_call << ").g1, dr(" << count_call << ").g2, dr(" << count_call << ").g3, b, dr(" << count_call << ").g1_x, dr(" << count_call << ").g1_xd, dr(" << count_call << ").g1_o]=" << dynamic_basename << "_" <<  block + 1 << "(y, x, params, steady_state, it_-" << max_lag << ", 1, " << max_lag << ", " << block_recursive << "," << "options_.periods" << ");\n";
           mDynamicModelFile << "    residual(y_index_eq)=r(:,M_.maximum_lag+1);\n";
           break;
         default:
@@ -1891,9 +1908,11 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
                     << "  else" << endl
                     << "    mthd='UNKNOWN';" << endl
                     << "  end;" << endl
-                    << "  disp (['-----------------------------------------------------']) ;" << endl
-                    << "  disp (['MODEL SIMULATION: (method=' mthd ')']) ;" << endl
-                    << "  fprintf('\\n') ;" << endl
+		    << "  if options_.verbosity" << endl 
+                    << "    printline(41)" << endl
+                    << "    disp(sprintf('MODEL SIMULATION (method=%s):',mthd))" << endl
+		    << "    skipline()" << endl
+		    << "  end" << endl
                     << "  periods=options_.periods;" << endl
                     << "  maxit_=options_.simul.maxit;" << endl
                     << "  solve_tolf=options_.solve_tolf;" << endl
@@ -1930,7 +1949,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
           mDynamicModelFile << "  g1=[];g2=[];g3=[];\n";
           mDynamicModelFile << "  y=" << dynamic_basename << "_" << block + 1 << "(y, x, params, steady_state, 0, y_kmin, periods);\n";
           mDynamicModelFile << "  tmp = y(:,M_.block_structure.block(" << block + 1 << ").variable);\n";
-          mDynamicModelFile << "  if any(isnan(tmp) | isinf(tmp))\n";
+	  mDynamicModelFile << "  if any(isnan(tmp) | isinf(tmp))\n";
           mDynamicModelFile << "    disp(['Inf or Nan value during the evaluation of block " << block <<"']);\n";
           mDynamicModelFile << "    return;\n";
           mDynamicModelFile << "  end;\n";
@@ -2012,7 +2031,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
           mDynamicModelFile << "  y = solve_one_boundary('"  << dynamic_basename << "_" <<  block + 1 << "'"
                             <<", y, x, params, steady_state, y_index, " << nze
                             <<", options_.periods, " << blocks_linear[block]
-                            <<", blck_num, y_kmin, options.simul.maxit, options_.solve_tolf, options_.slowc, " << cutoff << ", options_.stack_solve_algo, 1, 1, 0);\n";
+                            <<", blck_num, y_kmin, options_.simul.maxit, options_.solve_tolf, options_.slowc, " << cutoff << ", options_.stack_solve_algo, 1, 1, 0);\n";
           mDynamicModelFile << "  tmp = y(:,M_.block_structure.block(" << block + 1 << ").variable);\n";
           mDynamicModelFile << "  if any(isnan(tmp) | isinf(tmp))\n";
           mDynamicModelFile << "    disp(['Inf or Nan value during the resolution of block " << block <<"']);\n";
@@ -2042,7 +2061,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
                             <<", options_.periods, " << max_leadlag_block[block].first
                             <<", " << max_leadlag_block[block].second
                             <<", " << blocks_linear[block]
-                            <<", blck_num, y_kmin, options_.simul.maxit, options_.solve_tolf, options_.slowc, " << cutoff << ", options_.stack_solve_algo, M_, oo_);\n";
+                            <<", blck_num, y_kmin, options_.simul.maxit, options_.solve_tolf, options_.slowc, " << cutoff << ", options_.stack_solve_algo, options_, M_, oo_);\n";
           mDynamicModelFile << "  tmp = y(:,M_.block_structure.block(" << block + 1 << ").variable);\n";
           mDynamicModelFile << "  if any(isnan(tmp) | isinf(tmp))\n";
           mDynamicModelFile << "    disp(['Inf or Nan value during the resolution of block " << block <<"']);\n";
@@ -2054,6 +2073,7 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
     mDynamicModelFile << "  end;\n";
   open_par = false;
   mDynamicModelFile << "  oo_.endo_simul = y';\n";
+  mDynamicModelFile << "  varargout{1} = oo_;\n";
   mDynamicModelFile << "return;\n";
   mDynamicModelFile << "end" << endl;
 
@@ -2773,89 +2793,6 @@ DynamicModel::writeOutput(ostream &output, const string &basename, bool block_de
           
           typedef pair<int, pair<int, int > > index_KF;
           vector<index_KF> v_index_KF;
-          
-          /*   DO 170, J = 1, N
-                TEMP1 = ALPHA*A( J, J )
-                DO 110, I = 1, M
-                   C( I, J ) = TEMP1*B( I, J )
-  11  110       CONTINUE
-                DO 140, K = 1, J - 1
-                   TEMP1 = ALPHA*A( K, J )
-                   DO 130, I = 1, M
-                      C( I, J ) = C( I, J ) + TEMP1*B( I, K )
-  13  130          CONTINUE
-  14  140       CONTINUE
-                DO 160, K = J + 1, N
-                   TEMP1 = ALPHA*A( J, K )
-                   DO 150, I = 1, M
-                      C( I, J ) = C( I, J ) + TEMP1*B( I, K )
-  15  150          CONTINUE
-  16  160       CONTINUE
-  17  170    CONTINUE
-          for(int j = 0; j < n; j++)
-            {
-              double temp1 = P_t_t1[j + j * n];
-              for (int i = 0; i < n; i++)
-                tmp[i + j * n] = tmp1 * T[i + j * n];
-              for (int k = 0; k < j - 1; k++)
-                {
-                  temp1 = P_t_t1[k + j * n];
-                  for (int i = 0; i < n; i++)
-                    tmp[i + j * n] += temp1 * T[i + k * n];
-                }
-              for (int k = j + 1; k < n; k++)
-                {
-                  temp1 = P_t_t1[j + k * n];
-                  for (int i = 0; i < n; i++)
-                    tmp[i + j * n] += temp1 * T[i + k * n];
-                }
-            }
-
-          for(int j = n_obs; j < n; j++)
-            {
-              int j1 = j - n_obs;
-              double temp1 = P_t_t1[j1 + j1 * n_state];
-              for (int i = 0; i < n; i++)
-                tmp[i + j1 * n] = tmp1 * T[i + j * n];
-              for (int k = n_obs; k < j - 1; k++)
-                {
-                  int k1 = k - n_obs;
-                  temp1 = P_t_t1[k1 + j1 * n_state];
-                  for (int i = 0; i < n; i++)
-                    tmp[i + j1 * n] += temp1 * T[i + k * n];
-                }
-              for (int k = max(j + 1, n_obs); k < n; k++)
-                {
-                  int k1 = k - n_obs;
-                  temp1 = P_t_t1[j1 + k1 * n_state];
-                  for (int i = 0; i < n; i++)
-                    tmp[i + j1 * n] += temp1 * T[i + k * n];
-                }
-            }
-          
-          for(int j = n_obs; j < n; j++)
-            {
-              int j1 = j - n_obs;
-              double temp1 = P_t_t1[j1 + j1 * n_state];
-              for (int i = 0; i < n; i++)
-                tmp[i + j1 * n] = tmp1 * T[i + j * n];
-              for (int k = n_obs; k < j - 1; k++)
-                {
-                  int k1 = k - n_obs;
-                  temp1 = P_t_t1[k1 + j1 * n_state];
-                  for (int i = 0; i < n; i++)
-                  if ((i < n_obs) || (i >= nb_diag + n_obs) || (j1 >= nb_diag))
-                      tmp[i + j1 * n] += temp1 * T[i + k * n];
-                }
-              for (int k = max(j + 1, n_obs); k < n; k++)
-                {
-                  int k1 = k - n_obs;
-                  temp1 = P_t_t1[j1 + k1 * n_state];
-                  for (int i = 0; i < n; i++)
-                    if ((i < n_obs) || (i >= nb_diag + n_obs) || (j1 >= nb_diag))
-                      tmp[i + j1 * n] += temp1 * T[i + k * n];
-                }
-            }*/
           for (int i = 0; i < n; i++)
             //int i = 0;
             for (int j = n_obs; j < n; j++)
@@ -2874,7 +2811,6 @@ DynamicModel::writeOutput(ostream &output, const string &basename, bool block_de
           for (vector<index_KF>::iterator it = v_index_KF.begin(); it != v_index_KF.end(); it++)
             KF_index_file.write(reinterpret_cast<char *>(&(*it)), sizeof(index_KF));
 
-          //typedef pair<pair<int, int>, pair<int, int > > index_KF_2;
           vector<index_KF> v_index_KF_2;
           int n_n_obs = n * n_obs;
           for (int i = 0; i < n; i++)
@@ -3230,12 +3166,13 @@ DynamicModel::collect_block_first_order_derivatives()
       int var = symbol_table.getTypeSpecificID(getSymbIDByDerivID(it2->first.second));
       int lag = getLagByDerivID(it2->first.second);
       int block_eq = equation_2_block[eq];
-      int block_var = variable_2_block[var];
+      int block_var=0;
       derivative_t tmp_derivative;
       lag_var_t lag_var;
       switch (getTypeByDerivID(it2->first.second))
         {
         case eEndogenous:
+          block_var = variable_2_block[var];
           if (block_eq == block_var)
             {
               if (lag < 0 && lag < -endo_max_leadlag_block[block_eq].first)
@@ -3974,6 +3911,12 @@ DynamicModel::writeLatexFile(const string &basename) const
 }
 
 void
+DynamicModel::writeLatexOriginalFile(const string &basename) const
+{
+  writeLatexModelFile(basename + "_original.tex", oLatexDynamicModel);
+}
+
+void
 DynamicModel::substituteEndoLeadGreaterThanTwo(bool deterministic_model)
 {
   substituteLeadLagInternal(avEndoLead, deterministic_model, vector<string>());
@@ -4278,5 +4221,117 @@ DynamicModel::dynamicOnlyEquationsNbr() const
   return eqs.size();
 }
 
+#ifndef PRIVATE_BUFFER_SIZE
+#define PRIVATE_BUFFER_SIZE 1024
+#endif
 
+bool
+DynamicModel::isChecksumMatching(const string &basename) const
+{
+  boost::crc_32_type result;
 
+  std::stringstream buffer;
+
+  // Write equation tags
+  for (size_t i = 0; i < equation_tags.size(); i++)
+    buffer << "  " << equation_tags[i].first + 1
+           << equation_tags[i].second.first
+           << equation_tags[i].second.second;
+
+  ExprNodeOutputType buffer_type = oCDynamicModel;
+
+  for (int eq = 0; eq < (int) equations.size(); eq++)
+    {
+      BinaryOpNode *eq_node = equations[eq];
+      expr_t lhs = eq_node->get_arg1();
+      expr_t rhs = eq_node->get_arg2();
+
+      // Test if the right hand side of the equation is empty.
+      double vrhs = 1.0;
+      try
+        {
+          vrhs = rhs->eval(eval_context_t());
+        }
+      catch (ExprNode::EvalException &e)
+        {
+        }
+
+      if (vrhs != 0) // The right hand side of the equation is not empty ==> residual=lhs-rhs;
+        {
+          buffer << "lhs =";
+          lhs->writeOutput(buffer, buffer_type, temporary_terms);
+          buffer << ";" << endl;
+
+          buffer << "rhs =";
+          rhs->writeOutput(buffer, buffer_type, temporary_terms);
+          buffer << ";" << endl;
+
+          buffer << "residual" << LEFT_ARRAY_SUBSCRIPT(buffer_type)
+                 << eq + ARRAY_SUBSCRIPT_OFFSET(buffer_type)
+                 << RIGHT_ARRAY_SUBSCRIPT(buffer_type)
+                 << "= lhs-rhs;" << endl;
+        }
+      else // The right hand side of the equation is empty ==> residual=lhs;
+        {
+          buffer << "residual" << LEFT_ARRAY_SUBSCRIPT(buffer_type)
+                 << eq + ARRAY_SUBSCRIPT_OFFSET(buffer_type)
+                 << RIGHT_ARRAY_SUBSCRIPT(buffer_type)
+                 << " = ";
+          lhs->writeOutput(buffer, buffer_type, temporary_terms);
+          buffer << ";" << endl;
+        }
+    }
+
+  char private_buffer[PRIVATE_BUFFER_SIZE];
+  while(buffer)
+    {
+      buffer.get(private_buffer,PRIVATE_BUFFER_SIZE);
+      result.process_bytes(private_buffer,strlen(private_buffer));
+    }
+
+  bool basename_dir_exists = false;
+#ifdef _WIN32
+  int r = mkdir(basename.c_str());
+#else
+  int r = mkdir(basename.c_str(), 0777);
+#endif
+  if (r < 0)
+    if (errno != EEXIST)
+      {
+	perror("ERROR");
+	exit(EXIT_FAILURE);
+      }
+    else
+      basename_dir_exists = true;
+
+  // check whether basename directory exist. If not, create it.
+  // If it does, read old checksum if it exist
+  fstream checksum_file;
+  string filename = basename + "/checksum";
+  unsigned int old_checksum = 0;
+  // read old checksum if it exists
+  if (basename_dir_exists)
+    {
+      checksum_file.open(filename.c_str(), ios::in | ios::binary);
+      if (checksum_file.is_open())
+	{
+	  checksum_file >> old_checksum;
+	  checksum_file.close();
+	}
+    }
+  // write new checksum file if none or different from old checksum
+  if (old_checksum != result.checksum())
+	{
+	  checksum_file.open(filename.c_str(), ios::out | ios::binary);
+	  if (!checksum_file.is_open())
+	    {
+	      cerr << "ERROR: Can't open file " << filename << endl;
+	      exit(EXIT_FAILURE);
+	    }
+	  checksum_file << result.checksum();
+	  checksum_file.close();
+	  return false;
+	}
+  
+  return true;
+}

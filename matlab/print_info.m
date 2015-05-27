@@ -88,6 +88,8 @@ if ~noprint
         error('Some updated params contain NaN or Inf')
       case 25
         error('The solution to the static equations is not a steady state of the dynamic model: verify that the equations tagged by [static] and [dynamic] are consistent')
+      case 26
+        error('The loglinearization of the model cannot be performed, because the steady state is not strictly positive.')
       case 30
         error('Variance can''t be computed')
       case 41

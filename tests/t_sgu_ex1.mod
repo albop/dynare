@@ -28,10 +28,10 @@ stoch_simul(nomoments,nocorr,ar=0,irf=0);
 global dr_
 load objectives/sgu_ex1;
 
-test(oo_.dr.ghx,dr_obj_.ghx,1);
-test(oo_.dr.ghu,dr_obj_.ghu,2);
-test(oo_.dr.ghxx,dr_obj_.ghxx,3);
-test(oo_.dr.ghxu,dr_obj_.ghxu,4);
-test(oo_.dr.ghuu,dr_obj_.ghuu,5);
+fataltest(oo_.dr.ghx,dr_obj_.ghx,1);
+fataltest(oo_.dr.ghu,dr_obj_.ghu,2);
+fataltest(oo_.dr.ghxx,dr_obj_.ghxx,3);
+fataltest(oo_.dr.ghxu,dr_obj_.ghxu,4);
+fataltest(oo_.dr.ghuu,dr_obj_.ghuu,5);
 
 disp('TESTS OK');

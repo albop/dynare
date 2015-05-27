@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2013 Dynare Team
+ * Copyright (C) 2007-2015 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -307,15 +307,42 @@ public:
   ErrorMsg()
   {
     mxArray *M_ = mexGetVariable("global", "M_");
-    nb_endo = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-    endo_name_length = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-    P_endo_names = (char *) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-    nb_exo = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
-    exo_name_length = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
-    P_exo_names = (char *) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
-    nb_param = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
-    param_name_length = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
-    P_param_names = (char *) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
+    if (mxGetFieldNumber(M_, "endo_names") == -1)
+      {
+        nb_endo = 0;
+        endo_name_length = 0;
+        P_endo_names = NULL;
+      }
+    else
+      {
+        nb_endo = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+        endo_name_length = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+        P_endo_names = (char *) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+      }
+    if (mxGetFieldNumber(M_, "exo_names") == -1)
+      {
+        nb_exo = 0;
+        exo_name_length = 0;
+        P_exo_names = NULL;
+      }
+    else
+      {
+        nb_exo = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
+        exo_name_length = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
+        P_exo_names = (char *) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
+      }
+    if (mxGetFieldNumber(M_, "param_names") == -1)
+      {
+        nb_param = 0;
+        param_name_length = 0;
+        P_param_names = NULL;
+      }
+    else
+      {
+        nb_param = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
+        param_name_length = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
+        P_param_names = (char *) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
+      }
     is_load_variable_list = false;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Dynare Team
+ * Copyright (C) 2008-2015 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -81,6 +81,32 @@ CONT \\\\
 
                               create_include_context(filename, yylloc, driver);
 
+                              BEGIN(INITIAL);
+                            }
+
+<INITIAL>^{SPC}*@#{SPC}*include{SPC}+[^\"\r\n]*{SPC}*{EOL} {
+                              yylloc->lines(1);
+                              yylloc->step();
+
+                              // Get variable name
+                              string modvarname = string(yytext);
+                              int dblq_idx1 = modvarname.find("include");
+                              modvarname.erase(0, dblq_idx1 + 7);
+                              modvarname.erase(0, modvarname.find_first_not_of(" \t"));
+                              size_t p = modvarname.find_last_not_of(" \t\n\r");
+                              if (string::npos != p)
+                                modvarname.erase(p+1);
+
+                              string *filename = NULL;
+                              try
+                              {
+                                filename = new string(driver.get_variable(modvarname)->toString());
+                              }
+                              catch(MacroDriver::UnknownVariable(&e))
+                              {
+                                driver.error(*yylloc, "Unknown variable: " + modvarname);
+                              }
+                              create_include_context(filename, yylloc, driver);
                               BEGIN(INITIAL);
                             }
 
@@ -190,7 +216,7 @@ CONT \\\\
                               yylloc->step();
                             }
 <FOR_BODY>.                 { for_body_tmp.append(yytext); yylloc->step(); }
-<FOR_BODY><<EOF>>           { driver.error(for_stmt_loc_tmp, "@#for loop not matched by an @#endfor (unexpected end of file)"); }
+<FOR_BODY><<EOF>>           { driver.error(for_stmt_loc_tmp, "@#for loop not matched by an @#endfor or file does not end with a new line (unexpected end of file)"); }
 <FOR_BODY>^{SPC}*@#{SPC}*endfor{SPC}*(\/\/.*)?{EOL} {
                               yylloc->lines(1);
                               yylloc->step();
@@ -227,7 +253,7 @@ CONT \\\\
                               yylloc->step();
                             }
 <THEN_BODY>.                { then_body_tmp.append(yytext); yylloc->step(); }
-<THEN_BODY><<EOF>>          { driver.error(if_stmt_loc_tmp, "@#if/@#ifdef/@#ifndef not matched by an @#endif (unexpected end of file)"); }
+<THEN_BODY><<EOF>>          { driver.error(if_stmt_loc_tmp, "@#if/@#ifdef/@#ifndef not matched by an @#endif or file does not end with a new line (unexpected end of file)"); }
 <THEN_BODY>^{SPC}*@#{SPC}*else{SPC}*(\/\/.*)?{EOL} {
                               yylloc->lines(1);
                               yylloc->step();
@@ -269,7 +295,7 @@ CONT \\\\
                               yylloc->step();
                             }
 <ELSE_BODY>.                { else_body_tmp.append(yytext); yylloc->step(); }
-<ELSE_BODY><<EOF>>          { driver.error(if_stmt_loc_tmp, "@#if/@#ifdef/@#ifndef not matched by an @#endif (unexpected end of file)"); }
+<ELSE_BODY><<EOF>>          { driver.error(if_stmt_loc_tmp, "@#if/@#ifdef/@#ifndef not matched by an @#endif or file does not end with a new line (unexpected end of file)"); }
 
 <ELSE_BODY>^{SPC}*@#{SPC}*endif{SPC}*(\/\/.*)?{EOL} {
                               yylloc->lines(1);

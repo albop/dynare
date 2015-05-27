@@ -1,5 +1,4 @@
 function skipline(n, fid)
-% function skipline(n, fid)
 % This function prints n newlines to fid
 %
 % INPUTS 
@@ -29,13 +28,12 @@ function skipline(n, fid)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.    
 
 if nargin < 2
-	fid = 1;
-	if nargin < 1
-		n = 1;
-	end
+    fid = 1;
+    if nargin < 1
+        n = 1;
+    end
 end
 
 for i=1:n
-	fprintf(fid,'\n');
-end
+    fprintf(fid,'\n');
 end

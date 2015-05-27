@@ -1,4 +1,5 @@
 function [nvar,vartan,CovarFileNumber] = dsge_simulated_theoretical_covariance(SampleSize,M_,options_,oo_,type)
+% function [nvar,vartan,CovarFileNumber] = dsge_simulated_theoretical_covariance(SampleSize,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the endogenous
 % variables second order moments.
 %
@@ -15,7 +16,7 @@ function [nvar,vartan,CovarFileNumber] = dsge_simulated_theoretical_covariance(S
 %   vartan            [char]     array of characters (with nvar rows).
 %   CovarFileNumber   [integer]  scalar, number of prior or posterior data files (for covariance).
 
-% Copyright (C) 2007-2012 Dynare Team
+% Copyright (C) 2007-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -47,6 +48,13 @@ else
     error();
 end
 NumberOfDrawsFiles = length(DrawsFiles);
+
+%delete old stale files before creating new ones
+if posterior
+    delete_stale_file([M_.dname '/metropolis/' M_.fname '_Posterior2ndOrderMoments*'])
+else
+    delete_stale_file([M_.dname '/prior/moments/' M_.fname '_Prior2ndOrderMoments*'])
+end
 
 % Set varlist (vartan)
 if ~posterior

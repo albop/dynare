@@ -44,7 +44,6 @@ varobs x, y;
 //estimation(datafile=mydata,order=1,first_obs=5001,nobs=100,mh_replic=0);
 
 options_.particle.status = 1;
-options_.particle.algorithm = 'sequential_importance_particle_filter';
 options_.particle.initialization = 1;
 options_.particle.number_of_particles = 1000;
 
@@ -58,4 +57,4 @@ d, 0.7912;
 g, 0.2448;
 end;
 
-estimation(datafile=mydata,order=2,first_obs=5001,nobs=100,mh_replic=0,mode_compute=8);
+estimation(datafile=mydata,order=2,first_obs=5001,nobs=100,mh_replic=0,mode_compute=8,filter_algorithm=sis);

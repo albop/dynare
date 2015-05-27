@@ -1,7 +1,7 @@
-function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_BC)
+function dr = dyn_second_order_solver(jacobia,hessian_mat,dr,M_,threads_ABC,threads_BC)
 
 %@info:
-%! @deftypefn {Function File} {@var{dr} =} dyn_second_order_solver (@var{jacobia},@var{hessian},@var{dr},@var{M_},@var{threads_ABC},@var{threads_BC})
+%! @deftypefn {Function File} {@var{dr} =} dyn_second_order_solver (@var{jacobia},@var{hessian_mat},@var{dr},@var{M_},@var{threads_ABC},@var{threads_BC})
 %! @anchor{dyn_second_order_solver}
 %! @sp 1
 %! Computes the second order reduced form of the DSGE model
@@ -11,7 +11,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
 %! @table @ @var
 %! @item jacobia
 %! Matrix containing the Jacobian of the model
-%! @item hessian
+%! @item hessian_mat
 %! Matrix containing the second order derivatives of the model
 %! @item dr
 %! Matlab's structure describing the reduced form solution of the model.
@@ -73,7 +73,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     kk1 = reshape([1:nk^2],nk,nk);
     kk1 = kk1(kk,kk);
     % reordering second order derivatives
-    hessian = hessian(:,kk1(:));
+    hessian_mat = hessian_mat(:,kk1(:));
 
     zx = zeros(np,np);
     zu=zeros(np,M_.exo_nbr);
@@ -91,7 +91,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     zu=[zu; eye(M_.exo_nbr);zeros(M_.exo_det_nbr,M_.exo_nbr)];
     [nrzx,nczx] = size(zx);
 
-    [rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zx,threads_BC);
+    [rhs, err] = sparse_hessian_times_B_kronecker_C(hessian_mat,zx,threads_BC);
     mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
     rhs = -rhs;
 
@@ -118,7 +118,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     %ghxu
     %rhs
     hu = dr.ghu(nstatic+1:nstatic+nspred,:);
-    [rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zx,zu,threads_BC);
+    [rhs, err] = sparse_hessian_times_B_kronecker_C(hessian_mat,zx,zu,threads_BC);
     mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
     hu1 = [hu;zeros(np-nspred,M_.exo_nbr)];
@@ -136,7 +136,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
 
     %ghuu
     %rhs
-    [rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zu,threads_BC);
+    [rhs, err] = sparse_hessian_times_B_kronecker_C(hessian_mat,zu,threads_BC);
     mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
     [B1, err] = A_times_B_kronecker_C(B*dr.ghxx,hu1,threads_ABC);
@@ -164,7 +164,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     hxx = dr.ghxx(nstatic+[1:nspred],:);
     [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+2,order_var));
     k3 = nnz(M_.lead_lag_incidence(1:M_.maximum_endo_lag+1,:))+(1:M_.nsfwrd)';
-    [B1, err] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k2a,:),threads_BC);
+    [B1, err] = sparse_hessian_times_B_kronecker_C(hessian_mat(:,kh(k3,k3)),gu(k2a,:),threads_BC);
     mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
     RHS = RHS + jacobia(:,k2)*guu(k2a,:)+B1;
 

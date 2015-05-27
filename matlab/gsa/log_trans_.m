@@ -1,4 +1,4 @@
-function [yy, xdir, isig, lam]=log_trans_(y0,xdir0)
+function [yy, xdir, isig, lam]=log_trans_(y0,xdir0,isig,lam)
 
 % Copyright (C) 2012 Dynare Team
 %
@@ -16,6 +16,12 @@ function [yy, xdir, isig, lam]=log_trans_(y0,xdir0)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+if nargin==4,
+    % inverse transformation
+    yy = (exp(y0)-lam)*isig;
+    return
+end
 
 if nargin==1,
   xdir0='';
@@ -67,5 +73,6 @@ else
         lam = -min(y0)+abs(median(y0)); %abs(100*(1+min(y0)));
     end
   end
+  lam = max(lam,0);
   yy = log(y0+lam);
 end

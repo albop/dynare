@@ -1,4 +1,5 @@
 function draw = rand_multivariate_student(Mean,Sigma_upper_chol,df)
+% function draw = rand_multivariate_student(Mean,Sigma_upper_chol,df)
 % Pseudo random draws from a multivariate student distribution,
 % with expectation Mean, variance Sigma*df/(df-2) and degrees of freedom df>0.
 %
@@ -13,10 +14,14 @@ function draw = rand_multivariate_student(Mean,Sigma_upper_chol,df)
 %    draw               [double]    1*n vector drawn from a multivariate normal distribution with expectation Mean and
 %                                   covariance Sigma.
 %        
-% REMARK This is certainly not the most efficient way...
 %
 % NOTE See Zellner (appendix B.2, 1971) for a definition.     
-%    
+%    Computes the t-distributed random numbers from 
+%       X = \mu + Y\sqrt{\frac{\nu}{U}}
+%   where 
+%       Y~N(0,Sigma) with Sigma=Sigma_upper_chol'*Sigma_upper_chol
+%       U~\Chi^2_{\nu}
+%   The latter is constructed as the sum of \nu standard normals.
 
 % Copyright (C) 2003-2009 Dynare Team
 %

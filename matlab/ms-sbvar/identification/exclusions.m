@@ -1,4 +1,4 @@
-function [Ui,Vi,n0,np,ixmC0Pres] = exclusions(nvar,nexo,options_ms)
+function [Ui,Vi,n0,np,ixmC0Pres,Qi] = exclusions(nvar,nexo,options_ms)
 % function [Ui,Vi,n0,np,ixmC0Pres] = exclusions(nvar,nexo,options_ms)
 %
 % INPUTS

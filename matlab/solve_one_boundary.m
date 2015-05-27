@@ -55,7 +55,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, steady_state, ...
 %   none.
 %  
 
-% Copyright (C) 1996-2013 Dynare Team
+% Copyright (C) 1996-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -80,7 +80,7 @@ correcting_factor=0.01;
 ilu_setup.droptol=1e-10;
 max_resa=1e100;
 reduced = 0;
-if(forward_backward)
+if forward_backward
     incr = 1;
     start = y_kmin+1;
     finish = periods+y_kmin;
@@ -89,140 +89,113 @@ else
     start = periods+y_kmin;
     finish = y_kmin+1;
 end
-%lambda=1;
+
 for it_=start:incr:finish
     cvg=0;
     iter=0;
     g1=spalloc( Blck_size, Blck_size, nze);
-    while ~(cvg==1 || iter>maxit_),
-        if(is_dynamic)
-            [r, y, g1, g2, g3] = feval(fname, y, x, params, steady_state, ...
-                                       it_, 0);
+    while ~(cvg==1 || iter>maxit_)
+        if is_dynamic
+            [r, y, g1, g2, g3] = feval(fname, y, x, params, steady_state, it_, 0);
         else
             [r, y, g1] = feval(fname, y, x, params);
-        end;
-        if(~isreal(r))
+        end
+        if ~isreal(r)
             max_res=(-(max(max(abs(r))))^2)^0.5;
         else
             max_res=max(max(abs(r)));
-        end;
-        %['max_res=' num2str(max_res) ' Block_Num=' int2str(Block_Num) ' it_=' int2str(it_)]
-        %disp(['iteration : ' int2str(iter+1) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
-        
-        %     fjac = zeros(Blck_size, Blck_size);
-        %     disp(['Blck_size=' int2str(Blck_size) ' it_=' int2str(it_)]);
-        %     dh = max(abs(y(it_, y_index_eq)),options_.gstep*ones(1, Blck_size))*eps^(1/3);
-        %     fvec = r;
-        %       for j = 1:Blck_size
-        %         ydh = y ;
-        %           ydh(it_, y_index_eq(j)) = ydh(it_, y_index_eq(j)) + dh(j)  ;
-        %           [t, y1, g11, g21, g31]=feval(fname, ydh, x, params, it_, 0);
-        %           fjac(:,j) = (t - fvec)./dh(j) ;
-        %       end;
-        %     diff = g1 -fjac;
-        %     diff
-        %     disp('g1');
-        %     disp([num2str(g1,'%4.5f')]);
-        %     disp('fjac');
-        %     disp([num2str(fjac,'%4.5f')]);
-        %     [c_max, i_c_max] = max(abs(diff));
-        %     [l_c_max, i_r_max] = max(c_max);
-        %     disp(['maximum element row=' int2str(i_c_max(i_r_max)) ' and column=' int2str(i_r_max) ' value = ' num2str(l_c_max)]);
-        %     equation = i_c_max(i_r_max);
-        %     variable = i_r_max;
-        %     variable
-        %     mod(variable, Blck_size)
-        %     disp(['equation ' int2str(equation) ' and variable ' int2str(y_index_eq(variable)) ' ' M_.endo_names(y_index_eq(variable), :)]);
-        %     disp(['g1(' int2str(equation) ', ' int2str(variable) ')=' num2str(g1(equation, variable),'%3.10f') ' fjac(' int2str(equation) ', ' int2str(variable) ')=' num2str(fjac(equation, variable), '%3.10f') ' y(' int2str(it_) ', ' int2str(variable) ')=' num2str(y(it_, variable))]);
-        %     %return;
-        %     %g1 = fjac;
-
-        
-        
-        
-        
-        if(verbose==1)
-            disp(['iteration : ' int2str(iter+1) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
-            if(is_dynamic)
-                disp([M.endo_names(y_index_eq,:) num2str([y(it_,y_index_eq)' r g1])]);
+        end
+        if verbose==1
+            disp(['iteration : ' int2str(iter+1) ' => ' num2str(max_res) ' time = ' int2str(it_)])
+            if is_dynamic
+                disp([M.endo_names(y_index_eq,:) num2str([y(it_,y_index_eq)' r g1])])
             else
-                disp([M.endo_names(y_index_eq,:) num2str([y(y_index_eq) r g1])]);
-            end;
-        end;
-        if(~isreal(max_res) || isnan(max_res))
+                disp([M.endo_names(y_index_eq,:) num2str([y(y_index_eq) r g1])])
+            end
+        end
+        if ~isreal(max_res) || isnan(max_res)
             cvg = 0;
-        elseif(is_linear && iter>0)
+        elseif is_linear && iter>0
             cvg = 1;
         else
             cvg=(max_res<solve_tolf);
-        end;
-        if(~cvg)
-            if(iter>0)
-                if(~isreal(max_res) || isnan(max_res) || (max_resa<max_res && iter>1))
-                    if(isnan(max_res) || (max_resa<max_res && iter>0))
+        end
+        if ~cvg
+            if iter>0
+                if ~isreal(max_res) || isnan(max_res) || (max_resa<max_res && iter>1)
+                    if isnan(max_res) || (max_resa<max_res && iter>0)
                         detJ=det(g1a);
                         if(abs(detJ)<1e-7)
                             max_factor=max(max(abs(g1a)));
                             ze_elem=sum(diag(g1a)<cutoff);
-                            disp([num2str(full(ze_elem),'%d') ' elements on the Jacobian diagonal are below the cutoff (' num2str(cutoff,'%f') ')']);
-                            if(correcting_factor<max_factor)
+                            if verbose
+                                disp([num2str(full(ze_elem),'%d') ' elements on the Jacobian diagonal are below the cutoff (' num2str(cutoff,'%f') ')'])
+                            end
+                            if correcting_factor<max_factor
                                 correcting_factor=correcting_factor*4;
-                                disp(['The Jacobain matrix is singular, det(Jacobian)=' num2str(detJ,'%f') '.']);
-                                disp(['    trying to correct the Jacobian matrix:']);
-                                disp(['    correcting_factor=' num2str(correcting_factor,'%f') ' max(Jacobian)=' num2str(full(max_factor),'%f')]);
+                                if verbose
+                                    disp(['The Jacobain matrix is singular, det(Jacobian)=' num2str(detJ,'%f') '.'])
+                                    disp(['    trying to correct the Jacobian matrix:'])
+                                    disp(['    correcting_factor=' num2str(correcting_factor,'%f') ' max(Jacobian)=' num2str(full(max_factor),'%f')])
+                                end
                                 dx = - r/(g1+correcting_factor*speye(Blck_size));
-                                %dx = -b'/(g1+correcting_factor*speye(Blck_size))-ya_save;
                                 y(it_,y_index_eq)=ya_save+lambda*dx;
-                                continue;
+                                continue
                             else
-                                disp('The singularity of the jacobian matrix could not be corrected');
+                                if verbose
+                                    disp('The singularity of the jacobian matrix could not be corrected')
+                                end
                                 info = -Block_Num*10;
-                                return;
-                            end;
-                        end;
-                    elseif(lambda>1e-8)
+                                return
+                            end
+                        end
+                    elseif lambda>1e-8
                         lambda=lambda/2;
                         reduced = 1;
-                        disp(['reducing the path length: lambda=' num2str(lambda,'%f')]);
-                        if(is_dynamic)
+                        if verbose
+                            disp(['reducing the path length: lambda=' num2str(lambda,'%f')])
+                        end
+                        if is_dynamic
                             y(it_,y_index_eq)=ya_save-lambda*dx;
                         else
                             y(y_index_eq)=ya_save-lambda*dx;
-                        end;
-                        continue;
+                        end
+                        continue
                     else
-                        if(cutoff == 0)
-                            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit".\n',Block_Num, it_, iter);
-                        else
-                            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit" or set "cutoff=0" in model options.\n',Block_Num, it_, iter);
-                        end;
-                        if(is_dynamic)
+                        if verbose
+                            if cutoff==0
+                                fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit".\n',Block_Num, it_, iter);
+                            else
+                                fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit" or set "cutoff=0" in model options.\n',Block_Num, it_, iter);
+                            end
+                        end
+                        if is_dynamic
                             oo_.deterministic_simulation.status = 0;
                             oo_.deterministic_simulation.error = max_res;
                             oo_.deterministic_simulation.iterations = iter;
                             oo_.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
                             oo_.deterministic_simulation.block(Block_Num).error = max_res;
                             oo_.deterministic_simulation.block(Block_Num).iterations = iter;
-                        end;
+                        end
                         info = -Block_Num*10;
-                        return;
-                    end;
+                        return
+                    end
                 else
-                    if(lambda<1)
+                    if lambda<1
                         lambda=max(lambda*2, 1);
-                    end;
-                end;
-            end;
-            if(is_dynamic)
+                    end
+                end
+            end
+            if is_dynamic
                 ya = y(it_,y_index_eq)';
             else
                 ya = y(y_index_eq);
-            end;
+            end
             ya_save=ya;
             g1a=g1;
-            if(~is_dynamic && options.solve_algo == 0)
-                if (verbose == 1)
-                    disp('steady: fsolve');
+            if ~is_dynamic && options.solve_algo==0
+                if verbose
+                    disp('steady: fsolve')
                 end
                 if ~isoctave
                     if ~user_has_matlab_license('optimization_toolbox')
@@ -248,31 +221,30 @@ for it_=start:incr:finish
                     else
                         yn = y(y_index_eq);
                         exitval = 3;
-                    end;
+                    end
                 end
-                    
                 y(y_index_eq) = yn;
                 if exitval > 0
                     info = 0;
                 else
                     info = -Block_Num*10;
                 end
-            elseif((~is_dynamic && options.solve_algo==2) || (is_dynamic && stack_solve_algo==4))
-                if (verbose == 1 && ~is_dynamic)
-                    disp('steady: LU + lnsrch1');
+            elseif (~is_dynamic && options.solve_algo==2) || (is_dynamic && stack_solve_algo==4)
+                if verbose==1 && ~is_dynamic
+                    disp('steady: LU + lnsrch1')
                 end
                 lambda=1;
                 stpmx = 100 ;
-                if (is_dynamic)
+                if is_dynamic
                     stpmax = stpmx*max([sqrt(ya'*ya);size(y_index_eq,2)]);
                 else
                     stpmax = stpmx*max([sqrt(ya'*ya);size(y_index_eq,2)]);
-                end;
+                end
                 nn=1:size(y_index_eq,2);
                 g = (r'*g1)';
                 f = 0.5*r'*r;
                 p = -g1\r ;
-                if (is_dynamic)
+                if is_dynamic
                     [ya,f,r,check]=lnsrch1(y(it_,:)',f,g,p,stpmax, ...
                                            'lnsrch1_wrapper_one_boundary',nn, ...
                                            y_index_eq, y_index_eq, fname, y, x, params, steady_state, it_);
@@ -281,126 +253,133 @@ for it_=start:incr:finish
                     [ya,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, ...
                                            params, steady_state,0);
                     dx = ya - y(y_index_eq);
-                end;
-                
-                if(is_dynamic)
+                end
+                if is_dynamic
                     y(it_,:) = ya';
                 else
                     y = ya';
-                end;
-            elseif(~is_dynamic && options.solve_algo==3)
-                if (verbose == 1)
-                    disp('steady: csolve');
+                end
+            elseif ~is_dynamic && options.solve_algo==3
+                if verbose==1
+                    disp('steady: csolve')
                 end
                 [yn,info] = csolve(@local_fname, y(y_index_eq),@ ...
                                    local_fname,1e-6,500, x, params, steady_state, y, y_index_eq, fname, 1);
                 dx = ya - yn;
                 y(y_index_eq) = yn;
-            elseif((stack_solve_algo==1 && is_dynamic) || (stack_solve_algo==0 && is_dynamic) || (~is_dynamic && (options.solve_algo==1 || options.solve_algo==6))),
-                if (verbose == 1 && ~is_dynamic)
-                    disp('steady: Sparse LU ');
+            elseif (stack_solve_algo==1 && is_dynamic) || (stack_solve_algo==0 && is_dynamic) || (~is_dynamic && (options.solve_algo==1 || options.solve_algo==6))
+                if verbose==1 && ~is_dynamic
+                    disp('steady: Sparse LU ')
                 end
                 dx =  g1\r;
                 ya = ya - lambda*dx;
-                if(is_dynamic)
+                if is_dynamic
                     y(it_,y_index_eq) = ya';
                 else
                     y(y_index_eq) = ya;
-                end;
-            elseif((stack_solve_algo==2 && is_dynamic) || (options.solve_algo==7 && ~is_dynamic)),
+                end
+            elseif (stack_solve_algo==2 && is_dynamic) || (options.solve_algo==7 && ~is_dynamic)
                 flag1=1;
                 if isoctave
                     error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=7 since GMRES is not implemented in Octave')
                 end
-                if (verbose == 1 && ~is_dynamic)
-                    disp('steady: GMRES ');
+                if verbose == 1 && ~is_dynamic
+                    disp('steady: GMRES ')
                 end
-                while(flag1>0)
+                while flag1>0
                     [L1, U1]=ilu(g1,ilu_setup);
                     [dx,flag1] = gmres(g1,-r,Blck_size,1e-6,Blck_size,L1,U1);
-                    if (flag1>0 || reduced)
-                        if(flag1==1)
-                            disp(['Error in simul: No convergence inside GMRES after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
-                        elseif(flag1==2)
-                            disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Num,'%3d')]);
-                        elseif(flag1==3)
-                            disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')]);
-                        end;
+                    if  flag1>0 || reduced
+                        if verbose
+                            if flag1==1
+                                disp(['Error in simul: No convergence inside GMRES after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')])
+                            elseif(flag1==2)
+                                disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Num,'%3d')])
+                            elseif(flag1==3)
+                                disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')])
+                            end
+                        end
                         ilu_setup.droptol = ilu_setup.droptol/10;
                         reduced = 0;
                     else
                         ya = ya + lambda*dx;
-                        if(is_dynamic)
+                        if is_dynamic
                             y(it_,y_index_eq) = ya';
                         else
                             y(y_index_eq) = ya';
-                        end;
-                    end;
-                end;
-            elseif((stack_solve_algo==3 && is_dynamic) || (options.solve_algo==8 && ~is_dynamic)),
-                flag1=1;
-                if (verbose == 1 && ~is_dynamic)
-                    disp('steady: BiCGStab');
+                        end
+                    end
                 end
-                while(flag1>0)
+            elseif (stack_solve_algo==3 && is_dynamic) || (options.solve_algo==8 && ~is_dynamic)
+                flag1=1;
+                if verbose == 1 && ~is_dynamic
+                    disp('steady: BiCGStab')
+                end
+                while flag1>0
                     [L1, U1]=ilu(g1,ilu_setup);
                     phat = ya - U1 \ (L1 \ r);
-                    if(is_dynamic)
+                    if is_dynamic
                         y(it_,y_index_eq) = phat;
                     else
                         y(y_index_eq) = phat;
-                    end;
-                    if(is_dynamic)
+                    end
+                    if is_dynamic
                         [r, y, g1, g2, g3] = feval(fname, y, x, params, ...
                                                    steady_state, it_, 0);
                     else
                         [r, y, g1] = feval(fname, y, x, params);
-                    end;
-                    if max(abs(r)) >= options.solve_tolf
+                    end
+                    if max(abs(r))>=options.solve_tolf
                         [dx,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
                     else
                         flag1 = 0;
                         dx = phat - ya;
-                    end;
-                    if (flag1>0 || reduced)
-                        if(flag1==1)
-                            disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
-                        elseif(flag1==2)
-                            disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Num,'%3d')]);
-                        elseif(flag1==3)
-                            disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')]);
-                        end;
+                    end
+                    if flag1>0 || reduced
+                        if verbose
+                            if(flag1==1)
+                                disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')])
+                            elseif(flag1==2)
+                                disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Num,'%3d')])
+                            elseif(flag1==3)
+                                disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')])
+                            end
+                        end
                         ilu_setup.droptol = ilu_setup.droptol/10;
                         reduced = 0;
                     else
                         ya = ya + lambda*dx;
-                        if(is_dynamic)
+                        if is_dynamic
                             y(it_,y_index_eq) = ya';
                         else
                             y(y_index_eq) = ya';
-                        end;
-                    end;
-                end;
+                        end
+                    end
+                end
             else
-                disp('unknown option : ');
-                if(is_dynamic)
-                    disp(['options_.stack_solve_algo = ' num2str(stack_solve_algo) ' not implemented']);
-                else
-                    disp(['options_.solve_algo = ' num2str(options.solve_algo) ' not implemented']);
-                end;
+                if verbose
+                    disp('unknown option : ')
+                    if is_dynamic
+                        disp(['options_.stack_solve_algo = ' num2str(stack_solve_algo) ' not implemented'])
+                    else
+                        disp(['options_.solve_algo = ' num2str(options.solve_algo) ' not implemented'])
+                    end
+                end
                 info = -Block_Num*10;
-                return;
-            end;
+                return
+            end
             iter=iter+1;
             max_resa = max_res;
         end
     end
     if cvg==0
-        if(cutoff == 0)
-            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit\".\n',Block_Num, it_,iter);
-        else
-            fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit" or set "cutoff=0" in model options.\n',Block_Num, it_,iter);
-        end;
+        if verbose
+            if cutoff == 0
+                fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit\".\n',Block_Num, it_,iter);
+            else
+                fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.simul.maxit" or set "cutoff=0" in model options.\n',Block_Num, it_,iter);
+            end
+        end
         if(is_dynamic)
             oo_.deterministic_simulation.status = 0;
             oo_.deterministic_simulation.error = max_res;
@@ -410,10 +389,11 @@ for it_=start:incr:finish
             oo_.deterministic_simulation.block(Block_Num).iterations = iter;
         end;
         info = -Block_Num*10;
-        return;
+        return
     end
 end
-if(is_dynamic)
+
+if is_dynamic
     info = 1;
     oo_.deterministic_simulation.status = 1;
     oo_.deterministic_simulation.error = max_res;
@@ -423,12 +403,11 @@ if(is_dynamic)
     oo_.deterministic_simulation.block(Block_Num).iterations = iter;
 else
     info = 0;
-end;
-return;
+end
 
 function [err, G]=local_fname(yl, x, params, steady_state, y, y_index_eq, fname, is_csolve)
 y(y_index_eq) = yl;
 [err, y, G] = feval(fname, y, x, params, steady_state, 0);
 if(is_csolve)
     G = full(G);
-end;
+end

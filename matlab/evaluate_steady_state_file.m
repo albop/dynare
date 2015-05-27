@@ -63,7 +63,7 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
         updated_params_flag = max(abs(params1-params)) > 1e-12 ...
             || ~isequal(isnan(params1),isnan(params)); %checks whether numbers or NaN changed
     else
-        updated_params_flag = 0
+        updated_params_flag = 0;
     end
 
     h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);
@@ -117,8 +117,7 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
         end
         [ys,check] = dynare_solve('restricted_steadystate',...
                                   ys(indv),...
-                                  options.jacobian_flag, ...
-                                  exo_ss,indv);
+                                  options, exo_ss,indv);
     end
 
     

@@ -327,11 +327,11 @@ MultInitSS::MultInitSS(const PlannerBuilder& pb, const Vector& pvals, Vector& yy
 	ogp::FormulaCustomEvaluator fe(builder.static_tree, terms);
 	fe.eval(dssav, *this);
 
-	// solve overdetermined system b+F*lambda=0 => lambda=-(F^T*F)^{-1}*F^T*b
-	GeneralMatrix FtF(F, "transpose", F);
-	Vector lambda(builder.diff_f_static.dim2());
-	F.multVecTrans(0.0, lambda, -1.0, b);
-	ConstGeneralMatrix(FtF).multInvLeft(lambda);
+	// solve overdetermined system b+F*lambda=0 using SVD decomposition
+    SVDDecomp decomp(F);
+    Vector lambda(builder.diff_f_static.dim2());
+    decomp.solve(b, lambda);
+    lambda.mult(-1);
 
 	// take values of lambda and put it to yy
 	for (int fi = 0; fi < builder.diff_f_static.dim2(); fi++) {

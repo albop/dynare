@@ -1,7 +1,7 @@
 function [dLIK,dlik,a,Pstar] = missing_observations_kalman_filter_d(data_index,number_of_observations,no_more_missing_observations, ...
                                                       Y, start, last, ...
                                                       a, Pinf, Pstar, ...
-                                                      kalman_tol, riccati_tol, presample, ...
+                                                      kalman_tol, diffuse_kalman_tol, riccati_tol, presample, ...
                                                       T, R, Q, H, Z, mm, pp, rr)
 % Computes the diffuse likelihood of a state space model when some observations are missing.
 %
@@ -72,7 +72,7 @@ if isequal(H,0)
 end
 s = 0;
 
-while rank(Pinf,kalman_tol) && (t<=last)
+while rank(Pinf,diffuse_kalman_tol) && (t<=last)
     s = t-start+1;
     d_index = data_index{t};
     if isempty(d_index)
@@ -83,8 +83,8 @@ while rank(Pinf,kalman_tol) && (t<=last)
         ZZ = Z(d_index,:);
         v  = Y(d_index,t)-ZZ*a;
         Finf  = ZZ*Pinf*ZZ';
-        if rcond(Finf) < kalman_tol
-            if ~all(abs(Finf(:)) < kalman_tol)
+        if rcond(Finf) < diffuse_kalman_tol
+            if ~all(abs(Finf(:)) < diffuse_kalman_tol)
                 % The univariate diffuse kalman filter should be used.
                 return
             else

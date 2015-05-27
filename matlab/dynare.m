@@ -16,7 +16,7 @@ function dynare(fname, varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2014 Dynare Team
+% Copyright (C) 2001-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -44,7 +44,22 @@ if strcmpi(fname,'help')
     return
 end
 
-% detect if MEX files are present; if not, use alternative M-files
+% Set default local options
+change_path_flag = true;
+
+% Filter out some options.
+if nargin>1
+    id = strfind(varargin,'nopathchange');
+    if ~isempty(id)
+        change_path_flag = false;
+        varargin(id{1}) = [];
+    end
+end
+
+% Check matlab path
+check_matlab_path(change_path_flag);
+
+% Detect if MEX files are present; if not, use alternative M-files
 dynareroot = dynare_config;
 
 warning_config()
@@ -81,6 +96,10 @@ end
 
 % Testing if file have extension
 % If no extension default .mod is added
+dot_location=(strfind(fname,'.'));
+if length(dot_location)>1
+    error('DYNARE: Periods in filenames are only allowed for .mod or .dyn extensions')
+end
 if isempty(strfind(fname,'.'))
     fnamelength = length(fname);
     fname1 = [fname '.dyn'];
@@ -91,9 +110,10 @@ if isempty(strfind(fname,'.'))
     fname = fname1;
     % Checking file extension
 else
-    if ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.MOD') ...
+    if dot_location~=length(fname)-3 ... %if the file name has fewer than 4 characters and there is a period
+        || ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.MOD') ...
             && ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.DYN')
-        error('DYNARE: argument must be a filename with .mod or .dyn extension')
+        error('DYNARE: argument must be a filename with .mod or .dyn extension and must not include any other periods')
     end;
     fnamelength = length(fname) - 4;
 end;
@@ -140,14 +160,32 @@ if ~exist(fname,'file') || isequal(fname,'dir')
     error(['dynare:: can''t open ' fname])
 end
 
+if ~isvarname(fname(1:end-4))
+    error('DYNARE: argument of dynare must conform to Matlab''s convention for naming functions, i.e. start with a letter and not contain special characters. Please rename your MOD-file.')
+end
+
 % pre-dynare-preprocessor-hook
 if exist(fname(1:end-4),'dir') && exist([fname(1:end-4) filesep 'hooks'],'dir') && exist([fname(1:end-4) filesep 'hooks/priorprocessing.m'],'file')
     run([fname(1:end-4) filesep 'hooks/priorprocessing'])
 end
 
-command = ['"' dynareroot 'dynare_m" ' fname] ;
-for i=2:nargin
-    command = [command ' ' varargin{i-1}];
+if ispc
+    arch = getenv('PROCESSOR_ARCHITECTURE');
+else
+    [junk, arch] = system('uname -m');
+end
+
+if isempty(strfind(arch, '64'))
+  arch_ext = '32';
+  disp('Using 32-bit preprocessor');
+else
+  arch_ext = '64';
+  disp('Using 64-bit preprocessor');
+end
+
+command = ['"' dynareroot 'preprocessor' arch_ext filesep 'dynare_m" ' fname] ;
+for i=1:length(varargin)
+    command = [command ' ' varargin{i}];
 end
 
 [status, result] = system(command);
@@ -164,8 +202,8 @@ end
 
 % Save preprocessor result in logfile (if `no_log' option not present)
 no_log = 0;
-for i=2:nargin
-    no_log = no_log || strcmp(varargin{i-1}, 'nolog');
+for i=1:length(varargin)
+    no_log = no_log || strcmp(varargin{i}, 'nolog');
 end
 if ~no_log
     logname = [fname(1:end-4) '.log'];

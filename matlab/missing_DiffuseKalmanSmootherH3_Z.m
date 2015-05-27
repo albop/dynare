@@ -1,4 +1,4 @@
-function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag)
+function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag)
 % function [alphahat,epsilonhat,etahat,a1,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag)
 % Computes the diffuse kalman smoother without measurement error, in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
@@ -17,7 +17,8 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSm
 %    smpl:     sample size
 %    data_index                   [cell]      1*smpl cell of column vectors of indices.
 %    nk        number of forecasting periods
-%    kalman_tol   tolerance for zero divider 
+%    kalman_tol   tolerance for zero divider
+%    diffuse_kalman_tol   tolerance for zero divider
 %    decomp_flag  if true, compute filter decomposition
 %
 % OUTPUTS
@@ -38,7 +39,7 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSm
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2011 Dynare Team
+% Copyright (C) 2004-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -80,7 +81,6 @@ Pstar           = zeros(spstar(1),spstar(2),smpl); Pstar(:,:,1) = Pstar1;
 Pinf            = zeros(spinf(1),spinf(2),smpl); Pinf(:,:,1) = Pinf1;
 Pstar1          = Pstar;
 Pinf1           = Pinf;
-crit1       = 1.e-6;
 steady          = smpl;
 rr              = size(Q,1); % number of structural shocks
 QQ              = R*Q*transpose(R);
@@ -92,7 +92,7 @@ r               = zeros(mm,smpl);
 
 t = 0;
 icc=0;
-newRank   = rank(Pinf(:,:,1),crit1);
+newRank = rank(Pinf(:,:,1),diffuse_kalman_tol);
 while newRank && t < smpl
     t = t+1;
     a(:,t) = a1(:,t);
@@ -121,7 +121,7 @@ while newRank && t < smpl
         end
     end
     if newRank
-        oldRank = rank(Pinf(:,:,t),crit1);
+        oldRank = rank(Pinf(:,:,t),diffuse_kalman_tol);
     else
         oldRank = 0;
     end
@@ -134,7 +134,7 @@ while newRank && t < smpl
     Pinf(:,:,t+1) = T*Pinf(:,:,t)*T';
     P0=Pinf(:,:,t+1);
     if newRank,
-        newRank       = rank(Pinf(:,:,t+1),crit1);
+        newRank       = rank(Pinf(:,:,t+1),diffuse_kalman_tol);
     end
     if oldRank ~= newRank
         disp('univariate_diffuse_kalman_filter:: T does influence the rank of Pinf!')   

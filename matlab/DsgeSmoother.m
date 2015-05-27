@@ -17,18 +17,20 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,de
 %   o trend_coeff   [double]  (n*1) vector, parameters specifying the slope of the trend associated to each observed variable.
 %   o aK            [double]  (K,n,T+K) array, k (k=1,...,K) steps ahead filtered (endogenous) variables.
 %   o T and R       [double]  Matrices defining the state equation (T is the (m*m) transition matrix).
-%    P:             3D array of one-step ahead forecast error variance
-%                   matrices
-%    PK:            4D array of k-step ahead forecast error variance
-%                   matrices (meaningless for periods 1:d)
-%    
+%   o P:            3D array of one-step ahead forecast error variance
+%                       matrices
+%   o PK:           4D array of k-step ahead forecast error variance
+%                       matrices (meaningless for periods 1:d)
+%   o decomp        4D array of shock decomposition of k-step ahead
+%                       filtered variables
+% 
 % ALGORITHM 
 %   Diffuse Kalman filter (Durbin and Koopman)       
 %
 % SPECIAL REQUIREMENTS
 %   None
 
-% Copyright (C) 2006-2012 Dynare Team
+% Copyright (C) 2006-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -67,9 +69,16 @@ M_ = set_all_parameters(xparam1,estim_params_,M_);
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
+oldoo.restrict_var_list = oo_.dr.restrict_var_list; 
+oldoo.restrict_columns = oo_.dr.restrict_columns;
 oo_.dr.restrict_var_list = bayestopt_.smoother_var_list;
 oo_.dr.restrict_columns = bayestopt_.smoother_restrict_columns;
+
 [T,R,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
+
+oo_.dr.restrict_var_list = oldoo.restrict_var_list;
+oo_.dr.restrict_columns = oldoo.restrict_columns;
+
 bayestopt_.mf = bayestopt_.smoother_mf;
 if options_.noconstant
     constant = zeros(vobs,1);
@@ -172,6 +181,7 @@ elseif options_.lik_init == 5            % Old diffuse Kalman filter only for th
     Pinf  = [];
 end
 kalman_tol = options_.kalman_tol;
+diffuse_kalman_tol = options_.diffuse_kalman_tol;
 riccati_tol = options_.riccati_tol;
 data1 = Y-trend;
 % -----------------------------------------------------------------------------
@@ -197,7 +207,7 @@ if kalman_algo == 1 || kalman_algo == 3
     [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(ST, ...
                                                       Z,R1,Q,H,Pinf,Pstar, ...
                                                       data1,vobs,np,smpl,data_index, ...
-                                                      options_.nk,kalman_tol,options_.filter_decomposition);
+                                                      options_.nk,kalman_tol,diffuse_kalman_tol,options_.filter_decomposition);
     if isinf(alphahat)
         if kalman_algo == 1
             kalman_algo = 2;
@@ -224,7 +234,7 @@ if kalman_algo == 2 || kalman_algo == 4
     [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(ST, ...
                                                       Z,R1,Q,diag(H), ...
                                                       Pinf,Pstar,data1,vobs,np,smpl,data_index, ...
-                                                      options_.nk,kalman_tol,...
+                                                      options_.nk,kalman_tol,diffuse_kalman_tol, ...
                                                       options_.filter_decomposition);
 end
 

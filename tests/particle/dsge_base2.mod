@@ -137,8 +137,8 @@ options_.mode_check.number_of_points = 250;
 //estimation(datafile=risky,order=2,nograph,filter_algorithm=gf,distribution_approximation=montecarlo,number_of_particles=1000,nobs=150,mh_replic=0,mode_compute=4,mode_check);
 
 // GCF
-//estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,nobs=150,mh_replic=0,mode_compute=4);
-//estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,nobs=150,mh_replic=0,mode_compute=8,mode_file=dsge_base2_mode,mode_check);
+estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,nobs=150,mh_replic=0,mode_compute=8);
+estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,nobs=150,mh_replic=0,mode_compute=4,mode_file=dsge_base2_mode,mode_check);
 
 // GUF
 //estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,proposal_approximation=unscented,distribution_approximation=unscented,nobs=150,mh_replic=0,mode_compute=4);
@@ -155,15 +155,15 @@ options_.mode_check.number_of_points = 250;
 //estimation(datafile=extreme,nograph,order=2,filter_algorithm=gmf,nobs=150,mh_replic=0,mode_compute=0,mode_file=dsge_base2_mode,mode_check);
 
 // P-MH with SIR
-%options_.mh_posterior_mode_estimation = 1 ;
-%options_.mh_jscale = 1.2e-3 ; 
-options_.mh_nblck = 10 ;
+//options_.mh_posterior_mode_estimation = 1 ;
+//options_.mh_jscale = 1.2e-3 ; 
+//options_.mh_nblck = 10 ;
 //estimation(datafile=extreme,order=2,nobs=150,number_of_particles=50000,mh_replic=0,mode_compute=7);
-options_.posterior_sampling_method = 'RWGMH';
-options_.rwgmh_scale_shock = (1e-5)*[10 10 1 1 10 10 10 1000 10 10] ;
+//options_.posterior_sampling_method = 'RWGMH';
+//options_.rwgmh_scale_shock = (1e-5)*[10 10 1 1 10 10 10 1000 10 10] ;
 //estimation(datafile=extreme,order=2,nobs=150,number_of_particles=1000,mh_replic=10000,mode_compute=8);
 //estimation(datafile=extreme,order=2,nobs=150,number_of_particles=1000,mh_replic=10000,mode_file=dsge_base2_mode,mode_compute=0);
-estimation(datafile=extreme,order=1,mh_replic=5000,mode_compute=0,mode_file=dsge_base2_mode);
+//estimation(datafile=extreme,order=1,mh_replic=5000,mode_compute=0,mode_file=dsge_base2_mode);
 
 //estimation(datafile=extreme,order=2,nobs=150,number_of_particles=50000,mode_file=dsge_base2_mode,mh_replic=60000,mode_compute=7);
 //estimation(datafile=extreme,order=2,nobs=150,number_of_particles=10000,load_mh_file,mh_replic=1,mode_compute=0);

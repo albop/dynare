@@ -321,6 +321,8 @@ if isempty(estim_params_)% If estim_params_ is empty (e.g. when running the smoo
     estim_params_.ncx = 0;
     estim_params_.ncn = 0;
     estim_params_.np = 0;
+    bounds.lb = [];
+    bounds.ub = [];
 end
 
 % storing prior parameters in results
@@ -440,6 +442,9 @@ else
 end;
 
 if options_.analytic_derivation,
+    if options_.lik_init == 3,
+        error('analytic derivation is incompatible with diffuse filter')
+    end
     options_.analytic_derivation = 1;
     if ~(exist('sylvester3','file')==2),
         dynareroot = strrep(which('dynare'),'dynare.m','');
