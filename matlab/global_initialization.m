@@ -255,8 +255,8 @@ particle.proposal_approximation.cubature = 1;
 particle.proposal_approximation.unscented = 0;
 particle.proposal_approximation.montecarlo = 0;
 % Approximation of the particle distribution
-particle.distribution_approximation.cubature = 0;
-particle.distribution_approximation.unscented = 1;
+particle.distribution_approximation.cubature = 1;
+particle.distribution_approximation.unscented = 0;
 particle.distribution_approximation.montecarlo = 0;
 % Number of partitions for the smoothed resampling method
 particle.resampling.number_of_partitions = 200;
