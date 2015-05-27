@@ -4,6 +4,24 @@
 //
 // Juin 2015
 
+// DGP
+@#define RISKY_CALIBRATION = 0
+@#define EXTREME_CALIBRATION = 1
+@#define BENCHMARK_CALIBRATION = 0
+
+// ALGORITHM
+@#define LINEAR_KALMAN = 0
+@#define ALGO_SIR = 0
+@#define ALGO_SISmoothR = 0
+@#define ALGO_APF = 0
+@#define ALGO_GPF = 0
+@#define ALGO_GCF = 0
+@#define ALGO_GUF = 0
+@#define ALGO_GMPF = 0
+@#define ALGO_GMCF = 0
+@#define ALGO_ONLINE_1 = 1
+@#define ALGO_ONLINE_2 = 0
+
 var k A c l i y;
 varexo e_a;
 
@@ -43,131 +61,106 @@ stderr l, uniform_pdf,,, 0.00001, 0.1;
 stderr i, uniform_pdf,,, 0.00001, 0.1;
 end;
 
-// Risky
-estimated_params_init;
-alp, 0.4;   
-bet, 0.99;
-tet, 0.357;
-tau, 50;
-delt, 0.02;
-rho, 0.95;
-stderr e_a, .035;
-stderr y, .00158;
-stderr l, .0011;
-stderr i, .000866;
-end;
+@#if RISKY_CALIBRATION
+  estimated_params_init;
+  alp, 0.4;
+  bet, 0.99;
+  tet, 0.357;
+  tau, 50;
+  delt, 0.02;
+  rho, 0.95;
+  stderr e_a, .035;
+  stderr y, .00158;
+  stderr l, .0011;
+  stderr i, .000866;
+  end;
+@#endif
 
-estimated_params_init;
-alp, 0.405156;   
-bet, 0.9999;
-tet, 0.360716;
-tau, 30.687089;
-delt, 0.017113;
-rho, 0.968120;
-stderr e_a, .043001;
-stderr y, .006791;
-stderr l, .001065;
-stderr i, .004716;
-end;
-
-estimated_params_init;
-stderr e_a, 0.043021303067030 ;
-stderr y, 0.006670476313281;
-stderr l, 0.001074088088005;
-stderr i, 0.004799910878108;
-alp, 0.405140190096526;
-bet, 0.9953935267771;
-tet, 0.360731313440020;
-tau, 30.687088931783695 ;
-delt, 0.017070312172381 ;
-rho, 0.968261076182835 ;
-end;
-
-// Extreme 
-estimated_params_init;
-alp, 0.4;   
-bet, 0.99;
-tet, 0.357;
-tau, 50;
-delt, 0.02;
-rho, 0.95;
-stderr e_a, .035;
-stderr y, .0175;
-stderr l, .00312;
-stderr i, .00465;
-end;
-
-// Extreme: intermediate solution for SIR
-//estimated_params_init;
-//stderr e_a, 0.025533519509666;
-//stderr y, 0.018507739054788;
-//stderr l, 0.003197047316401;
-//stderr i, 0.003802850762698;
-//alp, 0.363888235523713;
-//bet, 0.994999761247253;
-//tet, 0.342346704799396;
-//tau, 53.199696552640710;
-//delt, 0.012206251968057;
-//rho, 0.976115559512299 ;
-//end ; 
+@#if EXTREME_CALIBRATION
+  estimated_params_init;
+  alp, 0.4;
+  bet, 0.99;
+  tet, 0.357;
+  tau, 50;
+  delt, 0.02;
+  rho, 0.95;
+  stderr e_a, .035;
+  stderr y, .0175;
+  stderr l, .00312;
+  stderr i, .00465;
+  end;
+@#endif
 
 varobs y l i ;
 
 options_.mode_check.neighbourhood_size = .01 ;
 options_.mode_check.number_of_points = 250;
 
-//KALMAN
-//estimation(datafile=extreme,nograph,order=1,nobs=150,mode_compute=8,mh_replic=0,mode_check);
+@#if EXTREME_CALIBRATION
+  data(file='./extreme.m');
+@#else
+  @#if RISKY_CALIBRATION
+    data(file='./risky.m');
+  @#else
+    @#if BECHMARK_CALIBRATION
+      data(file='./benchmark.m');
+    @#endif
+  @#endif
+@#endif
 
-//SIR 
-//estimation(datafile=extreme,order=2,nograph,number_of_particles=1000,nobs=150,mh_replic=0,mode_compute=8,mode_check);
+@#if LINEAR_KALMAN
+  estimation(nograph,order=1,mode_compute=8,mh_replic=0,mode_check);
+@#endif
 
-// SISmoothR
-//estimation(datafile=extreme,order=2,nograph,number_of_particles=1000,nobs=150,resampling_method=smooth,mode_compute=4,mh_replic=0);
-//estimation(datafile=extreme,order=2,nograph,number_of_particles=1000,nobs=150,resampling_method=smooth,mode_compute=8,mode_file=dsge_base2_mode,mh_replic=0,mode_check);
-//estimation(datafile=extreme,order=2,nograph,number_of_particles=1000,nobs=150,resampling_method=smooth,mode_compute=4,mode_file=dsge_base2_mode,mh_replic=0,mode_check);
+@#if ALGO_SIR
+  estimation(order=2,nograph,number_of_particles=1000,mh_replic=0,mode_compute=8,mode_check);
+@#endif
 
-// APF
-//estimation(datafile=extreme,order=2,nograph,filter_algorithm=apf,number_of_particles=1000,nobs=150,mh_replic=0,mode_compute=8,mode_check);
+@#if ALGO_SISmoothR
+  estimation(order=2,nograph,number_of_particles=1000,resampling_method=smooth,mode_compute=4,mh_replic=0);
+  estimation(order=2,nograph,number_of_particles=1000,resampling_method=smooth,mode_compute=8,mode_file=dsge_base2_mode,mh_replic=0,mode_check);
+  estimation(order=2,nograph,number_of_particles=1000,resampling_method=smooth,mode_compute=4,mode_file=dsge_base2_mode,mh_replic=0,mode_check);
+@#endif
 
-// GPF
-//estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,distribution_approximation=montecarlo,number_of_particles=1000,nobs=150,mh_replic=0,mode_compute=8);
-//estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,distribution_approximation=montecarlo,number_of_particles=1000,nobs=150,mode_file=dsge_base2_mode,mh_replic=0,mode_compute=4,mode_check);
-//estimation(datafile=risky,order=2,nograph,filter_algorithm=gf,distribution_approximation=montecarlo,number_of_particles=1000,nobs=150,mh_replic=0,mode_compute=8);
-//estimation(datafile=risky,order=2,nograph,filter_algorithm=gf,distribution_approximation=montecarlo,number_of_particles=1000,nobs=150,mh_replic=0,mode_compute=4,mode_check);
+@#if ALGO_APF
+  estimation(order=2,nograph,filter_algorithm=apf,number_of_particles=1000,mh_replic=0,mode_compute=8,mode_check);
+@#endif
 
-// GCF
-estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,nobs=150,mh_replic=0,mode_compute=8);
-estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,nobs=150,mh_replic=0,mode_compute=4,mode_file=dsge_base2_mode,mode_check);
+@#if ALGO_GPF
+  estimation(order=2,nograph,filter_algorithm=gf,distribution_approximation=montecarlo,number_of_particles=1000,mh_replic=0,mode_compute=8);
+  estimation(order=2,nograph,filter_algorithm=gf,distribution_approximation=montecarlo,number_of_particles=1000,mode_file=dsge_base2_mode,mh_replic=0,mode_compute=4,mode_check);
+  estimation(order=2,nograph,filter_algorithm=gf,distribution_approximation=montecarlo,number_of_particles=1000,mh_replic=0,mode_compute=8);
+  estimation(order=2,nograph,filter_algorithm=gf,distribution_approximation=montecarlo,number_of_particles=1000,mh_replic=0,mode_compute=4,mode_check);
+@#endif
 
-// GUF
-//estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,proposal_approximation=unscented,distribution_approximation=unscented,nobs=150,mh_replic=0,mode_compute=4);
-//estimation(datafile=extreme,order=2,nograph,filter_algorithm=gf,proposal_approximation=unscented,distribution_approximation=unscented,nobs=150,mh_replic=0,mode_compute=8,mode_check);
+@#if ALGO_GCF
+  estimation(order=2,nograph,filter_algorithm=gf,mh_replic=0,mode_compute=8);
+  estimation(order=2,nograph,filter_algorithm=gf,mh_replic=0,mode_compute=4,mode_file=dsge_base2_mode,mode_check);
+@#endif
 
-// GMPF
-//estimation(datafile=extreme,nograph,order=2,filter_algorithm=gmf,distribution_approximation=montecarlo,number_of_particles=1000,nobs=150,mh_replic=0,mode_compute=8);
-//estimation(datafile=extreme,nograph,order=2,filter_algorithm=gmf,distribution_approximation=montecarlo,number_of_particles=1000,nobs=150,mh_replic=0,mode_file=dsge_base2_mode,mode_compute=8);
-//estimation(datafile=extreme,nograph,order=2,filter_algorithm=gmf,distribution_approximation=montecarlo,number_of_particles=1000,nobs=150,mh_replic=0,mode_file=dsge_base2_mode,mode_compute=4,mode_check);
+@#if ALGO_GUF
+  estimation(order=2,nograph,filter_algorithm=gf,proposal_approximation=unscented,distribution_approximation=unscented,mh_replic=0,mode_compute=4);
+  estimation(order=2,nograph,filter_algorithm=gf,proposal_approximation=unscented,distribution_approximation=unscented,mh_replic=0,mode_compute=8,mode_check);
+@#endif
 
-// GMCF
-//estimation(datafile=extreme,nograph,order=2,filter_algorithm=gmf,nobs=150,mh_replic=0,mode_file=dsge_base2_mode,mode_compute=8);
-//estimation(datafile=extreme,nograph,order=2,filter_algorithm=gmf,nobs=150,mh_replic=0,mode_compute=4,mode_file=dsge_base2_mode,mode_check);
-//estimation(datafile=extreme,nograph,order=2,filter_algorithm=gmf,nobs=150,mh_replic=0,mode_compute=0,mode_file=dsge_base2_mode,mode_check);
+@#if ALGO_GMPF
+  estimation(nograph,order=2,filter_algorithm=gmf,distribution_approximation=montecarlo,number_of_particles=1000,mh_replic=0,mode_compute=8);
+  estimation(nograph,order=2,filter_algorithm=gmf,distribution_approximation=montecarlo,number_of_particles=1000,mh_replic=0,mode_file=dsge_base2_mode,mode_compute=8);
+  estimation(nograph,order=2,filter_algorithm=gmf,distribution_approximation=montecarlo,number_of_particles=1000,mh_replic=0,mode_file=dsge_base2_mode,mode_compute=4,mode_check);
+@#endif
 
-// P-MH with SIR
-//options_.mh_posterior_mode_estimation = 1 ;
-//options_.mh_jscale = 1.2e-3 ; 
-//options_.mh_nblck = 10 ;
-//estimation(datafile=extreme,order=2,nobs=150,number_of_particles=50000,mh_replic=0,mode_compute=7);
-//options_.posterior_sampling_method = 'RWGMH';
-//options_.rwgmh_scale_shock = (1e-5)*[10 10 1 1 10 10 10 1000 10 10] ;
-//estimation(datafile=extreme,order=2,nobs=150,number_of_particles=1000,mh_replic=10000,mode_compute=8);
-//estimation(datafile=extreme,order=2,nobs=150,number_of_particles=1000,mh_replic=10000,mode_file=dsge_base2_mode,mode_compute=0);
-//estimation(datafile=extreme,order=1,mh_replic=5000,mode_compute=0,mode_file=dsge_base2_mode);
+@#if ALGO_GMCF
+  estimation(nograph,order=2,filter_algorithm=gmf,mh_replic=0,mode_file=dsge_base2_mode,mode_compute=8);
+  estimation(nograph,order=2,filter_algorithm=gmf,mh_replic=0,mode_compute=4,mode_file=dsge_base2_mode,mode_check);
+  estimation(nograph,order=2,filter_algorithm=gmf,mh_replic=0,mode_compute=0,mode_file=dsge_base2_mode,mode_check);
+@#endif
 
-//estimation(datafile=extreme,order=2,nobs=150,number_of_particles=50000,mode_file=dsge_base2_mode,mh_replic=60000,mode_compute=7);
-//estimation(datafile=extreme,order=2,nobs=150,number_of_particles=10000,load_mh_file,mh_replic=1,mode_compute=0);
+@#if ALGO_ONLINE_2
+  options_.particle.liu_west_delta = 0.9 ;
+  estimation(order=2,number_of_particles=10000,mode_compute=11);
+@#endif
 
-// Online
-//options_.particle.liu_west_delta = 0.9 ;
-//estimation(datafile=extreme,order=2,number_of_particles=10000,nobs=150,mode_compute=11);
+@#if ALGO_ONLINE_1
+  options_.particle.liu_west_delta = 0.9 ;
+  estimation(order=1,number_of_particles=10000,mode_compute=11);
+@#endif
