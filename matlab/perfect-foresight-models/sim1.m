@@ -125,7 +125,7 @@ for iter = 1:options_.simul.maxit
             dr = max(abs(d1));
             if dr<azero
                 vperiods(iter) = it;
-                periods = it-maximum_lag;
+                periods = it-maximum_lag+1;
                 break
             end
         end
