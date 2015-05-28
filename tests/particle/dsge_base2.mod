@@ -10,17 +10,18 @@
 @#define BENCHMARK_CALIBRATION = 0
 
 // ALGORITHM
-@#define LINEAR_KALMAN = 0
+@#define LINEAR_KALMAN = 1
 @#define ALGO_SIR = 0
 @#define ALGO_SISmoothR = 0
 @#define ALGO_APF = 0
 @#define ALGO_GPF = 0
-@#define ALGO_GCF = 1
+@#define ALGO_GCF = 0
 @#define ALGO_GUF = 0
 @#define ALGO_GMPF = 0
 @#define ALGO_GMCF = 0
 @#define ALGO_ONLINE_1 = 0
 @#define ALGO_ONLINE_2 = 0
+
 
 var k A c l i y;
 varexo e_a;
@@ -98,18 +99,19 @@ options_.mode_check.number_of_points = 250;
 
 @#if EXTREME_CALIBRATION
   data(file='./extreme.m');
-@#else
-  @#if RISKY_CALIBRATION
+@#endif 
+
+@#if RISKY_CALIBRATION
     data(file='./risky.m');
-  @#else
-    @#if BECHMARK_CALIBRATION
-      data(file='./benchmark.m');
-    @#endif
-  @#endif
 @#endif
 
+@#if BENCHMARK_CALIBRATION
+    data(file='./benchmark.m');
+@#endif
+
+
 @#if LINEAR_KALMAN
-  estimation(nograph,order=1,mode_compute=8,mh_replic=0,mode_check);
+%  estimation(nograph,order=1,mode_compute=8,mh_replic=0,mode_check);
 @#endif
 
 @#if ALGO_SIR
@@ -161,3 +163,8 @@ options_.mode_check.number_of_points = 250;
   options_.particle.liu_west_delta = 0.9 ;
   estimation(order=1,number_of_particles=1000,mode_compute=11);
 @#endif
+
+options_.mh_nblck = 10 ;
+options_.posterior_sampling_method = 'RWGMH';
+options_.rwgmh_scale_shock = (1e-5)*[10 10 1 1 10 10 10 1000 10 10] ;
+estimation(order=1,mh_replic=5000,mode_compute=0,mode_file=dsge_base2_mode);
