@@ -57,7 +57,7 @@ options_.lyapunov_complex_threshold = 1e-15;
 options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);
 options_.dr_display_tol=1e-6;
-
+options_.minimal_workspace = 0;
 options_.dp.maxit = 3000;
 options_.steady.maxit = 50;
 options_.simul.maxit = 50;
