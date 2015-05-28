@@ -111,7 +111,8 @@ end
 % Evaluate the likelihood.
 ana_deriv = DynareOptions.analytic_derivation;
 DynareOptions.analytic_derivation=0;
-if ~isequal(DynareOptions.mode_compute,11)
+if ~isequal(DynareOptions.mode_compute,11) || ...
+        (isequal(DynareOptions.mode_compute,11) && isequal(DynareOptions.order,1))
   [fval,junk1,junk2,a,b,c,d] = feval(objective_function,xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults);
 else 
     b=0;

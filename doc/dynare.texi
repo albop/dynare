@@ -4923,6 +4923,9 @@ Uses the CMA-ES (Covariance Matrix Adaptation Evolution Strategy) algorithm of
 Uses the simpsa algorithm, based on the combination of the non-linear simplex and simulated annealing algorithms and proposed by
 @cite{Cardoso, Salcedo and Feyo de Azevedo (1996)}.
 
+@item 11
+This is not strictly speaking an optimization algorithm. The (estimated) parameters are treated as state variables and estimated jointly with the original state variables of the model using a nonlinear filter. The algorithm implemented in Dynare is described in @cite{Liu and West (2001)}.
+
 @item 101
 Uses the SolveOpt algorithm for local nonlinear optimization problems proposed by
 @cite{Kuntsevich and Kappel (1997)}.
@@ -12638,6 +12641,9 @@ University of Graz, Graz, Austria
 Laffargue, Jean-Pierre (1990): ``Résolution d'un modèle
 macroéconomique avec anticipations rationnelles'', @i{Annales
 d'Économie et Statistique}, 17, 97--119
+
+@item
+Liu, Jane and Mike West (2001): ``Combined parameter and state estimation in simulation-based filtering'', in @i{Sequential Monte Carlo Methods in Practice}, Eds. Doucet, Freitas and Gordon, Springer Verlag
 
 @item
 Lubik, Thomas and Frank Schorfheide (2007): ``Do Central Banks Respond

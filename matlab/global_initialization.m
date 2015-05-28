@@ -255,8 +255,8 @@ particle.proposal_approximation.cubature = 1;
 particle.proposal_approximation.unscented = 0;
 particle.proposal_approximation.montecarlo = 0;
 % Approximation of the particle distribution
-particle.distribution_approximation.cubature = 0;
-particle.distribution_approximation.unscented = 1;
+particle.distribution_approximation.cubature = 1;
+particle.distribution_approximation.unscented = 0;
 particle.distribution_approximation.montecarlo = 0;
 % Number of partitions for the smoothed resampling method
 particle.resampling.number_of_partitions = 200;
@@ -271,6 +271,9 @@ particle.liu_west_delta = 0.99 ;
 particle.liu_west_chol_sigma_bar = .01 ;
 % Copy ep structure in options_ global structure
 options_.particle = particle;
+options_.rwgmh_init_scale = 1e-4 ;
+options_.rwgmh_scale_chain = 1 ; 
+options_.rwgmh_scale_shock = 1e-5 ; 
 
 % TeX output
 options_.TeX = 0;
