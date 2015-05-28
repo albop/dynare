@@ -146,7 +146,9 @@ if options_.periods > 0 && ~PI_PCL_solver
     end
     [ys, oo_] = simult(y0,oo_.dr,M_,options_,oo_);
     oo_.endo_simul = ys;
-    dyn2vec;
+    if ~options_.minimal_workspace
+      dyn2vec;
+    end
 end
 
 if options_.nomoments == 0
