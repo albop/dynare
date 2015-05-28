@@ -271,9 +271,9 @@ particle.liu_west_delta = 0.99 ;
 particle.liu_west_chol_sigma_bar = .01 ;
 % Copy ep structure in options_ global structure
 options_.particle = particle;
-options_.rwgmh_init_scale = 1e-4 ;
-options_.rwgmh_scale_chain = 1 ; 
-options_.rwgmh_scale_shock = 1e-5 ; 
+options_.rwgmh.init_scale = 1e-4 ;
+options_.rwgmh.scale_chain = 1 ;
+options_.rwgmh.scale_shock = 1e-5 ;
 
 % TeX output
 options_.TeX = 0;
