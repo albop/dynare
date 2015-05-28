@@ -56,7 +56,7 @@ if options_.debug
 end
 
 initperiods = 1:M_.maximum_lag;
-lastperiods = (M_.maximum_endo_lag+options_.periods+1):(M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead);
+lastperiods = (M_.maximum_lag+options_.periods+1):(M_.maximum_lag+options_.periods+M_.maximum_lead);
 
 
 oo_ = simulation_core(options_, M_, oo_);
@@ -116,7 +116,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
         if isequal(iteration,1)
             oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = endoinit(:,1:options_.periods);
         elseif path_with_nans || path_with_cplx
-            oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = saved_endo_simul(:,1+M_.maximum_endo_lag:end-M_.maximum_endo_lead);
+            oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = saved_endo_simul(:,1+M_.maximum_lag:end-M_.maximum_lead);
         end
         
         saved_endo_simul = oo_.endo_simul;

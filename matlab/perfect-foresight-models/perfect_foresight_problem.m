@@ -1,10 +1,10 @@
 function [residuals,JJacobian] = perfect_foresight_problem(y, dynamic_function, Y0, YT, ...
                                            exo_simul, params, steady_state, ...
-                                           T, ny, i_cols, ...
+                                           maximum_lag, T, ny, i_cols, ...
                                            i_cols_J1, i_cols_1, i_cols_T, ...
                                            i_cols_j,nnzJ)
-% function perfect_foresight_problem(x, model_dynamic, Y0, YT,exo_simul,
-% params, steady_state, periods, ny, i_cols,i_cols_J1, i_cols_1,
+% function [residuals,JJacobian] = perfect_foresight_problem(x, model_dynamic, Y0, YT,exo_simul,
+% params, steady_state, maximum_lag, periods, ny, i_cols,i_cols_J1, i_cols_1,
 % i_cols_T, i_cols_j, nnzA) 
 % computes the residuals and th Jacobian matrix
 % for a perfect foresight problem over T periods.
@@ -19,7 +19,7 @@ function [residuals,JJacobian] = perfect_foresight_problem(y, dynamic_function, 
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 1996-2014 Dynare Team
+% Copyright (C) 1996-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -47,7 +47,7 @@ function [residuals,JJacobian] = perfect_foresight_problem(y, dynamic_function, 
     i_rows = 1:ny;
     i_cols_J = i_cols;
 
-    for it = 2:(T+1)
+    for it = maximum_lag+(1:T)
         if nargout == 1
             residuals(i_rows) = dynamic_function(YY(i_cols),exo_simul, params, ...
                                                          steady_state,it);

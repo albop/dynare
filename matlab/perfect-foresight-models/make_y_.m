@@ -51,6 +51,8 @@ else
     if ~isempty(ys0_)
         error('histval and endval cannot be used simultaneously')
     end
-    oo_.endo_simul = [M_.endo_histval ...
+    % the first NaNs take care of the case where there are lags > 1 on
+    % exogenous variables
+    oo_.endo_simul = [NaN(M_.endo_nbr,M_.maximum_lag-1) M_.endo_histval ...
                       oo_.steady_state*ones(1,options_.periods+M_.maximum_lead)];
 end
