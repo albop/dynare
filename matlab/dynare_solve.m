@@ -86,18 +86,18 @@ if options.solve_algo == 0
             error('You can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
         end
     end
-    options=optimset('fsolve');
-    options.MaxFunEvals = 50000;
-    options.MaxIter = options.steady.maxit;
-    options.TolFun = tolf;
-    options.Display = 'iter';
+    options4fsolve=optimset('fsolve');
+    options4fsolve.MaxFunEvals = 50000;
+    options4fsolve.MaxIter = options.steady.maxit;
+    options4fsolve.TolFun = tolf;
+    options4fsolve.Display = 'iter';
     if jacobian_flag
-        options.Jacobian = 'on';
+        Options4fsolve.Jacobian = 'on';
     else
-        options.Jacobian = 'off';
+        Options4fsolve.Jacobian = 'off';
     end
     if ~isoctave
-        [x,fval,exitval,output] = fsolve(func,x,options,varargin{:});
+        [x,fval,exitval,output] = fsolve(func,x,options4fsolve,varargin{:});
     else
         % Under Octave, use a wrapper, since fsolve() does not have a 4th arg
         func2 = str2func(func);
@@ -105,7 +105,7 @@ if options.solve_algo == 0
         % The Octave version of fsolve does not converge when it starts from the solution
         fvec = feval(func,x);
         if max(abs(fvec)) >= tolf
-            [x,fval,exitval,output] = fsolve(func,x,options);
+            [x,fval,exitval,output] = fsolve(func,x,options4fsolve);
         else
             exitval = 3;
         end;
