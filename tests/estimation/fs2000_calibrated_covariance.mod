@@ -1,7 +1,7 @@
 //two covariances are calibrated and one covariance of the ME. One of the calibrated covariances is superseded by estimation
 
 var m P c e W R k d n l gy_obs gp_obs y dA;
-varexo e_a e_m e_f;
+varexo e_a e_m;
 
 parameters alp bet gam mst rho psi del;
 
@@ -51,11 +51,9 @@ varobs gp_obs gy_obs;
 
 shocks;
 var e_a; stderr 0.01;
-var e_f; stderr 0.01;
 var gy_obs; stderr 0.01;
 var gy_obs, gp_obs= 0.00005;
 var e_a, e_m = 0.00005;
-var e_m, e_f = 0.00001;
 end;
 
 steady;
@@ -75,9 +73,6 @@ end;
 
 estimation(order=1,datafile=fsdat_simul,nobs=192, loglinear, mh_replic=2002, mh_nblocks=1, mh_jscale=0.8);
 
-if ~isequal(M_.Sigma_e(3,2),1e-5) || ~isequal(M_.Sigma_e(2,3),1e-5)
-    error('Problem in setting calibrated covariance of structural shocks')
-end
 if isequal(M_.Sigma_e(2,1),5e-5) || isequal(M_.Sigma_e(1,2),5e-5)
     error('Problem in overriding calibrated covariance of structural shocks by estimated correlation')
 end
