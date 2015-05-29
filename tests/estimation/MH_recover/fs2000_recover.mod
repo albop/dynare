@@ -124,7 +124,7 @@ estimation(order=1, datafile='../fsdat_simul',mode_compute=0,mode_file=fs2000_re
 
 %check first unaffected chain
 temp1=load('fs2000_mh1_blck1.mat');
-temp2=load([M_.dname filesep 'Metropolis' filesep 'fs2000_recover_mh1_blck1.mat']);
+temp2=load([M_.dname filesep 'metropolis' filesep 'fs2000_recover_mh1_blck1.mat']);
 
 if max(max(temp1.x2-temp2.x2))>1e-10
     error('Draws of unaffected chain are not the same')
@@ -132,7 +132,7 @@ end
 
 %check second, affected chain with last unaffected file
 temp1=load('fs2000_mh3_blck2.mat');
-temp2=load([M_.dname filesep 'Metropolis' filesep 'fs2000_recover_mh3_blck2.mat']);
+temp2=load([M_.dname filesep 'metropolis' filesep 'fs2000_recover_mh3_blck2.mat']);
 
 if max(max(temp1.x2-temp2.x2))>1e-10
     error('Draws of affected chain''s unaffected files are not the same')
