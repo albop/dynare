@@ -6807,6 +6807,24 @@ instrument.
 
 @end deffn
 
+@deffn Block ramsey_constraints
+@anchor{ramsey_constraints}
+
+@descriptionhead
+
+This block lets you define constraints on the variables in the Ramsey
+problem. The constraints take the form of a variable, an inequality
+operator (@code{>} or @code{<}) and a constant.
+
+@examplehead
+
+@example
+ramsey_constraints;
+i > 0;
+end;
+@end example
+@end deffn
+ 
 @deffn Command ramsey_policy [@var{VARIABLE_NAME}@dots{}];
 @deffnx Command ramsey_policy (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
 @anchor{ramsey_policy}

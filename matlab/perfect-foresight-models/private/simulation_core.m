@@ -66,7 +66,7 @@ else
             elseif options_.stack_solve_algo == 7
                 periods = options_.periods;
                 if ~isfield(options_.lmmcp,'lb')
-                    [lb,ub,pfm.eq_index] = get_complementarity_conditions(M_);
+                    [lb,ub,pfm.eq_index] = get_complementarity_conditions(M_,options_.ramsey_policy);
                     options_.lmmcp.lb = repmat(lb,periods,1);
                     options_.lmmcp.ub = repmat(ub,periods,1);
                 end
