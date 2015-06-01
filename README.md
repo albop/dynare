@@ -254,6 +254,7 @@ Configure and make:
 
 - Install the Xcode Command Line Tools:
     - Download "Command Line Tools (OS X 10.X) for Xcode," where 10.X corresponds to your OS X version, from https://developer.apple.com/downloads/index.action
+- Install the latest version of [MacTeX](http://www.tug.org/mactex/)
 - Install [Homebrew](http://mxcl.github.io/homebrew/) by following the instructions on the website
 - Tap [Homebrew Science](https://github.com/Homebrew/homebrew-science) by opening Terminal and typing:
     - ```brew tap homebrew/science```
@@ -270,7 +271,7 @@ Configure and make:
     - ```brew link --force bison```
 - **(Optional)** To compile Dynare mex files for use on Octave:
     - ```brew install octave```
-- **(Optional)** To compile Dynare's documentation, first install the latest version of [MacTeX](http://www.tug.org/mactex/). Then install `doxygen`, `latex2html` and `texi2html` via Homebrew with the following commands:
+- **(Optional)** To compile Dynare's documentation:
     - ```brew install doxygen```
     - ```brew install texinfo```
     - ```brew install latex2html```
