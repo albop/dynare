@@ -272,6 +272,9 @@ AIM/ls2003_2L2L_AIM.o.trs: AIM/ls2003_2L2L.o.trs
 estimation/fs2000_mf.m.trs: estimation/fs2000.m.trs
 estimation/fs2000_mf.o.trs: estimation/fs2000.o.trs
 
+optimizers/fs2000_102.m.trs: estimation/fs2000.m.trs
+optimizers/fs2000_102.o.trs: estimation/fs2000.o.trs
+
 arima/mod1a.m.trs: arima/mod1.m.trs
 arima/mod1b.m.trs: arima/mod1.m.trs
 arima/mod1c.m.trs: arima/mod1.m.trs
