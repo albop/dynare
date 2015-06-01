@@ -5,7 +5,7 @@ function [opt_par_values,fval,exitflag,hessian_mat,options_,Scale]=dynare_minimi
 % INPUTS
 %   objective_function  [function handle]                   handle to the objective function
 %   start_par_value     [n_params by 1] vector of doubles   starting values for the parameters
-%   minimizer_algorithm [scalar double]                     code of the optimizer algorithm
+%   minimizer_algorithm [scalar double, or string]          code of the optimizer algorithm, or string for the name of a user defined optimization routine (not shipped with dynare).
 %   options_            [matlab structure]                  Dynare options structure
 %   bounds              [n_params by 2] vector of doubles   2 row vectors containing lower and upper bound for parameters
 %   parameter_names     [n_params by 1] cell array          strings containing the parameters names   
