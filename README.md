@@ -257,30 +257,16 @@ Configure and make:
 - Install the latest version of [MacTeX](http://www.tug.org/mactex/)
 - Install [Homebrew](http://mxcl.github.io/homebrew/) by following the instructions on the website
 - Tap [Homebrew Science](https://github.com/Homebrew/homebrew-science) by opening Terminal and typing:
-    - ```brew tap homebrew/science```
-- Install the following brews:
-    - ```brew install gcc```
-    - ```brew install automake```
-    - ```brew install gsl```
-    - ```brew install bison```
-    - ```brew install boost```
-    - ```brew install libmatio --with-hdf5```
-    - ```brew install slicot --with-default-integer-8```
-- Force link ```flex``` and ```bison```
-    - ```brew link --force flex```
-    - ```brew link --force bison```
+- ```brew tap homebrew/science```
 - **(Optional)** To compile Dynare mex files for use on Octave:
     - ```brew install octave```
-- **(Optional)** To compile Dynare's documentation:
-    - ```brew install doxygen```
-    - ```brew install texinfo```
-    - ```brew install latex2html```
-    - ```brew install texi2html```
-- **(On OS X 10.7 Only)** Copy [FlexLexer.h](http://www.dynare.org/build/FlexLexer.h) into the `preprocessor` directory (there was an error in the `FlexLexer.h` file distributed with 10.7)
-- Ensure `/usr/local/bin` is at the beginning of your path:
-    - ```PATH=/usr/local/bin:$PATH```
-- Finally, switch to the root dynare directory and compile dynare
-    - `autoreconf -si`
-    - `./configure --with-matlab=/Applications/MATLAB_R2014b.app MATLAB_VERSION=8.4`
-    - `make`
-    - `make pdf TEXI2DVI=/usr/local/Cellar/texinfo/5.2/bin/texi2dvi`, where you replace everything after the equal sign with the path to the `texi2dvi` installed by homebrew when you installed `texinfo`.
+- To see the available options for compiling Dynare, type:
+    - ```brew info dynare```
+- Install Dynare via a command of the form:
+    - (basic) ```brew install dynare --HEAD --without-check```
+    - (with Matlab mex) ```brew install dynare --HEAD --without-check --with-matlab=/Applications/MATLAB_R2015a.app --with-matlab-version=8.5```
+- **NB**: If compiling Dynare documentation, add ```--with-doc``` to the installation command
+- **NB**: If not compiling Dynare mex files for Octave, add ```--without-octave``` to the installation command
+- **NB**: To compile the latest stable version of dynare, follow the same instructions as above, omitting the ```--HEAD``` argument
+- Once compilation is done, open Matlab and type the last line shown when you type ```brew info dynare``` in the Terminal window. With the typical Homebrew setup, this is:
+    - ```addpath /usr/local/opt/dynare/lib/dynare/matlab```
