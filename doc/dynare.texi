@@ -7801,9 +7801,11 @@ It completely offsets any use of the sensitivity analysis toolbox.
 
 Given a list of variables, observed variables and a data file, Dynare
 can be used to solve a Markov-switching SBVAR model according to
-@cite{Sims, Waggoner and Zha (2008)}. Having done this, you can create
-forecasts and compute the marginal data density, regime probabilities,
-IRFs, and variance decomposition of the model.
+@cite{Sims, Waggoner and Zha (2008)}.@footnote{If you want to align
+the paper with the description herein, please note that @math{A} is
+@math{A^0} and @math{F} is @math{A^+}.} Having done this, you can
+create forecasts and compute the marginal data density, regime
+probabilities, IRFs, and variance decomposition of the model.
 
 The commands have been modularized, allowing for multiple calls to the
 same command within a @code{<mod_file>.mod} file. The default is to use
