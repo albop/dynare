@@ -97,6 +97,7 @@ if info(1)==0,
             derivatives_info.DOm=dOm;
             derivatives_info.DYss=dYss;
             evalin('caller',['options_ident.ar=',int2str(nlags),';']);
+            indJJ = (find(max(abs(JJ'),[],1)>1.e-8));
         end
         if length(indJJ)<nparam,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
