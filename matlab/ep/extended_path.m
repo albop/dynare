@@ -156,7 +156,7 @@ end
 
 
 % set boundaries if mcp
-[lb,ub,pfm.eq_index] = get_complementarity_conditions(M_);
+[lb,ub,pfm.eq_index] = get_complementarity_conditions(M_, options_.ramsey_policy);
 options_.lmmcp.lb = repmat(lb,block_nbr,1);
 options_.lmmcp.ub = repmat(ub,block_nbr,1);
 pfm.block_nbr = block_nbr;
