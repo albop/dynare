@@ -58,7 +58,6 @@ end
 initperiods = 1:M_.maximum_lag;
 lastperiods = (M_.maximum_lag+options_.periods+1):(M_.maximum_lag+options_.periods+M_.maximum_lead);
 
-
 oo_ = simulation_core(options_, M_, oo_);
 
 % If simulation failed try homotopy.
@@ -66,8 +65,23 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
     skipline()
     disp('Simulation of the perfect foresight model failed!')
     disp('Switching to a homotopy method...')
+    if ~M_.maximum_lag
+        disp('Homotopy not implemented for purely forward models!')
+        disp('Failed to solve the model!')
+        disp('Return with empty oo_.endo_simul.')
+        oo_.endo_simul = [];
+        skipline()
+        return
+    end
+    if ~M_.maximum_lead
+        disp('Homotopy not implemented for purely backward models!')
+        disp('Failed to solve the model!')
+        disp('Return with empty oo_.endo_simul.')
+        oo_.endo_simul = [];
+        skipline()
+        return
+    end
     skipline()
-    
     % Disable warnings if homotopy
     warning_old_state = warning;
     warning off all
@@ -88,7 +102,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
 
     fprintf('Iter. \t | Lambda \t | status \t | Max. residual\n')
     fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
-    
+
     while (step > options_.dynatol.x)
 
         if ~isequal(step,1)
