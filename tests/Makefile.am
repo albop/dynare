@@ -124,6 +124,7 @@ MODFILES = \
 	seeds.mod \
 	identification/kim/kim2.mod \
 	identification/as2007/as2007.mod \
+	identification/ident_unit_root/ident_unit_root.mod \
 	simul/example1.mod \
 	simul/Solow_no_varexo.mod \
 	simul/simul_ZLB_purely_forward.mod \
