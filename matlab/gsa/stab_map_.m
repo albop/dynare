@@ -87,7 +87,7 @@ nshock = estim_params_.nvx;
 nshock = nshock + estim_params_.nvn;
 nshock = nshock + estim_params_.ncx;
 nshock = nshock + estim_params_.ncn;
-lpmat0=[];
+lpmat0=zeros(Nsam,0);
 xparam1=[];
 
 pshape = bayestopt_.pshape(nshock+1:end);
@@ -143,7 +143,7 @@ if fload==0,
                 end
             end
         else %ilptau==0
-            %[lpmat] = rand(Nsam,np);
+            [lpmat] = NaN(Nsam,np);
             for j=1:np,
                 lpmat(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
             end
@@ -242,6 +242,7 @@ if fload==0,
         else
             d = chol(inv(hh));
             lp=randn(Nsam*2,nshock+np)*d+kron(ones(Nsam*2,1),xparam1');
+            lnprior=zeros(1,Nsam*2);
             for j=1:Nsam*2,
                 lnprior(j) = any(lp(j,:)'<=bounds.lb | lp(j,:)'>=bounds.ub);
             end
@@ -263,6 +264,7 @@ if fload==0,
     iwrong=zeros(1,Nsam);
     inorestriction=zeros(1,Nsam);
     irestriction=zeros(1,Nsam);
+    infox=zeros(1,Nsam);
     for j=1:Nsam,
         M_ = set_all_parameters([lpmat0(j,:) lpmat(j,:)]',estim_params_,M_);
         %try stoch_simul([]);
@@ -273,7 +275,7 @@ if fload==0,
                 [Tt,Rr,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_,'restrict');
             end
             infox(j,1)=info(1);
-            if infox(j,1)==0 && ~exist('T'),
+            if infox(j,1)==0 && ~exist('T','var'),
                 dr_=oo_.dr;
                 if prepSA,
                     try
@@ -321,7 +323,7 @@ if fload==0,
                 %           bayestopt_.restrict_columns, ...
                 %           bayestopt_.restrict_aux);
             end
-            if ~exist('nspred'),
+            if ~exist('nspred','var'),
                 nspred = dr_.nspred; %size(dr_.ghx,2);
                 nboth = dr_.nboth;
                 nfwrd = dr_.nfwrd;
@@ -339,7 +341,7 @@ if fload==0,
             istable(j)=0;
             if isfield(dr_,'eigval')
                 egg(:,j) = sort(dr_.eigval);
-                if exist('nspred')
+                if exist('nspred','var')
                     if any(isnan(egg(1:nspred,j)))
                         iwrong(j)=j;
                     else
@@ -349,7 +351,7 @@ if fload==0,
                     end
                 end
             else
-                if exist('egg'),
+                if exist('egg','var'),
                     egg(:,j)=ones(size(egg,1),1).*NaN;
                 end
                 iwrong(j)=j;
@@ -457,6 +459,7 @@ else
         stoch_simul([]);
         %T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),length(istable));
         ntrans=length(istable);
+        yys=NaN(length(ys_),ntrans);
         for j=1:ntrans,
             M_.params(estim_params_.param_vals(:,1)) = lpmat(istable(j),:)';
             %stoch_simul([]);
@@ -465,12 +468,12 @@ else
             %[Tt,Rr,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
             %    bayestopt_.restrict_columns,...
             %    bayestopt_.restrict_aux);
-            if ~exist('T')
+            if ~exist('T','var')
                 T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),ntrans);
             end
             dr_ = oo_.dr;
             T(:,:,j) = [dr_.ghx dr_.ghu];
-            if ~exist('nspred')
+            if ~exist('nspred','var')
                 nspred = dr_.nspred; %size(dr_.ghx,2);
                 nboth = dr_.nboth;
                 nfwrd = dr_.nfwrd;
