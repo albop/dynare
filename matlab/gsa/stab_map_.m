@@ -96,7 +96,18 @@ p2 = bayestopt_.p2(nshock+1:end);
 p3 = bayestopt_.p3(nshock+1:end);
 p4 = bayestopt_.p4(nshock+1:end);
 
-bounds = prior_bounds(bayestopt_,options_);
+[junk1,junk2,junk3,lb,ub,junk4] = set_prior(estim_params_,M_,options_); %Prepare bounds
+if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
+    % Set prior bounds
+    bounds = prior_bounds(bayestopt_,options_);
+    bounds.lb = max(bounds.lb,lb);
+    bounds.ub = min(bounds.ub,ub);
+else  % estimated parameters but no declared priors
+    % No priors are declared so Dynare will estimate the model by
+    % maximum likelihood with inequality constraints for the parameters.
+    bounds.lb = lb;
+    bounds.ub = ub;
+end
 
 if nargin==0,
     OutputDirectoryName='';
@@ -151,7 +162,7 @@ if fload==0,
         end
     end
     %   try
-    dummy=prior_draw_gsa(1);
+%     dummy=prior_draw_gsa(1);
     %   catch
     %     if pprior,
     %       if opt_gsa.prior_range==0;
