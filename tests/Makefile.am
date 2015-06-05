@@ -6,6 +6,7 @@ MODFILES = \
 	estimation/t_proposal/fs2000_student.mod \
 	gsa/ls2003.mod \
 	gsa/ls2003a.mod \
+	gsa/cod_ML_morris/cod_ML_morris.mod \
 	ramst.mod \
 	ramst_a.mod \
 	ramst_static_tag.mod \
