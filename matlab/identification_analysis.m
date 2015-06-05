@@ -86,7 +86,7 @@ if info(1)==0,
     if init,
         indJJ = (find(max(abs(JJ'),[],1)>1.e-8));
         if isempty(indJJ) && any(any(isnan(JJ)))
-            error('There are NaN in the JJ matrix. Please check whether your model has units roots and you forgot to set lik_init~=1.' )
+            error('There are NaN in the JJ matrix. Please check whether your model has units roots and you forgot to set diffuse_filter=1.' )
         end
         while length(indJJ)<nparam && nlags<10,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
