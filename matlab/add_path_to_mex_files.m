@@ -21,7 +21,7 @@ if nargin<2
     modifypath = true;
 end
     
-if isoctave
+if exist('OCTAVE_VERSION')
     mexpath = {[dynareroot '../mex/octave/']};
     if modifypath
         addpath(mexpath{1});
