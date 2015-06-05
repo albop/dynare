@@ -5358,6 +5358,7 @@ decomposition of the above k-step ahead filtered values. Stores results in @code
 
 
 @item diffuse_filter
+@anchor{diffuse_filter}
 Uses the diffuse Kalman filter (as described in
 @cite{Durbin and Koopman (2012)} and @cite{Koopman and Durbin
 (2003)}) to estimate models with non-stationary observed variables.
