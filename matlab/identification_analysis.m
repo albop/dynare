@@ -118,14 +118,14 @@ if info(1)==0,
     ide_strength_J_prior=NaN(1,nparam);
     if init, %~isempty(indok),
         normaliz = abs(params);
-        if prior_exist,
+        if prior_exist,           
             if ~isempty(estim_params_.var_exo),
-                normaliz1 = estim_params_.var_exo(:,7); % normalize with prior standard deviation
+                normaliz1 = estim_params_.var_exo(:,7)'; % normalize with prior standard deviation
             else
                 normaliz1=[];
             end
             if ~isempty(estim_params_.param_vals),
-                normaliz1 = [normaliz1; estim_params_.param_vals(:,7)]'; % normalize with prior standard deviation
+                normaliz1 = [normaliz1 estim_params_.param_vals(:,7)']; % normalize with prior standard deviation
             end
             %                         normaliz = max([normaliz; normaliz1]);
             normaliz1(isinf(normaliz1)) = 1;
