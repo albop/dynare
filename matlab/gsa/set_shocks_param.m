@@ -69,7 +69,7 @@ end
 %diagonal
 Sigma_e = diag(sqrt(diag(Sigma_e)))*Correlation_matrix*diag(sqrt(diag(Sigma_e))); 
 %if calibrated covariances, set them now to their stored value
-if isfield(estim_params,'calibrated_covariances')
+if isfield(estim_params_,'calibrated_covariances')
     Sigma_e(estim_params_.calibrated_covariances.position)=estim_params_.calibrated_covariances.cov_value;
 end
 % update offset
@@ -89,7 +89,7 @@ end
 %diagonal
 H = diag(sqrt(diag(H)))*Correlation_matrix_ME*diag(sqrt(diag(H)));
 %if calibrated covariances, set them now to their stored value
-if isfield(estim_params,'calibrated_covariances_ME')
+if isfield(estim_params_,'calibrated_covariances_ME')
     H(estim_params_.calibrated_covariances_ME.position)=estim_params_.calibrated_covariances_ME.cov_value;
 end
 
