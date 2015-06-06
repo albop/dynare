@@ -162,7 +162,7 @@ if fload==0,
         end
     end
     %   try
-%     dummy=prior_draw_gsa(1);
+    dummy=prior_draw_gsa(1); %initialize persistent variables
     %   catch
     %     if pprior,
     %       if opt_gsa.prior_range==0;
