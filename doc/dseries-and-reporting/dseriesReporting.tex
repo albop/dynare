@@ -240,9 +240,9 @@ would be transformed into
 \begin{alltt}
   disp(`In dates(`1999q1'), ...')
 \end{alltt}
-      \myitem To fix this, simply prefix any date that you don't want transformed by the preprocessor with a `\texttt{\$}'
+      \myitem To fix this, simply prefix any date that you don't want transformed by the preprocessor with a `\texttt{\$}': \texttt{disp(`In \$1999q1, ...')}
 \begin{alltt}
-  disp(`In $1999q1, ...')
+  \(\Rightarrow\) disp(`In 1999q1, ...')
 \end{alltt}
 
   \end{itemize}
