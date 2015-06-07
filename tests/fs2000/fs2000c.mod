@@ -35,18 +35,27 @@ M-M(-1)+d = l;
 y = k(-1)^alp*(A*n)^(1-alp);
 end;
 
-initval;
-k = 6;
-gM = mst;
-P = 2.25;
-c = 0.45;
-W = 4;
-R = 1.02;
-d = 0.85;
-n = 0.19;
-l = 0.86;
-y = 0.6;
-gA = exp(gam);
+steady_state_model;
+  gA = exp(gam);
+  gst = 1/gA;
+  gM = mst;
+  khst = ( (1-gst*bet*(1-del)) / (alp*gst^alp*bet) )^(1/(alp-1));
+  xist = ( ((khst*gst)^alp - (1-gst*(1-del))*khst)/mst )^(-1);
+  nust = psi*mst^2/( (1-alp)*(1-psi)*bet*gst^alp*khst^alp );
+  n  = xist/(nust+xist);
+  P  = xist + nust;
+  k  = khst*n;
+
+  l  = psi*mst*n/( (1-psi)*(1-n) );
+  c  = mst/P;
+  d  = l - mst + 1;
+  y  = k^alp*n^(1-alp)*gst^alp;
+  R  = mst/bet;
+  W  = l/n;
+  ist  = y-c;
+  q  = 1 - d;
+
+  e = 1;
 end;
 
 shocks;

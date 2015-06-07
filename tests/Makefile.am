@@ -353,8 +353,6 @@ EXTRA_DIST = \
 	printMakeCheckOctaveErrMsg.m \
 	fataltest.m \
 	AIM/data_ca1.m \
-	AIM/fs2000_b1L1L_AIM_steadystate.m \
-	AIM/fs2000_b1L1L_steadystate.m \
 	AIM/fsdat.m \
 	block_bytecode/run_ls2003.m \
 	bvar_a_la_sims/bvar_sample.m \
@@ -365,12 +363,10 @@ EXTRA_DIST = \
 	steady_state/walsh1_old_ss_steadystate.m \
 	data/test.xls \
 	analytic_derivatives/fsdat_simul.m \
-	fs2000/fs2000a_steadystate.m \
 	fs2000/fsdat_simul.m \
 	k_order_perturbation/run_fs2000kplusplus.m \
 	ls2003/data_ca1.m \
 	measurement_errors/data_ca1.m \
-	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME_steadystate.m \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fsdat_simul.m \
 	missing/simulate_data_with_missing_observations.m \
 	objectives/sgu_ex1.mat \
@@ -393,18 +389,14 @@ EXTRA_DIST = \
 	ms-sbvar/archive-files/specification_2v2c.dat \
 	recursive/data_ca1.m \
 	kalman_filter_smoother/fsdat_simul.m \
-	kalman_filter_smoother/fs2000a_steadystate.m \
 	identification/kim/kim2_steadystate.m \
+	identification/as2007/as2007_steadystate.m \
 	estimation/fsdat_simul.m \
 	ep/mean_preserving_spread.m \
 	third_order/comparison_policy_functions_dynare_mathematica.m \
 	third_order/policyfunctions.mat \
 	shock_decomposition/example1_calib_shock_decomp_data.mat \
 	shock_decomposition/fsdat_simul.m \
-	estimation/fs2000_MCMC_jumping_covariance_steadystate.m \
-	estimation/fs2000_initialize_from_calib_steadystate.m \
-	filter_step_ahead/fs2000_filter_step_ahead_bayesian_steadystate.m \
-	filter_step_ahead/fs2000_filter_step_ahead_ML_steadystate.m \
 	loglinear/results_exp.mat \
 	smoother2histval/fsdat_simul.m \
 	optimal_policy/Ramsey/find_c.m \
