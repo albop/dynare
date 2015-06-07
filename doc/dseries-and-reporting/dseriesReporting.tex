@@ -34,7 +34,7 @@
 \title{Dynare Time Series \& Reporting}
 \author[Houtan Bastani]{Houtan Bastani\newline\href{mailto:houtan@dynare.org}{houtan@dynare.org}}
 \institute{CEPREMAP}
-\date{13 June 2014}
+\date{11 June 2015}
 
 \newcommand{\myitem}{\item[$\bullet$]}
 
@@ -70,7 +70,8 @@
     \myitem Windows, Mac OS X, Linux
     \myitem Matlab 7.5 (R2007b) or later, Octave
     \end{itemize}
-  \myitem NB: More complete information is included in the Dynare manual
+  \myitem Must run \texttt{dynare} or \texttt{dynare\_config} at least once in the current Matlab/Octave session before use
+  \myitem More complete information is included in the Dynare manual
   \end{itemize}
 \end{frame}
 
@@ -167,14 +168,14 @@ X =
 \begin{frame}[fragile,t]
   \frametitle{\texttt{dates} Syntax}
   \begin{itemize}
-    \myitem The \texttt{dates} command creates an object that represents at least one date at a given frequency
+    \myitem The \texttt{dates} command creates an object that represents zero or more dates at a given frequency
     \myitem A \texttt{dates} object contains 3 members (fields):
     \begin{itemize}
       \myitem{\textbf{\texttt{freq}}}: 1, `y' (Annual); 4, `q' (Quarterly); 12, `m' (Monthly); 52, `w' (Weekly)
       \myitem{\textbf{\texttt{ndat}}}: The number of dates
       \myitem{\textbf{\texttt{time}}}: An \texttt{ndat$\times$2} matrix; the 1\textsuperscript{st} col is the year and the 2\textsuperscript{nd} col is the period
     \end{itemize}
-    \myitem \texttt{dseries} members cannot be modified. Thus, this is not allowed:
+    \myitem \texttt{dates} members cannot be modified. Thus, this is not allowed
 \begin{alltt}
   >> dd.freq = 12;
 \end{alltt}
@@ -239,7 +240,7 @@ would be transformed into
 \begin{alltt}
   disp(`In dates(`1999q1'), ...')
 \end{alltt}
-      \myitem To fix this, simply escape any date that you don't want transformed by the preprocessor with a `\texttt{\$}'
+      \myitem To fix this, simply prefix any date that you don't want transformed by the preprocessor with a `\texttt{\$}'
 \begin{alltt}
   disp(`In $1999q1, ...')
 \end{alltt}
@@ -334,7 +335,7 @@ would be transformed into
     \myitem \texttt{setdiff}: returns dates present in first arg but not in second
     \begin{alltt}
   >> setdiff(a, b)
-  ans = <dates: 1900Y>
+  ans = <dates: 1990Q1, 1990Q2>
     \end{alltt}
     \myitem \texttt{union}: returns the union of two sets (repititions removed)
     \begin{alltt}
@@ -354,7 +355,7 @@ would be transformed into
 \begin{frame}[fragile,t]
   \frametitle{Misc \texttt{dates} operations}
   \begin{itemize}
-    \myitem Can index a \texttt{dates} object.
+    \myitem Can index a \texttt{dates} object
     \begin{alltt}
   >> a = dates(`2000y'):dates(`2009y');
   >> a(1)
@@ -386,7 +387,7 @@ would be transformed into
 \begin{frame}[fragile,t]
   \frametitle{\texttt{dseries} Syntax}
   \begin{itemize}
-    \myitem A \texttt{dseries} is composed of one or more individual time series
+    \myitem A \texttt{dseries} is composed of zero or more individual time series
     \myitem All time series in a \texttt{dseries} must have the same frequency
     \myitem A \texttt{dseries} runs from the earliest date to the latest date,
     with \texttt{NaN}'s inserted to pad the shorter series
@@ -447,7 +448,7 @@ would be transformed into
       cons = randn(100,1);
     \end{alltt}
   \end{itemize}
-  Create an empty time series. Usefull for programatically creating a series.
+  Create an empty time series. Useful for programatically creating a series.
   \begin{itemize}
     \myitem \texttt{ts=dseries();}
     \myitem \texttt{ts=dseries(dates(`1999y'));}
@@ -459,8 +460,11 @@ would be transformed into
 \begin{frame}[fragile,t]
   \frametitle{Creating subsamples from a \texttt{dseries}}
   \begin{itemize}
-    \myitem Let \texttt{ts} be a \texttt{dseries} with $N$ variables and 5
+    \myitem Let \texttt{ts} be a \texttt{dseries} with $3$ variables and 5
     observations from \texttt{2000Y} to \texttt{2004Y}
+    \begin{alltt}
+  ts=dseries(randn(5,3), '2000y')
+    \end{alltt}
     \myitem To obtain a subsample from \texttt{2001Y} to \texttt{2003Y}
     \begin{alltt}
   ts(2001Y:2003Y)
@@ -874,8 +878,8 @@ shocke = dseries();
 shocku = dseries();
 @#define endovars=["y", "c", "k", "a", "h", "b"]
 @#for var in endovars
-  shocke = [shocke dseries(@{var}_e, 2014q3, '@{var}')];
-  shocku = [shocku dseries(@{var}_u, 2014q3, '@{var}')];
+  shocke = [shocke dseries(@{var}_e, 2014q3, `@{var}')];
+  shocku = [shocku dseries(@{var}_u, 2014q3, `@{var}')];
 @#endfor
 \end{verbatim}
   \end{block}
