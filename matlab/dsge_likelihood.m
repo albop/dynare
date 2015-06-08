@@ -352,7 +352,7 @@ if (kalman_algo == 2) || (kalman_algo == 4)
             Q = blkdiag(Q,H);
             R = blkdiag(R,eye(pp));
             Pstar = blkdiag(Pstar,H);
-            Pinf  = blckdiag(Pinf,zeros(pp));
+            Pinf  = blkdiag(Pinf,zeros(pp));
             H = zeros(pp,1);
             mmm   = mm+pp;
         end
@@ -436,7 +436,7 @@ switch DynareOptions.lik_init
                 Q = blkdiag(Q,H);
                 R = blkdiag(R,eye(pp));
                 Pstar = blkdiag(Pstar,H);
-                Pinf  = blckdiag(Pinf,zeros(pp));
+                Pinf  = blkdiag(Pinf,zeros(pp));
                 H1 = zeros(pp,1);
                 mmm   = mm+pp;
             end
@@ -726,7 +726,7 @@ if (kalman_algo==2) || (kalman_algo==4)
                 Q = blkdiag(Q,H);
                 R = blkdiag(R,eye(pp));
                 Pstar = blkdiag(Pstar,H);
-                Pinf  = blckdiag(Pinf,zeros(pp));
+                Pinf  = blkdiag(Pinf,zeros(pp));
                 H1 = zeros(pp,1);
                 mmm   = mm+pp;
             end
