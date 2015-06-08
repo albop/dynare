@@ -107,6 +107,10 @@ else  % estimated parameters but no declared priors
     % maximum likelihood with inequality constraints for the parameters.
     bounds.lb = lb;
     bounds.ub = ub;
+    if opt_gsa.prior_range==0
+        warning('GSA:: When using ML, sampling from the prior is not possible. Setting prior_range=1')
+        opt_gsa.prior_range=1;
+    end
 end
 
 if nargin==0,
