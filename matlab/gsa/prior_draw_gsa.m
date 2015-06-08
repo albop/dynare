@@ -42,7 +42,7 @@ function pdraw = prior_draw_gsa(init,rdraw)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global bayestopt_ options_
+global bayestopt_ options_ estim_params_ M_
 persistent npar pshape p6 p7 p3 p4 lbcum ubcum
   
 if init
@@ -55,7 +55,18 @@ if init
     pdraw = zeros(npar,1);
     lbcum = zeros(npar,1);
     ubcum = ones(npar,1);
-    bounds = prior_bounds(bayestopt_,options_);
+    [junk1,junk2,junk3,lb,ub,junk4] = set_prior(estim_params_,M_,options_); %Prepare bounds
+    if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
+        % Set prior bounds
+        bounds = prior_bounds(bayestopt_,options_);
+        bounds.lb = max(bounds.lb,lb);
+        bounds.ub = min(bounds.ub,ub);
+    else  % estimated parameters but no declared priors
+        % No priors are declared so Dynare will estimate the model by
+        % maximum likelihood with inequality constraints for the parameters.
+        bounds.lb = lb;
+        bounds.ub = ub;
+    end
     % set bounds for cumulative probabilities
     for i = 1:npar
       switch pshape(i)
@@ -63,8 +74,8 @@ if init
           p4(i) = min(p4(i),bounds.ub(i));
           p3(i) = max(p3(i),bounds.lb(i));
         case 3% Gaussian prior.
-          lbcum(i) = 0.5 * erfc(-(bounds.lb(i)-p6(i))/p7(i) ./ sqrt(2));;
-          ubcum(i) = 0.5 * erfc(-(bounds.ub(i)-p6(i))/p7(i) ./ sqrt(2));;
+          lbcum(i) = 0.5 * erfc(-(bounds.lb(i)-p6(i))/p7(i) ./ sqrt(2));
+          ubcum(i) = 0.5 * erfc(-(bounds.ub(i)-p6(i))/p7(i) ./ sqrt(2));
         case 2% Gamma prior.
           lbcum(i) = gamcdf(bounds.lb(i)-p3(i),p6(i),p7(i));
           ubcum(i) = gamcdf(bounds.ub(i)-p3(i),p6(i),p7(i));

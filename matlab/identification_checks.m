@@ -82,7 +82,7 @@ end
 
 
 ixnoJ = 0;
-if rankJ<npar || rankJJ<npar || min(1-McoJ)<1.e-10
+if npar>0 && (rankJ<npar || rankJJ<npar || min(1-McoJ)<1.e-10)
     %         - find out which parameters are involved
     %   disp('Some parameters are NOT identified by the moments included in J')
     %   disp(' ')

@@ -5358,6 +5358,7 @@ decomposition of the above k-step ahead filtered values. Stores results in @code
 
 
 @item diffuse_filter
+@anchor{diffuse_filter}
 Uses the diffuse Kalman filter (as described in
 @cite{Durbin and Koopman (2012)} and @cite{Koopman and Durbin
 (2003)}) to estimate models with non-stationary observed variables.
@@ -7238,8 +7239,8 @@ for identification analysis. Default: @code{0}
 @item ar = @var{INTEGER}
 Maximum number of lags for moments in identification analysis. Default: @code{1}
 
-@item lik_init = @var{INTEGER}
-@xref{lik_init}.
+@item diffuse_filter = @var{INTEGER}
+@xref{diffuse_filter}.
 
 @end table
 

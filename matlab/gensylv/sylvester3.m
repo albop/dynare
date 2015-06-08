@@ -52,6 +52,7 @@ else
 end
 i = 1;
 c = zeros(n,1,p);
+c1 = zeros(n,1,p);
 while i < m
     if t(i+1,i) == 0
         if i == 1

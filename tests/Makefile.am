@@ -6,6 +6,7 @@ MODFILES = \
 	estimation/t_proposal/fs2000_student.mod \
 	gsa/ls2003.mod \
 	gsa/ls2003a.mod \
+	gsa/cod_ML_morris/cod_ML_morris.mod \
 	ramst.mod \
 	ramst_a.mod \
 	ramst_static_tag.mod \
@@ -124,6 +125,9 @@ MODFILES = \
 	seeds.mod \
 	identification/kim/kim2.mod \
 	identification/as2007/as2007.mod \
+	identification/ident_unit_root/ident_unit_root.mod \
+	identification/rbc_ident/rbc_ident_std_as_structural_par.mod \
+	identification/rbc_ident/rbc_ident_varexo_only.mod \
 	simul/example1.mod \
 	simul/Solow_no_varexo.mod \
 	simul/simul_ZLB_purely_forward.mod \
@@ -304,6 +308,8 @@ deterministic_simulations/rbc_det_exo_lag_2c.o.trs: deterministic_simulations/rb
 initval_file/ramst_initval_file.m.trs: initval_file/ramst_initval_file_data.m.tls
 initval_file/ramst_initval_file.o.trs: initval_file/ramst_initval_file_data.o.tls
 
+identification/rbc_ident/rbc_ident_varexo_only.m.trs: identification/rbc_ident/rbc_ident_std_as_structural_par.m.trs
+identification/rbc_ident/rbc_ident_varexo_only.o.trs: identification/rbc_ident/rbc_ident_std_as_structural_par.o.trs
 
 
 # Matlab TRS Files
