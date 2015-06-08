@@ -110,6 +110,10 @@ else
     clear('dseriesobjectforuserdataset');
 end
 
+if size(unique(DynareDataset.name),1)~=size(DynareDataset.name,1)
+    error('makedataset: the data set must not contain two variables with the same name and must not contain empty/non-named columns.')
+end
+
 % Select a subset of the variables.
 DynareDataset = DynareDataset{DynareOptions.varobs{:}};
 
