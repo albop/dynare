@@ -436,10 +436,10 @@ would be transformed into
   >> ts = dseries(FILENAME);
     \end{alltt}
     \myitem File format (\texttt{.csv, .xls}): dates (optional) in first column (using the
-    standard format: 199Q1 for quarterly data, 1990Y for annual data, \dots) and variable
+    standard format: 1990Q1 for quarterly data, 1990Y for annual data, \dots) and variable
     names (optional) in the first row
-    \myitem File format (\texttt{.m, .mat}): must define the variables \texttt{INIT\_\_},
-    \texttt{NAMES\_\_}, and, optionally, \texttt{TEX\_\_}. More info in the
+    \myitem File format (\texttt{.m, .mat}): variables \texttt{INIT\_\_},
+    \texttt{NAMES\_\_}, and \texttt{TEX\_\_} are optional. More info in the
     manual. Data are vectors.
     \begin{alltt}
       INIT__ = `1999q1';
