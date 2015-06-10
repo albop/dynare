@@ -24,7 +24,7 @@
 {
   \begin{frame}
     \frametitle{Outline}
-    \tableofcontents[currentsection]
+    \tableofcontents[currentsection, hideothersubsections]
   \end{frame}
 }
 
@@ -86,8 +86,8 @@
       \myitem A class is a template for defining objects, defining their member
       variables and methods.
       \begin{itemize}
-        \myitem \textit{e.g.,} The \texttt{dates} class defines 3 member
-        variables--\texttt{ndat}, \texttt{freq}, and \texttt{time}--and many
+        \myitem \textit{e.g.,} The \texttt{dates} class defines 2 member
+        variables--\texttt{freq} and \texttt{time}--and many
         methods (analogous to functions)
       \end{itemize}
       \myitem An object is an instance of a specific class. For exemplary
@@ -172,8 +172,7 @@ X =
     \myitem A \texttt{dates} object contains 3 members (fields):
     \begin{itemize}
       \myitem{\textbf{\texttt{freq}}}: 1, `y' (Annual); 4, `q' (Quarterly); 12, `m' (Monthly); 52, `w' (Weekly)
-      \myitem{\textbf{\texttt{ndat}}}: The number of dates
-      \myitem{\textbf{\texttt{time}}}: An \texttt{ndat$\times$2} matrix; the 1\textsuperscript{st} col is the year and the 2\textsuperscript{nd} col is the period
+      \myitem{\textbf{\texttt{time}}}: A \texttt{<<No of dates>>$\times$2} matrix; the 1\textsuperscript{st} col is the year and the 2\textsuperscript{nd} col is the period
     \end{itemize}
     \myitem \texttt{dates} members cannot be modified. Thus, this is not allowed
 \begin{alltt}
@@ -463,7 +462,7 @@ would be transformed into
     \myitem Let \texttt{ts} be a \texttt{dseries} with $3$ variables and 5
     observations from \texttt{2000Y} to \texttt{2004Y}
     \begin{alltt}
-  ts=dseries(randn(5,3), '2000y')
+  ts=dseries(randn(5,3), `2000y')
     \end{alltt}
     \myitem To obtain a subsample from \texttt{2001Y} to \texttt{2003Y}
     \begin{alltt}
