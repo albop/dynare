@@ -116,13 +116,9 @@ for shock=1:ny
     figure('Name',['Posterior BVAR Impulse Responses (shock in equation ' int2str(shock) ').']);
     for variable=1:ny
         subplot(number_of_rows,number_of_columns,variable);
-        h1 = area(1:options_.irf,squeeze(posterior_up_conf_irfs(shock,variable,:)));
-        set(h1,'BaseValue',min([min(posterior_up_conf_irfs(shock,variable,:)),min(posterior_down_conf_irfs(shock,variable,:))]))
-        set(h1,'FaceColor',[.9 .9 .9])
+        h1 = area(1:options_.irf,squeeze(posterior_up_conf_irfs(shock,variable,:)),'FaceColor',[.9 .9 .9],'BaseValue',min([min(posterior_up_conf_irfs(shock,variable,:)),min(posterior_down_conf_irfs(shock,variable,:))]));
         hold on
-        h2 = area(1:options_.irf,squeeze(posterior_down_conf_irfs(shock,variable,:)));
-        set(h2,'BaseValue',min([min(posterior_up_conf_irfs(shock,variable,:)),min(posterior_down_conf_irfs(shock,variable,:))]))
-        set(h2,'FaceColor',[1 1 1])
+        h2 = area(1:options_.irf,squeeze(posterior_down_conf_irfs(shock,variable,:)),'FaceColor',[1 1 1],'BaseValue',min([min(posterior_up_conf_irfs(shock,variable,:)),min(posterior_down_conf_irfs(shock,variable,:))]));
         plot(1:options_.irf,squeeze(posterior_median_irfs(shock,variable,:)),'-k','linewidth',2)
         axis tight
         hold off
