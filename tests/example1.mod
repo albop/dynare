@@ -4,7 +4,7 @@ varexo e, u;
 
 verbatim;
 % I want these comments included in
-% example1.m
+% example1.m 1999q1 1999y
 %
 var = 1;
 end;
