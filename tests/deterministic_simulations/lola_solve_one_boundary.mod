@@ -1,6 +1,12 @@
 //  Based on Luca Marchiori/Olivier Pierrard(2012) LOLA 2.0: Luxembourg OverLapping generation model for policy Analysis
 // Involves a call to solve_one_boundary.m that is tested here
 
+if ~isoctave() && ~matlab_ver_less_than('8.4')
+   websave('lola_data.mat','http://www.dynare.org/Datasets/lola_data.mat')
+else
+   urlwrite('http://www.dynare.org/Datasets/lola_data.mat','lola_data.mat')
+end
+
 load lola_data.mat
 
 % ====================================================
