@@ -75,7 +75,7 @@ if info(1)==0,
     tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); dyn_vech(B*M_.Sigma_e*B')];
     yy0=oo_.dr.ys(I);
     [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, ...
-        oo_.exo_steady_state', M_.params, ...
+        repmat(oo_.exo_steady_state',[M_.maximum_exo_lag+M_.maximum_exo_lead+1]), M_.params, ...
         oo_.dr.ys, 1);
     vg1 = [oo_.dr.ys(oo_.dr.order_var); vec(g1)];
 
@@ -118,7 +118,7 @@ if info(1)==0,
     ide_strength_J_prior=NaN(1,nparam);
     if init, %~isempty(indok),
         normaliz = abs(params);
-        if prior_exist,           
+        if prior_exist,
             if ~isempty(estim_params_.var_exo),
                 normaliz1 = estim_params_.var_exo(:,7)'; % normalize with prior standard deviation
             else
