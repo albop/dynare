@@ -196,5 +196,8 @@ We no longer support compilation on Windows. To use the unstable version of Dyna
 - **NB**: If compiling Dynare documentation, add ```--with-doc``` to the installation command
 - **NB**: If not compiling Dynare mex files for Octave, add ```--without-octave``` to the installation command
 - **NB**: To compile the latest stable version of dynare, follow the same instructions as above, omitting the ```--HEAD``` argument
+- **NB**: To update a ```--HEAD``` install of dynare you need to uninstall it then install it again: ```brew uninstall dynare; brew install dynare --HEAD```.
+- **NB**: If you want to maintain a separate git directory of dynare, you can do a ```--HEAD``` install of dynare, then uninstall it. This will have the effect of bringing in all the dependencies you will need to then compile dynare from your git directory. Then, change to the git directory and type:
+    - ```autoreconf -si; ./configure --with-matlab=/Applications/MATLAB_R2015a.app MATLAB_VERSION=R2015a```, adjusting the Matlab path and version to accord with your version
 - Once compilation is done, open Matlab and type the last line shown when you type ```brew info dynare``` in the Terminal window. With the typical Homebrew setup, this is:
     - ```addpath /usr/local/opt/dynare/lib/dynare/matlab```
