@@ -4797,7 +4797,7 @@ Default value is @code{1}. For advanced use only.
 For internal use and testing only.
 
 @item conf_sig = @var{DOUBLE}
-Confidence interval used for classical forecasting after estimation. See @xref{conf_sig}.
+Confidence interval used for classical forecasting after estimation. @xref{conf_sig}.
 
 @item mh_conf_sig = @var{DOUBLE}
 @anchor{mh_conf_sig} 
@@ -4949,6 +4949,11 @@ value of that function as the posterior mode.
 @noindent
 Default value is @code{4}.
 
+@item silent_optimizer
+@anchor{silent_optimizer}
+Instructs Dynare to run mode computing/optimization silently without displaying results or 
+saving files in between. Useful when running loops.
+
 @item mcmc_jumping_covariance = hessian|prior_variance|identity_matrix|@var{FILENAME}
 Tells Dynare which covariance to use for the proposal density of the MCMC sampler. @code{mcmc_jumping_covariance} can be one of the following:
 
@@ -5074,6 +5079,12 @@ Size of the perturbation used to compute numerically the gradient of the objecti
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-7}
 
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
+@item 'SaveFiles'
+Controls saving of intermediate results during optimization. Set to 0 to shut off saving. Default: @code{1}
+
 @end table
 
 @item 5
@@ -5092,6 +5103,12 @@ Maximum number of iterations. Default: @code{1000}
 
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-5} for numerical derivatives @code{1e-7} for analytic derivatives.
+
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
+@item 'SaveFiles'
+Controls saving of intermediate results during optimization. Set to 0 to shut off saving. Default: @code{1}
 
 @end table
 
@@ -5143,6 +5160,9 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
 
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
 @end table
 
 @item 9
@@ -5161,6 +5181,12 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-7}
 
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-7}
+
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
+@item 'SaveFiles'
+Controls saving of intermediate results during optimization. Set to 0 to shut off saving. Default: @code{1}
 
 @end table
 
@@ -5184,6 +5210,9 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
 
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
 @end table
 
 @item 101
@@ -5205,6 +5234,9 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-6}
 
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-6}
+
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
 
 @end table
 
@@ -5249,6 +5281,32 @@ deprecated and will be removed in a future release of Dynare.
 @item dsge_varlag = @var{INTEGER}
 @anchor{dsge_varlag} The number of lags used to estimate a DSGE-VAR
 model. Default: @code{4}.
+
+
+@item use_tarb
+Instructs Dynare to use the Tailored randomized block (TaRB) Metropolis-Hastings algorithm 
+proposed by @cite{Chib and Ramamurthy (2010)} instead of the standard Random-Walk Metropolis-Hastings. 
+In this algorithm, at each iteration the estimated parameters are randomly assigned to different 
+blocks. For each of these blocks a mode-finding step is conducted. The inverse Hessian at this mode 
+is then used as the covariance of the proposal density for a Random-Walk Metropolis-Hastings step. 
+If the numerical Hessian is not positive definite, the generalized Cholesky decomposition of 
+@cite{Schnabel and Eskow (1990)} is used, but without pivoting. The TaRB-MH algorithm massively reduces 
+the autocorrelation in the MH draws and thus reduces the number of draws required to 
+representatively sample from the posterior. However, this comes at a computational costs as the 
+algorithm takes more time to run.
+
+@item tarb_new_block_probability = @var{DOUBLE}
+Specifies the probability of the next parameter belonging to a new block when the random blocking in the TaRB 
+Metropolis-Hastings algorithm is conducted. The higher this number, the smaller is the average block size and the 
+more random blocks are formed during each parameter sweep. Default: @code{0.25}. 
+
+@item tarb_mode_compute = @var{INTEGER}
+Specifies the mode-finder run in every iteration for every block of the 
+TaRB Metropolis-Hastings algorithm. @xref{mode_compute}. Default: @code{4}. 
+
+@item tarb_optim = @var{INTEGER}
+Specifies the options for the mode-finder used in the TaRB 
+Metropolis-Hastings algorithm. @xref{optim}. 
 
 @item moments_varendo
 @anchor{moments_varendo} Triggers the computation of the posterior
@@ -6665,6 +6723,9 @@ Specifies the optimizer for minimizing the objective function. The same solvers 
 
 @item optim = (@var{NAME}, @var{VALUE}, ...)
 A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the optimization routines. The set of available options depends on the selected optimization routine (i.e. on the value of option @ref{opt_algo}). @xref{optim}.
+
+@item silent_optimizer
+@pxref{silent_optimizer}
 
 @item huge_number = @var{DOUBLE}
 Value for replacing the infinite bounds on parameters by finite numbers. Used by some optimizers for numerical reasons (@pxref{huge_number}).
@@ -9366,7 +9427,7 @@ Note that creating the configuration file is not enough in order to
 trigger parallelization of the computations: you also need to specify
 the @code{parallel} option to the @code{dynare} command. For more
 details, and for other options related to the parallelization engine,
-see @pxref{Dynare invocation}.
+@pxref{Dynare invocation}.
 
 You also need to verify that the following requirements are met by
 your cluster (which is composed of a master and of one or more
@@ -12553,6 +12614,17 @@ computational and graphical statistics}, 7, pp. 434--455
 Cardoso, Margarida F., R. L. Salcedo and S. Feyo de Azevedo (1996): ``The simplex simulated annealing approach to continuous non-linear optimization,'' @i{Computers chem. Engng}, 20(9), 1065-1080
 
 @item
+Chib, Siddhartha and Srikanth Ramamurthy (2010):
+``Tailored randomized block MCMC methods with application to DSGE models,'' 
+@i{Journal of Econometrics}, 155, 19--38
+
+@item
+Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
+``Introducing financial frictions and unemployment into a small open
+economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
+1999--2041
+
+@item
 Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''
 
 @item
@@ -12570,12 +12642,6 @@ Economics}, 17, 125--139
 Corona, Angelo,  M. Marchesi, Claudio Martini, and Sandro Ridella (1987):
 ``Minimizing multimodal functions of continuous variables with the ``simulated annealing'' algorithm'',
 @i{ACM Transactions on Mathematical Software}, 13(3), 262--280
-
-@item
-Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
-``Introducing financial frictions and unemployment into a small open
-economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
-1999--2041
 
 @item
 Del Negro, Marco and Franck Schorfheide (2004): ``Priors from General Equilibrium Models for VARS'',
@@ -12715,6 +12781,10 @@ Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
 General Equilibrium Models Using a Second-Order Approximation to the
 Policy Function,'' @i{Journal of Economic Dynamics and Control},
 28(4), 755--775
+
+@item
+Schnabel, Robert B. and Elizabeth Eskow (1990): ``A new modified Cholesky algorithm,'' 
+@i{SIAM Journal of Scientific and Statistical Computing}, 11, 1136--1158
 
 @item
 Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): ``Methods for

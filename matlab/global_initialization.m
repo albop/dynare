@@ -416,7 +416,14 @@ options_.recursive_estimation_restart = 0;
 options_.MCMC_jumping_covariance='hessian';
 options_.use_calibration_initialization = 0;
 options_.endo_vars_for_moment_computations_in_estimation=[];
+
+% Tailored Random Block Metropolis-Hastings
 options_.TaRB.use_TaRB = 0;
+options_.TaRB.mode_compute=4;
+options_.TaRB.new_block_probability=0.25; %probability that next parameter belongs to new block
+
+% Run optimizer silently
+options_.silent_optimizer=0;
 
 % Prior restrictions
 options_.prior_restrictions.status = 0;
@@ -487,6 +494,9 @@ options_.homotopy_force_continue = 0;
 %csminwel optimization routine
 csminwel.tolerance.f=1e-7;
 csminwel.maxiter=1000;
+csminwel.verbosity=1;
+csminwel.Save_files=1;
+
 options_.csminwel=csminwel;
 
 %newrat optimization routine
@@ -494,6 +504,9 @@ newrat.hess=1; % dynare numerical hessian
 newrat.tolerance.f=1e-5;
 newrat.tolerance.f_analytic=1e-7;
 newrat.maxiter=1000;
+newrat.verbosity=1;
+newrat.Save_files=1;
+
 options_.newrat=newrat;
 
 % Simplex optimization routine (variation on Nelder Mead algorithm).

@@ -4,6 +4,7 @@ MODFILES = \
 	estimation/fs2000_calibrated_covariance.mod \
 	estimation/MH_recover/fs2000_recover.mod \
 	estimation/t_proposal/fs2000_student.mod \
+	estimation/TaRB/fs2000_tarb.mod \
 	gsa/ls2003.mod \
 	gsa/ls2003a.mod \
 	gsa/cod_ML_morris/cod_ML_morris.mod \

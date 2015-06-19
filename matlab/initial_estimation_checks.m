@@ -54,6 +54,10 @@ if DynareOptions.student_degrees_of_freedom <= 0
     error('initial_estimation_checks:: the student_degrees_of_freedom takes a positive integer argument');
 end
 
+if DynareOptions.TaRB.use_TaRB && (DynareOptions.TaRB.new_block_probability<0 || DynareOptions.TaRB.new_block_probability>1)
+    error(['initial_estimation_checks:: The tarb_new_block_probability must be between 0 and 1!'])
+end
+
 old_steady_params=Model.params; %save initial parameters for check if steady state changes param values
 
 % % check if steady state solves static model (except if diffuse_filter == 1)

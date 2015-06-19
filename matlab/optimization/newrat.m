@@ -1,4 +1,4 @@
-function [xparam1, hh, gg, fval, igg] = newrat(func0, x, analytic_derivation, ftol0, nit, flagg, varargin)
+function [xparam1, hh, gg, fval, igg] = newrat(func0, x, analytic_derivation, ftol0, nit, flagg, Verbose, Save_files, varargin)
 %  [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit, flagg, varargin)
 %
 %  Optimiser with outer product gradient and with sequences of univariate steps
@@ -49,6 +49,7 @@ function [xparam1, hh, gg, fval, igg] = newrat(func0, x, analytic_derivation, ft
 
 global objective_function_penalty_base
 
+
 icount=0;
 nx=length(x);
 xparam1=x;
@@ -95,14 +96,19 @@ else
     h1=[];
 end
 H = igg;
-disp(['Gradient norm ',num2str(norm(gg))])
+disp_verbose(['Gradient norm ',num2str(norm(gg))],Verbose)
 ee=eig(hh);
-disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
-disp(['Maximum Hessian eigenvalue ',num2str(max(ee))])
+disp_verbose(['Minimum Hessian eigenvalue ',num2str(min(ee))],Verbose)
+disp_verbose(['Maximum Hessian eigenvalue ',num2str(max(ee))],Verbose)
 g=gg;
 check=0;
-if max(eig(hh))<0, disp('Negative definite Hessian! Local maximum!'), pause, end,
-save m1.mat x hh g hhg igg fval0
+if max(eig(hh))<0
+    disp_verbose('Negative definite Hessian! Local maximum!',Verbose)
+    pause
+end
+if Save_files
+    save m1.mat x hh g hhg igg fval0
+end
 
 igrad=1;
 igibbs=1;
@@ -116,13 +122,13 @@ while norm(gg)>gtol && check==0 && jit<nit
     tic
     icount=icount+1;
     objective_function_penalty_base = fval0(icount);
-    disp([' '])
-    disp(['Iteration ',num2str(icount)])
-    [fval,x0,fc,retcode] = csminit1(func0,xparam1,fval0(icount),gg,0,H,varargin{:});
+    disp_verbose([' '],Verbose)
+    disp_verbose(['Iteration ',num2str(icount)],Verbose)
+    [fval,x0,fc,retcode] = csminit1(func0,xparam1,fval0(icount),gg,0,H,Verbose,varargin{:});
     if igrad
-        [fval1,x01,fc,retcode1] = csminit1(func0,x0,fval,gg,0,inx,varargin{:});
+        [fval1,x01,fc,retcode1] = csminit1(func0,x0,fval,gg,0,inx,Verbose,varargin{:});
         if (fval-fval1)>1
-            disp('Gradient step!!')
+            disp_verbose('Gradient step!!',Verbose)
         else
             igrad=0;
         end
@@ -139,27 +145,27 @@ while norm(gg)>gtol && check==0 && jit<nit
         end
         iggx=eye(length(gg));
         iggx(find(ig),find(ig)) = inv( hhx(find(ig),find(ig)) );
-        [fvala,x0,fc,retcode] = csminit1(func0,x0,fval,ggx,0,iggx,varargin{:});
+        [fvala,x0,fc,retcode] = csminit1(func0,x0,fval,ggx,0,iggx,Verbose,varargin{:});
     end
-    [fvala, x0, ig] = mr_gstep(h1,x0,func0,htol,varargin{:});
+    [fvala, x0, ig] = mr_gstep(h1,x0,func0,htol,Verbose,Save_files,varargin{:});
     nig=[nig ig];
-    disp('Sequence of univariate steps!!')
+    disp_verbose('Sequence of univariate steps!!',Verbose)
     fval=fvala;
     if (fval0(icount)-fval)<ftol && flagit==0
-        disp('Try diagonal Hessian')
+        disp_verbose('Try diagonal Hessian',Verbose)
         ihh=diag(1./(diag(hhg)));
-        [fval2,x0,fc,retcode2] = csminit1(func0,x0,fval,gg,0,ihh,varargin{:});
+        [fval2,x0,fc,retcode2] = csminit1(func0,x0,fval,gg,0,ihh,Verbose,varargin{:});
         if (fval-fval2)>=ftol
-            disp('Diagonal Hessian successful')
+            disp_verbose('Diagonal Hessian successful',Verbose)
         end
         fval=fval2;
     end
     if (fval0(icount)-fval)<ftol && flagit==0
-        disp('Try gradient direction')
+        disp_verbose('Try gradient direction',Verbose)
         ihh0=inx.*1.e-4;
-        [fval3,x0,fc,retcode3] = csminit1(func0,x0,fval,gg,0,ihh0,varargin{:});
+        [fval3,x0,fc,retcode3] = csminit1(func0,x0,fval,gg,0,ihh0,Verbose,varargin{:});
         if (fval-fval3)>=ftol
-            disp('Gradient direction successful')
+            disp_verbose('Gradient direction successful',Verbose)
         end
         fval=fval3;
     end
@@ -167,7 +173,7 @@ while norm(gg)>gtol && check==0 && jit<nit
     x(:,icount+1)=xparam1;
     fval0(icount+1)=fval;
     if (fval0(icount)-fval)<ftol
-        disp('No further improvement is possible!')
+        disp_verbose('No further improvement is possible!',Verbose)
         check=1;
         if analytic_derivation,
             [fvalx,gg,hh]=feval(func0,xparam1,varargin{:});
@@ -189,29 +195,33 @@ while norm(gg)>gtol && check==0 && jit<nit
             end
         end
         end
-        disp(['Actual dxnorm ',num2str(norm(x(:,end)-x(:,end-1)))])
-        disp(['FVAL          ',num2str(fval)])
-        disp(['Improvement   ',num2str(fval0(icount)-fval)])
-        disp(['Ftol          ',num2str(ftol)])
-        disp(['Htol          ',num2str(htol0)])
-        disp(['Gradient norm  ',num2str(norm(gg))])
+        disp_verbose(['Actual dxnorm ',num2str(norm(x(:,end)-x(:,end-1)))],Verbose)
+        disp_verbose(['FVAL          ',num2str(fval)],Verbose)
+        disp_verbose(['Improvement   ',num2str(fval0(icount)-fval)],Verbose)
+        disp_verbose(['Ftol          ',num2str(ftol)],Verbose)
+        disp_verbose(['Htol          ',num2str(htol0)],Verbose)
+        disp_verbose(['Gradient norm  ',num2str(norm(gg))],Verbose)
         ee=eig(hh);
-        disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
-        disp(['Maximum Hessian eigenvalue ',num2str(max(ee))])
+        disp_verbose(['Minimum Hessian eigenvalue ',num2str(min(ee))],Verbose)
+        disp_verbose(['Maximum Hessian eigenvalue ',num2str(max(ee))],Verbose)
         g(:,icount+1)=gg;
     else
         df = fval0(icount)-fval;
-        disp(['Actual dxnorm ',num2str(norm(x(:,end)-x(:,end-1)))])
-        disp(['FVAL          ',num2str(fval)])
-        disp(['Improvement   ',num2str(df)])
-        disp(['Ftol          ',num2str(ftol)])
-        disp(['Htol          ',num2str(htol0)])
+        disp_verbose(['Actual dxnorm ',num2str(norm(x(:,end)-x(:,end-1)))],Verbose)
+        disp_verbose(['FVAL          ',num2str(fval)],Verbose)
+        disp_verbose(['Improvement   ',num2str(df)],Verbose)
+        disp_verbose(['Ftol          ',num2str(ftol)],Verbose)
+        disp_verbose(['Htol          ',num2str(htol0)],Verbose)
         htol=htol_base;
         if norm(x(:,icount)-xparam1)>1.e-12 && analytic_derivation==0,
             try
-                save m1.mat x fval0 nig -append
+                if Save_files
+                    save m1.mat x fval0 nig -append
+                end
             catch
-                save m1.mat x fval0 nig
+                if Save_files
+                    save m1.mat x fval0 nig
+                end
             end
             [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,xparam1,func0,flagit,htol,varargin{:});
             if isempty(dum),
@@ -220,12 +230,12 @@ while norm(gg)>gtol && check==0 && jit<nit
             if htol0>htol
                 htol=htol0;
                 skipline()
-                disp('Numerical noise in the likelihood')
-                disp('Tolerance has to be relaxed')
+                disp_verbose('Numerical noise in the likelihood',Verbose)
+                disp_verbose('Tolerance has to be relaxed',Verbose)
                 skipline()
             end
             if ~outer_product_gradient,
-                H = bfgsi1(H,gg-g(:,icount),xparam1-x(:,icount));
+                H = bfgsi1(H,gg-g(:,icount),xparam1-x(:,icount),Verbose,Save_files);
                 hh=inv(H);
                 hhg=hh;
             else
@@ -246,39 +256,44 @@ while norm(gg)>gtol && check==0 && jit<nit
             hhg=hh;
             H = inv(hh);
         end
-        disp(['Gradient norm  ',num2str(norm(gg))])
+        disp_verbose(['Gradient norm  ',num2str(norm(gg))],Verbose)
         ee=eig(hh);
-        disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
-        disp(['Maximum Hessian eigenvalue ',num2str(max(ee))])
-        if max(eig(hh))<0, disp('Negative definite Hessian! Local maximum!'), pause(1), end,
+        disp_verbose(['Minimum Hessian eigenvalue ',num2str(min(ee))],Verbose)
+        disp_verbose(['Maximum Hessian eigenvalue ',num2str(max(ee))],Verbose)
+        if max(eig(hh))<0
+            disp_verbose('Negative definite Hessian! Local maximum!',Verbose)
+            pause(1)
+        end
         t=toc;
-        disp(['Elapsed time for iteration ',num2str(t),' s.'])
+        disp_verbose(['Elapsed time for iteration ',num2str(t),' s.'],Verbose)
         g(:,icount+1)=gg;
-
-        save m1.mat x hh g hhg igg fval0 nig H
+        if Save_files
+            save m1.mat x hh g hhg igg fval0 nig H
+        end
     end
 end
-
-save m1.mat x hh g hhg igg fval0 nig
+if Save_files
+    save m1.mat x hh g hhg igg fval0 nig
+end
 if ftol>ftol0
     skipline()
-    disp('Numerical noise in the likelihood')
-    disp('Tolerance had to be relaxed')
+    disp_verbose('Numerical noise in the likelihood',Verbose)
+    disp_verbose('Tolerance had to be relaxed',Verbose)
     skipline()
 end
 
 if jit==nit
     skipline()
-    disp('Maximum number of iterations reached')
+    disp_verbose('Maximum number of iterations reached',Verbose)
     skipline()
 end
 
 if norm(gg)<=gtol
-    disp(['Estimation ended:'])
-    disp(['Gradient norm < ', num2str(gtol)])
+    disp_verbose(['Estimation ended:'],Verbose)
+    disp_verbose(['Gradient norm < ', num2str(gtol)],Verbose)
 end
 if check==1,
-    disp(['Estimation successful.'])
+    disp_verbose(['Estimation successful.'],Verbose)
 end
 
 return
