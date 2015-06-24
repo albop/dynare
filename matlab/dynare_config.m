@@ -63,7 +63,6 @@ addpath([dynareroot '/lmmcp/'])
 addpath([dynareroot '/optimization/'])
 addpath([dynareroot '/modules/dates/src/'])
 addpath([dynareroot '/modules/dseries/src/'])
-addpath([dynareroot '/modules/dseries/src/read'])
 addpath([dynareroot '/utilities/doc/'])
 addpath([dynareroot '/utilities/tests/src/'])
 addpath([dynareroot '/utilities/dataset/'])
@@ -217,8 +216,7 @@ if verbose
     skipline()
 end
 
-% Save empty dates and dseries objects (necessary if a mod file is not preprocessed).
-initialize_dates_toolbox;
-dseries('initialize');
+% Initialization of the dates and dseries classes (recursive).
+initialize_dseries_toolbox;
 
 cd(origin);
