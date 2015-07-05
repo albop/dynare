@@ -3503,6 +3503,9 @@ errors are  more important with  this mixed strategy (user  should check
 the reported value  of the maximum absolute error).  Only available with
 option @code{stack_solve_algo==0}.
 
+@item linear_approximation
+Solves the linearized version of the perfect foresight model. The model must be stationary. Only available with option @code{stack_solve_algo==0}.
+
 @end table
 
 @outputhead

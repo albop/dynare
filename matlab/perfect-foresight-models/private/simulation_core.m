@@ -18,6 +18,14 @@ function [oo_, maxerror] = simulation_core(options_, M_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if options_.linear_approximation && ~isequal(options_.stack_solve_algo,0)
+    error('perfect_foresight_solver: Option linear_approximation is only available with option stack_solve_algo equal to 0.')
+end
+
+if options_.linear && isequal(options_.stack_solve_algo,0)
+    options_.linear_approximation = 1;
+end
+
 if options_.block
     if options_.bytecode
         try
@@ -60,7 +68,11 @@ else
             oo_ = sim1_purely_forward(options_, M_, oo_);
         else % General case
             if options_.stack_solve_algo == 0
-                oo_ = sim1(options_, M_, oo_);
+                if options_.linear_approximation
+                    oo_ = sim1_linear(options_, M_, oo_);
+                else
+                    oo_ = sim1(options_, M_, oo_);
+                end
             elseif options_.stack_solve_algo == 6
                 oo_ = sim1_lbj(options_, M_, oo_);
             elseif options_.stack_solve_algo == 7
