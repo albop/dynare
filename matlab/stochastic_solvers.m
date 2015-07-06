@@ -143,7 +143,7 @@ end
     
 if options_.debug
     if ~isempty(infrow)     
-    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains Inf. The problam is associated with:\n\n')    
+    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains Inf. The problem is associated with:\n\n')    
     display_problematic_vars_Jacobian(infrow,infcol,M_,dr.ys,'dynamic','STOCHASTIC_SOLVER: ')
     save([M_.fname '_debug.mat'],'jacobia_')
     end
@@ -167,7 +167,7 @@ end
 [nanrow,nancol]=find(isnan(jacobia_));
 if options_.debug
     if ~isempty(nanrow)     
-    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains NaN. The problam is associated with:\n\n')    
+    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains NaN. The problem is associated with:\n\n')    
     display_problematic_vars_Jacobian(nanrow,nancol,M_,dr.ys,'dynamic','STOCHASTIC_SOLVER: ')
     save([M_.fname '_debug.mat'],'jacobia_')
     end
