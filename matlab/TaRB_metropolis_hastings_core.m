@@ -178,7 +178,7 @@ for curr_chain = fblck:nblck,
                     inverse_hessian_mat=eye(nxopt)*1e-4; %use diagonal
                 end               
             end
-            [proposal_covariance_Cholesky_decomposition_upper,negeigenvalues]=cholcov(inverse_hessian_mat,0);
+            [proposal_covariance_Cholesky_decomposition_upper,negeigenvalues]=chol(inverse_hessian_mat);            
             %if not positive definite, use generalized Cholesky if
             %Eskow/Schnabel
             if negeigenvalues~=0 

@@ -114,9 +114,9 @@ end;
 
 varobs gp_obs gy_obs;
 
-options_.silent_optimizer=1;
 estimation(order=1, datafile='../fsdat_simul',nobs=192, loglinear, mh_replic=30, mh_nblocks=2, mh_jscale=0.5,mode_compute=4,
 use_TaRB,
 tarb_mode_compute=4,
-tarb_new_block_probability=0.3
+tarb_new_block_probability=0.3,
+silent_optimizer
 );
