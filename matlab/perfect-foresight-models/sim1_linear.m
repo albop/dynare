@@ -1,19 +1,16 @@
-function oo_ = sim1(options_, M_, oo_)
-% function sim1
-% Performs deterministic simulations with lead or lag on one period.
-% Uses sparse matrices.
-%
-% INPUTS
-%   ...
-% OUTPUTS
-%   ...
-% ALGORITHM
-%   ...
-%
-% SPECIAL REQUIREMENTS
-%   None.
+function oo_ = sim1_linear(options_, M_, oo_)
 
-% Copyright (C) 1996-2015 Dynare Team
+% Solves a linear approximation of a perfect foresight model susing sparse matrix.
+%
+% INPUTS 
+% - options_ [struct] contains various options.
+% - M_       [struct] contains a description of the model.
+% - oo_      [struct] contains results.
+%
+% OUTPUTS 
+% - oo_
+
+% Copyright (C) 2015 Dynare Team
 %
 % This file is part of Dynare.
 %
