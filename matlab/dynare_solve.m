@@ -92,9 +92,9 @@ if options.solve_algo == 0
     options4fsolve.TolFun = tolf;
     options4fsolve.Display = 'iter';
     if jacobian_flag
-        Options4fsolve.Jacobian = 'on';
+        options4fsolve.Jacobian = 'on';
     else
-        Options4fsolve.Jacobian = 'off';
+        options4fsolve.Jacobian = 'off';
     end
     if ~isoctave
         [x,fval,exitval,output] = fsolve(func,x,options4fsolve,varargin{:});
