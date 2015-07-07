@@ -44,20 +44,11 @@ maximum_lag = M_.maximum_lag;
 max_lag = M_.maximum_endo_lag;
 
 nyp = nnz(lead_lag_incidence(1,:)) ;
-iyp = find(lead_lag_incidence(1,:)>0) ;
 ny0 = nnz(lead_lag_incidence(2,:)) ;
-iy0 = find(lead_lag_incidence(2,:)>0) ;
 nyf = nnz(lead_lag_incidence(3,:)) ;
-iyf = find(lead_lag_incidence(3,:)>0) ;
 
 nd = nyp+ny0+nyf;
-nrc = nyf+1 ;
-isp = [1:nyp] ;
-is = [nyp+1:ny+nyp] ;
-isf = iyf+nyp ;
-isf1 = [nyp+ny+1:nyf+nyp+ny+1] ;
 stop = 0 ;
-iz = [1:ny+nyp+nyf];
 
 periods = options_.periods;
 steady_state = oo_.steady_state;
@@ -96,7 +87,7 @@ h1 = clock ;
 iA = zeros(periods*M_.NNZDerivatives(1),3);
 for iter = 1:options_.simul.maxit
     h2 = clock ;
-    
+
     i_rows = (1:ny)';
     i_cols_A = find(lead_lag_incidence');
     i_cols = i_cols_A+(maximum_lag-1)*ny;
@@ -118,9 +109,9 @@ for iter = 1:options_.simul.maxit
             iA((1:length(v))+m,:) = [i_rows(r),i_cols_A(c),v];
         end
         m = m + length(v);
-        
+
         res(i_rows) = d1;
-        
+
         if endogenous_terminal_period && iter>1
             dr = max(abs(d1));
             if dr<azero
@@ -129,25 +120,25 @@ for iter = 1:options_.simul.maxit
                 break
             end
         end
-    
+
         i_rows = i_rows + ny;
         i_cols = i_cols + ny;
-        
+
         if it > maximum_lag+1
             i_cols_A = i_cols_A + ny;
         end
     end
-        
+
     err = max(abs(res));
-    
+
     if options_.debug
-        fprintf('\nLargest absolute residual at iteration %d: %10.3f\n',iter,err);    
+        fprintf('\nLargest absolute residual at iteration %d: %10.3f\n',iter,err);
         if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
-            fprintf('\nWARNING: NaN or Inf detected in the residuals or endogenous variables.\n');    
+            fprintf('\nWARNING: NaN or Inf detected in the residuals or endogenous variables.\n');
         end
         if ~isreal(res) || ~isreal(Y)
-            fprintf('\nWARNING: Imaginary parts detected in the residuals or endogenous variables.\n');    
-        end        
+            fprintf('\nWARNING: Imaginary parts detected in the residuals or endogenous variables.\n');
+        end
         skipline()
     end
 
@@ -156,7 +147,7 @@ for iter = 1:options_.simul.maxit
         disp(str);
     end
 
-    
+
     if err < options_.dynatol.f
         stop = 1 ;
         break
@@ -171,7 +162,7 @@ for iter = 1:options_.simul.maxit
     else
         dy = -A\res;
     end
-    
+
     Y(i_upd) =   Y(i_upd) + dy;
 
 end
