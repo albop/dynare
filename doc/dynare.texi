@@ -4718,7 +4718,8 @@ also be specified. The forecasts are stored in the
 
 @item first_obs = @var{INTEGER}
 @anchor{first_obs}
-The number of the first observation to be used. Default: @code{1}
+The number of the first observation to be used. In case of estimating a DSGE-VAR, 
+@code{first_obs} needs to be larger than the number of lags.  Default: @code{1}
 
 @item prefilter = @var{INTEGER}
 @anchor{prefilter}
