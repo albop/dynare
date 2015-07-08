@@ -4979,7 +4979,10 @@ Note that the covariance matrices are still scaled with @ref{mh_jscale}. Default
 @item mode_check
 Tells Dynare to plot the posterior density for values around the
 computed mode for each estimated parameter in turn. This is helpful to
-diagnose problems with the optimizer
+diagnose problems with the optimizer. Note that for @code{order}>1, the 
+likelihood function resulting from the particle filter is not differentiable
+anymore due to random chatter introduced by selecting different particles for 
+different parameter values. For this reason, the @code{mode_check}-plot may look wiggly.
 
 @item mode_check_neighbourhood_size = @var{DOUBLE}
 Used in conjunction with option @code{mode_check}, gives the width of
