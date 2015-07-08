@@ -4706,8 +4706,8 @@ The range with the data in an Excel file. For example, @code{xls_range=B2:D200}
 
 @item nobs = @var{INTEGER}
 @anchor{nobs}
-The number of observations to be used. Default: all observations in
-the file
+The number of observations following @ref{first_obs} to be used. Default: all observations in
+the file after @code{first_obs}
 
 @item nobs = [@var{INTEGER1}:@var{INTEGER2}]
 @anchor{nobs1}
