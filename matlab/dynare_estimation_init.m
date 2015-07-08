@@ -65,6 +65,10 @@ else
     options_.varlist = var_list_;
 end
 
+if options_.dsge_var && options_.presample~=0
+    error('DSGE-VAR does not support the presample option.')
+end
+
 % Set the number of observed variables.
 options_.number_of_observed_variables = length(options_.varobs);
 
