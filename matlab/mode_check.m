@@ -89,6 +89,8 @@ if isinf(ll),
     DynareOptions.mode_check.symmetric_plots = 0;
 end
 
+mcheck = struct('cross',struct(),'emode',struct());
+
 for plt = 1:nbplt,
     if TeX
         NAMES = [];
@@ -149,6 +151,8 @@ for plt = 1:nbplt,
                 y(i,2)  = (y(i,1)+lnprior-dy);
             end
         end
+        mcheck.cross = setfield(mcheck.cross, name, [transpose(z), -y]);
+        mcheck.emode = setfield(mcheck.emode, name, x(kk));
         fighandle=plot(z,-y);
         hold on
         yl=get(gca,'ylim');
@@ -195,3 +199,5 @@ for plt = 1:nbplt,
         fprintf(fidTeX,' \n');
     end
 end
+
+save('check_plot_data','mcheck');
