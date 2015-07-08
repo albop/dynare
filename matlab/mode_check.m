@@ -200,4 +200,5 @@ for plt = 1:nbplt,
     end
 end
 
-save('check_plot_data','mcheck');
+OutputDirectoryName = CheckPath('modecheck',Model.dname);
+save([OutputDirectoryName '/check_plot_data'],'mcheck');
