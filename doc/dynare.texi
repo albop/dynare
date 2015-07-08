@@ -4727,8 +4727,9 @@ each data series by its empirical mean. Default: @code{0}, @i{i.e.} no prefilter
 
 @item presample = @var{INTEGER}
 @anchor{presample}
-The number of observations to be skipped before evaluating the
-likelihood. These first observations are used as a training sample. Default: @code{0}
+The number of observations after @pxref{first_obs} to be skipped before evaluating the
+likelihood. These presample observations do not enter the likelihood, but are used as a 
+training sample for starting the Kalman filter iterations. Default: @code{0}
 
 @item loglinear
 @anchor{loglinear}
