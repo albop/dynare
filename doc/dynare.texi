@@ -11864,7 +11864,7 @@ The file name to use when saving this report. Default:
 
 @item header, @var{STRING}
 The @LaTeX{} code to be included in the report before
-@code{\begin{document}}. Default: @code{empty}
+@code{\begin@{document@}}. Default: @code{empty}
 
 @item margin, @var{DOUBLE}
 The margin size. Default: @code{2.5}
