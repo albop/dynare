@@ -4730,7 +4730,8 @@ each data series by its empirical mean. Default: @code{0}, @i{i.e.} no prefilter
 @anchor{presample}
 The number of observations after @ref{first_obs} to be skipped before evaluating the
 likelihood. These presample observations do not enter the likelihood, but are used as a 
-training sample for starting the Kalman filter iterations. Default: @code{0}
+training sample for starting the Kalman filter iterations. This option is incompatible with 
+estimating a DSGE-VAR. Default: @code{0}
 
 @item loglinear
 @anchor{loglinear}
