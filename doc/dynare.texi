@@ -11841,7 +11841,7 @@ used.
 Below, you will see a list of methods available for the Report class and
 a clarifying example.
 
-@defmethod Report report compiler, showDate, fileName, margin, marginUnit, orientation, paper, showOutput, title
+@defmethod Report report compiler, showDate, fileName, header, margin, marginUnit, orientation, paper, showOutput, title
 Instantiates a @code{Report} object.
 @optionshead
 @table @code
@@ -11861,6 +11861,10 @@ Display the date and time when the report was compiled. Default:
 @item fileName, @var{FILENAME}
 The file name to use when saving this report. Default:
 @code{report.tex}
+
+@item header, @var{STRING}
+The @LaTeX{} code to be included in the report before
+@code{\begin{document}}. Default: @code{empty}
 
 @item margin, @var{DOUBLE}
 The margin size. Default: @code{2.5}
@@ -11888,15 +11892,28 @@ Report Title. Default: @code{none}
 @end defmethod
 
 @anchor{addPage}
-@defmethod Report addPage footnote, orientation, paper, title, titleFormat, titleTruncate
+@defmethod Report addPage footnote, latex, orientation, pageDirName, paper, title, titleFormat, titleTruncate
 Adds a @code{Page} to the @code{Report}.
 @optionshead
 @table @code
 @item footnote, @code{STRING}
 A footnote to be included at the bottom of this page. Default: @code{none}
 
+@anchor{latex}
+@item latex, @code{STRING}
+The @LaTeX{} code to be used for this page. Alows the user to create a
+page to be included in the report by passing @LaTeX{} code
+directly. If this option is passed, the page itself will be saved in
+the @ref{pageDirName} directory in the form @code{page_X.tex} where
+@code{X} refers to the page number. Default @code{empty}
+
 @item orientation, `landscape' | `portrait'
 @xref{orientation}.
+
+@anchor{pageDirName}
+@item pageDirName, @code{STRING}
+The name of the folder in which to store this page. Only used when the
+@ref{latex} command is passed. Default: @code{tmpRepDir}
 
 @item paper, `a4' | `letter'
 @xref{paper}.
