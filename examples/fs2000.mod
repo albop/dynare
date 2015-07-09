@@ -1,7 +1,7 @@
 /*
- * This file replicates the estimation of the cash in advance model described
- * Frank Schorfheide (2000): "Loss function-based evaluation of DSGE models",
- * Journal of Applied Econometrics, 15(6), 645-670.
+ * This file replicates the estimation of the cash in advance model (termed M1 
+ * in the paper) described in Frank Schorfheide (2000): "Loss function-based 
+ * evaluation of DSGE models", Journal of Applied Econometrics, 15(6), 645-670.
  *
  * The data are in file "fsdat_simul.m", and have been artificially generated.
  * They are therefore different from the original dataset used by Schorfheide.
@@ -17,7 +17,7 @@
  */
 
 /*
- * Copyright (C) 2004-2010 Dynare Team
+ * Copyright (C) 2004-2015 Dynare Team
  *
  * This file is part of Dynare.
  *
