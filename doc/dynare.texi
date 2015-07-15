@@ -1920,8 +1920,8 @@ This command creates a @LaTeX{} file containing the model, as defined
 in the model block.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
-will create a file called @file{@var{FILENAME}_dynamic.tex},
-containing the list of all the dynamic model equations.
+will create a file called @file{@var{FILENAME}_original.tex},
+containing the list of all the original model equations.
 
 If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
