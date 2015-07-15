@@ -1916,12 +1916,15 @@ equations using the @code{write_latex_static_model} command.
 
 @descriptionhead
 
-This command creates a @LaTeX{} file containing the model, as defined
-in the model block.
+This command creates two @LaTeX{} files: one containing the model as
+defined in the model block and one containing the @LaTeX{} document
+header information.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
-will create a file called @file{@var{FILENAME}_original.tex},
-containing the list of all the original model equations.
+will create a file called @file{@var{FILENAME}_original.tex}, which
+includes a file called @file{@var{FILENAME}_original_content.tex}
+(also created by Dynare) containing the list of all the original model
+equations.
 
 If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
@@ -1938,11 +1941,14 @@ appended to the variable names, as @LaTeX{} subscripts.
 
 @descriptionhead
 
-This command creates a @LaTeX{} file containing the (dynamic) model.
+This command creates two @LaTeX{} files: one containing the dynamic
+model and one containing the @LaTeX{} document header information.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
-will create a file called @file{@var{FILENAME}_dynamic.tex},
-containing the list of all the dynamic model equations.
+will create a file called @file{@var{FILENAME}_dynamic.tex}, which
+includes a file called @file{@var{FILENAME}_dynamic_content.tex}
+(also created by Dynare) containing the list of all the dynamic model
+equations.
 
 If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
@@ -1985,11 +1991,14 @@ Compiling the @TeX{} file requires the following @LaTeX{} packages:
 
 @descriptionhead
 
-This command creates a @LaTeX{} file containing the static model.
+This command creates two @LaTeX{} files: one containing the static
+model and one containing the @LaTeX{} document header information.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
-will create a file called @file{@var{FILENAME}_static.tex}, containing
-the list of all the equations of the steady state model.
+will create a file called @file{@var{FILENAME}_static.tex}, which
+includes a file called @file{@var{FILENAME}_static_content.tex} (also
+created by Dynare) containing the list of all the steady state model
+equations.
 
 If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
