@@ -118,7 +118,11 @@ if estimated_model
     trend = trend(oo_.dr.order_var,:);
     InitState(:,1) = atT(:,end);
 else
-    InitState(:,1) = zeros(M_.endo_nbr,1);
+    if isempty(M_.endo_histval)
+        InitState(:,1) = zeros(M_.endo_nbr,1);
+    else
+        InitState(:,1) = M_.endo_histval(oo_.dr.order_var) - oo_.steady_state(oo_.dr.order_var);
+    end        
     trend = repmat(oo_.steady_state(oo_.dr.order_var),1,options_cond_fcst.periods+1);
     graph_title='Calibration';
 end
