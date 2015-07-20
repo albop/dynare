@@ -4741,8 +4741,8 @@ The range with the data in an Excel file. For example, @code{xls_range=B2:D200}
 
 @item nobs = @var{INTEGER}
 @anchor{nobs}
-The number of observations to be used. Default: all observations in
-the file
+The number of observations following @ref{first_obs} to be used. Default: all observations in
+the file after @code{first_obs}
 
 @item nobs = [@var{INTEGER1}:@var{INTEGER2}]
 @anchor{nobs1}
@@ -4753,7 +4753,8 @@ also be specified. The forecasts are stored in the
 
 @item first_obs = @var{INTEGER}
 @anchor{first_obs}
-The number of the first observation to be used. Default: @code{1}
+The number of the first observation to be used. In case of estimating a DSGE-VAR, 
+@code{first_obs} needs to be larger than the number of lags.  Default: @code{1}
 
 @item prefilter = @var{INTEGER}
 @anchor{prefilter}
@@ -4762,14 +4763,16 @@ each data series by its empirical mean. Default: @code{0}, @i{i.e.} no prefilter
 
 @item presample = @var{INTEGER}
 @anchor{presample}
-The number of observations to be skipped before evaluating the
-likelihood. These first observations are used as a training sample. Default: @code{0}
+The number of observations after @ref{first_obs} to be skipped before evaluating the
+likelihood. These presample observations do not enter the likelihood, but are used as a 
+training sample for starting the Kalman filter iterations. This option is incompatible with 
+estimating a DSGE-VAR. Default: @code{0}
 
 @item loglinear
 @anchor{loglinear}
 Computes a log-linear approximation of the model instead of a linear
 approximation. As always in the context of estimation, the data must correspond to the definition of the
-variables used in the model (see @cite{Pfeifer 2013} for more details on how to correctly specify observation equations linking model variables and the data). If you specify the loglinear option, Dynare will take the logarithm of both your model variables and of your data as it assumes the data to correspond to the original non-logged model variables. The displayed posterior results like impulse responses, smoothed variables, and moments will be for the logged variables, not the original un-logged ones. Default: computes a linear approximation
+variables used in the model (see @cite{Pfeifer (2013)} for more details on how to correctly specify observation equations linking model variables and the data). If you specify the loglinear option, Dynare will take the logarithm of both your model variables and of your data as it assumes the data to correspond to the original non-logged model variables. The displayed posterior results like impulse responses, smoothed variables, and moments will be for the logged variables, not the original un-logged ones. Default: computes a linear approximation
 
 @item logdata
 @anchor{logdata}
@@ -5012,7 +5015,10 @@ Note that the covariance matrices are still scaled with @ref{mh_jscale}. Default
 @item mode_check
 Tells Dynare to plot the posterior density for values around the
 computed mode for each estimated parameter in turn. This is helpful to
-diagnose problems with the optimizer
+diagnose problems with the optimizer. Note that for @code{order}>1, the 
+likelihood function resulting from the particle filter is not differentiable
+anymore due to random chatter introduced by selecting different particles for 
+different parameter values. For this reason, the @code{mode_check}-plot may look wiggly.
 
 @item mode_check_neighbourhood_size = @var{DOUBLE}
 Used in conjunction with option @code{mode_check}, gives the width of
