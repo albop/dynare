@@ -99,6 +99,7 @@ DecompFileNumber = 1;
 % Compute total variances (covariances are not saved) and variances
 % implied by each structural shock.
 linea = 0;
+only_non_stationary_vars=0;
 for file = 1:NumberOfDrawsFiles
     if posterior
         load([M_.dname '/metropolis/' DrawsFiles(file).name ]);
@@ -115,10 +116,26 @@ for file = 1:NumberOfDrawsFiles
             set_parameters(pdraws{linee,1});
             [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         end
-        tmp = th_autocovariances(dr,ivar,M_,options_,nodecomposition);
-        for i=1:nvar
-            for j=1:nexo
-                Decomposition_array(linea,(i-1)*nexo+j) = tmp{2}(i,j);
+        if file==1 && linee==1
+            [tmp, stationary_vars] = th_autocovariances(dr,ivar,M_,options_,nodecomposition);
+            if isempty(stationary_vars)
+              fprintf('\ndsge_simulated_theoretical_variance_decomposition:: All requested endogenous variables have a unit root and thus infinite variance.\n')
+              fprintf('dsge_simulated_theoretical_variance_decomposition:: No decomposition is performed.\n')
+              only_non_stationary_vars=1; 
+            end
+        end
+        if only_non_stationary_vars
+           for i=1:nvar
+                for j=1:nexo
+                    Decomposition_array(linea,(i-1)*nexo+j) = NaN;
+                end
+           end            
+        else
+            tmp = th_autocovariances(dr,ivar,M_,options_,nodecomposition);
+            for i=1:nvar
+                for j=1:nexo
+                    Decomposition_array(linea,(i-1)*nexo+j) = tmp{2}(i,j);
+                end
             end
         end
         if linea == NumberOfDecompLines
