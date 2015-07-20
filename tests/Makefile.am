@@ -135,6 +135,8 @@ MODFILES = \
 	simul/simul_ZLB_purely_forward_no_solution.mod \
 	conditional_forecasts/fs2000_cal.mod \
 	conditional_forecasts/fs2000_est.mod \
+	conditional_forecasts/fs2000_conditional_forecast_initval.mod \
+	conditional_forecasts/fs2000_conditional_forecast_histval.mod \
 	recursive/ls2003.mod \
 	recursive/ls2003_bayesian.mod \
 	recursive/ls2003_bayesian_xls.mod \
