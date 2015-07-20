@@ -2186,7 +2186,7 @@ possible types of simulations in stochastic mode:
 @ref{conditional_forecast} as the initial point at which the conditional forecasts are computed
 @end itemize
 
-To start simulations at a particular set of starting values that are not a computed steady state, use @xref{histval}.
+To start simulations at a particular set of starting values that are not a computed steady state, use @ref{histval}.
 
 @optionshead
 
