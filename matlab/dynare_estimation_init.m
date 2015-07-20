@@ -281,6 +281,22 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
     skipline()
 end
 
+%check for calibrated covariances before updating parameters
+if ~isempty(estim_params_)
+    estim_params_=check_for_calibrated_covariances(xparam1,estim_params_,M_);
+end
+
+%%read out calibration that was set in mod-file and can be used for initialization
+xparam1_calib=get_all_parameters(estim_params_,M_); %get calibrated parameters
+if ~any(isnan(xparam1_calib)) %all estimated parameters are calibrated
+    estim_params_.full_calibration_detected.full_calibration_detected=1;
+else
+    estim_params_.full_calibration_detected.full_calibration_detected=0;
+end
+if options_.use_calibration_initialization %set calibration as starting values
+    [xparam1,estim_params_]=do_parameter_initialization(estim_params_,xparam1_calib,xparam1); %get explicitly initialized parameters that have precedence to calibrated values
+end
+
 if ~isempty(estim_params_) 
     if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
         % Plot prior densities.
@@ -299,7 +315,17 @@ if ~isempty(estim_params_)
         bounds.ub = ub;
     end
     % Test if initial values of the estimated parameters are all between the prior lower and upper bounds.
-    check_prior_bounds(xparam1,bounds,M_,estim_params_,options_,bayestopt_)
+    if options_.use_calibration_initialization
+        try
+            check_prior_bounds(xparam1,bounds,M_,estim_params_,options_,bayestopt_)
+        catch
+            e = lasterror();
+            fprintf('Cannot use parameter values from calibration as they violate the prior bounds.')
+            rethrow(e);
+        end
+    else
+        check_prior_bounds(xparam1,bounds,M_,estim_params_,options_,bayestopt_)
+    end        
 end
 
 if isempty(estim_params_)% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
@@ -514,7 +540,13 @@ ncn = estim_params_.ncn;
 if estim_params_.np
   M.params(estim_params_.param_vals(:,1)) = xparam1(nvx+ncx+nvn+ncn+1:end);
 end
-[oo_.steady_state, params] = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);
+[oo_.steady_state, params,info] = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);
+
+if info(1)
+    fprintf('\ndynare_estimation_init:: The steady state at the initial parameters cannot be computed.')
+    print_info(info, 0, options_);
+end
+
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
     options_.noconstant = 1;
 else
