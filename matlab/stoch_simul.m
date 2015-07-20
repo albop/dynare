@@ -186,8 +186,13 @@ if options_.irf
             if PI_PCL_solver
                 y=PCL_Part_info_irf (0, PCL_varobs, i_var, M_, oo_.dr, options_.irf, i);
             else
-                y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
-                      options_.replic, options_.order);
+                if options_.order>1 && options_.relative_irf % normalize shock to 0.01 before IRF generation for GIRFs; multiply with 100 later
+                    y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i)./cs(i,i)/100, options_.irf, options_.drop, ...
+                          options_.replic, options_.order);                
+                else %for linear model, rescaling is done later
+                    y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
+                          options_.replic, options_.order);
+                end
             end
             if ~options_.noprint && any(any(isnan(y))) && ~options_.pruning && ~(options_.order==1)
                 fprintf('\nstoch_simul:: The simulations conducted for generating IRFs to %s were explosive.\n',M_.exo_names(i,:))
@@ -196,7 +201,9 @@ if options_.irf
                 skipline(2);
             end
             if options_.relative_irf
-                y = 100*y/cs(i,i);
+                if options_.order==1 %multiply with 100 for backward compatibility
+                    y = 100*y/cs(i,i);
+                end
             end
             irfs   = [];
             mylist = [];
