@@ -2169,9 +2169,10 @@ commands (@code{stoch_simul}, @code{estimation}@dots{}).
 It is not necessary to declare @code{0} as initial value for exogenous
 stochastic variables, since it is the only possible value.
 
-The subsequently computed steady state (not the initial values, use @xref{histval} or this) will be used as the initial condition at all the 
-periods preceeding the first simulation period for the three possible
-types of simulations in stochastic mode:
+The subsequently computed steady state (not the initial values, use
+@ref{histval} or this) will be used as the initial condition at all
+the periods preceeding the first simulation period for the three
+possible types of simulations in stochastic mode:
 
 @itemize
 
