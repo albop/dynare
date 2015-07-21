@@ -131,7 +131,7 @@ for iter = 1:options.simul.maxit
 
     err = max(abs(res));
 
-    if options_.debug
+    if options.debug
         fprintf('\nLargest absolute residual at iteration %d: %10.3f\n',iter,err);
         if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
             fprintf('\nWARNING: NaN or Inf detected in the residuals or endogenous variables.\n');
