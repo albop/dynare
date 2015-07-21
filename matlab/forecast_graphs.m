@@ -29,7 +29,11 @@ nc = 4;
 nr = 3;
 endo_names = M_.endo_names;
 fname = M_.fname;
-dname = M_.dname;
+if ~isfield(M_,'dname')
+    dname = options_.dirname;
+else
+    dname = M_.dname;
+end
 yf = oo_.forecast.Mean;
 hpdinf = oo_.forecast.HPDinf;
 hpdsup = oo_.forecast.HPDsup;
