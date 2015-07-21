@@ -17,7 +17,7 @@ function histvalf(fname)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ oo_
+global M_ oo_ ex0_
 
 if ~exist(fname)
     error(['Can''t find datafile: ' fname ]);

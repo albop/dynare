@@ -118,8 +118,6 @@ if estimated_model
     trend = trend(oo_.dr.order_var,:);
     InitState(:,1) = atT(:,end);
 else
-    InitState(:,1) = zeros(M_.endo_nbr,1);
-    trend = repmat(oo_.steady_state(oo_.dr.order_var),1,options_cond_fcst.periods+1);
     graph_title='Calibration';
 end
 
@@ -132,13 +130,26 @@ end
 if ~isdiagonal(M_.Sigma_e)
     warning(sprintf('The innovations are correlated (the covariance matrix has non zero off diagonal elements), the results of the conditional forecasts will\ndepend on the ordering of the innovations (as declared after varexo) because a Cholesky decomposition is used to factorize the covariance matrix.\n\n=> It is preferable to declare the correlations in the model block (explicitly imposing the identification restrictions), unless you are satisfied\nwith the implicit identification restrictions implied by the Cholesky decomposition.'))
 end
-
 sQ = chol(M_.Sigma_e,'lower');
+
+if ~estimated_model
+    if isempty(M_.endo_histval)
+        y0 = ys;
+    else
+        y0 = M_.endo_histval;
+    end
+    InitState(:,1) = y0(oo_.dr.order_var)-ys(oo_.dr.order_var,:); %initial state in deviations from steady state
+    trend = repmat(ys(oo_.dr.order_var,:),1,options_cond_fcst.periods+1); %trend needs to contain correct steady state
+end
+sQ = sqrt(M_.Sigma_e);
+
+
+
 
 NumberOfStates = length(InitState);
 FORCS1 = zeros(NumberOfStates,options_cond_fcst.periods+1,options_cond_fcst.replic);
 
-FORCS1(:,1,:) = repmat(InitState,1,options_cond_fcst.replic);
+FORCS1(:,1,:) = repmat(InitState,1,options_cond_fcst.replic); %set initial steady state to deviations from steady state in first period
 
 EndoSize = M_.endo_nbr;
 ExoSize = M_.exo_nbr;
@@ -169,15 +180,19 @@ cL = size(constrained_paths,2);
 
 constrained_paths = bsxfun(@minus,constrained_paths,trend(idx,1:cL));
 
+FORCS1_shocks = zeros(n1,cL,options_cond_fcst.replic);
+
 %randn('state',0);
 
-for b=1:options_cond_fcst.replic
+for b=1:options_cond_fcst.replic %conditional forecast using cL set to constrained values
     shocks = sQ*randn(ExoSize,options_cond_fcst.periods);
     shocks(jdx,:) = zeros(length(jdx),options_cond_fcst.periods);
-    FORCS1(:,:,b) = mcforecast3(cL,options_cond_fcst.periods,constrained_paths,shocks,FORCS1(:,:,b),T,R,mv, mu)+trend;
+    [FORCS1(:,:,b), FORCS1_shocks(:,:,b)] = mcforecast3(cL,options_cond_fcst.periods,constrained_paths,shocks,FORCS1(:,:,b),T,R,mv, mu);
+    FORCS1(:,:,b)=FORCS1(:,:,b)+trend; %add trend
 end
 
 mFORCS1 = mean(FORCS1,3);
+mFORCS1_shocks = mean(FORCS1_shocks,3);
 
 tt = (1-options_cond_fcst.conf_sig)/2;
 t1 = round(options_cond_fcst.replic*tt);
@@ -193,16 +208,21 @@ for i = 1:EndoSize
           ' = [tmp(t1,:)'' ,tmp(t2,:)'' ]'';']);
 end
 
-clear FORCS1;
+for i = 1:n1
+    eval(['forecasts.controlled_exo_variables.Mean.' deblank(options_cond_fcst.controlled_varexo(i,:)) ' = mFORCS1_shocks(i,:)'';']);
+    tmp = sort(squeeze(FORCS1_shocks(i,:,:))');
+    eval(['forecasts.controlled_exo_variables.ci.' deblank(options_cond_fcst.controlled_varexo(i,:))  ...
+          ' = [tmp(t1,:)'' ,tmp(t2,:)'' ]'';']);
+end
+
+clear FORCS1 mFORCS1_shocks;
 
 FORCS2 = zeros(NumberOfStates,options_cond_fcst.periods+1,options_cond_fcst.replic);
-for b=1:options_cond_fcst.replic
-    FORCS2(:,1,b) = InitState;
-end
+FORCS2(:,1,:) = repmat(InitState,1,options_cond_fcst.replic); %set initial steady state to deviations from steady state in first period
 
 %randn('state',0);
 
-for b=1:options_cond_fcst.replic
+for b=1:options_cond_fcst.replic %conditional forecast using cL set to 0
     shocks = sQ*randn(ExoSize,options_cond_fcst.periods);
     shocks(jdx,:) = zeros(length(jdx),options_cond_fcst.periods);
     FORCS2(:,:,b) = mcforecast3(0,options_cond_fcst.periods,constrained_paths,shocks,FORCS2(:,:,b),T,R,mv, mu)+trend;

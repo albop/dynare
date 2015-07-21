@@ -19,10 +19,18 @@ function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,options_,kro
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<6 || isempty(kronflag), kronflag = 0; end
-if nargin<7 || isempty(indx), indx = [1:M_.param_nbr]; end,
-if nargin<8 || isempty(indexo), indexo = []; end,
-if nargin<9 || isempty(iv), iv = (1:length(A))'; end,
+if nargin<6 || isempty(kronflag)
+    kronflag = 0; 
+end
+if nargin<7 || isempty(indx)
+    indx = []; 
+end
+if nargin<8 || isempty(indexo)
+    indexo = []; 
+end
+if nargin<9 || isempty(iv)
+    iv = (1:length(A))'; 
+end
 
 [I,J]=find(M_.lead_lag_incidence');
 yy0=oo_.dr.ys(I);
@@ -122,7 +130,7 @@ else
 dyssdtheta=zeros(length(oo_.dr.ys),M_.param_nbr);
 d2yssdtheta=zeros(length(oo_.dr.ys),M_.param_nbr,M_.param_nbr);
 [residual, gg1] = feval([M_.fname,'_static'],oo_.dr.ys, oo_.exo_steady_state', M_.params);
-df = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
+df = feval([M_.fname,'_params_derivs'],yy0, repmat(oo_.exo_steady_state',[M_.maximum_exo_lag+M_.maximum_exo_lead+1]), ...
     M_.params, oo_.dr.ys, 1, dyssdtheta, d2yssdtheta);
 dyssdtheta = -gg1\df;
 if nargout>5,
@@ -184,9 +192,9 @@ if nargout>5,
 %     g22 = get_all_2nd_derivs(gpp,m,nelem,M_.param_nbr);
 %     g22 = g22(:,:,indx,indx);
 else
-    [df, gp] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
+    [df, gp] = feval([M_.fname,'_params_derivs'],yy0, repmat(oo_.exo_steady_state',[M_.maximum_exo_lag+M_.maximum_exo_lead+1,1]), ...
         M_.params, oo_.dr.ys, 1, dyssdtheta,d2yssdtheta);
-    [residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
+    [residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, repmat(oo_.exo_steady_state',[M_.maximum_exo_lag+M_.maximum_exo_lead+1,1]), ...
         M_.params, oo_.dr.ys, 1);
     [nr, nc]=size(g2);
 end

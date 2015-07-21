@@ -64,7 +64,7 @@ if opt_gsa.load_ident_files==0,
   if opt_gsa.morris==2,
    pdraws = dynare_identification(options_.options_ident,[lpmatx lpmat(istable,:)]);
 %    [pdraws, TAU, GAM] = dynare_identification(options_.options_ident,[lpmatx lpmat(istable,:)]);
-    if max(max(abs(pdraws-[lpmatx lpmat(istable,:)])))==0,
+    if ~isempty(pdraws) && max(max(abs(pdraws-[lpmatx lpmat(istable,:)])))==0,
       disp(['Sample check OK ', num2str(max(max(abs(pdraws-[lpmatx lpmat(istable,:)]))))]),
       clear pdraws;
     end

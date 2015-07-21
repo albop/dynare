@@ -1,15 +1,13 @@
 MODFILES = \
-	estimation/fs2000_mc4.mod \
-	estimation/fs2000_mc4_mf.mod \
-	estimation/fs2000_mc6.mod \
-	estimation/fs2000_mc6_mf.mod \
 	estimation/fs2000_MCMC_jumping_covariance.mod \
 	estimation/fs2000_initialize_from_calib.mod	\
 	estimation/fs2000_calibrated_covariance.mod \
 	estimation/MH_recover/fs2000_recover.mod \
 	estimation/t_proposal/fs2000_student.mod \
+	estimation/TaRB/fs2000_tarb.mod \
 	gsa/ls2003.mod \
 	gsa/ls2003a.mod \
+	gsa/cod_ML_morris/cod_ML_morris.mod \
 	ramst.mod \
 	ramst_a.mod \
 	ramst_static_tag.mod \
@@ -21,6 +19,7 @@ MODFILES = \
 	example1_abs_sign.mod \
 	example1_macroif.mod \
 	t_sgu_ex1.mod \
+	irfs/example1_unit_std.mod \
 	optimal_policy/osr_example.mod \
 	optimal_policy/osr_example_objective_correctness.mod \
 	optimal_policy/osr_example_obj_corr_non_stat_vars.mod \
@@ -41,6 +40,7 @@ MODFILES = \
 	optimal_policy/Ramsey/ramsey_ex.mod \
 	optimal_policy/Ramsey/ramsey_ex_initval_AR2.mod \
 	optimal_policy/Ramsey/ramsey_ex_aux.mod \
+	optimal_policy/RamseyConstraints/test1.mod \
 	discretionary_policy/dennis_1.mod \
 	initval_file/ramst_initval_file.mod \
 	ramst_normcdf_and_friends.mod \
@@ -127,12 +127,17 @@ MODFILES = \
 	seeds.mod \
 	identification/kim/kim2.mod \
 	identification/as2007/as2007.mod \
+	identification/ident_unit_root/ident_unit_root.mod \
+	identification/rbc_ident/rbc_ident_std_as_structural_par.mod \
+	identification/rbc_ident/rbc_ident_varexo_only.mod \
 	simul/example1.mod \
 	simul/Solow_no_varexo.mod \
 	simul/simul_ZLB_purely_forward.mod \
 	simul/simul_ZLB_purely_forward_no_solution.mod \
 	conditional_forecasts/fs2000_cal.mod \
 	conditional_forecasts/fs2000_est.mod \
+	conditional_forecasts/fs2000_conditional_forecast_initval.mod \
+	conditional_forecasts/fs2000_conditional_forecast_histval.mod \
 	recursive/ls2003.mod \
 	recursive/ls2003_bayesian.mod \
 	recursive/ls2003_bayesian_xls.mod \
@@ -164,6 +169,10 @@ MODFILES = \
 	kalman_filter_smoother/fs2000_smoother_only.mod \
 	kalman_filter_smoother/check_variable_dimensions/fs2000.mod \
 	kalman_filter_smoother/check_variable_dimensions/fs2000_ML.mod \
+	kalman/likelihood_from_dynare/fs2000_corr_ME.mod \
+	kalman/likelihood_from_dynare/fs2000_corr_ME_missing.mod \
+	kalman/likelihood_from_dynare/fs2000_uncorr_ME.mod \
+	kalman/likelihood_from_dynare/fs2000_uncorr_ME_missing.mod \
 	second_order/burnside_1.mod \
 	second_order/ds1.mod \
 	second_order/ds2.mod \
@@ -184,6 +193,8 @@ MODFILES = \
 	deterministic_simulations/rbc_det_exo_lag_2b.mod \
 	deterministic_simulations/rbc_det_exo_lag_2c.mod \
 	deterministic_simulations/sim_several_leads_lags.mod \
+	deterministic_simulations/lola_solve_one_boundary.mod \
+	deterministic_simulations/linear_approximation/sw.mod \
 	walsh.mod \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
@@ -221,11 +232,13 @@ MODFILES = \
 	optimizers/fs2000_102.mod \
 	optimizers/fs2000_w.mod \
 	differentiate_forward_vars/RBC_differentiate_forward.mod \
+	TeX/fs2000_corr_ME.mod \
 	reporting/example1.mod
 
 XFAIL_MODFILES = ramst_xfail.mod \
-	estim_param_in_shock_value.mod \
-	optimal_policy/Ramsey/ramsey_ex_wrong_ss_file.mod
+	estim_param_in_shock_value_xfail.mod \
+	optimal_policy/Ramsey/ramsey_ex_wrong_ss_file_xfail.mod \
+	steady_state/Linear_steady_state_xfail.mod
 
 MFILES = initval_file/ramst_initval_file_data.m
 
@@ -272,10 +285,11 @@ AIM/fs2000x10_L9_L_AIM.o.trs: AIM/fs2000x10_L9_L.o.trs
 AIM/ls2003_2L0L_AIM.o.trs: AIM/ls2003_2L0L.o.trs
 AIM/ls2003_2L2L_AIM.o.trs: AIM/ls2003_2L2L.o.trs
 
-estimation/fs2000_mc4_mf.m.trs: estimation/fs2000_mc4.m.trs
-estimation/fs2000_mc6_mf.m.trs: estimation/fs2000_mc6.m.trs
-estimation/fs2000_mc4_mf.o.trs: estimation/fs2000_mc4.o.trs
-estimation/fs2000_mc6_mf.o.trs: estimation/fs2000_mc6.o.trs
+estimation/fs2000_mf.m.trs: estimation/fs2000.m.trs
+estimation/fs2000_mf.o.trs: estimation/fs2000.o.trs
+
+optimizers/fs2000_102.m.trs: estimation/fs2000.m.trs
+optimizers/fs2000_102.o.trs: estimation/fs2000.o.trs
 
 arima/mod1a.m.trs: arima/mod1.m.trs
 arima/mod1b.m.trs: arima/mod1.m.trs
@@ -306,6 +320,8 @@ deterministic_simulations/rbc_det_exo_lag_2c.o.trs: deterministic_simulations/rb
 initval_file/ramst_initval_file.m.trs: initval_file/ramst_initval_file_data.m.tls
 initval_file/ramst_initval_file.o.trs: initval_file/ramst_initval_file_data.o.tls
 
+identification/rbc_ident/rbc_ident_varexo_only.m.trs: identification/rbc_ident/rbc_ident_std_as_structural_par.m.trs
+identification/rbc_ident/rbc_ident_varexo_only.o.trs: identification/rbc_ident/rbc_ident_std_as_structural_par.o.trs
 
 
 # Matlab TRS Files
@@ -355,8 +371,6 @@ EXTRA_DIST = \
 	printMakeCheckOctaveErrMsg.m \
 	fataltest.m \
 	AIM/data_ca1.m \
-	AIM/fs2000_b1L1L_AIM_steadystate.m \
-	AIM/fs2000_b1L1L_steadystate.m \
 	AIM/fsdat.m \
 	block_bytecode/run_ls2003.m \
 	bvar_a_la_sims/bvar_sample.m \
@@ -367,12 +381,10 @@ EXTRA_DIST = \
 	steady_state/walsh1_old_ss_steadystate.m \
 	data/test.xls \
 	analytic_derivatives/fsdat_simul.m \
-	fs2000/fs2000a_steadystate.m \
 	fs2000/fsdat_simul.m \
 	k_order_perturbation/run_fs2000kplusplus.m \
 	ls2003/data_ca1.m \
 	measurement_errors/data_ca1.m \
-	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME_steadystate.m \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fsdat_simul.m \
 	missing/simulate_data_with_missing_observations.m \
 	objectives/sgu_ex1.mat \
@@ -395,18 +407,17 @@ EXTRA_DIST = \
 	ms-sbvar/archive-files/specification_2v2c.dat \
 	recursive/data_ca1.m \
 	kalman_filter_smoother/fsdat_simul.m \
-	kalman_filter_smoother/fs2000a_steadystate.m \
+	kalman/likelihood_from_dynare/fsdat_simul_corr_ME_missing.m \
+	kalman/likelihood_from_dynare/fsdat_simul_uncorr_ME.m \
+	kalman/likelihood_from_dynare/fsdat_simul_uncorr_ME_missing.m \
 	identification/kim/kim2_steadystate.m \
+	identification/as2007/as2007_steadystate.m \
 	estimation/fsdat_simul.m \
 	ep/mean_preserving_spread.m \
 	third_order/comparison_policy_functions_dynare_mathematica.m \
 	third_order/policyfunctions.mat \
 	shock_decomposition/example1_calib_shock_decomp_data.mat \
 	shock_decomposition/fsdat_simul.m \
-	estimation/fs2000_MCMC_jumping_covariance_steadystate.m \
-	estimation/fs2000_initialize_from_calib_steadystate.m \
-	filter_step_ahead/fs2000_filter_step_ahead_bayesian_steadystate.m \
-	filter_step_ahead/fs2000_filter_step_ahead_ML_steadystate.m \
 	loglinear/results_exp.mat \
 	smoother2histval/fsdat_simul.m \
 	optimal_policy/Ramsey/find_c.m \

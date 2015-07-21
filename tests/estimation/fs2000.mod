@@ -30,22 +30,32 @@ gy_obs = dA*y/y(-1);
 gp_obs = (P/P(-1))*m(-1)/dA;
 end;
 
-initval;
-k = 6;
-m = mst;
-P = 2.25;
-c = 0.45;
-e = 1;
-W = 4;
-R = 1.02;
-d = 0.85;
-n = 0.19;
-l = 0.86;
-y = 0.6;
-gy_obs = exp(gam);
-gp_obs = exp(-gam);
-dA = exp(gam);
+steady_state_model;
+  dA = exp(gam);
+  gst = 1/dA;
+  m = mst;
+  khst = ( (1-gst*bet*(1-del)) / (alp*gst^alp*bet) )^(1/(alp-1));
+  xist = ( ((khst*gst)^alp - (1-gst*(1-del))*khst)/mst )^(-1);
+  nust = psi*mst^2/( (1-alp)*(1-psi)*bet*gst^alp*khst^alp );
+  n  = xist/(nust+xist);
+  P  = xist + nust;
+  k  = khst*n;
+
+  l  = psi*mst*n/( (1-psi)*(1-n) );
+  c  = mst/P;
+  d  = l - mst + 1;
+  y  = k^alp*n^(1-alp)*gst^alp;
+  R  = mst/bet;
+  W  = l/n;
+  ist  = y-c;
+  q  = 1 - d;
+
+  e = 1;
+  
+  gp_obs = m/dA;
+  gy_obs = dA;
 end;
+
 
 shocks;
 var e_a; stderr 0.014;
@@ -72,4 +82,4 @@ varobs gp_obs gy_obs;
 
 options_.solve_tolf = 1e-12;
 
-estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=2000,mh_nblocks=2,mh_jscale=0.8);
+estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=3000,mh_nblocks=2,mh_jscale=0.8,moments_varendo,selected_variables_only) y m;

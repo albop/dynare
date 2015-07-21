@@ -72,12 +72,12 @@ copyfile('rbcii_steady_state.m','rbcii_steadystate2.m');
     options_.ep.stochastic.nodes = 2;
     options_.console_mode = 0;
 
-    ts = extended_path([],100);
+    ts = extended_path([],20);
 
     options_.ep.stochastic.order = 1;
     options_.ep.IntegrationAlgorithm='Tensor-Gaussian-Quadrature';
 //    profile on
-    ts1_4 = extended_path([],100);
+    ts1_4 = extended_path([],20);
 //    profile off
 //    profile viewer
 @#else

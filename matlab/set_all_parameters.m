@@ -32,8 +32,12 @@ function M = set_all_parameters(xparam1,estim_params,M)
 %! @sp 2
 %! @end deftypefn
 %@eod:
+%
+% Remarks: Changes to this file also need to be ported to
+% gsa/set_shocks_param.m
 
-% Copyright (C) 2003-2013 Dynare Team
+
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

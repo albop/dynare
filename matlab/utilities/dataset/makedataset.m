@@ -74,8 +74,13 @@ if ~isempty(datafile)
     datafile_extension = get_file_extension(datafile);
     if isempty(datafile_extension)
         available_extensions = {}; j = 1;
+        [datafilepath,datafilename,datafileext] = fileparts(datafile);
+        if isempty(datafilepath)
+            datafilepath = '.';
+        end
+        dircontent = dir(datafilepath);
         for i=1:length(allowed_extensions)
-            if exist([datafile '.' allowed_extensions{i}])
+            if ~isempty(strmatch([datafilename '.' allowed_extensions{i}],{dircontent.name},'exact'))
                 available_extensions(j) = {allowed_extensions{i}};
                 j = j+1;
             end
@@ -103,6 +108,10 @@ if ~isempty(datafile)
 else
     DynareDataset = dseriesobjectforuserdataset;
     clear('dseriesobjectforuserdataset');
+end
+
+if size(unique(DynareDataset.name),1)~=size(DynareDataset.name,1)
+    error('makedataset: the data set must not contain two variables with the same name and must not contain empty/non-named columns.')
 end
 
 % Select a subset of the variables.

@@ -56,14 +56,22 @@ if SampleSize == 1,
     subplot(211)
     mmm = (idehess.ide_strength_J);
     [ss, is] = sort(mmm);
-    bar(log([idehess.ide_strength_J(:,is)' idehess.ide_strength_J_prior(:,is)']))
+    if ~all(isnan(idehess.ide_strength_J_prior))
+        bar(log([idehess.ide_strength_J(:,is)' idehess.ide_strength_J_prior(:,is)']))
+    else
+        bar(log([idehess.ide_strength_J(:,is)' ]))
+    end
     set(gca,'xlim',[0 nparam+1])
     set(gca,'xticklabel','')
     dy = get(gca,'ylim');
     for ip=1:nparam,
         text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
     end
-    legend('relative to param value','relative to prior std','Location','Best')
+    if ~all(isnan(idehess.ide_strength_J_prior))
+        legend('relative to param value','relative to prior std','Location','Best')
+    else
+        legend('relative to param value','Location','Best')
+    end
     if  idehess.flag_score,
         title('Identification strength with asymptotic Information matrix (log-scale)')
     else
@@ -71,14 +79,23 @@ if SampleSize == 1,
     end
     
     subplot(212)
-    bar(log([idehess.deltaM(is) idehess.deltaM_prior(is)]))
+    if ~all(isnan(idehess.deltaM_prior))
+        bar(log([idehess.deltaM(is) idehess.deltaM_prior(is)]))
+    else
+        bar(log([idehess.deltaM(is)]))
+    end
+
     set(gca,'xlim',[0 nparam+1])
     set(gca,'xticklabel','')
     dy = get(gca,'ylim');
     for ip=1:nparam,
         text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
     end
-    legend('relative to param value','relative to prior std','Location','Best')
+    if ~all(isnan(idehess.deltaM_prior))
+        legend('relative to param value','relative to prior std','Location','Best')
+    else
+        legend('relative to param value','Location','Best')
+    end
     if  idehess.flag_score,
         title('Sensitivity component with asymptotic Information matrix (log-scale)')
     else
@@ -91,27 +108,30 @@ if SampleSize == 1,
             skipline()
             disp('Press ENTER to plot advanced diagnostics'), pause(5),
         end
-        hh = dyn_figure(options_,'Name',[tittxt, ' - Sensitivity plot']);
-        subplot(211)
-        mmm = (siJnorm)'./max(siJnorm);
-        mmm1 = (siHnorm)'./max(siHnorm);
-        mmm=[mmm mmm1];
-        mmm1 = (siLREnorm)'./max(siLREnorm);
-        offset=length(siHnorm)-length(siLREnorm);
-        mmm1 = [NaN(offset,1); mmm1];
-        mmm=[mmm mmm1];
-        
-        bar(log(mmm(is,:).*100))
-        set(gca,'xlim',[0 nparam+1])
-        set(gca,'xticklabel','')
-        dy = get(gca,'ylim');
-        for ip=1:nparam,
-            text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+        if all(isnan([siJnorm';siHnorm';siLREnorm']))
+            fprintf('\nIDENTIFICATION: Skipping sensitivity plot, because standard deviation of parameters is NaN, possibly due to the use of ML.\n')
+        else
+            hh = dyn_figure(options_,'Name',[tittxt, ' - Sensitivity plot']);
+            subplot(211)
+            mmm = (siJnorm)'./max(siJnorm);
+            mmm1 = (siHnorm)'./max(siHnorm);
+            mmm=[mmm mmm1];
+            mmm1 = (siLREnorm)'./max(siLREnorm);
+            offset=length(siHnorm)-length(siLREnorm);
+            mmm1 = [NaN(offset,1); mmm1];
+            mmm=[mmm mmm1];
+
+            bar(log(mmm(is,:).*100))
+            set(gca,'xlim',[0 nparam+1])
+            set(gca,'xticklabel','')
+            dy = get(gca,'ylim');
+            for ip=1:nparam,
+                text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+            end
+            legend('Moments','Model','LRE model','Location','Best')
+            title('Sensitivity bars using derivatives (log-scale)')
+            dyn_saveas(hh,[IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1 ],options_);
         end
-        legend('Moments','Model','LRE model','Location','Best')
-        title('Sensitivity bars using derivatives (log-scale)')
-        dyn_saveas(hh,[IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1 ],options_);
-        
         % identificaton patterns
         for  j=1:size(idemoments.cosnJ,2),
             pax=NaN(nparam,nparam);

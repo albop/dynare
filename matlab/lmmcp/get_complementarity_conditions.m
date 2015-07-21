@@ -1,4 +1,4 @@
-function [lb,ub,eq_index] = get_complementarity_conditions(M)
+function [lb,ub,eq_index] = get_complementarity_conditions(M,ramsey_policy)
 
 % Copyright (C) 2014 Dynare Team
 %
@@ -17,11 +17,27 @@ function [lb,ub,eq_index] = get_complementarity_conditions(M)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-
-etags = M.equations_tags;
 ub = inf(M.endo_nbr,1);
 lb = -ub;
 eq_index = (1:M.endo_nbr)';
+if ramsey_policy
+    if isfield(M,'ramsey_model_constraints')
+        rc = M.ramsey_model_constraints;
+        for i = 1:length(rc)
+            switch rc{i}{2}
+              case {'>','>='}
+                lb(rc{i}{1}) = eval(rc{i}{3});
+              case {'<','<='}
+                ub(rc{i}{1}) = eval(rc{i}{3});
+              otherwise
+                error('Wrong operator in get_complementarity_conditions')
+            end
+            eq_index(i) = 1;
+        end
+    end
+end
+
+etags = M.equations_tags;
 for i=1:size(etags,1)
     if strcmp(etags{i,2},'mcp')
         str = etags{i,3};

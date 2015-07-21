@@ -1,4 +1,4 @@
-function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel1(fcn,x0,H0,grad,crit,nit,method,epsilon,varargin)
+function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel1(fcn,x0,H0,grad,crit,nit,method,epsilon,Verbose,Save_files,varargin)
 %[fhat,xhat,ghat,Hhat,itct,fcount,retcodeh] = csminwel1(fcn,x0,H0,grad,crit,nit,method,epsilon,varargin)
 % Inputs:
 %   fcn:    [string]        string naming the objective function to be minimized
@@ -65,7 +65,6 @@ fh = [];
 xh = [];
 [nx,no]=size(x0);
 nx=max(nx,no);
-Verbose=1;
 NumGrad= isempty(grad);
 done=0;
 itct=0;
@@ -87,7 +86,7 @@ retcodeh = [];
 [f0,junk1,junk2,cost_flag] = feval(fcn,x0,varargin{:});
 
 if ~cost_flag
-    disp('Bad initial parameter.')
+    disp_verbose('Bad initial parameter.',Verbose)
     return
 end
 
@@ -110,15 +109,13 @@ while ~done
 
     g1=[]; g2=[]; g3=[];
     %addition fj. 7/6/94 for control
-    if Verbose
-        disp('-----------------')
-        disp(sprintf('f at the beginning of new iteration, %20.10f',f))
-    end
+    disp_verbose('-----------------',Verbose)
+    disp_verbose(sprintf('f at the beginning of new iteration, %20.10f',f),Verbose)
     %-----------Comment out this line if the x vector is long----------------
-    %   disp([sprintf('x = ') sprintf('%15.8g %15.8g %15.8g %15.8g\n',x)]);
+    %   disp_verbose([sprintf('x = ') sprintf('%15.8g %15.8g %15.8g %15.8g\n',x)]);
     %-------------------------
     itct=itct+1;
-    [f1, x1, fc, retcode1] = csminit1(fcn,x,f,g,badg,H,varargin{:});
+    [f1, x1, fc, retcode1] = csminit1(fcn,x,f,g,badg,H,Verbose,varargin{:});
     fcount = fcount+fc;
     % erased on 8/4/94
     % if (retcode == 1) || (abs(f1-f) < crit)
@@ -142,7 +139,9 @@ while ~done
             end
             wall1=badg1;
             % g1
-            save g1.mat g1 x1 f1 varargin;
+            if Save_files
+                save g1.mat g1 x1 f1 varargin;
+            end
         end
         if wall1 % && (~done) by Jinill
                  % Bad gradient or back and forth on step length.  Possibly at
@@ -150,10 +149,8 @@ while ~done
                  %
                  %fcliff=fh;xcliff=xh;
             Hcliff=H+diag(diag(H).*rand(nx,1));
-            if Verbose
-                disp('Cliff.  Perturbing search direction.')
-            end
-            [f2, x2, fc, retcode2] = csminit1(fcn,x,f,g,badg,Hcliff,varargin{:});
+            disp_verbose('Cliff.  Perturbing search direction.',Verbose)
+            [f2, x2, fc, retcode2] = csminit1(fcn,x,f,g,badg,Hcliff,Verbose,varargin{:});
             fcount = fcount+fc; % put by Jinill
             if  f2 < f
                 if retcode2==2 || retcode2==4
@@ -169,11 +166,15 @@ while ~done
                     end
                     wall2=badg2;
                     % g2
-                    badg2
-                    save g2.mat g2 x2 f2 varargin
+                    if Verbose
+                        badg2
+                    end
+                    if Save_files
+                        save g2.mat g2 x2 f2 varargin
+                    end
                 end
                 if wall2
-                    disp('Cliff again.  Try traversing')
+                    disp_verbose('Cliff again.  Try traversing',Verbose)
                     if norm(x2-x1) < 1e-13
                         f3=f; x3=x; badg3=1;retcode3=101;
                     else
@@ -181,7 +182,7 @@ while ~done
                         if(size(x0,2)>1)
                             gcliff=gcliff';
                         end
-                        [f3, x3, fc, retcode3] = csminit1(fcn,x,f,gcliff,0,eye(nx),varargin{:});
+                        [f3, x3, fc, retcode3] = csminit1(fcn,x,f,gcliff,0,eye(nx),Verbose,varargin{:});
                         fcount = fcount+fc; % put by Jinill
                         if retcode3==2 || retcode3==4
                             wall3=1; 
@@ -197,7 +198,9 @@ while ~done
                             end
                             wall3=badg3;
                             % g3
-                            save g3.mat g3 x3 f3 varargin;
+                            if Save_files
+                                save g3.mat g3 x3 f3 varargin;
+                            end
                         end
                     end
                 else
@@ -225,7 +228,7 @@ while ~done
         fh=f1;xh=x1;gh=g1;badgh=badg1;retcodeh=retcode1;
     else
         [fh,ih] = min([f1,f2,f3]);
-        %disp(sprintf('ih = %d',ih))
+        %disp_verbose(sprintf('ih = %d',ih))
         %eval(['xh=x' num2str(ih) ';'])
         switch ih
           case 1
@@ -259,18 +262,16 @@ while ~done
     %end of picking
     stuck = (abs(fh-f) < crit);
     if (~badg) && (~badgh) && (~stuck)
-        H = bfgsi1(H,gh-g,xh-x);
+        H = bfgsi1(H,gh-g,xh-x,Verbose,Save_files);
     end
-    if Verbose
-        disp('----')
-        disp(sprintf('Improvement on iteration %d = %18.9f',itct,f-fh))
-    end
+    disp_verbose('----',Verbose)
+    disp_verbose(sprintf('Improvement on iteration %d = %18.9f',itct,f-fh),Verbose)
     % if Verbose
     if itct > nit
-        disp('iteration count termination')
+        disp_verbose('iteration count termination',Verbose)
         done = 1;
     elseif stuck
-        disp('improvement < crit termination')
+        disp_verbose('improvement < crit termination',Verbose)
         done = 1;
     end
     rc=retcodeh;
@@ -278,19 +279,19 @@ while ~done
         if rc ==0
             %do nothing, just a normal step
         elseif rc == 1
-            disp('zero gradient')
+            disp_verbose('zero gradient',Verbose)
         elseif rc == 6
-            disp('smallest step still improving too slow, reversed gradient')
+            disp_verbose('smallest step still improving too slow, reversed gradient',Verbose)
         elseif rc == 5
-            disp('largest step still improving too fast')
+            disp_verbose('largest step still improving too fast',Verbose)
         elseif (rc == 4) || (rc==2)
-            disp('back and forth on step length never finished')
+            disp_verbose('back and forth on step length never finished',Verbose)
         elseif rc == 3
-            disp('smallest step still improving too slow')
+            disp_verbose('smallest step still improving too slow',Verbose)
         elseif rc == 7
-            disp('warning: possible inaccuracy in H matrix')
+            disp_verbose('warning: possible inaccuracy in H matrix',Verbose)
         else
-            error('Unaccounted Case, please contact the developers')
+            error('Unaccounted Case, please contact the developers',Verbose)
         end
     end
      

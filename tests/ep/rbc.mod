@@ -75,19 +75,19 @@ steady(nocheck);
 options_.ep.verbosity = 0;
 
 options_.ep.stochastic.order = 0;
-ts0 = extended_path([],100);
+ts0 = extended_path([],10);
 
 options_.ep.stochastic.order = 1;
 options_.ep.stochastic.nodes = 3;
 options_.ep.IntegrationAlgorithm='Tensor-Gaussian-Quadrature';
-ts1_3 = extended_path([],100);
+ts1_3 = extended_path([],10);
 
 options_.ep.stochastic.nodes = 5;
-ts1_5 = extended_path([],100);
+ts1_5 = extended_path([],10);
 
 options_.ep.stochastic.order = 2;
 options_.ep.stochastic.nodes = 3;
-ts2_3 = extended_path([],100);
+ts2_3 = extended_path([],10);
 
 options_.ep.stochastic.nodes = 5;
-ts2_5 = extended_path([],100);
+ts2_5 = extended_path([],10);

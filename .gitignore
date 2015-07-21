@@ -33,6 +33,9 @@ install-sh
 ylwrap
 ar-lib
 
+# checksum associated with fast option
+checksum
+
 # Make Check Rules
 *.trs
 

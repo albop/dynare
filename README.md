@@ -176,110 +176,28 @@ Alternatively, if you want to build everything, manually install the following p
 
 ## Windows
 
-The following instructions are compatible with MATLAB or with Octave/MinGW (as downloadable [here](http://www.dynare.org/download/octave)).
-
-### Setting up the Compilation Environment
-
-- First, you need to setup a Cygwin environment, following the instructions at <http://www.cygwin.com>. You can install either the 32-bit or the 64-bit version. If you opt for the latter, you need to replace `c:\cygwin` by `c:\cygwin64` in the following.
-- Install the following packages:
-    - `make`
-    - `bison`
-    - `flex`
-    - `git`, `gettext`
-    - `autoconf`
-    - `automake`
-    - `texi2html`
-    - `texlive`, `texlive-collection-latexextra`, `texlive-collection-formatsextra`, `texlive-collection-publishers`, `texlive-collection-fontsrecommended`, `texlive-collection-fontsextra`, `texlive-collection-bibtexextra`, `texlive-collection-genericrecommended`, `texlive-collection-mathextra`, `texlive-collection-binextra`
-    - `texinfo`
-    - `doxygen`
-    - `mingw64-i686-gcc-core`, `mingw64-i686-gcc-g++`, `mingw64-i686-gcc-fortran` (if you have Octave/MinGW or if you have MATLAB 32-bit)
-    - `mingw64-x86_64-gcc-core`, `mingw64-x86_64-gcc-g++`, `mingw64-x86_64-gcc-fortran` (if you have MATLAB 64-bit)
-- Second, install precompiled librairies for BLAS, LAPACK, Boost and GSL:
-    - If you have Octave or MATLAB 32-bit, download [dynare-mingw32-libs.zip](http://www.dynare.org/build/dynare-mingw32-libs.zip), and uncompress it in `c:\cygwin\usr\local\lib\mingw32`
-    - If you have MATLAB 64-bit, download [dynare-mingw64-libs.zip](http://www.dynare.org/build/dynare-mingw64-libs.zip), and uncompress it in `c:\cygwin\usr\local\lib\mingw64`
-
-*Remark*: You need to make sure that Cygwin’s git is used and not a potentially installed msysgit. The latter typically happens when one installs msysgit and allows it to set a system path. This will result in wrong line endings and cryptic error messages à la "syntax error near unexpected token `fi'". In that case it might be necessary to uninstall msysgit and reinstall it without setting a system path.
-
-### Compiling the preprocessor, Dynare++, the MEX for MATLAB and the documentation
-
-Install the Dynare source tree, let’s say in `c:\cygwin\home\user\dynare` (by either uncompressing a source archive, or by cloning the git repository with `git clone --recursive http://github.com/DynareTeam/dynare.git`).
-
-Launch a Cygwin shell, and enter the Dynare source tree:
-```
-cd dynare
-```
-If you retrieved the source from Git, don't forget to do:
-```
-autoreconf -i -s
-```
-Then, configure the package.
-
-- If your MATLAB is 32-bit, let's say version R2008b installed in `c:\Program Files\MATLAB\R2008b`
-```
-./configure --host=i686-w64-mingw32 --with-boost=/usr/local/lib/mingw32/boost --with-blas=/usr/local/lib/mingw32/blas/libopenblas.a --with-lapack=/usr/local/lib/mingw32/lapack/liblapack.a --with-gsl=/usr/local/lib/mingw32/gsl --with-matio=/usr/local/lib/mingw32/matio --with-slicot=/usr/local/lib/mingw32/slicot --with-matlab=/cygdrive/c/Progra~1/MATLAB/R2008b MATLAB_VERSION=R2008b --disable-octave
-```
-- If your MATLAB is 64-bit:
-```
-./configure --host=x86_64-w64-mingw32 --with-boost=/usr/local/lib/mingw64/boost --with-blas=/usr/local/lib/mingw64/blas/libopenblas.a --with-lapack=/usr/local/lib/mingw64/lapack/liblapack.a --with-gsl=/usr/local/lib/mingw64/gsl --with-matio=/usr/local/lib/mingw64/matio --with-slicot=/usr/local/lib/mingw64/slicot --with-matlab=/cygdrive/c/Progra~1/MATLAB/R2008b MATLAB_VERSION=R2008b --disable-octave
-```
-A few remarks:
-
-- Note that here we use `Progra~1` (the 8.3 filename) instead of `Program Files`. This is because spaces in filenames confuse the configuration scripts.
-- If you don’t have MATLAB, then drop the `--with-matlab` and `MATLAB_VERSION` options
-- If your MATLAB is 32-bit and your Windows is 64-bit, you need to explicitly give the MEX extension, with `MEXEXT=mexw32`
-
-Then compile everything with:
-```
-make all pdf html
-```
-This should build:
-
-- Dynare preprocessor
-- Dynare MEX files for MATLAB (provided you gave the MATLAB path to configure)
-- Dynare++
-- Part of the documentation
-
-### Compiling the MEX for Octave (MinGW package)
-
-Launch a Cygwin shell, and enter the Dynare source tree for Octave MEX:
-
-    cd dynare/mex/build/octave
-
-Configure and make:
-
-    ./configure MKOCTFILE=/usr/local/lib/mingw32/mkoctfile-win --with-boost=/usr/local/lib/mingw32/boost --with-gsl=/usr/local/lib/mingw32/gsl --with-matio=/usr/local/lib/mingw32/matio --with-slicot=/usr/local/lib/mingw32/slicot-underscore
-    make
+We no longer support compilation on Windows. To use the unstable version of Dynare on a Windows system, please download it from the [Dynare website](http://www.dynare.org/download/dynare-unstable).
 
 ## Mac OS X
 
 - Install the Xcode Command Line Tools:
     - Download "Command Line Tools (OS X 10.X) for Xcode," where 10.X corresponds to your OS X version, from https://developer.apple.com/downloads/index.action
+- Install the latest version of [MacTeX](http://www.tug.org/mactex/)
 - Install [Homebrew](http://mxcl.github.io/homebrew/) by following the instructions on the website
 - Tap [Homebrew Science](https://github.com/Homebrew/homebrew-science) by opening Terminal and typing:
-    - ```brew tap homebrew/science```
-- Install the following brews:
-    - ```brew install gcc```
-    - ```brew install automake```
-    - ```brew install gsl```
-    - ```brew install bison```
-    - ```brew install boost```
-    - ```brew install libmatio --with-hdf5```
-    - ```brew install slicot --with-default-integer-8```
-- Force link ```flex``` and ```bison```
-    - ```brew link --force flex```
-    - ```brew link --force bison```
+- ```brew tap homebrew/science```
 - **(Optional)** To compile Dynare mex files for use on Octave:
     - ```brew install octave```
-- **(Optional)** To compile Dynare's documentation, first install the latest version of [MacTeX](http://www.tug.org/mactex/). Then install `doxygen`, `latex2html` and `texi2html` via Homebrew with the following commands:
-    - ```brew install doxygen```
-    - ```brew install texinfo```
-    - ```brew install latex2html```
-    - ```brew install texi2html```
-- **(On OS X 10.7 Only)** Copy [FlexLexer.h](http://www.dynare.org/build/FlexLexer.h) into the `preprocessor` directory (there was an error in the `FlexLexer.h` file distributed with 10.7)
-- Ensure `/usr/local/bin` is at the beginning of your path:
-    - ```PATH=/usr/local/bin:$PATH```
-- Finally, switch to the root dynare directory and compile dynare
-    - `autoreconf -si`
-    - `./configure --with-matlab=/Applications/MATLAB_R2014b.app MATLAB_VERSION=8.4`
-    - `make`
-    - `make pdf TEXI2DVI=/usr/local/Cellar/texinfo/5.2/bin/texi2dvi`, where you replace everything after the equal sign with the path to the `texi2dvi` installed by homebrew when you installed `texinfo`.
+- To see the available options for compiling Dynare, type:
+    - ```brew info dynare```
+- Install Dynare via a command of the form:
+    - (basic) ```brew install dynare --HEAD --without-check```
+    - (with Matlab mex) ```brew install dynare --HEAD --without-check --with-matlab=/Applications/MATLAB_R2015a.app --with-matlab-version=8.5```
+- **NB**: If compiling Dynare documentation, add ```--with-doc``` to the installation command
+- **NB**: If not compiling Dynare mex files for Octave, add ```--without-octave``` to the installation command
+- **NB**: To compile the latest stable version of dynare, follow the same instructions as above, omitting the ```--HEAD``` argument
+- **NB**: To update a ```--HEAD``` install of dynare you need to uninstall it then install it again: ```brew uninstall dynare; brew install dynare --HEAD```.
+- **NB**: If you want to maintain a separate git directory of dynare, you can do a ```--HEAD``` install of dynare, then uninstall it. This will have the effect of bringing in all the dependencies you will need to then compile dynare from your git directory. Then, change to the git directory and type:
+    - ```autoreconf -si; ./configure --with-matlab=/Applications/MATLAB_R2015a.app MATLAB_VERSION=R2015a```, adjusting the Matlab path and version to accord with your version
+- Once compilation is done, open Matlab and type the last line shown when you type ```brew info dynare``` in the Terminal window. With the typical Homebrew setup, this is:
+    - ```addpath /usr/local/opt/dynare/lib/dynare/matlab```

@@ -17,10 +17,18 @@ function [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo_,options_,kronflag,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<7 || isempty(indx), indx = [1:M_.param_nbr];, end,
-if nargin<8 || isempty(indexo), indexo = [];, end,
-if nargin<10 || isempty(nlags), nlags=3; end,
-if nargin<11 || isempty(useautocorr), useautocorr=0; end,
+if nargin<7 || isempty(indx)
+%     indx = [1:M_.param_nbr];
+end,
+if nargin<8 || isempty(indexo)
+    indexo = [];
+end,
+if nargin<10 || isempty(nlags)
+    nlags=3; 
+end
+if nargin<11 || isempty(useautocorr)
+    useautocorr=0; 
+end
 
 %   if useautocorr,
 warning('off','MATLAB:divideByZero')

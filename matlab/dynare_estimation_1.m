@@ -33,11 +33,11 @@ global M_ options_ oo_ estim_params_ bayestopt_ dataset_ dataset_info
 
 % Set particle filter flag.
 if options_.order > 1
-    if options_.particle.status && options_.order==2
+    if options_.particle.status && options_.order==2  
         skipline()
         disp('Estimation using a non linear filter!')
         skipline()
-        if ~options_.nointeractive && ismember(options_.mode_compute,[1,3,4]) % Known gradient-based optimizers
+        if ~options_.nointeractive && ismember(options_.mode_compute,[1,3,4]) && ~strcmpi(options_.particle.filter_algorithm,'gf')% Known gradient-based optimizers
             disp('You are using a gradient-based mode-finder. Particle filtering introduces discontinuities in the') 
             disp('objective function w.r.t the parameters. Thus, should use a non-gradient based optimizer.')
             fprintf('\nPlease choose a mode-finder:\n')
@@ -107,29 +107,6 @@ if options_.dsge_var
     end
 end
 
-%check for calibrated covariances before updating parameters
-if ~isempty(estim_params_)
-    estim_params_=check_for_calibrated_covariances(xparam1,estim_params_,M_);
-end
-
-%%read out calibration that was set in mod-file and can be used for initialization
-xparam1_calib=get_all_parameters(estim_params_,M_); %get calibrated parameters
-if ~any(isnan(xparam1_calib)) %all estimated parameters are calibrated
-    full_calibration_detected=1;
-else
-    full_calibration_detected=0;
-end
-if options_.use_calibration_initialization %set calibration as starting values
-    [xparam1,estim_params_]=do_parameter_initialization(estim_params_,xparam1_calib,xparam1);   %get explicitly initialized parameters that have precedence to calibrated values
-    try
-        check_prior_bounds(xparam1,bounds,M_,estim_params_,options_,bayestopt_); %check whether calibration satisfies prior bounds
-    catch
-        e = lasterror();
-        fprintf('Cannot use parameter values from calibration as they violate the prior bounds.')
-        rethrow(e);
-    end
-end
-
 % Set sigma_e_is_diagonal flag (needed if the shocks block is not declared in the mod file).
 M_.sigma_e_is_diagonal = 1;
 if estim_params_.ncx || any(nnz(tril(M_.Correlation_matrix,-1))) || isfield(estim_params_,'calibrated_covariances')
@@ -180,7 +157,7 @@ try
     oo_ = initial_estimation_checks(objective_function,xparam1,dataset_,dataset_info,M_,estim_params_,options_,bayestopt_,bounds,oo_);
 catch % if check fails, provide info on using calibration if present
     e = lasterror();
-    if full_calibration_detected %calibrated model present and no explicit starting values
+    if estim_params_.full_calibration_detected %calibrated model present and no explicit starting values
         skipline(1);
         fprintf('ESTIMATION_CHECKS: There was an error in computing the likelihood for initial parameter values.\n')
         fprintf('ESTIMATION_CHECKS: You should try using the calibrated version of the model as starting values. To do\n')
@@ -314,9 +291,9 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     end
     parameter_names = bayestopt_.name;
     if options_.cova_compute || options_.mode_compute==5 || options_.mode_compute==6
-        save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
+        save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names','fval');
     else
-        save([M_.fname '_mode.mat'],'xparam1','parameter_names');
+        save([M_.fname '_mode.mat'],'xparam1','parameter_names','fval');
     end
 end
 
@@ -527,7 +504,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
     oo_.Smoother.TrendCoeffs = trend_coeff;
     oo_.Smoother.Variance = P;
     i_endo = bayestopt_.smoother_saved_var_list;
-    if options_.nk ~= 0
+    if options_.nk ~= 0 && ~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file))
         oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead, ...
                                              i_endo,:);
         if isfield(options_,'kalman_algo')
@@ -545,7 +522,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         i1 = dr.order_var(bayestopt_.smoother_var_list(i));
         eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = ' ...
                             'atT(i,:)'';']);
-        if options_.nk > 0
+        if options_.nk > 0 && ~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file))
             eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ...
                   ' = squeeze(aK(1,i,2:end-(options_.nk-1)));']);
         end
@@ -557,9 +534,9 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
     end
     if ~options_.nograph,
         [nbplt,nr,nc,lr,lc,nstar] = pltorg(M_.exo_nbr);
-        if options_.TeX
+        if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
             fidTeX = fopen([M_.fname '_SmoothedShocks.TeX'],'w');
-            fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
+            fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation_1.m (Dynare).\n');
             fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
             fprintf(fidTeX,' \n');
         end
@@ -606,7 +583,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 title(name,'Interpreter','none')
             end
             dyn_saveas(fh,[M_.fname '_SmoothedShocks' int2str(plt)],options_);
-            if options_.TeX
+            if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar0
                     fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
@@ -619,7 +596,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,'\n');
             end
         end
-        if options_.TeX
+        if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
             fprintf(fidTeX,'\n');
             fprintf(fidTeX,'%% End of TeX file.\n');
             fclose(fidTeX);
@@ -649,9 +626,9 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         end
         if ~options_.nograph
             [nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
-            if options_.TeX
+            if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
                 fidTeX = fopen([M_.fname '_SmoothedObservationErrors.TeX'],'w');
-                fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
+                fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation_1.m (Dynare).\n');
                 fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
                 fprintf(fidTeX,' \n');
             end
@@ -699,7 +676,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     title(name,'Interpreter','none')
                 end
                 dyn_saveas(fh,[M_.fname '_SmoothedObservationErrors' int2str(plt)],options_);
-                if options_.TeX
+                if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
                     fprintf(fidTeX,'\\begin{figure}[H]\n');
                     for jj = 1:nstar0
                         fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
@@ -712,7 +689,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     fprintf(fidTeX,'\n');
                 end
             end
-            if options_.TeX
+            if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
                 fprintf(fidTeX,'\n');
                 fprintf(fidTeX,'%% End of TeX file.\n');
                 fclose(fidTeX);
@@ -724,9 +701,9 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
     %%
     if ~options_.nograph
     [nbplt,nr,nc,lr,lc,nstar] = pltorg(n_varobs);
-    if options_.TeX
+    if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
         fidTeX = fopen([M_.fname '_HistoricalAndSmoothedVariables.TeX'],'w');
-        fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
+        fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation_1.m (Dynare).\n');
         fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
         fprintf(fidTeX,' \n');
     end
@@ -774,7 +751,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             title(name,'Interpreter','none')
         end
         dyn_saveas(fh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)],options_);
-        if options_.TeX
+        if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:nstar0,
                 fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
@@ -787,7 +764,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,'\n');
         end
     end
-    if options_.TeX
+    if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
         fprintf(fidTeX,'\n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);

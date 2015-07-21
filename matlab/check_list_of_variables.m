@@ -65,7 +65,7 @@ elseif isempty(varlist) && ~isempty(options_.endo_vars_for_moment_computations_i
     if strcmp(options_.endo_vars_for_moment_computations_in_estimation,'all_endogenous_variables')
         varlist = M_.endo_names(1:M_.orig_endo_nbr, :);    
     elseif strcmp(options_.endo_vars_for_moment_computations_in_estimation,'only_observed_variables')
-        varlist = options_.varobs;
+        varlist = char(options_.varobs');
     else
         error('Unknown option')
     end

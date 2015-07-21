@@ -5,7 +5,7 @@ function [opt_par_values,fval,exitflag,hessian_mat,options_,Scale]=dynare_minimi
 % INPUTS
 %   objective_function  [function handle]                   handle to the objective function
 %   start_par_value     [n_params by 1] vector of doubles   starting values for the parameters
-%   minimizer_algorithm [scalar double]                     code of the optimizer algorithm
+%   minimizer_algorithm [scalar double, or string]          code of the optimizer algorithm, or string for the name of a user defined optimization routine (not shipped with dynare).
 %   options_            [matlab structure]                  Dynare options structure
 %   bounds              [n_params by 2] vector of doubles   2 row vectors containing lower and upper bound for parameters
 %   parameter_names     [n_params by 1] cell array          strings containing the parameters names   
@@ -46,11 +46,7 @@ function [opt_par_values,fval,exitflag,hessian_mat,options_,Scale]=dynare_minimi
 %% set bounds and parameter names if not already set
 n_params=size(start_par_value,1);
 if isempty(bounds)
-    if isnumeric(minimizer_algorithm) && minimizer_algorithm==10
-        error('Algorithm 10 (simpsa) requires upper and lower bounds')
-    else
-        bounds=[-Inf(n_params,1) Inf(n_params,1)];
-    end
+    bounds=[-Inf(n_params,1) Inf(n_params,1)];
 end
 
 if isempty(parameter_names)
@@ -76,6 +72,9 @@ switch minimizer_algorithm
     optim_options = optimset('display','iter', 'LargeScale','off', 'MaxFunEvals',100000, 'TolFun',1e-8, 'TolX',1e-6);
     if ~isempty(options_.optim_opt)
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+    end
+    if options_.silent_optimizer
+        optim_options = optimset(optim_options,'display','off');
     end
     if options_.analytic_derivation,
         optim_options = optimset(optim_options,'GradObj','on','TolX',1e-7);
@@ -114,15 +113,20 @@ switch minimizer_algorithm
             end
         end
     end
+    if options_.silent_optimizer
+        sa_options.verbosity = 0;
+    end
     npar=length(start_par_value);
     [LB, UB]=set_bounds_to_finite_values(bounds, options_.huge_number);
-    fprintf('\nNumber of parameters= %d, initial temperatur= %4.3f \n', npar,sa_options.initial_temperature);
-    fprintf('rt=  %4.3f; TolFun=  %4.3f; ns=  %4.3f;\n',sa_options.rt,sa_options.TolFun,sa_options.ns);
-    fprintf('nt=  %4.3f; neps=  %4.3f; MaxIter=  %d\n',sa_options.nt,sa_options.neps,sa_options.MaxIter);
-    fprintf('Initial step length(vm): %4.3f; step_length_c: %4.3f\n', sa_options.initial_step_length,sa_options.step_length_c);
-    fprintf('%-20s  %-6s    %-6s    %-6s\n','Name:', 'LB;','Start;','UB;');
-    for pariter=1:npar
-        fprintf('%-20s  %6.4f;   %6.4f;  %6.4f;\n',parameter_names{pariter}, LB(pariter),start_par_value(pariter),UB(pariter));
+    if sa_options.verbosity
+        fprintf('\nNumber of parameters= %d, initial temperatur= %4.3f \n', npar,sa_options.initial_temperature);
+        fprintf('rt=  %4.3f; TolFun=  %4.3f; ns=  %4.3f;\n',sa_options.rt,sa_options.TolFun,sa_options.ns);
+        fprintf('nt=  %4.3f; neps=  %4.3f; MaxIter=  %d\n',sa_options.nt,sa_options.neps,sa_options.MaxIter);
+        fprintf('Initial step length(vm): %4.3f; step_length_c: %4.3f\n', sa_options.initial_step_length,sa_options.step_length_c);
+        fprintf('%-20s  %-6s    %-6s    %-6s\n','Name:', 'LB;','Start;','UB;');
+        for pariter=1:npar
+            fprintf('%-20s  %6.4f;   %6.4f;  %6.4f;\n',parameter_names{pariter}, LB(pariter),start_par_value(pariter),UB(pariter));
+        end
     end
     sa_options.initial_step_length= sa_options.initial_step_length*ones(npar,1); %bring step length to correct vector size
     sa_options.step_length_c= sa_options.step_length_c*ones(npar,1); %bring step_length_c to correct vector size
@@ -142,6 +146,9 @@ switch minimizer_algorithm
     if options_.analytic_derivation,
         optim_options = optimset(optim_options,'GradObj','on');
     end
+    if options_.silent_optimizer
+        optim_options = optimset(optim_options,'display','off');
+    end
     if ~isoctave
         [opt_par_values,fval,exitflag] = fminunc(objective_function,start_par_value,optim_options,varargin{:});
     else
@@ -156,6 +163,8 @@ switch minimizer_algorithm
     nit = options_.csminwel.maxiter;
     numgrad = options_.gradient_method;
     epsilon = options_.gradient_epsilon;
+    Verbose = options_.csminwel.verbosity;
+    Save_files = options_.csminwel.Save_files;
     % Change some options.
     if ~isempty(options_.optim_opt)
         options_list = read_key_value_string(options_.optim_opt);
@@ -171,11 +180,19 @@ switch minimizer_algorithm
                 numgrad = options_list{i,2};
               case 'NumgradEpsilon'
                 epsilon = options_list{i,2};
+              case 'verbosity'
+                Verbose = options_list{i,2};
+              case 'SaveFiles'
+                Save_files = options_list{i,2};                
               otherwise
                 warning(['csminwel: Unknown option (' options_list{i,1} ')!'])
             end
         end
     end
+    if options_.silent_optimizer
+        Save_files = 0; 
+        Verbose = 0;
+    end    
     % Set flag for analytical gradient.
     if options_.analytic_derivation
         analytic_grad=1;
@@ -184,7 +201,7 @@ switch minimizer_algorithm
     end
     % Call csminwell.
     [fval,opt_par_values,grad,inverse_hessian_mat,itct,fcount,exitflag] = ...
-        csminwel1(objective_function, start_par_value, H0, analytic_grad, crit, nit, numgrad, epsilon, varargin{:});
+        csminwel1(objective_function, start_par_value, H0, analytic_grad, crit, nit, numgrad, epsilon, Verbose, Save_files, varargin{:});
     hessian_mat=inv(inverse_hessian_mat);
   case 5
     if options_.analytic_derivation==-1 %set outside as code for use of analytic derivation
@@ -197,6 +214,8 @@ switch minimizer_algorithm
         newratflag = options_.newrat.hess; %default
     end
     nit=options_.newrat.maxiter;
+    Verbose = options_.newrat.verbosity;
+    Save_files = options_.newrat.Save_files;
     if ~isempty(options_.optim_opt)
         options_list = read_key_value_string(options_.optim_opt);
         for i=1:rows(options_list)
@@ -212,12 +231,20 @@ switch minimizer_algorithm
                 end
               case 'TolFun'
                 crit = options_list{i,2};
+              case 'verbosity'
+                Verbose = options_list{i,2};
+              case 'SaveFiles'
+                Save_files = options_list{i,2};                
               otherwise
                 warning(['newrat: Unknown option (' options_list{i,1} ')!'])
             end
         end
     end
-    [opt_par_values,hessian_mat,gg,fval,invhess] = newrat(objective_function,start_par_value,analytic_grad,crit,nit,0,varargin{:});
+    if options_.silent_optimizer
+        Save_files = 0; 
+        Verbose = 0;
+    end    
+    [opt_par_values,hessian_mat,gg,fval,invhess] = newrat(objective_function,start_par_value,analytic_grad,crit,nit,0,Verbose, Save_files,varargin{:});
     %hessian_mat is the plain outer product gradient Hessian
   case 6
     [opt_par_values, hessian_mat, Scale, fval] = gmhmaxlik(objective_function, start_par_value, ...
@@ -232,6 +259,9 @@ switch minimizer_algorithm
     optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
     if ~isempty(options_.optim_opt)
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+    end
+    if options_.silent_optimizer
+        optim_options = optimset(optim_options,'display','off');
     end
     if ~isoctave
         [opt_par_values,fval,exitflag] = fminsearch(objective_function,start_par_value,optim_options,varargin{:});
@@ -259,11 +289,16 @@ switch minimizer_algorithm
                 simplexOptions.maxfcallfactor = options_list{i,2};
               case 'InitialSimplexSize'
                 simplexOptions.delta_factor = options_list{i,2};
+              case 'verbosity'
+                simplexOptions.verbose = options_list{i,2};
               otherwise
                 warning(['simplex: Unknown option (' options_list{i,1} ')!'])
             end
         end
     end
+    if options_.silent_optimizer
+        simplexOptions.verbose = options_list{i,2};
+    end    
     [opt_par_values,fval,exitflag] = simplex_optimization_routine(objective_function,start_par_value,simplexOptions,parameter_names,varargin{:});
   case 9
     % Set defaults
@@ -282,11 +317,29 @@ switch minimizer_algorithm
                 cmaesOptions.TolX = options_list{i,2};
               case 'MaxFunEvals'
                 cmaesOptions.MaxFunEvals = options_list{i,2};
+              case 'verbosity'
+                if options_list{i,2}==0
+                    cmaesOptions.DispFinal  = 'off';   % display messages like initial and final message';
+                    cmaesOptions.DispModulo = '0';   % [0:Inf], disp messages after every i-th iteration';
+                end
+              case 'SaveFiles'
+                if options_list{i,2}==0
+                  cmaesOptions.SaveVariables='off';
+                  cmaesOptions.LogModulo = '0';    % [0:Inf] if >1 record data less frequently after gen=100';
+                  cmaesOptions.LogTime   = '0';    % [0:100] max. percentage of time for recording data';
+                end
               otherwise
                 warning(['cmaes: Unknown option (' options_list{i,1}  ')!'])
             end
         end
     end
+    if options_.silent_optimizer
+        cmaesOptions.DispFinal  = 'off';   % display messages like initial and final message';
+        cmaesOptions.DispModulo = '0';   % [0:Inf], disp messages after every i-th iteration';
+        cmaesOptions.SaveVariables='off';
+        cmaesOptions.LogModulo = '0';    % [0:Inf] if >1 record data less frequently after gen=100';
+        cmaesOptions.LogTime   = '0';    % [0:100] max. percentage of time for recording data';
+    end    
     warning('off','CMAES:NonfinitenessRange');
     warning('off','CMAES:InitialSigma');
     [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),start_par_value,H0,cmaesOptions,varargin{:});
@@ -313,10 +366,19 @@ switch minimizer_algorithm
                 simpsaOptions.TEMP_END = options_list{i,2};
               case 'MaxFunEvals'
                 simpsaOptions.MAX_FUN_EVALS = options_list{i,2};
+              case 'verbosity'
+                  if options_list{i,2} == 0
+                    simpsaOptions.DISPLAY = 'none';
+                  else
+                    simpsaOptions.DISPLAY = 'iter';
+                  end                      
               otherwise
                 warning(['simpsa: Unknown option (' options_list{i,1}  ')!'])
             end
         end
+    end
+    if options_.silent_optimizer
+        simpsaOptions.DISPLAY = 'none';
     end
     simpsaOptionsList = options2cell(simpsaOptions);
     simpsaOptions = simpsaset(simpsaOptionsList{:});
@@ -348,6 +410,9 @@ switch minimizer_algorithm
             end
         end
     end
+    if options_.silent_optimizer
+        solveoptoptions.verbosity = 0;
+    end
     [opt_par_values,fval]=solvopt(start_par_value,objective_function,[],[],[],solveoptoptions,varargin{:});
   case 102
     if isoctave
@@ -360,12 +425,15 @@ switch minimizer_algorithm
     if ~isempty(options_.optim_opt)
         eval(['optim_options = saoptimset(optim_options,' options_.optim_opt ');']);
     end
+    if options_.silent_optimizer
+        optim_options = optimset(optim_options,'display','off');
+    end
     func = @(x)objective_function(x,varargin{:});
     [opt_par_values,fval,exitflag,output] = simulannealbnd(func,start_par_value,bounds(:,1),bounds(:,2),optim_options);
   otherwise
     if ischar(minimizer_algorithm)
-        if exist(options_.mode_compute)
-            [opt_par_values, fval, exitflag] = feval(options_.mode_compute,objective_function,start_par_value,varargin{:});
+        if exist(minimizer_algorithm)
+            [opt_par_values, fval, exitflag] = feval(minimizer_algorithm,objective_function,start_par_value,varargin{:});
         else
             error('No minimizer with the provided name detected.')
         end

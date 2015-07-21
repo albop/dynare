@@ -58,7 +58,7 @@ if size(stationary_vars, 1) > 0
     end
     if ~options_.noprint %options_.nomoments == 0
         if options_.order == 2
-            title='APROXIMATED THEORETICAL MOMENTS';
+            title='APPROXIMATED THEORETICAL MOMENTS';
         else
             title='THEORETICAL MOMENTS';
         end

@@ -1,3 +1,7 @@
+if isoctave() && octave_ver_less_than('3.8')
+   return
+end
+
 if ~isoctave() && ~matlab_ver_less_than('8.4')
    websave('data_ca1_xls.xlsx','http://www.dynare.org/Datasets/data_ca1_xls.xlsx')
 else

@@ -75,7 +75,7 @@ if info(1)==0,
     tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); dyn_vech(B*M_.Sigma_e*B')];
     yy0=oo_.dr.ys(I);
     [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, ...
-        oo_.exo_steady_state', M_.params, ...
+        repmat(oo_.exo_steady_state',[M_.maximum_exo_lag+M_.maximum_exo_lead+1]), M_.params, ...
         oo_.dr.ys, 1);
     vg1 = [oo_.dr.ys(oo_.dr.order_var); vec(g1)];
 
@@ -86,7 +86,7 @@ if info(1)==0,
     if init,
         indJJ = (find(max(abs(JJ'),[],1)>1.e-8));
         if isempty(indJJ) && any(any(isnan(JJ)))
-            error('There are NaN in the JJ matrix. Please check whether your model has units roots and you forgot to set lik_init~=1.' )
+            error('There are NaN in the JJ matrix. Please check whether your model has units roots and you forgot to set diffuse_filter=1.' )
         end
         while length(indJJ)<nparam && nlags<10,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
@@ -97,6 +97,7 @@ if info(1)==0,
             derivatives_info.DOm=dOm;
             derivatives_info.DYss=dYss;
             evalin('caller',['options_ident.ar=',int2str(nlags),';']);
+            indJJ = (find(max(abs(JJ'),[],1)>1.e-8));
         end
         if length(indJJ)<nparam,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
@@ -119,12 +120,12 @@ if info(1)==0,
         normaliz = abs(params);
         if prior_exist,
             if ~isempty(estim_params_.var_exo),
-                normaliz1 = estim_params_.var_exo(:,7); % normalize with prior standard deviation
+                normaliz1 = estim_params_.var_exo(:,7)'; % normalize with prior standard deviation
             else
                 normaliz1=[];
             end
             if ~isempty(estim_params_.param_vals),
-                normaliz1 = [normaliz1; estim_params_.param_vals(:,7)]'; % normalize with prior standard deviation
+                normaliz1 = [normaliz1 estim_params_.param_vals(:,7)']; % normalize with prior standard deviation
             end
             %                         normaliz = max([normaliz; normaliz1]);
             normaliz1(isinf(normaliz1)) = 1;

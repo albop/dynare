@@ -1,4 +1,4 @@
-function forcs = mcforecast3(cL,H,mcValue,shocks,forcs,T,R,mv,mu)
+function [forcs, e]= mcforecast3(cL,H,mcValue,shocks,forcs,T,R,mv,mu)
 % forcs = mcforecast3(cL,H,mcValue,shocks,forcs,T,R,mv,mu)
 % Computes the shock values for constrained forecasts necessary to keep
 % endogenous variables at their constrained paths

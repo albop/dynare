@@ -87,6 +87,10 @@ load_last_mh_history_file(MetropolisFolder, ModelName);
 % on many cores). The mandatory variables for local/remote parallel
 % computing are stored in the localVars struct.
 
+if options_.TaRB.use_TaRB
+    options_.silent_optimizer=1; %locally set optimizer to silent mode
+end
+
 localVars =   struct('TargetFun', TargetFun, ...
                      'ProposalFun', ProposalFun, ...
                      'xparam1', xparam1, ...
@@ -117,9 +121,12 @@ localVars =   struct('TargetFun', TargetFun, ...
 % single chain compute Random walk Metropolis-Hastings algorithm sequentially.
 
 if isnumeric(options_.parallel) || (nblck-fblck)==0,
-    fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
+    if options_.TaRB.use_TaRB
+        fout = TaRB_metropolis_hastings_core(localVars, fblck, nblck, 0);
+    else
+        fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
+    end
     record = fout.record;
-
     % Parallel in Local or remote machine.   
 else 
     % Global variables for parallel routines.
@@ -138,7 +145,11 @@ else
     end
     % from where to get back results
     %     NamFileOutput(1,:) = {[M_.dname,'/metropolis/'],'*.*'};
-    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'random_walk_metropolis_hastings_core', localVars, globalVars, options_.parallel_info);
+    if options_.TaRB.use_TaRB
+        [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'TaRB_metropolis_hastings_core', localVars, globalVars, options_.parallel_info);        
+    else    
+        [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'random_walk_metropolis_hastings_core', localVars, globalVars, options_.parallel_info);
+    end
     for j=1:totCPU,
         offset = sum(nBlockPerCPU(1:j-1))+fblck-1;
         record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)));

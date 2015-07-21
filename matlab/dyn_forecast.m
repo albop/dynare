@@ -64,7 +64,7 @@ switch task
         horizon = 5;
     end
     if isempty(M_.endo_histval)
-        y0 = repmat(oo_.steady_state,1,maximum_lag);
+        y0 = repmat(oo_.dr.ys,1,maximum_lag);
     else
         y0 = M_.endo_histval;
     end
@@ -136,5 +136,5 @@ for i=1:M_.exo_det_nbr
 end
 
 if options_.nograph == 0
-    forecast_graphs(var_list);
+    forecast_graphs(var_list,M_, oo_,options_)
 end

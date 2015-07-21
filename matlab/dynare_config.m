@@ -55,7 +55,7 @@ addpath([dynareroot '/ms-sbvar/'])
 addpath([dynareroot '/ms-sbvar/identification/'])
 addpath([dynareroot '../contrib/ms-sbvar/TZcode/MatlabFiles/'])
 addpath([dynareroot '/parallel/'])
-addpath([dynareroot '/particle/'])
+addpath([dynareroot '/particles/src'])
 addpath([dynareroot '/gsa/'])
 addpath([dynareroot '/ep/'])
 addpath([dynareroot '/cli/'])
@@ -63,7 +63,6 @@ addpath([dynareroot '/lmmcp/'])
 addpath([dynareroot '/optimization/'])
 addpath([dynareroot '/modules/dates/src/'])
 addpath([dynareroot '/modules/dseries/src/'])
-addpath([dynareroot '/modules/dseries/src/read'])
 addpath([dynareroot '/utilities/doc/'])
 addpath([dynareroot '/utilities/tests/src/'])
 addpath([dynareroot '/utilities/dataset/'])
@@ -131,7 +130,7 @@ mex_status(4,1) = {'sparse_hessian_times_B_kronecker_C'};
 mex_status(4,2) = {'kronecker'};
 mex_status(4,3) = {'Sparse kronecker products'};
 mex_status(5,1) = {'local_state_space_iteration_2'};
-mex_status(5,2) = {'particle/local_state_space_iteration'};
+mex_status(5,2) = {'reduced_form_models/local_state_space_iteration_2'};
 mex_status(5,3) = {'Local state space iteration (second order)'};
 number_of_mex_files = size(mex_status,1);
 %% Remove some directories from matlab's path. This is necessary if the user has
@@ -217,8 +216,7 @@ if verbose
     skipline()
 end
 
-% Save empty dates and dseries objects (necessary if a mod file is not preprocessed).
-initialize_dates_toolbox;
-dseries('initialize');
+% Initialization of the dates and dseries classes (recursive).
+initialize_dseries_toolbox;
 
 cd(origin);

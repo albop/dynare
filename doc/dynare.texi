@@ -859,6 +859,12 @@ and the equations haven't changed. We use a 32 bit checksum, stored in
 @code{<model filename>/checksum}. There is a very small probability that
 the preprocessor misses a change in the model. In case of doubt, re-run
 without the @code{fast} option.
+
+@item minimal_workspace
+Instructs Dynare not to write parameter assignments to parameter names
+in the @file{.m} file produced by the preprocessor. This is
+potentially useful when running @code{dynare} on a large @file{.mod}
+file that runs into workspace size limitations imposed by MATLAB.
 @end table
 
 @outputhead
@@ -1910,12 +1916,15 @@ equations using the @code{write_latex_static_model} command.
 
 @descriptionhead
 
-This command creates a @LaTeX{} file containing the model, as defined
-in the model block.
+This command creates two @LaTeX{} files: one containing the model as
+defined in the model block and one containing the @LaTeX{} document
+header information.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
-will create a file called @file{@var{FILENAME}_dynamic.tex},
-containing the list of all the dynamic model equations.
+will create a file called @file{@var{FILENAME}_original.tex}, which
+includes a file called @file{@var{FILENAME}_original_content.tex}
+(also created by Dynare) containing the list of all the original model
+equations.
 
 If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
@@ -1923,6 +1932,9 @@ the plain text names will be used.
 
 Time subscripts (@code{t}, @code{t+1}, @code{t-1}, @dots{}) will be
 appended to the variable names, as @LaTeX{} subscripts.
+
+Compiling the @TeX{} file requires the following @LaTeX{} packages:
+@code{geometry}, @code{fullpage}, @code{breqn}.
 
 @end deffn
 
@@ -1932,11 +1944,14 @@ appended to the variable names, as @LaTeX{} subscripts.
 
 @descriptionhead
 
-This command creates a @LaTeX{} file containing the (dynamic) model.
+This command creates two @LaTeX{} files: one containing the dynamic
+model and one containing the @LaTeX{} document header information.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
-will create a file called @file{@var{FILENAME}_dynamic.tex},
-containing the list of all the dynamic model equations.
+will create a file called @file{@var{FILENAME}_dynamic.tex}, which
+includes a file called @file{@var{FILENAME}_dynamic_content.tex}
+(also created by Dynare) containing the list of all the dynamic model
+equations.
 
 If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
@@ -1970,8 +1985,7 @@ for a stochastic model, exogenous variables with leads or lags will
 also have been replaced by new auxiliary variables and equations.
 @end itemize
 
-Compiling the @TeX{} file requires the following @LaTeX{} packages:
-@code{geometry}, @code{fullpage}, @code{breqn}.
+For the required @LaTeX{} packages, @pxref{write_latex_original_model}.
 
 @end deffn
 
@@ -1979,11 +1993,14 @@ Compiling the @TeX{} file requires the following @LaTeX{} packages:
 
 @descriptionhead
 
-This command creates a @LaTeX{} file containing the static model.
+This command creates two @LaTeX{} files: one containing the static
+model and one containing the @LaTeX{} document header information.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
-will create a file called @file{@var{FILENAME}_static.tex}, containing
-the list of all the equations of the steady state model.
+will create a file called @file{@var{FILENAME}_static.tex}, which
+includes a file called @file{@var{FILENAME}_static_content.tex} (also
+created by Dynare) containing the list of all the steady state model
+equations.
 
 If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
@@ -1998,8 +2015,7 @@ optional @code{steady_state_model} block (@pxref{steady_state_model});
 it will rather output a static version (@i{i.e.} without leads and
 lags) of the dynamic model declared in the @code{model} block.
 
-Compiling the @TeX{} file requires the following @LaTeX{} packages:
-@code{geometry}, @code{fullpage}, @code{breqn}.
+For the required @LaTeX{} packages, @pxref{write_latex_original_model}.
 
 @end deffn
 
@@ -2154,19 +2170,24 @@ commands (@code{stoch_simul}, @code{estimation}@dots{}).
 It is not necessary to declare @code{0} as initial value for exogenous
 stochastic variables, since it is the only possible value.
 
-This steady state will be used as the initial condition at all the
-periods preceeding the first simulation period for the two possible
-types of simulations in stochastic mode:
+The subsequently computed steady state (not the initial values, use
+@ref{histval} or this) will be used as the initial condition at all
+the periods preceeding the first simulation period for the three
+possible types of simulations in stochastic mode:
 
 @itemize
 
 @item
-in @code{stoch_simul}, if the @code{periods} options is specified
+@ref{stoch_simul}, if the @code{periods} options is specified
 
 @item
-in @code{forecast} (in this case, note that it is still possible to
-modify some of these initial values with @code{histval})
+@ref{forecast} as the initial point at which the forecasts are computed
+
+@item
+@ref{conditional_forecast} as the initial point at which the conditional forecasts are computed
 @end itemize
+
+To start simulations at a particular set of starting values that are not a computed steady state, use @ref{histval}.
 
 @optionshead
 
@@ -2380,15 +2401,29 @@ before (except when a @code{steady} command doesn't follow an
 @customhead{In a stochastic simulation context}
 
 In the context of stochastic simulations, @code{histval} allows setting
-the starting point of those simulations in the state space (it does not
-affect the starting point for impulse response functions). As for the case of
+the starting point of those simulations in the state space. As for the case of
 perfect foresight simulations, all not explicitly specified variables are set to 0.
-Moreover, as only states enter the recursive policy functions, all values specified for control variables will be ignored.
+Moreover, as only states enter the recursive policy functions, all values specified for control variables will be ignored. This can be used
 
-For @ref{Ramsey} policy, it also specifies the values of the endogenous states at 
+@itemize
+
+@item
+in @ref{stoch_simul}, if the @code{periods} options is specified. Note that this only affects the starting point for the simulation, but not for the impulse response functions.
+
+@item
+in @ref{forecast} as the initial point at which the forecasts are computed
+
+@item
+in @ref{conditional_forecast} as the initial point at which the conditional forecasts are computed
+
+@item 
+in @ref{Ramsey} policy, where it also specifies the values of the endogenous states at 
 which the objective function of the planner is computed. Note that the initial values 
 of the Lagrange multipliers associated with the planner's problem cannot be set
 (@pxref{planner_objective_value}).
+
+@end itemize
+
 
 @examplehead
 
@@ -3474,7 +3509,8 @@ options).
 By default, the perfect foresight solver uses a homotopy technique if it cannot
 solve the problem. Concretely, it divides the problem into smaller steps by
 diminishing the size of shocks and increasing them progressively until the
-problem converges. This option tells Dynare to disable that behavior.
+problem converges. This option tells Dynare to disable that behavior. Note that
+the homotopy is not implemented for purely forward or backward models.
 
 @item markowitz = @var{DOUBLE}
 Value of the Markowitz criterion, used to select the pivot. Only used
@@ -3495,6 +3531,9 @@ mix  of the  shooting and  relaxation  approaches. Note  that round  off
 errors are  more important with  this mixed strategy (user  should check
 the reported value  of the maximum absolute error).  Only available with
 option @code{stack_solve_algo==0}.
+
+@item linear_approximation
+Solves the linearized version of the perfect foresight model. The model must be stationary. Only available with option @code{stack_solve_algo==0}.
 
 @end table
 
@@ -3581,7 +3620,7 @@ solution is computed using the @code{extended_path} command.
 
 @deffn Command stoch_simul [@var{VARIABLE_NAME}@dots{}];
 @deffnx Command stoch_simul (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
-
+@anchor{stoch_simul}
 @descriptionhead
 
 @code{stoch_simul} solves a stochastic (@i{i.e.} rational
@@ -3656,8 +3695,12 @@ suppresses the plotting of IRFs. Default: @code{40}.
 The exogenous variables for which to compute IRFs. Default: all.
 
 @item relative_irf
-Requests the computation of normalized IRFs in percentage of the
-standard error of each shock.
+@anchor{relative_irf}
+
+Requests the computation of normalized IRFs. At first order, the normal shock vector of size one standard deviation is divided by the standard deviation of the current shock and multiplied by 100. The impulse responses are hence the responses to a unit shock of size 1 (as opposed to the regular shock size of one standard deviation), multiplied by 100. Thus, for a loglinearized model where the variables are measured in percent, the IRFs have the interpretation of the percent responses to a 100 percent shock. For example, a response of 400 of output to a TFP shock shows that output increases by 400 percent after a 100 percent TFP shock (you will see that TFP increases by 100 on impact). Given linearity at @code{ordeR=1}, it is straightforward to rescale the IRFs stored in @code{oo_.irfs} to any desired size.
+At higher order, the interpretation is different. The @code{relative_irf} option then triggers the generation of IRFs as the response to a 0.01 unit shock (corresponding to 1 percent for shocks measured in percent) and no multiplication with 100 is performed. That is, the normal shock vector of size one standard deviation is divided by the standard deviation of the current shock and divided by 100.
+For example, a response of 0.04 of log output (thus measured in percent of the steady state output level) to a TFP shock also measured in percent then shows that output increases by 4 percent after a 1 percent TFP shock (you will see that TFP increases by 0.01 on impact).
+
 
 @item irf_plot_threshold = @var{DOUBLE}
 @anchor{irf_plot_threshold}
@@ -3860,6 +3903,16 @@ not only selected ones. Thus, you have to make sure that your variables have str
 steady states. @code{stoch_simul} will display the moments, decision rules,
 and impulse responses for the log-linearized variables. The decision rules saved
 in @code{oo_.dr} and the simulated variables will also be the ones for the log-linear variables.
+
+@item tex
+@anchor{tex} Requests the printing of results and graphs in @TeX{}
+tables and graphics that can be later directly included in @LaTeX{}
+files.
+
+@item dr_display_tol = @var{DOUBLE}
+Tolerance for the suppression of small terms in the display of decision rules. Rows where all terms are 
+smaller than @code{dr_display_tol} are not displayed. 
+Default value: @code{1e-6}.
 
 @end table
 
@@ -4694,8 +4747,8 @@ The range with the data in an Excel file. For example, @code{xls_range=B2:D200}
 
 @item nobs = @var{INTEGER}
 @anchor{nobs}
-The number of observations to be used. Default: all observations in
-the file
+The number of observations following @ref{first_obs} to be used. Default: all observations in
+the file after @code{first_obs}
 
 @item nobs = [@var{INTEGER1}:@var{INTEGER2}]
 @anchor{nobs1}
@@ -4706,7 +4759,8 @@ also be specified. The forecasts are stored in the
 
 @item first_obs = @var{INTEGER}
 @anchor{first_obs}
-The number of the first observation to be used. Default: @code{1}
+The number of the first observation to be used. In case of estimating a DSGE-VAR, 
+@code{first_obs} needs to be larger than the number of lags.  Default: @code{1}
 
 @item prefilter = @var{INTEGER}
 @anchor{prefilter}
@@ -4715,14 +4769,16 @@ each data series by its empirical mean. Default: @code{0}, @i{i.e.} no prefilter
 
 @item presample = @var{INTEGER}
 @anchor{presample}
-The number of observations to be skipped before evaluating the
-likelihood. These first observations are used as a training sample. Default: @code{0}
+The number of observations after @ref{first_obs} to be skipped before evaluating the
+likelihood. These presample observations do not enter the likelihood, but are used as a 
+training sample for starting the Kalman filter iterations. This option is incompatible with 
+estimating a DSGE-VAR. Default: @code{0}
 
 @item loglinear
 @anchor{loglinear}
 Computes a log-linear approximation of the model instead of a linear
 approximation. As always in the context of estimation, the data must correspond to the definition of the
-variables used in the model (see @cite{Pfeifer 2013} for more details on how to correctly specify observation equations linking model variables and the data). If you specify the loglinear option, Dynare will take the logarithm of both your model variables and of your data as it assumes the data to correspond to the original non-logged model variables. The displayed posterior results like impulse responses, smoothed variables, and moments will be for the logged variables, not the original un-logged ones. Default: computes a linear approximation
+variables used in the model (see @cite{Pfeifer (2013)} for more details on how to correctly specify observation equations linking model variables and the data). If you specify the loglinear option, Dynare will take the logarithm of both your model variables and of your data as it assumes the data to correspond to the original non-logged model variables. The displayed posterior results like impulse responses, smoothed variables, and moments will be for the logged variables, not the original un-logged ones. Default: computes a linear approximation
 
 @item logdata
 @anchor{logdata}
@@ -4785,7 +4841,7 @@ Default value is @code{1}. For advanced use only.
 For internal use and testing only.
 
 @item conf_sig = @var{DOUBLE}
-Confidence interval used for classical forecasting after estimation. See @xref{conf_sig}.
+Confidence interval used for classical forecasting after estimation. @xref{conf_sig}.
 
 @item mh_conf_sig = @var{DOUBLE}
 @anchor{mh_conf_sig} 
@@ -4917,6 +4973,9 @@ Uses the CMA-ES (Covariance Matrix Adaptation Evolution Strategy) algorithm of
 Uses the simpsa algorithm, based on the combination of the non-linear simplex and simulated annealing algorithms and proposed by
 @cite{Cardoso, Salcedo and Feyo de Azevedo (1996)}.
 
+@item 11
+This is not strictly speaking an optimization algorithm. The (estimated) parameters are treated as state variables and estimated jointly with the original state variables of the model using a nonlinear filter. The algorithm implemented in Dynare is described in @cite{Liu and West (2001)}.
+
 @item 101
 Uses the SolveOpt algorithm for local nonlinear optimization problems proposed by
 @cite{Kuntsevich and Kappel (1997)}.
@@ -4933,6 +4992,11 @@ value of that function as the posterior mode.
 
 @noindent
 Default value is @code{4}.
+
+@item silent_optimizer
+@anchor{silent_optimizer}
+Instructs Dynare to run mode computing/optimization silently without displaying results or 
+saving files in between. Useful when running loops.
 
 @item mcmc_jumping_covariance = hessian|prior_variance|identity_matrix|@var{FILENAME}
 Tells Dynare which covariance to use for the proposal density of the MCMC sampler. @code{mcmc_jumping_covariance} can be one of the following:
@@ -4957,7 +5021,10 @@ Note that the covariance matrices are still scaled with @ref{mh_jscale}. Default
 @item mode_check
 Tells Dynare to plot the posterior density for values around the
 computed mode for each estimated parameter in turn. This is helpful to
-diagnose problems with the optimizer
+diagnose problems with the optimizer. Note that for @code{order}>1, the 
+likelihood function resulting from the particle filter is not differentiable
+anymore due to random chatter introduced by selecting different particles for 
+different parameter values. For this reason, the @code{mode_check}-plot may look wiggly.
 
 @item mode_check_neighbourhood_size = @var{DOUBLE}
 Used in conjunction with option @code{mode_check}, gives the width of
@@ -4982,6 +5049,10 @@ Number of points around the posterior mode where the posterior kernel is evaluat
 @anchor{prior_trunc} Probability of extreme values of the prior
 density that is ignored when computing bounds for the
 parameters. Default: @code{1e-32}
+
+@item huge_number  = @var{DOUBLE}
+@anchor{huge_number} Value for replacing infinite values in the definition of (prior) bounds 
+when finite values are required for computational reasons. Default: @code{1e7}
 
 @item load_mh_file
 @anchor{load_mh_file} Tells Dynare to add to previous
@@ -5055,6 +5126,12 @@ Size of the perturbation used to compute numerically the gradient of the objecti
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-7}
 
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
+@item 'SaveFiles'
+Controls saving of intermediate results during optimization. Set to 0 to shut off saving. Default: @code{1}
+
 @end table
 
 @item 5
@@ -5073,6 +5150,12 @@ Maximum number of iterations. Default: @code{1000}
 
 @item 'TolFun'
 Stopping criteria. Default: @code{1e-5} for numerical derivatives @code{1e-7} for analytic derivatives.
+
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
+@item 'SaveFiles'
+Controls saving of intermediate results during optimization. Set to 0 to shut off saving. Default: @code{1}
 
 @end table
 
@@ -5124,6 +5207,9 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
 
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
 @end table
 
 @item 9
@@ -5142,6 +5228,12 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-7}
 
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-7}
+
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
+@item 'SaveFiles'
+Controls saving of intermediate results during optimization. Set to 0 to shut off saving. Default: @code{1}
 
 @end table
 
@@ -5165,6 +5257,9 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
 
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
+
 @end table
 
 @item 101
@@ -5186,6 +5281,9 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-6}
 
 @item 'TolX'
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-6}
+
+@item 'verbosity'
+Controls verbosity of display during optimization. Set to 0 to set to silent. Default: @code{1}
 
 @end table
 
@@ -5210,6 +5308,9 @@ distribution of IRFs. The length of the IRFs are controlled by the
 @code{irf} option. Results are stored in @code{oo_.PosteriorIRF.dsge}
 (see below for a description of this variable)
 
+@item relative_irf
+@xref{relative_irf}.
+
 @item dsge_var = @var{DOUBLE}
 @anchor{dsge_var} Triggers the estimation of a DSGE-VAR model, where the
 weight of  the DSGE prior  of the VAR model  is calibrated to  the value
@@ -5230,6 +5331,32 @@ deprecated and will be removed in a future release of Dynare.
 @item dsge_varlag = @var{INTEGER}
 @anchor{dsge_varlag} The number of lags used to estimate a DSGE-VAR
 model. Default: @code{4}.
+
+
+@item use_tarb
+Instructs Dynare to use the Tailored randomized block (TaRB) Metropolis-Hastings algorithm 
+proposed by @cite{Chib and Ramamurthy (2010)} instead of the standard Random-Walk Metropolis-Hastings. 
+In this algorithm, at each iteration the estimated parameters are randomly assigned to different 
+blocks. For each of these blocks a mode-finding step is conducted. The inverse Hessian at this mode 
+is then used as the covariance of the proposal density for a Random-Walk Metropolis-Hastings step. 
+If the numerical Hessian is not positive definite, the generalized Cholesky decomposition of 
+@cite{Schnabel and Eskow (1990)} is used, but without pivoting. The TaRB-MH algorithm massively reduces 
+the autocorrelation in the MH draws and thus reduces the number of draws required to 
+representatively sample from the posterior. However, this comes at a computational costs as the 
+algorithm takes more time to run.
+
+@item tarb_new_block_probability = @var{DOUBLE}
+Specifies the probability of the next parameter belonging to a new block when the random blocking in the TaRB 
+Metropolis-Hastings algorithm is conducted. The higher this number, the smaller is the average block size and the 
+more random blocks are formed during each parameter sweep. Default: @code{0.25}. 
+
+@item tarb_mode_compute = @var{INTEGER}
+Specifies the mode-finder run in every iteration for every block of the 
+TaRB Metropolis-Hastings algorithm. @xref{mode_compute}. Default: @code{4}. 
+
+@item tarb_optim = @var{INTEGER}
+Specifies the options for the mode-finder used in the TaRB 
+Metropolis-Hastings algorithm. @xref{optim}. 
 
 @item moments_varendo
 @anchor{moments_varendo} Triggers the computation of the posterior
@@ -5281,9 +5408,7 @@ distribution of forecasts is stored in variables
 these variables.
 
 @item tex
-@anchor{tex} Requests the printing of results and graphs in @TeX{}
-tables and graphics that can be later directly included in @LaTeX{}
-files (not yet implemented)
+@pxref{tex}.
 
 @item kalman_algo = @var{INTEGER}
 @anchor{kalman_algo}
@@ -5339,6 +5464,7 @@ decomposition of the above k-step ahead filtered values. Stores results in @code
 
 
 @item diffuse_filter
+@anchor{diffuse_filter}
 Uses the diffuse Kalman filter (as described in
 @cite{Durbin and Koopman (2012)} and @cite{Koopman and Durbin
 (2003)}) to estimate models with non-stationary observed variables.
@@ -6227,7 +6353,7 @@ Fields are of the form:
 
 
 @deffn Command conditional_forecast (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
-
+@anchor{conditional_forecast}
 @descriptionhead
 
 This command computes forecasts on an estimated or calibrated model for a
@@ -6344,6 +6470,15 @@ Variable set by the @code{conditional_forecast} command. Stores the names of the
 Variable set by the @code{conditional_forecast} command. Stores the position of the constrained endogenous variables in declaration order.
 @end defvr
 
+@defvr {MATLAB/Octave variable} forecasts.controlled_exo_variables
+Variable set by the @code{conditional_forecast} command. Stores the values of the controlled exogenous 
+variables underlying the conditional forecasts to achieve the constrained endogenous 
+variables. Fields are number of constrained periods by 1 vectors and are of the form:
+@example
+@code{forecasts.controlled_exo_variables.@var{FORECAST_MOMENT}.@var{SHOCK_NAME}}
+@end example
+@end defvr
+
 @defvr {MATLAB/Octave variable} forecasts.graphs
 Variable set by the @code{conditional_forecast} command. Stores the information for generating the conditional forecast plots.
 @end defvr
@@ -6383,8 +6518,12 @@ Describes the path of constrained endogenous, before calling
 shocks in @code{shocks}, see @code{conditional_forecast} for an
 example.
 
-The syntax of the block is the same than the deterministic shocks in
-the @code{shocks} blocks (@pxref{Shocks on exogenous variables}).
+The syntax of the block is the same as for the deterministic shocks in
+the @code{shocks} blocks (@pxref{Shocks on exogenous variables}). Note that you need to specify the full path for all constrained endogenous 
+variables between the first and last specified period. If an intermediate period 
+is not specified, a value of 0 is assumed. That is, if you specify only 
+values for periods 1 and 3, the values for period 2 will be 0. Currently, it is not 
+possible to have uncontrolled intermediate periods.
 
 
 @end deffn
@@ -6646,6 +6785,13 @@ Specifies the optimizer for minimizing the objective function. The same solvers 
 @item optim = (@var{NAME}, @var{VALUE}, ...)
 A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the optimization routines. The set of available options depends on the selected optimization routine (i.e. on the value of option @ref{opt_algo}). @xref{optim}.
 
+@item silent_optimizer
+@pxref{silent_optimizer}
+
+@item huge_number = @var{DOUBLE}
+Value for replacing the infinite bounds on parameters by finite numbers. Used by some optimizers for numerical reasons (@pxref{huge_number}).
+Users need to make sure that the optimal parameters are not larger than this value. Default: @code{1e7}
+
 @end table
 
 The value of the objective is stored in the variable
@@ -6798,6 +6944,24 @@ instrument.
 
 @end deffn
 
+@deffn Block ramsey_constraints
+@anchor{ramsey_constraints}
+
+@descriptionhead
+
+This block lets you define constraints on the variables in the Ramsey
+problem. The constraints take the form of a variable, an inequality
+operator (@code{>} or @code{<}) and a constant.
+
+@examplehead
+
+@example
+ramsey_constraints;
+i > 0;
+end;
+@end example
+@end deffn
+ 
 @deffn Command ramsey_policy [@var{VARIABLE_NAME}@dots{}];
 @deffnx Command ramsey_policy (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
 @anchor{ramsey_policy}
@@ -7197,8 +7361,8 @@ for identification analysis. Default: @code{0}
 @item ar = @var{INTEGER}
 Maximum number of lags for moments in identification analysis. Default: @code{1}
 
-@item lik_init = @var{INTEGER}
-@xref{lik_init}.
+@item diffuse_filter = @var{INTEGER}
+@xref{diffuse_filter}.
 
 @end table
 
@@ -7761,9 +7925,11 @@ It completely offsets any use of the sensitivity analysis toolbox.
 
 Given a list of variables, observed variables and a data file, Dynare
 can be used to solve a Markov-switching SBVAR model according to
-@cite{Sims, Waggoner and Zha (2008)}. Having done this, you can create
-forecasts and compute the marginal data density, regime probabilities,
-IRFs, and variance decomposition of the model.
+@cite{Sims, Waggoner and Zha (2008)}.@footnote{If you want to align
+the paper with the description herein, please note that @math{A} is
+@math{A^0} and @math{F} is @math{A^+}.} Having done this, you can
+create forecasts and compute the marginal data density, regime
+probabilities, IRFs, and variance decomposition of the model.
 
 The commands have been modularized, allowing for multiple calls to the
 same command within a @code{<mod_file>.mod} file. The default is to use
@@ -9185,8 +9351,26 @@ the one that is highest on the MATLAB/Octave path).
 @deffn {MATLAB/Octave command} write_latex_definitions ;
 
 Writes the names, @LaTeX{} names and long names of model variables to
-tables in a file named @code{<<M_.fname>>_latex_definitions.tex}.
+tables in a file named @code{<<M_.fname>>_latex_definitions.tex}. Requires the
+following @LaTeX{} packages: @code{longtable}
+@end deffn
 
+@deffn {MATLAB/Octave command} write_latex_parameter_table ;
+
+Writes the @LaTeX{} names, parameter names, and long names of model parameters to
+a table in a file named @code{<<M_.fname>>_latex_parameters.tex}. The command writes the values
+of the parameters currently stored. Thus, if parameters are set or changed in the steady state 
+computation, the command should be called after a @code{steady}-command to make sure the 
+parameters were correctly updated. The long names can be used to add parameter descriptions. Requires the
+following @LaTeX{} packages: @code{longtable}
+@end deffn
+
+@deffn {MATLAB/Octave command} collect_LaTeX_Files(M_) ;
+
+Writes a @LaTeX{} file named @code{<<M_.fname>>_TeX_binder.tex} that collects all @TeX{} output generated by Dynare 
+into a file. This file can be compiled using pdflatex and automatically tries to load all required packages. 
+Requires the following @LaTeX{} packages: @code{longtable}, @code{psfrag}, 
+@code{graphicx}, @code{epstopdf}, @code{longtable}
 @end deffn
 
 
@@ -9322,7 +9506,7 @@ Note that creating the configuration file is not enough in order to
 trigger parallelization of the computations: you also need to specify
 the @code{parallel} option to the @code{dynare} command. For more
 details, and for other options related to the parallelization engine,
-see @pxref{Dynare invocation}.
+@pxref{Dynare invocation}.
 
 You also need to verify that the following requirements are met by
 your cluster (which is composed of a master and of one or more
@@ -11733,7 +11917,7 @@ used.
 Below, you will see a list of methods available for the Report class and
 a clarifying example.
 
-@defmethod Report report compiler, showDate, fileName, margin, marginUnit, orientation, paper, showOutput, title
+@defmethod Report report compiler, showDate, fileName, header, margin, marginUnit, orientation, paper, showOutput, title
 Instantiates a @code{Report} object.
 @optionshead
 @table @code
@@ -11753,6 +11937,10 @@ Display the date and time when the report was compiled. Default:
 @item fileName, @var{FILENAME}
 The file name to use when saving this report. Default:
 @code{report.tex}
+
+@item header, @var{STRING}
+The @LaTeX{} code to be included in the report before
+@code{\begin@{document@}}. Default: @code{empty}
 
 @item margin, @var{DOUBLE}
 The margin size. Default: @code{2.5}
@@ -11780,15 +11968,28 @@ Report Title. Default: @code{none}
 @end defmethod
 
 @anchor{addPage}
-@defmethod Report addPage footnote, orientation, paper, title, titleFormat, titleTruncate
+@defmethod Report addPage footnote, latex, orientation, pageDirName, paper, title, titleFormat, titleTruncate
 Adds a @code{Page} to the @code{Report}.
 @optionshead
 @table @code
 @item footnote, @code{STRING}
 A footnote to be included at the bottom of this page. Default: @code{none}
 
+@anchor{latex}
+@item latex, @code{STRING}
+The @LaTeX{} code to be used for this page. Alows the user to create a
+page to be included in the report by passing @LaTeX{} code
+directly. If this option is passed, the page itself will be saved in
+the @ref{pageDirName} directory in the form @code{page_X.tex} where
+@code{X} refers to the page number. Default @code{empty}
+
 @item orientation, `landscape' | `portrait'
 @xref{orientation}.
+
+@anchor{pageDirName}
+@item pageDirName, @code{STRING}
+The name of the folder in which to store this page. Only used when the
+@ref{latex} command is passed. Default: @code{tmpRepDir}
 
 @item paper, `a4' | `letter'
 @xref{paper}.
@@ -12509,6 +12710,17 @@ computational and graphical statistics}, 7, pp. 434--455
 Cardoso, Margarida F., R. L. Salcedo and S. Feyo de Azevedo (1996): ``The simplex simulated annealing approach to continuous non-linear optimization,'' @i{Computers chem. Engng}, 20(9), 1065-1080
 
 @item
+Chib, Siddhartha and Srikanth Ramamurthy (2010):
+``Tailored randomized block MCMC methods with application to DSGE models,'' 
+@i{Journal of Econometrics}, 155, 19--38
+
+@item
+Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
+``Introducing financial frictions and unemployment into a small open
+economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
+1999--2041
+
+@item
 Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''
 
 @item
@@ -12526,12 +12738,6 @@ Economics}, 17, 125--139
 Corona, Angelo,  M. Marchesi, Claudio Martini, and Sandro Ridella (1987):
 ``Minimizing multimodal functions of continuous variables with the ``simulated annealing'' algorithm'',
 @i{ACM Transactions on Mathematical Software}, 13(3), 262--280
-
-@item
-Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
-``Introducing financial frictions and unemployment into a small open
-economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
-1999--2041
 
 @item
 Del Negro, Marco and Franck Schorfheide (2004): ``Priors from General Equilibrium Models for VARS'',
@@ -12634,6 +12840,9 @@ macroéconomique avec anticipations rationnelles'', @i{Annales
 d'Économie et Statistique}, 17, 97--119
 
 @item
+Liu, Jane and Mike West (2001): ``Combined parameter and state estimation in simulation-based filtering'', in @i{Sequential Monte Carlo Methods in Practice}, Eds. Doucet, Freitas and Gordon, Springer Verlag
+
+@item
 Lubik, Thomas and Frank Schorfheide (2007): ``Do Central Banks Respond
 to Exchange Rate Movements? A Structural Investigation,'' @i{Journal
 of Monetary Economics}, 54(4), 1069--1087
@@ -12668,6 +12877,10 @@ Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
 General Equilibrium Models Using a Second-Order Approximation to the
 Policy Function,'' @i{Journal of Economic Dynamics and Control},
 28(4), 755--775
+
+@item
+Schnabel, Robert B. and Elizabeth Eskow (1990): ``A new modified Cholesky algorithm,'' 
+@i{SIAM Journal of Scientific and Statistical Computing}, 11, 1136--1158
 
 @item
 Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): ``Methods for

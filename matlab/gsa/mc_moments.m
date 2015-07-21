@@ -20,7 +20,7 @@ function [vdec, cc, ac] = mc_moments(mm, ss, dr)
 global options_ M_ estim_params_ oo_
 
   [nr1, nc1, nsam] = size(mm);
-  nobs=size(options_.varobs,1);
+  nobs=size(options_.varobs,2);
   disp('Computing theoretical moments ...')
   h = dyn_waitbar(0,'Theoretical moments ...');
   vdec = zeros(nobs,M_.exo_nbr,nsam);
@@ -37,7 +37,7 @@ global options_ M_ estim_params_ oo_
     cc(:,:,j)=triu(corr);
     dum=[];
     for i=1:options_.ar
-    dum=[dum, autocorr{i}];
+        dum=[dum, autocorr{i}];
     end
     ac(:,:,j)=dum;
     dyn_waitbar(j/nsam,h)

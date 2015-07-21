@@ -64,7 +64,9 @@ decomp        = [];
 vobs            = length(options_.varobs);
 smpl          = size(Y,2);
 
-M_ = set_all_parameters(xparam1,estim_params_,M_);
+if ~isempty(xparam1) %not calibrated model
+    M_ = set_all_parameters(xparam1,estim_params_,M_);
+end
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program

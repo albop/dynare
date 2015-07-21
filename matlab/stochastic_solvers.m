@@ -143,7 +143,7 @@ end
     
 if options_.debug
     if ~isempty(infrow)     
-    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains Inf. The problam is associated with:\n\n')    
+    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains Inf. The problem is associated with:\n\n')    
     display_problematic_vars_Jacobian(infrow,infcol,M_,dr.ys,'dynamic','STOCHASTIC_SOLVER: ')
     save([M_.fname '_debug.mat'],'jacobia_')
     end
@@ -158,6 +158,11 @@ if ~isreal(jacobia_)
     if max(max(abs(imag(jacobia_)))) < 1e-15
         jacobia_ = real(jacobia_);
     else
+        if options_.debug
+            [imagrow,imagcol]=find(abs(imag(jacobia_))>1e-15);
+            fprintf('\nMODEL_DIAGNOSTICS: The Jacobian of the dynamic model contains imaginary parts. The problem arises from: \n\n')
+            display_problematic_vars_Jacobian(imagrow,imagcol,M_,dr.ys,'dynamic','STOCHASTIC_SOLVER: ')
+        end
         info(1) = 6;
         info(2) = sum(sum(imag(jacobia_).^2));
         return
@@ -167,7 +172,7 @@ end
 [nanrow,nancol]=find(isnan(jacobia_));
 if options_.debug
     if ~isempty(nanrow)     
-    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains NaN. The problam is associated with:\n\n')    
+    fprintf('\nSTOCHASTIC_SOLVER: The Jacobian of the dynamic model contains NaN. The problem is associated with:\n\n')    
     display_problematic_vars_Jacobian(nanrow,nancol,M_,dr.ys,'dynamic','STOCHASTIC_SOLVER: ')
     save([M_.fname '_debug.mat'],'jacobia_')
     end

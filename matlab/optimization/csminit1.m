@@ -1,4 +1,4 @@
-function [fhat,xhat,fcount,retcode] = csminit1(fcn,x0,f0,g0,badg,H0,varargin)
+function [fhat,xhat,fcount,retcode] = csminit1(fcn,x0,f0,g0,badg,H0,Verbose,varargin)
 % [fhat,xhat,fcount,retcode] = csminit1(fcn,x0,f0,g0,badg,H0,varargin)
 % 
 % Inputs: 
@@ -101,7 +101,7 @@ else
     %      toc
     dxnorm = norm(dx);
     if dxnorm > 1e12
-        disp('Near-singular H problem.')
+        disp_verbose('Near-singular H problem.',Verbose)
         dx = dx*FCHANGE/dxnorm;
     end
     dfhat = dx'*g0;
@@ -115,10 +115,10 @@ else
             dx = dx - (ANGLE*dxnorm/gnorm+dfhat/(gnorm*gnorm))*g;
             dfhat = dx'*g;
             dxnorm = norm(dx);
-            disp(sprintf('Correct for low angle: %g',a))
+            disp_verbose(sprintf('Correct for low angle: %g',a),Verbose)
         end
     end
-    disp(sprintf('Predicted improvement: %18.9f',-dfhat/2))
+        disp_verbose(sprintf('Predicted improvement: %18.9f',-dfhat/2),Verbose)
     %
     % Have OK dx, now adjust length of step (lambda) until min and
     % max improvement rate criteria are met.
@@ -141,7 +141,7 @@ else
         %ARGLIST
         %f = feval(fcn,dxtest,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13);
         % f = feval(fcn,x0+dx*lambda,P1,P2,P3,P4,P5,P6,P7,P8);
-        disp(sprintf('lambda = %10.5g; f = %20.7f',lambda,f ))
+            disp_verbose(sprintf('lambda = %10.5g; f = %20.7f',lambda,f ),Verbose)
         %debug
         %disp(sprintf('Improvement too great? f0-f: %g, criterion: %g',f0-f,-(1-THETA)*dfhat*lambda))
         if f<fhat
@@ -176,7 +176,11 @@ else
             if abs(lambda) < MINLAMB
                 if (lambda > 0) && (f0 <= fhat)
                     % try going against gradient, which may be inaccurate
-                    lambda = -lambda*factor^6
+                    if Verbose
+                        lambda = -lambda*factor^6
+                    else
+                        lambda = -lambda*factor^6;                        
+                    end
                 else
                     if lambda < 0
                         retcode = 6;
@@ -222,4 +226,5 @@ else
         end
     end
 end
-disp(sprintf('Norm of dx %10.5g', dxnorm))
+
+disp_verbose(sprintf('Norm of dx %10.5g', dxnorm),Verbose)

@@ -36,7 +36,7 @@ options_.ep.stochastic.order = 0;
 options_.ep.stochastic.nodes = 0;
 options_.console_mode = 0;
 
-ts = extended_path([],1000);
+ts = extended_path([],10);
 
 options_.ep.verbosity = 0;
 options_.ep.stochastic.order = 1;
@@ -44,7 +44,7 @@ options_.ep.IntegrationAlgorithm='Tensor-Gaussian-Quadrature';
 options_.ep.stochastic.nodes = 3;
 options_.console_mode = 0;
 
-sts = extended_path([],1000);
+sts = extended_path([],10);
 
 if max(max(abs(ts-sts)))>pi*options_.dynatol.x
    disp('Stochastic Extended Path:: Something is wrong here (potential bug in extended_path.m)!!!')

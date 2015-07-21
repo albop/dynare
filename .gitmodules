@@ -13,10 +13,13 @@
 [submodule "matlab/utilities/tests"]
 	path = matlab/utilities/tests
 	url = https://github.com/DynareTeam/m-unit-tests.git
+[submodule "matlab/particles"]
+	path = matlab/particles
+	url = https://github.com/DynareTeam/particles.git
 [submodule "matlab/modules/dates"]
 	path = matlab/modules/dates
 	url = https://github.com/DynareTeam/dates.git
-	branch = old-oop-syntax
+	branch = old-oop-style
 [submodule "matlab/modules/dseries"]
 	path = matlab/modules/dseries
 	url = https://github.com/DynareTeam/dseries.git

@@ -56,8 +56,7 @@ if options_.debug
 end
 
 initperiods = 1:M_.maximum_lag;
-lastperiods = (M_.maximum_endo_lag+options_.periods+1):(M_.maximum_endo_lag+options_.periods+M_.maximum_endo_lead);
-
+lastperiods = (M_.maximum_lag+options_.periods+1):(M_.maximum_lag+options_.periods+M_.maximum_lead);
 
 [oo_.endo_simul,oo_.deterministic_simulation.status] = perfect_foresight_solver_core(M_,options_,oo_);
 
@@ -66,8 +65,23 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
     skipline()
     disp('Simulation of the perfect foresight model failed!')
     disp('Switching to a homotopy method...')
+    if ~M_.maximum_lag
+        disp('Homotopy not implemented for purely forward models!')
+        disp('Failed to solve the model!')
+        disp('Return with empty oo_.endo_simul.')
+        oo_.endo_simul = [];
+        skipline()
+        return
+    end
+    if ~M_.maximum_lead
+        disp('Homotopy not implemented for purely backward models!')
+        disp('Failed to solve the model!')
+        disp('Return with empty oo_.endo_simul.')
+        oo_.endo_simul = [];
+        skipline()
+        return
+    end
     skipline()
-    
     % Disable warnings if homotopy
     warning_old_state = warning;
     warning off all
@@ -88,7 +102,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
 
     fprintf('Iter. \t | Lambda \t | status \t | Max. residual\n')
     fprintf('++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
-    
+
     while (step > options_.dynatol.x)
 
         if ~isequal(step,1)
@@ -116,7 +130,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
         if isequal(iteration,1)
             oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = endoinit(:,1:options_.periods);
         elseif path_with_nans || path_with_cplx
-            oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = saved_endo_simul(:,1+M_.maximum_endo_lag:end-M_.maximum_endo_lead);
+            oo_.endo_simul(:,M_.maximum_lag+1:end-M_.maximum_lead) = saved_endo_simul(:,1+M_.maximum_lag:end-M_.maximum_lead);
         end
         
         saved_endo_simul = oo_.endo_simul;

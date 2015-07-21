@@ -227,32 +227,11 @@ end
 % Define a vector of indices for the observed variables. Is this really usefull?...
 BayesInfo.mf = BayesInfo.mf1;
 
-% Define the deterministic linear trend of the measurement equation.
-if DynareOptions.noconstant
-    constant = zeros(DynareDataset.vobs,1);
-else
-    constant = SteadyState(BayesInfo.mfys);
-end
-
-% Define the deterministic linear trend of the measurement equation.
-if BayesInfo.with_trend
-    trend_coeff = zeros(DynareDataset.vobs,1);
-    t = DynareOptions.trend_coeffs;
-    for i=1:length(t)
-        if ~isempty(t{i})
-            trend_coeff(i) = evalin('base',t{i});
-        end
-    end
-    trend = repmat(constant,1,DynareDataset.nobs)+trend_coeff*[1:DynareDataset.nobs];
-else
-    trend = repmat(constant,1,DynareDataset.nobs);
-end
-
 % Get needed informations for kalman filter routines.
 start = DynareOptions.presample+1;
 np    = size(T,1);
 mf    = BayesInfo.mf;
-Y     = transpose(DynareDataset.data)-trend;
+Y     = transpose(DynareDataset.data);
 
 %------------------------------------------------------------------------------
 % 3. Initial condition of the Kalman filter
@@ -297,7 +276,7 @@ switch DynareOptions.particle.initialization
     StateVectorMean = ReducedForm.constant(mf0);
     old_DynareOptionsperiods = DynareOptions.periods;
     DynareOptions.periods = 5000;
-    y_ = simult(oo_.steady_state, dr,Model,DynareOptions,DynareResults);
+    y_ = simult(DynareResults.steady_state, dr,Model,DynareOptions,DynareResults);
     y_ = y_(state_variables_idx,2001:5000);
     StateVectorVariance = cov(y_');
     DynareOptions.periods = old_DynareOptionsperiods;
@@ -316,7 +295,7 @@ ReducedForm.StateVectorVariance = StateVectorVariance;
 %------------------------------------------------------------------------------
 DynareOptions.warning_for_steadystate = 0;
 [s1,s2] = get_dynare_random_generator_state();
-LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,start,DynareOptions);
+LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,start,DynareOptions.particle,DynareOptions.threads);
 set_dynare_random_generator_state(s1,s2);
 if imag(LIK)
     info = 46;

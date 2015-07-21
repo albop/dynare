@@ -10,7 +10,7 @@ function plot_icforecast(Variables,periods,options_)
 % SPECIAL REQUIREMENTS
 %  This routine has to be called after imcforecast.m.
 
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2014 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,8 +34,16 @@ end
 
 load conditional_forecasts;
 
+eval(['forecast_periods = length(forecasts.cond.Mean.' Variables(1,:) ');']);
 if nargin==1 || isempty(periods) % Set default number of periods.
-    eval(['periods = length(forecasts.cond.Mean.' Variables(1,:) ');']);
+    periods=forecast_periods;
+else
+    periods=periods+1; %take care of initial period that is not forecasted
+end
+
+if periods>forecast_periods
+    fprintf('\nplot_icforecast:: Number of periods for plotting exceeds forecast horizon. Setting periods to %d.\n',forecast_periods-1)
+    periods=forecast_periods;
 end
 
 forecasts.graph.OutputDirectoryName = CheckPath('graphs',forecasts.graph.fname);

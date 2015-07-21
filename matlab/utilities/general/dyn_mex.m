@@ -47,11 +47,11 @@ end
 if ~exist('OCTAVE_VERSION')
     % Some mex commands are enclosed in an eval(), because otherwise it will make Octave fail
     if ispc
-      if msvc
+      if strcmp(win_compiler,'msvc')
           % MATLAB/Windows + Microsoft Visual C++
           eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Dynamic" ' basename '_dynamic.c ' basename '_dynamic_mex.c'])
-          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Dynamic" ' basename '_static.c ' basename '_static_mex.c'])
-      elseif cygwin
+          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Static" ' basename '_static.c ' basename '_static_mex.c'])
+      elseif strcmp(win_compiler,'cygwin')
           % MATLAB/Windows + Cygwin g++
           eval(['mex -O PRELINK_CMDS1="echo EXPORTS > mex.def & echo ' ...
                 'mexFunction >> mex.def & echo Dynamic >> mex.def" ' ...

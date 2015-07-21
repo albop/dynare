@@ -59,8 +59,24 @@ options_ident = set_default_option(options_ident,'periods',300);
 options_ident = set_default_option(options_ident,'replic',100);
 options_ident = set_default_option(options_ident,'advanced',0);
 options_ident = set_default_option(options_ident,'normalize_jacobians',1);
+
+%Deal with non-stationary cases
+if isfield(options_ident,'diffuse_filter') %set lik_init and options_
+    options_ident.lik_init=3; %overwrites any other lik_init set
+    options_.diffuse_filter=options_ident.diffuse_filter; %make options_ inherit diffuse filter; will overwrite any conflicting lik_init in dynare_estimation_init
+else
+    if options_.diffuse_filter==1 %warning if estimation with diffuse filter was done, but not passed
+        warning('IDENTIFICATION:: Previously the diffuse_filter option was used, but it was not passed to the identification command. This may result in problems if your model contains unit roots.')
+    end
+    if isfield(options_ident,'lik_init') 
+        if options_ident.lik_init==3 %user specified diffuse filter using the lik_init option
+            options_ident.analytic_derivation=0; %diffuse filter not compatible with analytic derivation
+        end
+    end
+end
 options_ident = set_default_option(options_ident,'lik_init',1);
 options_ident = set_default_option(options_ident,'analytic_derivation',1);
+
 if isfield(options_ident,'nograph'),
     options_.nograph=options_ident.nograph;
 end
@@ -69,6 +85,9 @@ if isfield(options_ident,'nodisplay'),
 end
 if isfield(options_ident,'graph_format'),
     options_.graph_format=options_ident.graph_format;
+end
+if isfield(options_ident,'prior_trunc'),
+    options_.prior_trunc=options_ident.prior_trunc;
 end
 
 if options_ident.gsa_sample_file,
@@ -122,8 +141,7 @@ options_.prior_mc = options_ident.prior_mc;
 options_.options_ident = options_ident;
 options_.Schur_vec_tol = 1.e-8;
 options_.nomoments=0;
-options_.analytic_derivation=1;
-
+options_ = set_default_option(options_,'analytic_derivation',1);
 options_ = set_default_option(options_,'datafile','');
 options_.mode_compute = 0;
 options_.plot_priors = 0;
