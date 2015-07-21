@@ -32,11 +32,19 @@ function xparam1=get_all_parameters(estim_params_,M_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-nvx = estim_params_.nvx;
-ncx = estim_params_.ncx;
-nvn = estim_params_.nvn;
-ncn = estim_params_.ncn;
-np = estim_params_.np;
+if ~isempty(estim_params_)
+    nvx = estim_params_.nvx;
+    ncx = estim_params_.ncx;
+    nvn = estim_params_.nvn;
+    ncn = estim_params_.ncn;
+    np = estim_params_.np;
+else
+    nvx = 0;
+    ncx = 0;
+    nvn = 0;
+    ncn = 0;
+    np = 0;
+end
 Sigma_e = M_.Sigma_e;
 Correlation_matrix = M_.Correlation_matrix;
 H = M_.H;
