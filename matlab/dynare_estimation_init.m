@@ -293,15 +293,15 @@ end
 %%read out calibration that was set in mod-file and can be used for initialization
 xparam1_calib=get_all_parameters(estim_params_,M_); %get calibrated parameters
 if ~any(isnan(xparam1_calib)) %all estimated parameters are calibrated
-    estim_params_.full_calibration_detected.full_calibration_detected=1;
+    estim_params_.full_calibration_detected=1;
 else
-    estim_params_.full_calibration_detected.full_calibration_detected=0;
+    estim_params_.full_calibration_detected=0;
 end
 if options_.use_calibration_initialization %set calibration as starting values
     [xparam1,estim_params_]=do_parameter_initialization(estim_params_,xparam1_calib,xparam1); %get explicitly initialized parameters that have precedence to calibrated values
 end
 
-if ~isempty(estim_params_) && ~strmatch(fieldnames(estim_params_),'full_calibration_detected')
+if ~isempty(estim_params_) && ~all(strcmp(fieldnames(estim_params_),'full_calibration_detected'))
     if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
         % Plot prior densities.
         if ~options_.nograph && options_.plot_priors
@@ -332,7 +332,7 @@ if ~isempty(estim_params_) && ~strmatch(fieldnames(estim_params_),'full_calibrat
     end        
 end
 
-if isempty(estim_params_) || strmatch(fieldnames(estim_params_),'full_calibration_detected')% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
+if isempty(estim_params_) || all(strcmp(fieldnames(estim_params_),'full_calibration_detected'))% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
     if ~options_.smoother
         error('Estimation: the ''estimated_params'' block is mandatory (unless you are running a smoother)')
     end
