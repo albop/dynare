@@ -1,3 +1,10 @@
+<a name="logo"/>
+<div align="center">
+<a href="http://www.dynare.org/" target="_blank">
+<img src="http://www.dynare.org/img/dynare.png" alt="Dynare Logo"></img>
+</a>
+</div>
+
 # Dynare
 
 Described on the homepage: <http://www.dynare.org/>
