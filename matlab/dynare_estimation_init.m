@@ -301,7 +301,7 @@ if options_.use_calibration_initialization %set calibration as starting values
     [xparam1,estim_params_]=do_parameter_initialization(estim_params_,xparam1_calib,xparam1); %get explicitly initialized parameters that have precedence to calibrated values
 end
 
-if ~isempty(estim_params_) && isempty(strmatch(fieldnames(estim_params_),'full_calibration_detected'))
+if ~isempty(estim_params_) && ~all(strcmp(fieldnames(estim_params_),'full_calibration_detected'))
     if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
         % Plot prior densities.
         if ~options_.nograph && options_.plot_priors
@@ -332,7 +332,7 @@ if ~isempty(estim_params_) && isempty(strmatch(fieldnames(estim_params_),'full_c
     end        
 end
 
-if isempty(estim_params_) || ~isempty(strmatch(fieldnames(estim_params_),'full_calibration_detected'))% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
+if isempty(estim_params_) || all(strcmp(fieldnames(estim_params_),'full_calibration_detected'))% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
     if ~options_.smoother
         error('Estimation: the ''estimated_params'' block is mandatory (unless you are running a smoother)')
     end
