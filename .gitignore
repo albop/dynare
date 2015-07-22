@@ -119,6 +119,9 @@ mex/build/matlab/run_m2html.m
 /matlab/preprocessor*
 /matlab/dynare_version.m
 
+# JULIA dir
+/julia/preprocessor*
+
 # DLL rules
 *.mex
 *.dll
