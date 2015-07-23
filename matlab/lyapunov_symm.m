@@ -1,14 +1,12 @@
-function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,method, R, debug)  % --*-- Unitary tests --*--
+function [x,u] = lyapunov_symm(a,b,lyapunov_fixed_point_tol,qz_criterium,lyapunov_complex_threshold,method, R, debug)  % --*-- Unitary tests --*--
 % Solves the Lyapunov equation x-a*x*a' = b, for b and x symmetric matrices.
 % If a has some unit roots, the function computes only the solution of the stable subsystem.
 %  
 % INPUTS:
 %   a                           [double]    n*n matrix.
 %   b                           [double]    n*n matrix.
-%   third_argument              [double]    scalar, if method <= 2 :
-%                                                      qz_criterium = third_argument unit root threshold for eigenvalues in a,
-%                                                    elseif method = 3 :
-%                                                      tol =third_argument the convergence criteria for fixed_point algorithm.
+%   qz_criterium                [double]    unit root threshold for eigenvalues
+%   lyapunov_fixed_point_tol    [double]    convergence criteria for fixed_point algorithm.
 %   lyapunov_complex_threshold  [double]    scalar, complex block threshold for the upper triangular matrix T.
 %   method                      [integer]   Scalar, if method=0 [default] then U, T, n and k are not persistent.  
 %                                                      method=1 then U, T, n and k are declared as persistent 
@@ -44,11 +42,11 @@ function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,met
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<5 || isempty(method)
+if nargin<6 || isempty(method)
     method = 0;
 end
 
-if nargin<7
+if nargin<8
     debug = 0;
 end
 
@@ -57,7 +55,6 @@ if method == 3
     if ~isempty(method1)
         method = method1;
     end;
-    tol = third_argument;
     if debug
         fprintf('lyapunov_symm:: [method=%d] \n',method);
     end
@@ -73,7 +70,7 @@ if method == 3
         end;
         at = a';
         %fixed point iterations
-        while evol > tol && it_fp < max_it_fp;
+        while evol >  lyapunov_fixed_point_tol && it_fp < max_it_fp;
             X_old = X;
             X = a * X * at + b;
             evol = max(sum(abs(X - X_old))); %norm_1
@@ -110,7 +107,6 @@ elseif method == 4
     return;
 end;
 
-qz_criterium = third_argument;
 if method
     persistent U T k n
 else
@@ -210,8 +206,8 @@ u = U(:,1:k);
 %$ 
 %$ % DynareOptions.lyapunov_fp == 1
 %$ try
-%$    Pstar1_small = lyapunov_symm(T_small,R_small*Q_small*R_small',lyapunov_fixed_point_tol,lyapunov_fixed_point_tol,3, [], 0);
-%$    Pstar1_large = lyapunov_symm(T_large,R_large*Q_large*R_large',lyapunov_fixed_point_tol,lyapunov_fixed_point_tol,3, [], 0);
+%$    Pstar1_small = lyapunov_symm(T_small,R_small*Q_small*R_small',lyapunov_fixed_point_tol,qz_criterium,lyapunov_complex_threshold,3, [], 0);
+%$    Pstar1_large = lyapunov_symm(T_large,R_large*Q_large*R_large',lyapunov_fixed_point_tol,qz_criterium,lyapunov_complex_threshold,3, [], 0);
 %$    t(1) = 1;
 %$ catch
 %$    t(1) = 0;
@@ -229,8 +225,8 @@ u = U(:,1:k);
 %$ % Dynareoptions.lyapunov_srs == 1
 %$ if (isoctave && user_has_octave_forge_package('control')) || (~isoctave && user_has_matlab_license('control_toolbox'))
 %$     try
-%$        Pstar3_small = lyapunov_symm(T_small,Q_small,lyapunov_fixed_point_tol,lyapunov_complex_threshold,4,R_small,0);
-%$        Pstar3_large = lyapunov_symm(T_large,Q_large,lyapunov_fixed_point_tol,lyapunov_complex_threshold,4,R_large,0);
+%$        Pstar3_small = lyapunov_symm(T_small,Q_small,lyapunov_fixed_point_tol,qz_criterium,lyapunov_complex_threshold,4,R_small,0);
+%$        Pstar3_large = lyapunov_symm(T_large,Q_large,lyapunov_fixed_point_tol,qz_criterium,lyapunov_complex_threshold,4,R_large,0);
 %$        t(3) = 1;
 %$     catch
 %$        t(3) = 0;
@@ -241,8 +237,8 @@ u = U(:,1:k);
 %$
 %$ % Standard
 %$ try
-%$     Pstar4_small = lyapunov_symm(T_small,R_small*Q_small*R_small',qz_criterium, lyapunov_complex_threshold, [], [], 0);
-%$     Pstar4_large = lyapunov_symm(T_large,R_large*Q_large*R_large',qz_criterium, lyapunov_complex_threshold, [], [], 0);
+%$     Pstar4_small = lyapunov_symm(T_small,R_small*Q_small*R_small',lyapunov_fixed_point_tol,qz_criterium, lyapunov_complex_threshold, [], [], 0);
+%$     Pstar4_large = lyapunov_symm(T_large,R_large*Q_large*R_large',lyapunov_fixed_point_tol,qz_criterium, lyapunov_complex_threshold, [], [], 0);
 %$    t(4) = 1;
 %$ catch
 %$    t(4) = 0;
