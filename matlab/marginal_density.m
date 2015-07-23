@@ -66,7 +66,7 @@ save([M_.fname '_mean.mat'],'xparam1','hh','SIGMA');
 
 fprintf('Estimation::marginal density: I''m computing the posterior log marginal density (modified harmonic mean)... ');
 logdetSIGMA = log(det(SIGMA));
-invSIGMA = inv(SIGMA);
+invSIGMA = hh;
 marginal = zeros(9,2);
 linee = 0;
 check_coverage = 1;
