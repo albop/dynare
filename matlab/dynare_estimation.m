@@ -199,3 +199,4 @@ if nnobs > 1 && horizon > 0
         end
     end
 end
+options_.mode_file = ''; %delete stored mode-file so that it is not reaccessed in later calls (and in case it was only set by the recursive estimation)
