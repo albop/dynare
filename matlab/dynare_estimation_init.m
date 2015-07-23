@@ -148,7 +148,7 @@ if ~isempty(estim_params_)
     [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
 end
 
-if ~all(bayestopt_.pshape~=0) || ~all(bayestopt_.pshape==0)
+if any(bayestopt_.pshape==0) && any(bayestopt_.pshape~=0)
     error('Estimation must be either fully ML or fully Bayesian. Maybe you forgot to specify a prior distribution.')
 end
 % Check if a _prior_restrictions.m file exists
