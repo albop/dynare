@@ -58,7 +58,7 @@ end
 initperiods = 1:M_.maximum_lag;
 lastperiods = (M_.maximum_lag+options_.periods+1):(M_.maximum_lag+options_.periods+M_.maximum_lead);
 
-oo_ = simulation_core(options_, M_, oo_);
+oo_ = perfect_foresight_solver_core(M_,options_,oo_);
 
 % If simulation failed try homotopy.
 if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
@@ -135,7 +135,7 @@ if ~oo_.deterministic_simulation.status && ~options_.no_homotopy
         
         saved_endo_simul = oo_.endo_simul;
 
-        [oo_, me] = simulation_core(options_, M_, oo_);
+        [oo_,me] = perfect_foresight_solver_core(M_,options_,oo_);
 
         if oo_.deterministic_simulation.status == 1
             current_weight = new_weight;
