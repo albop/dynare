@@ -81,8 +81,6 @@ res = zeros(periods*ny,1);
 
 o_periods = periods;
 
-ZERO = zeros(length(i_upd),1);
-
 h1 = clock ;
 iA = zeros(periods*M.NNZDerivatives(1),3);
 for iter = 1:options.simul.maxit
