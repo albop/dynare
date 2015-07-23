@@ -30,7 +30,7 @@ function [ts,results] = extended_path(initial_conditions,sample_size)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-global M_ options_ oo_
+    global M_ options_ oo_
 
 ep  = options_.ep;
 options_.verbosity = ep.verbosity;
@@ -269,6 +269,8 @@ function y = extended_path_core(periods,endo_nbr,exo_nbr,positive_var_indx, ...
                                 verbosity,bytecode_flag,order,M,pfm,algo,stack_solve_algo,...
                                 olmmcp,options,oo)
     
+    
+ep = options.ep;
 if init% Compute first order solution (Perturbation)...
     endo_simul = simult_(initial_conditions,oo.dr,exo_simul(2:end,:),1);
 else
@@ -311,7 +313,7 @@ if flag
                 if ~flag
                     break
                 end
-                endo_simul = tmp(:,2:end);
+                endo_simul = tmp.endo_simul;
             end
         end
         info_convergence = flag;
@@ -324,6 +326,7 @@ if flag
             [flag,tmp] = ...
                 solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,options_,pfm,ep.stochastic.order);
         end
+        endo_simul = tmp;
         info_convergence = ~flag;
     end
 end
@@ -334,7 +337,6 @@ if verbosity
         disp(['Time: ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
     end
 end
-endo_simul = tmp;
 if info_convergence
     y = endo_simul(:,2);
 else
