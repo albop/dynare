@@ -238,6 +238,7 @@ MODFILES = \
 XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value_xfail.mod \
 	optimal_policy/Ramsey/ramsey_ex_wrong_ss_file_xfail.mod \
+	estimation/fs2000_mixed_ML_xfail.mod \
 	steady_state/Linear_steady_state_xfail.mod
 
 MFILES = initval_file/ramst_initval_file_data.m
