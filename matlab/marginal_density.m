@@ -65,8 +65,8 @@ fprintf(' Done!\n');
 save([M_.fname '_mean.mat'],'xparam1','hh','SIGMA');
 
 fprintf('Estimation::marginal density: I''m computing the posterior log marginal density (modified harmonic mean)... ');
-detSIGMA = det(SIGMA);
-invSIGMA = inv(SIGMA);
+logdetSIGMA = log(det(SIGMA));
+invSIGMA = hh;
 marginal = zeros(9,2);
 linee = 0;
 check_coverage = 1;
@@ -81,9 +81,9 @@ while check_coverage
                 load([ BaseName '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2');
                 EndOfFile = size(x2,1);
                 for i = ifil:EndOfFile
-                    deviation  = (x2(i,:)-MU)*invSIGMA*(x2(i,:)-MU)';
+                    deviation  = ((x2(i,:)-MU)*invSIGMA*(x2(i,:)-MU)')/increase;
                     if deviation <= critval
-                        lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
+                        lftheta = -log(p)-(npar*log(2*pi)+(npar*log(increase)+logdetSIGMA)+deviation)/2;
                         tmp = tmp + exp(lftheta - logpo2(i) + lpost_mode);
                     end
                 end
@@ -102,14 +102,10 @@ while check_coverage
             disp('Estimation::marginal density: The support of the weighting density function is not large enough...')
             disp('Estimation::marginal density: I increase the variance of this distribution.')
             increase = 1.2*increase;
-            invSIGMA = inv(SIGMA*increase);
-            detSIGMA = det(SIGMA*increase);
             linee    = 0;   
         else
             disp('Estimation::marginal density: Let me try again.')
             increase = 1.2*increase;
-            invSIGMA = inv(SIGMA*increase);
-            detSIGMA = det(SIGMA*increase);
             linee    = 0;
             if increase > 20
                 check_coverage = 0;
