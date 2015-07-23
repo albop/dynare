@@ -36,15 +36,7 @@ function []=display_problematic_vars_Jacobian(problemrow,problemcol,M_,x,type,ca
 if nargin<6
     caller_string='';
 end
-if ~isempty(M_.aux_vars)
-    aux_vars_type = [M_.aux_vars.type];
-    aux_eq_nbr = max(find(aux_vars_type == 6)); 
-    if isempty(aux_eq_nbr)
-        aux_eq_nbr=0;
-    end
-else
-    aux_eq_nbr=0;
-end
+aux_eq_nbr=M_.eq_nbr-M_.orig_eq_nbr;
 if strcmp(type,'dynamic')
     for ii=1:length(problemrow)
         [var_row,var_index]=find(M_.lead_lag_incidence==problemcol(ii));
