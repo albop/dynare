@@ -1069,6 +1069,17 @@ extension or if the filename contains a non-alphanumeric character;
 @node Variable declarations
 @section Variable declarations
 
+While Dynare allows the user to choose their own variable names, there are some restrictions 
+to be kept in mind. First, variables and parameters must not have the same name as Dynare commands or
+built-in functions. In this respect, Dynare is not case-sensitive. For example, do not use @var{Ln}
+or @var{Sigma_e} to name your variable. Not conforming to this rule might yield hard-to-debug
+error messages or crashes. Second, to minimize interference with MATLAB or Octave functions that
+may be called by Dynare or user-defined steady state files, it is recommended to avoid using the name
+of MATLAB functions. In particular when working with steady state files, do not use correctly-spelled greek 
+names like @var{alpha}, because there are Matlab functions of the same name. Rather go for @var{alppha} or so.
+Lastly, please do not name a variable or parameter @var{i}. This may interfere with the imaginary 
+number @var{i} and the index in many loops. Rather, name investment @var{invest}.
+
 Declarations of variables and parameters are made with the following commands:
 
 @deffn Command var @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING})]@dots{};
