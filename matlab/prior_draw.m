@@ -139,7 +139,7 @@ if inverse_gamma_2_draws
     out_of_bound = find( (pdraw(inverse_gamma_2_index)'>ub(inverse_gamma_2_index)) | (pdraw(inverse_gamma_2_index)'<lb(inverse_gamma_2_index)));
     while ~isempty(out_of_bound),
         pdraw(inverse_gamma_2_index(out_of_bound)) = ...
-            sqrt(1./gamrnd(p7(inverse_gamma_2_index(out_of_bound))/2,2./p6(inverse_gamma_2_index(out_of_bound))))+p3(inverse_gamma_2_index(out_of_bound));
+            1./gamrnd(p7(inverse_gamma_2_index(out_of_bound))/2,2./p6(inverse_gamma_2_index(out_of_bound)))+p3(inverse_gamma_2_index(out_of_bound));
         out_of_bound = find( (pdraw(inverse_gamma_2_index)'>ub(inverse_gamma_2_index)) | (pdraw(inverse_gamma_2_index)'<lb(inverse_gamma_2_index)));
     end
 end
