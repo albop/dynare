@@ -1,7 +1,17 @@
 function []=graph_decomp(z,shock_names,endo_names,i_var,initial_date,DynareModel,DynareOptions)
-%function []=graph_decomp(z,varlist,initial_period,freq)
+%function []=graph_decomp(z,shock_names,endo_names,i_var,initial_date,DynareModel,DynareOptions)
+% Plots the results from the shock_decomposition command
+% 
+% Inputs
+%   z               [n_var*(nshock+2)*nperiods]     shock decomposition array, see shock_decomposition.m for details
+%   shock_names     [endo_nbr*string length]        shock names from M_.exo_names
+%   endo_names      [exo_nbr*string length]         variable names from M_.endo_names
+%   i_var           [n_var*1]                       vector indices of requested variables in M_.endo_names and z
+%   initial_date    [dseries object]                first period of decomposition to plot
+%   DynareModel     [structure]                     Dynare model structure
+%   DynareOptions   [structure]                     Dynare options structure
 
-% Copyright (C) 2010-2013 Dynare Team
+% Copyright (C) 2010-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
