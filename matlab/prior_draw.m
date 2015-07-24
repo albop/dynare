@@ -1,4 +1,4 @@
-function pdraw = prior_draw(init,uniform)
+function pdraw = prior_draw(init,uniform) % --*-- Unitary tests --*--
 % This function generate one draw from the joint prior distribution.
 % 
 % INPUTS 
@@ -93,6 +93,11 @@ end
 
 if uniform_draws
     pdraw(uniform_index) = rand(length(uniform_index),1).*(p4(uniform_index)-p3(uniform_index)) + p3(uniform_index);  
+    out_of_bound = find( (pdraw(uniform_index)'>ub(uniform_index)) | (pdraw(uniform_index)'<lb(uniform_index)));
+    while ~isempty(out_of_bound),
+        pdraw(uniform_index) = rand(length(uniform_index),1).*(p4(uniform_index)-p3(uniform_index)) + p3(uniform_index);
+        out_of_bound = find( (pdraw(uniform_index)'>ub(uniform_index)) | (pdraw(uniform_index)'<lb(uniform_index)));
+    end
 end
 
 if gaussian_draws
@@ -143,3 +148,4 @@ if inverse_gamma_2_draws
         out_of_bound = find( (pdraw(inverse_gamma_2_index)'>ub(inverse_gamma_2_index)) | (pdraw(inverse_gamma_2_index)'<lb(inverse_gamma_2_index)));
     end
 end
+
