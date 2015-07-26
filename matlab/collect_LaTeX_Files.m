@@ -1,4 +1,4 @@
-function collect_LaTeX_Files(M_)
+function collect_LaTeX_Files(M_,options_)
 % function collect_LaTeX_Files(M_);
 % Creates TeX-File embedding all eps-loaders created for current mod-file
 % 
@@ -36,7 +36,14 @@ fprintf(fid,'%s \n','\usepackage{epstopdf}');
 fprintf(fid,'%s \n','\usepackage{longtable}');
 fprintf(fid,'%s \n','\usepackage{amsfonts}');
 fprintf(fid,'%s \n','\usepackage{breqn}');
+fprintf(fid,'%s \n','\usepackage{float}');
 fprintf(fid,'%s \n','\begin{document}');
+
+if ~isfield(M_,'dname')
+    dname = options_.dirname;
+else
+    dname = M_.dname;
+end
 
 %% Root directory
 TeX_Files=dir([M_.fname,'*.TeX']);
@@ -51,20 +58,20 @@ for ii=1:length(TeX_Files)
 end
 
 %% Output directory
-TeX_Files=dir([M_.dname filesep 'Output' filesep  M_.fname '*.TeX']);
+TeX_Files=dir([dname filesep 'Output' filesep  M_.fname '*.TeX']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
-        fprintf(fid,'%s \n',['\include{', M_.dname '/Output' '/',f_name,'}']);    
+        fprintf(fid,'%s \n',['\include{', dname '/Output' '/',f_name,'}']);    
     end
 end
 
 %5 graphs directory
-TeX_Files=dir([M_.dname filesep 'graphs' filesep  M_.fname '*.TeX']);
+TeX_Files=dir([dname filesep 'graphs' filesep  M_.fname '*.TeX']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
-        fprintf(fid,'%s \n',['\include{', M_.dname '/graphs' '/',f_name,'}']);    
+        fprintf(fid,'%s \n',['\include{', dname '/graphs' '/',f_name,'}']);    
     end
 end
 

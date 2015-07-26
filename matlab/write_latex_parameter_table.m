@@ -47,9 +47,11 @@ fprintf(fid, ['\\caption{Parameter Values}\\\\%%\n']);
 
 fprintf(fid, '\\hline%%\n');
 fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Parameter}} &\n');
-fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Value}} &\n');
+fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Value}} ');
 if Long_names_present==1;
-    fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Description}}\\\\%%\n');
+    fprintf(fid, '&\n \\multicolumn{1}{c}{\\textbf{Description}}\\\\%%\n');
+else
+    fprintf(fid, ' \\\\%%\n');
 end
 fprintf(fid, '\\hline\\hline%%\n');
 fprintf(fid, '\\endfirsthead\n');
@@ -61,9 +63,11 @@ else
 end
 fprintf(fid, '\\hline%%\n');
 fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Parameter}} &\n');
-fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Value}} &\n');
+fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Value}} ');
 if Long_names_present==1;
-    fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Description}}\\\\%%\n');
+    fprintf(fid, '&\n  \\multicolumn{1}{c}{\\textbf{Description}}\\\\%%\n');
+else
+    fprintf(fid, '\\\\%%\n');
 end
 fprintf(fid, '\\hline\\hline%%\n');
 fprintf(fid, '\\endhead\n');
