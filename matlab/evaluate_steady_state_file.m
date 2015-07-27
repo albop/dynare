@@ -57,6 +57,7 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
     if check
         info(1) = 19;
         info(2) = NaN;
+        return
     end
     
     if M.param_nbr > 0
