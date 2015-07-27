@@ -4,7 +4,8 @@ function oo_ = shock_decomposition(M_,oo_,options_,varlist)
 % oo_.shock_decomposition. It is a n_var by nshock+2 by nperiods array. The
 % first nshock columns store the respective shock contributions, column n+1
 % stores the role of the initial conditions, while column n+2 stores the
-% value of the smoothed variables.
+% value of the smoothed variables.  Both the variables and shocks are stored 
+% in the order of declaration, i.e. M_.endo_names and M_.exo_names, respectively.
 %
 % INPUTS
 %    M_:          [structure]  Definition of the model
