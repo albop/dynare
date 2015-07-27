@@ -326,6 +326,7 @@ options_.conditional_variance_decomposition = [];
 
 % Ramsey policy
 options_.ramsey_policy = 0;
+options_.instruments = [];
 options_.timeless = 0;
 
 % estimation
