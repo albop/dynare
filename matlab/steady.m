@@ -89,6 +89,12 @@ else
     if options_.noprint == 0
         resid;
     end
+    if options_.debug
+        fprintf('\nThe steady state computation failed. It terminated with the following values:\n')
+        for i=1:M_.orig_endo_nbr
+            fprintf('%s \t\t %g\n',M_.endo_names(i,:),steady_state(i));
+        end        
+    end
     print_info(info,options_.noprint, options_);
 end
 
