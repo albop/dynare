@@ -186,3 +186,4 @@ elseif options.solve_algo == 10
 else
     error('DYNARE_SOLVE: option solve_algo must be one of [0,1,2,3,4,9,10]')
 end
+
