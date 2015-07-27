@@ -22,7 +22,7 @@ function m = compute_prior_mode(hyperparameters,shape)
 % [3] The uniform distribution has an infinity of modes. In this case the function returns the prior mean.
 % [4] For the beta distribution we can have 1, 2 or an infinity of modes.
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -74,7 +74,7 @@ switch shape
         m = m + hyperparameters(3);
     end
   case 5
-    m = .5*(hyperparameters(2)-hyperparameters(1)) ;
+    m = hyperparameters(1);
   case 6
     % s  = hyperparameters(1)
     % nu = hyperparameters(2)
