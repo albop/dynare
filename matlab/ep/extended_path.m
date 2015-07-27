@@ -338,7 +338,7 @@ if verbosity
     end
 end
 if info_convergence
-    y = endo_simul(:,2);
+    y = tmp.endo_simul(:,2);
 else
     y = NaN(size(endo_nbr,1));
 end
