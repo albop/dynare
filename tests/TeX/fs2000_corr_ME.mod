@@ -162,7 +162,7 @@ end;
 estimation(mode_compute=9,order=1,datafile='../fs2000/fsdat_simul',mode_check,smoother,filter_decomposition,mh_replic=2002, mh_nblocks=2, mh_jscale=0.8,forecast = 8,bayesian_irf,filtered_vars,filter_step_ahead=[1,3],irf=20,moments_varendo) m P c e W R k d y;
 shock_decomposition y W R;
 
-collect_LaTeX_Files(M_);
+collect_LaTeX_Files(M_,options_);
 
 //identification(advanced=1,max_dim_cova_group=3,prior_mc=250);
 if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.TeX'])
