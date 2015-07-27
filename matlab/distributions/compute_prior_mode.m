@@ -1,4 +1,4 @@
-function m = compute_prior_mode(hyperparameters,shape)
+function m = compute_prior_mode(hyperparameters,shape) % --*-- Unitary tests --*--
 % This function computes the mode of the prior distribution given the (two, three or four) hyperparameters
 % of the prior distribution.
 %    
@@ -97,3 +97,74 @@ switch shape
   otherwise
     error('Unknown prior shape!')
 end
+
+%@test:1
+%$
+%$ % Beta
+%$ m1 = compute_prior_mode([2 1],1); 
+%$ m2 = compute_prior_mode([2 5 1 4],1); % Wolfram Alpha: BetaDistribution[2,5]
+%$ % Check the results
+%$ t(1) = dassert(m1,0,1e-6);
+%$ t(2) = dassert(m2,1/5*3+1,1e-6);
+%$ T = all(t);
+%@eof:1
+%$
+%@test:2
+%$ % Gamma
+%$ m1 = compute_prior_mode([1 2],2); 
+%$ m2 = compute_prior_mode([9 0.5 1],2);  % Wolfram Alpha: GammaDistribution[9,0.5] 
+%$ % Check the results
+%$ t(1) = dassert(m1,0,1e-6);
+%$ t(2) = dassert(m2,4+1,1e-6);
+%$ T = all(t);
+%@eof:2
+%$
+%@test:3
+%$ % Normal
+%$ m1 = compute_prior_mode([1 1],3); 
+%$ m2 = compute_prior_mode([2 5],3); 
+%$ % Check the results
+%$ t(1) = dassert(m1,1,1e-6);
+%$ t(2) = dassert(m2,2,1e-6);
+%$ T = all(t);
+%@eof:3
+%$
+%@test:4
+%$ % Inverse Gamma I
+%$ m1 = compute_prior_mode([8 2],4);  
+%$ m2 = compute_prior_mode([8 2 1],4); 
+%$ % Check the results
+%$ t(1) = dassert(m1,1.632993161855452,1e-6);
+%$ t(2) = dassert(m2,1.632993161855452+1,1e-6);
+%$ T = all(t);
+%@eof:4
+%$
+%@test:5
+%$ % Uniform
+%$ m1 = compute_prior_mode([0.5 1/sqrt(12)],5); 
+%$ m2 = compute_prior_mode([2 5 1 2],5); 
+%$ % Check the results
+%$ t(1) = dassert(m1,0.5,1e-6);
+%$ t(2) = dassert(m2,2,1e-6);
+%$ T = all(t);
+%@eof:5
+%$
+%@test:6
+%$ % Inverse Gamma II, parameterized with s and nu where  s=2*beta and nu=2*alpha
+%$ m1 = compute_prior_mode([8 2],6);  % Wolfram Alpha, parameterized with alpha beta: InversegammaDistribution[1,4]
+%$ m2 = compute_prior_mode([8 4 1],6); % Wolfram Alpha, parameterized with alpha beta: InversegammaDistribution[2,4]
+%$ % Check the results
+%$ t(1) = dassert(m1,2,1e-6);
+%$ t(2) = dassert(m2,1+4/3,1e-6);
+%$ T = all(t);
+%@eof:6
+%$
+%@test:7
+%$ % Weibull
+%$ m1 = compute_prior_mode([1 1],8); 
+%$ m2 = compute_prior_mode([1 2 1],8); % Wolfram Alpha: WeibullDistribution[2,1]
+%$ % Check the results
+%$ t(1) = dassert(m1,0,1e-6);
+%$ t(2) = dassert(m2,1+1/sqrt(2),1e-6);
+%$ T = all(t);
+%@eof:7
