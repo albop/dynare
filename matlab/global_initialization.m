@@ -197,6 +197,7 @@ ep.innovation_distribution = 'gaussian';
 ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
 ep.stack_solve_algo = 7;
+ep.solve_algo = 9;
 % Number of replications
 ep.replic_nbr = 1;
 % Parallel execution of replications
