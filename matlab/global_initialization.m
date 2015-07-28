@@ -34,6 +34,7 @@ estim_params_ = [];
 bayestopt_ = [];
 options_.datafile = '';
 options_.dirname = M_.fname;
+M_.dname = M_.fname;
 options_.dataset = [];
 options_.verbosity = 1;
 options_.terminal_condition = 0;

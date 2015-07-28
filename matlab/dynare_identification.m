@@ -45,9 +45,6 @@ else
 end
 
 fname_ = M_.fname;
-if ~isfield(M_,'dname'),
-    M_.dname = M_.fname;
-end
 options_ident = set_default_option(options_ident,'gsa_sample_file',0);
 options_ident = set_default_option(options_ident,'parameter_set','prior_mean');
 options_ident = set_default_option(options_ident,'load_ident_files',0);

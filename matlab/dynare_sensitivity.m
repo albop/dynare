@@ -28,9 +28,6 @@ if options_.dsge_var
 end
 
 fname_ = M_.fname;
-if ~isfield(M_,'dname'),
-    M_.dname = M_.fname;
-end
 lgy_ = M_.endo_names;
 x0=[];
 
