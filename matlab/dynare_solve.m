@@ -76,7 +76,9 @@ if ~isempty(i)
     return;
 end
 
-if max(abs(fvec)) < tolf
+% this test doesn't check complementarity conditions and is not used for
+% mixed complementarity problems
+if (options.solve_algo ~= 10) && (max(abs(fvec)) < tolf)
     return ;
 end
 
@@ -174,6 +176,7 @@ elseif options.solve_algo == 3
     end
 elseif options.solve_algo == 10
     olmmcp = options.lmmcp;
+
     [x,fval,exitflag] = lmmcp(func,x,olmmcp.lb,olmmcp.ub,olmmcp,varargin{:});
     if exitflag == 1
         info = 0;
@@ -183,3 +186,4 @@ elseif options.solve_algo == 10
 else
     error('DYNARE_SOLVE: option solve_algo must be one of [0,1,2,3,4,9,10]')
 end
+

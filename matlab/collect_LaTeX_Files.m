@@ -34,6 +34,9 @@ fprintf(fid,'%s \n','\usepackage{psfrag}');
 fprintf(fid,'%s \n','\usepackage{graphicx}');
 fprintf(fid,'%s \n','\usepackage{epstopdf}');
 fprintf(fid,'%s \n','\usepackage{longtable}');
+fprintf(fid,'%s \n','\usepackage{amsfonts}');
+fprintf(fid,'%s \n','\usepackage{breqn}');
+fprintf(fid,'%s \n','\usepackage{float}');
 fprintf(fid,'%s \n','\begin{document}');
 
 %% Root directory

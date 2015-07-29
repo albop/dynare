@@ -46,7 +46,7 @@ for i=1:size(etags,1)
                 k = find(strcmp(strtrim(str(1:kop-1)),cellstr(M.endo_names)));
                 if isempty(k)
                     error(sprintf(['Complementarity condition %s: variable %s is ' ...
-                                   'not recognized',etags{i,3},b{1}]))
+                                   'not recognized',etags{i,3},strtrim(str(1:kop-1))]))
                 end
                 ub(k) = str2num(str(kop+1:end));
                 eq_index(etags{i,1}) = k;
@@ -57,7 +57,7 @@ for i=1:size(etags,1)
                 k = find(strcmp(strtrim(str(1:kop-1)),cellstr(M.endo_names)));
                 if isempty(k)
                     error(sprintf(['Complementarity condition %s: variable %s is ' ...
-                                   'not recognized',etags{i},b{1}]))
+                                   'not recognized',etags{i},strtrim(str(1:kop-1))]))
                 end
                 lb(k) = str2num(str(kop+1:end));
                 eq_index(etags{i,1}) = k;

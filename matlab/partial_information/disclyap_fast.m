@@ -1,6 +1,14 @@
-function X=disclyap_fast(G,V,tol,ch)
+function [X,exitflag]=disclyap_fast(G,V,tol,ch)
 % function X=disclyap_fast(G,V,ch)
-% 
+% Inputs:
+%   - G     [double]    first input matrix
+%   - V     [double]    second input matrix
+%   - tol   [scalar]    tolerance criterion 
+%   - ch    empty of non-empty             if non-empty: check positive-definiteness
+% Outputs:
+%   - X     [double]    solution matrix
+%   - exitflag [scalar] 0 if solution is found, 1 otherwise
+%
 % Solve the discrete Lyapunov Equation 
 % X=G*X*G'+V 
 % Using the Doubling Algorithm 
@@ -11,7 +19,7 @@ function X=disclyap_fast(G,V,tol,ch)
 % Joe Pearlman and Alejandro Justiniano 
 % 3/5/2005 
 
-% Copyright (C) 2010-2012 Dynare Team
+% Copyright (C) 2010-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,6 +42,7 @@ else
     flag_ch = 1; 
 end 
 s=size(G,1); 
+exitflag=0;
 
 %tol = 1e-16; 
 
@@ -41,13 +50,20 @@ P0=V;
 A0=G; 
 
 matd=1; 
-while matd > tol 
+iter=1;
+while matd > tol && iter< 2000 
     P1=P0+A0*P0*A0'; 
     A1=A0*A0;  
     matd=max( max( abs( P1 - P0 ) ) ); 
     P0=P1; 
     A0=A1; 
+    iter=iter+1;
 end 
+if iter==5000
+    X=NaN(P0);
+    exitflag=1;
+    return
+end
 clear A0 A1 P1; 
 
 X=(P0+P0')/2; 
@@ -56,6 +72,7 @@ X=(P0+P0')/2;
 if flag_ch==1 
     [C,p]=chol(X); 
     if p ~= 0 
+        exitflag=1;
         error('X is not positive definite')
     end 
 end 

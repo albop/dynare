@@ -34,6 +34,7 @@ estim_params_ = [];
 bayestopt_ = [];
 options_.datafile = '';
 options_.dirname = M_.fname;
+M_.dname = M_.fname;
 options_.dataset = [];
 options_.verbosity = 1;
 options_.terminal_condition = 0;
@@ -195,7 +196,12 @@ ep.innovation_distribution = 'gaussian';
 % Set flag for the seed
 ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
-ep.stack_solve_algo = 4;
+ep.stack_solve_algo = 7;
+ep.solve_algo = 9;
+% Number of replications
+ep.replic_nbr = 1;
+% Parallel execution of replications
+ep.parallel_1 = false;
 % Stochastic extended path related options.
 ep.stochastic.method = '';
 ep.stochastic.algo = 0;
@@ -322,6 +328,7 @@ options_.conditional_variance_decomposition = [];
 
 % Ramsey policy
 options_.ramsey_policy = 0;
+options_.instruments = [];
 options_.timeless = 0;
 
 % estimation

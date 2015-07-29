@@ -20,7 +20,9 @@ function pfm = setup_stochastic_perfect_foresight_model_solver(DynareModel,Dynar
 pfm.lead_lag_incidence = DynareModel.lead_lag_incidence;
 pfm.ny = DynareModel.endo_nbr;
 pfm.Sigma = DynareModel.Sigma_e;
-pfm.Omega = chol(pfm.Sigma,'upper'); % Sigma = Omega'*Omega
+if det(pfm.Sigma) > 0
+    pfm.Omega = chol(pfm.Sigma,'upper'); % Sigma = Omega'*Omega
+end
 pfm.number_of_shocks = length(pfm.Sigma);
 pfm.stochastic_order = DynareOptions.ep.stochastic.order;
 pfm.max_lag = DynareModel.maximum_endo_lag;

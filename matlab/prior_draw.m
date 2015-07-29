@@ -1,4 +1,4 @@
-function pdraw = prior_draw(init,uniform)
+function pdraw = prior_draw(init,uniform) % --*-- Unitary tests --*--
 % This function generate one draw from the joint prior distribution.
 % 
 % INPUTS 
@@ -15,7 +15,7 @@ function pdraw = prior_draw(init,uniform)
 % NOTE 1. Input arguments 1 an 2 are only needed for initialization.
 % NOTE 2. A given draw from the joint prior distribution does not satisfy BK conditions a priori.
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -93,6 +93,11 @@ end
 
 if uniform_draws
     pdraw(uniform_index) = rand(length(uniform_index),1).*(p4(uniform_index)-p3(uniform_index)) + p3(uniform_index);  
+    out_of_bound = find( (pdraw(uniform_index)'>ub(uniform_index)) | (pdraw(uniform_index)'<lb(uniform_index)));
+    while ~isempty(out_of_bound),
+        pdraw(uniform_index) = rand(length(uniform_index),1).*(p4(uniform_index)-p3(uniform_index)) + p3(uniform_index);
+        out_of_bound = find( (pdraw(uniform_index)'>ub(uniform_index)) | (pdraw(uniform_index)'<lb(uniform_index)));
+    end
 end
 
 if gaussian_draws
@@ -139,7 +144,374 @@ if inverse_gamma_2_draws
     out_of_bound = find( (pdraw(inverse_gamma_2_index)'>ub(inverse_gamma_2_index)) | (pdraw(inverse_gamma_2_index)'<lb(inverse_gamma_2_index)));
     while ~isempty(out_of_bound),
         pdraw(inverse_gamma_2_index(out_of_bound)) = ...
-            sqrt(1./gamrnd(p7(inverse_gamma_2_index(out_of_bound))/2,2./p6(inverse_gamma_2_index(out_of_bound))))+p3(inverse_gamma_2_index(out_of_bound));
+            1./gamrnd(p7(inverse_gamma_2_index(out_of_bound))/2,2./p6(inverse_gamma_2_index(out_of_bound)))+p3(inverse_gamma_2_index(out_of_bound));
         out_of_bound = find( (pdraw(inverse_gamma_2_index)'>ub(inverse_gamma_2_index)) | (pdraw(inverse_gamma_2_index)'<lb(inverse_gamma_2_index)));
     end
 end
+
+%@test:1
+%$ %% Initialize required structures
+%$ options_.prior_trunc=0;
+%$ options_.initialize_estimated_parameters_with_the_prior_mode=0;
+%$ 
+%$ M_.dname='test';
+%$ M_.param_names = 'alp';
+%$ ndraws=100000;
+%$ global estim_params_
+%$ estim_params_.var_exo = [];
+%$ estim_params_.var_endo = [];
+%$ estim_params_.corrx = [];
+%$ estim_params_.corrn = [];
+%$ estim_params_.param_vals = [];
+%$ estim_params_.param_vals = [1, NaN, (-Inf), Inf, 1, 0.356, 0.02, NaN, NaN, NaN ];
+%$ 
+%$ %% beta
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 1;%Shape
+%$ estim_params_.param_vals(1,6)=0.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=NaN;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4 || any(pdraw_vec<0) || any(pdraw_vec>1)
+%$     error('Beta prior wrong')
+%$ end
+%$ 
+%$ 
+%$ %% Gamma
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 2;%Shape 
+%$ estim_params_.param_vals(1,6)=0.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=NaN;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4 || any(pdraw_vec<0)
+%$     error('Gamma prior wrong')
+%$ end
+%$ 
+%$ %% Normal
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 3;%Shape 
+%$ estim_params_.param_vals(1,6)=0.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=NaN;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4
+%$     error('Normal prior wrong')
+%$ end
+%$ 
+%$ %% inverse gamma distribution (type 1)
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 4;%Shape 
+%$ estim_params_.param_vals(1,6)=0.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=NaN;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4 || any(pdraw_vec<0)
+%$     error('inverse gamma distribution (type 1) prior wrong')
+%$ end
+%$ 
+%$ %% Uniform
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 5;%Shape 
+%$ estim_params_.param_vals(1,6)=0.5;
+%$ estim_params_.param_vals(1,7)=sqrt(12)^(-1)*(1-0);
+%$ estim_params_.param_vals(1,8)=NaN;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-2 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-3 || any(pdraw_vec<0) || any(pdraw_vec>1)
+%$     error('Uniform prior wrong')
+%$ end
+%$ 
+%$ %% inverse gamma distribution (type 2)
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 6;%Shape 
+%$ estim_params_.param_vals(1,6)=0.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=NaN;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4 || any(pdraw_vec<0)
+%$     error('inverse gamma distribution (type 2) prior wrong')
+%$ end
+%$ 
+%$ 
+%$ %%%%%%%%%%%%%%%%%%%%%% Generalized distributions %%%%%%%%%%%%%%%%%%%%%
+%$ 
+%$ %% beta
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 1;%Shape
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=1;
+%$ estim_params_.param_vals(1,9)=3;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4 || any(pdraw_vec<estim_params_.param_vals(1,3)) || any(pdraw_vec>estim_params_.param_vals(1,4))
+%$     error('Beta prior wrong')
+%$ end
+%$ 
+%$ %% Gamma
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 2;%Shape 
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=1;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4 || any(pdraw_vec<estim_params_.param_vals(1,8))
+%$     error('Gamma prior wrong')
+%$ end
+%$ 
+%$ %% inverse gamma distribution (type 1)
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 4;%Shape 
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=1;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4 || any(pdraw_vec<estim_params_.param_vals(1,8)) 
+%$     error('inverse gamma distribution (type 1) prior wrong')
+%$ end
+%$ 
+%$ %% Uniform
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 5;%Shape 
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=NaN;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4 || any(pdraw_vec<estim_params_.param_vals(1,3)) || any(pdraw_vec>estim_params_.param_vals(1,4))
+%$     error('Uniform prior wrong')
+%$ end
+%$ 
+%$ %% inverse gamma distribution (type 2)
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 6;%Shape 
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=1;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>1e-4 || abs(std(pdraw_vec)-estim_params_.param_vals(1,7))>1e-4 || any(pdraw_vec<estim_params_.param_vals(1,8)) 
+%$     error('inverse gamma distribution (type 2) prior wrong')
+%$ end
+%$ 
+%$ %%%%%%%%%%%% With prior truncation
+%$ options_.prior_trunc=.4;
+%$ 
+%$ %% beta
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 1;%Shape
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=1;
+%$ estim_params_.param_vals(1,9)=3;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>5e-3 || any(pdraw_vec<bounds.lb) || any(pdraw_vec>bounds.ub)
+%$     error('Beta prior wrong')
+%$ end
+%$ 
+%$ %% Gamma
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 2;%Shape 
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=1;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>5e-3 || any(pdraw_vec<bounds.lb) || any(pdraw_vec>bounds.ub)
+%$     error('Gamma prior wrong')
+%$ end
+%$ 
+%$ %% inverse gamma distribution (type 1)
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 4;%Shape 
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=1;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>5e-3 || any(pdraw_vec<bounds.lb) || any(pdraw_vec>bounds.ub)
+%$     error('inverse gamma distribution (type 1) prior wrong')
+%$ end
+%$ 
+%$ %% Uniform
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 5;%Shape 
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=NaN;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>5e-3 || any(pdraw_vec<bounds.lb) || any(pdraw_vec>bounds.ub)
+%$     error('Uniform prior wrong')
+%$ end
+%$ 
+%$ 
+%$ %% inverse gamma distribution (type 2)
+%$ estim_params_.param_vals(1,3)= -Inf;%LB
+%$ estim_params_.param_vals(1,4)= +Inf;%UB
+%$ estim_params_.param_vals(1,5)= 6;%Shape 
+%$ estim_params_.param_vals(1,6)=1.5;
+%$ estim_params_.param_vals(1,7)=0.01;
+%$ estim_params_.param_vals(1,8)=1;
+%$ estim_params_.param_vals(1,9)=NaN;
+%$ 
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
+%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ 
+%$ pdraw = prior_draw(1,0);
+%$ pdraw_vec=NaN(ndraws,1);
+%$ for ii=1:ndraws
+%$     pdraw_vec(ii)=prior_draw(0,0);
+%$ end
+%$ 
+%$ if abs(mean(pdraw_vec)-estim_params_.param_vals(1,6))>5e-3 || any(pdraw_vec<bounds.lb) || any(pdraw_vec>bounds.ub)
+%$     error('inverse gamma distribution (type 2) prior wrong')
+%$ end
+%$ 
+%@eof:1

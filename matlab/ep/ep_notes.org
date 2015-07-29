@@ -1,0 +1,35 @@
+
+                         debug: 0
+                        memory: 0
+                     verbosity: 0
+                  use_bytecode: 0
+                          init: 0
+                         maxit: 500
+                       periods: 200
+                          step: 50
+               check_stability: 0
+                            lp: 5
+                            fp: 2
+       innovation_distribution: 'gaussian'
+    set_dynare_seed_to_default: 1
+              stack_solve_algo: 4
+                    stochastic: [1x1 struct]
+          IntegrationAlgorithm: 'Tensor-Gaussian-Quadrature'
+
+stochastic:
+             method: ''
+               algo: 0
+         quadrature: [1x1 struct]
+              order: 1
+       hybrid_order: 0
+    homotopic_steps: 1
+              nodes: 3
+quadrature:
+    ortpol: 'hermite'
+     nodes: 5
+    pruned: [1x1 struct]
+
+pruned:
+    ortpol: 'hermite'
+     nodes: 5
+    pruned: [1x1 struct]

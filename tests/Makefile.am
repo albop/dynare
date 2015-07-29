@@ -192,7 +192,13 @@ MODFILES = \
 	deterministic_simulations/rbc_det_exo_lag_2a.mod \
 	deterministic_simulations/rbc_det_exo_lag_2b.mod \
 	deterministic_simulations/rbc_det_exo_lag_2c.mod \
-	deterministic_simulations/sim_several_leads_lags.mod \
+	deterministic_simulations/multiple_lead_lags/sim_base.mod \
+	deterministic_simulations/multiple_lead_lags/sim_exo_lead_lag_aux_vars.mod \
+	deterministic_simulations/multiple_lead_lags/sim_exo_lead_lag.mod \
+	deterministic_simulations/multiple_lead_lags/sim_endo_lead_lag_aux_vars.mod \
+	deterministic_simulations/multiple_lead_lags/sim_endo_lead_lag.mod \
+	deterministic_simulations/multiple_lead_lags/sim_lead_lag_aux_vars.mod \
+	deterministic_simulations/multiple_lead_lags/sim_lead_lag.mod \
 	deterministic_simulations/lola_solve_one_boundary.mod \
 	deterministic_simulations/linear_approximation/sw.mod \
 	walsh.mod \
@@ -238,6 +244,7 @@ MODFILES = \
 XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value_xfail.mod \
 	optimal_policy/Ramsey/ramsey_ex_wrong_ss_file_xfail.mod \
+	estimation/fs2000_mixed_ML_xfail.mod \
 	steady_state/Linear_steady_state_xfail.mod
 
 MFILES = initval_file/ramst_initval_file_data.m
@@ -323,6 +330,23 @@ initval_file/ramst_initval_file.o.trs: initval_file/ramst_initval_file_data.o.tl
 identification/rbc_ident/rbc_ident_varexo_only.m.trs: identification/rbc_ident/rbc_ident_std_as_structural_par.m.trs
 identification/rbc_ident/rbc_ident_varexo_only.o.trs: identification/rbc_ident/rbc_ident_std_as_structural_par.o.trs
 
+deterministic_simulations/multiple_lead_lags/sim_exo_lead_lag_aux_vars.m.trs: deterministic_simulations/multiple_lead_lags/sim_base.m.trs
+deterministic_simulations/multiple_lead_lags/sim_exo_lead_lag_aux_vars.o.trs: deterministic_simulations/multiple_lead_lags/sim_base.o.trs
+
+deterministic_simulations/multiple_lead_lags/sim_exo_lead_lag.m.trs: deterministic_simulations/multiple_lead_lags/sim_base.m.trs deterministic_simulations/multiple_lead_lags/sim_exo_lead_lag_aux_vars.m.trs
+deterministic_simulations/multiple_lead_lags/sim_exo_lead_lag.o.trs: deterministic_simulations/multiple_lead_lags/sim_base.o.trs deterministic_simulations/multiple_lead_lags/sim_exo_lead_lag_aux_vars.o.trs
+
+deterministic_simulations/multiple_lead_lags/sim_endo_lead_lag_aux_vars.m.trs: deterministic_simulations/multiple_lead_lags/sim_base.m.trs
+deterministic_simulations/multiple_lead_lags/sim_endo_lead_lag_aux_vars.o.trs: deterministic_simulations/multiple_lead_lags/sim_base.o.trs
+
+deterministic_simulations/multiple_lead_lags/sim_endo_lead_lag.m.trs: deterministic_simulations/multiple_lead_lags/sim_base.m.trs deterministic_simulations/multiple_lead_lags/sim_endo_lead_lag_aux_vars.m.trs
+deterministic_simulations/multiple_lead_lags/sim_endo_lead_lag.o.trs: deterministic_simulations/multiple_lead_lags/sim_base.o.trs deterministic_simulations/multiple_lead_lags/sim_endo_lead_lag_aux_vars.o.trs
+
+deterministic_simulations/multiple_lead_lags/sim_lead_lag_aux_vars.m.trs: deterministic_simulations/multiple_lead_lags/sim_base.m.trs
+deterministic_simulations/multiple_lead_lags/sim_lead_lag_aux_vars.o.trs: deterministic_simulations/multiple_lead_lags/sim_base.o.trs
+
+deterministic_simulations/multiple_lead_lags/sim_lead_lag.m.trs: deterministic_simulations/multiple_lead_lags/sim_base.m.trs deterministic_simulations/multiple_lead_lags/sim_lead_lag_aux_vars.m.trs
+deterministic_simulations/multiple_lead_lags/sim_lead_lag.o.trs: deterministic_simulations/multiple_lead_lags/sim_base.o.trs deterministic_simulations/multiple_lead_lags/sim_lead_lag_aux_vars.o.trs
 
 # Matlab TRS Files
 M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
