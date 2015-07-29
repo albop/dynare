@@ -39,15 +39,27 @@ if M_.exo_det_nbr > 1 && isempty(oo_.exo_det_steady_state)
 end
 
 % Initialize oo_.exo_simul
-if isempty(ex0_)
-    oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+options_.periods+M_.maximum_lead,1);
+if isempty(M_.exo_histval)
+    if isempty(ex0_)
+        oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+options_.periods+M_.maximum_lead,1);
+    else
+        oo_.exo_simul = [ repmat(ex0_',M_.maximum_lag,1) ; repmat(oo_.exo_steady_state',options_.periods+M_.maximum_lead,1) ];
+    end
 else
-    oo_.exo_simul = [ repmat(ex0_',M_.maximum_lag,1) ; repmat(oo_.exo_steady_state',options_.periods+M_.maximum_lead,1) ];
-end
+    if isempty(ex0_)
+        oo_.exo_simul = [M_.exo_histval'; repmat(oo_.exo_steady_state',options_.periods+M_.maximum_lead,1)];
+    else
+        error('histval and endval cannot be used simultaneously')
+    end
+end    
 
 % Initialize oo_.exo_det_simul
 if M_.exo_det_nbr > 0
-    oo_.exo_det_simul = [ones(M_.maximum_lag+options_.periods+M_.maximum_lead,1)*oo_.exo_det_steady_state'];
+    if isempty(M_.exo_det_histval)
+        oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+options_.periods+M_.maximum_lead,1);
+    else
+        oo_.exo_det_simul = [M_.exo_det_histval'; repmat(oo_.exo_det_steady_state',options_.periods+M_.maximum_lead,1)];
+    end
 end
 
 % Add temporary shocks
