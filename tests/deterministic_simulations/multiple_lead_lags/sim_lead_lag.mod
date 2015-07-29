@@ -20,13 +20,15 @@ end;
 initval;
 c = 1.2;
 k = 12;
-x = 1; %set x(0)
-z_backward=0.5; %set z_backward(0)
+x = 1; %set x steady state
 end;
 
 histval;
+k(0) = 12;
+x(0) = 1;
 x(-1)=1.30; %set x(-1)
 x(-2)=1.30; %set x(-2)
+z_backward(0)=0.5; %set z_backward(0)
 z_backward(-1)=0.4; %set z_backward(-1)
 z_backward(-2)=0.9; %set z_backward(-2)
 end;
@@ -50,7 +52,7 @@ end
 clear base_results
 base_results_aux_vars=load('sim_lead_lag_aux_vars_results.mat');
 
-if max(abs(base_results_aux_vars.oo_.endo_simul(strmatch('x_lag_4',base_results_aux_vars.M_.endo_names,'exact'),1:end-base_results_aux_vars.M_.maximum_lead)' -...
+if max(abs(base_results_aux_vars.oo_.endo_simul(strmatch('x_lag_3',base_results_aux_vars.M_.endo_names,'exact'),1:end-base_results_aux_vars.M_.maximum_lead-1)' -...
     oo_.exo_simul(1:end-M_.maximum_lead-M_.maximum_lag,strmatch('x',M_.exo_names,'exact'))))>1e-8 
     error('Translation of aux vars is wrong')
 end
