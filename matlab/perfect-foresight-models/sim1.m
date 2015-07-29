@@ -81,6 +81,10 @@ res = zeros(periods*ny,1);
 
 o_periods = periods;
 
+if endogenous_terminal_period
+    ZERO = zeros(length(i_upd),1);
+end
+
 h1 = clock ;
 iA = zeros(periods*M.NNZDerivatives(1),3);
 for iter = 1:options.simul.maxit
