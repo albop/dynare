@@ -25,8 +25,11 @@ z_backward=0.5;
 end;
 
 histval;
-z_backward(-1)=0.4;
-z_backward(-2)=0.9;
+x(0) = 1;
+k(0) = 12;
+z_backward(0) = 0.5;
+z_backward(-1) = 0.4;
+z_backward(-2) = 0.9;
 end;
 
 shocks;
@@ -45,13 +48,13 @@ if max(abs(base_results.oo_.endo_simul(strmatch('c',base_results.M_.endo_names,'
 end
 
 if max(abs(base_results.oo_.exo_simul(1:end-base_results.M_.maximum_lead-base_results.M_.maximum_lag,strmatch('x',base_results.M_.exo_names,'exact')) -...
-    oo_.exo_simul(1+M_.maximum_lag:end-M_.maximum_lead,strmatch('x',M_.exo_names,'exact'))))>1e-8 
+    oo_.exo_simul(1:end-M_.maximum_lead-M_.maximum_lag,strmatch('x',M_.exo_names,'exact'))))>1e-8 
     error('Translation of exogenous variables is wrong')
 end
 
 clear base_results;
 base_results_aux_vars=load('sim_endo_lead_lag_aux_vars_results.mat');
-if max(abs(base_results_aux_vars.oo_.endo_simul(strmatch('z_backward_lag_3',base_results_aux_vars.M_.endo_names,'exact'),1:end-base_results_aux_vars.M_.maximum_lead) -...
+if max(abs(base_results_aux_vars.oo_.endo_simul(strmatch('z_backward_lag_2',base_results_aux_vars.M_.endo_names,'exact'),1:end-base_results_aux_vars.M_.maximum_lead) -...
     oo_.endo_simul(strmatch('AUX_ENDO_LAG_2_2',M_.endo_names,'exact'),1:end-M_.maximum_lag)))>1e-8 
     error('Translation of endogenous variables is wrong')
 end
