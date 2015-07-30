@@ -64,7 +64,7 @@ var e; stderr 1;
 var u; stderr 1;
 end;
 
-stoch_simul(irf=20,order=1);
+stoch_simul(irf=20,order=1,nomoments,nofunctions);
 unit_irf=cell2mat(struct2cell(oo_.irfs));
 
 shocks;
@@ -86,7 +86,7 @@ var u; stderr 0.01;
 end;
 set_dynare_seed('default');
 options_.relative_irf=0;
-stoch_simul(irf=20,order=2);
+stoch_simul(irf=20,order=2,nomoments,nofunctions);
 unit_irf_order_2=cell2mat(struct2cell(oo_.irfs));
 
 shocks;
@@ -94,9 +94,9 @@ var e; stderr 0.0095;
 var u; stderr 0.0095;
 end;
 set_dynare_seed('default');
-stoch_simul(irf=20,order=2,relative_irf);
+stoch_simul(irf=20,order=2,relative_irf,nomoments,nofunctions);
 relative_irfs_order_2=cell2mat(struct2cell(oo_.irfs));
-if max(max(abs(unit_irf_order_2-relative_irfs_order_2)))>1e-4;
+if max(max(abs(unit_irf_order_2-relative_irfs_order_2)))>2e-4;
      error('relative_irf-option at order=2 is broken')
 end
 
