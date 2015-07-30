@@ -495,6 +495,7 @@ M_.exo_histval = [];
 M_.exo_det_histval = [];
 M_.Correlation_matrix = [];
 M_.Correlation_matrix_ME = [];
+M_.parameter_used_with_lead_lag = false;
 
 % homotopy for steady state
 options_.homotopy_mode = 0;
