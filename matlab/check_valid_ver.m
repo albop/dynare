@@ -30,10 +30,12 @@ function check_valid_ver(ver)
 
 test_ver = strsplit(ver, {'.', '-'});
 errmsg = 'check_valid_ver: the desired version must be in the proper format';
-assert (length(test_ver) == 3 && ...
-    ~isempty(str2double(test_ver{1})) && ...
-    ~isempty(str2double(test_ver{2})), errmsg);
-if isnan(str2double(test_ver{3}))
+
+assert((length(test_ver) == 2 || length(test_ver) == 3) ...
+       && ~isempty(str2double(test_ver{1})) ...
+       && ~isempty(str2double(test_ver{2})), ...
+       errmsg);
+if length(test_ver) == 3 && isnan(str2double(test_ver{3}))
     assert(strcmp(test_ver{3}, 'unstable'), errmsg);
 end
 end

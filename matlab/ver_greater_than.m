@@ -45,17 +45,19 @@ if (maj_ver1 == maj_ver2) && (min_ver1 > min_ver2)
     return;
 end
 
-ismaster1 = isnan(str2double(ver1{3}));
-ismaster2 = isnan(str2double(ver2{3}));
-if (maj_ver1 == maj_ver2) && (min_ver1 == min_ver2) && (ismaster1 && ~ismaster2)
-    return;
-end
-
-if ~ismaster1 && ~ismaster2
-    rev_ver1 = str2double(ver1{3});
-    rev_ver2 = str2double(ver2{3});
-    if (maj_ver1 == maj_ver2) && (min_ver1 == min_ver2) && (rev_ver1 > rev_ver2)
+if (length(ver1) == length(ver2) && length(ver1) == 3)
+    ismaster1 = isnan(str2double(ver1{3}));
+    ismaster2 = isnan(str2double(ver2{3}));
+    if (maj_ver1 == maj_ver2) && (min_ver1 == min_ver2) && (ismaster1 && ~ismaster2)
         return;
+    end
+
+    if ~ismaster1 && ~ismaster2
+        rev_ver1 = str2double(ver1{3});
+        rev_ver2 = str2double(ver2{3});
+        if (maj_ver1 == maj_ver2) && (min_ver1 == min_ver2) && (rev_ver1 > rev_ver2)
+            return;
+        end
     end
 end
 
