@@ -206,7 +206,7 @@ MODFILES = \
 	trend_var/fs2000_nonstationary.mod \
 	trend_var/fs2000_log_nonstationary.mod \
 	decision_rules/third_order/FV2011.mod \
-	decision_rules/example_1.mod \
+	decision_rules/example1.mod \
 	shock_decomposition/example1_calib_shock_decomp.mod \
 	shock_decomposition/fs2000_est.mod \
 	shock_decomposition/fs2000_est_varlist.mod \
