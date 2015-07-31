@@ -301,7 +301,11 @@ else
     estim_params_.full_calibration_detected=0;
 end
 if options_.use_calibration_initialization %set calibration as starting values
-    [xparam1,estim_params_]=do_parameter_initialization(estim_params_,xparam1_calib,xparam1); %get explicitly initialized parameters that have precedence to calibrated values
+    if ~isempty(bayestopt_) && all(bayestopt_.pshape==0) && any(all(isnan([xparam1_calib xparam1]),2))
+        error('Estimation: When using the use_calibration option with ML, the parameters must be properly initialized.')
+    else
+        [xparam1,estim_params_]=do_parameter_initialization(estim_params_,xparam1_calib,xparam1); %get explicitly initialized parameters that have precedence to calibrated values
+    end
 end
 
 if ~isempty(estim_params_) && ~all(strcmp(fieldnames(estim_params_),'full_calibration_detected'))
