@@ -104,19 +104,16 @@ bb = ghu(iky,:);
 
 if options_.hp_filter == 0
     tmp = aa*vx*aa'+ bb*M_.Sigma_e*bb';
-    k = find(abs(tmp) < 1e-12);
-    tmp(k) = 0;
+    tmp(abs(tmp) < 1e-12) = 0;
     Gamma(:,1) = diag(tmp);
     vxy = (A*vx*aa'+ghu1*M_.Sigma_e*bb');
     tmp = aa*vxy;
-    k = find(abs(tmp) < 1e-12);
-    tmp(k) = 0;
+    tmp(abs(tmp) < 1e-12) = 0;
     Gamma(:,2) = diag(tmp);
     for i=2:cutoff
         vxy = A*vxy;
         tmp = aa*vxy;
-        k = find(abs(tmp) < 1e-12);
-        tmp(k) = 0;
+        tmp(abs(tmp) < 1e-12) = 0;
         Gamma(:,i+1) = diag(tmp);
     end
 else
@@ -129,28 +126,26 @@ else
     tpos  = exp( sqrt(-1)*freqs);
     tneg  =  exp(-sqrt(-1)*freqs);
     hp1 = 4*lambda*(1 - cos(freqs)).^2 ./ (1 + 4*lambda*(1 - cos(freqs)).^2);
-    mathp_col = [];
+    mathp_col = NaN(ngrid,length(ivar)^2);
     IA = eye(size(A,1));
     IE = eye(M_.exo_nbr);
     for ig = 1:ngrid
-        f_omega  =(1/(2*pi))*( [inv(IA-A*tneg(ig))*ghu1;IE]...
-                               *M_.Sigma_e*[ghu1'*inv(IA-A'*tpos(ig)) IE]); % state variables
+        f_omega  =(1/(2*pi))*( [(IA-A*tneg(ig))\ghu1;IE]...
+                               *M_.Sigma_e*[ghu1'/(IA-A'*tpos(ig)) IE]); % state variables
         g_omega = [aa*tneg(ig) bb]*f_omega*[aa'*tpos(ig); bb']; % selected variables
         f_hp = hp1(ig)^2*g_omega; % spectral density of selected filtered series
-        mathp_col = [mathp_col ; (f_hp(:))'];    % store as matrix row
+        mathp_col(ig,:) = (f_hp(:))';    % store as matrix row
                                                  % for ifft
     end;
     imathp_col = real(ifft(mathp_col))*(2*pi);
     tmp = reshape(imathp_col(1,:),nvar,nvar);
-    k = find(abs(tmp)<1e-12);
-    tmp(k) = 0;
+    tmp(abs(tmp)<1e-12) = 0;
     Gamma(:,1) = diag(tmp);
     sy = sqrt(Gamma(:,1));
     sy = sy *sy';
     for i=1:cutoff-1
         tmp = reshape(imathp_col(i+1,:),nvar,nvar)./sy;
-        k = find(abs(tmp) < 1e-12);
-        tmp(k) = 0;
+        tmp(abs(tmp) < 1e-12) = 0;
         Gamma(:,i+1) = diag(tmp);
     end
 end
