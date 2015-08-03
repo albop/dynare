@@ -164,6 +164,9 @@ options_.SpectralDensity.cutoff  = 150;
 options_.SpectralDensity.sdl = 0.01; 
 options_.nofunctions = false;
 
+options_.bandpass.indicator = 0;
+options_.bandpass.passband = [6; 32];
+
 % Extended path options
 %
 % Set debug flag
