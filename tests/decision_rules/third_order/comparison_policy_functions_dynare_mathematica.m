@@ -129,3 +129,4 @@ if max(max(max(max(abs(gxxx-gxxx_dyn))))) > 1e-8
 else max(max(max(max(abs(gxxx-gxxx_dyn)))))
 end
 
+delete('FV_2011_policyfunctions.mat')

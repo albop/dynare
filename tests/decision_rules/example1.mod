@@ -85,3 +85,4 @@ if max(max(abs(oo_.dr.ghxx-dyn_432_results.oo_.dr.ghxx)))>1e-6 || max(max(abs(oo
     error('Second order decision rules wrong')
 end
 
+delete('example1_results_dyn_432.mat')

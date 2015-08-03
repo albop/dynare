@@ -979,3 +979,5 @@ end;
 % *******************************************
 
 simul(periods=125,maxit=100);
+
+delete('lola_data.mat')
