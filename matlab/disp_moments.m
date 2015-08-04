@@ -42,10 +42,18 @@ y = y(ivar,options_.drop+1:end)';
 
 m = mean(y);
 
-if options_.hp_filter
+if options_.hp_filter && ~options.one_sided_hp_filter  && ~options_.bandpass.indicator
     [hptrend,y] = sample_hp_filter(y,options_.hp_filter);
-else
+elseif ~options_.hp_filter && options_.one_sided_hp_filter && ~options_.bandpass.indicator
+    error('disp_moments:: The one-sided HP filter is not yet available')   
+elseif ~options_.hp_filter && ~options_.one_sided_hp_filter && options_.bandpass.indicator
+    data_temp=dseries(y,'0q1');
+    data_temp=baxter_king_filter(data_temp,options_.bandpass.passband(1),options_.bandpass.passband(2),200);
+    y=data_temp.data;
+elseif ~options_.hp_filter && ~options_.one_sided_hp_filter  && ~options_.bandpass.indicator
     y = bsxfun(@minus, y, m);
+else 
+    error('disp_moments:: You cannot use more than one filter at the same time')
 end
 
 s2 = mean(y.*y);
