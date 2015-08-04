@@ -350,7 +350,7 @@ if options_.irf
 end
 
 if options_.SpectralDensity.trigger == 1
-    [omega,f] = UnivariateSpectralDensity(oo_.dr,var_list);
+    [oo_] = UnivariateSpectralDensity(M_,oo_,options_,var_list);
 end
 
 
