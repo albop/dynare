@@ -8,6 +8,7 @@ MODFILES = \
 	gsa/ls2003.mod \
 	gsa/ls2003a.mod \
 	gsa/cod_ML_morris/cod_ML_morris.mod \
+	gsa/morris/nk_est.mod \
 	ramst.mod \
 	ramst_a.mod \
 	ramst_static_tag.mod \
@@ -405,6 +406,7 @@ EXTRA_DIST = \
 	expectations/expectation_ss_old_steadystate.m \
 	steady_state/walsh1_old_ss_steadystate.m \
 	data/test.xls \
+	gsa/morris/nk_est_data.m \
 	analytic_derivatives/fsdat_simul.m \
 	fs2000/fsdat_simul.m \
 	k_order_perturbation/run_fs2000kplusplus.m \
