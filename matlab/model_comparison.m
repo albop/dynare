@@ -47,8 +47,10 @@ else % The prior density has to sum up to one.
     prior_flag = 1;
     improper = abs(sum(ModelPriors)-1)>1e-6;
     if improper
-        disp('model_comparison:: The user supplied prior distribution over models is improper...')
-        disp('model_comparison:: The distribution is automatically rescaled!')
+        if ~all(ModelPriors==1)
+            disp('model_comparison:: The user supplied prior distribution over models is improper...')
+            disp('model_comparison:: The distribution is automatically rescaled!')
+        end
         ModelPriors=ModelPriors/sum(ModelPriors);
     end
 end
