@@ -150,14 +150,12 @@ if ~loadSA,
     if options_.opt_gsa.ppost || (options_.opt_gsa.ppost==0 && options_.opt_gsa.lik_only==0)
         skipline()
         disp('Computing RMSE''s...')
-        fobs = options_.first_obs;
-        nobs=options_.nobs;
         for i=1:size(vvarvecm,1),
             vj=deblank(vvarvecm(i,:));
             
             jxj(i) = strmatch(vj,lgy_(dr_.order_var,:),'exact');
             js(i) = strmatch(vj,lgy_,'exact');
-            yss(i,:,:)=repmat(sto_ys(:,js(i))',[nobs,1]);
+            yss(i,:,:)=repmat(sto_ys(:,js(i))',[gend,1]);
         end
             if exist('xparam1','var')
                 [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value);
@@ -171,7 +169,7 @@ if ~loadSA,
             for j=1:length(filfilt),
                 load([DirectoryName filesep M_.fname '_filter_step_ahead',num2str(j),'.mat']);
                 nb = size(stock,4);
-                y0(:,:,nbb+1:nbb+nb)=y0(:,:,nbb+1:nbb+nb)+squeeze(stock(1,js,1:nobs,:));
+                y0(:,:,nbb+1:nbb+nb)=y0(:,:,nbb+1:nbb+nb)+squeeze(stock(1,js,1:gend,:));
                 nbb=nbb+nb;
                 clear stock;
             end
@@ -180,7 +178,7 @@ if ~loadSA,
             for j=1:length(filupdate),
                 load([DirectoryName filesep M_.fname '_update',num2str(j),'.mat']);
                 nb = size(stock,3);
-                yobs(:,:,nbb+1:nbb+nb)=yobs(:,:,nbb+1:nbb+nb)+squeeze(stock(js,1:nobs,:));
+                yobs(:,:,nbb+1:nbb+nb)=yobs(:,:,nbb+1:nbb+nb)+squeeze(stock(js,1:gend,:));
                 nbb=nbb+nb;
                 clear stock;
             end
