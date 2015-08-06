@@ -1,4 +1,5 @@
 MODFILES = \
+	estimation/fs2000.mod \
 	estimation/fs2000_MCMC_jumping_covariance.mod \
 	estimation/fs2000_initialize_from_calib.mod	\
 	estimation/fs2000_calibrated_covariance.mod \
@@ -292,9 +293,6 @@ AIM/fs2000x10L9_L_AIM.o.trs: AIM/fs2000x10L9_L.o.trs
 AIM/fs2000x10_L9_L_AIM.o.trs: AIM/fs2000x10_L9_L.o.trs
 AIM/ls2003_2L0L_AIM.o.trs: AIM/ls2003_2L0L.o.trs
 AIM/ls2003_2L2L_AIM.o.trs: AIM/ls2003_2L2L.o.trs
-
-estimation/fs2000_mf.m.trs: estimation/fs2000.m.trs
-estimation/fs2000_mf.o.trs: estimation/fs2000.o.trs
 
 optimizers/fs2000_102.m.trs: estimation/fs2000.m.trs
 optimizers/fs2000_102.o.trs: estimation/fs2000.o.trs
