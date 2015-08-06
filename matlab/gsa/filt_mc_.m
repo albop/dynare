@@ -206,7 +206,13 @@ if ~loadSA,
     disp('... done!')
     
     if options_.opt_gsa.ppost
-        save([OutDir,filesep,fnamtmp,'.mat'], 'x', 'logpo2', 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean', 'r2_MC', 'r2_mode','r2_pmean')
+        save([OutDir,filesep,fnamtmp,'.mat'], 'x', 'logpo2', 'likelihood', 'rmse_MC', 'r2_MC')
+        if exist('xparam1_mean','var')
+            save([OutDir,filesep,fnamtmp, '.mat'], 'rmse_pmean', 'r2_pmean','-append')
+        end
+        if exist('xparam1','var')
+            save([OutDir,filesep,fnamtmp,'.mat'], 'rmse_mode', 'r2_mode','-append')
+        end
     else
         if options_.opt_gsa.lik_only
             save([OutDir,filesep,fnamtmp, '.mat'], 'x', 'logpo2','likelihood', '-append')
