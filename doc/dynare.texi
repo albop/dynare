@@ -5814,12 +5814,14 @@ Standard deviation of structural shocks
 
 
 @defvr {MATLAB/Octave variable} oo_.MarginalDensity.LaplaceApproximation
-Variable set by the @code{estimation} command.
+Variable set by the @code{estimation} command. Stores the marginal data density 
+based on the Laplace Approximation.
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.MarginalDensity.ModifiedHarmonicMean
 Variable set by the @code{estimation} command, if it is used with
-@code{mh_replic > 0} or @code{load_mh_file} option.
+@code{mh_replic > 0} or @code{load_mh_file} option. Stores the marginal data density 
+based on @cite{Geweke (1999)} Modified Harmonic Mean estimator.
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.FilteredVariables
@@ -6154,6 +6156,20 @@ Dynare: it is the user's responsibility to make sure that model comparison is
 based on proper priors. Note that, for obvious reasons, this is not an issue if
 the compared marginal densities are based on Laplace approximations.
 
+@optionshead
+
+@table @code
+
+@item marginal_density = @var{ESTIMATOR}
+Specifies the estimator for computing the marginal data density. @var{ESTIMATOR} can 
+take one of the following two values:
+@code{laplace} for the Laplace estimator or @code{modifiedharmonicmean} for the 
+@cite{Geweke (1999)} Modified Harmonic Mean estimator. Default value: @code{laplace}
+@end table
+
+@outputhead
+
+The results are stored in @code{oo_.Model_Comparison}, which is described below.
 
 @examplehead
 
@@ -6164,6 +6180,32 @@ This example attributes a 70% prior over @code{my_model} and 30% prior
 over @code{alt_model}.
 
 @end deffn
+
+@defvr {MATLAB/Octave variable} oo_.Model_Comparison
+Variable set by the @code{model_comparison} command. Fields are of the form:
+@example
+@code{oo_.Model_Comparison.@var{FILENAME}.@var{VARIABLE_NAME}}
+@end example
+where @var{FILENAME} is the file name of the model and @var{VARIABLE_NAME} is one of the following:
+
+@table @code
+
+@item Prior
+(Normalized) prior density over the model
+
+@item Log_Marginal_Density
+Logarithm of the marginal data density
+
+@item Bayes_Ratio
+Ratio of the marginal data density of the model relative to the one of the first declared model
+
+@item Posterior_Model_Probability
+Posterior probability of the respective model
+
+@end table
+
+@end defvr
+
 
 @deffn Command shock_decomposition [@var{VARIABLE_NAME}]@dots{};
 @deffnx Command shock_decomposition (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}]@dots{};
