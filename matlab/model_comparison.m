@@ -111,19 +111,27 @@ lmpd = log(ModelPriors)+MarginalLogDensity;
 [maxval,k] = max(lmpd);
 elmpd = exp(lmpd-maxval);
 
-
 % Now I display the posterior probabilities.
 headers = char('Model',ShortModelNames{:});
 if prior_flag
     labels = char('Priors','Log Marginal Density','Bayes Ratio', ...
                   'Posterior Model Probability');
+    field_labels={'Priors','Log_Marginal_Density','Bayes_Ratio', ...
+                  'Posterior_Model_Probability'};          
     values = [ModelPriors';MarginalLogDensity';exp(lmpd-lmpd(1))'; ...
               elmpd'/sum(elmpd)];
 else
     labels = char('Priors','Log Marginal Density','Bayes Ratio','Posterior Odds Ratio', ...
                   'Posterior Model Probability');
+    field_labels={'Priors','Log_Marginal_Density','Bayes_Ratio','Posterior_Odds_Ratio','Posterior_Model_Probability'};          
     values = [ModelPriors';MarginalLogDensity'; exp(MarginalLogDensity-MarginalLogDensity(1))'; ...
               exp(lmpd-lmpd(1))'; elmpd'/sum(elmpd)];
+end
+
+for model_iter=1:NumberOfModels
+    for var_iter=1:size(labels,1)
+        oo.Model_Comparison.(deblank(headers(1+model_iter,:))).(field_labels{var_iter})=values(var_iter,model_iter);
+    end
 end
 
 dyntable(title,headers,labels,values, 0, 15, 6);
