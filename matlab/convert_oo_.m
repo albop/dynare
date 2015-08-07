@@ -1,13 +1,16 @@
-function oo_ = convert_oo_(oo_, ver)
-%function oo_ = convert_oo_(oo_, ver)
+function oo_ = convert_oo_(M_, options_, oo_, from_ver, to_ver)
+%function oo_ = convert_oo_(M_, options_, oo_, from_ver, to_ver)
 % Converts oo_ from oo_.dynare_version to ver
 %
 % INPUTS
-%    oo_    [struct]    dynare output struct
-%    ver    [string]    desired oo_ output version
+%    M_          [struct]    dynare model struct
+%    options_    [struct]    dynare options struct
+%    oo_         [struct]    dynare output struct
+%    from_ver    [string]    original oo_ output version
+%    to_ver      [string]    desired oo_ output version
 %
 % OUTPUTS
-%    oo_    [struct]    dynare output struct
+%    oo_         [struct]    dynare output struct
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -27,21 +30,56 @@ function oo_ = convert_oo_(oo_, ver)
 % GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+% along = with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-check_valid_ver(ver);
+check_valid_ver(to_ver);
+check_valid_ver(from_ver);
 
-if isfield(oo_, 'dynare_version')
-    ver_orig = oo_.dynare_version;
-else
-    ver_orig = '4.4.3';
+MIN_VER = '4.4';
+MAX_VER = '4.5';
+
+if ver_less_than(to_ver, MIN_VER)
+    error(['Can only convert as far back as Dynare ' MIN_VER
+           '. All versions before have the same oo_ structure.']);
 end
 
-if strcmp(ver_orig, ver)
+if ver_greater_than(to_ver, MAX_VER)
+    error(['Can only convert up to Dynare ' MAX_VER]);
+end
+
+min_ver = strsplit(MIN_VER, {'.', '-'});
+max_ver = strsplit(MAX_VER, {'.', '-'});
+from_ver_split = strsplit(from_ver, {'.', '-'});
+to_ver_split = strsplit(to_ver, {'.', '-'});
+
+if length(from_ver_split) ~= 2 || length(to_ver_split) ~= 2
+    error('The version numbers may only be of the form X.Y');
+end
+
+if to_ver_split{2} > from_ver_split{2}
+    new_to_ver = [to_ver_split{1} '.' num2str(str2double(to_ver_split{2})-1)];
+else
+    new_to_ver = [to_ver_split{1} '.' num2str(str2double(to_ver_split{2})+1)];
+end
+
+if strcmp(from_ver, to_ver)
     return;
 end
 
-if ver_less_than(ver_orig, '4.5.0') && ver_greater_than_equal(ver, '4.5.0')
-    oo_.exo_simul = oo_.exo_simul';
+if ver_greater_than(to_ver, from_ver)
+    moving_up = 1;
+else
+    moving_up = -1;
 end
+
+oo_ = convert_oo_(M_, options_, oo_, from_ver, new_to_ver)
+
+if abs(to_ver_split{2} - (from_ver_split{2} - moving_up)) > 1
+    new_from_ver = [to_ver_split{1} '.' num2str(str2double(to_ver_split{2}) - moving_up)];
+else
+    new_from_ver = from_ver;
+end
+
+eval(['oo_ = convert_dyn_' strrep(new_from_ver, '.', '') '_to_' ...
+                           strrep(to_ver, '.', '') '(M_, options_, oo_);']);
 end

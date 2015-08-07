@@ -1,10 +1,34 @@
-function []=convert_dyn_45_to_44
-% function []=convert_dyn_45_to_44
-% This function converts the oo_-structure fields that have been changed in Dynare 4.5. 
-% following https://github.com/DynareTeam/dynare/pull/771 to the old format
-% of Dynare 4.4
+function oo_ = convert_dyn_45_to_44(M_, options_, oo_)
+%function oo_ = convert_dyn_45_to_44(M_, options_, oo_
+% Converts oo_ from 4.5 to 4.4
+%
+% INPUTS
+%    M_          [struct]    dynare model struct
+%    options_    [struct]    dynare options struct
+%    oo_         [struct]    dynare output struct
+%
+% OUTPUTS
+%    oo_         [struct]    dynare output struct
+%
+% SPECIAL REQUIREMENTS
+%    none
 
-global M_ oo_ options_
+% Copyright (C) 2015 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along = with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 %% add initial conditions to Bayesian forecasts
 if isfield(oo_,'PointForecast')
