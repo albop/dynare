@@ -160,7 +160,7 @@ if options_.nomoments == 0
             disp_th_moments(oo_.dr,var_list);
         end
     else
-        disp_moments(oo_.endo_simul,var_list);
+        oo_=disp_moments(oo_.endo_simul,var_list,M_,options_,oo_);
     end
 end
 

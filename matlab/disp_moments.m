@@ -1,7 +1,17 @@
-function disp_moments(y,var_list)
+function oo_=disp_moments(y,var_list,M_,options_,oo_)
+% function disp_moments(y,var_list,M_,options_,oo_)
 % Displays moments of simulated variables
+% INPUTS
+%   y                   [double]       nvar*nperiods vector of simulated variables.
+%   var_list            [char]         nvar character array with names of variables.
+%   M_                  [structure]    Dynare's model structure
+%   oo_                 [structure]    Dynare's results structure
+%   options_            [structure]    Dynare's options structure
+%    
+% OUTPUTS
+%   oo_                 [structure]    Dynare's results structure,
 
-% Copyright (C) 2001-2012 Dynare Team
+% Copyright (C) 2001-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,8 +27,6 @@ function disp_moments(y,var_list)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global M_ options_ oo_
 
 warning_old_state = warning;
 warning off
