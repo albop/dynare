@@ -33,6 +33,9 @@ function oo_ = compute_moments_varendo(type,options_,M_,oo_,var_list_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.    
 
+
+fprintf('Estimation::compute_moments_varendo: I''m computing endogenous moments (this may take a while)... ');
+
 if strcmpi(type,'posterior')
     posterior = 1;
     if nargin==4
@@ -126,3 +129,5 @@ if M_.exo_nbr > 1
         end
     end
 end
+
+fprintf(' Done!\n');

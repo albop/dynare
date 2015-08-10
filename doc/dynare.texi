@@ -2189,7 +2189,7 @@ possible types of simulations in stochastic mode:
 @itemize
 
 @item
-@ref{stoch_simul}, if the @code{periods} options is specified
+@ref{stoch_simul}, if the @code{periods} option is specified
 
 @item
 @ref{forecast} as the initial point at which the forecasts are computed
@@ -2419,7 +2419,7 @@ Moreover, as only states enter the recursive policy functions, all values specif
 @itemize
 
 @item
-in @ref{stoch_simul}, if the @code{periods} options is specified. Note that this only affects the starting point for the simulation, but not for the impulse response functions.
+in @ref{stoch_simul}, if the @code{periods} option is specified. Note that this only affects the starting point for the simulation, but not for the impulse response functions.
 
 @item
 in @ref{forecast} as the initial point at which the forecasts are computed
@@ -3925,6 +3925,11 @@ Tolerance for the suppression of small terms in the display of decision rules. R
 smaller than @code{dr_display_tol} are not displayed. 
 Default value: @code{1e-6}.
 
+@item contemporaneous_correlation
+@anchor{contemporaneous_correlation} 
+Saves the contemporaneous correlation between the endogenous variables in @code{oo_.contemporaneous_correlation}.
+Requires the @code{nocorr}-option not to be set.
+
 @end table
 
 @outputhead
@@ -3942,6 +3947,8 @@ If options @code{irf} is different from zero, sets @code{oo_.irfs}
 the global workspace (this latter way of accessing the IRFs is
 deprecated and will disappear in a future version).
 
+If the option @code{contemporaneous_correlation} is different from 0, sets 
+{oo_.contemporaneous_correlation}, which is described below.
 
 @customhead{Example 1}
 
@@ -3971,14 +3978,15 @@ response functions on 60 periods for variables @code{y} and @code{k}.
 @defvr {MATLAB/Octave variable} oo_.mean
 After a run of @code{stoch_simul}, contains the mean of the endogenous
 variables. Contains theoretical mean if the @code{periods} option is
-not present, and empirical mean otherwise. The variables are arranged
+not present, and simulated mean otherwise. The variables are arranged
 in declaration order.
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.var
 After a run of @code{stoch_simul}, contains the variance-covariance of
 the endogenous variables. Contains theoretical variance if the
-@code{periods} option is not present (or an approximation thereof for @code{order=2}), and empirical variance
+@code{periods} option is not present (or an approximation thereof for @code{order=2}), 
+and simulated variance
 otherwise. The variables are arranged in declaration order.
 @end defvr
 
@@ -3990,7 +3998,7 @@ number of the matrix in the cell array corresponds to the order of
 autocorrelation. The option @code{ar} specifies the number of
 autocorrelation matrices available. Contains theoretical
 autocorrelations if the @code{periods} option is not present (or an approximation thereof for @code{order=2}), and
-empirical autocorrelations otherwise. The field is only created if stationary variables are present.
+simulated autocorrelations otherwise. The field is only created if stationary variables are present.
 
 The element @code{oo_.autocorr@{i@}(k,l)} is equal to the correlation
 between @math{y^k_t} and @math{y^l_{t-i}}, where @math{y^k}
@@ -4024,13 +4032,18 @@ If a second order approximation has been requested, contains the
 vector of the mean correction terms.
 @end table
 
-In case of @code{order=2}, the theoretical second moments are a second order accurate approximation of the true second moments, see @code{conditional_variance_decomposition}.
+In case of @code{order=2}, the theoretical second moments are a second order 
+accurate approximation of the true second moments, see @code{conditional_variance_decomposition}.
 
 @end defvr
 
 @anchor{oo_.variance_decomposition}
 @defvr {MATLAB/Octave variable} oo_.variance_decomposition
-After a run of @code{stoch_simul} when requesting theoretical moments (@code{periods=0}), contains a matrix with the result of the unconditional variance decomposition (i.e. at horizon infinity). The first dimension corresponds to the endogenous variables (in the order of declaration) and the second dimension corresponds to exogenous variables (in the order of declaration). Numbers are in percent and sum up to 100 across columns.
+After a run of @code{stoch_simul} when requesting theoretical moments (@code{periods=0}), 
+contains a matrix with the result of the unconditional variance decomposition (i.e. at horizon infinity). 
+The first dimension corresponds to the endogenous variables (in the order of declaration) and 
+the second dimension corresponds to exogenous variables (in the order of declaration). 
+Numbers are in percent and sum up to 100 across columns.
 @end defvr
 
 @anchor{oo_.conditional_variance_decomposition}
@@ -4043,6 +4056,15 @@ option), the second dimension corresponds to endogenous variables (in
 the order of declaration), the third dimension corresponds to
 exogenous variables (in the order of declaration).
 @end defvr
+
+@anchor{oo_.contemporaneous_correlation}
+@defvr {MATLAB/Octave variable} oo_.contemporaneous_correlation
+After a run of @code{stoch_simul} with the
+@code{contemporaneous_correlation} option, contains theoretical contemporaneous correlations if the
+@code{periods} option is not present (or an approximation thereof for @code{order=2}), 
+and simulated contemporaneous correlations otherwise. The variables are arranged in declaration order.
+@end defvr
+
 
 @defvr {MATLAB/Octave variable} oo_.irfs
 After a run of @code{stoch_simul} with option @code{irf} different
@@ -5380,6 +5402,10 @@ variables. Results are stored in
 @code{oo_.PosteriorTheoreticalMoments} (@pxref{oo_.PosteriorTheoreticalMoments}). The number of lags in the autocorrelation function is
 controlled by the @code{ar} option.
 
+@item contemporaneous_correlation
+@xref{contemporaneous_correlation}. Results are stored in @code{oo_.PosteriorTheoreticalMoments}. 
+Note that the @code{nocorr}-option has no effect.
+
 @item conditional_variance_decomposition = @var{INTEGER}
 See below.
 
@@ -5923,6 +5949,9 @@ where @var{THEORETICAL_MOMENT} is one of the following:
 
 @item covariance
 Variance-covariance of endogenous variables
+
+@item contemporaneous_correlation
+Contemporaneous correlation of endogenous variables when the @ref{contemporaneous_correlation} option is specified.
 
 @item correlation
 Auto- and cross-correlation of endogenous variables. Fields are vectors with correlations from 1 up to order @code{options_.ar}

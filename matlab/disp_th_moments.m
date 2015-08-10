@@ -117,6 +117,9 @@ end
 
 if options_.nocorr == 0 && size(stationary_vars, 1) > 0
     corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
+    if options_.contemporaneous_correlation 
+        oo_.contemporaneous_correlation = corr;
+    end
     if ~options_.noprint,
         skipline()
         if options_.order == 2

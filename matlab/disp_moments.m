@@ -69,6 +69,9 @@ end
 
 if options_.nocorr == 0
     corr = (y'*y/size(y,1))./(s'*s);
+    if options_.contemporaneous_correlation 
+        oo_.contemporaneous_correlation = corr;
+    end
     if options_.noprint == 0
         title = 'CORRELATION OF SIMULATED VARIABLES';
         if options_.hp_filter
