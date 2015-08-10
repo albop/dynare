@@ -50,19 +50,8 @@ y = y(ivar,options_.drop+1:end)';
 
 m = mean(y);
 
-if options_.hp_filter && ~options.one_sided_hp_filter  && ~options_.bandpass.indicator
-    [hptrend,y] = sample_hp_filter(y,options_.hp_filter);
-elseif ~options_.hp_filter && options_.one_sided_hp_filter && ~options_.bandpass.indicator
-    error('disp_moments:: The one-sided HP filter is not yet available')   
-elseif ~options_.hp_filter && ~options_.one_sided_hp_filter && options_.bandpass.indicator
-    data_temp=dseries(y,'0q1');
-    data_temp=baxter_king_filter(data_temp,options_.bandpass.passband(1),options_.bandpass.passband(2),200);
-    y=data_temp.data;
-elseif ~options_.hp_filter && ~options_.one_sided_hp_filter  && ~options_.bandpass.indicator
-    y = bsxfun(@minus, y, m);
-else 
-    error('disp_moments:: You cannot use more than one filter at the same time')
-end
+% filter series
+y=get_filtered_time_series(y,m,options_);
 
 s2 = mean(y.*y);
 s = sqrt(s2);
@@ -121,4 +110,72 @@ if ar > 0
     end
 end
 
+
+if ~options_.nodecomposition
+    if M_.exo_nbr == 1
+        oo_.variance_decomposition = 100*ones(nvar,1);
+    else
+        oo_.variance_decomposition=zeros(nvar,M_.exo_nbr);
+        %get starting values
+        if isempty(M_.endo_histval)
+            y0 = oo_.dr.ys;
+        else
+            y0 = M_.endo_histval;
+        end
+        %back out shock matrix used for generating y
+        i_exo_var = setdiff([1:M_.exo_nbr],find(diag(M_.Sigma_e) == 0)); % find shocks with 0 variance
+        chol_S = chol(M_.Sigma_e(i_exo_var,i_exo_var)); %decompose rest
+        shock_mat=zeros(options_.periods,M_.exo_nbr); %initialize
+        shock_mat(:,i_exo_var)=oo_.exo_simul(:,i_exo_var)/chol_S; %invert construction of oo_.exo_simul from simult.m
+        
+        for shock_iter=1:length(i_exo_var)
+            temp_shock_mat=zeros(size(shock_mat));
+            temp_shock_mat(:,i_exo_var(shock_iter))=shock_mat(:,i_exo_var(shock_iter));
+            temp_shock_mat(:,i_exo_var) = temp_shock_mat(:,i_exo_var)*chol_S;
+            y_sim_one_shock = simult_(y0,oo_.dr,temp_shock_mat,options_.order);
+            y_sim_one_shock=y_sim_one_shock(ivar,1+options_.drop+1:end)';
+            y_sim_one_shock=get_filtered_time_series(y_sim_one_shock,mean(y_sim_one_shock),options_);
+            oo_.variance_decomposition(:,i_exo_var(shock_iter))=var(y_sim_one_shock)./s2*100;
+        end
+        if ~options_.noprint %options_.nomoments == 0
+            skipline()
+            title='VARIANCE DECOMPOSITION SIMULATING ONE SHOCK AT A TIME (in percent)';
+            if options_.hp_filter
+                title = [title ' (HP filter, lambda = ' ...
+                    num2str(options_.hp_filter) ')'];
+            end
+            headers = M_.exo_names;
+            headers(M_.exo_names_orig_ord,:) = headers;
+            headers = char(' ',headers);
+            lh = size(deblank(M_.endo_names(ivar,:)),2)+2;
+            dyntable(title,char(headers,'Total linear contrib.'),deblank(M_.endo_names(ivar,:)),[oo_.variance_decomposition sum(oo_.variance_decomposition,2)],lh,8,2);
+            if options_.order == 1
+                fprintf('Note: numbers do not add up to 100 due to non-zero correlation of simulated shocks in small samples\n\n')
+            else
+                fprintf('Note: numbers do not add up to 100 due to i) non-zero correlation of simulated shocks in small samples and ii) nonlinearity\n\n')
+            end
+        end
+
+    end
+end
+        
 warning(warning_old_state);
+end
+
+function y=get_filtered_time_series(y,m,options_)
+        
+if options_.hp_filter && ~options.one_sided_hp_filter  && ~options_.bandpass.indicator
+    [hptrend,y] = sample_hp_filter(y,options_.hp_filter);
+elseif ~options_.hp_filter && options_.one_sided_hp_filter && ~options_.bandpass.indicator
+    error('disp_moments:: The one-sided HP filter is not yet available')   
+elseif ~options_.hp_filter && ~options_.one_sided_hp_filter && options_.bandpass.indicator
+    data_temp=dseries(y,'0q1');
+    data_temp=baxter_king_filter(data_temp,options_.bandpass.passband(1),options_.bandpass.passband(2),200);
+    y=data_temp.data;
+elseif ~options_.hp_filter && ~options_.one_sided_hp_filter  && ~options_.bandpass.indicator
+    y = bsxfun(@minus, y, m);
+else 
+    error('disp_moments:: You cannot use more than one filter at the same time')
+end
+        
+end
