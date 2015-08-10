@@ -63,10 +63,9 @@ labels = deblank(M_.endo_names(ivar,:));
 if options_.nomoments == 0
     z = [ m' s' s2' (mean(y.^3)./s2.^1.5)' (mean(y.^4)./(s2.*s2)-3)' ];    
     title='MOMENTS OF SIMULATED VARIABLES';
-    if options_.hp_filter
-        title = [title ' (HP filter, lambda = ' ...
-                 num2str(options_.hp_filter) ')'];
-    end
+    
+    title=add_filter_subtitle(title,options_);
+    
     headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
                  'KURTOSIS');
     dyntable(title,headers,labels,z,size(labels,2)+2,16,6);
@@ -79,10 +78,9 @@ if options_.nocorr == 0
     end
     if options_.noprint == 0
         title = 'CORRELATION OF SIMULATED VARIABLES';
-        if options_.hp_filter
-            title = [title ' (HP filter, lambda = ' ...
-                     num2str(options_.hp_filter) ')'];
-        end
+
+        title=add_filter_subtitle(title,options_);
+
         headers = char('VARIABLE',M_.endo_names(ivar,:));
         dyntable(title,headers,labels,corr,size(labels,2)+2,8,4);
     end
@@ -101,10 +99,7 @@ if ar > 0
     end
     if options_.noprint == 0
         title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
-        if options_.hp_filter
-            title = [title ' (HP filter, lambda = ' ...
-                     num2str(options_.hp_filter) ')'];
-        end
+        title=add_filter_subtitle(title,options_);
         headers = char('VARIABLE',int2str([1:ar]'));
         dyntable(title,headers,labels,autocorr,size(labels,2)+2,8,4);
     end
@@ -140,10 +135,9 @@ if ~options_.nodecomposition
         if ~options_.noprint %options_.nomoments == 0
             skipline()
             title='VARIANCE DECOMPOSITION SIMULATING ONE SHOCK AT A TIME (in percent)';
-            if options_.hp_filter
-                title = [title ' (HP filter, lambda = ' ...
-                    num2str(options_.hp_filter) ')'];
-            end
+        
+            title=add_filter_subtitle(title,options_);
+            
             headers = M_.exo_names;
             headers(M_.exo_names_orig_ord,:) = headers;
             headers = char(' ',headers);
@@ -164,7 +158,7 @@ end
 
 function y=get_filtered_time_series(y,m,options_)
         
-if options_.hp_filter && ~options.one_sided_hp_filter  && ~options_.bandpass.indicator
+if options_.hp_filter && ~options_.one_sided_hp_filter  && ~options_.bandpass.indicator
     [hptrend,y] = sample_hp_filter(y,options_.hp_filter);
 elseif ~options_.hp_filter && options_.one_sided_hp_filter && ~options_.bandpass.indicator
     error('disp_moments:: The one-sided HP filter is not yet available')   

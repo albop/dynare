@@ -62,9 +62,7 @@ if size(stationary_vars, 1) > 0
         else
             title='THEORETICAL MOMENTS';
         end
-        if options_.hp_filter
-            title = [title ' (HP filter, lambda = ' num2str(options_.hp_filter) ')'];
-        end
+        title=add_filter_subtitle(title,options_);
         headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE');
         labels = deblank(M_.endo_names(ivar,:));
         lh = size(labels,2)+2;
@@ -77,10 +75,7 @@ if size(stationary_vars, 1) > 0
             else
                 title='VARIANCE DECOMPOSITION (in percent)';
             end
-            if options_.hp_filter
-                title = [title ' (HP filter, lambda = ' ...
-                         num2str(options_.hp_filter) ')'];
-            end
+            title=add_filter_subtitle(title,options_);
             headers = M_.exo_names;
             headers(M_.exo_names_orig_ord,:) = headers;
             headers = char(' ',headers);
@@ -127,9 +122,7 @@ if options_.nocorr == 0 && size(stationary_vars, 1) > 0
         else
             title='MATRIX OF CORRELATIONS';
         end
-        if options_.hp_filter
-            title = [title ' (HP filter, lambda = ' num2str(options_.hp_filter) ')'];
-        end
+        title=add_filter_subtitle(title,options_);
         labels = deblank(M_.endo_names(ivar(i1),:));
         headers = char('Variables',labels);
         lh = size(labels,2)+2;
@@ -149,9 +142,7 @@ if options_.ar > 0 && size(stationary_vars, 1) > 0
         else
             title='COEFFICIENTS OF AUTOCORRELATION';
         end
-        if options_.hp_filter        
-            title = [title ' (HP filter, lambda = ' num2str(options_.hp_filter) ')'];      
-        end      
+        title=add_filter_subtitle(title,options_);
         labels = deblank(M_.endo_names(ivar(i1),:));      
         headers = char('Order ',int2str([1:options_.ar]'));
         lh = size(labels,2)+2;
