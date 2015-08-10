@@ -47,13 +47,11 @@ elseif strcmpi(type,'prior')
         end
     end
 else
-    disp('compute_moments_varendo:: Unknown type!')
-    error()
+    error('compute_moments_varendo:: Unknown type!')
 end
 
 NumberOfEndogenousVariables = rows(var_list_);
 NumberOfExogenousVariables = M_.exo_nbr;
-list_of_exogenous_variables = M_.exo_names;
 NumberOfLags = options_.ar;
 NoDecomposition = options_.nodecomposition;
 if isfield(options_,'conditional_variance_decomposition')

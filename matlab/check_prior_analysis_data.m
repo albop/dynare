@@ -1,4 +1,23 @@
 function [info,description] = check_prior_analysis_data(type,M_)
+% function [info,description] = check_prior_analysis_data(type,M_)
+% Checks the status of prior analysis and in particular if files need to be 
+% created or updated; called by prior_analysis.m
+% 
+% Inputs:
+%   type        [string]        name of the posterior moment considered
+%   M_          [structure]     Dynare model structure
+% 
+% Outputs: 
+%   info        [scalar]        return code
+%                                   info = 1; % prior_sampler has to be called first.
+%                                   info = 2; % _prior_draws files have to be updated.
+%                                   info = 3; % Ok! prior draws files are up to date ;
+%                                   info = 4; % prior draws have to be processed.
+%                                   info = 5; % prior data files have to be updated.
+%                                   info = 6; % Ok (nothing to do ;-)
+%   description [string]        Message corresponding to info
+
+
 % Copyright (C) 2009-2011 Dynare Team
 %
 % This file is part of Dynare.
@@ -28,7 +47,6 @@ if ~exist([ M_.dname '/prior/draws'],'dir')
 end
 
 prior_draws_info = dir([ M_.dname '/prior/draws/prior_draws*.mat']);
-name_of_the_last_prior_draw_file = prior_draws_info(end).name;
 date_of_the_last_prior_draw_file = prior_draws_info(end).datenum;
 
 %% Get informations about _posterior_draws files.
@@ -39,7 +57,6 @@ if isempty(prior_draws_info)
     end
     return
 else
-    number_of_last_prior_draws_file = length(prior_draws_info);
     date_of_the_prior_definition = get_date_of_a_file([ M_.dname '/prior/definition.mat']);
     if date_of_the_prior_definition>date_of_the_last_prior_draw_file
         info = 2;

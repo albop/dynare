@@ -1,6 +1,23 @@
 function [info,description] = check_posterior_analysis_data(type,M_)
+% function [info,description] = check_posterior_analysis_data(type,M_)
+% Checks the status of posterior analysis and in particular if files need to be 
+% created or updated; called by posterior_analysis.m
+% 
+% Inputs:
+%   type        [string]        name of the posterior moment considered
+%   M_          [structure]     Dynare model structure
+% 
+% Outputs: 
+%   info        [scalar]        return code
+%                                   info = 1; % select_posterior_draws has to be called first.
+%                                   info = 2; % _posterior_draws files have to be updated.
+%                                   info = 3; % Ok! posterior draws files are up to date ;
+%                                   info = 4; % posterior draws have to be processed.
+%                                   info = 5; % posterior data files have to be updated.
+%                                   info = 6; % Ok (nothing to do ;-)
+%   description [string]        Message corresponding to info
 
-% Copyright (C) 2008-2013 Dynare Team
+% Copyright (C) 2008-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
