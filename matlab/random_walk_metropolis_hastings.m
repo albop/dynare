@@ -163,6 +163,8 @@ end
 irun = fout(1).irun;
 NewFile = fout(1).NewFile;
 
+record.MCMCConcludedSuccessfully = 1; %set indicator for successful run
+
 update_last_mh_history_file(MetropolisFolder, ModelName, record);
 
 % Provide diagnostic output

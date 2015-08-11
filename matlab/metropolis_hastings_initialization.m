@@ -210,6 +210,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
     record.LastLogPost = zeros(nblck,1);
     record.LastFileNumber = AnticipatedNumberOfFiles ;
     record.LastLineNumber = AnticipatedNumberOfLinesInTheLastFile;
+    record.MCMCConcludedSuccessfully = 0;
     fprintf('Ok!\n');
     id = write_mh_history_file(MetropolisFolder, ModelName, record);
     disp(['Estimation::mcmc: Details about the MCMC are available in ' BaseName '_mh_history_' num2str(id) '.mat'])
@@ -234,6 +235,10 @@ elseif options_.load_mh_file && ~options_.mh_recover
     % Here we consider previous mh files (previous mh did not crash).
     disp('Estimation::mcmc: I am loading past Metropolis-Hastings simulations...')
     load_last_mh_history_file(MetropolisFolder, ModelName);
+    if ~isnan(record.MCMCConcludedSuccessfully) && ~record.MCMCConcludedSuccessfully
+        error('Estimation::mcmc: You are trying to load an MCMC that did not finish successfully. Please use mh_recover.')
+    end
+    record.MCMCConcludedSuccessfully=0; %reset indicator for this run
     mh_files = dir([ MetropolisFolder filesep ModelName '_mh*.mat']);
     if ~length(mh_files)
         error('Estimation::mcmc: I cannot find any MH file to load here!')
