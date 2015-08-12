@@ -6,6 +6,10 @@
  * The data are in file "fsdat_simul.m", and have been artificially generated.
  * They are therefore different from the original dataset used by Schorfheide.
  *
+ * The prior distribution follows the one originally specified in Schorfheide's paper.
+ * Note that the beta prior for rho implies an asymptote and corresponding prior mode 
+ * for rho at 0. It is generally recommended to avoid this extreme type of prior.  
+ *
  * The equations are taken from J. Nason and T. Cogley (1994): "Testing the
  * implications of long-run neutrality for monetary business cycle models",
  * Journal of Applied Econometrics, 9, S37-S70.
