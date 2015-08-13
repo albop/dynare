@@ -3948,7 +3948,7 @@ the global workspace (this latter way of accessing the IRFs is
 deprecated and will disappear in a future version).
 
 If the option @code{contemporaneous_correlation} is different from 0, sets 
-{oo_.contemporaneous_correlation}, which is described below.
+@code{oo_.contemporaneous_correlation}, which is described below.
 
 @customhead{Example 1}
 
