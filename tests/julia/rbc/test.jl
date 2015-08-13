@@ -2,7 +2,7 @@
 unshift!(LOAD_PATH, abspath("../../../julia"))
 
 # Load Dynare package
-using Dynare
+importall Dynare
 
 # Compile the rbc.mod file -> produce a module with the model definition.
-Dynare.dynare("rbc.mod")
+@dynare "rbc.mod"
