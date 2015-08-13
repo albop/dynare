@@ -123,7 +123,7 @@ end;
 
 steady;
 
-stoch_simul(order=1,irf=20,graph_format=eps);
+stoch_simul(order=1,irf=20,graph_format=eps,contemporaneous_correlation);
 
 write_latex_original_model;
 write_latex_static_model;
@@ -143,7 +143,7 @@ stderr gy_obs, 1;
 corr gp_obs, gy_obs,0;
 end;
 
-estimation(order=1,datafile='../fs2000/fsdat_simul',mode_check,smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
+estimation(order=1,datafile='../fs2000/fsdat_simul',mode_check,smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20,contemporaneous_correlation) m P c e W R k d y gy_obs;
 
 
 
@@ -159,7 +159,7 @@ stderr gp_obs, inv_gamma_pdf, 0.001, inf;
 //corr gp_obs, gy_obs,normal_pdf, 0, 0.2;
 end;
 
-estimation(mode_compute=9,order=1,datafile='../fs2000/fsdat_simul',mode_check,smoother,filter_decomposition,mh_replic=2002, mh_nblocks=2, mh_jscale=0.8,forecast = 8,bayesian_irf,filtered_vars,filter_step_ahead=[1,3],irf=20,moments_varendo) m P c e W R k d y;
+estimation(mode_compute=9,order=1,datafile='../fs2000/fsdat_simul',mode_check,smoother,filter_decomposition,mh_replic=2002, mh_nblocks=2, mh_jscale=0.8,forecast = 8,bayesian_irf,filtered_vars,filter_step_ahead=[1,3],irf=20,moments_varendo,contemporaneous_correlation) m P c e W R k d y;
 shock_decomposition y W R;
 
 collect_LaTeX_Files(M_);

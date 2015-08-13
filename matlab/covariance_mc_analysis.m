@@ -1,4 +1,4 @@
-function oo_ = covariance_mc_analysis(NumberOfSimulations,type,dname,fname,vartan,nvar,var1,var2,mh_conf_sig,oo_)
+function oo_ = covariance_mc_analysis(NumberOfSimulations,type,dname,fname,vartan,nvar,var1,var2,mh_conf_sig,oo_,options_)
 % This function analyses the (posterior or prior) distribution of the
 % endogenous variables' covariance matrix.
 % 
@@ -14,6 +14,7 @@ function oo_ = covariance_mc_analysis(NumberOfSimulations,type,dname,fname,varta
 %   mh_conf_sig             [double]            2 by 1 vector with upper
 %                                               and lower bound of HPD intervals
 %   oo_                     [structure]         Dynare structure where the results are saved.
+%   options_                [structure]         Dynare options structure 
 %
 % OUTPUTS
 %   oo_                     [structure]        Dynare structure where the results are saved.
@@ -86,10 +87,21 @@ end
 
 ListOfFiles = dir([ PATH  fname '_' TYPE '2ndOrderMoments*.mat']);
 i1 = 1; tmp = zeros(NumberOfSimulations,1);
+if options_.contemporaneous_correlation
+    tmp_corr_mat = zeros(NumberOfSimulations,1);
+    cov_pos=symmetric_matrix_index(indx1,indx2,nvar);
+    var_pos_1=symmetric_matrix_index(indx1,indx1,nvar);
+    var_pos_2=symmetric_matrix_index(indx2,indx2,nvar);
+end
 for file = 1:length(ListOfFiles)
     load([ PATH ListOfFiles(file).name ]);
     i2 = i1 + rows(Covariance_matrix) - 1;
     tmp(i1:i2) = Covariance_matrix(:,symmetric_matrix_index(indx1,indx2,nvar));
+    if options_.contemporaneous_correlation
+        temp=Covariance_matrix(:,cov_pos)./(sqrt(Covariance_matrix(:,var_pos_1)).*sqrt(Covariance_matrix(:,var_pos_2)));
+        temp(Covariance_matrix(:,cov_pos)==0)=0; %filter out 0 correlations that would result in 0/0
+        tmp_corr_mat(i1:i2)=temp;
+    end    
     i1 = i2+1;
 end
 name = [var1 '.' var2];
@@ -111,4 +123,16 @@ else
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.HPDsup.' name ' = NaN;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.deciles.' name ' = NaN;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = NaN;']);
+end
+
+if options_.contemporaneous_correlation
+    [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
+        posterior_moments(tmp_corr_mat,1,mh_conf_sig);
+    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.Mean.' name ' = p_mean;']);
+    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.Median.' name ' = p_median;']);
+    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.Variance.' name ' = p_var;']);
+    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.HPDinf.' name ' = hpd_interval(1);']);
+    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.HPDsup.' name ' = hpd_interval(2);']);
+    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.deciles.' name ' = p_deciles;']);
+    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.density.' name ' = density;']);
 end

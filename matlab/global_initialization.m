@@ -480,6 +480,7 @@ end
 options_.filter_covariance = 0;
 options_.filter_decomposition = 0;
 options_.selected_variables_only = 0;
+options_.contemporaneous_correlation = 0;
 options_.initialize_estimated_parameters_with_the_prior_mode = 0;
 options_.estimation_dll = 0;
 % Misc

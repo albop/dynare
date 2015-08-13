@@ -87,7 +87,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
     if nblck > 1
         disp('Estimation::mcmc: Multiple chains mode.')
     else
-        disp('Etimation::mcmc: One Chain mode.')
+        disp('Estimation::mcmc: One Chain mode.')
     end
     % Delete old mh files if any...
     files = dir([BaseName '_mh*_blck*.mat']);

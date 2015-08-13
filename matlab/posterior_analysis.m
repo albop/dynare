@@ -55,7 +55,7 @@ switch type
             dsge_simulated_theoretical_covariance(SampleSize,M_,options_,oo_,'posterior');
     end
     oo_ = covariance_mc_analysis(SampleSize,'posterior',M_.dname,M_.fname,...
-                                 vartan,nvar,arg1,arg2,options_.mh_conf_sig,oo_);          
+                                 vartan,nvar,arg1,arg2,options_.mh_conf_sig,oo_,options_);          
   case 'decomposition'
     if nargin==narg1
         [nvar,vartan,NumberOfFiles] = ...
