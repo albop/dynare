@@ -111,3 +111,9 @@ if isfield(oo_,'FilteredVariables')
         end
     end
 end
+
+%% set old field posterior_std and remove new field posterior_std_at_mode
+if isfield(oo_,'posterior_std_at_mode')
+    oo_.posterior_std=oo_.posterior_std_at_mode;
+    oo_=rmfield(oo_,'posterior_std_at_mode');
+end

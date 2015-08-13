@@ -6004,10 +6004,19 @@ Variable set by the @code{estimation} command, if it is used with
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.posterior_mode
-Variable set by the @code{estimation} command, if it is used with
-@code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
+Variable set by the @code{estimation} command during mode-finding. Fields are 
+of the form:
 @example
 @code{oo_.posterior_mode.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior_std_at_mode
+Variable set by the @code{estimation} command during mode-finding. It is based on the
+inverse Hessian at @code{oo_.posterior_mode}. Fields are 
+of the form:
+@example
+@code{oo_.posterior_std_at_mode.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 
@@ -6016,6 +6025,22 @@ Variable set by the @code{estimation} command, if it is used with
 @code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
 @example
 @code{oo_.posterior_std.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior_var
+Variable set by the @code{estimation} command, if it is used with
+@code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
+@example
+@code{oo_.posterior_var.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior_median
+Variable set by the @code{estimation} command, if it is used with
+@code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
+@example
+@code{oo_.posterior_median.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 

@@ -382,6 +382,7 @@ eval(['oo.posterior_hpdinf.' type '.' name ' = hpdinterval(1);']);
 eval(['oo.posterior_hpdsup.' type '.' name ' = hpdinterval(2);']);      
 eval(['oo.posterior_median.' type '.' name ' = postmedian;']);
 eval(['oo.posterior_variance.' type '.' name ' = postvar;']);
+eval(['oo.posterior_std.' type '.' name ' = sqrt(postvar);']);
 eval(['oo.posterior_deciles.' type '.' name ' = postdecile;']);
 eval(['oo.posterior_density.' type '.' name ' = density;']);
 

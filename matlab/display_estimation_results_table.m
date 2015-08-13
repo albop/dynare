@@ -73,7 +73,7 @@ if np
                  header_width,name,xparam1(ip),stdh(ip),tstath(ip));
         end
         eval(['oo_.' field_name '_mode.parameters.' name ' = xparam1(ip);']);
-        eval(['oo_.' field_name '_std.parameters.' name ' = stdh(ip);']);
+        eval(['oo_.' field_name '_std_at_mode.parameters.' name ' = stdh(ip);']);
         ip = ip+1;
     end
     skipline()
@@ -95,7 +95,7 @@ if nvx
         end
         M_.Sigma_e(k,k) = xparam1(ip)*xparam1(ip);
         eval(['oo_.' field_name '_mode.shocks_std.' name ' = xparam1(ip);']);
-        eval(['oo_.' field_name '_std.shocks_std.' name ' = stdh(ip);']);
+        eval(['oo_.' field_name '_std_at_mode.shocks_std.' name ' = stdh(ip);']);
         ip = ip+1;
     end
     skipline()
@@ -116,7 +116,7 @@ if nvx
             fprintf('%-*s %8.4f %7.4f %7.4f \n',header_width,name,xparam1(ip),stdh(ip),tstath(ip))            
         end
         eval(['oo_.' field_name '_mode.measurement_errors_std.' name ' = xparam1(ip);']);
-        eval(['oo_.' field_name '_std.measurement_errors_std.' name ' = stdh(ip);']);
+        eval(['oo_.' field_name '_std_at_mode.measurement_errors_std.' name ' = stdh(ip);']);
         ip = ip+1;
     end
     skipline()
@@ -141,7 +141,7 @@ if ncx
         M_.Sigma_e(k1,k2) = xparam1(ip)*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
         M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
         eval(['oo_.' field_name '_mode.shocks_corr.' NAME ' = xparam1(ip);']);
-        eval(['oo_.' field_name '_std.shocks_corr.' NAME ' = stdh(ip);']);
+        eval(['oo_.' field_name '_std_at_mode.shocks_corr.' NAME ' = stdh(ip);']);
         ip = ip+1;
     end
     skipline()
@@ -164,7 +164,7 @@ if ncn
             fprintf('%-*s %8.4f %7.4f %7.4f \n',header_width,name,xparam1(ip),stdh(ip),tstath(ip));            
         end
         eval(['oo_.' field_name '_mode.measurement_errors_corr.' NAME ' = xparam1(ip);']);
-        eval(['oo_.' field_name '_std.measurement_errors_corr.' NAME ' = stdh(ip);']);
+        eval(['oo_.' field_name '_std_at_mode.measurement_errors_corr.' NAME ' = stdh(ip);']);
         ip = ip+1;
     end
     skipline()
