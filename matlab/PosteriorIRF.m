@@ -398,7 +398,7 @@ if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
         figunumber = 0;
 
         for jj=1:nvar
-            if max(abs(MeanIRF(:,jj,ii))) > options_.impulse_responses.plot_threshold
+            if max(abs(MeanIRF(:,jj,ii))) >= options_.impulse_responses.plot_threshold
                 subplotnum = subplotnum+1;
                 
                 if subplotnum == 1 

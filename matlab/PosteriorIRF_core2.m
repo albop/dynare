@@ -100,7 +100,7 @@ for i=fpar:npar,
     figunumber = 0;
 
     for j=1:nvar
-        if max(abs(MeanIRF(:,j,i))) > options_.impulse_responses.plot_threshold
+        if max(abs(MeanIRF(:,j,i))) >= options_.impulse_responses.plot_threshold
             subplotnum = subplotnum+1;
             if subplotnum == 1 && options_.relative_irf
                 hh = dyn_figure(options_,'Name',['Relative response to orthogonalized shock to ' tit(i,:)]);
