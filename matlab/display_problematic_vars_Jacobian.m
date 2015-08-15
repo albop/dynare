@@ -95,10 +95,10 @@ elseif strcmp(type,'static')
             if M_.aux_vars(1,problemcol(ii)-M_.orig_endo_nbr).type ==6 %Ramsey Lagrange Multiplier 
                 if problemrow(ii)<=aux_eq_nbr
                     eq_nbr=problemrow(ii);
-                    fprintf('Derivative of Auxiliary Equation %s with respect to Lagrange multiplier of equation %d (initial value: %g) \n',eq_nbr,M_.aux_vars(1,problemcol(ii)-M_.orig_endo_nbr).eq_nbr,x(problemcol(ii)))            
+                    fprintf('Derivative of Auxiliary Equation %d with respect to Lagrange multiplier of equation %d (initial value: %g) \n',eq_nbr,M_.aux_vars(1,problemcol(ii)-M_.orig_endo_nbr).eq_nbr,x(problemcol(ii)))            
                 else
                     eq_nbr=problemrow(ii)-aux_eq_nbr;
-                    fprintf('Derivative of Equation %s with respect to Lagrange multiplier of equation %d (initial value: %g) \n',eq_nbr,M_.aux_vars(1,problemcol(ii)-M_.orig_endo_nbr).eq_nbr,x(problemcol(ii)))            
+                    fprintf('Derivative of Equation %d with respect to Lagrange multiplier of equation %d (initial value: %g) \n',eq_nbr,M_.aux_vars(1,problemcol(ii)-M_.orig_endo_nbr).eq_nbr,x(problemcol(ii)))            
                 end
             else
             if problemrow(ii)<=aux_eq_nbr
