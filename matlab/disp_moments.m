@@ -59,6 +59,7 @@ oo_.mean = transpose(m);
 oo_.var = y'*y/size(y,1);
 
 labels = deblank(M_.endo_names(ivar,:));
+labels_TeX = deblank(M_.endo_names_tex(ivar,:));
 
 if options_.nomoments == 0
     z = [ m' s' s2' (mean(y.^3)./s2.^1.5)' (mean(y.^4)./(s2.*s2)-3)' ];    
@@ -69,6 +70,9 @@ if options_.nomoments == 0
     headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
                  'KURTOSIS');
     dyntable(title,headers,labels,z,size(labels,2)+2,16,6);
+    if options_.TeX
+        dyn_latex_table(M_,title,'sim_moments',headers,labels_TeX,z,size(labels,2)+2,16,6);
+    end
 end
 
 if options_.nocorr == 0
@@ -83,6 +87,11 @@ if options_.nocorr == 0
 
         headers = char('VARIABLE',M_.endo_names(ivar,:));
         dyntable(title,headers,labels,corr,size(labels,2)+2,8,4);
+        if options_.TeX
+            headers = char('VARIABLE',M_.endo_names_tex(ivar,:));
+            lh = size(labels,2)+2;
+            dyn_latex_table(M_,title,'sim_corr_matrix',headers,labels_TeX,corr,size(labels,2)+2,8,4);
+        end
     end
 end
 
@@ -102,7 +111,13 @@ if ar > 0
         title=add_filter_subtitle(title,options_);
         headers = char('VARIABLE',int2str([1:ar]'));
         dyntable(title,headers,labels,autocorr,size(labels,2)+2,8,4);
+        if options_.TeX
+            headers = char('VARIABLE',int2str([1:ar]'));
+            lh = size(labels,2)+2;
+            dyn_latex_table(M_,title,'sim_autocorr_matrix',headers,labels_TeX,autocorr,size(labels_TeX,2)+2,8,4);
+        end
     end
+    
 end
 
 
@@ -142,7 +157,15 @@ if ~options_.nodecomposition
             headers(M_.exo_names_orig_ord,:) = headers;
             headers = char(' ',headers);
             lh = size(deblank(M_.endo_names(ivar,:)),2)+2;
-            dyntable(title,char(headers,'Total linear contrib.'),deblank(M_.endo_names(ivar,:)),[oo_.variance_decomposition sum(oo_.variance_decomposition,2)],lh,8,2);
+            dyntable(title,char(headers,'Tot. lin. contr.'),deblank(M_.endo_names(ivar,:)),[oo_.variance_decomposition sum(oo_.variance_decomposition,2)],lh,8,2);
+            if options_.TeX
+                headers=M_.exo_names_tex;
+                headers = char(' ',headers);
+                labels = deblank(M_.endo_names_tex(ivar,:));
+                lh = size(labels,2)+2;
+                dyn_latex_table(M_,title,'sim_var_decomp',char(headers,'Tot. lin. contr.'),labels_TeX,[oo_.variance_decomposition sum(oo_.variance_decomposition,2)],lh,8,2);
+            end
+
             if options_.order == 1
                 fprintf('Note: numbers do not add up to 100 due to non-zero correlation of simulated shocks in small samples\n\n')
             else

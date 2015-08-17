@@ -107,6 +107,12 @@ if ~options_.noprint
     headers = char('Variables',labels);
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
+    if options_.TeX
+        labels = deblank(M_.exo_names_tex);
+        headers = char('Variables',labels);
+        lh = size(labels,2)+2;
+        dyn_latex_table(M_,my_title,'covar_ex_shocks',headers,labels,M_.Sigma_e,lh,10,6);
+    end
     if options_.partial_information
         skipline()
         disp('SOLUTION UNDER PARTIAL INFORMATION')

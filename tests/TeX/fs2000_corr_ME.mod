@@ -123,7 +123,8 @@ end;
 
 steady;
 
-stoch_simul(order=1,irf=20,graph_format=eps,contemporaneous_correlation);
+stoch_simul(order=1,irf=20,graph_format=eps,periods=1000,contemporaneous_correlation,conditional_variance_decomposition=[1,3]);
+stoch_simul(order=1,irf=20,graph_format=eps,periods=0,contemporaneous_correlation,conditional_variance_decomposition=[1,3]);
 
 write_latex_original_model;
 write_latex_static_model;

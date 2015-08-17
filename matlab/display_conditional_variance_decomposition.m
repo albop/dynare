@@ -31,11 +31,13 @@ function display_conditional_variance_decomposition(conditional_decomposition_ar
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if options_.order == 2
-skipline()                
-disp('APPROXIMATED CONDITIONAL VARIANCE DECOMPOSITION (in percent)')
+    skipline()
+    title='APPROXIMATED CONDITIONAL VARIANCE DECOMPOSITION (in percent)';
+    disp(title)
 else
-skipline()               
-disp('CONDITIONAL VARIANCE DECOMPOSITION (in percent)')
+    skipline()
+    title='CONDITIONAL VARIANCE DECOMPOSITION (in percent)';
+    disp(title)
 end
 
 vardec_i = zeros(length(SubsetOfVariables),M_.exo_nbr);
@@ -54,4 +56,10 @@ for i=1:length(Steps)
     dyntable('',headers,...
              deblank(M_.endo_names(SubsetOfVariables,:)),...
              vardec_i,lh,8,2);
+     if options_.TeX
+         labels_TeX = deblank(M_.endo_names_tex(SubsetOfVariables,:));
+         headers_TeX=char('',deblank(M_.exo_names_tex));
+         lh = size(labels_TeX,2)+2;
+         dyn_latex_table(M_,[title,'; Period ' int2str(Steps(i))],['th_var_decomp_cond_h',int2str(Steps(i))],headers_TeX,labels_TeX,vardec_i,lh,8,2);
+     end    
 end
