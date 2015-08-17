@@ -2,7 +2,9 @@
 workspace()
 
 # Modification of the path (for packages). Should be done in ~/.juliarc.jl with a fixed path instead.
-unshift!(LOAD_PATH, abspath("../../../julia"))
+if isempty(findin([abspath("../../../julia")], LOAD_PATH))
+    unshift!(LOAD_PATH, abspath("../../../julia"))
+end
 
 # Load Dynare package
 importall Dynare
