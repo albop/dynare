@@ -106,7 +106,7 @@ if ismember('moments', varargin) % Prior simulations (2nd order moments).
     % Solve model
     [dr,info, M_ ,options_ , oo_] = resol(0, M_ , options_ ,oo_);
     % Compute and display second order moments
-    disp_th_moments(oo_.dr,[]);
+    oo_=disp_th_moments(oo_.dr,[],M_,options_,oo_);
     skipline(2)
     donesomething = true;
 end

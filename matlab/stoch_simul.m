@@ -157,7 +157,7 @@ if options_.nomoments == 0
     elseif options_.periods == 0
         % There is no code for theoretical moments at 3rd order
         if options_.order <= 2
-            disp_th_moments(oo_.dr,var_list);
+            oo_=disp_th_moments(oo_.dr,var_list,M_,options_,oo_);
         end
     else
         oo_=disp_moments(oo_.endo_simul,var_list,M_,options_,oo_);

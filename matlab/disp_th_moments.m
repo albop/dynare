@@ -1,7 +1,7 @@
-function disp_th_moments(dr,var_list)
+function oo_=disp_th_moments(dr,var_list,M_,options_,oo_)
 % Display theoretical moments of variables
 
-% Copyright (C) 2001-2013 Dynare Team
+% Copyright (C) 2001-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,8 +17,6 @@ function disp_th_moments(dr,var_list)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global M_ oo_ options_
 
 nodecomposition = options_.nodecomposition;
 
