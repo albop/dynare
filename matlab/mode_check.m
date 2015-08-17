@@ -40,7 +40,7 @@ function mode_check(fun,x,hessian_mat,DynareDataset,DatasetInfo,DynareOptions,Mo
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2003-2013 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -197,6 +197,7 @@ for plt = 1:nbplt,
         fprintf(fidTeX,'\\label{Fig:CheckPlots:%s}\n',int2str(plt));
         fprintf(fidTeX,'\\end{figure}\n');
         fprintf(fidTeX,' \n');
+        fclose(fidTeX);
     end
 end
 
