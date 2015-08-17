@@ -5,4 +5,4 @@ rm -f rbcDynamic.jl
 rm -f rbcSteadyState2.jl
 rm -rf rbc
 rm -f rbcStatic.jl
-rm -f rbc_set_auxiliary_variables.m
+rm -f rbc_set_auxiliary_variables.jl
