@@ -69,13 +69,13 @@ if options_.dsge_var && options_.presample~=0
     error('DSGE-VAR does not support the presample option.')
 end
 
+% Test if observed variables are declared.
+if ~isfield(options_,'varobs')
+    error('VAROBS statement is missing!')
+end
+
 % Set the number of observed variables.
 options_.number_of_observed_variables = length(options_.varobs);
-
-% Test if observed variables are declared.
-if ~options_.number_of_observed_variables
-    error('VAROBS is missing!')
-end
 
 % Check that each declared observed variable is also an endogenous variable.
 for i = 1:options_.number_of_observed_variables
