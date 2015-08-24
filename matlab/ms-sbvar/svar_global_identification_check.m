@@ -1,5 +1,6 @@
-function indent = sbvar_global_identification_check(options_)
-% function sbvar_global_identification_check(options_.ms)
+function indent = svar_global_identification_check(options_)
+% function svar_global_identification_check(options_.ms) checks
+% identification of s structural VAR
 %
 % INPUTS
 %    options_ms:    (struct)    options
@@ -9,6 +10,11 @@ function indent = sbvar_global_identification_check(options_)
 %
 % SPECIAL REQUIREMENTS
 %    none
+%
+% REFERENCES
+%   J. Rubio Ramirez, D. Waggoner, T. Zha (2010) "Structural Vector
+%   Autoregressions: Theory of Identification and Algorithms for
+%   Inference" in Review of Economic Studies, 77, 665-696.
 
 % Copyright (C) 2015 Dynare Team
 %
@@ -42,27 +48,33 @@ end
 nvar = length(options_.varobs);   % number of endogenous variables
 nexo = 1;
    
-[Uiconst,Viconst,n0,np,ixmC0Pres,Qi] = exclusions(nvar,nexo,options_.ms );
+[Uiconst,Viconst,n0,np,ixmC0Pres,Qi,Ri] = exclusions(nvar,nexo,options_.ms );
 
 % order column constraints by rank
-Qranks = zeros(nvar,2);
+QQranks = zeros(nvar,2);
 for j=1:nvar
-    Qranks(j,:) = [j,rank(Qi{j})];
+    n = nvar*(options_.ms.nlags+1);
+    QQi{j} = zeros(n,n);
+    QQi{j}(1:nvar,1:nvar) = Qi{j};
+    QQi{j}(nvar+1:end,nvar+1:end) = Ri{j}(1:end-1,1:end-1);
+    QQranks(j,:) = [j,rank(QQi{j})];
 end
-Qranks = sortrows(Qranks,-2);
+QQranks = sortrows(QQranks,-2);
 
 ident = true;
 
 for j=1:nvar
-    i = Qranks(j,1);
+    i = QQranks(j,1);
     for k=1:1
-        M = [Qi{i}*rand(size(Qi{i},1),nvar);[eye(j) zeros(j,nvar- ...
-                                                          j)]];
-        disp([j,k,rank(M)])
+        M = [QQi{i}*rand(size(QQi{i},1),nvar);[eye(j) ...
+                            zeros(j,nvar-j)]];
         if rank(M) < nvar
-            ident = false
+            ident = false;
             break
         end
+    end
+    if ~ident
+        break
     end
 end
 

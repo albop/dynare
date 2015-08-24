@@ -10,7 +10,5 @@ exclusion lag 1;
 equation 2, Y;
 end;
 
-sbvar_global_identification_check(options_);
-
-sbvar(datafile = data,freq=4,initial_year=1959,final_year=2005,nlags=4);
+svar_global_identification_check;
 
