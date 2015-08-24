@@ -487,6 +487,10 @@ options_.selected_variables_only = 0;
 options_.contemporaneous_correlation = 0;
 options_.initialize_estimated_parameters_with_the_prior_mode = 0;
 options_.estimation_dll = 0;
+options_.estimation.posterior_kernel_density.indicator = 0;
+options_.estimation.posterior_kernel_density.gridpoints = 2^9;
+options_.estimation.posterior_kernel_density.bandwidth = 0; % Rule of thumb optimal bandwidth parameter.
+options_.estimation.posterior_kernel_density.kernel_function = 'gaussian'; % Gaussian kernel for Fast Fourrier Transform approximaton.
 % Misc
 options_.conf_sig = 0.6;
 oo_.exo_simul = [];

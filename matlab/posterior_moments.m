@@ -1,4 +1,4 @@
-function [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(xx,info,mh_conf_sig)
+function [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(xx,info,mh_conf_sig,kernel_options)
 % Computes posterior mean, median, variance, HPD interval, deciles, and density from posterior draws.
 %
 % INPUTS
@@ -38,6 +38,16 @@ function [post_mean, post_median, post_var, hpd_interval, post_deciles, density]
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if nargin<4
+    number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
+    bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
+    kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
+else
+    number_of_grid_points = kernel_options.gridpoints;
+    bandwidth = kernel_options.bandwidth;
+    kernel_function = kernel_options.kernel_function;
+end
+
 xx = xx(:);
 xx = sort(xx);
 
@@ -76,10 +86,7 @@ else
 end
 density = [];
 if info
-    number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
     if post_var > 1e-12
-        bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
-        kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
         optimal_bandwidth = mh_optimal_bandwidth(xx,number_of_draws,bandwidth,kernel_function);
         [density(:,1),density(:,2)] = kernel_density_estimate(xx,number_of_grid_points,...
                                                           number_of_draws,optimal_bandwidth,kernel_function);
