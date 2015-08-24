@@ -256,7 +256,6 @@ public:
              vector<int> predetermined_variables_arg,
              vector<int> varobs_arg,
              vector<int> NNZDerivatives_arg);
-  ~DynareInfo();
 
   inline void addMarkovSwitching(MarkovSwitching *ms) { markov_switching_vector.push_back(ms); };
 
