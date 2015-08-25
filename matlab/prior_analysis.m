@@ -63,7 +63,7 @@ switch type
             dsge_simulated_theoretical_variance_decomposition(SampleSize,M_,options_,oo_,'prior');
     end
     oo_ = variance_decomposition_mc_analysis(SampleSize,'prior',M_.dname,M_.fname,...
-                                             M_.exo_names,arg2,vartan,arg1,options_.mh_conf_sig,oo_);
+                                             M_.exo_names,arg2,vartan,arg1,options_.mh_conf_sig,oo_,options_);
   case 'correlation'
     if nargin==narg1
         [nvar,vartan,NumberOfFiles] = ...
@@ -77,7 +77,7 @@ switch type
             dsge_simulated_theoretical_conditional_variance_decomposition(SampleSize,arg3,M_,options_,oo_,'prior');
     end
     oo_ = conditional_variance_decomposition_mc_analysis(SampleSize,'prior',M_.dname,M_.fname,...
-                                                      arg3,M_.exo_names,arg2,vartan,arg1,options_.mh_conf_sig,oo_);
+                                                      arg3,M_.exo_names,arg2,vartan,arg1,options_.mh_conf_sig,oo_,options_);
   otherwise
     disp('Not yet implemented')
 end

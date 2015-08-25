@@ -1,5 +1,5 @@
 function oo_ = ...
-    conditional_variance_decomposition_mc_analysis(NumberOfSimulations, type, dname, fname, Steps, exonames, exo, var_list, endogenous_variable_index, mh_conf_sig, oo_)
+    conditional_variance_decomposition_mc_analysis(NumberOfSimulations, type, dname, fname, Steps, exonames, exo, var_list, endogenous_variable_index, mh_conf_sig, oo_,options_)
 % This function analyses the (posterior or prior) distribution of the
 % endogenous variables' conditional variance decomposition.
 %
@@ -91,19 +91,26 @@ p_mean = NaN(1,length(Steps));
 p_median = NaN(1,length(Steps));
 p_variance = NaN(1,length(Steps));
 p_deciles = NaN(9,length(Steps));
-p_density = NaN(2^9,2,length(Steps));
+if options_.estimation.moments_posterior_density.indicator
+    p_density = NaN(2^9,2,length(Steps));
+end
 p_hpdinf = NaN(1,length(Steps));
 p_hpdsup = NaN(1,length(Steps));
 for i=1:length(Steps)
-    [pp_mean, pp_median, pp_var, hpd_interval, pp_deciles, pp_density] = ...
-        posterior_moments(tmp(:,i),1,mh_conf_sig);
+    if options_.estimation.moments_posterior_density.indicator
+        [pp_mean, pp_median, pp_var, hpd_interval, pp_deciles, pp_density] = ...
+            posterior_moments(tmp(:,i),1,mh_conf_sig);
+        p_density(:,:,i) = pp_density;
+    else
+        [pp_mean, pp_median, pp_var, hpd_interval, pp_deciles] = ...
+            posterior_moments(tmp(:,i),0,mh_conf_sig);        
+    end
     p_mean(i) = pp_mean;
     p_median(i) = pp_median;
     p_variance(i) = pp_var;
     p_deciles(:,i) = pp_deciles;
     p_hpdinf(i) = hpd_interval(1);
     p_hpdsup(i) = hpd_interval(2);
-    p_density(:,:,i) = pp_density;
 end
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.Steps = Steps;']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.Mean.' name ' = p_mean;']);
@@ -112,4 +119,6 @@ eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.Vari
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.HPDinf.' name ' = p_hpdinf;']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.HPDsup.' name ' = p_hpdsup;']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.deciles.' name ' = p_deciles;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.density.' name ' = p_density;']);
+if options_.estimation.moments_posterior_density.indicator
+    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.density.' name ' = p_density;']);
+end

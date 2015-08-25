@@ -1,14 +1,14 @@
-function oo_ = variance_decomposition_mc_analysis(NumberOfSimulations,type,dname,fname,exonames,exo,vartan,var,mh_conf_sig,oo_)
+function oo_ = variance_decomposition_mc_analysis(NumberOfSimulations,type,dname,fname,exonames,exo,vartan,var,mh_conf_sig,oo_,options_)
 % function oo_ = variance_decomposition_mc_analysis(NumberOfSimulations,type,dname,fname,exonames,exo,vartan,var,mh_conf_sig,oo_)
 % This function analyses the (posterior or prior) distribution of the
 % endogenous variables' variance decomposition.
-% 
+%
 % INPUTS
 %   NumberOfSimulations     [integer]           scalar, number of simulations.
 %   type                    [string]            'prior' or 'posterior'
 %   dname                   [string]            directory name where to save
 %   fname                   [string]            name of the mod-file
-%   exonames                [string]            (n_exo*char_length) character array with names of exogenous variables        
+%   exonames                [string]            (n_exo*char_length) character array with names of exogenous variables
 %   exo                     [string]            name of current exogenous
 %                                               variable
 %   vartan                  [string]            (n_endo*char_length) character array with name
@@ -18,6 +18,7 @@ function oo_ = variance_decomposition_mc_analysis(NumberOfSimulations,type,dname
 %   mh_conf_sig             [double]            2 by 1 vector with upper
 %                                               and lower bound of HPD intervals
 %   oo_                     [structure]         Dynare structure where the results are saved.
+%   options_                [structure]         Dynare options structure
 %
 % OUTPUTS
 %   oo_          [structure]        Dynare structure where the results are saved.
@@ -93,7 +94,7 @@ if t3<1.0e-12
     end
     if abs(t1-1)<1.0e-12
         t1 = 1;
-    end 
+    end
     p_mean = t1;
     p_median = t1;
     p_var = 0;
@@ -101,8 +102,13 @@ if t3<1.0e-12
     p_deciles = NaN(9,1);
     density = NaN;
 else
-    [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
-        posterior_moments(tmp,1,mh_conf_sig);
+    if options_.estimation.moments_posterior_density.indicator
+        [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
+            posterior_moments(tmp,1,mh_conf_sig);
+    else
+        [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
+            posterior_moments(tmp,0,mh_conf_sig);        
+    end
 end
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.Mean.' name ' = p_mean;']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.Median.' name ' = p_median;']);
@@ -110,4 +116,6 @@ eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.Variance.' name
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.HPDinf.' name ' = hpd_interval(1);']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.HPDsup.' name ' = hpd_interval(2);']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.deciles.' name ' = p_deciles;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.density.' name ' = density;']);
+if options_.estimation.moments_posterior_density.indicator
+    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.density.' name ' = density;']);
+end

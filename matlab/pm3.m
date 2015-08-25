@@ -79,6 +79,9 @@ Median = zeros(n2,nvar);
 Var = zeros(n2,nvar);
 Distrib = zeros(9,n2,nvar);
 HPD = zeros(2,n2,nvar);
+if options_.estimation.moments_posterior_density.indicator
+    Density = zeros(options_.estimation.moments_posterior_density.gridpoints,2,n2,nvar);
+end
 fprintf(['Estimation::mcmc: ' tit1 '\n']);
 stock1 = zeros(n1,n2,B);
 k = 0;
@@ -112,18 +115,33 @@ if filter_step_ahead_indicator
     Var_filter_step_ahead = zeros(filter_steps,nvar,n2);
     Distrib_filter_step_ahead = zeros(9,filter_steps,nvar,n2);
     HPD_filter_step_ahead = zeros(2,filter_steps,nvar,n2);
+    if options_.estimation.moments_posterior_density.indicator
+        Density_filter_step_ahead = zeros(options_.estimation.moments_posterior_density.gridpoints,2,filter_steps,nvar,n2);
+    end
 end
 
 tmp =zeros(B,1);
 for i = 1:nvar
     for j = 1:n2
-        [Mean(j,i),Median(j,i),Var(j,i),HPD(:,j,i),Distrib(:,j,i)] = ...
-            posterior_moments(squeeze(stock1(SelecVariables(i),j,:)),0,options_.mh_conf_sig);
+        if options_.estimation.moments_posterior_density.indicator
+            [Mean(j,i),Median(j,i),Var(j,i),HPD(:,j,i),Distrib(:,j,i),Density(:,:,j,i)] = ...
+                posterior_moments(squeeze(stock1(SelecVariables(i),j,:)),1,options_.mh_conf_sig,options_.estimation.moments_posterior_density);            
+        else
+            [Mean(j,i),Median(j,i),Var(j,i),HPD(:,j,i),Distrib(:,j,i)] = ...
+                posterior_moments(squeeze(stock1(SelecVariables(i),j,:)),0,options_.mh_conf_sig);
+        end
         if filter_step_ahead_indicator
-            for K_step = 1:length(options_.filter_step_ahead)
-                [Mean_filter_step_ahead(K_step,i,j),Median_filter_step_ahead(K_step,i,j),Var_filter_step_ahead(K_step,i,j),HPD_filter_step_ahead(:,K_step,i,j),Distrib_filter_step_ahead(:,K_step,i,j)] = ...
-                    posterior_moments(squeeze(stock1_filter_step_ahead(SelecVariables(i),j,:,K_step)),0,options_.mh_conf_sig);
-            end    
+            if options_.estimation.moments_posterior_density.indicator
+                for K_step = 1:length(options_.filter_step_ahead)
+                    [Mean_filter_step_ahead(K_step,i,j),Median_filter_step_ahead(K_step,i,j),Var_filter_step_ahead(K_step,i,j),HPD_filter_step_ahead(:,K_step,i,j),Distrib_filter_step_ahead(:,K_step,i,j),Density_filter_step_ahead(:,:,K_step,i,j) ] = ...
+                        posterior_moments(squeeze(stock1_filter_step_ahead(SelecVariables(i),j,:,K_step)),1,options_.mh_conf_sig,options_.estimation.moments_posterior_density);
+                end
+            else
+                for K_step = 1:length(options_.filter_step_ahead)
+                    [Mean_filter_step_ahead(K_step,i,j),Median_filter_step_ahead(K_step,i,j),Var_filter_step_ahead(K_step,i,j),HPD_filter_step_ahead(:,K_step,i,j),Distrib_filter_step_ahead(:,K_step,i,j)] = ...
+                        posterior_moments(squeeze(stock1_filter_step_ahead(SelecVariables(i),j,:,K_step)),0,options_.mh_conf_sig);
+                end
+            end
         end
     end
 end
@@ -142,21 +160,27 @@ end
 
 for i = 1:nvar
     name = deblank(names1(SelecVariables(i),:));
-    eval(['oo_.' name3 '.Mean.' name ' = Mean(:,i);']);
-    eval(['oo_.' name3 '.Median.' name ' = Median(:,i);']);
-    eval(['oo_.' name3 '.Var.' name ' = Var(:,i);']);
-    eval(['oo_.' name3 '.deciles.' name ' = Distrib(:,:,i);']);
-    eval(['oo_.' name3 '.HPDinf.' name ' = HPD(1,:,i)'';']);
-    eval(['oo_.' name3 '.HPDsup.' name ' = HPD(2,:,i)'';']);
+    oo_.(name3).Mean.(name) = Mean(:,i);
+    oo_.(name3).Median.(name) = Median(:,i);
+    oo_.(name3).Var.(name) = Var(:,i);
+    oo_.(name3).deciles.(name) = Distrib(:,:,i);
+    oo_.(name3).HPDinf.(name) = HPD(1,:,i)';
+    oo_.(name3).HPDsup.(name) = HPD(2,:,i)';
+    if options_.estimation.moments_posterior_density.indicator
+        oo_.(name3).density.(name) = Density(:,:,:,i);
+    end
     if filter_step_ahead_indicator
         for K_step = 1:length(options_.filter_step_ahead)
             name4=['Filtered_Variables_',num2str(K_step),'_step_ahead'];
-            eval(['oo_.' name4 '.Mean.' name ' = squeeze(Mean_filter_step_ahead(K_step,i,:));']);
-            eval(['oo_.' name4 '.Median.' name ' = squeeze(Median_filter_step_ahead(K_step,i,:));']);
-            eval(['oo_.' name4 '.Var.' name ' = squeeze(Var_filter_step_ahead(K_step,i,:));']);
-            eval(['oo_.' name4 '.deciles.' name ' = squeeze(Distrib_filter_step_ahead(:,K_step,i,:));']);
-            eval(['oo_.' name4 '.HPDinf.' name ' = squeeze(HPD_filter_step_ahead(1,K_step,i,:));']);
-            eval(['oo_.' name4 '.HPDsup.' name ' = squeeze(HPD_filter_step_ahead(2,K_step,i,:));']);
+            oo_.(name4).Mean.(name) = squeeze(Mean_filter_step_ahead(K_step,i,:));
+            oo_.(name4).Median.(name) = squeeze(Median_filter_step_ahead(K_step,i,:));
+            oo_.(name4).Var.(name) = squeeze(Var_filter_step_ahead(K_step,i,:));
+            oo_.(name4).deciles.(name) = squeeze(Distrib_filter_step_ahead(:,K_step,i,:));
+            oo_.(name4).HPDinf.(name) = squeeze(HPD_filter_step_ahead(1,K_step,i,:));
+            oo_.(name4).HPDsup.(name) = squeeze(HPD_filter_step_ahead(2,K_step,i,:));
+            if options_.estimation.moments_posterior_density.indicator
+                oo_.(name4).density.(name) = squeeze(Density_filter_step_ahead(:,:,K_step,i,:));
+            end
         end
     end    
 end
@@ -268,9 +292,3 @@ if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
 end
 
 fprintf(['Estimation::mcmc: ' tit1 ', done!\n']);
-
-
-
-
-
-

@@ -106,15 +106,20 @@ for file = 1:length(ListOfFiles)
 end
 name = [var1 '.' var2];
 if ~isconst(tmp)
-    [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
-        posterior_moments(tmp,1,mh_conf_sig);
+    if options_.estimation.moments_posterior_density.indicator
+        [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
+                posterior_moments(tmp,1,mh_conf_sig);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = density;']);
+    else
+        [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
+                        posterior_moments(tmp,0,mh_conf_sig);
+    end
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Mean.' name ' = p_mean;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Median.' name ' = p_median;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Variance.' name ' = p_var;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.HPDinf.' name ' = hpd_interval(1);']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.HPDsup.' name ' = hpd_interval(2);']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.deciles.' name ' = p_deciles;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = density;']);
 else
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Mean.' name ' = NaN;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Median.' name ' = NaN;']);
@@ -122,17 +127,24 @@ else
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.HPDinf.' name ' = NaN;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.HPDsup.' name ' = NaN;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.deciles.' name ' = NaN;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = NaN;']);
+    if options_.estimation.moments_posterior_density.indicator
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = NaN;']);
+    end
 end
 
 if options_.contemporaneous_correlation
-    [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
-        posterior_moments(tmp_corr_mat,1,mh_conf_sig);
+    if options_.estimation.moments_posterior_density.indicator
+        [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
+            posterior_moments(tmp_corr_mat,1,mh_conf_sig);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.density.' name ' = density;']);
+    else
+        [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
+            posterior_moments(tmp_corr_mat,0,mh_conf_sig);
+    end
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.Mean.' name ' = p_mean;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.Median.' name ' = p_median;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.Variance.' name ' = p_var;']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.HPDinf.' name ' = hpd_interval(1);']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.HPDsup.' name ' = hpd_interval(2);']);
     eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.deciles.' name ' = p_deciles;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.density.' name ' = density;']);
 end

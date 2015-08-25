@@ -67,19 +67,19 @@ if isfield(oo_,[TYPE 'TheoreticalMoments'])
                         end
                     end
                 else
-                    oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_);
+                    oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_,options_);
                 end
             else
-                oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_);
+                oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_,options_);
             end
         else
-            oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_);
+            oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_,options_);
         end
     else
-        oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_);
+        oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_,options_);
     end
 else
-    oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_);
+    oo_ = initialize_output_structure(var1,var2,nar,TYPE,oo_,options_);
 end
 ListOfFiles = dir([ PATH  fname '_' TYPE 'Correlations*.mat']);
 i1 = 1; tmp = zeros(SampleSize,1);
@@ -91,8 +91,13 @@ for file = 1:length(ListOfFiles)
 end
 name = [ var1 '.' var2 ];
 if ~isconst(tmp)
-    [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
-        posterior_moments(tmp,1,mh_conf_sig);
+    if options_.estimation.moments_posterior_density.indicator
+        [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
+            posterior_moments(tmp,1,mh_conf_sig);
+    else
+        [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
+            posterior_moments(tmp,0,mh_conf_sig);
+    end
     if isfield(oo_,[ TYPE 'TheoreticalMoments'])
         eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments;'])
         if isfield(temporary_structure,'dsge')
@@ -104,7 +109,9 @@ if ~isconst(tmp)
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDinf',nar,hpd_interval(1));
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDsup',nar,hpd_interval(2));
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'deciles',nar,p_deciles);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'density',nar,density);
+                if options_.estimation.moments_posterior_density.indicator
+                    oo_ = fill_output_structure(var1,var2,TYPE,oo_,'density',nar,density);
+                end
             end
         end
     end
@@ -120,13 +127,15 @@ else
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDinf',nar,NaN);
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDsup',nar,NaN);
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'deciles',nar,NaN);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'density',nar,NaN);
+                if options_.estimation.moments_posterior_density.indicator
+                    oo_ = fill_output_structure(var1,var2,TYPE,oo_,'density',nar,NaN);
+                end
             end
         end
     end
 end
 
-function oo_ = initialize_output_structure(var1,var2,nar,type,oo_)
+function oo_ = initialize_output_structure(var1,var2,nar,type,oo_,options_)
 name = [ var1 '.' var2 ];
 eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.Mean.' name ' = NaN(' int2str(nar) ',1);']);
 eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.Median.' name ' = NaN(' int2str(nar) ',1);']);
@@ -134,9 +143,13 @@ eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.Variance.' name ' = NaN('
 eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.HPDinf.' name ' = NaN(' int2str(nar) ',1);']);
 eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.HPDsup.' name ' = NaN(' int2str(nar) ',1);']);
 eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.deciles.' name ' = cell(' int2str(nar) ',1);']);
-eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.density.' name ' = cell(' int2str(nar) ',1);']);
+if options_.estimation.moments_posterior_density.indicator
+    eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.density.' name ' = cell(' int2str(nar) ',1);']);
+end
 for i=1:nar
-    eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.density.' name '(' int2str(i) ',1) = {NaN};']);
+    if options_.estimation.moments_posterior_density.indicator
+        eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.density.' name '(' int2str(i) ',1) = {NaN};']);
+    end
     eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.deciles.' name '(' int2str(i) ',1) = {NaN};']);
 end
 
