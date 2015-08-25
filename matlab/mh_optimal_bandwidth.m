@@ -21,10 +21,10 @@ function optimal_bandwidth = mh_optimal_bandwidth(data,number_of_draws,bandwidth
 %   none.
 %
 % REFERENCES:
-%   [1] M. Skold and G.O. Roberts [2003], "Density estimation for the Metropolis-Hastings algorithm". 
+%   [1] M. Skoeld and G.O. Roberts [2003], "Density estimation for the Metropolis-Hastings algorithm". 
 %   [2] Silverman [1986], "Density estimation for statistics and data analysis". 
 
-% Copyright (C) 2004-2011 Dynare Team
+% Copyright (C) 2004-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -44,44 +44,43 @@ function optimal_bandwidth = mh_optimal_bandwidth(data,number_of_draws,bandwidth
 %% Kernel specifications.
 if strcmpi(kernel_function,'gaussian')
     % Kernel definition
-    k    = inline('inv(sqrt(2*pi))*exp(-0.5*x.^2)');
+    k    = @(x)inv(sqrt(2*pi))*exp(-0.5*x.^2);
     % Second derivate of the kernel function
-    k2   = inline('inv(sqrt(2*pi))*(-exp(-0.5*x.^2)+(x.^2).*exp(-0.5*x.^2))');
+    k2   = @(x)inv(sqrt(2*pi))*(-exp(-0.5*x.^2)+(x.^2).*exp(-0.5*x.^2));
     % Fourth derivate of the kernel function
-    k4   = inline('inv(sqrt(2*pi))*(3*exp(-0.5*x.^2)-6*(x.^2).*exp(-0.5*x.^2)+(x.^4).*exp(-0.5*x.^2))');
+    k4   = @(x)inv(sqrt(2*pi))*(3*exp(-0.5*x.^2)-6*(x.^2).*exp(-0.5*x.^2)+(x.^4).*exp(-0.5*x.^2));
     % Sixth derivate of the kernel function
-    k6   = inline(['inv(sqrt(2*pi))*(-15*exp(-0.5*x.^2)+45*(x.^2).*exp(-' ...
-                   '0.5*x.^2)-15*(x.^4).*exp(-0.5*x.^2)+(x.^6).*exp(-0.5*x.^2))']);
+    k6   = @(x)inv(sqrt(2*pi))*(-15*exp(-0.5*x.^2)+45*(x.^2).*exp(-0.5*x.^2)-15*(x.^4).*exp(-0.5*x.^2)+(x.^6).*exp(-0.5*x.^2));
     mu02 = inv(2*sqrt(pi));
     mu21 = 1;
 elseif strcmpi(kernel_function,'uniform') 
-    k    = inline('0.5*(abs(x) <= 1)');
+    k    = @(x)0.5*(abs(x) <= 1);
     mu02 = 0.5;
     mu21 = 1/3;
 elseif strcmpi(kernel_function,'triangle') 
-    k    = inline('(1-abs(x)).*(abs(x) <= 1)');
+    k    = @(x)(1-abs(x)).*(abs(x) <= 1);
     mu02 = 2/3;
     mu21 = 1/6;
 elseif strcmpi(kernel_function,'epanechnikov') 
-    k    = inline('0.75*(1-x.^2).*(abs(x) <= 1)');
+    k    = @(x)0.75*(1-x.^2).*(abs(x) <= 1);
     mu02 = 3/5;
     mu21 = 1/5;
 elseif strcmpi(kernel_function,'quartic') 
-    k    = inline('0.9375*((1-x.^2).^2).*(abs(x) <= 1)');
+    k    = @(x)0.9375*((1-x.^2).^2).*(abs(x) <= 1);
     mu02 = 15/21;
     mu21 = 1/7;
 elseif strcmpi(kernel_function,'triweight') 
-    k    = inline('1.09375*((1-x.^2).^3).*(abs(x) <= 1)');
-    k2   = inline('(105/4*(1-x.^2).*x.^2-105/16*(1-x.^2).^2).*(abs(x) <= 1)');
-    k4   = inline('(-1575/4*x.^2+315/4).*(abs(x) <= 1)');
-    k6   = inline('(-1575/2).*(abs(x) <= 1)');
+    k    = @(x)1.09375*((1-x.^2).^3).*(abs(x) <= 1);
+    k2   = @(x)(105/4*(1-x.^2).*x.^2-105/16*(1-x.^2).^2).*(abs(x) <= 1);
+    k4   = @(x)(-1575/4*x.^2+315/4).*(abs(x) <= 1);
+    k6   = @(x)(-1575/2).*(abs(x) <= 1);
     mu02 = 350/429;
     mu21 = 1/9;
 elseif strcmpi(kernel_function,'cosinus') 
-    k    = inline('(pi/4)*cos((pi/2)*x).*(abs(x) <= 1)');
-    k2   = inline('(-1/16*cos(pi*x/2)*pi^3).*(abs(x) <= 1)');
-    k4   = inline('(1/64*cos(pi*x/2)*pi^5).*(abs(x) <= 1)');
-    k6   = inline('(-1/256*cos(pi*x/2)*pi^7).*(abs(x) <= 1)');
+    k    = @(x)(pi/4)*cos((pi/2)*x).*(abs(x) <= 1);
+    k2   = @(x)(-1/16*cos(pi*x/2)*pi^3).*(abs(x) <= 1);
+    k4   = @(x)(1/64*cos(pi*x/2)*pi^5).*(abs(x) <= 1);
+    k6   = @(x)(-1/256*cos(pi*x/2)*pi^7).*(abs(x) <= 1);
     mu02 = (pi^2)/16;
     mu21 = (pi^2-8)/pi^2;
 else
@@ -163,7 +162,7 @@ else
 end
 
 optimal_bandwidth = h;
-return,
+return
 
 
 function correction = correction_for_repeated_draws(draws,n)
