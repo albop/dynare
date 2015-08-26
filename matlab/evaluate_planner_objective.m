@@ -92,7 +92,6 @@ if ~isempty(M.endo_histval)
     end
 end
 yhat1 = yhat1(dr.order_var(nstatic+(1:nspred)),1)-dr.ys(dr.order_var(nstatic+(1:nspred)));
-yhat2 = yhat2(dr.order_var(nstatic+(1:nspred)),1)-dr.ys(dr.order_var(nstatic+(1:nspred)));
 u = oo.exo_simul(1,:)';
 
 [Wyyyhatyhat1, err] = A_times_B_kronecker_C(Wyy,yhat1,yhat1,options.threads.kronecker.A_times_B_kronecker_C);
@@ -104,6 +103,7 @@ mexErrCheck('A_times_B_kronecker_C', err);
 planner_objective_value(1) = Wbar+Wy*yhat1+Wu*u+Wyuyhatu1 ...
     + 0.5*(Wyyyhatyhat1 + Wuuuu+Wss);
 if options.ramsey_policy
+    yhat2 = yhat2(dr.order_var(nstatic+(1:nspred)),1)-dr.ys(dr.order_var(nstatic+(1:nspred)));
     [Wyyyhatyhat2, err] = A_times_B_kronecker_C(Wyy,yhat2,yhat2,options.threads.kronecker.A_times_B_kronecker_C);
     mexErrCheck('A_times_B_kronecker_C', err);
     [Wyuyhatu2, err] = A_times_B_kronecker_C(Wyu,yhat2,u,options.threads.kronecker.A_times_B_kronecker_C);
@@ -115,9 +115,13 @@ end
 if ~options.noprint
     skipline()
     disp('Approximated value of planner objective function')
-    disp(['    - with initial Lagrange multipliers set to 0: ' ...
+    if options.ramsey_policy
+        disp(['    - with initial Lagrange multipliers set to 0: ' ...
           num2str(planner_objective_value(2)) ])
-    disp(['    - with initial Lagrange multipliers set to steady state: ' ...
-          num2str(planner_objective_value(1)) ])
+        disp(['    - with initial Lagrange multipliers set to steady state: ' ...
+              num2str(planner_objective_value(1)) ])
+    elseif options.discretionary_policy
+        fprintf('with discretionary policy: %10.8f',planner_objective_value(1))
+    end
     skipline()
 end
