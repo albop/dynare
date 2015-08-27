@@ -845,6 +845,13 @@ information about the configuration file.
 Defines a macro-variable from the command line (the same effect as using
 the Macro directive @code{@@#define} in a model file, @pxref{Macro-processing language}).
 
+@item -I@var{<<path>>}
+Defines a path to search for files to be included by the
+macroprocessor (using the @ref{@@#include} command). Multiple
+@code{-I} flags can be passed on the command line. The paths will be
+searched in the order that the @code{-I} flags are passed and the
+first matching file will be used.
+
 @item nostrict
 Allows Dynare to issue a warning and continue processing when
 @enumerate
@@ -8930,6 +8937,7 @@ constructed as explained above.
 @node Macro directives
 @subsection Macro directives
 
+@anchor{@@#include}
 @deffn {Macro directive} @@#include "@var{FILENAME}"
 @deffnx {Macro directive} @@#include @var{MACRO_VARIABLE}
 This directive simply includes the content of another file at the
