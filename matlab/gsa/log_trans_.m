@@ -26,7 +26,7 @@ end
 if nargin==1,
   xdir0='';
 end
-f=inline('gsa_skewness(log(y+lam))','lam','y');
+f=@(lam,y)gsa_skewness(log(y+lam));
 isig=1;
 if ~(max(y0)<0 | min(y0)>0)
   if gsa_skewness(y0)<0,

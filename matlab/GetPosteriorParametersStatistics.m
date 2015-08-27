@@ -377,18 +377,18 @@ fclose(fid);
 
 
 function oo = Filloo(oo,name,type,postmean,hpdinterval,postmedian,postvar,postdecile,density)
-eval(['oo.posterior_mean.' type '.' name ' = postmean;']);
-eval(['oo.posterior_hpdinf.' type '.' name ' = hpdinterval(1);']); 
-eval(['oo.posterior_hpdsup.' type '.' name ' = hpdinterval(2);']);      
-eval(['oo.posterior_median.' type '.' name ' = postmedian;']);
-eval(['oo.posterior_variance.' type '.' name ' = postvar;']);
-eval(['oo.posterior_std.' type '.' name ' = sqrt(postvar);']);
-eval(['oo.posterior_deciles.' type '.' name ' = postdecile;']);
-eval(['oo.posterior_density.' type '.' name ' = density;']);
+oo.posterior_mean.(type).(name) = postmean;
+oo.posterior_hpdinf.(type).(name) = hpdinterval(1);
+oo.posterior_hpdsup.(type).(name) = hpdinterval(2);
+oo.posterior_median.(type).(name) = postmedian;
+oo.posterior_variance.(type).(name) = postvar;
+oo.posterior_std.(type).(name) = sqrt(postvar);
+oo.posterior_deciles.(type).(name) = postdecile;
+oo.posterior_density.(type).(name) = density;
 
 function [post_mean,hpd_interval,post_var] = Extractoo(oo,name,type)
 hpd_interval = zeros(2,1);
-eval(['post_mean = oo.posterior_mean.' type '.' name ';']);
-eval(['hpd_interval(1) = oo.posterior_hpdinf.' type '.' name ';']); 
-eval(['hpd_interval(2) = oo.posterior_hpdsup.' type '.' name ';']);
-eval(['post_var = oo.posterior_variance.' type '.' name ';']);
+post_mean = oo.posterior_mean.(type).(name);
+hpd_interval(1) = oo.posterior_hpdinf.(type).(name); 
+hpd_interval(2) = oo.posterior_hpdsup.(type).(name);
+post_var = oo.posterior_variance.(type).(name);
