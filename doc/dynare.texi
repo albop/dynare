@@ -845,12 +845,14 @@ information about the configuration file.
 Defines a macro-variable from the command line (the same effect as using
 the Macro directive @code{@@#define} in a model file, @pxref{Macro-processing language}).
 
+@anchor{-I}
 @item -I@var{<<path>>}
 Defines a path to search for files to be included by the
 macroprocessor (using the @ref{@@#include} command). Multiple
 @code{-I} flags can be passed on the command line. The paths will be
 searched in the order that the @code{-I} flags are passed and the
-first matching file will be used.
+first matching file will be used. The flags passed here take priority
+over those passed to @ref{@@#includepath}.
 
 @item nostrict
 Allows Dynare to issue a warning and continue processing when
@@ -8832,6 +8834,8 @@ of the line indicates that the directive is continued on the next
 line. The main directives are:
 @itemize
 @item
+@code{@@#includepath}, paths to search for files that are to be included,
+@item
 @code{@@#include}, for file inclusion,
 @item
 @code{@@#define}, for defining a macro-processor variable,
@@ -8937,13 +8941,34 @@ constructed as explained above.
 @node Macro directives
 @subsection Macro directives
 
+@anchor{@@#includepath}
+@deffn {Macro directive} @@#includepath "@var{PATH}"
+@deffnx {Macro directive} @@#includepath @var{MACRO_VARIABLE}
+This directive adds the colon-separated paths contained in @var{PATH}
+to the list of those to search when looking for a @code{.mod} file
+specified by @ref{@@#include}. Note that these paths are added
+@i{after} any paths passed using @ref{-I}.
+
+@examplehead
+
+@example
+@@#include "/path/to/folder/containing/modfiles:/path/to/another/folder"
+@@#include folders_containing_mod_files
+@end example
+
+@end deffn
+
+
 @anchor{@@#include}
 @deffn {Macro directive} @@#include "@var{FILENAME}"
 @deffnx {Macro directive} @@#include @var{MACRO_VARIABLE}
 This directive simply includes the content of another file at the
 place where it is inserted. It is exactly equivalent to a copy/paste
 of the content of the included file. Note that it is possible to nest
-includes (@i{i.e.} to include a file from an included file).
+includes (@i{i.e.} to include a file from an included file). The file
+will be searched for in the current directory. If it is not found, the
+file will be searched for in the folders provided by @ref{-I} and
+@ref{@@#includepath}.
 
 @examplehead
 
