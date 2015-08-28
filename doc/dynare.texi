@@ -9571,6 +9571,35 @@ GlobalInitFile = /home/usern/dynare/myInitFile.m
 
 @end deffn
 
+@deffn {Configuration block} [paths]
+
+@descriptionhead
+
+The @code{[paths]} block can be used to specify paths that will be
+used when running dynare.
+
+@optionshead
+
+@table @code
+
+@item Include = @var{PATH}
+A colon-separated path to use when searching for files to include via
+@ref{@@#include}. Paths specified via @ref{-I} take priority over
+paths specified here, while these paths take priority over those
+specified by @ref{@@#includepath}.
+
+@end table
+
+@examplehead
+
+@example
+[paths]
+Include = /path/to/folder/containing/modfiles:/path/to/another/folder
+
+@end example
+
+@end deffn
+
 @node Parallel Configuration
 @section Parallel Configuration
 
