@@ -78,7 +78,8 @@ it_ = MaxLag + 1 ;
 if exo_nbr == 0
     oo_.exo_steady_state = [] ;
 end
-[junk,jacobia_] = feval([M_.fname '_dynamic'],z, [oo_.exo_simul ...
+
+[junk,jacobia_] = feval([M_.fname '_dynamic'],z, [zeros(size(oo_.exo_simul)) ...
                     oo_.exo_det_simul], M_.params, zeros(endo_nbr,1), it_);
 if any(junk~=0)
     error(['discretionary_policy: the model must be written in deviation ' ...
