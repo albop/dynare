@@ -43,6 +43,7 @@ MODFILES = \
 	optimal_policy/Ramsey/ramsey_ex_aux.mod \
 	optimal_policy/RamseyConstraints/test1.mod \
 	discretionary_policy/dennis_1.mod \
+	discretionary_policy/Gali_discretion.mod \
 	initval_file/ramst_initval_file.mod \
 	ramst_normcdf_and_friends.mod \
 	ramst_vec.mod \
