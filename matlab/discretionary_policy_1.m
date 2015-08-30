@@ -88,7 +88,13 @@ end
 eq_nbr= size(jacobia_,1);
 instr_nbr=endo_nbr-eq_nbr;
 
-  
+if instr_nbr==0
+    error('discretionary_policy:: There are no available instruments, because the model has as many equations as variables.') 
+end
+if size(Instruments,1)~= instr_nbr
+   error('discretionary_policy:: There are more declared instruments than omitted equations.') 
+end 
+
 instr_id=nan(instr_nbr,1);
 for j=1:instr_nbr
 	vj=deblank(Instruments(j,:));

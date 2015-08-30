@@ -19,7 +19,7 @@ y = y(+1) -(omega/sigma)*(i-pi(+1))+g;
 pi =  beta*pi(+1)+kappa*y+u;
 pi_c = pi+(alpha/(1-alpha))*(q-q(-1));
 q = q(+1)-(1-alpha)*(i-pi(+1))+(1-alpha)*e;
-i = 1.5*pi;
+% i = 1.5*pi;
 end;
 
 shocks;
@@ -29,6 +29,5 @@ var e; stderr 1;
 end;
 
 planner_objective pi_c^2 + y^2;
-
-discretionary_policy(instruments=(i),irf=0,qz_criterium=0.999999);
+discretionary_policy(instruments=(i),irf=0,planner_discount=beta);
 
