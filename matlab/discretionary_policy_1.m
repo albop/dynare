@@ -1,6 +1,6 @@
 function [dr,ys,info]=discretionary_policy_1(oo_,Instruments)
 
-% Copyright (C) 2007-2012 Dynare Team
+% Copyright (C) 2007-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -88,6 +88,7 @@ end
 eq_nbr= size(jacobia_,1);
 instr_nbr=endo_nbr-eq_nbr;
 
+  
 instr_id=nan(instr_nbr,1);
 for j=1:instr_nbr
 	vj=deblank(Instruments(j,:));
@@ -126,24 +127,49 @@ if info
     dr=[];
     return
 else
-	Hold=H;
+	Hold=H; %save previous solution
 	% Hold=[]; use this line if persistent command is not used.
 end
 % update the following elements
 
 LLI=lead_lag_incidence;
-LLI(MaxLag,:)=any(H);
+LLI(MaxLag,:)=any(H); %check if variable drops out in solution 
 
 LLI=LLI';
 tmp=find(LLI);
-LLI(tmp)=1:numel(tmp);
+LLI(tmp)=1:numel(tmp); %renumber
 
-M_.lead_lag_incidence = LLI';
+M_.lead_lag_incidence = LLI'; %update lead_lag_incidence
+
+%update info in M_
+max_lag = M_.maximum_endo_lag;
+endo_nbr = M_.endo_nbr;
+lead_lag_incidence = M_.lead_lag_incidence;
+
+fwrd_var = find(lead_lag_incidence(max_lag+2:end,:))';
+if max_lag > 0
+    pred_var = find(lead_lag_incidence(1,:))';
+    both_var = intersect(pred_var,fwrd_var);
+    pred_var = setdiff(pred_var,both_var);
+    fwrd_var = setdiff(fwrd_var,both_var);
+    stat_var = setdiff([1:endo_nbr]',union(union(pred_var,both_var),fwrd_var));  % static variables
+else
+    pred_var = [];
+    both_var = [];
+    stat_var = setdiff([1:endo_nbr]',fwrd_var);
+end
+M_.nstatic=length(stat_var);
+M_.nfwrd=length(fwrd_var);
+M_.npred=length(pred_var);
+M_.nboth=length(both_var);
+M_.nspred=M_.npred+M_.nboth;
+M_.nsfwrd=M_.nfwrd+M_.nboth;
+M_.ndynamic=M_.endo_nbr-M_.nstatic;
 
 % set the state
 dr=oo_.dr;
 dr.ys =zeros(endo_nbr,1);
-dr=set_state_space(dr,M_,options_);
+dr=set_state_space(dr,M_,options_); %relies on M_.lead_lag_incidence being updated
 order_var=dr.order_var;
 
 T=H(order_var,order_var);
