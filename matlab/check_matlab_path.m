@@ -117,34 +117,26 @@ function flist = getallroutinenames(p, excludedsubfolders)
     if nargin<2
         excludedsubfolders = {};
     end
-    dd = dir(p);
-    flist = {};
-    for f=1:length(dd)
-        if ~(isequal(dd(f).name,'.') || isequal(dd(f).name,'..'))
-            if dd(f).isdir
-                if ~ismember(dd(f).name, excludedsubfolders)
-                    r = getallroutinenames([ p filesep dd(f).name]);
-                    flist = { flist{:} r{:} };
-                end
-            else
-                % Filter out files without m extension.
-                if isequal(dd(f).name(end-1:end),'.m')
-                    flist{length(flist)+1} = [dd(f).name];
-                end
-            end
-        end
-    end
-
-function dlist = getalldirectories(p)
-    dd = dir(p);
-    dlist = {};
-    for f = 1:length(dd)
-        if ~(isequal(dd(f).name,'.') || isequal(dd(f).name,'..'))
-            if dd(f).isdir
-                dlist{length(dlist)+1} = [dd(f).name];
-            end
-        end
+    flist={};
+    %get m-files in this directory
+    dd = dir([p,filesep '*.m']);
+    temp=struct2cell(dd);
+    flist=[flist temp(1,:)];
+    %deal with subdirectories
+    dlist=getalldirectories(p,excludedsubfolders); %first call with excluded directories
+    for ii=1:length(dlist)
+        flist=[flist getallroutinenames([ p filesep dlist{ii}])]; %recursive calls without subfolders
     end
     
+
+function dlist = getalldirectories(p,excluded_directories)
+    if nargin<2
+        excluded_directories = {};
+    end
+    dd = dir(p);
+    dir_result=struct2cell(dd);
+    directory_indicator=cell2mat(dir_result(4,:));
+    dlist = dir_result(1,directory_indicator==1 & ~strcmp('.',dir_result(1,:)) & ~strcmp('..',dir_result(1,:)) & ~ismember(dir_result(1,:),excluded_directories));
+
 function n = position(i, currentpath)
     n = length(strfind(currentpath(1:i), pathsep));
