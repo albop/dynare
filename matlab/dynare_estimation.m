@@ -46,13 +46,16 @@ end
 var_list = check_list_of_variables(options_, M_, var_list);
 options_.varlist = var_list;
 
-if isfield(options_,'nobs')
-    nobs = sort(options_.nobs); 
-else
-    nobs = [];
-end
+nobs = sort(options_.nobs); 
+first_obs = sort(options_.first_obs); 
 
 nnobs = length(nobs);
+nfirstobs = length(first_obs);
+
+if nnobs~=1 && nfirstobs~=1
+    error('You cannot simultaneously do rolling window and recursive estimation')
+end
+    
 horizon = options_.forecast;
 
 if nargin<2 || ~exist(dname) || isempty(dname)
@@ -73,10 +76,15 @@ if options_.logged_steady_state
 end
 
 
-if nnobs > 1
-    for i=1:nnobs
-        options_.nobs = nobs(i);
-        M_.dname = [dname '_' int2str(nobs(i))];
+if nnobs>1 || nfirstobs > 1
+    for i=1:max(nnobs,nfirstobs)
+        if nnobs>1
+            options_.nobs = nobs(i);
+            M_.dname = [dname '_' int2str(nobs(i))];
+        elseif nfirstobs>1;
+            options_.first_obs=first_obs(i);            
+            M_.dname = [dname '_' int2str(first_obs(i))];
+        end
         dynare_estimation_1(var_list,M_.dname);
         if isequal(i,1)
             options_.mode_file = [M_.fname '_mode'];
@@ -86,7 +94,11 @@ if nnobs > 1
                 dynare_estimation_1(var_list,M_.dname);
             end
         end
-        oo_recursive_{nobs(i)} = oo_;
+        if nnobs>1
+            oo_recursive_{nobs(i)} = oo_;
+        elseif nfirstobs>1;
+            oo_recursive_{first_obs(i)} = oo_;
+        end
     end
 else
     dynare_estimation_1(var_list,dname);

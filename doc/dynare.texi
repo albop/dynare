@@ -4797,12 +4797,24 @@ the file after @code{first_obs}
 Runs a recursive estimation and forecast for samples of size ranging
 of @var{INTEGER1} to @var{INTEGER2}. Option @code{forecast} must
 also be specified. The forecasts are stored in the
-@code{RecursiveForecast} field of the results structure (@pxref{RecursiveForecast}). The respective results structures @code{oo_} are saved in @code{oo_recursive_} (@pxref{oo_recursive_}).
+@code{RecursiveForecast} field of the results structure (@pxref{RecursiveForecast}). 
+The respective results structures @code{oo_} are saved in @code{oo_recursive_} (@pxref{oo_recursive_})
+and are indexed with the respective sample length.
 
 @item first_obs = @var{INTEGER}
 @anchor{first_obs}
 The number of the first observation to be used. In case of estimating a DSGE-VAR, 
 @code{first_obs} needs to be larger than the number of lags.  Default: @code{1}
+
+@item first_obs = [@var{INTEGER1}:@var{INTEGER2}]
+@anchor{first_obs1}
+Runs a rolling window estimation and forecast for samples of fixed size @code{nobs} starting with the 
+first observation ranging from @var{INTEGER1} to @var{INTEGER2}. Option @code{forecast} 
+must also be specified. This option is incompatible with requesting recursive forecasts using an 
+expanding window (@pxref{nobs1,,nobs}). The respective results structures @code{oo_} 
+are saved in @code{oo_recursive_} (@pxref{oo_recursive_}) and are indexed with the respective
+first observation of the rolling window.
+
 
 @item prefilter = @var{INTEGER}
 @anchor{prefilter}
