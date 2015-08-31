@@ -1,3 +1,5 @@
+
+@#includepath "folder"
 @#include "endovars.mod"
 
 varexo e_R e_q e_ys e_pies e_A;
