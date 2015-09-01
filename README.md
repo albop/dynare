@@ -1,4 +1,4 @@
-84;0;0c<a name="logo"/>
+<a name="logo"/>
 <div align="center">
 <a href="http://www.dynare.org/" target="_blank">
 <img src="http://www.dynare.org/img/dynare.png" alt="Dynare Logo"></img>
@@ -7,7 +7,7 @@
 
 # Dynare
 
-+[![Join the chat at https://gitter.im/DynareTeam](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DynareTeam?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/DynareTeam](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DynareTeam?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Described on the homepage: <http://www.dynare.org/>
 
