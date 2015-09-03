@@ -55,7 +55,7 @@ int main(int argc, char **argv)
   user.exogenous = new double[exo_nbr];
   user.params = params;
   user.steady_state = steady_state;
-  user.periods = 40;
+  user.periods = 4000;
   user.first_col = endo_nbr;
   user.endo_nbr = endo_nbr;
   user.exo_nbr = exo_nbr;
@@ -197,6 +197,12 @@ int main(int argc, char **argv)
      Set SNES/KSP/KSP/PC runtime options, e.g.,
          -snes_view -snes_monitor -ksp_type <ksp> -pc_type <pc>
   */
+  KSP ksp;
+  PC pc;
+  ierr = SNESGetKSP(snes,&ksp);CHKERRQ(ierr);
+  ierr = KSPGetPC(ksp,&pc);CHKERRQ(ierr);
+  ierr = PCSetType(pc,PCLU);CHKERRQ(ierr);
+  //  PetscOptionsSetValue("-pc_type","lu");
   ierr = SNESSetFromOptions(snes);CHKERRQ(ierr);
 
   /*
@@ -390,7 +396,7 @@ PetscErrorCode FormJacobian(SNES snes,Vec y,Mat J, Mat B,void *ctx)
     xsi - starting interior grid index
     xei - ending interior grid index
   */
-  int row = 0;
+  int row = ys;
   if (ys == 0) /* left boundary */
     {
       PetscReal *y1 = new PetscReal[3*user->endo_nbr];
