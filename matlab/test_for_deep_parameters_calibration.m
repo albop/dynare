@@ -44,10 +44,12 @@ if ~isempty(plist)
     message = [message, ' when using ' tmp(2).name '. '];
     message = [message, 'If these parameters are not initialized in a steadystate file or a steady_state_model-block, Dynare may not be able to solve the model...'];
     message_id  = 'Dynare:ParameterCalibration:NaNValues';
+    warning('off','backtrace')
     warning(message_id,message);
     if strmatch('optimal_policy_discount_factor',plist,'exact')
         warning('Either you have not correctly initialized planner_discount or you are calling a command like steady or stoch_simul that is not allowed in the context of ramsey_policy')
     end
+    warning('on','backtrace')
 else
     info=0;
 end
