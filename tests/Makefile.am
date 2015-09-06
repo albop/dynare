@@ -149,7 +149,8 @@ MODFILES = \
 	simul/Solow_no_varexo.mod \
 	simul/simul_ZLB_purely_forward.mod \
 	simul/simul_ZLB_purely_forward_no_solution.mod \
-	conditional_forecasts/1/fs2000_cal.mod \
+
+	simul/Irreversible_investment.mod \
 	conditional_forecasts/2/fs2000_est.mod \
 	conditional_forecasts/3/fs2000_conditional_forecast_initval.mod \
 	conditional_forecasts/4/fs2000_conditional_forecast_histval.mod \
