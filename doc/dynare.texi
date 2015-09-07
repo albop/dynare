@@ -7465,7 +7465,7 @@ Maximum number of lags for moments in identification analysis. Default: @code{1}
 
 IRF and moment calibration can be defined in @code{irf_calibration} and @code{moment_calibration} blocks:
 
-@deffn Block irf_calibration;
+@deffn Block irf_calibration ;
 @deffnx Block irf_calibration (@var{OPTIONS}@dots{});
 
 @descriptionhead
@@ -7507,7 +7507,7 @@ end;
 
 @end deffn
 
-@deffn Block moment_calibration;
+@deffn Block moment_calibration ;
 @deffnx Block moment_calibration (@var{OPTIONS}@dots{});
 
 @descriptionhead
