@@ -69,8 +69,7 @@ stderr e_pies,inv_gamma_pdf,(1.88/3),(0.9827/10);
 end;
 
 // endogenous prior restrictions
-options_.relative_irf=1;
-irf_calibration;
+irf_calibration(relative_irf);
 y(1:4), e_ys, [ -50 50]; //[first year response]
 //y(1:4), e_ys, [-inf -50]; //[first year response]
 @#for ilag in 21:40

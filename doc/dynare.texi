@@ -7485,6 +7485,15 @@ To set IRF restrictions with specific intervals, the following syntax is used
 When @code{(@var{INTEGER}:@var{INTEGER})} is used, the restriction is considered to be fulfilled by a logical OR.
 A list of restrictions must always be fulfilled with logical AND.
 
+@optionshead
+
+@table @code
+
+@item relative_irf
+@xref{relative_irf}.
+
+@end table
+
 @examplehead
 
 @example
