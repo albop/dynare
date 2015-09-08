@@ -8,6 +8,7 @@ declare -a failed_tests=("");
 declare -a xpassed_tests=("");
 
 # Parse TRS Files
+tosort=""
 for file in $1 ; do
   # Find number of tests run in trs file
   ((total += `grep number-tests $file | cut -d: -f3`))
@@ -20,6 +21,9 @@ for file in $1 ; do
       failed_tests=("${failed_tests[@]}" "$failedfile");
     done
   fi
+
+  time=`grep cputime $file | cut -d: -f3`
+  tosort=`echo $tosort\| $file ' - ' $time:`
 done
 ((passed=$total-$failed));
 
@@ -37,9 +41,14 @@ for file in $2 ; do
       xpassed_tests=("${xpassed_tests[@]}" "$xpassedfile");
     done
   fi
+
+  time=`grep cputime $file | cut -d: -f3`
+  tosort=`echo $tosort\| $file ' - ' $time:`
 done
 ((xfailed=$total_xfail-$xpassed));
 ((total+=$total_xfail));
+
+timing=`echo $tosort | tr ":" "\n" | sort -rn -k4 | sed -e 's/$/:/' | head -n10`
 
 # Determine if we are parsing Matlab or Octave trs files
 if [ `grep -c '.m.trs' <<< $1` -eq 0 ]; then
@@ -81,4 +90,12 @@ if [ $xpassed -gt 0 ] ; then
     echo '|     * '$modfile                        >> $outfile
   done
 fi
+echo '|'                                           >> $outfile
+echo '| LIST OF 10 SLOWEST TESTS:'                 >> $outfile
+if [ "$prg" == "MATLAB" ]; then
+    timing=`sed 's/\.m\.trs/\.mod/g' <<< $timing`
+else
+    timing=`sed 's/\.o\.trs/\.mod/g' <<< $timing`
+fi
+echo $timing | tr ':' '\n' | sed -e 's/^[ \t]*//' | sed '/^$/d' >> $outfile
 echo                                               >> $outfile

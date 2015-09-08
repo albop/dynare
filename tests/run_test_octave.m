@@ -38,8 +38,11 @@ setenv("GNUTERM", "dumb");
 name = getenv("FILESTEM");
 [directory, testfile, ext] = fileparts([top_test_dir '/' name]);
 cd(directory);
+
 printf("\n***  TESTING: %s ***\n", name);
 
+cput = cputime;
+save(['wsOct' testfile '.mat']);
 try
   dynare([testfile ext])
   testFailed = false;
@@ -47,10 +50,14 @@ catch
   printMakeCheckOctaveErrMsg(getenv("FILESTEM"), lasterror);
   testFailed = true;
 end_try_catch
-
 top_test_dir = getenv('TOP_TEST_DIR');
-cd(top_test_dir);
 name = getenv("FILESTEM");
+[directory, testfile, ext] = fileparts([top_test_dir '/' name]);
+load(['wsOct' testfile '.mat']);
+ecput = cputime - cput;
+delete(['wsOct' testfile '.mat']);
+
+cd(top_test_dir);
 fid = fopen([name '.o.trs'], 'w+');
 if testFailed
   fprintf(fid,':test-result: FAIL\n');
@@ -63,6 +70,7 @@ else
   fprintf(fid,':number-failed-tests: 0\n');
   fprintf(fid,':list-of-passed-tests: %s\n', [name '.mod']);
 end
+fprintf(fid,':cputime: %f\n', ecput);
 fclose(fid);
 
 ## Local variables:

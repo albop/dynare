@@ -31,6 +31,9 @@ cd(directory);
 
 disp('');
 disp(['***  TESTING: ' modfile ' ***']);
+
+cput = cputime;
+save(['wsMat' testfile '.mat']);
 try
   dynare([testfile ext], 'console')
   testFailed = false;
@@ -38,8 +41,14 @@ catch exception
   printMakeCheckMatlabErrMsg(strtok(getenv('FILESTEM')), exception);
   testFailed = true;
 end
+top_test_dir = getenv('TOP_TEST_DIR');
+[modfile, name] = strtok(getenv('FILESTEM'));
+[directory, testfile, ext] = fileparts([top_test_dir '/' modfile]);
+load(['wsMat' testfile '.mat']);
+ecput = cputime - cput;
+delete(['wsMat' testfile '.mat']);
 
-cd(getenv('TOP_TEST_DIR'));
+cd(top_test_dir);
 name = strtok(getenv('FILESTEM'));
 fid = fopen([name '.m.trs'], 'w');
 if fid < 0
@@ -58,5 +67,6 @@ else
   fprintf(fid,':number-failed-tests: 0\n');
   fprintf(fid,':list-of-passed-tests: %s\n', [name '.mod']);
 end
+fprintf(fid,':cputime: %f\n', ecput);
 fclose(fid);
 exit;

@@ -38,6 +38,7 @@ failedBlock = {};
 num_block_tests = 0;
 cd([top_test_dir filesep 'block_bytecode']);
 has_optimization_toolbox = user_has_matlab_license('optimization_toolbox');
+cput = cputime;
 for blockFlag = 0:1
     for bytecodeFlag = 0:1
         default_solve_algo = 2;
@@ -128,6 +129,7 @@ for blockFlag = 0:1
         end
     end
 end
+ecput = cputime - cput;
 delete('wsMat.mat')
 cd(getenv('TOP_TEST_DIR'));
 fid = fopen('run_block_byte_tests_matlab.m.trs', 'w+');
@@ -141,5 +143,6 @@ else
   fprintf(fid,':number-tests: %d\n', num_block_tests);
   fprintf(fid,':number-failed-tests: 0\n');
 end
+fprintf(fid,':cputime: %f\n', ecput);
 fclose(fid);
 exit;
