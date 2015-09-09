@@ -136,10 +136,10 @@ MODFILES = \
 	simul/Solow_no_varexo.mod \
 	simul/simul_ZLB_purely_forward.mod \
 	simul/simul_ZLB_purely_forward_no_solution.mod \
-	conditional_forecasts/fs2000_cal.mod \
-	conditional_forecasts/fs2000_est.mod \
-	conditional_forecasts/fs2000_conditional_forecast_initval.mod \
-	conditional_forecasts/fs2000_conditional_forecast_histval.mod \
+	conditional_forecasts/1/fs2000_cal.mod \
+	conditional_forecasts/2/fs2000_est.mod \
+	conditional_forecasts/3/fs2000_conditional_forecast_initval.mod \
+	conditional_forecasts/4/fs2000_conditional_forecast_histval.mod \
 	recursive/ls2003.mod \
 	recursive/ls2003_bayesian.mod \
 	recursive/ls2003_bayesian_xls.mod \
@@ -413,7 +413,7 @@ EXTRA_DIST = \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fsdat_simul.m \
 	missing/simulate_data_with_missing_observations.m \
 	objectives/sgu_ex1.mat \
-	conditional_forecasts/fsdat_simul.m \
+	conditional_forecasts/2/fsdat_simul.m \
 	ms-sbvar/data.m \
 	ms-sbvar/archive-files/ftd_2s_caseall_upperchol3v.m \
 	ms-sbvar/archive-files/ftd_2s_caseall_upperchol4v.m \
