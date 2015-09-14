@@ -10579,9 +10579,8 @@ A @code{nobs} by @code{vobs} array of doubles, the data.
 
 @deftypefn  {dseries} dseries ()
 @deftypefnx {dseries} dseries (@var{INITIAL_DATE})
-@deftypefnx {dseries} dseries (@var{RANGE_OF_DATES})
 
-Instantiates an empty @dseries object, with, if defined, an initial date given by the single element @dates object @var{INITIAL_DATE} or the first element of the @dates object @var{RANGE_OF_DATES}.
+Instantiates an empty @dseries object, with, if defined, an initial date given by the single element @dates object @var{INITIAL_DATE}.
 
 @end deftypefn
 
