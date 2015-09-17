@@ -2656,7 +2656,7 @@ You can use the following types of entries in the block:
 Specifies the standard error of a variable.
 
 @item var @var{VARIABLE_NAME} = @var{EXPRESSION};
-Specifies the variance error of a variable.
+Specifies the variance of a variable.
 
 @item var @var{VARIABLE_NAME}, @var{VARIABLE_NAME} = @var{EXPRESSION};
 Specifies the covariance of two variables.
