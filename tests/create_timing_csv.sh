@@ -1,7 +1,12 @@
 #!/bin/bash
 
 DATE=`date +%Y%m%d`
-CSVDIR="/home/dynbot/testSuiteTiming"
+if [[ "$unamestr" == 'Linux' ]]; then
+    CSVDIR="/home/$USER/testSuiteTiming"
+else
+    CSVDIR="/Users/$USER/testSuiteTiming"
+fi
+
 if [ ! -d $CSVDIR ]; then
     mkdir -p $CSVDIR
 fi
