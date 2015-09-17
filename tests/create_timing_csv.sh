@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DATE=`date +%Y%m%d`
-if [[ "$unamestr" == 'Linux' ]]; then
+if [[ `uname` == 'Linux' ]]; then
     CSVDIR="/home/$USER/testSuiteTiming"
 else
     CSVDIR="/Users/$USER/testSuiteTiming"
