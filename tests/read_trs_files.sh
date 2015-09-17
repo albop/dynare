@@ -69,7 +69,7 @@ echo '|  FAIL: '$failed                            >> $outfile
 echo '| XFAIL: '$xfailed                           >> $outfile
 echo '| XPASS: '$xpassed                           >> $outfile
 if [ $failed -gt 0 ] ; then
-  echo '|  LIST OF FAILED TESTS:'                  >> $outfile
+  echo '| LIST OF FAILED TESTS:'                   >> $outfile
   for file in ${failed_tests[@]} ; do
     if [ "$prg" == "MATLAB" ]; then
       modfile=`sed 's/\.m\.trs/\.mod/g' <<< $file` >> $outfile
@@ -97,5 +97,6 @@ if [ "$prg" == "MATLAB" ]; then
 else
     timing=`sed 's/\.o\.trs/\.mod/g' <<< $timing`
 fi
-echo $timing | tr ':' '\n' | sed -e 's/^[ \t]*//' | sed '/^$/d' >> $outfile
+echo $timing | tr ':' '\n' | sed -e 's/^[ \t]*//' | \
+     sed '/^$/d' | sed -e 's/^|[ ]/|     * /'      >> $outfile
 echo                                               >> $outfile
