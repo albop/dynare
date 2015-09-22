@@ -19,6 +19,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <algorithm>
 #include "Interpreter.hh"
 #define BIG 1.0e+8;
 #define SMALL 1.0e-5;
@@ -34,7 +35,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
                          int maxit_arg_, double solve_tolf_arg, size_t size_of_direction_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg,
                          string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg,
                          bool global_temporary_terms_arg, bool print_arg, bool print_error_arg, mxArray *GlobalTemporaryTerms_arg,
-                         bool steady_state_arg, bool print_it_arg
+                         bool steady_state_arg, bool print_it_arg, int col_x_arg
 #ifdef CUDA
                          , const int CUDA_device_arg, cublasHandle_t cublas_handle_arg, cusparseHandle_t cusparse_handle_arg, cusparseMatDescr_t descr_arg
 #endif
@@ -72,6 +73,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   solve_algo = solve_algo_arg;
   global_temporary_terms = global_temporary_terms_arg;
   print = print_arg;
+  col_x = col_x_arg;
   GlobalTemporaryTerms = GlobalTemporaryTerms_arg;
   print_error = print_error_arg;
   //steady_state = steady_state_arg;
@@ -80,9 +82,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
 }
 
 void
-Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basename, int block_num,
-                              const bool is_linear, const int symbol_table_endo_nbr, const int Block_List_Max_Lag,
-                              const int Block_List_Max_Lead, const int u_count_int, int block*/)
+Interpreter::evaluate_a_block(bool initialization)
 {
   it_code_type begining;
 
@@ -149,8 +149,11 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
       mxFree(r);
       break;
     case SOLVE_FORWARD_COMPLETE:
-      fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_base_name, size, 1, 0, 0, false, stack_solve_algo, solve_algo);
+      if (initialization)
+         {
+           fixe_u(&u, u_count_int, u_count_int);
+           Read_SparseMatrix(bin_base_name, size, 1, 0, 0, false, stack_solve_algo, solve_algo);
+         }
 #ifdef DEBUG
       mexPrintf("in SOLVE_FORWARD_COMPLETE r = mxMalloc(%d*sizeof(double))\n", size);
 #endif
@@ -244,8 +247,11 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
       mxFree(r);
       break;
     case SOLVE_BACKWARD_COMPLETE:
-      fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_base_name, size, 1, 0, 0, false, stack_solve_algo, solve_algo);
+      if (initialization)
+        {
+          fixe_u(&u, u_count_int, u_count_int);
+          Read_SparseMatrix(bin_base_name, size, 1, 0, 0, false, stack_solve_algo, solve_algo);
+        }
       r = (double *) mxMalloc(size*sizeof(double));
       if (steady_state)
         {
@@ -277,8 +283,11 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
       break;
     case SOLVE_TWO_BOUNDARIES_SIMPLE:
     case SOLVE_TWO_BOUNDARIES_COMPLETE:
-      fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_base_name, size, periods, y_kmin, y_kmax, true, stack_solve_algo, solve_algo);
+      if (initialization)
+        {
+          fixe_u(&u, u_count_int, u_count_int);
+          Read_SparseMatrix(bin_base_name, size, periods, y_kmin, y_kmax, true, stack_solve_algo, solve_algo);
+        }
       u_count = u_count_int*(periods+y_kmax+y_kmin);
       r = (double *) mxMalloc(size*sizeof(double));
       begining = it_code;
@@ -303,9 +312,11 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
 
 
 int
-Interpreter::simulate_a_block()
+Interpreter::simulate_a_block(vector_table_conditional_local_type vector_table_conditional_local)
 {
   it_code_type begining;
+  max_res = 0;
+  max_res_idx = 0;
   bool cvg;
   double *y_save;
 #ifdef DEBUG
@@ -347,8 +358,17 @@ Interpreter::simulate_a_block()
       mexPrintf("SOLVE_FORWARD_COMPLETE\n");
       mexEvalString("drawnow;");
 #endif
-      fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_base_name, size, 1, 0, 0, false, stack_solve_algo, solve_algo);
+      if (vector_table_conditional_local.size())
+        {
+          it_code_type curr_it_code = it_code;
+          evaluate_a_block(true);
+          it_code = curr_it_code;
+        }
+      else
+        {
+          fixe_u(&u, u_count_int, u_count_int);
+          Read_SparseMatrix(bin_base_name, size, 1, 0, 0, false, stack_solve_algo, solve_algo);
+        }
       start_code = it_code;
       Per_u_ = 0;
 
@@ -365,8 +385,17 @@ Interpreter::simulate_a_block()
       mexPrintf("SOLVE_BACKWARD_COMPLETE\n");
       mexEvalString("drawnow;");
 #endif
-      fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_base_name, size, 1, 0, 0, false, stack_solve_algo, solve_algo);
+      if (vector_table_conditional_local.size())
+        {
+          it_code_type curr_it_code = it_code;
+          evaluate_a_block(true);
+          it_code = curr_it_code;
+        }
+      else
+        {
+          fixe_u(&u, u_count_int, u_count_int);
+          Read_SparseMatrix(bin_base_name, size, 1, 0, 0, false, stack_solve_algo, solve_algo);
+        }
       start_code = it_code;
       Per_u_ = 0;
 
@@ -389,8 +418,17 @@ Interpreter::simulate_a_block()
           mexPrintf("SOLVE_TWO_BOUNDARIES in a steady state model: impossible case\n");
           return ERROR_ON_EXIT;
         }
-      fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_base_name, size, periods, y_kmin, y_kmax, true, stack_solve_algo, solve_algo);
+      if (vector_table_conditional_local.size())
+        {
+          it_code_type curr_it_code = it_code;
+          evaluate_a_block(true);
+          it_code = curr_it_code;
+        }
+      else
+        {
+          fixe_u(&u, u_count_int, u_count_int);
+          Read_SparseMatrix(bin_base_name, size, periods, y_kmin, y_kmax, true, stack_solve_algo, solve_algo);
+        }
       u_count = u_count_int*(periods+y_kmax+y_kmin);
       r = (double *) mxMalloc(size*sizeof(double));
       res = (double *) mxMalloc(size*periods*sizeof(double));
@@ -410,18 +448,27 @@ Interpreter::simulate_a_block()
               max_res = 0;
               max_res_idx = 0;
               memcpy(y_save, y, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
-
+              if (vector_table_conditional_local.size())
+                {
+                  for (vector_table_conditional_local_type::iterator it1 = vector_table_conditional_local.begin(); it1 != vector_table_conditional_local.end() ; it1++)
+                    {
+                      if (it1->is_cond)
+                        {
+                          //mexPrintf("y[%d] = %f\n", it1->var_endo + y_kmin * size, y[it1->var_endo + y_kmin * size]);
+                          y[it1->var_endo + y_kmin * size] = it1->constrained_value;
+                        }
+                        
+                    }
+                }
               compute_complete_2b(false, &res1, &res2, &max_res, &max_res_idx);
               end_code = it_code;
-
               if (!(isnan(res1) || isinf(res1)))
                 cvg = (max_res < solve_tolf);
               if (isnan(res1) || isinf(res1) || (stack_solve_algo == 4 && iter > 0))
                   memcpy(y, y_save, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
               u_count = u_count_saved;
               int prev_iter = iter;
-
-              Simulate_Newton_Two_Boundaries(block_num, symbol_table_endo_nbr, y_kmin, y_kmax, size, periods, cvg, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names);
+              Simulate_Newton_Two_Boundaries(block_num, symbol_table_endo_nbr, y_kmin, y_kmax, size, periods, cvg, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names, vector_table_conditional_local);
               iter++;
               if (iter > prev_iter)
                 {
@@ -448,7 +495,8 @@ Interpreter::simulate_a_block()
           end_code = it_code;
 
           cvg = false;
-          Simulate_Newton_Two_Boundaries(block_num, symbol_table_endo_nbr, y_kmin, y_kmax, size, periods, cvg, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names);
+          Simulate_Newton_Two_Boundaries(block_num, symbol_table_endo_nbr, y_kmin, y_kmax, size, periods, cvg, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names, vector_table_conditional_local);
+          max_res = 0; max_res_idx = 0;
         }
       it_code = end_code;
       mxFree(r);
@@ -510,17 +558,14 @@ Interpreter::print_a_block()
     }
 }
 
-bool
-Interpreter::compute_blocks(string file_name, string bin_basename, bool evaluate, int block, int &nb_blocks)
+void 
+Interpreter::ReadCodeFile(string file_name, CodeLoad &code)
 {
-  bool result = true;
-
-  int var;
   if (steady_state)
     file_name += "_static";
   else
     file_name += "_dynamic";
-  CodeLoad code;
+ 
   //First read and store in memory the code
   code_liste = code.get_op_code(file_name);
   EQN_block_number = code.get_block_number();
@@ -536,12 +581,51 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool evaluate
       tmp << " in compute_blocks, input argument block = " << block+1 << " is greater than the number of blocks in the model (" << code.get_block_number() << " see M_.block_structure_stat.block)\n";
       throw FatalExceptionHandling(tmp.str());
     }
-  //The big loop on intructions
+
+}
+
+
+void
+Interpreter::check_for_controlled_exo_validity(FBEGINBLOCK_ *fb,vector<s_plan> sconstrained_extended_path)
+{
+  vector<unsigned int> exogenous = fb->get_exogenous();
+  vector<int> endogenous = fb->get_endogenous();
+  for (vector<s_plan>::iterator it = sconstrained_extended_path.begin(); it != sconstrained_extended_path.end(); it++)
+    {
+      if ((find(endogenous.begin(), endogenous.end(), it->exo_num) != endogenous.end()) &&  (find(exogenous.begin(), exogenous.end(), it->var_num) == exogenous.end()))
+        {
+          ostringstream tmp;
+          tmp << "\n the conditional forecast involving as constrained variable " << get_variable(eEndogenous, it->exo_num) << " and as endogenized exogenous " << get_variable(eExogenous, it->var_num) << " that do not appear in block=" << Block_Count+1 << ")\n You should not use block in model options\n";
+          throw FatalExceptionHandling(tmp.str());
+        }
+      else if ((find(endogenous.begin(), endogenous.end(), it->exo_num) != endogenous.end()) &&  (find(exogenous.begin(), exogenous.end(), it->var_num) != exogenous.end()) && ((fb->get_type() == EVALUATE_FORWARD) || (fb->get_type() != EVALUATE_BACKWARD)))
+        {
+          ostringstream tmp;
+          tmp << "\n the conditional forecast cannot be implemented for the block=" << Block_Count+1 << ") that has to be evaluated instead to be solved\n You should not use block in model options\n";
+          throw FatalExceptionHandling(tmp.str());
+        }
+      else if (find(previous_block_exogenous.begin(), previous_block_exogenous.end(), it->var_num) != previous_block_exogenous.end())
+        {
+          ostringstream tmp;
+          tmp << "\n the conditional forecast involves in the block " << Block_Count+1 << " the endogenized exogenous " << get_variable(eExogenous, it->var_num) << " that appear also in a previous block\n You should not use block in model options\n";
+          throw FatalExceptionHandling(tmp.str());
+        }
+    }
+  for (vector<unsigned int>::iterator it = exogenous.begin(); it != exogenous.end(); it++)
+    previous_block_exogenous.push_back(*it);
+}
+
+
+
+bool
+Interpreter::MainLoop(string bin_basename, CodeLoad code, bool evaluate, int block, bool last_call, bool constrained, vector<s_plan> sconstrained_extended_path, vector_table_conditional_local_type vector_table_conditional_local)
+{
+  int var;
   Block_Count = -1;
   bool go_on = true;
+  double max_res_local = 0;
+  int max_res_idx_local = 0;
 
-  it_code = code_liste.begin();
-  it_code_type Init_Code = it_code;
   if (block < 0)
     {
       if (steady_state)
@@ -568,6 +652,10 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool evaluate
             FBEGINBLOCK_ *fb = (FBEGINBLOCK_ *) it_code->second;
             Block_Contain = fb->get_Block_Contain();
             it_code++;
+            if (constrained)
+              {
+                check_for_controlled_exo_validity(fb,sconstrained_extended_path);
+              }
             set_block(fb->get_size(), fb->get_type(), file_name, bin_basename, Block_Count, fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int(), block);
             if (print)
               print_a_block();
@@ -581,7 +669,9 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool evaluate
                   {
 #ifdef DEBUG
                     mexPrintf("allocates jacobian_exo_block( %d, %d, mxREAL)\n", fb->get_size(), fb->get_exo_size());
+                    mexPrintf("(0) Allocating Jacobian\n");
 #endif
+
                     jacobian_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_exo_jacob(), mxREAL));
                     jacobian_det_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_det_exo_jacob(), mxREAL));
                     jacobian_other_endo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_other_endo_jacob(), mxREAL));
@@ -593,19 +683,51 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool evaluate
                     else
                       residual = vector<double>(fb->get_size()*(periods+y_kmin));
                   }
-                evaluate_a_block();
+                evaluate_a_block(true);
               }
             else
               {
 #ifdef DEBUG
                 mexPrintf("endo in Block_Count=%d, block=%d, type=%d, steady_state=%d, print_it=%d, Block_Count=%d, fb->get_is_linear()=%d, fb->get_endo_nbr()=%d, fb->get_Max_Lag()=%d, fb->get_Max_Lead()=%d, fb->get_u_count_int()=%d\n",
                           Block_Count, fb->get_size(), fb->get_type(), steady_state, print_it, Block_Count, fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
-#endif
-                result = simulate_a_block();
+#endif      
+                bool result;
+                if (sconstrained_extended_path.size())
+                  {
+                    //mexPrintf("(1) Allocating Jacobian fb->get_size()=%d fb->get_nb_col_jacob()=%d\n", fb->get_size(), fb->get_nb_col_jacob());
+                    jacobian_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_jacob(), mxREAL));
+                    //mexPrintf("mxGetPr(jacobian_block[block_num])=%x\n",mxGetPr(jacobian_block[0]));
+                    jacobian_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_exo_jacob(), mxREAL));
+                    jacobian_det_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_det_exo_jacob(), mxREAL));
+                    jacobian_other_endo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_other_endo_jacob(), mxREAL));
+                    residual = vector<double>(fb->get_size()*(periods+y_kmin));
+                    result = simulate_a_block(vector_table_conditional_local);
+                    
+                    mxDestroyArray(jacobian_block.back());
+                    jacobian_block.pop_back();
+                    mxDestroyArray(jacobian_exo_block.back());
+                    jacobian_exo_block.pop_back();
+                    mxDestroyArray(jacobian_det_exo_block.back());
+                    jacobian_det_exo_block.pop_back();
+                    mxDestroyArray(jacobian_other_endo_block.back());
+                    jacobian_other_endo_block.pop_back();
+                  }
+                else
+                  {
+                    result = simulate_a_block(vector_table_conditional_local);
+                  }
+                  
+                //mexPrintf("OKe\n");
+                if (max_res > max_res_local)
+                  {
+                    max_res_local = max_res;
+                    max_res_idx_local = max_res_idx;
+                  }
                 if (result == ERROR_ON_EXIT)
                   return ERROR_ON_EXIT;
               }
-            delete fb;
+            if (last_call)
+              delete fb;
           }
           if (block >= 0)
             {
@@ -667,9 +789,163 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool evaluate
           throw FatalExceptionHandling(tmp.str());
         }
     }
+  max_res = max_res_local ;
+  max_res_idx = max_res_idx_local;
+  Close_SaveCode();
+  return true;
+}
+
+string
+Interpreter::elastic(string str, unsigned int len, bool left)
+{
+  if (str.length() > len)
+    return str;
+  else
+    {
+      int diff = len - str.length();
+      if (diff % 2 == 0)
+        {
+          if (left)
+            {
+              //mexPrintf("(1) diff=%d\n",diff);
+              str.insert(str.end(),diff-1,' ');
+              str.insert(str.begin(),1,' ');
+            }
+          else
+            {
+              str.insert(str.end(),diff/2,' ');
+              str.insert(str.begin(),diff/2,' ');
+            }
+        }
+      else
+        {
+          if (left)
+            {
+              //mexPrintf("(2) diff=%d\n",diff);
+              str.insert(str.end(),diff-1,' ');
+              str.insert(str.begin(),1,' ');
+            }
+          else
+            {
+              str.insert(str.end(),ceil(diff/2),' ');
+              str.insert(str.begin(),ceil(diff/2+1),' ');
+            }
+        }
+      return str;
+    }
+}
+
+bool
+Interpreter::extended_path(string file_name, string bin_basename, bool evaluate, int block, int &nb_blocks, int nb_periods, vector<s_plan> sextended_path, vector<s_plan> sconstrained_extended_path, vector<string> dates, table_conditional_global_type table_conditional_global)
+{
+  CodeLoad code;
+  ReadCodeFile(file_name, code);
+  it_code = code_liste.begin();
+  it_code_type Init_Code = code_liste.begin();
+  size_t size_of_direction = y_size*(periods + y_kmax + y_kmin)*sizeof(double);
+  double *y_save = (double *) mxMalloc(size_of_direction);
+  double *x_save = (double *) mxMalloc((periods + y_kmax + y_kmin) * col_x *sizeof(double));
+  vector_table_conditional_local_type vector_table_conditional_local;
+  vector_table_conditional_local.clear();
+
+  int endo_name_length_l = endo_name_length;
+  for (int j = 0; j < col_x* nb_row_x; j++)
+    x_save[j] = x[j];
+  for (int i = 0; i < (y_size*(periods + y_kmax + y_kmin)); i++)
+    y_save[i]  = y[i];
+  if (endo_name_length_l < 8)
+    endo_name_length_l = 8;
+  //mexPrintf("endo_name_length = %d\n",endo_name_length_l);
+  print_it = false;
+  //print_it = true;
+  mexPrintf("\nExtended Path simulation:\n");
+  mexPrintf("-------------------------\n");
+  ostringstream res1;
+  res1 << std::scientific << 2.54656875434865131;
+  int real_max_length = res1.str().length();
+  int date_length = dates[0].length();
+  int table_length = 2 + date_length + 3 + endo_name_length_l + 3 + real_max_length + 3 + 3 + 2 + 6 + 2;
+  string line;
+  line.insert(line.begin(),table_length,'-');
+  line.insert(line.length(),"\n");
+  mexPrintf(line.c_str());
+  string title = "|" + elastic("date",date_length+2, false) + "|" + elastic("variable",endo_name_length_l+2, false) + "|" + elastic("max. value",real_max_length+2, false) + "| iter. |" + elastic("cvg",5, false) + "|\n";
+  mexPrintf(title.c_str());
+  mexPrintf(line.c_str());
+  for (int t = 0; t < nb_periods; t++)
+    {
+      nb_blocks = 0;
+      previous_block_exogenous.clear();
+      mexPrintf("|%s|",elastic(dates[t], date_length+2, false).c_str());
+      mexEvalString("drawnow;");
+      for (vector<s_plan>::const_iterator it = sextended_path.begin(); it != sextended_path.end(); it++)
+        x[y_kmin + (it->exo_num - 1) * (periods + y_kmax + y_kmin)] = it->value[t];
+      it_code = Init_Code;
+      vector_table_conditional_local.clear();
+      if (table_conditional_global.size())
+        vector_table_conditional_local = table_conditional_global[t];
+      if (t < nb_periods)
+        MainLoop(bin_basename, code, evaluate, block, false, true, sconstrained_extended_path, vector_table_conditional_local);
+      else 
+        MainLoop(bin_basename, code, evaluate, block, true, true, sconstrained_extended_path, vector_table_conditional_local);
+      for (int j = 0; j < y_size; j++)
+        {
+          y_save[j + (t + y_kmin) * y_size] = y[ j +  (y_kmin) * y_size];
+          if (y_kmin > 0)
+            y[j ] = y[ j +  (y_kmin) * y_size];
+        }
+      for (int j = 0; j < col_x; j++)
+        {
+          x_save[t + y_kmin + j * nb_row_x] = x[y_kmin + j * nb_row_x];
+          x[y_kmin + j * nb_row_x] = 0;
+        }
+        
+      ostringstream res, res1;
+      for (unsigned int i = 0; i < endo_name_length; i++)
+        if (P_endo_names[CHAR_LENGTH*(max_res_idx+i*y_size)] != ' ')
+          res << P_endo_names[CHAR_LENGTH*(max_res_idx+i*y_size)];
+      res1 << std::scientific << max_res;
+      mexPrintf("%s|%s| %4d  |  x  |\n",elastic(res.str(),endo_name_length_l+2, true).c_str(), elastic(res1.str(), real_max_length+2, false).c_str(), iter);
+      mexPrintf(line.c_str());
+      mexEvalString("drawnow;");
+    }
+  for (int j = 0; j < y_size; j++)
+    {
+      for(int k = nb_periods; k < periods; k++)
+        y_save[j + (k + y_kmin) * y_size] = y[ j +  ( k - (nb_periods-1) + y_kmin) * y_size];
+    }
+  for (int i = 0; i < (y_size*(periods + y_kmax + y_kmin)); i++)
+    y[i]  = y_save[i];
+  for (int j = 0; j < col_x* nb_row_x; j++)
+    x[j] = x_save[j];
+    
+  mxFree(Init_Code->second);
+  mxFree(y_save);
+  mxFree(x_save);
+  nb_blocks = Block_Count+1;
+  if (T && !global_temporary_terms)
+    mxFree(T);
+  return true;
+}
+
+bool
+Interpreter::compute_blocks(string file_name, string bin_basename, bool evaluate, int block, int &nb_blocks)
+{
+  CodeLoad code;
+  ReadCodeFile(file_name, code);
+  
+  //The big loop on intructions
+  it_code = code_liste.begin();
+  it_code_type Init_Code = it_code;
+  vector<s_plan> s_plan_junk;
+  vector_table_conditional_local_type vector_table_conditional_local_junk;
+
+  MainLoop(bin_basename, code, evaluate, block, true, false, s_plan_junk, vector_table_conditional_local_junk);
+  
+  
   mxFree(Init_Code->second);
   nb_blocks = Block_Count+1;
   if (T && !global_temporary_terms)
     mxFree(T);
-  return result;
+  return true;
 }

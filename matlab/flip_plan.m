@@ -68,22 +68,34 @@ function plan = flip_plan(plan, exogenous, endogenous, expectation_type, date, v
           end
       end
   end
-  if isempty(plan.constrained_vars_)
-      plan.constrained_vars_ = ix;
-      plan.options_cond_fcst_.controlled_varexo  = iy;
-      if strcmp(expectation_type, 'perfect_foresight')
+  i_ix = find(ix == plan.constrained_vars_);
+  if isempty(i_ix)
+    if isempty(plan.constrained_vars_)
+       plan.constrained_vars_ = ix;
+       plan.options_cond_fcst_.controlled_varexo  = iy;
+       if strcmp(expectation_type, 'perfect_foresight')
           plan.constrained_perfect_foresight_ = 1;
-      else
+       else
           plan.constrained_perfect_foresight_ = 0;
-      end
-  else
-      plan.constrained_vars_ = [plan.constrained_vars_ ; ix];
-      plan.options_cond_fcst_.controlled_varexo  = [plan.options_cond_fcst_.controlled_varexo ; iy];
-      if strcmp(expectation_type, 'perfect_foresight')
+       end
+    else
+       plan.constrained_vars_ = [plan.constrained_vars_ ; ix];
+       plan.options_cond_fcst_.controlled_varexo  = [plan.options_cond_fcst_.controlled_varexo ; iy];
+       if strcmp(expectation_type, 'perfect_foresight')
           plan.constrained_perfect_foresight_ = [plan.constrained_perfect_foresight_ ; 1];
-      else
+       else
           plan.constrained_perfect_foresight_ = [plan.constrained_perfect_foresight_ ; 0];
-      end
-  end
-  plan.constrained_date_{length(plan.constrained_date_) + 1} = date;
-  plan.constrained_paths_{length(plan.constrained_paths_) + 1} = value;
+       end
+    end
+    plan.constrained_date_{length(plan.constrained_date_) + 1} = date;
+    plan.constrained_str_date_{length(plan.constrained_str_date_) + 1} = strings(date);
+    plan.constrained_int_date_{length(plan.constrained_int_date_) + 1} = date - plan.date(1) + 1;
+    plan.constrained_paths_{length(plan.constrained_paths_) + 1} = value;
+  elseif plan.options_cond_fcst_.controlled_varexo(i_ix) == iy % same exogenous and endogenous hard tune
+    [plan.constrained_str_date_{i_ix}, i1, i2] = union(strings(date), plan.constrained_str_date_{i_ix});
+    plan.constrained_date_{i_ix} = [date(i1) plan.constrained_date_{i_ix}(i2)];
+    plan.constrained_int_date_{i_ix} = [date(i1) - plan.date(1) + 1; plan.constrained_int_date_{i_ix}(i2)];
+    plan.constrained_paths_{i_ix} = [value(i1)'; plan.constrained_paths_{i_ix}(i2)];
+  else
+    error(['impossible case you have two conditional forecasts:\n - one involving ' plan.endo_names{plan.options_cond_fcst_.controlled_varexo(i_ix),:} ' as control and ' plan_exo_names{plan.constrained_vars_(ix_)} ' as constrined endogenous\n - the other involving  ' plan.endo_names{plan.options_cond_fcst_.controlled_varexo(iy),:} ' as control and ' plan_exo_names{plan.constrained_vars_(ix)} ' as constrined endogenous\n']);
+  end 

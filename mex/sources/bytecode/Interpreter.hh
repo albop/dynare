@@ -45,10 +45,12 @@ using namespace std;
 class Interpreter : public dynSparseMatrix
 {
 private:
+vector<int> previous_block_exogenous;
 protected:
-  void evaluate_a_block();
-  int simulate_a_block();
+  void evaluate_a_block(bool initialization);
+  int simulate_a_block(vector_table_conditional_local_type vector_table_conditional_local);
   void print_a_block();
+  string elastic(string str, unsigned int len, bool left);
 public:
   ~Interpreter();
   Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
@@ -57,12 +59,16 @@ public:
               int maxit_arg_, double solve_tolf_arg, size_t size_of_direction_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg,
               string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg,
               bool global_temporary_terms_arg, bool print_arg, bool print_error_arg, mxArray *GlobalTemporaryTerms_arg,
-              bool steady_state_arg, bool print_it_arg
+              bool steady_state_arg, bool print_it_arg, int col_x_arg
 #ifdef CUDA
               , const int CUDA_device, cublasHandle_t cublas_handle_arg, cusparseHandle_t cusparse_handle_arg, cusparseMatDescr_t descr_arg
 #endif
               );
+  bool extended_path(string file_name, string bin_basename, bool evaluate, int block, int &nb_blocks, int nb_periods, vector<s_plan> sextended_path, vector<s_plan> sconstrained_extended_path, vector<string> dates, table_conditional_global_type table_conditional_global);
   bool compute_blocks(string file_name, string bin_basename, bool evaluate, int block, int &nb_blocks);
+  void check_for_controlled_exo_validity(FBEGINBLOCK_ *fb,vector<s_plan> sconstrained_extended_path);
+  bool MainLoop(string bin_basename, CodeLoad code, bool evaluate, int block, bool last_call, bool constrained, vector<s_plan> sconstrained_extended_path, vector_table_conditional_local_type vector_table_conditional_local);
+  void ReadCodeFile(string file_name, CodeLoad &code);
 
   inline mxArray *
   get_jacob(int block_num)

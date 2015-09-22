@@ -143,6 +143,9 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
   
   while (go_on)
     {
+#ifdef DEBUG
+      mexPrintf("it_code->first=%d\n",it_code->first);
+#endif
       switch (it_code->first)
         {
         case FNUMEXPR:
@@ -721,7 +724,7 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
           if (!evaluate)
             {
               mexPrintf("impossible case!! \n");
-              mexEvalString("drawnow;pause;");
+              mexEvalString("drawnow;");
             }
 
 #endif
@@ -734,8 +737,8 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
               lag = ((FSTPG3_ *) it_code->second)->get_lag();
               pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
 #ifdef DEBUG
-              mexPrintf("Endo eq=%d, pos_col=%d, size=%d\n", eq, pos_col, size);
-              mexEvalString("drawnow;pause;");
+              mexPrintf("Endo eq=%d, pos_col=%d, size=%d, jacob=%x\n", eq, pos_col, size, jacob);
+              mexPrintf("jacob=%x\n",jacob);
 #endif
               jacob[eq + size*pos_col] = rr;
               break;
@@ -747,7 +750,7 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
               pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
 #ifdef DEBUG
               mexPrintf("other_endo eq=%d, pos_col=%d, size=%d\n", eq, pos_col, size);
-              mexEvalString("drawnow;pause;");
+              mexEvalString("drawnow;");
 #endif
               jacob_other_endo[eq + size*pos_col] = rr;
               break;
@@ -759,7 +762,7 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
               pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
 #ifdef DEBUG
               mexPrintf("Exo eq=%d, pos_col=%d, size=%d\n", eq, pos_col, size);
-              mexEvalString("drawnow;pause;");
+              mexEvalString("drawnow;");
 #endif
               jacob_exo[eq + size*pos_col] = rr;
               break;
@@ -771,7 +774,7 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
               pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
 #ifdef DEBUG
               mexPrintf("Exo det eq=%d, pos_col=%d, size=%d\n", eq, pos_col, size);
-              mexEvalString("drawnow;pause;");
+              mexEvalString("drawnow;");
 #endif
 
               jacob_exo_det[eq + size*pos_col] = rr;
@@ -1480,6 +1483,9 @@ Evaluate::compute_block_time(const int Per_u_, const bool evaluate, /*const int 
           tmp << " in compute_block_time, unknown opcode " << it_code->first << "\n";
           throw FatalExceptionHandling(tmp.str());
         }
+#ifdef DEBUG
+      mexPrintf("it_code++=%d\n",it_code);
+#endif
       it_code++;
     }
 #ifdef DEBUG

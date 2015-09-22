@@ -251,9 +251,10 @@ Get_Arguments_and_global_variables(int nrhs,
                                    bool &print,
                                    bool &print_error,
                                    mxArray *GlobalTemporaryTerms[],
-                                   string *plan_struct_name, string *pfplan_struct_name)
+                                   string *plan_struct_name, string *pfplan_struct_name, bool *extended_path, mxArray *ep_struct[])
 {
   size_t pos;
+  *extended_path = false;
 #ifdef DEBUG_EX
   for (int i = 2; i < nrhs; i++)
 #else
@@ -315,28 +316,39 @@ Get_Arguments_and_global_variables(int nrhs,
             print_error = false;
           else
             {
-              ;
-              if ((pos = Get_Argument(prhs[i]).find("block")) != string::npos)
+              pos = 0;
+              if (Get_Argument(prhs[i]).substr(0, 5) == "block")
                 {
-                  size_t pos1 = Get_Argument(prhs[i]).find("=", pos+5);
+                  size_t pos1 = Get_Argument(prhs[i]).find("=", pos + 5);
                   if (pos1 != string::npos)
                     pos = pos1 + 1;
                   else
                     pos += 5;
                   block =  atoi(Get_Argument(prhs[i]).substr(pos, string::npos).c_str())-1;
                 }
-              else if ((pos = Get_Argument(prhs[i]).find("pfplan")) != string::npos)
+              else if (Get_Argument(prhs[i]).substr(0,13) == "extended_path")
                 {
-                  size_t pos1 = Get_Argument(prhs[i]).find("=", pos+6);
+                  *extended_path = true;
+                  if ((i+1) >= nrhs)
+                    *ep_struct = NULL;
+                  else
+                    {
+                      *ep_struct = mxDuplicateArray(prhs[i + 1]);
+                      i++;
+                    }
+                }
+              else if (Get_Argument(prhs[i]).substr(0, 6) == "pfplan")
+                {
+                  size_t pos1 = Get_Argument(prhs[i]).find("=", pos + 6);
                   if (pos1 != string::npos)
                     pos = pos1 + 1;
                   else
                     pos += 6;
                   *pfplan_struct_name =  deblank(Get_Argument(prhs[i]).substr(pos, string::npos));
                 }
-              else if ((pos = Get_Argument(prhs[i]).find("plan")) != string::npos)
+              else if (Get_Argument(prhs[i]).substr(0, 4) == "plan")
                 {
-                  size_t pos1 = Get_Argument(prhs[i]).find("=", pos+4);
+                  size_t pos1 = Get_Argument(prhs[i]).find("=", pos + 4);
                   if (pos1 != string::npos)
                     pos = pos1 + 1;
                   else
@@ -421,8 +433,15 @@ main(int nrhs, const char *prhs[])
   bool print = false, print_error = true, print_it = false;
   double *steady_yd = NULL, *steady_xd = NULL;
   string plan, pfplan;
+  bool extended_path;
+  mxArray* extended_path_struct;
 
-  vector<s_plan> splan, spfplan;
+  table_conditional_local_type conditional_local;
+  vector<s_plan> splan, spfplan, sextended_path, sconditional_extended_path;
+  vector_table_conditional_local_type vector_conditional_local;
+  table_conditional_global_type table_conditional_global;
+
+  int max_periods = 0;
 
 #ifdef CUDA
   int CUDA_device = -1;
@@ -444,7 +463,7 @@ main(int nrhs, const char *prhs[])
                                          steady_state, evaluate, block,
                                          &M_, &oo_, &options_, global_temporary_terms,
                                          print, print_error, &GlobalTemporaryTerms,
-                                         &plan, &pfplan);
+                                         &plan, &pfplan, &extended_path, &extended_path_struct);
     }
   catch (GeneralExceptionHandling &feh)
     {
@@ -459,9 +478,210 @@ main(int nrhs, const char *prhs[])
     }
 
   ErrorMsg emsg;
-  
+  vector<string> dates;
 
-
+  if (extended_path)
+    {
+      if (extended_path_struct == NULL)
+        {
+          string tmp = "The 'extended_path' option must be followed by the extended_path descriptor";
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      mxArray* date_str = mxGetField(extended_path_struct, 0, "date_str");
+      if (date_str == NULL)
+        {
+          string tmp = "date_str";
+          tmp.insert(0,"The extended_path description structure does not contain the member: ");
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      int nb_periods = mxGetM(date_str) * mxGetN(date_str);
+      
+      mxArray* constrained_vars_ = mxGetField(extended_path_struct, 0, "constrained_vars_");
+      if (constrained_vars_ == NULL)
+        {
+          string tmp = "constrained_vars_";
+          tmp.insert(0,"The extended_path description structure does not contain the member: ");
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      mxArray* constrained_paths_ = mxGetField(extended_path_struct, 0, "constrained_paths_");
+      if (constrained_paths_ == NULL)
+        {
+          string tmp = "constrained_paths_";
+          tmp.insert(0,"The extended_path description structure does not contain the member: ");
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      mxArray* constrained_int_date_ = mxGetField(extended_path_struct, 0, "constrained_int_date_");
+      if (constrained_int_date_ == NULL)
+        {
+          string tmp = "constrained_int_date_";
+          tmp.insert(0,"The extended_path description structure does not contain the member: ");
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      mxArray* constrained_perfect_foresight_ = mxGetField(extended_path_struct, 0, "constrained_perfect_foresight_");
+      if (constrained_perfect_foresight_ == NULL)
+        {
+          string tmp = "constrained_perfect_foresight_";
+          tmp.insert(0,"The extended_path description structure does not contain the member: ");
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      
+      mxArray* shock_var_ = mxGetField(extended_path_struct, 0, "shock_vars_");
+      if (shock_var_ == NULL)
+        {
+          string tmp = "shock_vars_";
+          tmp.insert(0,"The extended_path description structure does not contain the member: ");
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      mxArray* shock_paths_ = mxGetField(extended_path_struct, 0, "shock_paths_");
+      if (shock_paths_ == NULL)
+        {
+          string tmp = "shock_paths_";
+          tmp.insert(0,"The extended_path description structure does not contain the member: ");
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      mxArray* shock_int_date_ = mxGetField(extended_path_struct, 0, "shock_int_date_");
+      if (shock_int_date_ == NULL)
+        {
+          string tmp = "shock_int_date_";
+          tmp.insert(0,"The extended_path description structure does not contain the member: ");
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      mxArray* shock_str_date_ = mxGetField(extended_path_struct, 0, "shock_str_date_");
+      if (shock_str_date_ == NULL)
+        {
+          string tmp = "shock_str_date_";
+          tmp.insert(0,"The extended_path description structure does not contain the member: ");
+          DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+        }
+      int nb_constrained = mxGetM(constrained_vars_) * mxGetN(constrained_vars_);
+      int nb_controlled = 0;
+      mxArray* options_cond_fcst_ = mxGetField(extended_path_struct, 0, "options_cond_fcst_");
+      mxArray* controlled_varexo = NULL;
+      if (options_cond_fcst_  != NULL)
+        {
+          controlled_varexo = mxGetField(options_cond_fcst_, 0, "controlled_varexo");
+          nb_controlled = mxGetM(controlled_varexo) * mxGetN(controlled_varexo);
+          if (nb_controlled != nb_constrained)
+            {
+              DYN_MEX_FUNC_ERR_MSG_TXT("The number of exogenized variables and the number of exogenous controlled variables should be equal.");
+            }
+        }
+      double * controlled_varexo_value = NULL;
+      if (controlled_varexo != NULL)
+        controlled_varexo_value = mxGetPr(controlled_varexo);
+      double * constrained_var_value = mxGetPr(constrained_vars_);
+      sconditional_extended_path.resize(nb_constrained);
+      max_periods = 0;
+      if ( nb_constrained)
+        {
+          conditional_local.is_cond = false;
+          conditional_local.var_exo = 0;
+          conditional_local.var_endo = 0;
+          conditional_local.constrained_value = 0;
+          for (int i = 0; i < nb_periods; i++)
+            {
+              vector_conditional_local.clear();
+              for (unsigned int j = 0; j < row_y; j++)
+                {
+                  conditional_local.var_endo = j;
+                  vector_conditional_local.push_back(conditional_local);
+                }
+              table_conditional_global[i] = vector_conditional_local;
+            }
+        }
+      
+      vector_table_conditional_local_type vv3 = table_conditional_global[0];
+      for (int i = 0; i < nb_constrained; i++)
+        {
+          sconditional_extended_path[i].exo_num = ceil(constrained_var_value[i]);
+          sconditional_extended_path[i].var_num = ceil(controlled_varexo_value[i]);
+          mxArray* Array_constrained_paths_ = mxGetCell(constrained_paths_, i);
+          double *specific_constrained_paths_ = mxGetPr(Array_constrained_paths_);
+          double *specific_constrained_int_date_ = mxGetPr(mxGetCell(constrained_int_date_, i));
+          int nb_local_periods = mxGetM(Array_constrained_paths_) * mxGetN(Array_constrained_paths_);
+          int* constrained_int_date = (int*)mxMalloc(nb_local_periods * sizeof(int));
+          if (nb_periods < nb_local_periods)
+            {
+              ostringstream oss;
+              oss << nb_periods;
+              string tmp = oss.str();
+              tmp.insert(0,"The total number of simulation periods (");
+              tmp.append(") is lesser than the number of periods in the shock definitions (");
+              oss << nb_local_periods;
+              string tmp1 = oss.str();
+              tmp.append(tmp1);
+              tmp.append(")");  
+              DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+            }
+          (sconditional_extended_path[i]).per_value.resize(nb_local_periods);
+          (sconditional_extended_path[i]).value.resize(nb_periods);
+          for (int j = 0; j < nb_periods; j++)
+            sconditional_extended_path[i].value[j] = 0;
+          for (int j = 0; j < nb_local_periods; j++)
+            {
+              constrained_int_date[j] = int(specific_constrained_int_date_[j]) - 1;
+              conditional_local.is_cond = true;
+              conditional_local.var_exo = sconditional_extended_path[i].var_num - 1;
+              conditional_local.var_endo = sconditional_extended_path[i].exo_num - 1;
+              conditional_local.constrained_value = specific_constrained_paths_[j];
+              table_conditional_global[constrained_int_date[j]][sconditional_extended_path[i].exo_num - 1] = conditional_local;
+              sconditional_extended_path[i].per_value[j] = make_pair(constrained_int_date[j], specific_constrained_paths_[j]);
+              sconditional_extended_path[i].value[constrained_int_date[j]] = specific_constrained_paths_[j];
+              if (max_periods < constrained_int_date[j] + 1)
+                  max_periods = constrained_int_date[j] + 1;
+            }
+          mxFree(constrained_int_date);
+        }
+      vector_table_conditional_local_type vv = table_conditional_global[0];
+      double * shock_var_value = mxGetPr(shock_var_);
+      int nb_shocks = mxGetM(shock_var_) * mxGetN(shock_var_);
+      sextended_path.resize(nb_shocks);
+      for (int i = 0; i < nb_shocks; i++)
+        {
+          sextended_path[i].exo_num = ceil(shock_var_value[i]);
+          mxArray* Array_shock_paths_ = mxGetCell(shock_paths_, i);
+          double *specific_shock_paths_ = mxGetPr(Array_shock_paths_);
+          double *specific_shock_int_date_ = mxGetPr(mxGetCell(shock_int_date_, i));
+          int nb_local_periods = mxGetM(Array_shock_paths_) * mxGetN(Array_shock_paths_);
+          if (nb_periods < nb_local_periods)
+            {
+              ostringstream oss;
+              oss << nb_periods;
+              string tmp = oss.str();
+              tmp.insert(0,"The total number of simulation periods (");
+              tmp.append(") is lesser than the number of periods in the shock definitions (");
+              oss << nb_local_periods;
+              string tmp1 = oss.str();
+              tmp.append(tmp1);
+              tmp.append(")");  
+              DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+            }
+          (sextended_path[i]).per_value.resize(nb_local_periods);
+          (sextended_path[i]).value.resize(nb_periods);
+          for (int j = 0; j < nb_periods; j++)
+            sextended_path[i].value[j] = 0;
+          for (int j = 0; j < nb_local_periods; j++)
+            {
+              sextended_path[i].per_value[j] = make_pair(int(specific_shock_int_date_[j]), specific_shock_paths_[j]);
+              sextended_path[i].value[int(specific_shock_int_date_[j]-1)] = specific_shock_paths_[j];
+              if (max_periods < int(specific_shock_int_date_[j]) )
+                  max_periods = int(specific_shock_int_date_[j]);
+            }
+        }
+      for (int i=0; i < nb_periods; i++)
+        {
+          int buflen = mxGetNumberOfElements(mxGetCell(date_str, i)) + 1;
+          char* buf = (char*)mxCalloc(buflen, sizeof(char));
+          int info = mxGetString(mxGetCell(date_str, i), buf, buflen);
+          if (info)
+            {
+              string tmp = "Can not allocated memory to store the date_str in the extended path descriptor";
+              DYN_MEX_FUNC_ERR_MSG_TXT(tmp.c_str());
+            }
+          dates.push_back(string(buf));//string(Dates[i]);
+          mxFree(buf);
+        }
+    }
   if (plan.length()>0)
     {
       mxArray* plan_struct = mexGetVariable("base", plan.c_str());
@@ -483,7 +703,7 @@ main(int nrhs, const char *prhs[])
               char name [100];
               mxGetString(tmp, name, 100);
               splan[i].var = name;
-              SymbolType variable_type;
+              SymbolType variable_type = eEndogenous;
               int exo_num = emsg.get_ID(name, &variable_type);
               if (variable_type == eExogenous || variable_type == eExogenousDet)
                 splan[i].var_num = exo_num;
@@ -561,7 +781,7 @@ main(int nrhs, const char *prhs[])
               char name [100];
               mxGetString(tmp, name, 100);
               spfplan[i].var = name;
-              SymbolType variable_type;
+              SymbolType variable_type = eEndogenous;
               int exo_num = emsg.get_ID(name, &variable_type);
               if (variable_type == eExogenous || variable_type == eExogenousDet)
                 splan[i].var_num = exo_num;
@@ -823,7 +1043,7 @@ main(int nrhs, const char *prhs[])
   clock_t t0 = clock();
   Interpreter interprete(params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal,
                          markowitz_c, file_name, minimal_solving_periods, stack_solve_algo, solve_algo, global_temporary_terms, print, print_error, GlobalTemporaryTerms, steady_state,
-                         print_it
+                         print_it, col_x
 #ifdef CUDA
                          , CUDA_device, cublas_handle, cusparse_handle, descr
 #endif
@@ -833,13 +1053,27 @@ main(int nrhs, const char *prhs[])
   int nb_blocks = 0;
   double *pind;
   bool no_error = true;
-  try
+  if (extended_path)
     {
-      interprete.compute_blocks(f, f, evaluate, block, nb_blocks);
+        try
+          {
+            interprete.extended_path(f, f, evaluate, block, nb_blocks, max_periods, sextended_path, sconditional_extended_path, dates, table_conditional_global);
+          }
+        catch (GeneralExceptionHandling &feh)
+          {
+            DYN_MEX_FUNC_ERR_MSG_TXT(feh.GetErrorMsg().c_str());
+          }
     }
-  catch (GeneralExceptionHandling &feh)
+  else
     {
-      DYN_MEX_FUNC_ERR_MSG_TXT(feh.GetErrorMsg().c_str());
+        try
+          {
+            interprete.compute_blocks(f, f, evaluate, block, nb_blocks);
+          }
+        catch (GeneralExceptionHandling &feh)
+          {
+            DYN_MEX_FUNC_ERR_MSG_TXT(feh.GetErrorMsg().c_str());
+          }
     }
 
 #ifdef CUDA
@@ -947,9 +1181,10 @@ main(int nrhs, const char *prhs[])
                 }
               else
                 {
-                  plhs[2] = mxCreateDoubleMatrix(1, 1, mxREAL);
-                  pind = mxGetPr(plhs[0]);
-                  pind[0] = NAN;
+                  plhs[2] = mxCreateDoubleMatrix(int(row_x), int(col_x), mxREAL);
+                  pind = mxGetPr(plhs[2]);
+                  for (i = 0; i < row_x*col_x; i++)
+                    pind[i] = x[i];
                 }
               if (nlhs > 3)
                 {
