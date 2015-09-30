@@ -733,8 +733,13 @@ cannot be named @file{test.mod}.
 
 @item noclearall
 By default, @code{dynare} will issue a @code{clear all} command to
-MATLAB or Octave, thereby deleting all workspace variables; this option
-instructs @code{dynare} not to clear the workspace
+MATLAB (<R2015b) or Octave, thereby deleting all workspace variables and
+functions; this option instructs @code{dynare} not to clear the
+workspace. Note that starting with Matlab 2015b @code{dynare} only
+deletes the global variables and the functions using persistent
+variables, in order to benefit from the JIT (Just In Time)
+compilation. In this case the option instructs @code{dynare} not to
+clear the globals and functions.
 
 @item onlyclearglobals
 By default, @code{dynare} will issue a @code{clear all} command to
