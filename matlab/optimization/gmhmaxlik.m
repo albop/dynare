@@ -33,9 +33,9 @@ if ~isempty(OptimizationOptions)
             gmhmaxlikOptions.iterations = DynareOptionslist{i,2};
           case 'ncov-mh'
             gmhmaxlikOptions.number = DynareOptionslist{i,2};
-          case 'nscale'
+          case 'nscale-mh'
             gmhmaxlikOptions.nscale = DynareOptionslist{i,2};
-          case 'nclimb'
+          case 'nclimb-mh'
             gmhmaxlikOptions.nclimb = DynareOptionslist{i,2};
           case 'InitialCovarianceMatrix'
             switch DynareOptionslist{i,2}
