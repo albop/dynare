@@ -146,7 +146,11 @@ while (niter < maxiter && ~info)
         delta = 0.5*delta;
         if (delta <= 1e1*macheps*xn)
             % Trust region became uselessly small.
-            info = -3;
+            if (fn1 <= tolf)
+                info = 1;
+            else
+                info = -3;
+            end
             break;
         end
     elseif (abs (1-ratio) <= 0.1)
@@ -179,8 +183,11 @@ while (niter < maxiter && ~info)
         info = 1;
     end
 end
-
-check = ~info;
+if info==1
+    check = 0;
+else
+    check = 1;
+end
 end
 
 
