@@ -93,7 +93,7 @@ end
 %   stailstr=[' P' num2str(i) stailstr];
 %end
 
-[f0,junk1,junk2,cost_flag] = penalty_objective_function(x0,fcn,penalty,varargin{:});
+[f0,cost_flag,arg1] = penalty_objective_function(x0,fcn,penalty,varargin{:});
 
 if ~cost_flag
     disp_verbose('Bad initial parameter.',Verbose)
@@ -105,7 +105,7 @@ if NumGrad
 elseif ischar(grad)
     [g,badg] = grad(x0,varargin{:});
 else
-    g=junk1;
+    g=arg1;
     badg=0;
 end
 retcode3=101;
@@ -144,7 +144,7 @@ while ~done
             elseif ischar(grad),
                 [g1, badg1] = grad(x1,varargin{:});
             else
-                [junk1,g1,junk2, cost_flag] = penalty_objective_function(x1,fcn,penalty,varargin{:});
+                [junk1,cost_flag,g1] = penalty_objective_function(x1,fcn,penalty,varargin{:});
                 badg1 = ~cost_flag;
             end
             wall1=badg1;
@@ -171,7 +171,7 @@ while ~done
                     elseif ischar(grad),
                         [g2, badg2] = grad(x2,varargin{:});
                     else
-                        [junk1,g2,junk2, cost_flag] = penalty_objective_function(x1,fcn,penalty,varargin{:});
+                        [junk1,cost_flag,g2] = penalty_objective_function(x1,fcn,penalty,varargin{:});
                         badg2 = ~cost_flag;
                     end
                     wall2=badg2;
@@ -203,7 +203,7 @@ while ~done
                             elseif ischar(grad),
                                 [g3, badg3] = grad(x3,varargin{:});
                             else
-                                [junk1,g3,junk2, cost_flag] = penalty_objective_function(x1,fcn,penalty,varargin{:});
+                                [junk1,cost_flag,g3] = penalty_objective_function(x1,fcn,penalty,varargin{:});
                                 badg3 = ~cost_flag;
                             end
                             wall3=badg3;
@@ -263,7 +263,7 @@ while ~done
             elseif ischar(grad),
                 [gh, badgh] = grad(xh,varargin{:});
             else
-                [junk1,gh,junk2, cost_flag] = penalty_objective_function(x1,penalty,varargin{:});
+                [junk1,cost_flag,gh] = penalty_objective_function(x1,penalty,varargin{:});
                 badgh = ~cost_flag;
             end
         end

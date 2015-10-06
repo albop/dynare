@@ -70,7 +70,7 @@ end
 
 if ~options_.dsge_var
     if options_.particle.status
-        objective_function = str2func('non_linear_dsge_likelihood');
+        objective_function = str2func('non_linear_dsge_likelihood_1');
         if strcmpi(options_.particle.filter_algorithm, 'sis')
             options_.particle.algorithm = 'sequential_importance_particle_filter';
         elseif strcmpi(options_.particle.filter_algorithm, 'apf')
@@ -291,7 +291,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 if compute_hessian,
                     crit = options_.newrat.tolerance.f;
                     newratflag = newratflag>0;
-                    hh = reshape(mr_hessian(0,xparam1,objective_function,newratflag,crit,dataset_, dataset_info, options_,M_,estim_params_,bayestopt_,bounds,oo_), nx, nx);
+                    hh = reshape(mr_hessian(0,xparam1,objective_function,fval,newratflag,crit,dataset_, dataset_info, options_,M_,estim_params_,bayestopt_,bounds,oo_), nx, nx);
                 end
                 options_.kalman_algo = kalman_algo0;
             end
