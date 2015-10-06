@@ -179,9 +179,8 @@ while (niter < maxiter && ~info)
         info = 1;
     end
 end
-if info~=1
-    check = 1;
-end
+
+check = ~info;
 end
 
 
