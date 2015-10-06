@@ -464,10 +464,8 @@ TARGETS += check-octave
 TEXTOUT += run_test_octave_output.txt
 endif
 
-check-local: $(TEXTOUT)
+check-local: $(TARGETS) $(TEXTOUT)
 	@cat $(TEXTOUT)
-
-$(TEXTOUT): $(TARGETS)
 
 check-matlab: $(M_XFAIL_TRS_FILES) $(M_TRS_FILES)
 	./read_trs_files.sh "$(M_TRS_FILES)" "$(M_XFAIL_TRS_FILES)"
