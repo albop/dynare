@@ -117,9 +117,9 @@ ana_deriv = DynareOptions.analytic_derivation;
 DynareOptions.analytic_derivation=0;
 if ~isequal(DynareOptions.mode_compute,11) || ...
         (isequal(DynareOptions.mode_compute,11) && isequal(DynareOptions.order,1))
-  [fval,junk1,junk2,a,b,c,d] = feval(objective_function,xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults);
+  [fval,a,b,c,d] = objective_function(xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults);
 else 
-    b=0;
+    a=0;
     fval = 0;
 end
 if DynareOptions.debug
@@ -127,10 +127,10 @@ if DynareOptions.debug
 end
 DynareOptions.analytic_derivation=ana_deriv;
 
-if DynareOptions.dsge_var || strcmp(func2str(objective_function),'non_linear_dsge_likelihood')
-    info = b;
-else
+if strcmp(func2str(objective_function),'non_linear_dsge_likelihood')
     info = d;
+else
+    info = a;
 end
 
 % if DynareOptions.mode_compute==5
