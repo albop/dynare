@@ -75,7 +75,6 @@ fval=fval0;
 
 outer_product_gradient=1;
 if isempty(hh)
-    mr_hessian(1,x,[],[],[],[],varargin{:});
     [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,x,func0,penalty,flagit,htol,varargin{:});
     if isempty(dum),
         outer_product_gradient=0;
