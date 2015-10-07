@@ -144,6 +144,7 @@ MODFILES = \
 	recursive/ls2003.mod \
 	recursive/ls2003_bayesian.mod \
 	recursive/ls2003_bayesian_xls.mod \
+	recursive/ls2003_bayesian_csv.mod \
 	ms-sbvar/test_exclusions.mod \
 	ms-sbvar/test_exclusions_nc.mod \
 	ms-sbvar/test_lower_cholesky.mod \
