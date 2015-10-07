@@ -85,6 +85,9 @@ end
 %$ system('touch e.m')
 %$ t(3) = isequal(isolder('e.m'), false);
 %$ cd ..
+%$ if isoctave()
+%$   confirm_recursive_rmdir(false, 'local');
+%$ end
 %$ rmdir('toto','s');
 %$ T = all(t);
 %@eof:1
