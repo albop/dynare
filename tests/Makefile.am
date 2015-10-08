@@ -143,6 +143,7 @@ MODFILES = \
 	conditional_forecasts/4/fs2000_conditional_forecast_histval.mod \
 	recursive/ls2003.mod \
 	recursive/ls2003_bayesian.mod \
+	recursive/ls2003_bayesian_xls.mod \
 	recursive/ls2003_bayesian_csv.mod \
 	ms-sbvar/test_exclusions.mod \
 	ms-sbvar/test_exclusions_nc.mod \
