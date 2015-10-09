@@ -1,6 +1,5 @@
 function [fval,ys,trend_coeff,exit_flag,info,Model,DynareOptions,BayesInfo,DynareResults] = non_linear_dsge_likelihood(xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults)
-% Evaluates the posterior kernel of a dsge model using a non linear
-% filter. Deprecated interface.
+% Evaluates the posterior kernel of a dsge model using a non linear filter.
 
 %@info:
 %! @deftypefn {Function File} {[@var{fval},@var{exit_flag},@var{ys},@var{trend_coeff},@var{info},@var{Model},@var{DynareOptions},@var{BayesInfo},@var{DynareResults}] =} non_linear_dsge_likelihood (@var{xparam1},@var{DynareDataset},@var{DynareOptions},@var{Model},@var{EstimatedParameters},@var{BayesInfo},@var{DynareResults})
@@ -102,7 +101,7 @@ function [fval,ys,trend_coeff,exit_flag,info,Model,DynareOptions,BayesInfo,Dynar
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2010-2015 Dynare Team
+% Copyright (C) 2010-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -122,6 +121,219 @@ function [fval,ys,trend_coeff,exit_flag,info,Model,DynareOptions,BayesInfo,Dynar
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 %           frederic DOT karame AT univ DASH lemans DOT fr
 
-[fval,info,exit_flag,ys,trend_coeff,exit_flag,info,Model,DynareOptions,BayesInfo,DynareResults] = ...
-    non_linear_dsge_likelihood_1(xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,...
-                                 EstimatedParameters,BayesInfo,BoundsInfo,DynareResults);
+persistent init_flag
+persistent restrict_variables_idx observed_variables_idx state_variables_idx mf0 mf1
+persistent sample_size number_of_state_variables number_of_observed_variables number_of_structural_innovations
+
+% Initialization of the returned arguments.
+fval            = [];
+ys              = [];
+trend_coeff     = [];
+exit_flag       = 1;
+
+% Issue an error if loglinear option is used.
+if DynareOptions.loglinear
+    error('non_linear_dsge_likelihood: It is not possible to use a non linear filter with the option loglinear!')
+end
+
+%------------------------------------------------------------------------------
+% 1. Get the structural parameters & define penalties
+%------------------------------------------------------------------------------
+
+% Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
+if (DynareOptions.mode_compute~=1) && any(xparam1<BoundsInfo.lb)
+    k = find(xparam1(:) < BoundsInfo.lb);
+    fval = Inf;
+    exit_flag = 0;
+    info(1) = 41;
+    info(2) = sum((BoundsInfo.lb(k)-xparam1(k)).^2);
+    return
+end
+
+% Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
+if (DynareOptions.mode_compute~=1) && any(xparam1>BoundsInfo.ub)
+    k = find(xparam1(:)>BoundsInfo.ub);
+    fval = Inf;
+    exit_flag = 0;
+    info(1) = 42;
+    info(2) = sum((xparam1(k)-BoundsInfo.ub(k)).^2);
+    return
+end
+
+Model = set_all_parameters(xparam1,EstimatedParameters,Model);
+
+Q = Model.Sigma_e;
+H = Model.H;
+
+if ~issquare(Q) || EstimatedParameters.ncx || isfield(EstimatedParameters,'calibrated_covariances')
+    [Q_is_positive_definite, penalty] = ispd(Q);
+    if ~Q_is_positive_definite
+        fval = Inf;
+        exit_flag = 0;
+        info(1) = 43;
+        info(2) = penalty;
+        return
+    end
+    if isfield(EstimatedParameters,'calibrated_covariances')
+        correct_flag=check_consistency_covariances(Q);
+        if ~correct_flag
+            penalty = sum(Q(EstimatedParameters.calibrated_covariances.position).^2);
+            fval = Inf;
+            exit_flag = 0;
+            info(1) = 71;
+            info(2) = penalty;
+            return
+        end
+    end
+
+end
+
+if ~issquare(H) || EstimatedParameters.ncn || isfield(EstimatedParameters,'calibrated_covariances_ME')
+    [H_is_positive_definite, penalty] = ispd(H);
+    if ~H_is_positive_definite
+        fval = Inf;
+        exit_flag = 0;
+        info(1) = 44;
+        info(2) = penalty;
+        return
+    end
+    if isfield(EstimatedParameters,'calibrated_covariances_ME')
+        correct_flag=check_consistency_covariances(H);
+        if ~correct_flag
+            penalty = sum(H(EstimatedParameters.calibrated_covariances_ME.position).^2);
+            fval = Inf;
+            exit_flag = 0;
+            info(1) = 72;
+            info(2) = penalty;
+            return
+        end
+    end
+
+end
+
+%------------------------------------------------------------------------------
+% 2. call model setup & reduction program
+%------------------------------------------------------------------------------
+
+% Linearize the model around the deterministic sdteadystate and extract the matrices of the state equation (T and R).
+[T,R,SteadyState,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
+
+if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 25 || info(1) == 10 || info(1) == 7
+    fval = Inf;
+    exit_flag = 0;
+    info(2) = 0.1;
+    return
+elseif info(1) == 3 || info(1) == 4 || info(1)==6 ||info(1) == 19 || info(1) == 20 || info(1) == 21
+    fval = Inf;
+    exit_flag = 0;
+    return
+end
+
+% Define a vector of indices for the observed variables. Is this really usefull?...
+BayesInfo.mf = BayesInfo.mf1;
+
+% Get needed informations for kalman filter routines.
+start = DynareOptions.presample+1;
+np    = size(T,1);
+mf    = BayesInfo.mf;
+Y     = transpose(DynareDataset.data);
+
+%------------------------------------------------------------------------------
+% 3. Initial condition of the Kalman filter
+%------------------------------------------------------------------------------
+
+% Get decision rules and transition equations.
+dr = DynareResults.dr;
+
+% Set persistent variables (first call).
+if isempty(init_flag)
+    mf0 = BayesInfo.mf0;
+    mf1 = BayesInfo.mf1;
+    restrict_variables_idx  = BayesInfo.restrict_var_list;
+    observed_variables_idx  = restrict_variables_idx(mf1);
+    state_variables_idx     = restrict_variables_idx(mf0);
+    sample_size = size(Y,2);
+    number_of_state_variables = length(mf0);
+    number_of_observed_variables = length(mf1);
+    number_of_structural_innovations = length(Q);
+    init_flag = 1;
+end
+
+ReducedForm.ghx  = dr.ghx(restrict_variables_idx,:);
+ReducedForm.ghu  = dr.ghu(restrict_variables_idx,:);
+ReducedForm.ghxx = dr.ghxx(restrict_variables_idx,:);
+ReducedForm.ghuu = dr.ghuu(restrict_variables_idx,:);
+ReducedForm.ghxu = dr.ghxu(restrict_variables_idx,:);
+ReducedForm.steadystate = dr.ys(dr.order_var(restrict_variables_idx));
+ReducedForm.constant = ReducedForm.steadystate + .5*dr.ghs2(restrict_variables_idx);
+ReducedForm.state_variables_steady_state = dr.ys(dr.order_var(state_variables_idx));
+ReducedForm.Q = Q;
+ReducedForm.H = H;
+ReducedForm.mf0 = mf0;
+ReducedForm.mf1 = mf1;
+
+% Set initial condition.
+switch DynareOptions.particle.initialization
+  case 1% Initial state vector covariance is the ergodic variance associated to the first order Taylor-approximation of the model.
+    StateVectorMean = ReducedForm.constant(mf0);
+    StateVectorVariance = lyapunov_symm(ReducedForm.ghx(mf0,:),ReducedForm.ghu(mf0,:)*ReducedForm.Q*ReducedForm.ghu(mf0,:)',DynareOptions.lyapunov_fixed_point_tol,DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold,[],[],DynareOptions.debug);
+  case 2% Initial state vector covariance is a monte-carlo based estimate of the ergodic variance (consistent with a k-order Taylor-approximation of the model).
+    StateVectorMean = ReducedForm.constant(mf0);
+    old_DynareOptionsperiods = DynareOptions.periods;
+    DynareOptions.periods = 5000;
+    y_ = simult(DynareResults.steady_state, dr,Model,DynareOptions,DynareResults);
+    y_ = y_(state_variables_idx,2001:5000);
+    StateVectorVariance = cov(y_');
+    DynareOptions.periods = old_DynareOptionsperiods;
+    clear('old_DynareOptionsperiods','y_');
+  case 3% Initial state vector covariance is a diagonal matrix.
+    StateVectorMean = ReducedForm.constant(mf0);
+    StateVectorVariance = DynareOptions.particle.initial_state_prior_std*eye(number_of_state_variables);
+  otherwise
+    error('Unknown initialization option!')
+end
+ReducedForm.StateVectorMean = StateVectorMean;
+ReducedForm.StateVectorVariance = StateVectorVariance;
+
+%------------------------------------------------------------------------------
+% 4. Likelihood evaluation
+%------------------------------------------------------------------------------
+DynareOptions.warning_for_steadystate = 0;
+[s1,s2] = get_dynare_random_generator_state();
+LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,start,DynareOptions.particle,DynareOptions.threads);
+set_dynare_random_generator_state(s1,s2);
+if imag(LIK)
+    info(1) = 46;
+    info(2) = 0.1;
+    likelihood = Inf;
+    exit_flag  = 0;
+elseif isnan(LIK)
+    info(1) = 45;
+    info(2) = 0.1;
+    likelihood = Inf;
+    exit_flag  = 0;
+else
+    likelihood = LIK;
+end
+DynareOptions.warning_for_steadystate = 1;
+% ------------------------------------------------------------------------------
+% Adds prior if necessary
+% ------------------------------------------------------------------------------
+lnprior = priordens(xparam1(:),BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+fval    = (likelihood-lnprior);
+
+if isnan(fval)
+    info(1) = 47;
+    info(2) = 0.1;
+    fval = Inf;
+    exit_flag = 0;
+    return
+end
+
+if imag(fval)~=0
+    info(1) = 48;
+    info(2) = 0.1
+    fval = Inf;
+    exit_flag = 0;
+    return
+end
