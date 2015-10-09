@@ -51,10 +51,15 @@ function [hessian_mat, gg, htol1, ihh, hh_mat0, hh1] = mr_hessian(init,x,func,pe
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+persistent h1 htol
+
 n=size(x,1);
-gstep_=varargin{3}.gstep;
-htol = 1.e-4;
-h1=repmat(varargin{3}.gradient_epsilon,n,1);
+if init
+    gstep_=varargin{3}.gstep;
+    htol = 1.e-4;
+    h1=varargin{3}.gradient_epsilon*ones(n,1);
+    return
+end
 
 [f0, exit_flag, ff0]=penalty_objective_function(x,func,penalty,varargin{:});
 h2=varargin{7}.ub-varargin{7}.lb;
