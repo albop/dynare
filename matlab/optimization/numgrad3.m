@@ -1,4 +1,4 @@
-function [g, badg] = numgrad3(fcn,f0,x,penalty,epsilon,varargin)
+function [g, badg] = numgrad3(fcn,f0,x,epsilon,varargin)
 % Computes the gradient of the objective function fcn using a three points
 % formula if possible.
 %
@@ -38,9 +38,9 @@ badg=0;
 for i=1:n
     xiold = x(i);
     x(i) = xiold+h;
-    f1 = penalty_objective_function(x, fcn, penatly, varargin{:});
+    f1 = feval(fcn, x, varargin{:});
     x(i) = xiold-h;
-    f2 = penalty_objective_function(x, fcn, penatly, varargin{:});
+    f2 = feval(fcn, x, varargin{:});
     g0 = (f1-f2)/H;
     if abs(g0)< 1e15
         g(i)=g0;

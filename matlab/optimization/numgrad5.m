@@ -1,4 +1,4 @@
-function [g, badg] = numgrad5(fcn,f0,x,penalty,epsilon,varargin)
+function [g, badg] = numgrad5(fcn,f0,x,epsilon,varargin)
 % Computes the gradient of the objective function fcn using a five points
 % formula if possible.
 %
@@ -40,13 +40,13 @@ badg = 0;
 for i=1:n
     xiold = x(i);
     x(i) = xiold+h;
-    f1 = penalty_objective_function(x, fcn, penalty, varargin{:});
+    f1 = feval(fcn, x, varargin{:});
     x(i) = xiold-h;
-    f2 = penalty_objective_function(x, fcn, penalty, varargin{:});
+    f2 = feval(fcn, x, varargin{:});
     x(i) = xiold+2*h;
-    f3 = penalty_objective_function(x, fcn, penalty, varargin{:});
+    f3 = feval(fcn, x, varargin{:});
     x(i) = xiold-2*h;
-    f4 = penalty_objective_function(x, fcn, penalty, varargin{:});
+    f4 = feval(fcn, x, varargin{:});
     g0 = (8*(f1-f2)+f4-f3)/H;
     if abs(g0)< 1e15
         g(i) = g0;
