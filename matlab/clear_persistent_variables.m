@@ -19,11 +19,13 @@ function clear_persistent_variables(folder)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+DYNARE_FOLDER = strrep(which('dynare'),'dynare.m','');
+
 if ~nargin || isempty(folder)
     folder = pwd();
 end
 
-if ~exist('list_of_functions_to_be_cleared.mat') || isolder('list_of_functions_to_be_cleared.mat')
+if ~exist('list_of_functions_to_be_cleared.mat') || isolder(sprintf('%slist_of_functions_to_be_cleared.mat', DYNARE_FOLDER), DYNARE_FOLDER)
     if isunix() || ismac()
         [status, output] = system(sprintf('grep -lr ^persistent %s', folder));
         list_of_files = strsplit(output);
@@ -45,7 +47,7 @@ if ~exist('list_of_functions_to_be_cleared.mat') || isolder('list_of_functions_t
         end
     end
     [paths, list_of_functions, extensions] = cellfun(@fileparts, list_of_files, 'UniformOutput',false);
-    save('list_of_functions_to_be_cleared', 'list_of_functions');
+    save(sprintf('%slist_of_functions_to_be_cleared.mat', DYNARE_FOLDER), 'list_of_functions');
 else
     load('list_of_functions_to_be_cleared');
 end
