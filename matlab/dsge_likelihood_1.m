@@ -347,14 +347,14 @@ if (kalman_algo == 2) || (kalman_algo == 4)
             H = diag(H);
             mmm = mm;
         else
-             Z = [Z, eye(pp)];
-             T = blkdiag(T,zeros(pp));
-             Q = blkdiag(Q,H);
-             R = blkdiag(R,eye(pp));
-             %             Pstar = blkdiag(Pstar,H);
-             %             Pinf  = blkdiag(Pinf,zeros(pp));
-             H = zeros(pp,1);
-             mmm   = mm+pp;
+            Z = [Z, eye(pp)];
+            T = blkdiag(T,zeros(pp));
+            Q = blkdiag(Q,H);
+            R = blkdiag(R,eye(pp));
+            Pstar = blkdiag(Pstar,H);
+            Pinf  = blkdiag(Pinf,zeros(pp));
+            H = zeros(pp,1);
+            mmm   = mm+pp;
         end
     end
 end

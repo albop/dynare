@@ -77,7 +77,7 @@ inv_order_var = oo_.dr.inv_order_var;
 %extract unique entries of covariance
 i_var=unique(i_var);
 %% do initial checks
-[loss,info,exit_flag,vx]=osr_obj_1(t0,i_params,inv_order_var(i_var),weights(i_var,i_var));
+[loss,info,exit_flag,vx]=osr_obj(t0,i_params,inv_order_var(i_var),weights(i_var,i_var));
 if info~=0
    print_info(info, options_.noprint, options_);
 else
@@ -99,7 +99,7 @@ elseif isequal(options_.osr.opt_algo,10)
     error('OSR: OSR does not support opt_algo=10.')    
 else
 %%do actual optimization
-[p, f, exitflag] = dynare_minimize_objective(str2func('osr_obj_1'),t0,options_.osr.opt_algo,options_,[],cellstr(M_.param_names(i_params,:)),[],[], i_params,...
+[p, f, exitflag] = dynare_minimize_objective(str2func('osr_obj'),t0,options_.osr.opt_algo,options_,[],cellstr(M_.param_names(i_params,:)),[],[], i_params,...
                 inv_order_var(i_var),weights(i_var,i_var));
 end
 

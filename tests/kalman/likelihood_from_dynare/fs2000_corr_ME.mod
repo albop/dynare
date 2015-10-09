@@ -117,16 +117,16 @@ options_.debug=1;
 
 %%default
 options_.lik_init=1;
-//estimation(kalman_algo=0,mode_compute=4,order=1,datafile='../../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
-//fval_algo_0=oo_.likelihood_at_initial_parameters;
+estimation(kalman_algo=0,mode_compute=4,order=1,datafile='../../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
+fval_algo_0=oo_.likelihood_at_initial_parameters;
 %%Multivariate Kalman Filter
 options_.lik_init=1;
-//estimation(kalman_algo=1,mode_file=fs2000_corr_ME_mode,mode_compute=0,order=1,datafile='../../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
-//fval_algo_1=oo_.likelihood_at_initial_parameters;
+estimation(kalman_algo=1,mode_file=fs2000_corr_ME_mode,mode_compute=0,order=1,datafile='../../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
+fval_algo_1=oo_.likelihood_at_initial_parameters;
 %%Univariate Kalman Filter
 options_.lik_init=1;
-//estimation(kalman_algo=3,mode_file=fs2000_corr_ME_mode,mode_compute=0,order=1,datafile='../../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
-//fval_algo_3=oo_.likelihood_at_initial_parameters;
+estimation(kalman_algo=3,mode_file=fs2000_corr_ME_mode,mode_compute=0,order=1,datafile='../../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
+fval_algo_3=oo_.likelihood_at_initial_parameters;
 %%Diffuse Multivariate Kalman Filter
 options_.lik_init=1;
 estimation(kalman_algo=2,mode_file=fs2000_corr_ME_mode,mode_compute=0,datafile='../../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
