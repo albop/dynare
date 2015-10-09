@@ -1,4 +1,4 @@
-function [g, badg] = numgrad5_(fcn,f0,x,penalty,epsilon,varargin)
+function [g, badg] = numgrad5(fcn,f0,x,epsilon,varargin)
 % Computes the gradient of the objective function fcn using a five points
 % formula if possible.
 %
@@ -48,13 +48,13 @@ for i=1:n
     xiold = x(i);
     h = step_length_correction(xiold,scale,i)*delta;
     x(i) = xiold+h;
-    [f1,junk1,junk2,cost_flag1] = penalty_objective_function(x, fcn, penalty, varargin{:});
+    [f1,junk1,junk2,cost_flag1] = feval(fcn, x, penalty, varargin{:});
     x(i) = xiold-h;
-    [f2,junk1,junk2,cost_flag2] = penalty_objective_function(x, fcn, penalty, varargin{:});
+    [f2,junk1,junk2,cost_flag2] = feval(fcn, x, penalty, varargin{:});
     x(i) = xiold+2*h;
-    [f3,junk1,junk2,cost_flag3] = penalty_objective_function(x, fcn, penalty, varargin{:});
+    [f3,junk1,junk2,cost_flag3] = feval(fcn, x, penalty, varargin{:});
     x(i) = xiold-2*h;
-    [f4,junk1,junk2,cost_flag4] = penalty_objective_function(x, fcn, penalty, varargin{:});
+    [f4,junk1,junk2,cost_flag4] = feval(fcn, x, penalty, varargin{:});
     if f0<f1 && f1<f3 && f0<f2 && f2<f4
         g0 = 0;
     else
