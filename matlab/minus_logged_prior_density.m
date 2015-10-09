@@ -29,6 +29,8 @@ function [fval,fake_1, fake_2, exit_flag ] = minus_logged_prior_density(xparams,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+global objective_function_penalty_base
+
 fake_1 = 1;
 fake_2 = 1;
 
@@ -42,20 +44,18 @@ info = 0;
 % Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
 if ~isequal(DynareOptions.mode_compute,1) && any(xparams<p3)
     k = find(xparams<p3);
-    fval = Inf;
+    fval = objective_function_penalty_base+sum((p3(k)-xparams(k)).^2);
     exit_flag = 0;
-    info(1) = 41;
-    info(2) = sum((p3(k)-xparams(k)).^2);
+    info = 41;
     return
 end
 
 % Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
 if ~isequal(DynareOptions.mode_compute,1) && any(xparams>p4)
     k = find(xparams>p4);
-    fval = Inf;
+    fval = objective_function_penalty_base+sum((xparams(k)-p4(k)).^2);
     exit_flag = 0;
-    info(1) = 42;
-    info(2) = sum((xparams(k)-p4(k)).^2);
+    info = 42;
     return
 end
 
@@ -71,20 +71,18 @@ if ~issquare(Q) || EstimatedParams.ncx || isfield(EstimatedParams,'calibrated_co
     [Q_is_positive_definite, penalty] = ispd(Q);
     if ~Q_is_positive_definite
         % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
-        fval = Inf;
+        fval = objective_function_penalty_base+penalty;
         exit_flag = 0;
-        info(1) = 43;
-        info(2) = penalty;
+        info = 43;
         return
     end
     if isfield(EstimatedParams,'calibrated_covariances')
         correct_flag=check_consistency_covariances(Q);
         if ~correct_flag
             penalty = sum(Q(EstimatedParams.calibrated_covariances.position).^2);
-            fval = Inf;
+            fval = objective_function_penalty_base+penalty;
             exit_flag = 0;
-            info(1) = 71;
-            info(2) = penalty;
+            info = 71;
             return
         end
     end
@@ -96,20 +94,18 @@ if ~issquare(H) || EstimatedParams.ncn || isfield(EstimatedParams,'calibrated_co
     [H_is_positive_definite, penalty] = ispd(H);
     if ~H_is_positive_definite
         % The variance-covariance matrix of the measurement errors is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
-        fval = Inf;
+        fval = objective_function_penalty_base+penalty;
         exit_flag = 0;
-        info(1) = 44;
-        info(2) = penalty;
+        info = 44;
         return
     end
     if isfield(EstimatedParams,'calibrated_covariances_ME')
         correct_flag=check_consistency_covariances(H);
         if ~correct_flag
             penalty = sum(H(EstimatedParams.calibrated_covariances_ME.position).^2);
-            fval = Inf;
+            fval = objective_function_penalty_base+penalty;
             exit_flag = 0;
-            info(1) = 72;
-            info(2) = penalty;
+            info = 72;
             return
         end
     end
@@ -126,13 +122,13 @@ M_ = set_all_parameters(xparams,EstimatedParams,DynareModel);
 % Return, with endogenous penalty when possible, if dynare_resolve issues an error code (defined in resol).
 if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) ...
             == 8 || info(1) == 22 || info(1) == 24 || info(1) == 19
-    fval = Inf;
-    info(1) = info(1);
-    info(2) = 0.1;
+    fval = objective_function_penalty_base+1;
+    info = info(1);
     exit_flag = 0;
     return
 elseif info(1) == 3 || info(1) == 4 || info(1)==6 || info(1) == 20 || info(1) == 21  || info(1) == 23
-    fval = Inf;
+    fval = objective_function_penalty_base+info(2);
+    info = info(1);
     exit_flag = 0;
     return
 end
