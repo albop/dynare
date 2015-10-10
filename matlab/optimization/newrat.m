@@ -119,7 +119,7 @@ ig=ones(nx,1);
 ggx=zeros(nx,1);
 while norm(gg)>gtol && check==0 && jit<nit
     jit=jit+1;
-    tic
+    tic1 = tic;
     icount=icount+1;
     objective_function_penalty_base = fval0(icount);
     disp_verbose([' '],Verbose)
@@ -264,7 +264,7 @@ while norm(gg)>gtol && check==0 && jit<nit
             disp_verbose('Negative definite Hessian! Local maximum!',Verbose)
             pause(1)
         end
-        t=toc;
+        t=toc(tic1);
         disp_verbose(['Elapsed time for iteration ',num2str(t),' s.'],Verbose)
         g(:,icount+1)=gg;
         if Save_files
