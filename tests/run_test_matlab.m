@@ -69,4 +69,5 @@ else
 end
 fprintf(fid,':cputime: %f\n', ecput);
 fclose(fid);
-exit;
+warning off
+exit
