@@ -1,16 +1,54 @@
 function [H,G,retcode]=discretionary_policy_engine(AAlag,AA0,AAlead,BB,bigw,instr_id,beta,solve_maxit,discretion_tol,qz_criterium,H00,verbose)
 
 % Solves the discretionary problem for a model of the form:
-% AAlag*yy_{t-1}+AA0*yy_t+AAlead*yy_{t+1}+BB*e=0, with W the weight on the
-% variables in vector y_t and instr_id is the location of the instruments
-% in the yy_t vector.
+% 
+%   Loss=E_0 sum_{t=0}^{\infty} beta^t [y_t'*W*y+x_t'*Q*x_t]
+%   subject to
+%   AAlag*yy_{t-1}+AA0*yy_t+AAlead*yy_{t+1}+BB*e=0
+% 
+% with W the weight on the variables in vector y_t.
+% 
+% The solution takes the form
+%   y_t=H*y_{t-1}+G*e_t
+% where H=[H1;F1] and G=[H2;F2].
+% 
 % We use the Dennis (2007, Macroeconomic Dynamics) algorithm and so we need
 % to re-write the model in the form
 %  A0*y_t=A1*y_{t-1}+A2*y_{t+1}+A3*x_t+A4*x_{t+1}+A5*e_t, with W the
 % weight on the y_t vector and Q the weight on the x_t vector of
 % instruments.
+% 
+% Inputs:
+%   AAlag               [double]    matrix of coefficients on lagged
+%                                   variables
+%   AA0                 [double]    matrix of coefficients on
+%                                   contemporaneous variables
+%   AAlead              [double]    matrix of coefficients on
+%                                   leaded variables
+%   BB                  [double]    matrix of coefficients on
+%                                   shocks
+%   bigw                [double]    matrix of coefficients on variables in
+%                                   loss/objective function; stacks [W and Q]                                   
+%   instr_id            [double]    location vector of the instruments in the yy_t vector.
+%   beta                [scalar]    planner discount factor
+%   solve_maxit         [scalar]    maximum number of iterations
+%   discretion_tol      [scalar]    convergence criterion for solution
+%   qz_criterium        [scalar]    tolerance for QZ decomposition
+%   H00
+%   verbose             [scalar]    dummy to control verbosity
+%
+% Outputs:
+%   H                   [double]    (endo_nbr*endo_nbr) solution matrix for endogenous
+%                                   variables, stacks [H1 and H1]
+%   G                   [double]    (endo_nbr*exo_nbr) solution matrix for shocks, stacks [H2 and F2]
+%                                   
+%   retcode             [scalar]    return code
+%
+% Algorithm:
+%  Dennis, Richard (2007): Optimal policy in rational expectations models: new solution algorithms,
+%       Macroeconomic Dynamics, 11, 31–55.
 
-% Copyright (C) 2007-2012 Dynare Team
+% Copyright (C) 2007-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -53,14 +91,15 @@ end
 
 [A0,A1,A2,A3,A4,A5,W,Q,endo_nbr,exo_nbr,aux,endo_augm_id]=GetDennisMatrices(AAlag,AA0,AAlead,BB,bigw,instr_id);
 % aux is a logical index of the instruments which appear with lags in the
-% model. Their location in the state vector is instr_id(aux)
+% model. Their location in the state vector is instr_id(aux);
 % endo_augm_id is index (not logical) of locations of the augmented vector
 % of non-instrumental variables
 
 AuxiliaryVariables_nbr=sum(aux);
 H0=zeros(endo_nbr+AuxiliaryVariables_nbr);
 if ~isempty(H00)
-    H0(1:endo_nbr,1:endo_nbr)=H00;clear H00
+    H0(1:endo_nbr,1:endo_nbr)=H00;
+    clear H00
 end
 
 H10=H0(endo_augm_id,endo_augm_id);
@@ -69,6 +108,7 @@ F10=H0(instr_id,endo_augm_id);
 iter=0;
 H1=H10;
 F1=F10;
+%solve equations (20) and (22) via fixed point iteration
 while 1
     iter=iter+1;
     P=SylvesterDoubling(W+beta*F1'*Q*F1,beta*H1',H1,discretion_tol,solve_maxit);
@@ -79,11 +119,11 @@ while 1
             return
         end
     end
-    D=A0-A2*H1-A4*F1;
+    D=A0-A2*H1-A4*F1; %equation (20)
     Dinv=inv(D);
-    A3DPD=A3'*Dinv'*P*Dinv;
-    F1=-(Q+A3DPD*A3)\(A3DPD*A1);
-    H1=Dinv*(A1+A3*F1);
+    A3DPD=A3'*Dinv'*P*Dinv; 
+    F1=-(Q+A3DPD*A3)\(A3DPD*A1); %component of (26)
+    H1=Dinv*(A1+A3*F1); %component of (27)
     
     [rcode,NQ]=CheckConvergence([H1;F1]-[H10;F10],iter,solve_maxit,discretion_tol);
     if rcode
@@ -97,16 +137,17 @@ while 1
     F10=F1;
 end
 
+%check if successful
 retcode = 0;
 switch rcode
   case 3 % nan
     retcode=63;
     retcode(2)=10000;
     if verbose
-        disp([mfilename,':: NAN elements in the solution'])
+        disp([mfilename,':: NaN elements in the solution'])
     end
   case 2% maxiter
-    retcode = 61
+    retcode = 61;
     if verbose
         disp([mfilename,':: Maximum Number of Iterations reached'])
     end
@@ -125,8 +166,8 @@ if retcode(1)
     H=[];
     G=[];
 else
-    F2=-(Q+A3DPD*A3)\(A3DPD*A5);
-    H2=Dinv*(A5+A3*F2);
+    F2=-(Q+A3DPD*A3)\(A3DPD*A5); %equation (29)
+    H2=Dinv*(A5+A3*F2); %equation (31)
     H=zeros(endo_nbr+AuxiliaryVariables_nbr);
     G=zeros(endo_nbr+AuxiliaryVariables_nbr,exo_nbr);
     H(endo_augm_id,endo_augm_id)=H1;
@@ -159,6 +200,7 @@ end
 end
 
 function [A00,A11,A22,A33,A44,A55,WW,Q,endo_nbr,exo_nbr,aux,endo_augm_id]=GetDennisMatrices(AAlag,AA0,AAlead,BB,bigw,instr_id)
+%get the matrices to use the Dennis (2007) algorithm
 [eq_nbr,endo_nbr]=size(AAlag);
 exo_nbr=size(BB,2);
 y=setdiff(1:endo_nbr,instr_id);
@@ -211,7 +253,7 @@ end
 
 function v = SylvesterHessenbergSchur(d,g,h)
 %
-% DSYLHS  Solves a discrete time sylvester equation	 using the
+% DSYLHS  Solves a discrete time sylvester equation	using the
 % Hessenberg-Schur algorithm
 %
 % v = DSYLHS(g,d,h) computes the matrix v that satisfies the

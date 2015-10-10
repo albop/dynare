@@ -11,7 +11,7 @@ function planner_objective_value = evaluate_planner_objective(M,options,oo)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2007-2012 Dynare Team
+% Copyright (C) 2007-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,19 +29,10 @@ function planner_objective_value = evaluate_planner_objective(M,options,oo)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 dr = oo.dr;
-endo_nbr = M.endo_nbr;
 exo_nbr = M.exo_nbr;
 nstatic = M.nstatic;
 nspred = M.nspred;
-lead_lag_incidence = M.lead_lag_incidence;
 beta = get_optimal_policy_discount_factor(M.params,M.param_names);
-if options.ramsey_policy
-    i_org = (1:M.orig_endo_nbr)';
-else
-    i_org = (1:M.endo_nbr)';
-end
-ipred = find(lead_lag_incidence(M.maximum_lag,:))';
-order_var = dr.order_var;
     
 Gy = dr.ghx(nstatic+(1:nspred),:);
 Gu = dr.ghu(nstatic+(1:nspred),:);
@@ -51,11 +42,9 @@ gu(dr.order_var,:) = dr.ghu;
 
 ys = oo.dr.ys;
 
-u = oo.exo_simul(1,:)';
-
 [U,Uy,Uyy] = feval([M.fname '_objective_static'],ys,zeros(1,exo_nbr), ...
                    M.params);
-
+%second order terms
 Uyy = full(Uyy);
 
 [Uyygygy, err] = A_times_B_kronecker_C(Uyy,gy,gy,options.threads.kronecker.A_times_B_kronecker_C);
@@ -65,7 +54,7 @@ mexErrCheck('A_times_B_kronecker_C', err);
 [Uyygygu, err] = A_times_B_kronecker_C(Uyy,gy,gu,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
 
-Wbar =U/(1-beta);
+Wbar =U/(1-beta); %steady state welfare
 Wy = Uy*gy/(eye(nspred)-beta*Gy);
 Wu = Uy*gu+beta*Wy*Gu;
 Wyy = Uyygygy/(eye(nspred*nspred)-beta*kron(Gy,Gy));
@@ -75,7 +64,7 @@ mexErrCheck('A_times_B_kronecker_C', err);
 mexErrCheck('A_times_B_kronecker_C', err);
 Wuu = Uyygugu+beta*Wyygugu;
 Wyu = Uyygygu+beta*Wyygygu;
-Wss = beta*Wuu*M.Sigma_e(:)/(1-beta);
+Wss = beta*Wuu*M.Sigma_e(:)/(1-beta); % at period 0, we are in steady state, so the deviation term only starts in period 1, thus the beta in front
 
 % initialize yhat1 at the steady state
 yhat1 = oo.steady_state;
@@ -92,7 +81,6 @@ if ~isempty(M.endo_histval)
     end
 end
 yhat1 = yhat1(dr.order_var(nstatic+(1:nspred)),1)-dr.ys(dr.order_var(nstatic+(1:nspred)));
-yhat2 = yhat2(dr.order_var(nstatic+(1:nspred)),1)-dr.ys(dr.order_var(nstatic+(1:nspred)));
 u = oo.exo_simul(1,:)';
 
 [Wyyyhatyhat1, err] = A_times_B_kronecker_C(Wyy,yhat1,yhat1,options.threads.kronecker.A_times_B_kronecker_C);
@@ -104,6 +92,7 @@ mexErrCheck('A_times_B_kronecker_C', err);
 planner_objective_value(1) = Wbar+Wy*yhat1+Wu*u+Wyuyhatu1 ...
     + 0.5*(Wyyyhatyhat1 + Wuuuu+Wss);
 if options.ramsey_policy
+    yhat2 = yhat2(dr.order_var(nstatic+(1:nspred)),1)-dr.ys(dr.order_var(nstatic+(1:nspred)));
     [Wyyyhatyhat2, err] = A_times_B_kronecker_C(Wyy,yhat2,yhat2,options.threads.kronecker.A_times_B_kronecker_C);
     mexErrCheck('A_times_B_kronecker_C', err);
     [Wyuyhatu2, err] = A_times_B_kronecker_C(Wyu,yhat2,u,options.threads.kronecker.A_times_B_kronecker_C);
@@ -115,9 +104,13 @@ end
 if ~options.noprint
     skipline()
     disp('Approximated value of planner objective function')
-    disp(['    - with initial Lagrange multipliers set to 0: ' ...
+    if options.ramsey_policy
+        disp(['    - with initial Lagrange multipliers set to 0: ' ...
           num2str(planner_objective_value(2)) ])
-    disp(['    - with initial Lagrange multipliers set to steady state: ' ...
-          num2str(planner_objective_value(1)) ])
+        disp(['    - with initial Lagrange multipliers set to steady state: ' ...
+              num2str(planner_objective_value(1)) ])
+    elseif options.discretionary_policy
+        fprintf('with discretionary policy: %10.8f',planner_objective_value(1))
+    end
     skipline()
 end
