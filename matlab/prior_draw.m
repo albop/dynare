@@ -1,9 +1,17 @@
 function pdraw = prior_draw(init,uniform) % --*-- Unitary tests --*--
-% This function generate one draw from the joint prior distribution.
+% This function generate one draw from the joint prior distribution and
+% allows sampling uniformly from the prior support (uniform==1 when called with init==1)
 % 
 % INPUTS 
-%   o init             [integer]    scalar equal to 1 (first call) or 0.
-%   o uniform          [integer]    scalar equal to 1 (first call) or 0.
+%   o init             [integer]    scalar equal to: 
+%                                       1: first call to set up persistent variables 
+%                                             describing the prior
+%                                       0: subsequent call to get prior
+%                                               draw
+%   o uniform          [integer]    scalar used in initialization (init=1), equal to:
+%                                       1: sample uniformly from prior
+%                                           support (overwrites prior shape used for sampling within this function)
+%                                       0: sample from joint prior distribution
 %    
 % OUTPUTS 
 %   o pdraw            [double]     1*npar vector, draws from the joint prior density.
@@ -14,7 +22,9 @@ function pdraw = prior_draw(init,uniform) % --*-- Unitary tests --*--
 %
 % NOTE 1. Input arguments 1 an 2 are only needed for initialization.
 % NOTE 2. A given draw from the joint prior distribution does not satisfy BK conditions a priori.
-
+% NOTE 3. This code relies on bayestopt_ as created in the base workspace
+%           by the preprocessor (or as updated in subsequent pieces of code and handed to the base workspace)
+% 
 % Copyright (C) 2006-2015 Dynare Team
 %
 % This file is part of Dynare.
@@ -87,7 +97,7 @@ if nargin>0 && init
     else
         inverse_gamma_2_draws = 1;
     end
-    pdraw = zeros(number_of_estimated_parameters,1);
+    pdraw = NaN(number_of_estimated_parameters,1);
     return
 end
 

@@ -246,6 +246,7 @@ MODFILES = \
 	optimizers/fs2000_w.mod \
 	differentiate_forward_vars/RBC_differentiate_forward.mod \
 	TeX/fs2000_corr_ME.mod \
+	prior_posterior_function/fs2000_prior_posterior_function \
 	reporting/example1.mod
 
 XFAIL_MODFILES = ramst_xfail.mod \
@@ -454,7 +455,9 @@ EXTRA_DIST = \
 	optimal_policy/Ramsey/find_c.m \
 	optimal_policy/Ramsey/oo_ramsey_policy_initval.mat \
 	optimizers/optimizer_function_wrapper.m \
-	optimizers/fs2000.common.inc
+	optimizers/fs2000.common.inc \
+	prior_posterior_function/posterior_function_demo
+
 
 TARGETS =
 TEXTOUT =

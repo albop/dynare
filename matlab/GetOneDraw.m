@@ -1,20 +1,19 @@
 function [xparams, logpost] = GetOneDraw(type)
-
 % function [xparams, logpost] = GetOneDraw(type)
-% draws one row from metropolis
+% draws one parameter vector and its posterior from MCMC or the prior
 %
 % INPUTS
-%    type:      posterior
-%               prior
+%    type:      [string]       'posterior': draw from MCMC draws
+%                              'prior': draw from prior
 %        
 % OUTPUTS
-%    xparams:   vector of estimated parameters (drawn from posterior distribution)
-%    logpost:   log of the posterior density relative to this row
+%    xparams:   vector of estimated parameters (drawn from posterior or prior distribution)
+%    logpost:   log of the posterior density of this parameter vector
 %        
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2011 Dynare Team
+% Copyright (C) 2005-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,5 +35,7 @@ switch type
     [xparams, logpost] = metropolis_draw(0);
   case 'prior'
     xparams = prior_draw(0);
-    logpost = evaluate_posterior_kernel(xparams');
+    if nargout>1
+        logpost = evaluate_posterior_kernel(xparams');
+    end
 end
