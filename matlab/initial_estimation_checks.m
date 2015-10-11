@@ -36,11 +36,15 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if DynareDataset.vobs>Model.exo_nbr+EstimatedParameters.nvn
+%get maximum number of simultaneously observed variables for stochastic
+%singularity check
+maximum_number_non_missing_observations=max(sum(~isnan(DynareDataset.data),2));
+
+if maximum_number_non_missing_observations>Model.exo_nbr+EstimatedParameters.nvn
     error(['initial_estimation_checks:: Estimation can''t take place because there are less declared shocks than observed variables!'])
 end
 
-if DynareDataset.vobs>length(find(diag(Model.Sigma_e)))+EstimatedParameters.nvn
+if maximum_number_non_missing_observations>length(find(diag(Model.Sigma_e)))+EstimatedParameters.nvn
     error(['initial_estimation_checks:: Estimation can''t take place because too many shocks have been calibrated with a zero variance!'])
 end
 
