@@ -5280,6 +5280,10 @@ Available options are:
 
 @table @code
 
+@item 'CMAESResume'
+Resume previous run. Requires the @code{variablescmaes.mat} from the last run. 
+Set to 1 to enable. Default: @code{0}
+
 @item 'MaxIter'
 Maximum number of iterations.
 

@@ -540,7 +540,7 @@ simplex.delta_factor=0.05;
 options_.simplex = simplex;
 
 % CMAES optimization routine.
-cmaes.SaveVariables='off';
+cmaes.SaveVariables='on';
 cmaes.DispFinal='on';
 cmaes.WarnOnEqualFunctionValues='no';
 cmaes.DispModulo='10';
@@ -548,6 +548,7 @@ cmaes.LogModulo='0';
 cmaes.LogTime='0';
 cmaes.TolFun = 1e-7;
 cmaes.TolX = 1e-7;
+cmaes.Resume = 0;
 options_.cmaes = cmaes;
 
 % simpsa optimization routine.
