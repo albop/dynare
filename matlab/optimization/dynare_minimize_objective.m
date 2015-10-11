@@ -302,8 +302,11 @@ switch minimizer_algorithm
     [opt_par_values,fval,exitflag] = simplex_optimization_routine(objective_function,start_par_value,simplexOptions,parameter_names,varargin{:});
   case 9
     % Set defaults
-    H0 = 1e-4*ones(n_params,1);
+    H0 = (bounds(:,2)-bounds(:,1))*0.2;
+    H0(~isfinite(H0)) = 0.01;
     cmaesOptions = options_.cmaes;
+    cmaesOptions.LBounds = bounds(:,1);
+    cmaesOptions.UBounds = bounds(:,2);
     % Modify defaults
     if ~isempty(options_.optim_opt)
         options_list = read_key_value_string(options_.optim_opt);
