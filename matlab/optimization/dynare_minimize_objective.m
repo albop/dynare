@@ -331,6 +331,10 @@ switch minimizer_algorithm
                   cmaesOptions.LogModulo = '0';    % [0:Inf] if >1 record data less frequently after gen=100';
                   cmaesOptions.LogTime   = '0';    % [0:100] max. percentage of time for recording data';
                 end
+              case 'CMAESResume'
+                  if options_list{i,2}==1
+                    cmaesOptions.Resume = 'yes';
+                  end
               otherwise
                 warning(['cmaes: Unknown option (' options_list{i,1}  ')!'])
             end
