@@ -5436,6 +5436,9 @@ controlled by the @code{ar} option.
 @xref{contemporaneous_correlation}. Results are stored in @code{oo_.PosteriorTheoreticalMoments}. 
 Note that the @code{nocorr}-option has no effect.
 
+@item no_posterior_kernel_density 
+Shuts off the computation of the kernel density estimator for the posterior objects (@pxref{density-field}). 
+
 @item conditional_variance_decomposition = @var{INTEGER}
 See below.
 
@@ -5814,8 +5817,10 @@ Variance of the posterior distribution
 Deciles of the distribution.
 
 @item density
-Non parametric estimate of the posterior density. First and second
-columns are respectively abscissa and ordinate coordinates.
+@anchor{density-field}
+Non parametric estimate of the posterior density following the approach outlined in @cite{Skoeld and Roberts (2003)}. First and second
+columns are respectively abscissa and ordinate coordinates. 
+
 @end table
 
 @item ESTIMATED_OBJECT
@@ -13123,6 +13128,10 @@ Schnabel, Robert B. and Elizabeth Eskow (1990): ``A new modified Cholesky algori
 Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): ``Methods for
 inference in large multiple-equation Markov-switching models,''
 @i{Journal of Econometrics}, 146, 255--274
+
+@item
+Skoeld, Martin and Gareth O. Roberts (2003): ``Density Estimation for the
+Metropolis-Hastings Algorithm,'' @i{Scandinavian Journal of Statistics}, 30, 699--718
 
 @item
 Smets, Frank and Rafael Wouters (2003): ``An Estimated Dynamic
