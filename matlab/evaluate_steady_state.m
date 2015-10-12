@@ -185,6 +185,9 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         % explicit steady state file
         [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M, ...
                                                        options);
+        if size(ys,2)>size(ys,1)
+            error('STEADY: steady_state-file must return a column vector, not a row vector.')
+        end
         if info(1)
             return;
         end
