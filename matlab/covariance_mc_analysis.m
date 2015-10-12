@@ -61,20 +61,20 @@ else
 end
 
 if isfield(oo_,[ TYPE 'TheoreticalMoments'])
-    eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments;'])   
+    temporary_structure = oo_.([TYPE, 'TheoreticalMoments']); 
     if isfield(temporary_structure,'dsge')
-        eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge;'])
+        temporary_structure = oo_.([TYPE, 'TheoreticalMoments']).dsge;
         if isfield(temporary_structure,'covariance')
-            eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Mean;'])
+            temporary_structure = oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Mean;
             if isfield(temporary_structure,var1)
-                eval(['temporary_structure_1 = oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Mean.' var1 ';'])
+                temporary_structure_1 = oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Mean.(var1);
                 if isfield(temporary_structure_1,var2)
                     % Nothing to do (the covariance matrix is symmetric!).
                     return
                 end
             else
                 if isfield(temporary_structure,var2)
-                    eval(['temporary_structure_2 = oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Mean.' var2 ';'])
+                    temporary_structure_2 = oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Mean.(var2);
                     if isfield(temporary_structure_2,var1)
                         % Nothing to do (the covariance matrix is symmetric!).
                         return
@@ -104,31 +104,31 @@ for file = 1:length(ListOfFiles)
     end    
     i1 = i2+1;
 end
-name = [var1 '.' var2];
+
 if ~isconst(tmp)
     if options_.estimation.moments_posterior_density.indicator
         [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
                 posterior_moments(tmp,1,mh_conf_sig);
-        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = density;']);
+        oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.density.(var1).(var2) = density;
     else
         [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
                         posterior_moments(tmp,0,mh_conf_sig);
     end
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Mean.' name ' = p_mean;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Median.' name ' = p_median;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Variance.' name ' = p_var;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.HPDinf.' name ' = hpd_interval(1);']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.HPDsup.' name ' = hpd_interval(2);']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.deciles.' name ' = p_deciles;']);
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Mean.(var1).(var2) = p_mean;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Median.(var1).(var2) = p_median;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Variance.(var1).(var2) = p_var;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDinf.(var1).(var2) = hpd_interval(1);
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDsup.(var1).(var2) = hpd_interval(2);
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.deciles.(var1).(var2) = p_deciles;
 else
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Mean.' name ' = NaN;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Median.' name ' = NaN;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.Variance.' name ' = NaN;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.HPDinf.' name ' = NaN;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.HPDsup.' name ' = NaN;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.deciles.' name ' = NaN;']);
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Mean.(var1).(var2) = NaN;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Median.(var1).(var2) = NaN;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Variance.(var1).(var2) = NaN;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDinf.(var1).(var2) = NaN;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDsup.(var1).(var2) = NaN;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.deciles.(var1).(var2) = NaN;
     if options_.estimation.moments_posterior_density.indicator
-        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = NaN;']);
+        oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.density.(var1).(var2) = NaN;
     end
 end
 
@@ -136,15 +136,15 @@ if options_.contemporaneous_correlation
     if options_.estimation.moments_posterior_density.indicator
         [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
             posterior_moments(tmp_corr_mat,1,mh_conf_sig);
-        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.density.' name ' = density;']);
+        oo_.([TYPE, 'TheoreticalMoments']).dsge.contemporeaneous_correlation.density.(var1).(var2) = density;
     else
         [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
             posterior_moments(tmp_corr_mat,0,mh_conf_sig);
     end
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.Mean.' name ' = p_mean;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.Median.' name ' = p_median;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.Variance.' name ' = p_var;']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.HPDinf.' name ' = hpd_interval(1);']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.HPDsup.' name ' = hpd_interval(2);']);
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.contemporeaneous_correlation.deciles.' name ' = p_deciles;']);
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.contemporeaneous_correlation.Mean.(var1).(var2) = p_mean;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.contemporeaneous_correlation.Median.(var1).(var2) = p_median;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.contemporeaneous_correlation.Variance.(var1).(var2) = p_var;
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.contemporeaneous_correlation.HPDinf.(var1).(var2) = hpd_interval(1);
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.contemporeaneous_correlation.HPDsup.(var1).(var2) = hpd_interval(2);
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.contemporeaneous_correlation.deciles.(var1).(var2) = p_deciles;
 end

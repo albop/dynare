@@ -389,6 +389,6 @@ oo.posterior_density.(type).(name) = density;
 function [post_mean,hpd_interval,post_var] = Extractoo(oo,name,type)
 hpd_interval = zeros(2,1);
 post_mean = oo.posterior_mean.(type).(name);
-hpd_interval(1) = oo.posterior_hpdinf.(type).(name); 
+hpd_interval(1) = oo.posterior_hpdinf.(type).(name);
 hpd_interval(2) = oo.posterior_hpdsup.(type).(name);
 post_var = oo.posterior_variance.(type).(name);

@@ -63,11 +63,11 @@ end
 
 name = [ var '.' exo ];
 if isfield(oo_, [ TYPE 'TheoreticalMoments'])
-    eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments;'])
+    temporary_structure = oo_.([TYPE, 'TheoreticalMoments']);
     if isfield(temporary_structure,'dsge')
-        eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge;'])
+        temporary_structure = oo_.([TYPE, 'TheoreticalMoments']).dsge;
         if isfield(temporary_structure,'VarianceDecomposition')
-            eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.Mean;'])
+            temporary_structure = oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.Mean;
             if isfield(temporary_structure,name)
                 % Nothing to do.
                 return
@@ -110,12 +110,12 @@ else
             posterior_moments(tmp,0,mh_conf_sig);        
     end
 end
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.Mean.' name ' = p_mean;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.Median.' name ' = p_median;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.Variance.' name ' = p_var;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.HPDinf.' name ' = hpd_interval(1);']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.HPDsup.' name ' = hpd_interval(2);']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.deciles.' name ' = p_deciles;']);
+oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.Mean.(var).(exo) = p_mean;
+oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.Median.(var).(exo) = p_median;
+oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.Variance.(var).(exo) = p_var;
+oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.HPDinf.(var).(exo) = hpd_interval(1);
+oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.HPDsup.(var).(exo) = hpd_interval(2);
+oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.deciles.(var).(exo) = p_deciles;
 if options_.estimation.moments_posterior_density.indicator
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.density.' name ' = density;']);
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.density.(var).(exo) = density;
 end

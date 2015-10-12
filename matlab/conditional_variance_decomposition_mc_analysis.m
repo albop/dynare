@@ -62,11 +62,11 @@ end
 
 name = [ var_list(endogenous_variable_index,:) '.' exo ];
 if isfield(oo_, [ TYPE 'TheoreticalMoments' ])
-    eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments;'])
+    temporary_structure = oo_.([TYPE 'TheoreticalMoments']);
     if isfield(temporary_structure,'dsge')
-        eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge;'])
+        temporary_structure = oo_.([TYPE 'TheoreticalMoments']).dsge;
         if isfield(temporary_structure,'ConditionalVarianceDecomposition')
-            eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.Mean;'])
+            temporary_structure = oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.Mean;
             if isfield(temporary_structure,name)
                 if sum(Steps-temporary_structure.(name)(1,:)) == 0
                     % Nothing (new) to do here...
@@ -112,13 +112,13 @@ for i=1:length(Steps)
     p_hpdinf(i) = hpd_interval(1);
     p_hpdsup(i) = hpd_interval(2);
 end
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.Steps = Steps;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.Mean.' name ' = p_mean;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.Median.' name ' = p_median;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.Variance.' name ' = p_variance;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.HPDinf.' name ' = p_hpdinf;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.HPDsup.' name ' = p_hpdsup;']);
-eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.deciles.' name ' = p_deciles;']);
+oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.Steps = Steps;
+oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.Mean.(name) = p_mean;
+oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.Median.(name) = p_median;
+oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.Variance.(name) = p_variance;
+oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.HPDinf.(name) = p_hpdinf;
+oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.HPDsup.(name)  = p_hpdsup;
+oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.deciles.(name)  = p_deciles;
 if options_.estimation.moments_posterior_density.indicator
-    eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.density.' name ' = p_density;']);
+    oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.density.(name) = p_density;
 end
