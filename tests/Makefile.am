@@ -7,7 +7,10 @@ MODFILES = \
 	estimation/MH_recover/fs2000_recover.mod \
 	estimation/t_proposal/fs2000_student.mod \
 	estimation/TaRB/fs2000_tarb.mod \
-	moments/example1_var_decomp \
+	moments/example1_var_decomp.mod \
+	moments/example1_hp_test.mod \
+	moments/example1_bp_test.mod \
+	moments/test_AR1_spectral_density.mod \
 	gsa/ls2003.mod \
 	gsa/ls2003a.mod \
 	gsa/cod_ML_morris/cod_ML_morris.mod \
