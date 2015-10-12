@@ -12833,6 +12833,7 @@ Number of draws used for sampling. Default: 500.
 
 @end table
 
+@end deffn
 
 @anchor{internals}
 @deffn {MATLAB/Octave command} internals @var{FLAG} @var{ROUTINENAME}[.m]|@var{MODFILENAME}
@@ -12907,7 +12908,6 @@ A @code{1*Nblck} array of doubles. Current acceptance ratios.
 @end table
 
 @end deffn
-
 
 @node Bibliography
 @chapter Bibliography
