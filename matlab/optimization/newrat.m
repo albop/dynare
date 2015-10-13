@@ -1,4 +1,4 @@
-function [xparam1, hh, gg, fval, igg] = newrat(func0, x, analytic_derivation, ftol0, nit, flagg, Verbose, Save_files, varargin)
+function [xparam1, hh, gg, fval, igg] = newrat(func0, x, bounds, analytic_derivation, ftol0, nit, flagg, Verbose, Save_files, varargin)
 %  [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit, flagg, varargin)
 %
 %  Optimiser with outer product gradient and with sequences of univariate steps
@@ -86,8 +86,11 @@ if isempty(hh)
             igg=inv(hh);
         end
     end
-    if htol0>htol
-        htol=htol0;
+    if max(htol0)>htol
+        skipline()
+        disp_verbose('Numerical noise in the likelihood')
+        disp_verbose('Tolerance has to be relaxed')
+        skipline()
     end
 else
     hh0=hh;
@@ -147,7 +150,9 @@ while norm(gg)>gtol && check==0 && jit<nit
         iggx(find(ig),find(ig)) = inv( hhx(find(ig),find(ig)) );
         [fvala,x0,fc,retcode] = csminit1(func0,x0,fval,ggx,0,iggx,Verbose,varargin{:});
     end
-    [fvala, x0, ig] = mr_gstep(h1,x0,func0,htol,Verbose,Save_files,varargin{:});
+    x0 = check_bounds(x0,bounds);
+    [fvala, x0, ig] = mr_gstep(h1,x0,bounds,func0,htol0,Verbose,Save_files,varargin{:});
+    x0 = check_bounds(x0,bounds);
     nig=[nig ig];
     disp_verbose('Sequence of univariate steps!!',Verbose)
     fval=fvala;
@@ -155,6 +160,7 @@ while norm(gg)>gtol && check==0 && jit<nit
         disp_verbose('Try diagonal Hessian',Verbose)
         ihh=diag(1./(diag(hhg)));
         [fval2,x0,fc,retcode2] = csminit1(func0,x0,fval,gg,0,ihh,Verbose,varargin{:});
+        x0 = check_bounds(x0,bounds);
         if (fval-fval2)>=ftol
             disp_verbose('Diagonal Hessian successful',Verbose)
         end
@@ -164,6 +170,7 @@ while norm(gg)>gtol && check==0 && jit<nit
         disp_verbose('Try gradient direction',Verbose)
         ihh0=inx.*1.e-4;
         [fval3,x0,fc,retcode3] = csminit1(func0,x0,fval,gg,0,ihh0,Verbose,varargin{:});
+        x0 = check_bounds(x0,bounds);
         if (fval-fval3)>=ftol
             disp_verbose('Gradient direction successful',Verbose)
         end
@@ -199,7 +206,7 @@ while norm(gg)>gtol && check==0 && jit<nit
         disp_verbose(['FVAL          ',num2str(fval)],Verbose)
         disp_verbose(['Improvement   ',num2str(fval0(icount)-fval)],Verbose)
         disp_verbose(['Ftol          ',num2str(ftol)],Verbose)
-        disp_verbose(['Htol          ',num2str(htol0)],Verbose)
+        disp_verbose(['Htol          ',num2str(max(htol0))],Verbose)
         disp_verbose(['Gradient norm  ',num2str(norm(gg))],Verbose)
         ee=eig(hh);
         disp_verbose(['Minimum Hessian eigenvalue ',num2str(min(ee))],Verbose)
@@ -211,7 +218,7 @@ while norm(gg)>gtol && check==0 && jit<nit
         disp_verbose(['FVAL          ',num2str(fval)],Verbose)
         disp_verbose(['Improvement   ',num2str(df)],Verbose)
         disp_verbose(['Ftol          ',num2str(ftol)],Verbose)
-        disp_verbose(['Htol          ',num2str(htol0)],Verbose)
+        disp_verbose(['Htol          ',num2str(max(htol0))],Verbose)
         htol=htol_base;
         if norm(x(:,icount)-xparam1)>1.e-12 && analytic_derivation==0,
             try
@@ -227,8 +234,7 @@ while norm(gg)>gtol && check==0 && jit<nit
             if isempty(dum),
                 outer_product_gradient=0;
             end
-            if htol0>htol
-                htol=htol0;
+            if max(htol0)>htol
                 skipline()
                 disp_verbose('Numerical noise in the likelihood',Verbose)
                 disp_verbose('Tolerance has to be relaxed',Verbose)
@@ -297,3 +303,16 @@ if check==1,
 end
 
 return
+
+
+function x = check_bounds(x,bounds)
+
+inx = find(x>=bounds(:,2));
+if ~isempty(inx),
+    x(inx) = bounds(inx,2)-eps;
+end
+
+inx = find(x<=bounds(:,1));
+if ~isempty(inx),
+    x(inx) = bounds(inx,1)+eps;
+end

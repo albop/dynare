@@ -86,8 +86,10 @@ if outer_product_gradient
 end
 
 i=0;
+hhtol=htol*ones(n,1);
 while i<n
     i=i+1;
+    htol=hhtol(i);
     h10=h1(i);
     hcheck=0;
     xh1(i)=x(i)+h1(i);
@@ -164,7 +166,8 @@ while i<n
     if hcheck && htol<1
         htol=min(1,max(min(abs(dx))*2,htol*10));
         h1(i)=h10;
-        i=0;
+        hhtol(i) = htol;
+        i=i-1;
     end
 end
 
@@ -263,4 +266,4 @@ else
     hh1 = [];
 end
 
-htol1=htol;
+htol1=hhtol;
