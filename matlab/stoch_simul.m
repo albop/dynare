@@ -107,6 +107,12 @@ if ~options_.noprint
     headers = char('Variables',labels);
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
+    if options_.TeX
+        labels = deblank(M_.exo_names_tex);
+        headers = char('Variables',labels);
+        lh = size(labels,2)+2;
+        dyn_latex_table(M_,my_title,'covar_ex_shocks',headers,labels,M_.Sigma_e,lh,10,6);
+    end
     if options_.partial_information
         skipline()
         disp('SOLUTION UNDER PARTIAL INFORMATION')
@@ -157,10 +163,10 @@ if options_.nomoments == 0
     elseif options_.periods == 0
         % There is no code for theoretical moments at 3rd order
         if options_.order <= 2
-            disp_th_moments(oo_.dr,var_list);
+            oo_=disp_th_moments(oo_.dr,var_list,M_,options_,oo_);
         end
     else
-        disp_moments(oo_.endo_simul,var_list);
+        oo_=disp_moments(oo_.endo_simul,var_list,M_,options_,oo_);
     end
 end
 
@@ -350,7 +356,7 @@ if options_.irf
 end
 
 if options_.SpectralDensity.trigger == 1
-    [omega,f] = UnivariateSpectralDensity(oo_.dr,var_list);
+    [oo_] = UnivariateSpectralDensity(M_,oo_,options_,var_list);
 end
 
 

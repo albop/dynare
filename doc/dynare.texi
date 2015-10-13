@@ -3703,12 +3703,26 @@ Number of points (burnin) dropped at the beginning of simulation before computin
 
 @item hp_filter = @var{DOUBLE}
 Uses HP filter with @math{\lambda} = @var{DOUBLE} before computing
-moments. Default: no filter.
+moments. If theoretical moments are requested, the spectrum of the model solution is filtered 
+following the approach outlined in @cite{Uhlig (2001)}.
+Default: no filter.
 
 @item hp_ngrid = @var{INTEGER}
 Number of points in the grid for the discrete Inverse Fast Fourier
 Transform used in the HP filter computation. It may be necessary to
 increase it for highly autocorrelated processes. Default: @code{512}.
+
+@item bandpass_filter
+Uses a bandpass filter with the default passband before computing moments. If theoretical moments are
+requested, the spectrum of the model solution is filtered using an ideal bandpass
+filter. If empirical moments are requested, the @cite{Baxter and King (1999)}-filter
+is used.
+Default: no filter.
+
+@item bandpass_filter = @var{[HIGHEST_PERIODICITY LOWEST_PERIODICITY]}
+Uses a bandpass filter before computing moments. The passband is set to a periodicity of @code{HIGHEST_PERIODICITY} 
+to @code{LOWEST_PERIODICITY}, e.g. 6 to 32 quarters if the model frequency is quarterly.
+Default: @code{[6,32]}.
 
 @item irf = @var{INTEGER}
 @anchor{irf}
@@ -10774,7 +10788,7 @@ ts1 is a dseries object:
 
 @deftypefn {dseries} {@var{B} = } baxter_king_filter (@var{A}, @var{hf}, @var{lf}, @var{K})
 
-Implementation of the Baxter and King (1999) band pass filter for @dseries objects. This filter isolates business cycle fluctuations with a period of length ranging between @var{hf} (high frequency) to @var{lf} (low frequency) using a symmetric moving average smoother with @math{2K+1} points, so that K observations at the beginning and at the end of the  sample are lost in the computation of the filter. The default value for @var{hf} is @math{6}, for @var{lf} is @math{32}, and for @var{K} is 12.
+Implementation of the @cite{Baxter and King (1999)} band pass filter for @dseries objects. This filter isolates business cycle fluctuations with a period of length ranging between @var{hf} (high frequency) to @var{lf} (low frequency) using a symmetric moving average smoother with @math{2K+1} points, so that K observations at the beginning and at the end of the  sample are lost in the computation of the filter. The default value for @var{hf} is @math{6}, for @var{lf} is @math{32}, and for @var{K} is 12.
 
 @examplehead
 @example
@@ -12939,6 +12953,11 @@ Backus, David K., Patrick J. Kehoe, and Finn E. Kydland (1992):
 Economy}, 100(4), 745--775
 
 @item
+Baxter, Marianne and Robert G. King (1999):
+``Measuring Business Cycles: Approximate Band-pass Filters for Economic Time Series,'' 
+@i{Review of Economics and Statistics}, 81(4), 575--593
+
+@item
 Boucekkine, Raouf (1995): ``An alternative methodology for solving
 nonlinear forward-looking models,'' @i{Journal of Economic Dynamics
 and Control}, 19, 711--734
@@ -13137,6 +13156,11 @@ Metropolis-Hastings Algorithm,'' @i{Scandinavian Journal of Statistics}, 30, 699
 Smets, Frank and Rafael Wouters (2003): ``An Estimated Dynamic
 Stochastic General Equilibrium Model of the Euro Area,'' @i{Journal of
 the European Economic Association}, 1(5), 1123--1175
+
+@item
+Uhlig, Harald (2001): ``A Toolkit for Analysing Nonlinear Dynamic Stochastic Models Easily,''
+in @i{Computational Methods for the Study of Dynamic
+Economies}, Eds. Ramon Marimon and Andrew Scott, Oxford University Press, 30--61
 
 @item
 Villemot, Sébastien (2011): ``Solving rational expectations models at

@@ -1,8 +1,8 @@
 function [Gamma_y,stationary_vars] = th_autocovariances(dr,ivar,M_,options_,nodecomposition)
 % Computes the theoretical auto-covariances, Gamma_y, for an AR(p) process 
-% with coefficients dr.ghx and dr.ghu and shock variances Sigma_e_
-% for a subset of variables ivar (indices in lgy_)
-% Theoretical HP-filtering is available as an option
+% with coefficients dr.ghx and dr.ghu and shock variances Sigma_e
+% for a subset of variables ivar.
+% Theoretical HP-filtering and band-pass filtering is available as an option
 %    
 % INPUTS
 %   dr:               [structure]    Reduced form solution of the DSGE model  (decisions rules)
@@ -156,7 +156,7 @@ if options_.order == 2 || options_.hp_filter == 0
         end
     end
 end
-if options_.hp_filter == 0
+if options_.hp_filter == 0 && ~options_.bandpass.indicator
     v = NaN*ones(nvar,nvar);
     v(stationary_vars,stationary_vars) = aa*vx*aa'+ bb*M_.Sigma_e*bb';
     k = find(abs(v) < 1e-12);
@@ -207,37 +207,44 @@ if options_.hp_filter == 0
             end
         end
     end
-else% ==> Theoretical HP filter.
+else% ==> Theoretical filters.
     % By construction, all variables are stationary when HP filtered
     iky = inv_order_var(ivar);  
     stationary_vars = (1:length(ivar))';
-    aa = ghx(iky,:);
-    bb = ghu(iky,:);
+    aa = ghx(iky,:); %R in Uhlig (2001)
+    bb = ghu(iky,:); %S in Uhlig (2001)
 
     lambda = options_.hp_filter;
     ngrid = options_.hp_ngrid;
-    freqs = 0 : ((2*pi)/ngrid) : (2*pi*(1 - .5/ngrid)); 
-    tpos  = exp( sqrt(-1)*freqs);
-    tneg  =  exp(-sqrt(-1)*freqs);
-    hp1 = 4*lambda*(1 - cos(freqs)).^2 ./ (1 + 4*lambda*(1 - cos(freqs)).^2);
-    mathp_col = [];
+    freqs = 0 : ((2*pi)/ngrid) : (2*pi*(1 - .5/ngrid)); %[0,2*pi)
+    tpos  = exp( sqrt(-1)*freqs); %positive frequencies
+    tneg  =  exp(-sqrt(-1)*freqs); %negative frequencies
+    if options_.bandpass.indicator
+        filter_gain = zeros(1,ngrid);
+        lowest_periodicity=options_.bandpass.passband(2);
+        highest_periodicity=options_.bandpass.passband(1);
+        highest_periodicity=max(2,highest_periodicity); % restrict to upper bound of pi
+        filter_gain(freqs>=2*pi/lowest_periodicity & freqs<=2*pi/highest_periodicity)=1;
+        filter_gain(freqs<=-2*pi/lowest_periodicity+2*pi & freqs>=-2*pi/highest_periodicity+2*pi)=1;
+    else
+        filter_gain = 4*lambda*(1 - cos(freqs)).^2 ./ (1 + 4*lambda*(1 - cos(freqs)).^2);   %HP transfer function  
+    end
+    mathp_col = NaN(ngrid,length(ivar)^2);
     IA = eye(size(A,1));
     IE = eye(M_.exo_nbr);
     for ig = 1:ngrid
-        if hp1(ig)==0,
+        if filter_gain(ig)==0,
             f_hp = zeros(length(ivar),length(ivar));
         else
-            f_omega  =(1/(2*pi))*( [inv(IA-A*tneg(ig))*ghu1;IE]...
-                                   *M_.Sigma_e*[ghu1'*inv(IA-A'*tpos(ig)) ...
-                                IE]); % state variables
-            g_omega = [aa*tneg(ig) bb]*f_omega*[aa'*tpos(ig); bb']; % selected variables
-            f_hp = hp1(ig)^2*g_omega; % spectral density of selected filtered series
+            f_omega  =(1/(2*pi))*([(IA-A*tneg(ig))\ghu1;IE]...
+                                   *M_.Sigma_e*[ghu1'/(IA-A'*tpos(ig)) IE]); % spectral density of state variables; top formula Uhlig (2001), p. 20 with N=0
+            g_omega = [aa*tneg(ig) bb]*f_omega*[aa'*tpos(ig); bb']; % spectral density of selected variables; middle formula Uhlig (2001), p. 20; only middle block, i.e. y_t' 
+            f_hp = filter_gain(ig)^2*g_omega; % spectral density of selected filtered series; top formula Uhlig (2001), p. 21;
         end
-        mathp_col = [mathp_col ; (f_hp(:))'];    % store as matrix row
-                                                 % for ifft
+        mathp_col(ig,:) = (f_hp(:))';    % store as matrix row for ifft
     end;
     % Covariance of filtered series
-    imathp_col = real(ifft(mathp_col))*(2*pi);
+    imathp_col = real(ifft(mathp_col))*(2*pi); % Inverse Fast Fourier Transformation; middle formula Uhlig (2001), p. 21;
     Gamma_y{1} = reshape(imathp_col(1,:),nvar,nvar);
     % Autocorrelations
     if nar > 0
@@ -253,44 +260,40 @@ else% ==> Theoretical HP filter.
             Gamma_y{nar+2} = ones(nvar,1);
         else
             Gamma_y{nar+2} = zeros(nvar,M_.exo_nbr);
-            SS(exo_names_orig_ord,exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr);
+            SS(exo_names_orig_ord,exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr); %make sure Covariance matrix is positive definite
             cs = chol(SS)';
             SS = cs*cs';
             b1(:,exo_names_orig_ord) = ghu1;
             b2(:,exo_names_orig_ord) = ghu(iky,:);
-            mathp_col = [];
+            mathp_col = NaN(ngrid,length(ivar)^2);
             IA = eye(size(A,1));
             IE = eye(M_.exo_nbr);
             for ig = 1:ngrid
-                if hp1(ig)==0,
+                if filter_gain(ig)==0,
                     f_hp = zeros(length(ivar),length(ivar));
                 else
-                    f_omega  =(1/(2*pi))*( [inv(IA-A*tneg(ig))*b1;IE]...
-                                           *SS*[b1'*inv(IA-A'*tpos(ig)) ...
-                                        IE]); % state variables
-                    g_omega = [aa*tneg(ig) b2]*f_omega*[aa'*tpos(ig); b2']; % selected variables
-                    f_hp = hp1(ig)^2*g_omega; % spectral density of selected filtered series
+                    f_omega  =(1/(2*pi))*( [(IA-A*tneg(ig))\b1;IE]...
+                                           *SS*[b1'/(IA-A'*tpos(ig)) IE]); % spectral density of state variables; top formula Uhlig (2001), p. 20 with N=0
+                    g_omega = [aa*tneg(ig) b2]*f_omega*[aa'*tpos(ig); b2']; % spectral density of selected variables; middle formula Uhlig (2001), p. 20; only middle block, i.e. y_t' 
+                    f_hp = filter_gain(ig)^2*g_omega;  % spectral density of selected filtered series; top formula Uhlig (2001), p. 21;
                 end
-                mathp_col = [mathp_col ; (f_hp(:))'];    % store as matrix row
-                                                         % for ifft
+                mathp_col(ig,:) = (f_hp(:))';    % store as matrix row for ifft
             end;  
             imathp_col = real(ifft(mathp_col))*(2*pi);
             vv = diag(reshape(imathp_col(1,:),nvar,nvar));
             for i=1:M_.exo_nbr
-                mathp_col = [];
+                mathp_col = NaN(ngrid,length(ivar)^2);
                 SSi = cs(:,i)*cs(:,i)';
                 for ig = 1:ngrid
-                    if hp1(ig)==0,
+                    if filter_gain(ig)==0,
                         f_hp = zeros(length(ivar),length(ivar));
                     else
-                        f_omega  =(1/(2*pi))*( [inv(IA-A*tneg(ig))*b1;IE]...
-                                               *SSi*[b1'*inv(IA-A'*tpos(ig)) ...
-                                            IE]); % state variables
-                        g_omega = [aa*tneg(ig) b2]*f_omega*[aa'*tpos(ig); b2']; % selected variables
-                        f_hp = hp1(ig)^2*g_omega; % spectral density of selected filtered series
+                        f_omega  =(1/(2*pi))*( [(IA-A*tneg(ig))\b1;IE]...
+                                               *SSi*[b1'/(IA-A'*tpos(ig)) IE]); % spectral density of state variables; top formula Uhlig (2001), p. 20 with N=0
+                        g_omega = [aa*tneg(ig) b2]*f_omega*[aa'*tpos(ig); b2']; % spectral density of selected variables; middle formula Uhlig (2001), p. 20; only middle block, i.e. y_t' 
+                        f_hp = filter_gain(ig)^2*g_omega; % spectral density of selected filtered series; top formula Uhlig (2001), p. 21;
                     end
-                    mathp_col = [mathp_col ; (f_hp(:))'];    % store as matrix row
-                                                             % for ifft
+                    mathp_col(ig,:) = (f_hp(:))';    % store as matrix row for ifft
                 end;
                 imathp_col = real(ifft(mathp_col))*(2*pi);
                 Gamma_y{nar+2}(:,i) = abs(diag(reshape(imathp_col(1,:),nvar,nvar)))./vv;

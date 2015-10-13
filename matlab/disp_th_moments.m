@@ -1,7 +1,7 @@
-function disp_th_moments(dr,var_list)
+function oo_=disp_th_moments(dr,var_list,M_,options_,oo_)
 % Display theoretical moments of variables
 
-% Copyright (C) 2001-2013 Dynare Team
+% Copyright (C) 2001-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -18,10 +18,10 @@ function disp_th_moments(dr,var_list)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ oo_ options_
-
 nodecomposition = options_.nodecomposition;
-
+if options_.one_sided_hp_filter
+    error(['disp_th_moments:: theoretical moments incompatible with one-sided HP filter. Use simulated moments instead'])
+end
 if size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
 end
@@ -62,13 +62,16 @@ if size(stationary_vars, 1) > 0
         else
             title='THEORETICAL MOMENTS';
         end
-        if options_.hp_filter
-            title = [title ' (HP filter, lambda = ' num2str(options_.hp_filter) ')'];
-        end
+        title=add_filter_subtitle(title,options_);
         headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE');
         labels = deblank(M_.endo_names(ivar,:));
         lh = size(labels,2)+2;
         dyntable(title,headers,labels,z,lh,11,4);
+        if options_.TeX
+            labels = deblank(M_.endo_names_tex(ivar,:));
+            lh = size(labels,2)+2;
+            dyn_latex_table(M_,title,'th_moments',headers,labels,z,lh,11,4);
+        end
 
         if M_.exo_nbr > 1 && ~nodecomposition
             skipline()
@@ -77,10 +80,7 @@ if size(stationary_vars, 1) > 0
             else
                 title='VARIANCE DECOMPOSITION (in percent)';
             end
-            if options_.hp_filter
-                title = [title ' (HP filter, lambda = ' ...
-                         num2str(options_.hp_filter) ')'];
-            end
+            title=add_filter_subtitle(title,options_);
             headers = M_.exo_names;
             headers(M_.exo_names_orig_ord,:) = headers;
             headers = char(' ',headers);
@@ -88,6 +88,13 @@ if size(stationary_vars, 1) > 0
             dyntable(title,headers,deblank(M_.endo_names(ivar(stationary_vars), ...
                                                          :)),100* ...
                      oo_.gamma_y{options_.ar+2}(stationary_vars,:),lh,8,2);
+            if options_.TeX
+                headers=M_.exo_names_tex;
+                headers = char(' ',headers);
+                labels = deblank(M_.endo_names_tex(ivar(stationary_vars),:));
+                lh = size(labels,2)+2;
+                dyn_latex_table(M_,title,'th_var_decomp_uncond',headers,labels,100*oo_.gamma_y{options_.ar+2}(stationary_vars,:),lh,8,2);
+            end
         end
     end
     
@@ -127,13 +134,17 @@ if options_.nocorr == 0 && size(stationary_vars, 1) > 0
         else
             title='MATRIX OF CORRELATIONS';
         end
-        if options_.hp_filter
-            title = [title ' (HP filter, lambda = ' num2str(options_.hp_filter) ')'];
-        end
+        title=add_filter_subtitle(title,options_);
         labels = deblank(M_.endo_names(ivar(i1),:));
         headers = char('Variables',labels);
         lh = size(labels,2)+2;
         dyntable(title,headers,labels,corr,lh,8,4);
+        if options_.TeX
+            labels = deblank(M_.endo_names_tex(ivar(i1),:));
+            headers=char('Variables',labels);
+            lh = size(labels,2)+2;
+            dyn_latex_table(M_,title,'th_corr_matrix',headers,labels,corr,lh,8,4);
+        end
     end
 end
 if options_.ar > 0 && size(stationary_vars, 1) > 0
@@ -149,12 +160,16 @@ if options_.ar > 0 && size(stationary_vars, 1) > 0
         else
             title='COEFFICIENTS OF AUTOCORRELATION';
         end
-        if options_.hp_filter        
-            title = [title ' (HP filter, lambda = ' num2str(options_.hp_filter) ')'];      
-        end      
+        title=add_filter_subtitle(title,options_);
         labels = deblank(M_.endo_names(ivar(i1),:));      
         headers = char('Order ',int2str([1:options_.ar]'));
         lh = size(labels,2)+2;
         dyntable(title,headers,labels,z,lh,8,4);
+        if options_.TeX
+            labels = deblank(M_.endo_names_tex(ivar(i1),:)); 
+            headers=char('Order ',int2str([1:options_.ar]'));
+            lh = size(labels,2)+2;
+            dyn_latex_table(M_,title,'th_autocorr_matrix',headers,labels,z,lh,8,4);
+        end
     end  
 end
