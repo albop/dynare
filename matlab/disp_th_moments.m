@@ -19,7 +19,9 @@ function oo_=disp_th_moments(dr,var_list,M_,options_,oo_)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 nodecomposition = options_.nodecomposition;
-
+if options_.one_sided_hp_filter
+    error(['disp_th_moments:: theoretical moments incompatible with one-sided HP filter. Use simulated moments instead'])
+end
 if size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
 end

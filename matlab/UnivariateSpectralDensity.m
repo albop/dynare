@@ -109,7 +109,9 @@ ngrid = options_.hp_ngrid; %number of grid points
 freqs = (0 : pi/(ngrid-1):pi)'; % grid on which to compute
 tpos  = exp( sqrt(-1)*freqs); %positive frequencies
 tneg  = exp(-sqrt(-1)*freqs); %negative frequencies
-if options_.hp_filter == 0 && ~options_.bandpass.indicator %do not filter
+if options_.one_sided_hp_filter
+    error('UnivariateSpectralDensity:: spectral density estimate not available with one-sided HP filter')
+elseif options_.hp_filter == 0 && ~options_.bandpass.indicator %do not filter
    filter_gain=ones(ngrid,1);
 elseif ~(options_.hp_filter == 0 && ~options_.bandpass.indicator) && options_.bandpass.indicator %filter with bandpass
     filter_gain = zeros(1,ngrid);

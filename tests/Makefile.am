@@ -11,6 +11,7 @@ MODFILES = \
 	moments/example1_hp_test.mod \
 	moments/example1_bp_test.mod \
 	moments/test_AR1_spectral_density.mod \
+	moments/example1_one_sided_hp_test.mod \
 	gsa/ls2003.mod \
 	gsa/ls2003a.mod \
 	gsa/cod_ML_morris/cod_ML_morris.mod \

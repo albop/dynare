@@ -184,7 +184,7 @@ function y=get_filtered_time_series(y,m,options_)
 if options_.hp_filter && ~options_.one_sided_hp_filter  && ~options_.bandpass.indicator
     [hptrend,y] = sample_hp_filter(y,options_.hp_filter);
 elseif ~options_.hp_filter && options_.one_sided_hp_filter && ~options_.bandpass.indicator
-    error('disp_moments:: The one-sided HP filter is not yet available')   
+    [hptrend,y] = one_sided_hp_filter(y,options_.one_sided_hp_filter);
 elseif ~options_.hp_filter && ~options_.one_sided_hp_filter && options_.bandpass.indicator
     data_temp=dseries(y,'0q1');
     data_temp=baxter_king_filter(data_temp,options_.bandpass.passband(1),options_.bandpass.passband(2),200);
