@@ -89,13 +89,14 @@ oo_unfiltered_all_shocks=oo_;
 verbatim;
 total_std_all_shocks_filtered_sim=std([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered])
 cov_filtered_all_shocks=cov([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered])
-acf(1,:)=autocorr([y_filtered ],5)';
-acf(2,:)=autocorr([c_filtered ],5)';
-acf(3,:)=autocorr([k_filtered ],5)';
-acf(4,:)=autocorr([a_filtered ],5)';
-acf(5,:)=autocorr([h_filtered ],5)';
-acf(6,:)=autocorr([b_filtered ],5)';
-autocorr_filtered_all_shocks=acf(:,2:end);
+acf = zeros(6);
+[junk, acf(:,1)] = sample_autocovariance([y_filtered ],5);
+[junk, acf(:,2)] = sample_autocovariance([c_filtered ],5);
+[junk, acf(:,3)] = sample_autocovariance([k_filtered ],5);
+[junk, acf(:,4)] = sample_autocovariance([a_filtered ],5);
+[junk, acf(:,5)] = sample_autocovariance([h_filtered ],5);
+[junk, acf(:,6)] = sample_autocovariance([b_filtered ],5);
+autocorr_filtered_all_shocks=acf(2:end,:)';
 end;
 
 shocks;
@@ -122,13 +123,14 @@ oo_unfiltered_one_shock=oo_;
 verbatim;
 total_std_one_shock_filtered_sim=std([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered])
 cov_filtered_one_shock=cov([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered])
-acf(1,:)=autocorr([y_filtered ],5)';
-acf(2,:)=autocorr([c_filtered ],5)';
-acf(3,:)=autocorr([k_filtered ],5)';
-acf(4,:)=autocorr([a_filtered ],5)';
-acf(5,:)=autocorr([h_filtered ],5)';
-acf(6,:)=autocorr([b_filtered ],5)';
-autocorr_filtered_one_shock=acf(:,2:end);
+acf = zeros(6);
+[junk, acf(:,1)] = sample_autocovariance([y_filtered ],5);
+[junk, acf(:,2)] = sample_autocovariance([c_filtered ],5);
+[junk, acf(:,3)] = sample_autocovariance([k_filtered ],5);
+[junk, acf(:,4)] = sample_autocovariance([a_filtered ],5);
+[junk, acf(:,5)] = sample_autocovariance([h_filtered ],5);
+[junk, acf(:,6)] = sample_autocovariance([b_filtered ],5);
+autocorr_filtered_one_shock=acf(2:end,:)';
 end;
 
 if max(abs((1-(total_std_one_shock_filtered_sim.^2)./(total_std_all_shocks_filtered_sim.^2))*100-oo_filtered_all_shocks.variance_decomposition(:,1)'))>2
