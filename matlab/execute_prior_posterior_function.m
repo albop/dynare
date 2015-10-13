@@ -47,7 +47,7 @@ end
 %Create function handle
 functionhandle=str2func(posterior_function_name);
 
-n_draws=options_.prior_posterior_sampling_draws;
+n_draws=options_.sampling_draws;
 % Get informations about the _posterior_draws files.
 if strcmpi(type,'posterior')
     %% discard first mh_drop percent of the draws:

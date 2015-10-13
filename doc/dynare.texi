@@ -12833,7 +12833,7 @@ Executes the user-defined function on draws from the prior. Either this option o
 @item `posterior'
 Executes the user-defined function on draws from the posterior. Either this option or the @ref{prior} option is required.
 
-@item prior_posterior_sampling_draws = @var{INTEGER}
+@item sampling_draws = @var{INTEGER}
 Number of draws used for sampling. Default: 500.
 
 @end table
