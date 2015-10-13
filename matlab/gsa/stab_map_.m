@@ -123,6 +123,7 @@ options_mcf.alpha2 = alpha2;
 options_mcf.param_names = char(bayestopt_.name(nshock+1:end));
 options_mcf.fname_ = fname_;
 options_mcf.OutputDirectoryName = OutputDirectoryName;
+options_mcf.xparam1 = [];
 
 opt=options_;
 options_.periods=0;
@@ -573,6 +574,9 @@ if length(iunstable)>0 || length(iwrong)>0,
     if length(iunstable)<Nsam || length(istable)>1
         itot = [1:Nsam];
         % Blanchard Kahn
+        if neighborhood_width,
+            options_mcf.xparam1 = xparam1(nshock+1:end);
+        end
         itmp = itot(find(~ismember(itot,istable)));
         options_mcf.amcf_name = asname;
         options_mcf.amcf_title = atitle;
@@ -614,6 +618,9 @@ if length(iunstable)>0 || length(iwrong)>0,
         end
         
         if ~isempty(irestriction),
+            if neighborhood_width,
+                options_mcf.xparam1 = xparam1;
+            end
             options_mcf.param_names = char(bayestopt_.name);
             options_mcf.amcf_name = acalibname;
             options_mcf.amcf_title = acalibtitle;
