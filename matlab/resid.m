@@ -108,9 +108,4 @@ if nargout == 0
     skipline(2)
 end
 
-if info(1)
-    print_info(info,options_.noprint, options_)
-end
-
-
 oo_.steady_state = steady_state_old;
