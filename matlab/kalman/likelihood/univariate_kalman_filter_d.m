@@ -122,7 +122,7 @@ while newRank && (t<=last)
         Fstar = Zi*Pstar*Zi' + H(d_index(i));
         Finf  = Zi*Pinf*Zi';
         Kstar = Pstar*Zi';
-        if Finf>kalman_tol && newRank
+        if Finf>diffuse_kalman_tol && newRank
             Kinf   = Pinf*Zi';
             Kinf_Finf = Kinf/Finf;
             a         = a + Kinf_Finf*prediction_error;

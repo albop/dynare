@@ -105,7 +105,7 @@ while newRank && t < smpl
         Fstar(i,t)  = Zi*Pstar(:,:,t)*Zi' +H(i);
         Finf(i,t)   = Zi*Pinf(:,:,t)*Zi';
         Kstar(:,i,t) = Pstar(:,:,t)*Zi';
-        if Finf(i,t) > kalman_tol && newRank
+        if Finf(i,t) > diffuse_kalman_tol && newRank
             icc=icc+1;
             Kinf(:,i,t)       = Pinf(:,:,t)*Zi';
             Kinf_Finf         = Kinf(:,i,t)/Finf(i,t);
@@ -233,7 +233,7 @@ if d
     for t = d:-1:1
         di = flipud(data_index{t})';
         for i = di
-            if Finf(i,t) > kalman_tol 
+            if Finf(i,t) > diffuse_kalman_tol 
                 r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
                           (Kinf(:,i,t)'*Fstar(i,t)/Finf(i,t)-Kstar(:,i,t)')*r0(:,t)/Finf(i,t)*Z(i,:)' + ...
                           r1(:,t)-Kinf(:,i,t)'*r1(:,t)/Finf(i,t)*Z(i,:)';
