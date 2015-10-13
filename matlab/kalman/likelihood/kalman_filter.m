@@ -169,7 +169,8 @@ while notsteady && t<=last
         v  = Y(:,t)-a(Z);
         F  = P(Z,Z) + H;
     end
-    if rcond(F) < kalman_tol
+    sig=sqrt(diag(F));
+    if any(diag(F)<kalman_tol) || rcond(F./(sig*sig')) < kalman_tol
         if ~all(abs(F(:))<kalman_tol)
             return
         else
@@ -178,9 +179,9 @@ while notsteady && t<=last
         end
     else
         F_singular = 0;
-        dF      = det(F);
-        iF      = inv(F);
-        likk(s) = log(dF)+transpose(v)*iF*v;
+        log_dF      = log(det(F./(sig*sig')))+2*sum(log(sig));
+        iF      = inv(F./(sig*sig'))./(sig*sig');
+        likk(s) = log_dF+transpose(v)*iF*v;
         if Zflag
             K = P*Z'*iF;
             Ptmp = T*(P-K*Z*P)*transpose(T)+QQ;
@@ -245,7 +246,7 @@ if t <= last
             Hess = Hess + tmp{3};
         end
     else
-        [tmp, likk(s+1:end)] = kalman_filter_ss(Y,t,last,a,T,K,iF,dF,Z,pp,Zflag);
+        [tmp, likk(s+1:end)] = kalman_filter_ss(Y,t,last,a,T,K,iF,log_dF,Z,pp,Zflag);
     end
 end
 

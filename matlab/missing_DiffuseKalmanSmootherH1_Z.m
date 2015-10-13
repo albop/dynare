@@ -168,11 +168,13 @@ while notsteady && t<smpl
         ZZ = Z(di,:);
         v(di,t)      = Y(di,t) - ZZ*a(:,t);
         F = ZZ*P(:,:,t)*ZZ' + H(di,di);
-        if rcond(F) < kalman_tol
+        sig=sqrt(diag(F));
+
+        if any(diag(F)<kalman_tol) || rcond(F./(sig*sig')) < kalman_tol
             alphahat = Inf;
             return
         end    
-        iF(di,di,t)   = inv(F);
+        iF(di,di,t)   = inv(F./(sig*sig'))./(sig*sig');
         PZI         = P(:,:,t)*ZZ'*iF(di,di,t);
         atilde(:,t) = a(:,t) + PZI*v(di,t);
         K(:,di,t)    = T*PZI;

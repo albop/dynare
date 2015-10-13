@@ -1,4 +1,4 @@
-function [LIK, likk, a] = kalman_filter_ss(Y,start,last,a,T,K,iF,dF,Z,pp,Zflag,analytic_derivation,Da,DT,DYss,D2a,D2T,D2Yss)
+function [LIK, likk, a] = kalman_filter_ss(Y,start,last,a,T,K,iF,log_dF,Z,pp,Zflag,analytic_derivation,Da,DT,DYss,D2a,D2T,D2Yss)
 % Computes the likelihood of a stationnary state space model (steady state kalman filter).
 
 %@info:
@@ -130,7 +130,7 @@ while t <= last
 end
 
 % Adding constant determinant of F (prediction error covariance matrix)
-likk = likk + log(dF);
+likk = likk + log_dF;
 
 % Add log-likelihhod constants and divide by two
 likk = .5*(likk + pp*log(2*pi));

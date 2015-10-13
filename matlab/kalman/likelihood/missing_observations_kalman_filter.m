@@ -102,7 +102,8 @@ while notsteady & t<=last
             v = Y(d_index,t) - a(z);
             F = P(z,z) + H(d_index,d_index);
         end
-        if rcond(F) < kalman_tol
+        sig=sqrt(diag(F));
+        if any(diag(F)<kalman_tol) || rcond(F./(sig*sig')) < kalman_tol
             if ~all(abs(F(:))<kalman_tol)
                 return
             else
@@ -111,9 +112,9 @@ while notsteady & t<=last
             end
         else
             F_singular = 0;
-            dF     = det(F);
-            iF     = inv(F);
-            lik(s) = log(dF) + transpose(v)*iF*v + length(d_index)*log(2*pi);
+            log_dF      = log(det(F./(sig*sig')))+2*sum(log(sig));
+            iF      = inv(F./(sig*sig'))./(sig*sig');
+            lik(s) = log_dF + transpose(v)*iF*v + length(d_index)*log(2*pi);
             if Zflag
                 K = P*z'*iF;
                 P = T*(P-K*z*P)*transpose(T)+QQ;
@@ -140,7 +141,7 @@ lik(1:s) = .5*lik(1:s);
 
 % Call steady state Kalman filter if needed.
 if t<=last
-    [tmp, lik(s+1:end)] = kalman_filter_ss(Y,t,last,a,T,K,iF,dF,Z,pp,Zflag);
+    [tmp, lik(s+1:end)] = kalman_filter_ss(Y,t,last,a,T,K,iF,log_dF,Z,pp,Zflag);
 end
 
 % Compute minus the log-likelihood.
