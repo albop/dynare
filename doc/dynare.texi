@@ -12808,32 +12808,32 @@ Baseline New Keynesian Model estimated in @cite{Fernández-Villaverde (2010)}. I
 @chapter Dynare misc commands
 
 @anchor{prior_posterior_function}
-@deffn {MATLAB/Octave command} @var{output_cell_name}=prior_posterior_function('@var{function_name_string}','@var{prior_posterior_selector}',@var{OPTIONS})
-Executes a user-defined function on parameter draws from the prior or posterior distribution. The function 
-provided using the @var{function_name_string} must have the following header
-@code{output_cell =FILENAME(xparam1,M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info)}. 
-It allows read-only access to all Dynare structures. The only output argument allowed is a 1 by n cell array, 
-which allows for storing any type of output/computations. Dynare returns the results of the 
-computations for all draws in a ndraws by n cell array named @var{output_cell_name}.
+@deffn Command prior_posterior_function(@var{OPTIONS}) ;
+
+Executes a user-defined function on parameter draws from the prior or posterior
+distribution. Dynare returns the results of the computations for all draws in an
+@math{ndraws} by @math{n} cell array named @var{oo_.posterior_function_results}.
 
 @optionshead
 
 @table @code
 
-@item prior_posterior_selector 
+@item function = @var{FUNCTION_NAME}
+The function must have the following header @code{output_cell =
+FILENAME(xparam1,M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info)},
+providing read-only access to all Dynare structures. The only output argument
+allowed is a @math{1} by @math{n} cell array, which allows for storing any type of
+output/computations. This option is required.
 
-Available options are
-@table @code
+@anchor{prior}
+@item `prior'
+Executes the user-defined function on draws from the prior. Either this option or the @ref{posterior} option is required.
 
-@item 'prior'
-Executes the user-defined function on draws from the prior
+@anchor{posterior}
+@item `posterior'
+Executes the user-defined function on draws from the posterior. Either this option or the @ref{prior} option is required.
 
-@item 'posterior'
-Executes the user-defined function on draws from the posterior
-
-@end table
-
-@item prior_posterior_sampling_draws
+@item prior_posterior_sampling_draws = @var{INTEGER}
 Number of draws used for sampling. Default: 500.
 
 @end table

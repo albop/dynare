@@ -17,7 +17,7 @@
  */
 
 /*
- * Copyright (C) 2004-2010 Dynare Team
+ * Copyright (C) 2004-2015 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -116,14 +116,14 @@ varobs gp_obs gy_obs;
 
 estimation(order=1,datafile='../fs2000/fsdat_simul', nobs=192, loglinear, mh_replic=2000, mh_nblocks=2, mh_jscale=0.8);
 
-posterior_function_results=execute_prior_posterior_function('posterior_function_demo',M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info,'posterior')
+oo_=execute_prior_posterior_function('posterior_function_demo',M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info,'posterior');
 
 % read out the contents of the cell and put them into ndraws by ncolumns
-posterior_params=cell2mat(posterior_function_results(:,1));
-posterior_steady_states=cell2mat(posterior_function_results(:,2));
+posterior_params=cell2mat(oo_.prior_posterior_function_results(:,1));
+posterior_steady_states=cell2mat(oo_.prior_posterior_function_results(:,2));
 
-prior_function_results=execute_prior_posterior_function('posterior_function_demo',M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info,'prior')
+oo_=execute_prior_posterior_function('posterior_function_demo',M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info,'prior');
 
 % read out the contents of the cell and put them into ndraws by ncolumns
-prior_params=cell2mat(posterior_function_results(:,1));
-prior_steady_states=cell2mat(posterior_function_results(:,2));
+prior_params=cell2mat(oo_.prior_posterior_function_results(:,1));
+prior_steady_states=cell2mat(oo_.prior_posterior_function_results(:,2));

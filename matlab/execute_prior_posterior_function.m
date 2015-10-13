@@ -1,24 +1,23 @@
-function [results_cell] = execute_prior_posterior_function(posterior_function_name,M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info,type)
-%[results_cell] = execute_prior_posterior_function(functionhandle,M_,options_,oo_,dataset_,estim_params_,bayestopt_,type)% This function executes a given function on draws of the posterior or prior distribution 
-% Executes user provided function on prior or posterior draws
-% 
+function oo_=execute_prior_posterior_function(posterior_function_name,M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info,type)
+%[oo_] = execute_prior_posterior_function(posterior_function_name,M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info,type)
+% This function executes a given function on draws of the posterior or prior distribution
+%
 % INPUTS
 %   functionhandle               Handle to the function to be executed
-%   M_           [structure]     Matlab's structure describing the Model (initialized by dynare, see @ref{M_}).
-%   options_     [structure]     Matlab's structure describing the options (initialized by dynare, see @ref{options_}).
-%   oo_          [structure]     Matlab's structure gathering the results (initialized by dynare, see @ref{oo_}).
-%   estim_params_[structure]     Matlab's structure describing the estimated_parameters (initialized by dynare, see @ref{estim_params_}).
-%   bayestopt_   [structure]     Matlab's structure describing the parameter options (initialized by dynare, see @ref{bayestopt_}).
-%   dataset_     [structure]     Matlab's structure storing the dataset
-%   dataset_info [structure]     Matlab's structure storing the information about the dataset
+%   M_           [structure]     Matlab/Octave structure describing the Model (initialized by dynare, see @ref{M_}).
+%   options_     [structure]     Matlab/Octave structure describing the options (initialized by dynare, see @ref{options_}).
+%   oo_          [structure]     Matlab/Octave structure gathering the results (initialized by dynare, see @ref{oo_}).
+%   estim_params_[structure]     Matlab/Octave structure describing the estimated_parameters (initialized by dynare, see @ref{estim_params_}).
+%   bayestopt_   [structure]     Matlab/Octave structure describing the parameter options (initialized by dynare, see @ref{bayestopt_}).
+%   dataset_     [structure]     Matlab/Octave structure storing the dataset
+%   dataset_info [structure]     Matlab/Octave structure storing the information about the dataset
 %   type         [string]        'prior' or 'posterior'
 %
 %
 % OUTPUTS
-%   results_cell    [cell]     ndrawsx1 cell array storing the results
-%                                of the prior/posterior computations
+%   oo_          [structure]     Matlab/Octave structure gathering the results (initialized by dynare, see @ref{oo_}).
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -83,10 +82,10 @@ catch err
 end
 
 %initialize cell with number of columns
-results_cell=cell(n_draws,size(junk,2));
+oo_.prior_posterior_function_results=cell(n_draws,size(junk,2));
 
 %% compute function on draws
 for draw_iter = 1:n_draws
     M_ = set_all_parameters(parameter_mat(draw_iter,:),estim_params_,M_);
-    [results_cell(draw_iter,:)]=functionhandle(parameter_mat(draw_iter,:),M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info);
+    [oo_.prior_posterior_function_results(draw_iter,:)]=functionhandle(parameter_mat(draw_iter,:),M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info);
 end
