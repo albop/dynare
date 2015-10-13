@@ -53,7 +53,7 @@ end
 JJ1 = JJ(:,ind1);
 [eu,ee2,ee1] = svd( JJ1, 0 );
 condJ= cond(JJ1);
-rankJ = rank(JJ./norm(JJ),1.e-10);
+rankJ = rank(JJ);
 rankJJ = rankJ;
 % if hess_flag==0,
 %     rankJJ = rank(JJ'*JJ);

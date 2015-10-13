@@ -122,7 +122,7 @@ for i = 1:p
                 plot(X(:,i),X(:,j),[plotsymbol,'b'])
             end
             if ~isempty(xparam1)
-                hold on, plot(xparam1(i),xparam1(j),'k*')
+                hold on, plot(xparam1(i),xparam1(j),'s','MarkerFaceColor',[0 0.75 0],'MarkerEdgeColor',[0 0.75 0])
             end
             hold off;
             %             axis([-0.1 1.1 -0.1 1.1])

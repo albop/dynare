@@ -32,6 +32,10 @@ beha_title = options_mcf.beha_title;
 nobeha_title = options_mcf.nobeha_title;
 title = options_mcf.title;
 fname_ = options_mcf.fname_;
+xparam1=[];
+if isfield(options_mcf,'xparam1'),
+    xparam1=options_mcf.xparam1;
+end    
 OutputDirectoryName = options_mcf.OutputDirectoryName;
 
 [proba, dproba] = stab_map_1(lpmat, ibeha, inobeha, [],0);
@@ -55,7 +59,9 @@ if length(ibeha)>10 && length(inobeha)>10,
 end
 if ~isempty(indmcf) && ~DynareOptions.nograph,
     skipline()
+    xx=[];
+    if ~ isempty(xparam1), xx=xparam1(indmcf); end
     scatter_mcf(lpmat(ibeha,indmcf),lpmat(inobeha,indmcf), param_names(indmcf,:), ...
-        '.', [fname_,'_',amcf_name], OutputDirectoryName, amcf_title,[], DynareOptions, ...
+        '.', [fname_,'_',amcf_name], OutputDirectoryName, amcf_title,xx, DynareOptions, ...
         beha_title, nobeha_title)
 end
