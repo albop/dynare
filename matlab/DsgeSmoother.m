@@ -147,7 +147,9 @@ elseif options_.lik_init == 3           % Diffuse Kalman filter
     if kalman_algo ~= 4
         kalman_algo = 3;
     end
-    [Z,ST,R1,QT,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,options_.qz_criterium);
+    [Z,ST,R1,QT,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,options_.qz_criterium,oo_.dr.restrict_var_list);
+    Pinf = QT*Pinf*QT';
+    Pstar = QT*Pstar*QT';
 elseif options_.lik_init == 4           % Start from the solution of the Riccati equation.
     [err, Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(mf,np,vobs)),H);
     mexErrCheck('kalman_steady_state',err);
@@ -196,13 +198,11 @@ if ~missing_value
     end
 end
 
-if kalman_algo == 1 || kalman_algo == 2
-    ST = T;
-    R1 = R;
-    Z = zeros(vobs,size(T,2));
-    for i=1:vobs
-        Z(i,mf(i)) = 1;
-    end
+ST = T;
+R1 = R;
+Z = zeros(vobs,size(T,2));
+for i=1:vobs
+    Z(i,mf(i)) = 1;
 end
 
 if kalman_algo == 1 || kalman_algo == 3
@@ -240,25 +240,6 @@ if kalman_algo == 2 || kalman_algo == 4
                                                       options_.filter_decomposition);
 end
 
-if kalman_algo == 3 || kalman_algo == 4
-    alphahat = QT*alphahat;
-    ahat = QT*ahat;
-    nk = options_.nk;
-    for jnk=1:nk
-        aK(jnk,:,:) = QT*dynare_squeeze(aK(jnk,:,:));
-        for i=1:size(PK,4)
-            PK(jnk,:,:,i) = QT*dynare_squeeze(PK(jnk,:,:,i))*QT';
-        end
-        if options_.filter_decomposition
-            for i=1:size(decomp,4)
-                decomp(jnk,:,:,i) = QT*dynare_squeeze(decomp(jnk,:,:,i));
-            end
-        end
-    end
-    for i=1:size(P,4)
-        P(:,:,i) = QT*dynare_squeeze(P(:,:,i))*QT';
-    end
-end
 
 if estim_params_.ncn && (kalman_algo == 2 || kalman_algo == 4)
     % extracting measurement errors

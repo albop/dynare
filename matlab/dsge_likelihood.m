@@ -398,11 +398,20 @@ switch DynareOptions.lik_init
             error(['The model requires Diffuse filter, but you specified a different Kalman filter. You must set options_.kalman_algo ' ...
                    'to 0 (default), 3 or 4'])
     end
-    [Z,T,R,QT,Pstar,Pinf] = schur_statespace_transformation(Z,T,R,Q,DynareOptions.qz_criterium);
+    [Ztmp,Ttmp,Rtmp,QT,Pstar,Pinf] = schur_statespace_transformation(Z,T,R,Q,DynareOptions.qz_criterium,[1:length(T)]);
+    Pinf = QT*Pinf*QT';
+    Pstar = QT*Pstar*QT';
+    Z1=Ztmp*0;
+    for jz=1:length(Z)
+        Z1(jz,Z(jz))=1;
+    end
+    Z=Z1;
+    clear Ztmp Z1
     Zflag = 1;
     % Run diffuse kalman filter on first periods.
     if (kalman_algo==3)
         % Multivariate Diffuse Kalman Filter
+        Pstar0 = Pstar; % store Pstar
         if no_missing_data_flag
             [dLIK,dlik,a,Pstar] = kalman_filter_d(Y, 1, size(Y,2), ...
                                                        zeros(mm,1), Pinf, Pstar, ...
@@ -419,6 +428,7 @@ switch DynareOptions.lik_init
         if isinf(dLIK)
             % Go to univariate diffuse filter if singularity problem.
             singular_diffuse_filter = 1;
+            Pstar = Pstar0;
         end
     end
     if singular_diffuse_filter || (kalman_algo==4)
@@ -693,7 +703,11 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
         if DynareOptions.lik_init==3
             LIK = LIK + dLIK;
             if analytic_derivation==0 && nargout==2,
-                lik = [dlik; lik];
+                if ~singular_diffuse_filter,
+                    lik = [dlik; lik];
+                else
+                    lik = [sum(dlik,2); lik];
+                end
             end
         end
     end
