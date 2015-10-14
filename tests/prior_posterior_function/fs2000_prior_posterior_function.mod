@@ -116,13 +116,13 @@ varobs gp_obs gy_obs;
 
 estimation(order=1,datafile='../fs2000/fsdat_simul', nobs=192, loglinear, mh_replic=2000, mh_nblocks=2, mh_jscale=0.8);
 
-prior_posterior_function(posterior, function='posterior_function_demo', sampling_draws=500);
+posterior_function(function='posterior_function_demo', sampling_draws=500);
 
 % read out the contents of the cell and put them into ndraws by ncolumns
 posterior_params=cell2mat(oo_.prior_posterior_function_results(:,1));
 posterior_steady_states=cell2mat(oo_.prior_posterior_function_results(:,2));
 
-prior_posterior_function(function='posterior_function_demo', prior);
+prior_function(function='posterior_function_demo');
 
 % read out the contents of the cell and put them into ndraws by ncolumns
 prior_params=cell2mat(oo_.prior_posterior_function_results(:,1));

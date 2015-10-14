@@ -12821,17 +12821,18 @@ Baseline New Keynesian Model estimated in @cite{Fernández-Villaverde (2010)}. I
 @node Dynare misc commands
 @chapter Dynare misc commands
 
-@anchor{prior_posterior_function}
-@deffn Command prior_posterior_function(@var{OPTIONS}) ;
+@anchor{prior_function}
+@deffn Command prior_function(@var{OPTIONS}) ;
 
-Executes a user-defined function on parameter draws from the prior or posterior
+Executes a user-defined function on parameter draws from the prior
 distribution. Dynare returns the results of the computations for all draws in an
-@math{ndraws} by @math{n} cell array named @var{oo_.posterior_function_results}.
+@math{ndraws} by @math{n} cell array named @var{oo_.prior_posterior_function_results}.
 
 @optionshead
 
 @table @code
 
+@anchor{prior_function_function}
 @item function = @var{FUNCTION_NAME}
 The function must have the following header @code{output_cell =
 FILENAME(xparam1,M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info)},
@@ -12839,16 +12840,27 @@ providing read-only access to all Dynare structures. The only output argument
 allowed is a @math{1} by @math{n} cell array, which allows for storing any type of
 output/computations. This option is required.
 
-@anchor{prior}
-@item `prior'
-Executes the user-defined function on draws from the prior. Either this option or the @ref{posterior} option is required.
-
-@anchor{posterior}
-@item `posterior'
-Executes the user-defined function on draws from the posterior. Either this option or the @ref{prior} option is required.
-
+@anchor{prior_function_sampling_draws}
 @item sampling_draws = @var{INTEGER}
 Number of draws used for sampling. Default: 500.
+
+@end table
+
+@end deffn
+
+@deffn Command posterior_function(@var{OPTIONS}) ;
+
+Same as the @ref{prior_function} command but for the posterior distribution.
+
+@optionshead
+
+@table @code
+
+@item function = @var{FUNCTION_NAME}
+@xref{prior_function_function}
+
+@item sampling_draws = @var{INTEGER}
+@xref{prior_function_sampling_draws}
 
 @end table
 
