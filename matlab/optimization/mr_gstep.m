@@ -1,4 +1,4 @@
-function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,Verbose,Save_files,varargin)
+function [f0, x, ig] = mr_gstep(h1,x,bounds,func0,htol0,Verbose,Save_files,varargin)
 % function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,varargin)
 %
 % Gibbs type step in optimisation
@@ -39,6 +39,9 @@ if isempty(htol0)
 else
     htol = htol0;
 end
+if length(htol)==1,
+    htol=htol*ones(n,1);
+end
 f0=feval(func0,x,varargin{:});
 
 xh1=x;
@@ -58,8 +61,8 @@ while i<n
     xh1(i)=x(i)-h1(i);
     fx = feval(func0,xh1,varargin{:});
     f_1(:,i)=fx;
-    if hcheck && htol<1
-        htol=min(1,max(min(abs(dx))*2,htol*10));
+    if hcheck && htol(i)<1
+        htol(i)=min(1,max(min(abs(dx))*2,htol(i)*10));
         h1(i)=h10;
         xh1(i)=x(i);
         i=i-1;
@@ -68,7 +71,7 @@ while i<n
         hh=gg;
         gg(i)=(f1(i)'-f_1(i)')./(2.*h1(i));
         hh(i) = 1/max(1.e-9,abs( (f1(i)+f_1(i)-2*f0)./(h1(i)*h1(i)) ));
-        if gg(i)*(hh(i)*gg(i))/2 > htol
+        if gg(i)*(hh(i)*gg(i))/2 > htol(i)
             [f0 x fc retcode] = csminit1(func0,x,f0,gg,0,diag(hh),Verbose,varargin{:});
             ig(i)=1;
             if Verbose
@@ -77,6 +80,7 @@ while i<n
         end
         xh1=x;
     end
+    x = check_bounds(x,bounds);
     if Save_files
         save gstep.mat x h1 f0
     end
@@ -84,4 +88,20 @@ end
 if Save_files
     save gstep.mat x h1 f0
 end
+
+return
+
+
+function x = check_bounds(x,bounds)
+
+inx = find(x>=bounds(:,2));
+if ~isempty(inx),
+    x(inx) = bounds(inx,2)-eps;
+end
+
+inx = find(x<=bounds(:,1));
+if ~isempty(inx),
+    x(inx) = bounds(inx,1)+eps;
+end
+
 
