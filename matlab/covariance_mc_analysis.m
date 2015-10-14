@@ -105,32 +105,20 @@ for file = 1:length(ListOfFiles)
     i1 = i2+1;
 end
 
-if ~isconst(tmp)
-    if options_.estimation.moments_posterior_density.indicator
-        [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
-                posterior_moments(tmp,1,mh_conf_sig);
-        oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.density.(var1).(var2) = density;
-    else
-        [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
-                        posterior_moments(tmp,0,mh_conf_sig);
-    end
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Mean.(var1).(var2) = p_mean;
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Median.(var1).(var2) = p_median;
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Variance.(var1).(var2) = p_var;
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDinf.(var1).(var2) = hpd_interval(1);
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDsup.(var1).(var2) = hpd_interval(2);
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.deciles.(var1).(var2) = p_deciles;
+if options_.estimation.moments_posterior_density.indicator
+    [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
+            posterior_moments(tmp,1,mh_conf_sig);
+    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.density.(var1).(var2) = density;
 else
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Mean.(var1).(var2) = NaN;
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Median.(var1).(var2) = NaN;
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Variance.(var1).(var2) = NaN;
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDinf.(var1).(var2) = NaN;
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDsup.(var1).(var2) = NaN;
-    oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.deciles.(var1).(var2) = NaN;
-    if options_.estimation.moments_posterior_density.indicator
-        oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.density.(var1).(var2) = NaN;
-    end
+    [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
+                    posterior_moments(tmp,0,mh_conf_sig);
 end
+oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Mean.(var1).(var2) = p_mean;
+oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Median.(var1).(var2) = p_median;
+oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.Variance.(var1).(var2) = p_var;
+oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDinf.(var1).(var2) = hpd_interval(1);
+oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.HPDsup.(var1).(var2) = hpd_interval(2);
+oo_.([TYPE, 'TheoreticalMoments']).dsge.covariance.deciles.(var1).(var2) = p_deciles;
 
 if options_.contemporaneous_correlation
     if options_.estimation.moments_posterior_density.indicator

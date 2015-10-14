@@ -90,46 +90,26 @@ for file = 1:length(ListOfFiles)
     i1 = i2+1;
 end
 name = [ var1 '.' var2 ];
-if ~isconst(tmp)
-    if options_.estimation.moments_posterior_density.indicator
-        [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
-            posterior_moments(tmp,1,mh_conf_sig);
-    else
-        [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
-            posterior_moments(tmp,0,mh_conf_sig);
-    end
-    if isfield(oo_,[ TYPE 'TheoreticalMoments'])
-        temporary_structure = oo_.([TYPE, 'TheoreticalMoments']);
-        if isfield(temporary_structure,'dsge')
-            temporary_structure = oo_.([TYPE, 'TheoreticalMoments']).dsge;
-            if isfield(temporary_structure,'correlation')
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Mean',nar,p_mean);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Median',nar,p_median);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Variance',nar,p_var);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDinf',nar,hpd_interval(1));
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDsup',nar,hpd_interval(2));
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'deciles',nar,p_deciles);
-                if options_.estimation.moments_posterior_density.indicator
-                    oo_ = fill_output_structure(var1,var2,TYPE,oo_,'density',nar,density);
-                end
-            end
-        end
-    end
+if options_.estimation.moments_posterior_density.indicator
+    [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
+        posterior_moments(tmp,1,mh_conf_sig);
 else
-    if isfield(oo_,'PosteriorTheoreticalMoments')
-        temporary_structure = oo_.([TYPE, 'TheoreticalMoments']);
-        if isfield(temporary_structure,'dsge')
-            temporary_structure = oo_.([TYPE, 'TheoreticalMoments']).dsge;
-            if isfield(temporary_structure,'correlation')
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Mean',nar,NaN);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Median',nar,NaN);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Variance',nar,NaN);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDinf',nar,NaN);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDsup',nar,NaN);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'deciles',nar,NaN);
-                if options_.estimation.moments_posterior_density.indicator
-                    oo_ = fill_output_structure(var1,var2,TYPE,oo_,'density',nar,NaN);
-                end
+    [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
+        posterior_moments(tmp,0,mh_conf_sig);
+end
+if isfield(oo_,[ TYPE 'TheoreticalMoments'])
+    temporary_structure = oo_.([TYPE, 'TheoreticalMoments']);
+    if isfield(temporary_structure,'dsge')
+        temporary_structure = oo_.([TYPE, 'TheoreticalMoments']).dsge;
+        if isfield(temporary_structure,'correlation')
+            oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Mean',nar,p_mean);
+            oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Median',nar,p_median);
+            oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Variance',nar,p_var);
+            oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDinf',nar,hpd_interval(1));
+            oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDsup',nar,hpd_interval(2));
+            oo_ = fill_output_structure(var1,var2,TYPE,oo_,'deciles',nar,p_deciles);
+            if options_.estimation.moments_posterior_density.indicator
+                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'density',nar,density);
             end
         end
     end

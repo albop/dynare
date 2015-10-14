@@ -86,30 +86,14 @@ for file = 1:length(ListOfFiles)
     i1 = i2+1;
 end
 
-t1 = min(tmp); t2 = max(tmp);
-t3 = t2-t1;% How to normalize ? t1 and t2 may be zero...
-if t3<1.0e-12
-    if t1<1.0e-12
-        t1 = 0;
-    end
-    if abs(t1-1)<1.0e-12
-        t1 = 1;
-    end
-    p_mean = t1;
-    p_median = t1;
-    p_var = 0;
-    hpd_interval = NaN(2,1);
-    p_deciles = NaN(9,1);
-    density = NaN;
+if options_.estimation.moments_posterior_density.indicator
+    [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
+        posterior_moments(tmp,1,mh_conf_sig);
 else
-    if options_.estimation.moments_posterior_density.indicator
-        [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...
-            posterior_moments(tmp,1,mh_conf_sig);
-    else
-        [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
-            posterior_moments(tmp,0,mh_conf_sig);        
-    end
+    [p_mean, p_median, p_var, hpd_interval, p_deciles] = ...
+        posterior_moments(tmp,0,mh_conf_sig);        
 end
+
 oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.Mean.(var).(exo) = p_mean;
 oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.Median.(var).(exo) = p_median;
 oo_.([TYPE, 'TheoreticalMoments']).dsge.VarianceDecomposition.Variance.(var).(exo) = p_var;
