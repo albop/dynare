@@ -12826,7 +12826,7 @@ Baseline New Keynesian Model estimated in @cite{Fernández-Villaverde (2010)}. I
 
 Executes a user-defined function on parameter draws from the prior
 distribution. Dynare returns the results of the computations for all draws in an
-@math{ndraws} by @math{n} cell array named @var{oo_.prior_posterior_function_results}.
+@math{ndraws} by @math{n} cell array named @var{oo_.prior_function_results}.
 
 @optionshead
 
@@ -12850,7 +12850,8 @@ Number of draws used for sampling. Default: 500.
 
 @deffn Command posterior_function(@var{OPTIONS}) ;
 
-Same as the @ref{prior_function} command but for the posterior distribution.
+Same as the @ref{prior_function} command but for the posterior
+distribution. Results returned in @var{oo_.posterior_function_results}
 
 @optionshead
 

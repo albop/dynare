@@ -47,6 +47,7 @@ end
 %Create function handle
 functionhandle=str2func(posterior_function_name);
 
+prior = true;
 n_draws=options_.sampling_draws;
 % Get informations about the _posterior_draws files.
 if strcmpi(type,'posterior')
@@ -59,6 +60,7 @@ if strcmpi(type,'posterior')
         error('EXECUTE_POSTERIOR_FUNCTION: The draws could not be initialized')
     end
     n_draws=options_.sub_draws;
+    prior = false;
 elseif strcmpi(type,'prior')
     prior_draw(1);
 else
@@ -82,10 +84,16 @@ catch err
 end
 
 %initialize cell with number of columns
-oo_.prior_posterior_function_results=cell(n_draws,size(junk,2));
+results_cell=cell(n_draws,size(junk,2));
 
 %% compute function on draws
 for draw_iter = 1:n_draws
     M_ = set_all_parameters(parameter_mat(draw_iter,:),estim_params_,M_);
-    [oo_.prior_posterior_function_results(draw_iter,:)]=functionhandle(parameter_mat(draw_iter,:),M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info);
+    [results_cell(draw_iter,:)]=functionhandle(parameter_mat(draw_iter,:),M_,options_,oo_,estim_params_,bayestopt_,dataset_,dataset_info);
+end
+
+if prior
+    oo_.prior_function_results = results_cell;
+else
+    oo_.posterior_function_results = results_cell;
 end

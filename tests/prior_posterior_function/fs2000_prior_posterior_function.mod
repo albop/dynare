@@ -119,11 +119,11 @@ estimation(order=1,datafile='../fs2000/fsdat_simul', nobs=192, loglinear, mh_rep
 posterior_function(function='posterior_function_demo', sampling_draws=500);
 
 % read out the contents of the cell and put them into ndraws by ncolumns
-posterior_params=cell2mat(oo_.prior_posterior_function_results(:,1));
-posterior_steady_states=cell2mat(oo_.prior_posterior_function_results(:,2));
+posterior_params=cell2mat(oo_.posterior_function_results(:,1));
+posterior_steady_states=cell2mat(oo_.posterior_function_results(:,2));
 
 prior_function(function='posterior_function_demo');
 
 % read out the contents of the cell and put them into ndraws by ncolumns
-prior_params=cell2mat(oo_.prior_posterior_function_results(:,1));
-prior_steady_states=cell2mat(oo_.prior_posterior_function_results(:,2));
+prior_params=cell2mat(oo_.prior_function_results(:,1));
+prior_steady_states=cell2mat(oo_.prior_function_results(:,2));
