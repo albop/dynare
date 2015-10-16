@@ -113,20 +113,23 @@ public:
                ,const int CUDA_device_arg, cublasHandle_t cublas_handle_arg, cusparseHandle_t cusparse_handle_arg, cusparseMatDescr_t descr_arg
 #endif
                );
-  void Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin, int y_kmax, int Size, int periods, bool cvg, int minimal_solving_periods, int stack_solve_algo, unsigned int endo_name_length, char *P_endo_names);
+  void Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin, int y_kmax, int Size, int periods, bool cvg, int minimal_solving_periods, int stack_solve_algo, unsigned int endo_name_length, char *P_endo_names, vector_table_conditional_local_type vector_table_conditional_local);
   void Simulate_Newton_One_Boundary(bool forward);
   void fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1);
   void Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool two_boundaries, int stack_solve_algo, int solve_algo);
+  void Close_SaveCode();
   void Read_file(string file_name, int periods, int u_size1, int y_size, int y_kmin, int y_kmax, int &nb_endo, int &u_count, int &u_count_init, double *u);
   void Singular_display(int block, int Size);
   void End_Solver();
   double g0, gp0, glambda2;
   int try_at_iteration;
+  int find_exo_num(vector<s_plan> sconstrained_extended_path, int value);
+  int find_int_date(vector<pair<int, double> > per_value, int value);
 
 private:
   void Init_GE(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
   void Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, mxArray *x0_m);
-  void Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, SuiteSparse_long **Ap, SuiteSparse_long **Ai, double **Ax, double **b, mxArray *x0_m);
+  void Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, SuiteSparse_long **Ap, SuiteSparse_long **Ai, double **Ax, double **b, mxArray *x0_m, vector_table_conditional_local_type vector_table_conditional_local, int block_num);
 #ifdef CUDA
   void Init_CUDA_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, int **Ap, int **Ai, double **Ax, int **Ap_tild, int **Ai_tild, double **A_tild, double **b, double **x0, mxArray *x0_m, int *nnz, int *nnz_tild, int preconditioner);
 #endif
@@ -142,8 +145,12 @@ private:
   void Solve_Matlab_Relaxation(mxArray *A_m, mxArray *b_m, unsigned int Size, double slowc_l, bool is_two_boundaries, int  it_);
   void Solve_Matlab_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, double slowc_l, bool is_two_boundaries, int it_);
   void Print_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, double *Ax, int n);
+  void Printfull_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, double *Ax, double *b, int n);
+
   void Solve_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, double slowc_l, bool is_two_boundaries, int  it_);
+  void Solve_LU_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, double *Ax, double *b, int n, int Size, double slowc_l, bool is_two_boundaries, int  it_, vector_table_conditional_local_type vector_table_conditional_local);
   void Solve_LU_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, double *Ax, double *b, int n, int Size, double slowc_l, bool is_two_boundaries, int  it_);
+
   void End_Matlab_LU_UMFPack();
 #ifdef CUDA
   void Solve_CUDA_BiCGStab_Free(double* tmp_vect_host, double* p, double* r, double* v, double* s, double* t, double* y_, double* z, double* tmp_,

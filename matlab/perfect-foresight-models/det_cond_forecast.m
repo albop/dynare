@@ -32,14 +32,20 @@ function data_set = det_cond_forecast(varargin)
 global options_ oo_ M_
 pp = 2;
 initial_conditions = oo_.steady_state;
+verbosity = options_.verbosity;
+options_.verbosity = 0;
 
 %We have to get an initial guess for the conditional forecast 
 % and terminal conditions for the non-stationary variables, we
 % use the first order approximation of the rational expectation solution.
-dr = struct();
-oo_.dr=set_state_space(dr,M_,options_);
-options_.order = 1;
-[dr,Info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+if ~isfield(oo_,'dr') || (isempty(oo_.dr))
+    fprintf('computing the first order solution of the model as initial guess...');
+    dr = struct();
+    oo_.dr=set_state_space(dr,M_,options_);
+    options_.order = 1;
+    [dr,Info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+    fprintf('done\n');
+end
 b_surprise = 0;
 b_pf = 0;
 surprise = 0;
@@ -77,7 +83,7 @@ if length(varargin) > 3
     end
         
 else
-    % alternative way to call
+    % alternative way to call: plan, dset, dates_of_frcst
     plan = varargin{1};
     if length(varargin) >= 2
         dset = varargin{2};
@@ -90,16 +96,16 @@ else
                 error('the third argmuent should be a dates');
             end
             %if (range(range.ndat) > dset.time(dset.nobs) )
-            if (range(range.ndat) > dset.dates(dset.nobs) )
+            if (range(range.ndat) > dset.dates(dset.nobs)+1 )
                 s1 = strings(dset.dates(dset.nobs));
                 s2 = strings(range(range.ndat));
                 error(['the dseries ' inputname(2) ' finish at time ' s1{1} ' before the last period of forecast ' s2{1}]);
             end
             
             sym_dset = dset(dates(-range(1)):dates(range(range.ndat)));
-            
-            oo_.exo_simul = repmat(oo_.exo_steady_state',max(range.ndat + 1, options_.periods),1);
-            oo_.endo_simul = repmat(oo_.steady_state, 1, max(range.ndat + 1, options_.periods));
+            periods = options_.periods + M_.maximum_lag + M_.maximum_lead;
+            oo_.exo_simul = repmat(oo_.exo_steady_state',max(range.ndat + 1, periods),1);
+            oo_.endo_simul = repmat(oo_.steady_state, 1, max(range.ndat + 1, periods));
             
             for i = 1:sym_dset.vobs
                 iy = find(strcmp(strtrim(sym_dset.name{i}), strtrim(plan.endo_names)));
@@ -119,7 +125,7 @@ else
                 if M_.aux_vars(i).type == 1 %lag variable
                     iy = find(strcmp(deblank(M_.endo_names(M_.aux_vars(i).orig_index,:)), sym_dset.name));
                     if ~isempty(iy)
-                        oo_.endo_simul(M_.aux_vars(i).endo_index, 1:sym_dset.nobs) = dset(dates(range(1) + (M_.aux_vars(i).orig_lead_lag - 1)):dates(range(range.ndat) + M_.aux_vars(i).orig_lead_lag)).data(:,iy);
+                        oo_.endo_simul(M_.aux_vars(i).endo_index, 1:sym_dset.nobs) = dset(dates(range(1) + (M_.aux_vars(i).orig_lead_lag - 1))).data(:,iy);
                         initial_conditions(M_.aux_vars(i).endo_index) = dset(dates(range(1) + (M_.aux_vars(i).orig_lead_lag - 1))).data(:,iy);
                     else
                         warning(['The variable auxiliary ' M_.endo_names(M_.aux_vars(i).endo_index, :) ' associated to the variable ' M_.endo_names(M_.aux_vars(i).orig_index,:) ' do not appear in the dataset']);
@@ -128,6 +134,52 @@ else
                     oo_.endo_simul(M_.aux_vars(i).endo_index, 1:sym_dset.nobs) = repmat(oo_.steady_state(M_.aux_vars(i).endo_index), 1, range.ndat + 1);
                 end
             end
+            %Compute the initial path using the first order solution around the
+            % steady-state
+            for jj = 2 : (options_.periods + 2)
+              oo_.endo_simul(:, jj) = oo_.steady_state;  
+            end
+
+            if options_.bytecode
+                save_options_dynatol_f = options_.dynatol.f;
+                options_.dynatol.f = 1e-7;
+                [Info, endo, exo] = bytecode('extended_path', plan, oo_.endo_simul, oo_.exo_simul, M_.params, oo_.steady_state, options_.periods);
+                options_.dynatol.f = save_options_dynatol_f;
+                if Info == 0
+                  oo_.endo_simul = endo;
+                  oo_.exo_simul = exo;
+                end
+                endo = endo';
+                endo_l = size(endo(1+M_.maximum_lag:end,:),1);
+                jrng = dates(plan.date(1)):dates(plan.date(1)+endo_l);
+                data_set = dseries(nan(endo_l, dset.vobs), plan.date(1), dset.name);
+                for i = 1:length(dset.name)
+                    pos = find(strcmp(dset.name{i},plan.endo_names));
+                    if ~isempty(pos)
+                        data_set.(dset.name{i}) = dseries(endo(1+M_.maximum_lag:end,pos), plan.date(1), dset.name{i});
+                    else
+                        pos = find(strcmp(dset.name{i},plan.exo_names));
+                        if ~isempty(pos)
+                           data_set{dset.name{i}} = dseries(exo(1+M_.maximum_lag:end,pos), plan.date(1),dset.name{i});
+                        end
+                    end
+                end
+                data_set = [dset(dset.dates(1):(plan.date(1)-1)) ; data_set];
+                return;
+                union_names = union(data_set.name, dset.name);
+                dif = setdiff(union_names, data_set.name);
+                data_set_nobs = data_set.nobs;
+                for i = 1:length(dif)
+                    data_set{dif{i}} = dseries(nan(data_set_nobs,1),plan.date(1), dif(i), dif(i));
+                end;
+                dif = setdiff(union_names, dset.name);
+                dset_nobs = dset.nobs;
+                for i = 1:length(dif)
+                    dset{dif{i}} = dseries(nan(dset_nobs,1),dset.dates(1), dif(i), dif(i));
+                end;
+                data_set = [dset(dset.dates(1):(plan.date(1)-1)) ; data_set];
+                return;
+            end;
         else
            error('impossible case'); 
         end;
@@ -165,10 +217,10 @@ options_.periods = 10;
 
 if direct_mode == 1
     n_periods = length(constrained_periods);
-    is_constraint = zeros(size(total_periods), n_periods);
+    is_constraint = zeros(length(total_periods), n_periods);
     constrained_paths_cell = constrained_paths;
     clear constrained_paths;
-    constrained_paths = zeros(n_periods, size(total_periods));
+    constrained_paths = zeros(n_periods, length(total_periods));
     max_periods_simulation = 0;
     for i = 1:n_periods
         period_i = constrained_periods{i};
@@ -207,8 +259,8 @@ if direct_mode == 1
         n_periods = length(shock_periods);
         shock_paths_cell = shock_paths;
         clear shock_paths;
-        shock_paths = zeros(n_periods, size(total_periods));
-        is_shock = zeros(size(total_periods), n_periods);
+        shock_paths = zeros(n_periods, length(total_periods));
+        is_shock = zeros(length(total_periods), n_periods);
         for i = 1:n_periods
             period_i = shock_periods{i};
             %period_i
@@ -320,8 +372,6 @@ eps1  = 1e-7;%1e-4;
 exo = zeros(maximum_lag + options_cond_fcst.periods, nx);
 endo = zeros(maximum_lag + options_cond_fcst.periods, ny);
 endo(1,:) = oo_.steady_state';
-verbosity = options_.verbosity;
-options_.verbosity = 0;
 
 
 % if all the endogenous paths are perfectly anticipated we do not need to
@@ -603,7 +653,8 @@ else
             not_achieved = 1;
             alpha = 1;
             while not_achieved
-                simul();
+                perfect_foresight_setup;
+                perfect_foresight_solver;
                 result = sum(sum(isfinite(oo_.endo_simul(:,time_index_constraint)))) == ny * length(time_index_constraint);
                 if (~oo_.deterministic_simulation.status || ~result) && it > 1
                     not_achieved = 1;

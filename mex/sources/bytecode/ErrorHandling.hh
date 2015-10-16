@@ -263,8 +263,17 @@ struct s_plan
   string var, exo;
   int var_num, exo_num;
   vector<pair<int, double> > per_value;
+  vector<double> value;
 };
 
+struct table_conditional_local_type
+        {
+          bool is_cond;
+          int var_exo, var_endo;
+          double constrained_value;
+        };
+typedef vector<table_conditional_local_type> vector_table_conditional_local_type;
+typedef map< int, vector_table_conditional_local_type > table_conditional_global_type;
 #ifdef MATLAB_MEX_FILE
 extern "C" bool utIsInterruptPending();
 #endif
@@ -282,7 +291,7 @@ public:
   double *y, *ya;
   int y_size;
   double *T;
-  int nb_row_xd, nb_row_x;
+  int nb_row_xd, nb_row_x, col_x;
   int y_kmin, y_kmax, periods;
   double *x, *params;
   double *u;
@@ -1132,7 +1141,7 @@ public:
             mexPrintf("FSTG2_ eq=%d var=%d", eq, var);
 #endif
             tmp_out.str("");
-            tmp_out << "jacob(" << eq+size*var+1 << ") = " << Stack.top();
+            tmp_out << "/*jacob(" << eq << ", " << var << ")*/ jacob(" << eq+size*var+1 << ") = " << Stack.top();
             Stack.pop();
             if (compute)
               {
@@ -1167,7 +1176,7 @@ public:
                 if (compute)
                   jacob[eq + size*pos_col] = r;
                 tmp_out.str("");
-                tmp_out << "jacob(" << eq+size*pos_col+1 << ") = " << Stack.top();
+                tmp_out << "/*jacob(" << eq << ", " << pos_col << " var= " << var << ")*/ jacob(" << eq+size*pos_col+1 << ") = " << Stack.top();
                 Stack.pop();
                 break;
               case FirstOtherEndoDerivative:
@@ -1184,14 +1193,14 @@ public:
                 if (compute)
                   jacob_exo[eq + size*pos_col] = r;
                 tmp_out.str("");
-                tmp_out << "jacob_exo(" << eq+size*pos_col+1 << ") = " << Stack.top();
+                tmp_out << "/*jacob_exo(" << eq << ", " << pos_col << " var=" << var << ")*/ jacob_exo(" << eq+size*pos_col+1 << ") = " << Stack.top();
                 Stack.pop();
                 break;
               case FirstExodetDerivative:
                 if (compute)
                   jacob_exo_det[eq + size*pos_col] = r;
                 tmp_out.str("");
-                tmp_out << "jacob_exo_det(" << eq+size*pos_col+1 << ") = " << Stack.top();
+                tmp_out << "/*jacob_exo_det(" << eq << ", " << pos_col << " var=" << var << ")*/ jacob_exo_det(" << eq+size*pos_col+1 << ") = " << Stack.top();
                 Stack.pop();
                 break;
               default:

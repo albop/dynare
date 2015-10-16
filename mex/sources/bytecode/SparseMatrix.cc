@@ -1,4 +1,4 @@
-  /*
+/*
  * Copyright (C) 2007-2013 Dynare Team
  *
  * This file is part of Dynare.
@@ -518,6 +518,12 @@ dynSparseMatrix::Insert(const int r, const int c, const int u_index, const int l
 }
 
 void
+dynSparseMatrix::Close_SaveCode()
+{
+  SaveCode.close();
+}
+
+void
 dynSparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool two_boundaries, int stack_solve_algo, int solve_algo)
 {
   unsigned int eq, var;
@@ -587,7 +593,6 @@ dynSparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods
           for (int j = 0; j < Size; j++)
             IM_i[make_pair(make_pair(Size*(periods+y_kmax), 0), j)] = j;
         }
-
     }
   else
     {
@@ -833,7 +838,6 @@ void
 dynSparseMatrix::Init_UMFPACK_Sparse_Simple(int Size, map<pair<pair<int, int>, int>, int> &IM, SuiteSparse_long **Ap, SuiteSparse_long **Ai, double **Ax, double **b, bool &zero_solution, mxArray *x0_m)
 {
   int eq, var;
-  //double *b = mxGetPr(b_m);
   *b = (double*)mxMalloc(Size * sizeof(double));
   if (!(*b))
     {
@@ -870,7 +874,6 @@ dynSparseMatrix::Init_UMFPACK_Sparse_Simple(int Size, map<pair<pair<int, int>, i
       tmp << " in Init_UMFPACK_Sparse, can't retrieve Ax matrix\n";
       throw FatalExceptionHandling(tmp.str());
     }
-
   map<pair<pair<int, int>, int>, int>::iterator it4;
   for (int i = 0; i < Size; i++)
     {
@@ -878,7 +881,7 @@ dynSparseMatrix::Init_UMFPACK_Sparse_Simple(int Size, map<pair<pair<int, int>, i
       ya[eq+it_*y_size] = y[eq+it_*y_size];
     }
 #ifdef DEBUG
-  unsigned int max_nze = mxGetNzmax(A_m);
+  unsigned int max_nze = prior_nz;//mxGetNzmax(A_m);
 #endif
   unsigned int NZE = 0;
   int last_var = 0;
@@ -949,11 +952,40 @@ dynSparseMatrix::Init_UMFPACK_Sparse_Simple(int Size, map<pair<pair<int, int>, i
   (*Ap)[Size] = NZE;
 }
 
+int
+dynSparseMatrix::find_exo_num(vector<s_plan> sconstrained_extended_path, int value)
+{
+  int res = -1;
+  int i = 0;
+  for (vector<s_plan>::iterator it = sconstrained_extended_path.begin(); it != sconstrained_extended_path.end(); it++, i++)
+    if (it->exo_num == value)
+      {
+        res = i;
+        break;
+      }
+  return res;
+}
+
+int
+dynSparseMatrix::find_int_date(vector<pair<int, double> > per_value, int value)
+{
+  int res = -1;
+  int i = 0;
+  for (vector<pair<int, double> >::iterator it = per_value.begin(); it != per_value.end(); it++, i++)
+    if (it->first == value)
+      {
+        res = i;
+        break;
+      }
+  return res;
+}
 
 void
-dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, SuiteSparse_long **Ap, SuiteSparse_long **Ai, double **Ax, double **b, mxArray *x0_m)
+dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, SuiteSparse_long **Ap, SuiteSparse_long **Ai, double **Ax, double **b, mxArray *x0_m, vector_table_conditional_local_type vector_table_conditional_local, int block_num)
 {
   int t, eq, var, lag, ti_y_kmin, ti_y_kmax;
+  double* jacob_exo ;
+  int row_x, col_x;
   int n = periods * Size;
   *b = (double*)mxMalloc(n * sizeof(double));
   if (!(*b))
@@ -991,11 +1023,11 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
       tmp << " in Init_UMFPACK_Sparse, can't retrieve Ax matrix\n";
       throw FatalExceptionHandling(tmp.str());
     }
-  map<pair<pair<int, int>, int>, int>::iterator it4;
+  map<pair<pair<int, int>, int>, int>::iterator it4, it5;
   for (int i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
 #ifdef DEBUG
-  unsigned int max_nze = mxGetNzmax(A_m);
+  unsigned int max_nze = prior_nz; //mxGetNzmax(A_m);
 #endif
   unsigned int NZE = 0;
   int last_var = 0;
@@ -1004,23 +1036,105 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
       (*b)[i] = 0;
       x0[i] = y[index_vara[Size*y_kmin+i]];
     }
+  if (vector_table_conditional_local.size())
+    {
+      jacob_exo = mxGetPr(jacobian_exo_block[block_num]);
+      row_x = mxGetM(jacobian_exo_block[block_num]);
+      col_x = mxGetN(jacobian_exo_block[block_num]);
+    }
+  int local_index;
+  
+  bool fliped = false;
+  bool fliped_exogenous_derivatives_updated = false;
+  int flip_exo;
   (*Ap)[0] = 0;
-  /*int min_lag = 0;
-  int max_lag = 0;*/
   for (t = 0; t < periods; t++)
     {
       last_var = -1;
       it4 = IM.begin();
-      while (it4 != IM.end())
+      var = 0;
+      while (it4 != IM.end()) 
         {
           var = it4->first.first.first;
+#ifdef DEBUG
+           if (var < 0 || var >= Size)
+             {
+               ostringstream tmp;
+               tmp << " in Init_UMFPACK_Sparse, var (" << var << ") out of range\n";
+               throw FatalExceptionHandling(tmp.str());
+             }
+#endif
+          eq = it4->first.second+Size*t;
+#ifdef DEBUG
+           if (eq < 0 || eq >= Size)
+             {
+               ostringstream tmp;
+               tmp << " in Init_UMFPACK_Sparse, eq (" << eq << ") out of range\n";
+               throw FatalExceptionHandling(tmp.str());
+             }
+#endif
+          lag = - it4->first.first.second;
+          int index = it4->second+ (t-lag) * u_count_init;
           if (var != last_var)
             {
               (*Ap)[1+last_var + t * Size] = NZE;
               last_var = var;
+              if (var < Size*(periods+y_kmax))
+                {
+                  if (t == 0 && vector_table_conditional_local.size())
+                    {
+                      fliped = vector_table_conditional_local[var].is_cond;
+                      fliped_exogenous_derivatives_updated = false;
+                    }
+                  else
+                    fliped = false;
+                }
+              else
+                fliped = false;
             }
-          eq = it4->first.second+Size*t;
-          lag = -it4->first.first.second;
+          if (fliped)
+            {
+              if ((t == 0) && (var < (periods+y_kmax)*Size) && (lag == 0) && (vector_table_conditional_local.size()))
+                {
+                  flip_exo = vector_table_conditional_local[var].var_exo;
+                  local_index = eq;
+                  if (!fliped_exogenous_derivatives_updated)
+                    {
+                      fliped_exogenous_derivatives_updated = true;
+                      for (int k = 0; k < row_x; k++)
+                        {
+                          if (jacob_exo[k + row_x*flip_exo] != 0)
+                            {
+                              (*Ax)[NZE] = jacob_exo[k + row_x*flip_exo];
+                              (*Ai)[NZE] = k;
+                              NZE++;
+                          
+#ifdef DEBUG
+                              if (local_index < 0 || local_index >= Size * periods)
+                               {
+                                 ostringstream tmp;
+                                 tmp << " in Init_UMFPACK_Sparse, index (" << local_index << ") out of range for b vector\n";
+                                 throw FatalExceptionHandling(tmp.str());
+                               }
+                             if (k + row_x*flip_exo < 0 || k + row_x*flip_exo >= row_x * col_x)
+                               {
+                                 ostringstream tmp;
+                                 tmp << " in Init_UMFPACK_Sparse, index (" << var+Size*(y_kmin+t+lag) << ") out of range for jacob_exo vector\n";
+                                 throw FatalExceptionHandling(tmp.str());
+                               }
+                             if (t+y_kmin+flip_exo*nb_row_x < 0 || t+y_kmin+flip_exo*nb_row_x >= nb_row_x * this->col_x)
+                               {
+                                 ostringstream tmp;
+                                 tmp << " in Init_UMFPACK_Sparse, index (" << index_vara[var+Size*(y_kmin+t+lag)] << ") out of range for x vector max=" << nb_row_x * this->col_x << "\n";
+                                 throw FatalExceptionHandling(tmp.str());
+                               }
+#endif    
+                              u[k] -=  jacob_exo[k + row_x*flip_exo] * x[t+y_kmin+flip_exo*nb_row_x];
+                            }
+                        }
+                    }
+                }
+            }
           /*if (t==0)
             {
               if (min_lag > lag)
@@ -1028,7 +1142,7 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
               if (max_lag < lag)
                 max_lag = lag;
             }*/
-          int index = it4->second+ (t-lag) * u_count_init;
+          
           if (var < (periods+y_kmax)*Size)
             {
               ti_y_kmin = -min(t, y_kmin);
@@ -1051,9 +1165,38 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
                       throw FatalExceptionHandling(tmp.str());
                     }
 #endif
-                  (*Ax)[NZE] = u[index];
-                  (*Ai)[NZE] = eq - lag * Size;
-                  NZE++;
+                  if ((!fliped /*|| lag != 0*/) /*&& (!(vector_table_conditional_local[eq-lag*Size].is_cond && (t-lag == 0)))*/)
+                    {
+                      (*Ax)[NZE] = u[index];
+                      (*Ai)[NZE] = eq - lag * Size;
+                      NZE++;
+                    }
+                  else /*if (fliped)*/
+                    {
+#ifdef DEBUG
+                      if (eq - lag * Size < 0 || eq  - lag * Size >= Size * periods)
+                        {
+                          ostringstream tmp;
+                          tmp << " in Init_UMFPACK_Sparse, index (" << eq  - lag * Size << ") out of range for b vector\n";
+                          throw FatalExceptionHandling(tmp.str());
+                        }
+                      if (var+Size*(y_kmin+t) < 0 || var+Size*(y_kmin+t) >= Size*(periods+y_kmin+y_kmax))
+                        {
+                          ostringstream tmp;
+                          tmp << " in Init_UMFPACK_Sparse, index (" << var+Size*(y_kmin+t) << ") out of range for index_vara vector\n";
+                          throw FatalExceptionHandling(tmp.str());
+                        }
+                      if (index_vara[var+Size*(y_kmin+t/*+lag*/)] < 0 || index_vara[var+Size*(y_kmin+t/*+lag*/)] >= y_size*(periods+y_kmin+y_kmax))
+                        {
+                          ostringstream tmp;
+                          tmp << " in Init_UMFPACK_Sparse, index (" << index_vara[var+Size*(y_kmin+t/*+lag*/)] << ") out of range for y vector max=" << y_size*(periods+y_kmin+y_kmax) << "\n";
+                          throw FatalExceptionHandling(tmp.str());
+                          }
+#endif
+                      double prev_b = (*b)[eq - lag * Size];
+                      (*b)[eq - lag * Size] += u[index] * y[index_vara[var+Size*(y_kmin+t/*+lag*/)]];
+                    }
+                  
                 }
               if (lag > ti_y_kmax || lag < ti_y_kmin)
                 {
@@ -1102,7 +1245,6 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
         }
     }
   (*Ap)[Size*periods] = NZE;
-
 #ifdef DEBUG
   mexPrintf("*Ax = [");
   for (int i = 0; i < NZE; i++)
@@ -1171,7 +1313,7 @@ dynSparseMatrix::Init_CUDA_Sparse_Simple(int Size, map<pair<pair<int, int>, int>
     }
 
 #ifdef DEBUG
-  unsigned int max_nze = mxGetNzmax(A_m);
+  unsigned int max_nze = prior_nz; //mxGetNzmax(A_m);
 #endif
   unsigned int NZE = 0;
   int last_var = 0;
@@ -1796,7 +1938,6 @@ dynSparseMatrix::Init_GE(int periods, int y_kmin, int y_kmax, int Size, map<pair
           it4++;
         }
     }
-  //mexPrintf("nnz/n=%f\n", double(nnz)/double(periods*Size));
   mxFree(temp_NZE_R);
   mxFree(temp_NZE_C);
 }
@@ -2286,7 +2427,6 @@ dynSparseMatrix::CheckIt(int y_size, int y_kmin, int y_kmax, int Size, int perio
             }
         }
     }
-  mexPrintf("G1a red done\n");
   SaveResult >> row;
   mexPrintf("row(2)=%d\n", row);
   double *B;
@@ -3110,6 +3250,24 @@ dynSparseMatrix::End_Solver()
 }
 
 void
+dynSparseMatrix::Printfull_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, double *Ax, double *b, int n)
+{
+  double A[n*n];
+  for (int i = 0 ; i  < n*n ; i++)
+    A[i] = 0;
+  int k = 0;
+  for (int i = 0; i < n; i++)
+      for (int j = Ap[i]; j < Ap[i+1]; j++)
+        A[Ai[j] * n + i] =  Ax[k++];
+  for (int i = 0; i < n; i++)
+    {
+      for (int j = 0; j < n; j++)
+        mexPrintf("%4.1f ",A[i*n+j]);
+      mexPrintf("     %6.3f\n",b[i]);
+    }
+}
+
+void
 dynSparseMatrix::Print_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, double *Ax, int n)
 {
   int k = 0;
@@ -3117,6 +3275,133 @@ dynSparseMatrix::Print_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, doubl
       for (int j = Ap[i]; j < Ap[i+1]; j++)
         mexPrintf("(%d, %d)    %f\n", Ai[j]+1, i+1, Ax[k++]);
 }
+
+void
+dynSparseMatrix::Solve_LU_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, double *Ax, double *b, int n, int Size, double slowc_l, bool is_two_boundaries, int  it_, vector_table_conditional_local_type vector_table_conditional_local)
+{
+  SuiteSparse_long status, sys = 0;
+#ifndef _MSC_VER
+  double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO], res [n];
+#else
+  double *Control, *Info, *res;
+  Control = (double*)mxMalloc(UMFPACK_CONTROL * sizeof(double));
+  Info = (double*)mxMalloc(UMFPACK_INFO * sizeof(double));
+  res = (double*)mxMalloc(n * sizeof(double));
+#endif
+
+  umfpack_dl_defaults(Control);
+  Control [UMFPACK_PRL] = 5;
+  status = 0;
+  if (iter == 0)
+    {
+      status = umfpack_dl_symbolic(n, n, Ap, Ai, Ax, &Symbolic, Control, Info);
+      if (status < 0)
+        {
+          umfpack_dl_report_info(Control, Info);
+          umfpack_dl_report_status(Control, status);
+          ostringstream  Error;
+          Error << " umfpack_dl_symbolic failed\n";
+          throw FatalExceptionHandling(Error.str());
+        }
+    }
+  if (iter > 0)
+    umfpack_dl_free_numeric(&Numeric) ;
+  status = umfpack_dl_numeric (Ap, Ai, Ax, Symbolic, &Numeric, Control, Info);
+  if (status < 0)
+    {
+      umfpack_dl_report_info(Control, Info);
+      umfpack_dl_report_status(Control, status);
+      ostringstream  Error;
+      Error << " umfpack_dl_numeric failed\n";
+      throw FatalExceptionHandling(Error.str());
+    }
+  status = umfpack_dl_solve(sys, Ap, Ai, Ax, res, b, Numeric, Control, Info);
+  if (status != UMFPACK_OK)
+    {
+      umfpack_dl_report_info(Control, Info);
+      umfpack_dl_report_status(Control, status);
+      ostringstream  Error;
+      Error << " umfpack_dl_solve failed\n";
+      throw FatalExceptionHandling(Error.str());
+    }
+
+  if (vector_table_conditional_local.size())
+    {
+      if (is_two_boundaries)
+        for (int t = 0; t < n / Size; t++)
+          if (t == 0)
+            {
+              for (int i = 0; i < Size; i++)
+                {
+                  bool fliped = vector_table_conditional_local[i].is_cond;
+                  if (fliped)
+                    {
+                      int eq = index_vara[i+Size*(y_kmin)];
+                      int flip_exo = vector_table_conditional_local[i].var_exo;
+                      double  yy = -(res[i] + x[y_kmin + flip_exo*/*row_x*/nb_row_x]);
+                      direction[eq] = 0;
+                      double mem_x = x[flip_exo*/*row_x*/nb_row_x + y_kmin];
+                      x[flip_exo*/*row_x*/nb_row_x + y_kmin] += slowc_l * yy;
+                    }
+                  else
+                    {
+                      int eq = index_vara[i+Size*(y_kmin)];
+                      double yy = -(res[i ] + y[eq]);
+                      direction[eq] = yy;
+                      y[eq] += slowc_l * yy;
+                    }
+                }
+            }
+          else
+            {
+              for (int i = 0; i < Size; i++)
+                {
+                  int eq = index_vara[i+Size*(t + y_kmin)];
+                  double yy = -(res[i + Size * t] + y[eq]);
+                  direction[eq] = yy;
+                  y[eq] += slowc_l * yy;
+                }
+            }
+      else
+        for (int i = 0; i < n; i++)
+          {
+            int eq = index_vara[i];
+            double yy = -(res[i] + y[eq+it_*y_size]);
+            direction[eq] = yy;
+            y[eq+it_*y_size] += slowc_l * yy;
+          }
+    }
+  else
+    {
+      if (is_two_boundaries)
+        for (int i = 0; i < n; i++)
+          {
+            int eq = index_vara[i+Size*y_kmin];
+            double yy = -(res[i] + y[eq]);
+            direction[eq] = yy;
+            y[eq] += slowc_l * yy;
+          }
+      else
+        for (int i = 0; i < n; i++)
+          {
+            int eq = index_vara[i];
+            double yy = -(res[i] + y[eq+it_*y_size]);
+            direction[eq] = yy;
+            y[eq+it_*y_size] += slowc_l * yy;
+          }
+      }
+  
+  mxFree(Ap);
+  mxFree(Ai);
+  mxFree(Ax);
+  mxFree(b);
+#ifdef _MSC_VER
+  mxFree(Control);
+  mxFree(Info);
+  mxFree(res);
+#endif
+}
+
 
 void
 dynSparseMatrix::Solve_LU_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, double *Ax, double *b, int n, int Size, double slowc_l, bool is_two_boundaries, int  it_)
@@ -3183,7 +3468,6 @@ dynSparseMatrix::Solve_LU_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, do
         direction[eq] = yy;
         y[eq+it_*y_size] += slowc_l * yy;
       }
-
   mxFree(Ap);
   mxFree(Ai);
   mxFree(Ax);
@@ -5777,7 +6061,6 @@ dynSparseMatrix::Check_and_Correct_Previous_Iteration(int block_num, int y_size,
 {
   double top = 1.0;
   double bottom = 0.1;
-  //mexPrintf("res2=%f > g0=%f, res1=%f, iter=%d it_=%d\n", res2, g0, res1, iter, it_);
   if (isnan(res1) || isinf(res1) || (res2 > g0 && iter > 0))
     {
       while ((isnan(res1) || isinf(res1)))
@@ -6131,7 +6414,6 @@ dynSparseMatrix::Simulate_Newton_One_Boundary(const bool forward)
 {
   g1 = (double *) mxMalloc(size*size*sizeof(double));
   r = (double *) mxMalloc(size*sizeof(double));
-  //mexPrintf("Simulate_Newton_One_Boundary, block_num=%d, size=%d, steady=%d, forward=%d, iter=%d, is_linear=%d\n", block_num, size, steady_state, forward, iter, is_linear);
   iter = 0;
   if ((solve_algo == 6 && steady_state) || ((stack_solve_algo == 0 || stack_solve_algo == 1 || stack_solve_algo == 4) && !steady_state))
     {
@@ -6217,7 +6499,7 @@ dynSparseMatrix::preconditioner_print_out(string s, int preconditioner, bool ss)
 }
 
 void
-dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin, int y_kmax, int Size, int periods, bool cvg, int minimal_solving_periods, int stack_solve_algo, unsigned int endo_name_length, char *P_endo_names)
+dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin, int y_kmax, int Size, int periods, bool cvg, int minimal_solving_periods, int stack_solve_algo, unsigned int endo_name_length, char *P_endo_names, vector_table_conditional_local_type vector_table_conditional_local)
 {
   double top = 0.5;
   double bottom = 0.1;
@@ -6237,8 +6519,6 @@ dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin
   mxArray *b_m = NULL, *A_m = NULL, *x0_m = NULL;
   double *Ax = NULL, *b;
   SuiteSparse_long *Ap = NULL, *Ai = NULL;
-
-
 
 
   if (iter > 0)
@@ -6276,7 +6556,7 @@ dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin
           if (iter == 0)
             Error << " in Simulate_Newton_Two_Boundaries, the initial values of endogenous variables are too far from the solution.\nChange them!\n";
           else
-            Error << " in Simulate_Newton_Two_Boundaries, dynare cannot improve the simulation in block " << blck+1 << " at time " << it_+1 << " (variable " << index_vara[max_res_idx]+1 << ")\n";
+            Error << " in Simulate_Newton_Two_Boundaries, dynare cannot improve the simulation in block " << blck+1 << " at time " << it_+1 << " (variable " << index_vara[max_res_idx]+1 << " = " << max_res << ")\n";
           throw FatalExceptionHandling(Error.str());
         }
       if (!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)) && (stack_solve_algo == 4 || stack_solve_algo == 5))
@@ -6311,7 +6591,7 @@ dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin
       else
         {
           prev_slowc_save = slowc_save;
-          slowc_save /= 1.1;
+          slowc_save /= 1.05;
         }
       if (print_it)
         {
@@ -6360,7 +6640,6 @@ dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin
         }
     }
   res1a = res1;
-
   if (print_it)
     {
       if (iter == 0)
@@ -6435,7 +6714,7 @@ dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin
                 }
             }
           if (stack_solve_algo == 0 || stack_solve_algo == 4)
-            Init_UMFPACK_Sparse(periods, y_kmin, y_kmax, Size, IM_i, &Ap, &Ai, &Ax, &b, x0_m);
+            Init_UMFPACK_Sparse(periods, y_kmin, y_kmax, Size, IM_i, &Ap, &Ai, &Ax, &b, x0_m, vector_table_conditional_local, blck);
 #ifdef CUDA
           else if (stack_solve_algo == 7)
             Init_CUDA_Sparse(periods, y_kmin, y_kmax, Size, IM_i, &Ap_i, &Ai_i, &Ax, &Ap_i_tild, &Ai_i_tild, &A_tild, &b, &x0, x0_m, &nnz, &nnz_tild, preconditioner);
@@ -6444,12 +6723,8 @@ dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin
             Init_Matlab_Sparse(periods, y_kmin, y_kmax, Size, IM_i, A_m, b_m, x0_m);
 
         }
-      //if (iter > 0)
-      /*mexPrintf("--> stack_solve_algo=%d\n", stack_solve_algo);
-      mexEvalString("drawnow;");*/
-
       if (stack_solve_algo == 0 || stack_solve_algo == 4)
-        Solve_LU_UMFPack(Ap, Ai, Ax, b, Size * periods, Size, slowc, true, 0);
+        Solve_LU_UMFPack(Ap, Ai, Ax, b, Size * periods, Size, slowc, true, 0, vector_table_conditional_local);
       else if (stack_solve_algo == 1)
         Solve_Matlab_Relaxation(A_m, b_m, Size, slowc, true, 0);
       else if (stack_solve_algo == 2)
