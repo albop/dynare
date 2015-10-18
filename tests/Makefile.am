@@ -164,6 +164,8 @@ MODFILES = \
 	ms-sbvar/test_ms_variances_repeated_runs.mod \
 	ms-dsge/test_ms_dsge.mod \
 	kalman/lyapunov/fs2000_lyap.mod \
+	kalman/fs2000_ns_lik_init.mod \
+	kalman/fs2000_lik_init.mod \
 	kalman_filter_smoother/gen_data.mod \
 	kalman_filter_smoother/algo1.mod \
 	kalman_filter_smoother/algo2.mod \

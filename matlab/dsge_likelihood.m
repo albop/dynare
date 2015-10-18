@@ -496,7 +496,7 @@ switch DynareOptions.lik_init
     indx_unstable = find(sum(abs(V),2)>1e-5);
     stable = find(sum(abs(V),2)<1e-5);
     nunit = length(eigenv) - nstable;
-    Pstar = options_.Harvey_scale_factor*eye(np);
+    Pstar = DynareOptions.Harvey_scale_factor*eye(nunit);
     if kalman_algo ~= 2
         kalman_algo = 1;
     end
