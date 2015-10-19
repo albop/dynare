@@ -985,7 +985,10 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
 {
   int t, eq, var, lag, ti_y_kmin, ti_y_kmax;
   double* jacob_exo ;
-  int row_x, col_x;
+  int row_x;
+#ifdef DEBUG
+  int col_x;
+#endif
   int n = periods * Size;
   *b = (double*)mxMalloc(n * sizeof(double));
   if (!(*b))
@@ -1040,9 +1043,13 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
     {
       jacob_exo = mxGetPr(jacobian_exo_block[block_num]);
       row_x = mxGetM(jacobian_exo_block[block_num]);
+#ifdef DEBUG
       col_x = mxGetN(jacobian_exo_block[block_num]);
+#endif
     }
+#ifdef DEBUG
   int local_index;
+#endif
   
   bool fliped = false;
   bool fliped_exogenous_derivatives_updated = false;
@@ -1097,7 +1104,9 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
               if ((t == 0) && (var < (periods+y_kmax)*Size) && (lag == 0) && (vector_table_conditional_local.size()))
                 {
                   flip_exo = vector_table_conditional_local[var].var_exo;
+#ifdef DEBUG
                   local_index = eq;
+#endif
                   if (!fliped_exogenous_derivatives_updated)
                     {
                       fliped_exogenous_derivatives_updated = true;
@@ -1193,7 +1202,6 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
                           throw FatalExceptionHandling(tmp.str());
                           }
 #endif
-                      double prev_b = (*b)[eq - lag * Size];
                       (*b)[eq - lag * Size] += u[index] * y[index_vara[var+Size*(y_kmin+t/*+lag*/)]];
                     }
                   
@@ -3340,7 +3348,6 @@ dynSparseMatrix::Solve_LU_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, do
                       int flip_exo = vector_table_conditional_local[i].var_exo;
                       double  yy = -(res[i] + x[y_kmin + flip_exo*/*row_x*/nb_row_x]);
                       direction[eq] = 0;
-                      double mem_x = x[flip_exo*/*row_x*/nb_row_x + y_kmin];
                       x[flip_exo*/*row_x*/nb_row_x + y_kmin] += slowc_l * yy;
                     }
                   else
