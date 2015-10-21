@@ -11911,6 +11911,28 @@ ts1 is a dseries object:
 
 @sp 1
 
+@deftypefn{dseries} {@var{B} =} rename (@var{A},@var{newname})
+
+Replace the names in @var{A} with those passed in the cell string array
+@var{newname}. @var{newname} must have the same number of cells as @var{A} has
+@var{dseries}. Returns a @dseries object.
+
+@examplehead
+@example
+>> ts0 = dseries(ones(2,3));
+>> ts1 = ts0.rename({'Bush','Worst','President'})
+
+ts1 is a dseries object:
+
+   | Bush | Worst | President
+1Y | 1    | 1     | 1
+2Y | 1    | 1     | 1
+@end example
+
+@end deftypefn
+
+@sp 1
+
 @deftypefn{dseries} save (@var{A}, @var{basename}[, @var{format}])
 
 Overloads the Matlab/Octave @code{save} function and saves @dseries
@@ -12012,6 +12034,16 @@ ans =
 
 Redefines the tex name of variable @var{name} to @var{newtexname}
 in @dseries object @var{A}. Returns a @dseries object.
+
+@end deftypefn
+
+@sp 1
+
+@deftypefn{dseries} {@var{B} =} tex_rename (@var{A}, @var{newtexname})
+
+Redefines the tex names of the @var{A} to those contained in
+@var{newtexname}. Here, @var{newtexname} is a cell string array with the same
+number of entries as variables in @var{A}
 
 @end deftypefn
 
