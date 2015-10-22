@@ -23,7 +23,7 @@ function oo_ = ...
 % OUTPUTS
 %   oo_          [structure]        Dynare structure where the results are saved.
 
-% Copyright (C) 2009-2013 Dynare Team
+% Copyright (C) 2009-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -115,13 +115,16 @@ for i=1:length(Steps)
     p_hpdinf(i) = hpd_interval(1);
     p_hpdsup(i) = hpd_interval(2);
 end
-oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.Steps = Steps;
-oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.Mean.(name_1).(name_2) = p_mean;
-oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.Median.(name_1).(name_2) = p_median;
-oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.Variance.(name_1).(name_2) = p_variance;
-oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.HPDinf.(name_1).(name_2) = p_hpdinf;
-oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.HPDsup.(name_1).(name_2) = p_hpdsup;
-oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.deciles.(name_1).(name_2)  = p_deciles;
+
+FirstField = sprintf('%sTheoreticalMoments', TYPE);
+
+oo_.(FirstField).dsge.ConditionalVarianceDecomposition.Steps = Steps;
+oo_.(FirstField).dsge.ConditionalVarianceDecomposition.Mean.(name_1).(name_2) = p_mean;
+oo_.(FirstField).dsge.ConditionalVarianceDecomposition.Median.(name_1).(name_2) = p_median;
+oo_.(FirstField).dsge.ConditionalVarianceDecomposition.Variance.(name_1).(name_2) = p_variance;
+oo_.(FirstField).dsge.ConditionalVarianceDecomposition.HPDinf.(name_1).(name_2) = p_hpdinf;
+oo_.(FirstField).dsge.ConditionalVarianceDecomposition.HPDsup.(name_1).(name_2) = p_hpdsup;
+oo_.(FirstField).dsge.ConditionalVarianceDecomposition.deciles.(name_1).(name_2)  = p_deciles;
 if options_.estimation.moments_posterior_density.indicator
-    oo_.([TYPE 'TheoreticalMoments']).dsge.ConditionalVarianceDecomposition.density.(name_1).(name_2) = p_density;
+    oo_.(FirstField).dsge.ConditionalVarianceDecomposition.density.(name_1).(name_2) = p_density;
 end
