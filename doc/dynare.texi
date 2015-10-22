@@ -11920,7 +11920,7 @@ Replace the names in @var{A} with those passed in the cell string array
 @examplehead
 @example
 >> ts0 = dseries(ones(2,3));
->> ts1 = ts0.rename(@{'Bush','Worst','President'@})
+>> ts1 = ts0.rename(@{'Tree','Worst','President'@})
 
 ts1 is a dseries object:
 
