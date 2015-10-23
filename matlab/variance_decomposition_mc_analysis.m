@@ -61,6 +61,9 @@ if isempty(jndx)
     return
 end
 
+var=deblank(var);
+exo=deblank(exo);
+
 name = [ var '.' exo ];
 if isfield(oo_, [ TYPE 'TheoreticalMoments'])
     temporary_structure = oo_.([TYPE, 'TheoreticalMoments']);
