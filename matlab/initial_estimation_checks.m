@@ -82,7 +82,7 @@ if isfield(EstimatedParameters,'param_vals') && ~isempty(EstimatedParameters.par
 
     if ~isempty(changed_par_indices)
         fprintf('\nThe steady state file internally changed the values of the following estimated parameters:\n')
-        disp(Model.param_names(changed_par_indices,:));
+        disp(Model.param_names(EstimatedParameters.param_vals(changed_par_indices,1),:));
         fprintf('This will override the parameter values drawn from the proposal density and may lead to wrong results.\n')
         fprintf('Check whether this is really intended.\n')    
         warning('The steady state file internally changes the values of the estimated parameters.')
