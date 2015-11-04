@@ -197,6 +197,7 @@ We no longer support compilation on Windows. To use the unstable version of Dyna
 - ```brew tap homebrew/science```
 - **(Optional)** To compile Dynare mex files for use on Octave:
     - ```brew install octave```
+    - ```brew install suite-sparse```
 - To see the available options for compiling Dynare, type:
     - ```brew info dynare```
 - Install Dynare via a command of the form:
