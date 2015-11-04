@@ -40,6 +40,10 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 %singularity check
 maximum_number_non_missing_observations=max(sum(~isnan(DynareDataset.data),2));
 
+if DynareOptions.order>1 && any(any(isnan(DynareDataset.data)))
+    error('initial_estimation_checks:: particle filtering does not support missing observations')
+end
+
 if maximum_number_non_missing_observations>Model.exo_nbr+EstimatedParameters.nvn
     error(['initial_estimation_checks:: Estimation can''t take place because there are less declared shocks than observed variables!'])
 end
