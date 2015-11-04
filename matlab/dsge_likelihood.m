@@ -513,6 +513,8 @@ switch DynareOptions.lik_init
     end    
     Pstar(stable, stable) = Pstar_tmp;
     Pinf  = [];
+    a = zeros(mm,1);
+    Zflag = 0;
   otherwise
     error('dsge_likelihood:: Unknown initialization approach for the Kalman filter!')
 end
