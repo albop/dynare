@@ -1,5 +1,36 @@
-// See fs2000.mod in the examples/ directory for details on the model
-// This version estimates the model in level rather than in growth rates
+/*
+ * This file is based on the cash in advance model described
+ * Frank Schorfheide (2000): "Loss function-based evaluation of DSGE models",
+ * Journal of Applied Econometrics, 15(6), 645-670.
+ *
+ * The equations are taken from J. Nason and T. Cogley (1994): "Testing the
+ * implications of long-run neutrality for monetary business cycle models",
+ * Journal of Applied Econometrics, 9, S37-S70.
+ * Note that there is an initial minus sign missing in equation (A1), p. S63.
+ *
+ * This implementation was written by Michel Juillard. Please note that the
+ * following copyright notice only applies to this Dynare implementation of the
+ * model. This version estimates the model in level rather than in growth rates.
+ */
+
+/*
+ * Copyright (C) 2004-2015 Dynare Team
+ *
+ * This file is part of Dynare.
+ *
+ * Dynare is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Dynare is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 var m P c e W R k d n l gy_obs gp_obs Y_obs P_obs y dA;
 varexo e_a e_m;
@@ -87,12 +118,7 @@ P_obs (log(mst)-gam);
 Y_obs (gam);
 end;
 
-%%default
-options_.lik_init=2;
-estimation(kalman_algo=1,mode_compute=4,order=1,datafile='../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
+data(file='../../fs2000/fsdat_simul.m');
 
-options_.lik_init=3;
-estimation(kalman_algo=3,mode_compute=4,order=1,datafile='../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
-
-options_.lik_init=5;
-estimation(kalman_algo=1,mode_compute=4,order=1,datafile='../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
+[dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_, bayestopt_, bounds] = ...
+    dynare_estimation_init(char(), M_.fname, [], M_, options_, oo_, estim_params_, bayestopt_);

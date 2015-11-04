@@ -164,8 +164,14 @@ MODFILES = \
 	ms-sbvar/test_ms_variances_repeated_runs.mod \
 	ms-dsge/test_ms_dsge.mod \
 	kalman/lyapunov/fs2000_lyap.mod \
-	kalman/fs2000_ns_lik_init.mod \
-	kalman/fs2000_lik_init.mod \
+	kalman/lik_init/fs2000_ns_lik_init_2.mod \
+	kalman/lik_init/fs2000_ns_lik_init_3.mod \
+	kalman/lik_init/fs2000_ns_lik_init_5.mod \
+	kalman/lik_init/fs2000_lik_init_1.mod \
+	kalman/lik_init/fs2000_lik_init_2.mod \
+	kalman/lik_init/fs2000_lik_init_3.mod \
+	kalman/lik_init/fs2000_lik_init_4.mod \
+	kalman/lik_init/fs2000_lik_init_5.mod \
 	kalman_filter_smoother/gen_data.mod \
 	kalman_filter_smoother/algo1.mod \
 	kalman_filter_smoother/algo2.mod \
@@ -452,6 +458,8 @@ EXTRA_DIST = \
 	kalman/likelihood_from_dynare/fsdat_simul_corr_ME_missing.m \
 	kalman/likelihood_from_dynare/fsdat_simul_uncorr_ME.m \
 	kalman/likelihood_from_dynare/fsdat_simul_uncorr_ME_missing.m \
+	kalman/lik_init/fs2000_common.inc \
+	kalman/lik_init/fs2000_ns_common.inc \
 	identification/kim/kim2_steadystate.m \
 	identification/as2007/as2007_steadystate.m \
 	estimation/fsdat_simul.m \

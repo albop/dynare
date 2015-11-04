@@ -14,7 +14,7 @@
  */
 
 /*
- * Copyright (C) 2004-2013 Dynare Team
+ * Copyright (C) 2004-2015 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -99,7 +99,6 @@ end;
 
 steady;
 
-
 estimated_params;
 alp, 0.356;
 gam,  0.0085;
@@ -112,26 +111,7 @@ stderr gy_obs, 1;
 corr gp_obs, gy_obs,0;
 end;
 
-options_.TeX=1;
-options_.debug=1;
+data(file='../../fs2000/fsdat_simul.m');
 
-%%default
-options_.lik_init=1;
-estimation(mode_compute=4,order=1,datafile='../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
-fval_algo_0=oo_.likelihood_at_initial_parameters;
-
-options_.lik_init=2;
-estimation(mode_compute=4,order=1,datafile='../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
-fval_algo_0=oo_.likelihood_at_initial_parameters;
-
-options_.lik_init=3;
-estimation(mode_compute=4,order=1,datafile='../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
-fval_algo_0=oo_.likelihood_at_initial_parameters;
-
-options_.lik_init=4;
-estimation(mode_compute=4,order=1,datafile='../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
-fval_algo_0=oo_.likelihood_at_initial_parameters;
-
-options_.lik_init=5;
-estimation(mode_compute=4,order=1,datafile='../fs2000/fsdat_simul',smoother,filter_decomposition,forecast = 8,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y gy_obs;
-fval_algo_0=oo_.likelihood_at_initial_parameters;
+[dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_, bayestopt_, bounds] = ...
+    dynare_estimation_init(char(), M_.fname, [], M_, options_, oo_, estim_params_, bayestopt_);
