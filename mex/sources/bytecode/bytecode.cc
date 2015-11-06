@@ -21,6 +21,38 @@
 #include "ErrorHandling.hh"
 #include <ctime>
 #include <math.h>
+#ifdef DYN_MEX_FUNC_ERR_MSG_TXT
+  #undef DYN_MEX_FUNC_ERR_MSG_TXT
+#endif // DYN_MEX_FUNC_ERR_MSG_TXT
+
+#define DYN_MEX_FUNC_ERR_MSG_TXT(str)                                                                   \
+ do {                                                                                                     \
+    mexPrintf("%s\n", str);                                                                             \
+    if (nlhs > 0)                                                                                       \
+      {                                                                                                 \
+        plhs[0] = mxCreateDoubleScalar(1);                                                              \
+        if (nlhs > 1)                                                                                   \
+          {                                                                                             \
+            double *pind;                                                                               \
+            plhs[1] = mxCreateDoubleMatrix(int(row_y), int(col_y), mxREAL);                             \
+            pind = mxGetPr(plhs[1]);                                                                    \
+            if (evaluate )                                                                              \
+              {                                                                                         \
+                for (unsigned int i = 0; i < row_y*col_y; i++)                                                   \
+                  pind[i] = 0;                                                                          \
+              }                                                                                         \
+            else                                                                                        \
+              {                                                                                         \
+                for (unsigned int i = 0; i < row_y*col_y; i++)                                                   \
+                  pind[i] = yd[i];                                                                      \
+              }                                                                                         \
+            for (int i = 2; i < nlhs; i++)                                                              \
+              plhs[i] = mxCreateDoubleScalar(1);                                                        \
+          }                                                                                             \
+      }                                                                                                 \
+    return;                                                                                             \
+  } while (0)
+
 
 #ifdef DEBUG_EX
 
@@ -935,16 +967,20 @@ main(int nrhs, const char *prhs[])
   if (field >= 0)
     temporaryfield = mxGetFieldByNumber(options_, 0, field);
   else
-    if (!steady_state)
-      DYN_MEX_FUNC_ERR_MSG_TXT("simul is not a field of options_");
-    else
-      DYN_MEX_FUNC_ERR_MSG_TXT("steady is not a field of options_");
+    {
+      if (!steady_state)
+        DYN_MEX_FUNC_ERR_MSG_TXT("simul is not a field of options_");
+      else
+        DYN_MEX_FUNC_ERR_MSG_TXT("steady is not a field of options_");
+    }
   field = mxGetFieldNumber(temporaryfield, "maxit");
   if (field<0)
-    if (!steady_state)
-      DYN_MEX_FUNC_ERR_MSG_TXT("maxit is not a field of options_.simul");
-    else
-      DYN_MEX_FUNC_ERR_MSG_TXT("maxit is not a field of options_.steady");
+    {
+      if (!steady_state)
+        DYN_MEX_FUNC_ERR_MSG_TXT("maxit is not a field of options_.simul");
+      else
+        DYN_MEX_FUNC_ERR_MSG_TXT("maxit is not a field of options_.steady");
+    }
   int maxit_ = int (floor(*(mxGetPr(mxGetFieldByNumber(temporaryfield, 0, field)))));
   field = mxGetFieldNumber(options_, "slowc");
   if (field < 0)
