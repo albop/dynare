@@ -34,7 +34,7 @@ nstatic = M.nstatic;
 nspred = M.nspred;
 if nspred > 180
     disp(' ')
-    disp(['evaluate_planner_objective: model too large, can''t evaluate planner ' ...
+    disp(['WARNING in evaluate_planner_objective: model too large, can''t evaluate planner ' ...
           'objective'])
     return NaN
 end
