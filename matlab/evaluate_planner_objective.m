@@ -36,7 +36,8 @@ if nspred > 180
     disp(' ')
     disp(['WARNING in evaluate_planner_objective: model too large, can''t evaluate planner ' ...
           'objective'])
-    return NaN
+    planner_objective_value = NaN;
+    return
 end
 beta = get_optimal_policy_discount_factor(M.params,M.param_names);
     
