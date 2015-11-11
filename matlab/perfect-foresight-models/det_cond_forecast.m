@@ -34,7 +34,9 @@ pp = 2;
 initial_conditions = oo_.steady_state;
 verbosity = options_.verbosity;
 options_.verbosity = 0;
-
+if options_.periods == 0
+	options_.periods = 25;
+end;
 %We have to get an initial guess for the conditional forecast 
 % and terminal conditions for the non-stationary variables, we
 % use the first order approximation of the rational expectation solution.
@@ -134,10 +136,18 @@ else
                     oo_.endo_simul(M_.aux_vars(i).endo_index, 1:sym_dset.nobs) = repmat(oo_.steady_state(M_.aux_vars(i).endo_index), 1, range.ndat + 1);
                 end
             end
-            %Compute the initial path using the first order solution around the
+            %Compute the initial path using the the steady-state
             % steady-state
             for jj = 2 : (options_.periods + 2)
               oo_.endo_simul(:, jj) = oo_.steady_state;  
+            end
+            missings = isnan(oo_.endo_simul(:,1));
+            if any(missings)
+                for jj = 1:M_.endo_nbr
+                    if missings(jj)
+                        oo_.endo_simul(jj,1) = oo_.steady_state(jj,1);
+                    end
+                end
             end
 
             if options_.bytecode
