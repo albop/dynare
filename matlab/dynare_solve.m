@@ -113,8 +113,16 @@ if options.solve_algo == 0
         end;
     end
 
-    if exitval > 0
+    if exitval == 1
         info = 0;
+    elseif exitval > 1
+        M=evalin('base','M_'); %get variable names from workspace
+        resid = evaluate_static_model(x,varargin{:},M,options);
+        if max(abs(resid)) > 1e-6
+            info = 1;
+        else
+            info = 0;        
+        end
     else
         info = 1;
     end
