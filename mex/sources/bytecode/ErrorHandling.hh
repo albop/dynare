@@ -438,7 +438,7 @@ public:
     switch (variable_type)
       {
       case eEndogenous:
-        if (variable_num < nb_endo)
+        if (variable_num <= nb_endo)
           {
             for (unsigned int i = 0; i < endo_name_length; i++)
               if (P_endo_names[CHAR_LENGTH*(variable_num+i*nb_endo)] != ' ')
@@ -449,7 +449,7 @@ public:
         break;
       case eExogenous:
       case eExogenousDet:
-        if (variable_num < nb_exo)
+        if (variable_num <= nb_exo)
           {
             for (unsigned int i = 0; i < exo_name_length; i++)
               if (P_exo_names[CHAR_LENGTH*(variable_num+i*nb_exo)] != ' ')
@@ -459,7 +459,7 @@ public:
           mexPrintf("=> Unknown exogenous variable # %d", variable_num);
         break;
       case eParameter:
-        if (variable_num < nb_param)
+        if (variable_num <= nb_param)
           {
             for (unsigned int i = 0; i < param_name_length; i++)
               if (P_param_names[CHAR_LENGTH*(variable_num+i*nb_param)] != ' ')
