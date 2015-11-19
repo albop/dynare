@@ -33,7 +33,6 @@ global options_ oo_ M_
 pp = 2;
 initial_conditions = oo_.steady_state;
 verbosity = options_.verbosity;
-options_.verbosity = 0;
 if options_.periods == 0
 	options_.periods = 25;
 end;
@@ -106,7 +105,14 @@ else
             
             sym_dset = dset(dates(-range(1)):dates(range(range.ndat)));
             periods = options_.periods + M_.maximum_lag + M_.maximum_lead;
-            oo_.exo_simul = repmat(oo_.exo_steady_state',max(range.ndat + 1, periods),1);
+            if isfield(oo_, 'exo_simul')
+                if size(oo_.exo_simul, 1) ~= max(range.ndat + 1, periods)
+                    oo_.exo_simul = repmat(oo_.exo_steady_state',max(range.ndat + 1, periods),1);
+                end
+            else
+                oo_.exo_simul = repmat(oo_.exo_steady_state',max(range.ndat + 1, periods),1);
+            end
+            
             oo_.endo_simul = repmat(oo_.steady_state, 1, max(range.ndat + 1, periods));
             
             for i = 1:sym_dset.vobs
@@ -175,6 +181,15 @@ else
                     end
                 end
                 data_set = [dset(dset.dates(1):(plan.date(1)-1)) ; data_set];
+                for i=1:M_.exo_nbr
+                    pos = find(strcmp(strtrim(M_.exo_names(i,:)),dset.name));
+                    if isempty(pos)
+                        data_set{strtrim(M_.exo_names(i,:))} = dseries(exo(1+M_.maximum_lag:end,i), plan.date(1), strtrim(M_.exo_names(i,:)));
+                    else
+                        data_set{strtrim(M_.exo_names(i,:))}(plan.date(1):plan.date(1)+ (size(exo, 1) - M_.maximum_lag)) = exo(1+M_.maximum_lag:end,i);
+                    end
+                end
+                data_set = merge(dset(dset.dates(1):(plan.date(1)-1)), data_set);
                 return;
                 union_names = union(data_set.name, dset.name);
                 dif = setdiff(union_names, data_set.name);
