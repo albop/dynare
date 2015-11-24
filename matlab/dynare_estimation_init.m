@@ -530,10 +530,8 @@ end
 
 [dataset_, dataset_info, newdatainterfaceflag] = makedataset(options_, options_.dsge_var*options_.dsge_varlag, gsa_flag);
 
-% Set options_.nobs if needed
-if newdatainterfaceflag
-    options_.nobs = dataset_.nobs;
-end
+% Set options_.nobs
+options_.nobs = dataset_.nobs;
 
 % setting steadystate_check_flag option
 if options_.diffuse_filter
