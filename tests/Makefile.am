@@ -4,6 +4,7 @@ MODFILES = \
 	estimation/fs2000_initialize_from_calib.mod	\
 	estimation/fs2000_calibrated_covariance.mod \
 	estimation/fs2000_model_comparison.mod \
+	estimation/fs2000_fast.mod \
 	estimation/MH_recover/fs2000_recover.mod \
 	estimation/t_proposal/fs2000_student.mod \
 	estimation/TaRB/fs2000_tarb.mod \

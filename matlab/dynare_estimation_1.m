@@ -206,7 +206,21 @@ if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.m
     return
 end
 
-% Estimation of the posterior mode or likelihood mode
+%% Estimation of the posterior mode or likelihood mode
+
+% analytical derivation is not yet available for kalman_filter_fast
+if options_.analytic_derivation && options_.fast_kalman_filter
+    error(['estimation option conflict: analytic_derivation isn''t available ' ...
+           'for fast_kalman_filter'])
+end
+
+% fast kalman filter is only available with kalman_algo == 1,3
+if options_.fast_kalman_filter && ...
+        (options_.kalman_algo == 1 || options_.kalman_algo == 3)
+    error(['estimation option conflict: fast_kalman_filter is only available ' ...
+           'with kalman_algo = 1 or kalman_algo = 3'])
+end
+
 if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     %prepare settings for newrat
     if options_.mode_compute==5

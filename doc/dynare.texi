@@ -5527,6 +5527,12 @@ from the likelihood computations (for details see @cite{Durbin and Koopman (2012
 singularity is encountered, Dynare by default automatically switches to the univariate Kalman filter for this parameter draw. This behavior can be changed via the
 @ref{use_univariate_filters_if_singularity_is_detected} option.
 
+@item fast_kalman_filter
+@anchor{fast_kalman_filter} Select the fast Kalman filter using Chandrasekhar
+recursions as described by @cite{Herbst, 2012}. This setting is only used with
+@code{kalman_algo=1} or @code{kalman_algo=3}. It is not yet compatible with
+@code{analytical_derivation}.
+
 @item kalman_tol = @var{DOUBLE}
 @anchor{kalman_tol} Numerical tolerance for determining the singularity of the covariance matrix of the prediction errors during the Kalman filter (minimum allowed reciprocal of the matrix condition number). Default value is @code{1e-10}
 
@@ -13098,6 +13104,11 @@ of Statistical Functions with Simulated Annealing,'' @i{Journal of Econometrics}
 Hansen, Nikolaus and Stefan Kern (2004): ``Evaluating the CMA Evolution Strategy 
 on Multimodal Test Functions''. In: @i{Eighth International Conference on Parallel 
 Problem Solving from Nature PPSN VIII, Proceedings}, Berlin: Springer, 282--291 
+
+@item
+Edward Herbst (2015):
+``Using the “Chandrasekhar Recursions” for Likelihood Evaluation of DSGE
+Models,'' @i{Computational Economics}, 45(4), 693--705.
 
 @item
 Ireland, Peter (2004): ``A Method for Taking Models to the Data,''
