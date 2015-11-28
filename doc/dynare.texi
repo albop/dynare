@@ -5529,7 +5529,7 @@ singularity is encountered, Dynare by default automatically switches to the univ
 
 @item fast_kalman_filter
 @anchor{fast_kalman_filter} Select the fast Kalman filter using Chandrasekhar
-recursions as described by @cite{Herbst, 2012}. This setting is only used with
+recursions as described by @cite{Herbst, 2015}. This setting is only used with
 @code{kalman_algo=1} or @code{kalman_algo=3}. It is not yet compatible with
 @code{analytical_derivation}.
 
@@ -13106,7 +13106,7 @@ on Multimodal Test Functions''. In: @i{Eighth International Conference on Parall
 Problem Solving from Nature PPSN VIII, Proceedings}, Berlin: Springer, 282--291 
 
 @item
-Edward Herbst (2015):
+Herbst, Edward (2015):
 ``Using the “Chandrasekhar Recursions” for Likelihood Evaluation of DSGE
 Models,'' @i{Computational Economics}, 45(4), 693--705.
 
