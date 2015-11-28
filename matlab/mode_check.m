@@ -197,8 +197,10 @@ for plt = 1:nbplt,
         fprintf(fidTeX,'\\label{Fig:CheckPlots:%s}\n',int2str(plt));
         fprintf(fidTeX,'\\end{figure}\n');
         fprintf(fidTeX,' \n');
-        fclose(fidTeX);
     end
+end
+if TeX && any(strcmp('eps',cellstr(DynareOptions.graph_format)))
+        fclose(fidTeX);
 end
 
 OutputDirectoryName = CheckPath('modecheck',Model.dname);

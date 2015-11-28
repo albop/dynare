@@ -187,7 +187,7 @@ elseif ~options_.hp_filter && options_.one_sided_hp_filter && ~options_.bandpass
     [hptrend,y] = one_sided_hp_filter(y,options_.one_sided_hp_filter);
 elseif ~options_.hp_filter && ~options_.one_sided_hp_filter && options_.bandpass.indicator
     data_temp=dseries(y,'0q1');
-    data_temp=baxter_king_filter(data_temp,options_.bandpass.passband(1),options_.bandpass.passband(2),200);
+    data_temp=baxter_king_filter(data_temp,options_.bandpass.passband(1),options_.bandpass.passband(2),12);
     y=data_temp.data;
 elseif ~options_.hp_filter && ~options_.one_sided_hp_filter  && ~options_.bandpass.indicator
     y = bsxfun(@minus, y, m);

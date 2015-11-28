@@ -88,8 +88,8 @@ if isempty(hh)
     end
     if max(htol0)>htol
         skipline()
-        disp_verbose('Numerical noise in the likelihood')
-        disp_verbose('Tolerance has to be relaxed')
+        disp_verbose('Numerical noise in the likelihood',Verbose)
+        disp_verbose('Tolerance has to be relaxed',Verbose)
         skipline()
     end
 else
