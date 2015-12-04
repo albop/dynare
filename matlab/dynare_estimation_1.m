@@ -130,7 +130,7 @@ ncn = estim_params_.ncn;  % Covariance of the measurement innovations (number of
 np  = estim_params_.np ;  % Number of deep parameters.
 nx  = nvx+nvn+ncx+ncn+np; % Total number of parameters to be estimated.
 %% Set the names of the priors.
-pnames = ['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
+pnames = ['     '; 'beta '; 'gamm '; 'norm '; 'invg '; 'unif '; 'invg2'; '     '; 'weibl'];
 
 dr = oo_.dr;
 
@@ -470,7 +470,7 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         if options_.mh_replic
             [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
             % Store posterior statistics by parameter name
-            oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_);
+            oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_, pnames);
             if ~options_.nograph
                 oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
             end

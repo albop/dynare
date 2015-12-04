@@ -260,6 +260,20 @@ for i=1:length(k)
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 6) ;
 end
 
+% Weibull distribution
+k = find(bayestopt_.pshape == 8);
+k1 = find(isnan(bayestopt_.p3(k)));
+k2 = find(isnan(bayestopt_.p4(k)));
+bayestopt_.p3(k(k1)) = zeros(length(k1),1);
+bayestopt_.p4(k(k2)) = Inf(length(k2),1);
+for i=1:length(k)
+    if (bayestopt_.p1(k(i))<bayestopt_.p3(k(i))) || (bayestopt_.p1(k(i))>bayestopt_.p4(k(i)))
+        error(['The prior mean of ' bayestopt_.name{k(i)} ' has to be above the lower (' num2str(bayestopt_.p3(k(i))) ') bound of the Weibull prior density!']);
+    end
+    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = weibull_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)), bayestopt_.p2(k(i)));
+    bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 8) ;
+end
+
 k = find(isnan(xparam1));
 if ~isempty(k)
     xparam1(k) = bayestopt_.p1(k);
@@ -272,6 +286,8 @@ if options_.initialize_estimated_parameters_with_the_prior_mode
         xparam1(k) = bayestopt_.p1(k);
     end
 end
+
+
 
 % I create subfolder M_.dname/prior if needed.
 CheckPath('prior',M_.dname);
