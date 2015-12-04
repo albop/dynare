@@ -165,10 +165,10 @@ if inverse_gamma_2_draws
 end
 
 if weibull_draws
-    pdraw(weibull_index) = weibrnd(p6(weibull_index), p7(weibull_index)) + p3(weibull_index);
+    pdraw(weibull_index) = wblrnd(p6(weibull_index), p7(weibull_index)) + p3(weibull_index);
     out_of_bound = find( (pdraw(weibull_index)'>ub(weibull_index)) | (pdraw(weibull_index)'<lb(weibull_index)));
     while ~isempty(out_of_bound),
-        pdraw(weibull_index(out_of_bound)) = weibrnd(p6(weibull_index(out_of_bound)),p7(weibull_index(out_of_bound)))+p3(weibull_index(out_of_bound));
+        pdraw(weibull_index(out_of_bound)) = wblrnd(p6(weibull_index(out_of_bound)),p7(weibull_index(out_of_bound)))+p3(weibull_index(out_of_bound));
         out_of_bound = find( (pdraw(weibull_index)'>ub(weibull_index)) | (pdraw(weibull_index)'<lb(weibull_index)));
     end
 end
