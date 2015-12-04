@@ -43,9 +43,8 @@ function pdraw = prior_draw(init,uniform) % --*-- Unitary tests --*--
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 persistent p6 p7 p3 p4 lb ub
-persistent uniform_index gaussian_index gamma_index beta_index inverse_gamma_1_index inverse_gamma_2_index
-persistent uniform_draws gaussian_draws gamma_draws beta_draws inverse_gamma_1_draws inverse_gamma_2_draws
-
+persistent uniform_index gaussian_index gamma_index beta_index inverse_gamma_1_index inverse_gamma_2_index weibull_index
+persistent uniform_draws gaussian_draws gamma_draws beta_draws inverse_gamma_1_draws inverse_gamma_2_draws weibull_draws
 
 if nargin>0 && init
     p6 = evalin('base', 'bayestopt_.p6');
@@ -96,6 +95,12 @@ if nargin>0 && init
         inverse_gamma_2_draws = 0;
     else
         inverse_gamma_2_draws = 1;
+    end
+    weibull_index = find(prior_shape==8);
+    if isempty(weibull_index)
+        weibull_draws = 0;
+    else
+        weibull_draws = 1;
     end
     pdraw = NaN(number_of_estimated_parameters,1);
     return
@@ -156,6 +161,15 @@ if inverse_gamma_2_draws
         pdraw(inverse_gamma_2_index(out_of_bound)) = ...
             1./gamrnd(p7(inverse_gamma_2_index(out_of_bound))/2,2./p6(inverse_gamma_2_index(out_of_bound)))+p3(inverse_gamma_2_index(out_of_bound));
         out_of_bound = find( (pdraw(inverse_gamma_2_index)'>ub(inverse_gamma_2_index)) | (pdraw(inverse_gamma_2_index)'<lb(inverse_gamma_2_index)));
+    end
+end
+
+if weibull_draws
+    pdraw(weibull_index) = weibrnd(p6(weibull_index), p7(weibull_index)) + p3(weibull_index);
+    out_of_bound = find( (pdraw(weibull_index)'>ub(weibull_index)) | (pdraw(weibull_index)'<lb(weibull_index)));
+    while ~isempty(out_of_bound),
+        pdraw(weibull_index(out_of_bound)) = weibrnd(p6(weibull_index(out_of_bound)),p7(weibull_index(out_of_bound)))+p3(weibull_index(out_of_bound));
+        out_of_bound = find( (pdraw(weibull_index)'>ub(weibull_index)) | (pdraw(weibull_index)'<lb(weibull_index)));
     end
 end
 

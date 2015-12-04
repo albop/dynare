@@ -1,5 +1,6 @@
 MODFILES = \
 	estimation/fs2000.mod \
+	estimation/fs2000_with_weibull_prior.mod \
 	estimation/fs2000_MCMC_jumping_covariance.mod \
 	estimation/fs2000_initialize_from_calib.mod	\
 	estimation/fs2000_calibrated_covariance.mod \

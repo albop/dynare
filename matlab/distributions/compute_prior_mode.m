@@ -69,7 +69,7 @@ switch shape
   case 4
     % s  = hyperparameters(1)
     % nu = hyperparameters(2)
-    m = 1/sqrt((hyperparameters(2)+1)/hyperparameters(1));%sqrt((hyperparameters(2)-1)/hyperparameters(1))
+    m = 1/sqrt((hyperparameters(2)+1)/hyperparameters(1));
     if length(hyperparameters)>2
         m = m + hyperparameters(3);
     end
@@ -80,6 +80,18 @@ switch shape
     % nu = hyperparameters(2)
     m = hyperparameters(1)/(hyperparameters(2)+2) ;
     if length(hyperparameters)>2
+        m = m + hyperparameters(3) ;
+    end
+  case 8
+    % s = hyperparameters(1) [scale parameter]
+    % k = hyperparameters(2) [shape parameter]
+    if hyperparameters(2)<=1
+        m = 0;
+    else
+        m = hyperparameters(1)*((hyperparameters(2)-1)/hyperparameters(2))^(1/hyperparameters(2))
+    end
+    if length(hyperparameters)>2
+        % Add location parameter
         m = m + hyperparameters(3) ;
     end
   otherwise

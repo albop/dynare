@@ -1,4 +1,4 @@
-function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_)
+function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_, pnames)
 % This function prints and saves posterior estimates after the mcmc
 % (+updates of oo_ & TeX output). 
 % 
@@ -8,6 +8,7 @@ function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bay
 %   options_         [structure]
 %   bayestopt_       [structure]
 %   oo_              [structure]
+%   pnames           [char]        Array of char, names of the prior shapes available
 %  
 % OUTPUTS 
 %   oo_              [structure]  
@@ -15,7 +16,7 @@ function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bay
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -59,7 +60,6 @@ FirstMhFile = record.KeepedDraws.FirstMhFile;
 NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 clear record;
 
-pnames=['     ';'beta ';'gamma';'norm ';'invg ';'unif ';'invg2'];
 header_width = row_header_width(M_,estim_params_,bayestopt_);
 hpd_interval=[num2str(options_.mh_conf_sig*100), '% HPD interval'];
 tit2 = sprintf('%-*s %12s %12s %23s %8s %12s\n',header_width,' ','prior mean','post. mean',hpd_interval,'prior','pstdev');
