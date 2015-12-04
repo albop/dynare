@@ -4537,7 +4537,7 @@ likelihood estimation. In a Bayesian estimation context, sets a lower bound
 only effective while maximizing the posterior kernel. This lower bound does not
 modify the shape of the prior density, and is only aimed at helping the
 optimizer in identifying the posterior mode (no consequences for the MCMC). For
-some prior densities (namely inverse gamma, gamma, uniform or beta) it is
+some prior densities (namely inverse gamma, gamma, uniform, beta or weibull) it is
 possible to shift the support of the prior distributions to the left or the right using
 @ref{prior_3rd_parameter}. In this case the prior density is effectively
 modified (note that the truncated Gaussian density is not implemented in
@@ -4552,7 +4552,7 @@ A keyword specifying the shape of the prior density.
 The possible values are: @code{beta_pdf},
 @code{gamma_pdf}, @code{normal_pdf},
 @code{uniform_pdf}, @code{inv_gamma_pdf},
-@code{inv_gamma1_pdf}, @code{inv_gamma2_pdf}. Note
+@code{inv_gamma1_pdf}, @code{inv_gamma2_pdf} and @code{weibull_pdf}. Note
 that @code{inv_gamma_pdf} is equivalent to
 @code{inv_gamma1_pdf}
 
@@ -4565,7 +4565,7 @@ that @code{inv_gamma_pdf} is equivalent to
 @item @var{PRIOR_3RD_PARAMETER}
 @anchor{prior_3rd_parameter}
 A third parameter of the prior used for generalized beta distribution,
-generalized gamma and for the uniform distribution. Default: @code{0}
+generalized gamma, generalized weibull and for the uniform distribution. Default: @code{0}
 
 @item @var{PRIOR_4TH_PARAMETER}
 @anchor{prior_4th_parameter}
