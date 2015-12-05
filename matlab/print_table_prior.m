@@ -38,7 +38,7 @@ T2 = strvcat(T2, l2);
 
 prior_trunc_backup = DynareOptions.prior_trunc ;
 DynareOptions.prior_trunc = (1-DynareOptions.prior_interval)/2 ;
-PriorIntervals = prior_bounds(BayesInfo,DynareOptions) ;
+PriorIntervals = prior_bounds(BayesInfo, DynareOptions.prior_trunc) ;
 DynareOptions.prior_trunc = prior_trunc_backup ;
 
 RESIZE = false;

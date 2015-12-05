@@ -315,7 +315,7 @@ if ~isempty(estim_params_) && ~all(strcmp(fieldnames(estim_params_),'full_calibr
             plot_priors(bayestopt_,M_,estim_params_,options_)
         end
         % Set prior bounds
-        bounds = prior_bounds(bayestopt_,options_);
+        bounds = prior_bounds(bayestopt_, options_.prior_trunc);
         bounds.lb = max(bounds.lb,lb);
         bounds.ub = min(bounds.ub,ub);
     else  % estimated parameters but no declared priors

@@ -51,7 +51,7 @@ if nargin>0 && init
     p7 = evalin('base', 'bayestopt_.p7');
     p3 = evalin('base', 'bayestopt_.p3');
     p4 = evalin('base', 'bayestopt_.p4');
-    bounds = evalin('base', 'prior_bounds(bayestopt_,options_)');
+    bounds = evalin('base', 'prior_bounds(bayestopt_, options_.prior_trunc)');
     lb = bounds.lb;
     ub = bounds.ub;
     number_of_estimated_parameters = length(p6);
@@ -173,6 +173,9 @@ if weibull_draws
     end
 end
 
+
+
+
 %@test:1
 %$ %% Initialize required structures
 %$ options_.prior_trunc=0;
@@ -190,17 +193,17 @@ end
 %$ estim_params_.param_vals = [1, NaN, (-Inf), Inf, 1, 0.356, 0.02, NaN, NaN, NaN ];
 %$ 
 %$ %% beta
-%$ estim_params_.param_vals(1,3)= -Inf;%LB
-%$ estim_params_.param_vals(1,4)= +Inf;%UB
-%$ estim_params_.param_vals(1,5)= 1;%Shape
+%$ estim_params_.param_vals(1,3)= -Inf; % LB
+%$ estim_params_.param_vals(1,4)= +Inf; % UB
+%$ estim_params_.param_vals(1,5)= 1;    % Shape
 %$ estim_params_.param_vals(1,6)=0.5;
 %$ estim_params_.param_vals(1,7)=0.01;
 %$ estim_params_.param_vals(1,8)=NaN;
 %$ estim_params_.param_vals(1,9)=NaN;
 %$ 
-%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
-%$ 
-%$ pdraw = prior_draw(1,0);
+%$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_)
+%$  
+%$ pdraw = prior_draw(1,0); pdraw
 %$ pdraw_vec=NaN(ndraws,1);
 %$ for ii=1:ndraws
 %$     pdraw_vec(ii)=prior_draw(0,0);
@@ -437,7 +440,7 @@ end
 %$ estim_params_.param_vals(1,9)=3;
 %$ 
 %$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
-%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ bounds = prior_bounds(bayestopt_,options_.prior_trunc)';
 %$ 
 %$ pdraw = prior_draw(1,0);
 %$ pdraw_vec=NaN(ndraws,1);
@@ -459,7 +462,7 @@ end
 %$ estim_params_.param_vals(1,9)=NaN;
 %$ 
 %$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
-%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ bounds = prior_bounds(bayestopt_,options_.prior_trunc)';
 %$ 
 %$ pdraw = prior_draw(1,0);
 %$ pdraw_vec=NaN(ndraws,1);
@@ -481,7 +484,7 @@ end
 %$ estim_params_.param_vals(1,9)=NaN;
 %$ 
 %$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
-%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ bounds = prior_bounds(bayestopt_,options_.prior_trunc)';
 %$ 
 %$ pdraw = prior_draw(1,0);
 %$ pdraw_vec=NaN(ndraws,1);
@@ -503,7 +506,7 @@ end
 %$ estim_params_.param_vals(1,9)=NaN;
 %$ 
 %$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
-%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ bounds = prior_bounds(bayestopt_,options_.prior_trunc)';
 %$ 
 %$ pdraw = prior_draw(1,0);
 %$ pdraw_vec=NaN(ndraws,1);
@@ -526,7 +529,7 @@ end
 %$ estim_params_.param_vals(1,9)=NaN;
 %$ 
 %$ [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_);
-%$ bounds = prior_bounds(bayestopt_,options_)';
+%$ bounds = prior_bounds(bayestopt_,options_.prior_trunc)';
 %$ 
 %$ pdraw = prior_draw(1,0);
 %$ pdraw_vec=NaN(ndraws,1);

@@ -56,7 +56,7 @@ pvalue_corr = options_gsa_.alpha2_redform;
 pnames = M_.param_names(estim_params_.param_vals(:,1),:);
 fname_ = M_.fname;
 
-bounds = prior_bounds(bayestopt_,options_);
+bounds = prior_bounds(bayestopt_, options_.prior_trunc);
 
 if nargin==0,
     dirname='';
