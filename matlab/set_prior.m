@@ -168,18 +168,7 @@ bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 k1 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p4(k(k1)) = ones(length(k1),1);
 for i=1:length(k)
-    if (bayestopt_.p1(k(i))<bayestopt_.p3(k(i))) || (bayestopt_.p1(k(i))>bayestopt_.p4(k(i)))
-        error(['The prior mean of ' bayestopt_.name{k(i)} ' has to be between the lower (' num2str(bayestopt_.p3(k(i))) ') and upper (' num2str(bayestopt_.p4(k(i))) ') bounds of the beta prior density!']);
-    end
-    mu = (bayestopt_.p1(k(i))-bayestopt_.p3(k(i)))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
-    stdd = bayestopt_.p2(k(i))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
-    if stdd^2 > (1-mu)*mu
-        error(sprintf(['Error in prior for %s: in a beta distribution with ' ...
-                       'mean %f, the standard error can''t be larger than' ...
-                       ' %f.'], bayestopt_.name{k(i)},mu,sqrt((1-mu)*mu)))
-    end
-    bayestopt_.p6(k(i)) = (1-mu)*mu^2/stdd^2 - mu ;
-    bayestopt_.p7(k(i)) = bayestopt_.p6(k(i))*(1/mu-1) ;
+    [bayestopt_.p6(k(i)), bayestopt_.p7(k(i))] = beta_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), bayestopt_.p4(k(i)), bayestopt_.name{k(i)});
     m = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) , bayestopt_.p4(k(i)) ],1);
     if length(m)==1
         bayestopt_.p5(k(i)) = m;
@@ -225,7 +214,7 @@ for i=1:length(k)
     [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = ...
         inverse_gamma_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)),bayestopt_.p2(k(i)),1,0) ;
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 4) ;
-end  
+end
 
 % uniform distribution
 k = find(bayestopt_.pshape == 5);
