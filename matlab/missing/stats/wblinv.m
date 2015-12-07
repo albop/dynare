@@ -1,4 +1,4 @@
-function t = icdfweibull(proba, scale, shape)   % --*-- Unitary tests --*--
+function t = wblinv(proba, scale, shape)   % --*-- Unitary tests --*--
 
 % Inverse cumulative distribution function.
 %
@@ -41,7 +41,7 @@ t = exp(log(scale)+log(-log(1-proba))/shape);
 
 %@test:1
 %$ try
-%$    x = icdfweibull(0, 1, 2);
+%$    x = wblinv(0, 1, 2);
 %$    t(1) = true;
 %$ catch
 %$    t(1) = false;
@@ -55,7 +55,7 @@ t = exp(log(scale)+log(-log(1-proba))/shape);
 
 %@test:2
 %$ try
-%$    x = icdfweibull(1, 1, 2);
+%$    x = wblinv(1, 1, 2);
 %$    t(1) = true;
 %$ catch
 %$    t(1) = false;
@@ -77,7 +77,7 @@ t = exp(log(scale)+log(-log(1-proba))/shape);
 %$    for i=1:3
 %$       for j=1:3
 %$           k = k+1;
-%$           x(k) = icdfweibull(.5, scales(i), shapes(j));
+%$           x(k) = wblinv(.5, scales(i), shapes(j));
 %$       end
 %$    end
 %$    t(1) = true;
@@ -109,7 +109,7 @@ t = exp(log(scale)+log(-log(1-proba))/shape);
 %$    for i=1:3
 %$       for j=1:3
 %$           k = k+1;
-%$           x(k) = icdfweibull(p, scales(i), shapes(j));
+%$           x(k) = wblinv(p, scales(i), shapes(j));
 %$       end
 %$    end
 %$    t(1) = true;
