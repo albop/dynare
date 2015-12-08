@@ -14,6 +14,10 @@ Described on the homepage: <http://www.dynare.org/>
 Most users should use the precompiled package available for your OS, also
 available via the Dynare homepage: <http://www.dynare.org/download/dynare-stable>.
 
+# Contributions
+
+To contribute to Dynare and participate in the Dynare community, please see: [CONTRIBUTING.md](https://github.com/DynareTeam/dynare/blob/master/CONTRIBUTING.md)
+
 # License
 
 Most of the source files are covered by the GNU General Public Licence version
