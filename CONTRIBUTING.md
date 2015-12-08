@@ -24,7 +24,9 @@ Before making changes to the codebase, it'd be helpful if you communicated your 
 
 ### Issues: Reporting Bugs
 
-To report a bug in Dynare, simply open a GitHub issue in the repository where the bug resides. For example, to report a bug in Dynare itself, go to the [dynare repository issue page](https://github.com/DynareTeam/dynare/issues) and click on "New Issue."
+You can report bugs in both the stable and unstable versions of Dynare. Before reporting a bug in the stable version of Dynare, please check the [Known Bugs](http://www.dynare.org/DynareWiki/KnownBugs) page to ensure it has not already been encountered/fixed. If reporting a bug in the unstable version of Dynare, please ensure the bug exists in the latest [unstable Dynare snapshot](http://www.dynare.org/download/dynare-unstable).
+
+To report a bug in Dynare, simply open a GitHub issue in the repository where the bug resides. For example, to report a bug in Dynare itself, go to the [Dynare repository issue page](https://github.com/DynareTeam/dynare/issues) and click on "New Issue."
 
 The minimal information to add is a subject and a description of the steps needed to reproduce the bug. However, the most helpful description would also provide the code to reproduce the bug (often times a `.mod` file). The most helpful `.mod` file is a minimal, quick-running example that reproduces the bug, but we'll take anything that will help us squash a bug.
 
