@@ -225,3 +225,15 @@ end
 %$ end
 %$ T = all(t);
 %@eof:7
+
+%@test:8
+%$ % Unknown density
+%$ try
+%$     m1 = compute_prior_mode([1 1],7);
+%$     t(1) = false;
+%$ catch
+%$     t(1) = true;
+%$ end
+%$
+%$ T = all(t);
+%@eof:8
