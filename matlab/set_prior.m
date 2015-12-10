@@ -185,7 +185,7 @@ k2 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
-    [bayestopt_.p6(k(i)), bayestopt_.p7(k(i))] = gamma_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), bayestopt_.name{k(i)});
+    [bayestopt_.p6(k(i)), bayestopt_.p7(k(i))] = gamma_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), bayestopt_.p4(k(i)), bayestopt_.name{k(i)});
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 2) ;
 end
 
@@ -206,7 +206,7 @@ k2 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
-    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = inverse_gamma_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)), bayestopt_.p2(k(i)), 1, false, bayestopt_.name{k(i)});
+    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = inverse_gamma_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), 1, false, bayestopt_.name{k(i)});
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 4);
 end
 
@@ -227,7 +227,8 @@ k2 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
-    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = inverse_gamma_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)), bayestopt_.p2(k(i)), 2, false, bayestopt_.name{k(i)});
+    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = ...
+        inverse_gamma_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), 2, false, bayestopt_.name{k(i)});
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 6) ;
 end
 
@@ -238,10 +239,7 @@ k2 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
-    if (bayestopt_.p1(k(i))<bayestopt_.p3(k(i))) || (bayestopt_.p1(k(i))>bayestopt_.p4(k(i)))
-        error(['The prior mean of ' bayestopt_.name{k(i)} ' has to be above the lower (' num2str(bayestopt_.p3(k(i))) ') bound of the Weibull prior density!']);
-    end
-    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = weibull_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)), bayestopt_.p2(k(i)));
+    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = weibull_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), bayestopt_.name{k(i)});
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 8) ;
 end
 

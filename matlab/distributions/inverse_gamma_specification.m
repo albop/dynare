@@ -1,4 +1,4 @@
-function [s,nu] = inverse_gamma_specification(mu, sigma2, type, use_fzero_flag, name) % --*-- Unitary tests --*--
+function [s,nu] = inverse_gamma_specification(mu, sigma2, lb, type, use_fzero_flag, name) % --*-- Unitary tests --*--
 
 % Computes the inverse Gamma hyperparameters from the prior mean and standard deviation.
 %
@@ -36,44 +36,46 @@ function [s,nu] = inverse_gamma_specification(mu, sigma2, type, use_fzero_flag, 
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<3
-    error('At least three input arguments are required!')
+if nargin<4
+    error('At least four input arguments are required!')
 end
 
 if ~isnumeric(mu) || ~isscalar(mu) || ~isreal(mu)
-    error('First input argument must be a real positive scalar!')
+    error('First input argument must be a real scalar!')
 end
 
 if ~isnumeric(sigma2) || ~isscalar(sigma2) || ~isreal(sigma2) || sigma2<=0
     error('Second input argument must be a real positive scalar!')
 end
 
-if ~isnumeric(mu) || ~isscalar(mu) || ~ismember(type, [1, 2])
-    error('Third input argument must be equal to 1 or 2!')
+if ~isnumeric(lb) || ~isscalar(lb) || ~isreal(lb)
+    error('Third input argument must be a real scalar!')
 end
 
-if nargin==3 || isempty(use_fzero_flag)
+if ~isnumeric(type) || ~isscalar(type) || ~ismember(type, [1, 2])
+    error('Fourth input argument must be equal to 1 or 2!')
+end
+
+if nargin==4 || isempty(use_fzero_flag)
     use_fzero_flag = false;
 else
-    if ~iscalar(use_fzero_flag) || ~islogical(use_fzero_flag)
+    if ~isscalar(use_fzero_flag) || ~islogical(use_fzero_flag)
         error('Fourth input argument must be a scalar logical!')
     end
 end
 
-if nargin>4 && (~ischar(name) || size(name, 1)>1)
-    error('Fifth input argument must be a string!')
+if nargin>5 && (~ischar(name) || size(name, 1)>1)
+    error('Sixth input argument must be a string!')
 else
     name = '';
 end
 
 if ~isempty(name)
-    name = sprintf(' for %s ', name);
-else
-    name = ' ';
+    name = sprintf(' for %s', name);
 end
 
-if mu<=0
-    error('The prior mean%smust be above the lower bound of the Inverse Gamma (type %d) prior distribution!', name, type);
+if mu<=lb
+    error('The prior mean%s (%f) must be above the lower bound (%f)of the Inverse Gamma (type %d) prior distribution!', mu, lb, name, type);
 end
 
 check_solution_flag = true;
@@ -145,7 +147,7 @@ end
 
 %@test:1
 %$ try
-%$    [s, nu] = inverse_gamma_specification(.5, .05, 1);
+%$    [s, nu] = inverse_gamma_specification(.5, .05, 0, 1);
 %$    t(1) = true;
 %$ catch
 %$    t(1) = false;
@@ -160,7 +162,7 @@ end
 
 %@test:2
 %$ try
-%$    [s, nu] = inverse_gamma_specification(.5, .05, 2);
+%$    [s, nu] = inverse_gamma_specification(.5, .05, 0, 2);
 %$    t(1) = true;
 %$ catch
 %$    t(1) = false;
@@ -175,7 +177,7 @@ end
 
 %@test:3
 %$ try
-%$    [s, nu] = inverse_gamma_specification(.5, Inf, 1);
+%$    [s, nu] = inverse_gamma_specification(.5, Inf, 0, 1);
 %$    t(1) = true;
 %$ catch
 %$    t(1) = false;
@@ -190,7 +192,7 @@ end
 
 %@test:4
 %$ try
-%$    [s, nu] = inverse_gamma_specification(.5, Inf, 2);
+%$    [s, nu] = inverse_gamma_specification(.5, Inf, 0, 2);
 %$    t(1) = true;
 %$ catch
 %$    t(1) = false;

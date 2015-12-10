@@ -1,4 +1,4 @@
-function [scale, shape] = weibull_specification(mu, sigma2)   % --*-- Unitary tests --*--
+function [scale, shape] = weibull_specification(mu, sigma2, lb, name)   % --*-- Unitary tests --*--
 
 % Returns the hyperparameters of the Weibull distribution given the expectation and variance.
 %
@@ -26,9 +26,30 @@ function [scale, shape] = weibull_specification(mu, sigma2)   % --*-- Unitary te
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if nargin<3
+    lb = 0;
+end
+
+if nargin>3 && ~isempty(name)
+    name1 = sprintf('for %s ', name);
+    name2 = sprintf(' (for %s)', name);
+else
+    name1 = '';
+    name2 = '';
+end
+
+if mu<lb
+    error('The prior expectation (%f) %scannot be smaller than the lower bound of the Weibull distribution (%f)!', mu, name1, lb)
+end
+
+if isinf(sigma2)
+    error('The variance of the Gamma distribution has to be finite%s!', name2)
+end
+
 scale = NaN;
 shape = NaN;
-    
+
+mu = mu-lb; 
 mu2 = mu*mu;   
 
 eqn = @(k) gammaln(1+2./k) - 2*gammaln(1+1./k) - log(1+sigma2/mu2);
