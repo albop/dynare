@@ -10,7 +10,8 @@ function m = compute_prior_mode(hyperparameters,shape) % --*-- Unitary tests --*
 %                                     shape=3 => Gaussian distribution,
 %                                     shape=4 => Inverse Gamma (type 1) distribution,
 %                                     shape=5 => Uniform distribution,
-%                                     shape=6 => Inverse Gamma (type 2) distribution.
+%                                     shape=6 => Inverse Gamma (type 2) distribution,
+%                                     shape=8 => Weibull distribution.
 %                                     
 % OUTPUTS 
 %   m       [double]    scalar or 2*1 vector, the prior mode.
@@ -38,6 +39,7 @@ function m = compute_prior_mode(hyperparameters,shape) % --*-- Unitary tests --*
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 m = NaN ;
 switch shape
   case 1
