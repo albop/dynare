@@ -166,7 +166,7 @@ end
 %$
 %$ % Check the results
 %$ if t(1)
-%$     t(3) = dassert(m1,1.632993161855452,1e-6);
+%$     t(2) = dassert(m1,1.632993161855452,1e-6);
 %$     t(3) = dassert(m2,1.632993161855452+1,1e-6);
 %$ end
 %$ T = all(t);
