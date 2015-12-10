@@ -90,7 +90,7 @@ switch shape
     if hyperparameters(2)<=1
         m = 0;
     else
-        m = hyperparameters(1)*((hyperparameters(2)-1)/hyperparameters(2))^(1/hyperparameters(2))
+        m = hyperparameters(1)*((hyperparameters(2)-1)/hyperparameters(2))^(1/hyperparameters(2));
     end
     if length(hyperparameters)>2
         % Add location parameter
