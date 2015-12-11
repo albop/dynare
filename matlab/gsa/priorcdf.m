@@ -1,5 +1,6 @@
-function [xcum] = priorcdf(para, pshape, p6, p7, p3, p4)
-% This procedure transforms x vectors into cumulative values 
+function xcum = priorcdf(para, pshape, p6, p7, p3, p4)
+
+% This procedure transforms x vectors into cumulative values
 % pshape: 0 is point mass, both para and p2 are ignored
 %         1 is BETA(mean,stdd)
 %         2 is GAMMA(mean,stdd)
@@ -27,45 +28,24 @@ function [xcum] = priorcdf(para, pshape, p6, p7, p3, p4)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-nprio 	= length(pshape);
-
-i = 1;
-while i <=  nprio;
-	a = 0;	
-	b = 0;
-	if pshape(i) == 1;     % (generalized) BETA Prior 
-% 		mu = (p1(i)-p3(i))/(p4(i)-p3(i));
-% 		stdd = p2(i)/(p4(i)-p3(i));
-% 		a = (1-mu)*mu^2/stdd^2 - mu;
-% 		b = a*(1/mu - 1);
-		%lnprior = lnprior + lpdfgbeta(para(i),a,b,p3(i),p4(i))   ;
-		para(:,i) = (para(:,i)-p3(i))./(p4(i)-p3(i));
-% 		xcum(:,i) = betacdf(para(:,i),a,b)   ;
-    xcum(:,i) = betainc(para(:,i),p6(i),p7(i));
-  elseif pshape(i) == 2; % GAMMA PRIOR 
-%      	b = p2(i)^2/(p1(i)-p3(i));
-% 		a = (p1(i)-p3(i))/b;
-		%lnprior = lnprior + lpdfgam(para(i)-p3(i),a,b);
-% 		xcum(:,i) = gamcdf(para(:,i)-p3(i),a,b);
-    xcum(:,i) = gamcdf(para(:,i)-p3(i),p6(i),p7(i));
-	elseif pshape(i) == 3; % GAUSSIAN PRIOR 
-     %lnprior = lnprior + lpdfnorm(para(i),p1(i),p2(i));
-%      xcum(:,i) = normcdf(para(:,i),p1(i),p2(i));
-     xcum(:,i) = 0.5 * erfc(-(para(:,i)-p6(i))/p7(i) ./ sqrt(2));
-	elseif pshape(i) == 4; % INVGAMMA1 PRIOR 
-     	%lnprior = lnprior + lpdfig1(para(i),p1(i),p2(i));
-%   		xcum(:,i) = gamcdf(1/para(:,i).^2,p2(i)/2,2/p1(i));
-      xcum(:,i) = gamcdf(1./(para(:,i)-p3(i)).^2,p7(i)/2,2/p6(i));
-	elseif pshape(i) == 5; % UNIFORM PRIOR 
-     	%lnprior = lnprior + log(1/(p2(i)-p1(i)));
-  		xcum(:,i) = (para(:,i)-p3(i))./(p4(i)-p3(i));
- 	elseif pshape(i) == 6; % INVGAMMA2 PRIOR 
-%     	lnprior = lnprior + lpdfig2(para(i),p1(i),p2(i));
-%   		xcum(:,i) = gamcdf(1/para(:,i),p2(i)/2,2/p1(i));
-      xcum(:,i) = gamcdf(1./(para(:,i)-p3(i)),p7(i)/2,2/p6(i));
-        elseif pshape(i)==8
-            xcum(:,i) = wblcdf(para(:,i)-p3(i),p6(i),p7(i));
- end;
-	i = i+1;
-end;
-
+for i=1:length(pshape)
+    switch pshape(i)
+      case 1 % (generalized) BETA Prior
+        para(:,i) = (para(:,i)-p3(i))./(p4(i)-p3(i));
+        xcum(:,i) = betainc(para(:,i),p6(i),p7(i));
+      case 2 % GAMMA PRIOR
+        xcum(:,i) = gamcdf(para(:,i)-p3(i),p6(i),p7(i));
+      case 3 % GAUSSIAN PRIOR
+        xcum(:,i) = 0.5 * erfc(-(para(:,i)-p6(i))/p7(i) ./ sqrt(2));
+      case 4 % INVGAMMA1 PRIOR
+        xcum(:,i) = gamcdf(1./(para(:,i)-p3(i)).^2,p7(i)/2,2/p6(i));
+      case 5 % UNIFORM PRIOR
+        xcum(:,i) = (para(:,i)-p3(i))./(p4(i)-p3(i));
+      case 6 % INVGAMMA2 PRIOR
+        xcum(:,i) = gamcdf(1./(para(:,i)-p3(i)),p7(i)/2,2/p6(i));
+      case 8 % WEIBULL
+        xcum(:,i) = wblcdf(para(:,i)-p3(i),p6(i),p7(i));
+      otherwise
+        error('Unknown prior shape!')
+    end
+end
