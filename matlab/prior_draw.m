@@ -1,4 +1,5 @@
 function pdraw = prior_draw(init,uniform) % --*-- Unitary tests --*--
+
 % This function generate one draw from the joint prior distribution and
 % allows sampling uniformly from the prior support (uniform==1 when called with init==1)
 % 
@@ -62,45 +63,45 @@ if nargin>0 && init
     end
     beta_index = find(prior_shape==1);
     if isempty(beta_index)
-        beta_draws = 0;
+        beta_draws = false;
     else
-        beta_draws = 1;
+        beta_draws = true;
     end
     gamma_index = find(prior_shape==2);
     if isempty(gamma_index)
-        gamma_draws = 0;
+        gamma_draws = false;
     else
-        gamma_draws = 1;
+        gamma_draws = true;
     end
     gaussian_index = find(prior_shape==3);
     if isempty(gaussian_index)
-        gaussian_draws = 0;
+        gaussian_draws = false;
     else
-        gaussian_draws = 1;
+        gaussian_draws = true;
     end
     inverse_gamma_1_index = find(prior_shape==4);
     if isempty(inverse_gamma_1_index)
-        inverse_gamma_1_draws = 0;
+        inverse_gamma_1_draws = false;
     else
-        inverse_gamma_1_draws = 1;
+        inverse_gamma_1_draws = true;
     end
     uniform_index = find(prior_shape==5);
     if isempty(uniform_index)
-        uniform_draws = 0;
+        uniform_draws = false;
     else
-        uniform_draws = 1;
+        uniform_draws = true;
     end
     inverse_gamma_2_index = find(prior_shape==6);
     if isempty(inverse_gamma_2_index)
-        inverse_gamma_2_draws = 0;
+        inverse_gamma_2_draws = false;
     else
-        inverse_gamma_2_draws = 1;
+        inverse_gamma_2_draws = true;
     end
     weibull_index = find(prior_shape==8);
     if isempty(weibull_index)
-        weibull_draws = 0;
+        weibull_draws = false;
     else
-        weibull_draws = 1;
+        weibull_draws = true;
     end
     pdraw = NaN(number_of_estimated_parameters,1);
     return
@@ -172,9 +173,6 @@ if weibull_draws
         out_of_bound = find( (pdraw(weibull_index)'>ub(weibull_index)) | (pdraw(weibull_index)'<lb(weibull_index)));
     end
 end
-
-
-
 
 %@test:1
 %$ %% Initialize required structures
