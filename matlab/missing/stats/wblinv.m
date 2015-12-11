@@ -27,6 +27,25 @@ function t = wblinv(proba, scale, shape)   % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+% Check input arguments.
+
+if nargin<3
+    error('Three input arguments required!')
+end
+
+if ~isnumeric(proba) || ~isscalar(proba) || ~isreal(proba) || proba<0 || proba>1
+    error('First input argument must be a real scalar between 0 and 1 (probability)!')
+end
+
+if ~isnumeric(scale) || ~isscalar(scale) || ~isreal(scale) || scale<=0
+    error('Second input argument must be a real positive scalar (scale parameter of the Weibull distribution)!')
+end
+
+if ~isnumeric(shape) || ~isscalar(shape) || ~isreal(shape) || shape<=0
+    error('Third input argument must be a real positive scalar (shape parameter of the Weibull distribution)!')
+end
+
+
 if proba<2*eps()
     t = 0;
     return
