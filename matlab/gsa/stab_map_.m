@@ -99,7 +99,7 @@ p4 = bayestopt_.p4(nshock+1:end);
 [junk1,junk2,junk3,lb,ub,junk4] = set_prior(estim_params_,M_,options_); %Prepare bounds
 if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
     % Set prior bounds
-    bounds = prior_bounds(bayestopt_, options_.trunc);
+    bounds = prior_bounds(bayestopt_, options_.prior_trunc);
     bounds.lb = max(bounds.lb,lb);
     bounds.ub = min(bounds.ub,ub);
 else  % estimated parameters but no declared priors
