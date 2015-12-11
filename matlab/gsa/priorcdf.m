@@ -4,11 +4,13 @@ function [xcum] = priorcdf(para, pshape, p6, p7, p3, p4)
 %         1 is BETA(mean,stdd)
 %         2 is GAMMA(mean,stdd)
 %         3 is NORMAL(mean,stdd)
-%         4 is INVGAMMA(s^2,nu)
+%         4 is INVGAMMA(s^2,nu) type I
 %         5 is UNIFORM [p1,p2]
+%         6 is INNGAMMA(s^2,nu) type II
+%         8 is WEIBULL(s, k)
 % Adapted by M. Ratto from MJ priordens.m
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -61,7 +63,9 @@ while i <=  nprio;
 %     	lnprior = lnprior + lpdfig2(para(i),p1(i),p2(i));
 %   		xcum(:,i) = gamcdf(1/para(:,i),p2(i)/2,2/p1(i));
       xcum(:,i) = gamcdf(1./(para(:,i)-p3(i)),p7(i)/2,2/p6(i));
-	end;
+        elseif pshape(i)==8
+            xcum(:,i) = wblcdf(para(:,i)-p3(i),p6(i),p7(i));
+ end;
 	i = i+1;
 end;
 
