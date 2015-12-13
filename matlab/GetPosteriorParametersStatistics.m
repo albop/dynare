@@ -336,22 +336,23 @@ fprintf(fidTeX,['%% ' datestr(now,0)]);
 fprintf(fidTeX,' \n');
 fprintf(fidTeX,' \n');
 fprintf(fidTeX,'\\begin{center}\n');
-fprintf(fidTeX,'\\begin{longtable}{l|lcccccc} \n');
+fprintf(fidTeX,'\\begin{longtable}{llcccccc} \n');
 fprintf(fidTeX,['\\caption{Results from Metropolis-Hastings (' title ')}\n ']);
 fprintf(fidTeX,['\\label{Table:MHPosterior:' int2str(fnum)  '}\\\\\n']);
-fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-fprintf(fidTeX,['  & Prior distribution & Prior mean  & Prior ' ...
-                's.d. & Posterior mean & Posterior s.d.  & HPD inf & HPD sup\\\\ \n']);
-fprintf(fidTeX,'\\hline \\endfirsthead \n');
-fprintf(fidTeX,['\\caption{(continued)}']);
-fprintf(fidTeX,['\\label{Table:MHPosterior:' int2str(fnum)  '}\\\\\n']);
-fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-fprintf(fidTeX,['  & Prior distribution & Prior mean  & Prior ' ...
-                's.d. & Posterior mean & Posterior s.d.  & HPD inf & HPD sup\\\\ \n']);
-fprintf(fidTeX,'\\hline \\endhead \n');
+fprintf(fidTeX,'\\toprule \n');
+fprintf(fidTeX,'  & \\multicolumn{3}{c}{Prior}  &  \\multicolumn{4}{c}{Posterior} \\\\\n');
+fprintf(fidTeX,'  \\cmidrule(r{.75em}){2-4} \\cmidrule(r{.75em}){5-8}\n');
+fprintf(fidTeX,'  & Dist. & Mean  & Stdev. & Mean & Stdev. & HPD inf & HPD sup\\\\\n');
+fprintf(fidTeX,'\\midrule \\endfirsthead \n');
+fprintf(fidTeX,['\\caption{(continued)}\\\\']);
+fprintf(fidTeX,'\\toprule \n');
+fprintf(fidTeX,'  & \\multicolumn{3}{c}{Prior}  &  \\multicolumn{4}{c}{Posterior} \\\\\n');
+fprintf(fidTeX,'  \\cmidrule(r{.75em}){2-4} \\cmidrule(r{.75em}){5-8}\n');
+fprintf(fidTeX,'  & Dist. & Mean  & Stdev. & Mean & Stdev. & HPD inf & HPD sup\\\\\n');
+fprintf(fidTeX,'\\midrule \\endhead \n');
 
-fprintf(fidTeX,'\\hline \\multicolumn{8}{r}{(Continued on next page)} \\\\ \\hline \\endfoot \n');
-fprintf(fidTeX,'\\hline \\hline \\endlastfoot \n');
+fprintf(fidTeX,'\\bottomrule \\multicolumn{8}{r}{(Continued on next page)} \\endfoot \n');
+fprintf(fidTeX,'\\bottomrule \\endlastfoot \n');
 
 
 fid = fidTeX;
