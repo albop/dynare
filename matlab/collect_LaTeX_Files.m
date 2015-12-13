@@ -30,13 +30,14 @@ function collect_LaTeX_Files(M_)
 f_name_binder=[M_.fname,'_TeX_binder.TeX'];
 fid=fopen(f_name_binder,'w+');
 fprintf(fid,'%s \n','\documentclass[12pt]{article}');
+fprintf(fid,'%s \n','\usepackage[margin=2cm]{geometry}');
 fprintf(fid,'%s \n','\usepackage{psfrag}');
 fprintf(fid,'%s \n','\usepackage{graphicx}');
 fprintf(fid,'%s \n','\usepackage{epstopdf}');
-fprintf(fid,'%s \n','\usepackage{longtable}');
+fprintf(fid,'%s \n','\usepackage{longtable,booktabs}');
 fprintf(fid,'%s \n','\usepackage{amsfonts}');
 fprintf(fid,'%s \n','\usepackage{breqn}');
-fprintf(fid,'%s \n','\usepackage{float}');
+fprintf(fid,'%s \n','\usepackage{float,morefloats,caption}');
 fprintf(fid,'%s \n','\begin{document}');
 
 %% Root directory
