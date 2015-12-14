@@ -34,7 +34,7 @@ switch type
   case 'posterior'
     [xparams, logpost] = metropolis_draw(0);
   case 'prior'
-    xparams = prior_draw(0);
+    xparams = prior_draw();
     if nargout>1
         logpost = evaluate_posterior_kernel(xparams');
     end

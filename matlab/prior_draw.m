@@ -1,4 +1,4 @@
-function pdraw = prior_draw(init,uniform) % --*-- Unitary tests --*--
+function pdraw = prior_draw(BayesInfo, prior_trunc, uniform) % --*-- Unitary tests --*--
 
 % This function generate one draw from the joint prior distribution and
 % allows sampling uniformly from the prior support (uniform==1 when called with init==1)
@@ -47,19 +47,19 @@ persistent p6 p7 p3 p4 lb ub
 persistent uniform_index gaussian_index gamma_index beta_index inverse_gamma_1_index inverse_gamma_2_index weibull_index
 persistent uniform_draws gaussian_draws gamma_draws beta_draws inverse_gamma_1_draws inverse_gamma_2_draws weibull_draws
 
-if nargin>0 && init
-    p6 = evalin('base', 'bayestopt_.p6');
-    p7 = evalin('base', 'bayestopt_.p7');
-    p3 = evalin('base', 'bayestopt_.p3');
-    p4 = evalin('base', 'bayestopt_.p4');
-    bounds = evalin('base', 'prior_bounds(bayestopt_, options_.prior_trunc)');
+if nargin>0
+    p6 = BayesInfo.p6;
+    p7 = BayesInfo.p7;
+    p3 = BayesInfo.p3;
+    p4 = BayesInfo.p4;
+    bounds = prior_bounds(BayesInfo, prior_trunc);
     lb = bounds.lb;
     ub = bounds.ub;
     number_of_estimated_parameters = length(p6);
-    if nargin>1 && uniform
+    if nargin>2 && uniform
         prior_shape = repmat(5,number_of_estimated_parameters,1);
     else
-        prior_shape = evalin('base', 'bayestopt_.pshape');
+        prior_shape = BayesInfo.pshape;
     end
     beta_index = find(prior_shape==1);
     if isempty(beta_index)

@@ -62,7 +62,7 @@ if strcmpi(type,'posterior')
     n_draws=options_.sub_draws;
     prior = false;
 elseif strcmpi(type,'prior')
-    prior_draw(1);
+    prior_draw(bayestopt_, options_.prior_trunc);
 else
     error('EXECUTE_POSTERIOR_FUNCTION: Unknown type!')
 end

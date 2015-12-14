@@ -149,9 +149,9 @@ options_ident.analytic_derivation_mode = options_.analytic_derivation_mode;
 if prior_exist
     if any(bayestopt_.pshape > 0)
         if options_ident.prior_range
-            prior_draw(1,1);
+            prior_draw(bayestopt_, options_.prior_trunc, true);
         else
-            prior_draw(1);
+            prior_draw(bayestopt_, options_.prior_trunc, false);
         end
     else
         options_ident.prior_mc=1;
