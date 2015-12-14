@@ -61,12 +61,21 @@ for ii=1:length(TeX_Files)
     end
 end
 
-%5 graphs directory
+%% graphs directory
 TeX_Files=dir([M_.dname filesep 'graphs' filesep  M_.fname '*.TeX']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
         fprintf(fid,'%s \n',['\include{', M_.dname '/graphs' '/',f_name,'}']);    
+    end
+end
+
+%% Identification directory
+TeX_Files=dir([M_.dname filesep 'identification' filesep  M_.fname '*.TeX']);
+for ii=1:length(TeX_Files)
+    [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
+    if ~strcmp(TeX_Files(ii).name,f_name_binder)
+        fprintf(fid,'%s \n',['\include{', M_.dname '/identification' '/',f_name,'}']);    
     end
 end
 
