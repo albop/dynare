@@ -155,8 +155,8 @@ for i=1:length(p6)
             bounds.lb(i) = p3(i);
             bounds.ub(i) = Inf;
         else
-            bounds.lb(i) = p3(i)+icdfweibull(prior_trunc,p6(i),p7(i));
-            bounds.ub(i) = p3(i)+icdfweibull(1-prior_trunc,p6(i),p7(i));
+            bounds.lb(i) = p3(i)+wblinv(prior_trunc,p6(i),p7(i));
+            bounds.ub(i) = p3(i)+wblinv(1-prior_trunc,p6(i),p7(i));
         end
       otherwise
         error(sprintf('prior_bounds: unknown distribution shape (index %d, type %d)', i, pshape(i)));
