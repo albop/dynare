@@ -61,7 +61,7 @@ stderr e_ys,inv_gamma_pdf,1.2533,0.6551;
 stderr e_pies,inv_gamma_pdf,1.88,0.9827;
 end;
 
-  
+options_.TeX=1;  
 disp(' ');
 disp('NOW I DO STABILITY MAPPING and prepare sample for Reduced form Mapping');
 disp(' ');
@@ -217,3 +217,7 @@ dynare_sensitivity(nodisplay, stab=0, // no need for stability analysis since th
 datafile='data_ca1.m',first_obs=8,nobs=79,prefilter=1,
 rmse=1,ppost=1);
 
+collect_LaTeX_Files(M_);
+if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.TeX'])
+    error('TeX-File did not compile.')
+end
