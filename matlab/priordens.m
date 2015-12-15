@@ -15,7 +15,7 @@ function [logged_prior_density, dlprior, d2lprior, info] = priordens(x, pshape, 
 %    info                  [double]  error code for index of Inf-prior parameter
 %
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -37,50 +37,49 @@ persistent tt1 tt2 tt3 tt4 tt5 tt6 tt8
 
 info=0;
 
-if nargin > 6  && initialization == 1
+if nargin > 6  && initialization
     % Beta indices.
-    tt1 = 1;
+    tt1 = true;
     id1 = find(pshape==1);
     if isempty(id1)
-        tt1 = 0;
+        tt1 = false;
     end
     % Gamma indices.
-    tt2 = 1;
+    tt2 = true;
     id2 = find(pshape==2);
     if isempty(id2)
-        tt2 = 0;
+        tt2 = false;
     end
     % Gaussian indices.
-    tt3 = 1;
+    tt3 = true;
     id3 = find(pshape==3);
     if isempty(id3)
-        tt3 = 0;
+        tt3 = false;
     end
     % Inverse-Gamma-1 indices.
-    tt4 = 1;
+    tt4 = true;
     id4 = find(pshape==4);
     if isempty(id4)
-        tt4 = 0;
+        tt4 = false;
     end
     % Uniform indices.
-    tt5 = 1;
+    tt5 = true;
     id5 = find(pshape==5);
     if isempty(id5)
-        tt5 = 0;
+        tt5 = false;
     end
     % Inverse-Gamma-2 indices.
-    tt6 = 1;
+    tt6 = true;
     id6 = find(pshape==6);
     if isempty(id6)
-        tt6 = 0;
+        tt6 = false;
     end
     % Weibull indices.
-    tt8 = 1;
+    tt8 = true;
     id8 = find(pshape==8);
     if isempty(id8)
-        tt8 = 0;
+        tt8 = false;
     end
-    pflag = 1;
 end
 
 logged_prior_density = 0.0;
