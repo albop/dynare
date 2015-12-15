@@ -1,7 +1,6 @@
-function oo = sim1(M, options, oo)
-% function sim1
-% Performs deterministic simulations with lead or lag on one period.
-% Uses sparse matrices.
+function [endogenousvariables, info] = sim1(endogenousvariables, exogenousvariables, steadystate, M, options)
+
+% Performs deterministic simulations with lead or lag on one period. Uses sparse matrices.
 %
 % INPUTS
 %   ...
@@ -51,10 +50,8 @@ nd = nyp+ny0+nyf;
 stop = 0 ;
 
 periods = options.periods;
-steady_state = oo.steady_state;
 params = M.params;
-endo_simul = oo.endo_simul;
-exo_simul = oo.exo_simul;
+
 i_cols_1 = nonzeros(lead_lag_incidence(2:3,:)');
 i_cols_A1 = find(lead_lag_incidence(2:3,:)');
 i_cols_A1 = i_cols_A1(:);
@@ -65,7 +62,7 @@ i_cols_A0 = i_cols_A0(:);
 i_cols_j = (1:nd)';
 i_upd = maximum_lag*ny+(1:periods*ny);
 
-Y = endo_simul(:);
+Y = endogenousvariables(:);
 
 if verbose
     skipline()
@@ -76,8 +73,8 @@ end
 
 model_dynamic = str2func([M.fname,'_dynamic']);
 z = Y(find(lead_lag_incidence'));
-[d1,jacobian] = model_dynamic(z,oo.exo_simul, params, ...
-                              steady_state,maximum_lag+1);
+
+[d1,jacobian] = model_dynamic(z, exogenousvariables, params, steadystate,maximum_lag+1);
 
 res = zeros(periods*ny,1);
 
@@ -89,17 +86,16 @@ end
 
 h1 = clock ;
 iA = zeros(periods*M.NNZDerivatives(1),3);
+
 for iter = 1:options.simul.maxit
     h2 = clock ;
-
     i_rows = (1:ny)';
     i_cols_A = find(lead_lag_incidence');
     i_cols_A = i_cols_A(:);
     i_cols = i_cols_A+(maximum_lag-1)*ny;
     m = 0;
     for it = (maximum_lag+1):(maximum_lag+periods)
-        [d1,jacobian] = model_dynamic(Y(i_cols), exo_simul, params, ...
-                                      steady_state,it);
+        [d1,jacobian] = model_dynamic(Y(i_cols), exogenousvariables, params, steadystate,it);
         if it == maximum_lag+periods && it == maximum_lag+1
             [r,c,v] = find(jacobian(:,i_cols_0));
             iA((1:length(v))+m,:) = [i_rows(r(:)),i_cols_A0(c(:)),v(:)];
@@ -114,9 +110,7 @@ for iter = 1:options.simul.maxit
             iA((1:length(v))+m,:) = [i_rows(r(:)),i_cols_A(c(:)),v(:)];
         end
         m = m + length(v);
-
         res(i_rows) = d1;
-
         if endogenous_terminal_period && iter>1
             dr = max(abs(d1));
             if dr<azero
@@ -125,17 +119,13 @@ for iter = 1:options.simul.maxit
                 break
             end
         end
-
         i_rows = i_rows + ny;
         i_cols = i_cols + ny;
-
         if it > maximum_lag+1
             i_cols_A = i_cols_A + ny;
         end
     end
-
     err = max(abs(res));
-
     if options.debug
         fprintf('\nLargest absolute residual at iteration %d: %10.3f\n',iter,err);
         if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
@@ -146,20 +136,16 @@ for iter = 1:options.simul.maxit
         end
         skipline()
     end
-
     if verbose
         str = sprintf('Iter: %s,\t err. = %s, \t time = %s',num2str(iter),num2str(err), num2str(etime(clock,h2)));
         disp(str);
     end
-
     if err < options.dynatol.f
         stop = 1 ;
         break
     end
-
     iA = iA(1:m,:);
     A = sparse(iA(:,1),iA(:,2),iA(:,3),periods*ny,periods*ny);
-
     if endogenous_terminal_period && iter>1
         dy = ZERO;
         if options.simul.robust_lin_solve
@@ -174,24 +160,22 @@ for iter = 1:options.simul.maxit
             dy = -lin_solve( A, res, verbose );
         end
     end
-
-    Y(i_upd) =   Y(i_upd) + dy;
-
+    Y(i_upd) = Y(i_upd) + dy;
 end
 
 if endogenous_terminal_period
-    err = evaluate_max_dynamic_residual(model_dynamic, Y, oo.exo_simul, params, steady_state, o_periods, ny, max_lag, lead_lag_incidence);
+    err = evaluate_max_dynamic_residual(model_dynamic, Y, exogenousvariables, params, steadystate, o_periods, ny, max_lag, lead_lag_incidence);
     periods = o_periods;
 end
 
 
 if stop
-    if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
-        oo.deterministic_simulation.status = false;% NaN or Inf occurred
-        oo.deterministic_simulation.error = err;
-        oo.deterministic_simulation.iterations = iter;
-        oo.deterministic_simulation.periods = vperiods(1:iter);
-        oo.endo_simul = reshape(Y,ny,periods+maximum_lag+M.maximum_lead);
+    if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y)) || ~isreal(res) || ~isreal(Y)
+        info.status = false;% NaN or Inf occurred
+        info.error = err;
+        info.iterations = iter;
+        info.periods = vperiods(1:iter);
+        endogenousvariables = reshape(Y,ny,periods+maximum_lag+M.maximum_lead);
         if verbose
             skipline()
             disp(sprintf('Total time of simulation: %s.', num2str(etime(clock,h1))))
@@ -205,11 +189,11 @@ if stop
             disp(sprintf('Total time of simulation: %s', num2str(etime(clock,h1))))
             printline(56)
         end
-        oo.deterministic_simulation.status = true;% Convergency obtained.
-        oo.deterministic_simulation.error = err;
-        oo.deterministic_simulation.iterations = iter;
-        oo.deterministic_simulation.periods = vperiods(1:iter);
-        oo.endo_simul = reshape(Y,ny,periods+maximum_lag+M.maximum_lead);
+        info.status = true;% Convergency obtained.
+        info.error = err;
+        info.iterations = iter;
+        info.periods = vperiods(1:iter);
+        endogenousvariables = reshape(Y,ny,periods+maximum_lag+M.maximum_lead);
     end
 elseif ~stop
     if verbose
@@ -218,10 +202,10 @@ elseif ~stop
         disp('Maximum number of iterations is reached (modify option maxit).')
         printline(62)
     end
-    oo.deterministic_simulation.status = false;% more iterations are needed.
-    oo.deterministic_simulation.error = err;
-    oo.deterministic_simulation.periods = vperiods(1:iter);
-    oo.deterministic_simulation.iterations = options.simul.maxit;
+    info.status = false;% more iterations are needed.
+    info.error = err;
+    info.periods = vperiods(1:iter);
+    info.iterations = options.simul.maxit;
 end
 
 if verbose

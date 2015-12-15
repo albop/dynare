@@ -71,7 +71,8 @@ else
                 if options_.linear_approximation
                     oo_ = sim1_linear(options_, M_, oo_);
                 else
-                    oo_ = sim1(options_, M_, oo_);
+                    [oo_.endo_simul, oo_.deterministic_simulation] = ...
+                        sim1(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, M_, options_);
                 end
             elseif options_.stack_solve_algo == 6
                 oo_ = sim1_lbj(options_, M_, oo_);
