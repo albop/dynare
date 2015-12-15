@@ -45,7 +45,7 @@ else
 end
 fprintf(fid, ['\\caption{Parameter Values}\\\\%%\n']);
 
-fprintf(fid, '\\hline%%\n');
+fprintf(fid, '\\toprule%%\n');
 fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Parameter}} &\n');
 fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Value}} ');
 if Long_names_present==1;
@@ -53,7 +53,7 @@ if Long_names_present==1;
 else
     fprintf(fid, ' \\\\%%\n');
 end
-fprintf(fid, '\\hline\\hline%%\n');
+fprintf(fid, '\\midrule%%\n');
 fprintf(fid, '\\endfirsthead\n');
 
 if Long_names_present==1;
@@ -61,7 +61,7 @@ if Long_names_present==1;
 else
     fprintf(fid, '\\multicolumn{2}{c}{{\\tablename} \\thetable{} -- Continued}\\\\%%\n');
 end
-fprintf(fid, '\\hline%%\n');
+fprintf(fid, '\\midrule%%\n');
 fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Parameter}} &\n');
 fprintf(fid, '\\multicolumn{1}{c}{\\textbf{Value}} ');
 if Long_names_present==1;
@@ -69,7 +69,7 @@ if Long_names_present==1;
 else
     fprintf(fid, '\\\\%%\n');
 end
-fprintf(fid, '\\hline\\hline%%\n');
+fprintf(fid, '\\midrule%%\n');
 fprintf(fid, '\\endhead\n');
 
 tex = M_.param_names_tex;
@@ -90,7 +90,7 @@ else
         M_.params(j,:));
 end
 end
-fprintf(fid, '\\hline%%\n');
+fprintf(fid, '\\bottomrule%%\n');
 fprintf(fid, '\\end{longtable}\n');
 fprintf(fid, '\\end{center}\n');
 

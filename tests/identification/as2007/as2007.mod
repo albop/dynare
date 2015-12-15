@@ -59,7 +59,12 @@ stderr 1;
 var e_z;
 stderr 1;
 end;
-
+options_.TeX=1;
 identification;
 
 identification(advanced=1,max_dim_cova_group=3,prior_mc=250);
+
+collect_LaTeX_Files(M_);
+if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.TeX'])
+    error('TeX-File did not compile.')
+end

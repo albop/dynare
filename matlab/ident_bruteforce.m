@@ -73,14 +73,22 @@ for ll = 1:n,
         fprintf(fidTeX,['%% ' datestr(now,0)]);
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,' \n');
+        
         fprintf(fidTeX,'{\\tiny \n');
-        fprintf(fidTeX,'\\begin{table}\n');
-        fprintf(fidTeX,'\\centering\n');
-        fprintf(fidTeX,'\\begin{tabular}{l|lc} \n');
-        fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+        fprintf(fidTeX,'\\begin{longtable}{llc} \n');
+        fprintf(fidTeX,['\\caption{Collinearity patterns with ',int2str(ll),' parameter(s)}\n ']);
+        fprintf(fidTeX,['\\label{Table:CollinearityPatterns:',int2str(ll),'}\\\\\n']);
+        fprintf(fidTeX,'\\toprule \n');
         fprintf(fidTeX,'  Parameter & Explanatory & cosn \\\\ \n');
         fprintf(fidTeX,'            & parameter(s)   &  \\\\ \n');
-        fprintf(fidTeX,'\\hline \\\\ \n');
+        fprintf(fidTeX,'\\midrule \\endfirsthead \n');
+        fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
+        fprintf(fidTeX,'\\bottomrule \n');
+        fprintf(fidTeX,'  Parameter & Explanatory & cosn \\\\ \n');
+        fprintf(fidTeX,'            & parameter(s)   &  \\\\ \n');
+        fprintf(fidTeX,'\\midrule \\endhead \n');
+        fprintf(fidTeX,'\\bottomrule \\multicolumn{3}{r}{(Continued on next page)}\\endfoot \n');
+        fprintf(fidTeX,'\\bottomrule\\endlastfoot \n');
         for i=1:k,
             plist='';
             for ii=1:ll,
@@ -93,11 +101,8 @@ for ll = 1:n,
                 plist,...
                 cosnJ(i,ll));
         end
-        fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,['\\caption{Collinearity patterns with ',int2str(ll),' parameter(s)}\n ']);
-        fprintf(fidTeX,['\\label{Table:CollinearityPatterns:',int2str(ll),'}\n']);
-        fprintf(fidTeX,'\\end{table}\n');
+        fprintf(fidTeX,'\\bottomrule \n');
+        fprintf(fidTeX,'\\end{longtable}\n');
         fprintf(fidTeX,'} \n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
