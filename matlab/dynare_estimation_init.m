@@ -590,7 +590,7 @@ Sigma_e_non_zero_columns=find(~all(M_.Sigma_e==0,2));
 if ~isequal(Sigma_e_non_zero_rows,Sigma_e_non_zero_columns')
     error('Structual error matrix not symmetric')
 end
-if ~isempty(estim_params_.var_exo)
+if isfield(estim_params_,'var_exo') && ~isempty(estim_params_.var_exo)
     estim_params_.Sigma_e_entries_to_check_for_positive_definiteness=union(Sigma_e_non_zero_rows,estim_params_.var_exo(:,1));
 else
     estim_params_.Sigma_e_entries_to_check_for_positive_definiteness=Sigma_e_non_zero_rows;
