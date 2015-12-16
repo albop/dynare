@@ -75,7 +75,8 @@ else
                         sim1(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, M_, options_);
                 end
             elseif options_.stack_solve_algo == 6
-                oo_ = sim1_lbj(options_, M_, oo_);
+                [oo_.endo_simul, oo_.deterministic_simulation] = ...
+                    sim1_lbj(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, M_, options_);
             elseif options_.stack_solve_algo == 7
                 periods = options_.periods;
                 if ~isfield(options_.lmmcp,'lb')

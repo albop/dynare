@@ -1,7 +1,6 @@
-function oo_ = sim1_lbj(options_, M_, oo_)
-% function sim1_lbj
-% performs deterministic simulations with lead or lag on one period
-% using the historical LBJ algorithm
+function [endogenousvariables, info] = sim1_lbj(endogenousvariables, exogenousvariables, steadystate, M, options)
+
+% Performs deterministic simulations with lead or lag on one period using the historical LBJ algorithm
 %
 % INPUTS
 %   ...
@@ -33,23 +32,25 @@ function oo_ = sim1_lbj(options_, M_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-lead_lag_incidence = M_.lead_lag_incidence;
+lead_lag_incidence = M.lead_lag_incidence;
 
-ny = size(oo_.endo_simul,1) ;
-nyp = nnz(lead_lag_incidence(1,:)) ;
-nyf = nnz(lead_lag_incidence(3,:)) ;
-nrs = ny+nyp+nyf+1 ;
-nrc = nyf+1 ;
-iyf = find(lead_lag_incidence(3,:)>0) ;
-iyp = find(lead_lag_incidence(1,:)>0) ;
-isp = [1:nyp] ;
-is = [nyp+1:ny+nyp] ;
-isf = iyf+nyp ;
-isf1 = [nyp+ny+1:nyf+nyp+ny+1] ;
-stop = 0 ;
+ny = size(endogenousvariables,1);
+nyp = nnz(lead_lag_incidence(1,:));
+nyf = nnz(lead_lag_incidence(3,:));
+nrs = ny+nyp+nyf+1;
+nrc = nyf+1;
+iyf = find(lead_lag_incidence(3,:)>0);
+iyp = find(lead_lag_incidence(1,:)>0);
+isp = [1:nyp];
+is = [nyp+1:ny+nyp];
+isf = iyf+nyp;
+isf1 = [nyp+ny+1:nyf+nyp+ny+1];
+stop = false;
 iz = [1:ny+nyp+nyf];
 
-verbose = options_.verbosity;
+dynamicmodel = sprintf('%s_dynamic', M.fname);
+
+verbose = options.verbosity;
 
 if verbose
     printline(56)
@@ -57,66 +58,59 @@ if verbose
     skipline()
 end
 
-it_init = M_.maximum_lag+1 ;
+it_init = M.maximum_lag+1;
+h1 = clock;
 
-h1 = clock ;
-for iter = 1:options_.simul.maxit
-    h2 = clock ;
-    
-    if options_.terminal_condition == 0
-        c = zeros(ny*options_.periods,nrc) ;
+for iter = 1:options.simul.maxit
+    h2 = clock;
+    if ~options.terminal_condition
+        c = zeros(ny*options.periods, nrc);
     else
-        c = zeros(ny*(options_.periods+1),nrc) ;
+        c = zeros(ny*(options.periods+1), nrc);
     end
-    
-    it_ = it_init ;
-    z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-    [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, oo_.steady_state,it_);
-    jacobian = [jacobian(:,iz) -d1] ;
-    ic = [1:ny] ;
-    icp = iyp ;
-    c (ic,:) = jacobian(:,is)\jacobian(:,isf1) ;
-    for it_ = it_init+(1:options_.periods-1)
-        z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-        [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, ...
-                              M_.params, oo_.steady_state, it_);
-        jacobian = [jacobian(:,iz) -d1] ;
-        jacobian(:,[isf nrs]) = jacobian(:,[isf nrs])-jacobian(:,isp)*c(icp,:) ;
-        ic = ic + ny ;
-        icp = icp + ny ;
-        c (ic,:) = jacobian(:,is)\jacobian(:,isf1) ;
+    it_ = it_init;
+    z = [endogenousvariables(iyp,it_-1) ; endogenousvariables(:,it_) ; endogenousvariables(iyf,it_+1)];
+    [d1, jacobian] = feval(dynamicmodel, z, exogenousvariables, M.params, steadystate, it_);
+    jacobian = [jacobian(:,iz), -d1];
+    ic = [1:ny];
+    icp = iyp;
+    c (ic,:) = jacobian(:,is)\jacobian(:,isf1);
+    for it_ = it_init+(1:options.periods-1)
+        z = [endogenousvariables(iyp,it_-1) ; endogenousvariables(:,it_) ; endogenousvariables(iyf,it_+1)];
+        [d1, jacobian] = feval(dynamicmodel, z, exogenousvariables, M.params, steadystate, it_);
+        jacobian = [jacobian(:,iz), -d1];
+        jacobian(:,[isf nrs]) = jacobian(:,[isf nrs])-jacobian(:,isp)*c(icp,:);
+        ic = ic + ny;
+        icp = icp + ny;
+        c (ic,:) = jacobian(:,is)\jacobian(:,isf1);
     end
-    
-    if options_.terminal_condition == 1
-        s = eye(ny) ;
-        s(:,isf) = s(:,isf)+c(ic,1:nyf) ;
-        ic = ic + ny ;
-        c(ic,nrc) = s\c(ic,nrc) ;
-        c = bksup1(c,ny,nrc,iyf,options_.periods) ;
-        c = reshape(c,ny,options_.periods+1) ;
-        oo_.endo_simul(:,it_init+(0:options_.periods)) = oo_.endo_simul(:,it_init+(0:options_.periods))+options_.slowc*c ;
+    if options.terminal_condition == 1
+        s = eye(ny);
+        s(:,isf) = s(:,isf)+c(ic,1:nyf);
+        ic = ic + ny;
+        c(ic,nrc) = s\c(ic,nrc);
+        c = bksup1(c, ny, nrc, iyf, options.periods);
+        c = reshape(c, ny, options.periods+1);
+        endogenousvariables(:,it_init+(0:options.periods)) = endogenousvariables(:,it_init+(0:options.periods))+options.slowc*c;
     else
-        c = bksup1(c,ny,nrc,iyf,options_.periods) ;
-        c = reshape(c,ny,options_.periods) ;
-        oo_.endo_simul(:,it_init+(0:options_.periods-1)) = oo_.endo_simul(:,it_init+(0:options_.periods-1))+options_.slowc*c ;
+        c = bksup1(c, ny, nrc, iyf, options.periods);
+        c = reshape(c, ny, options.periods);
+        endogenousvariables(:,it_init+(0:options.periods-1)) = endogenousvariables(:,it_init+(0:options.periods-1))+options.slowc*c;
     end
-    
-    err = max(max(abs(c./options_.scalv')));
-
+    err = max(max(abs(c./options.scalv')));
     if verbose
-        str = sprintf('Iter: %s,\t err. = %s, \t time = %s',num2str(iter),num2str(err), num2str(etime(clock,h2)));
+        str = sprintf('Iter: %s,\t err. = %s, \t time = %s', num2str(iter), num2str(err), num2str(etime(clock, h2)));
         disp(str);
     end
-    
-    if err < options_.dynatol.f
-        stop = 1 ;
+    if err < options.dynatol.f
+        stop = true;
         if verbose
             skipline()
             disp(sprintf('Total time of simulation: %s', num2str(etime(clock,h1))))
         end
-        oo_.deterministic_simulation.status = 1;% Convergency obtained.
-        oo_.deterministic_simulation.error = err;
-        oo_.deterministic_simulation.iterations = iter;
+        info.status = 1;% Convergency obtained.
+        info.error = err;
+        info.iterations = iter;
         break
     end
 end
@@ -126,10 +120,10 @@ if ~stop
         disp(sprintf('Total time of simulation: %s.', num2str(etime(clock,h1))))
         disp('Maximum number of iterations is reached (modify option maxit).')
     end
-    oo_.deterministic_simulation.status = 0;% more iterations are needed.
-    oo_.deterministic_simulation.error = err;
-    oo_.deterministic_simulation.errors = c/abs(err);    
-    oo_.deterministic_simulation.iterations = options_.simul.maxit;
+    info.status = 0;% more iterations are needed.
+    info.error = err;
+    info.errors = c/abs(err);    
+    info.iterations = options.simul.maxit;
 end
 
 if verbose
