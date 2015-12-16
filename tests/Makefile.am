@@ -239,6 +239,7 @@ MODFILES = \
 	deterministic_simulations/multiple_lead_lags/AR2.mod \
 	deterministic_simulations/multiple_lead_lags/AR2_forward.mod \
 	deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.mod \
+        deterministic_simulations/linear_approximation/lbj/rbc.mod \
 	walsh.mod \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
