@@ -1,4 +1,5 @@
-function oo_ = sim1_purely_backward(options_, M_, oo_)
+function [endogenousvariables, info] = sim1_purely_backward(endogenousvariables, exogenousvariables, steadystate, M, options)
+
 % Performs deterministic simulation of a purely backward model
 
 % Copyright (C) 2012-2015 Dynare Team
@@ -18,38 +19,34 @@ function oo_ = sim1_purely_backward(options_, M_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(M_.lead_lag_incidence,1) > 1
-        ny0 = nnz(M_.lead_lag_incidence(2,:)); % Number of variables at current period
-        nyb = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at previous period
-        iyb = find(M_.lead_lag_incidence(1,:)>0); % Indices of variables at previous period
-    else
-        ny0 = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at current period
-        nyb = 0;
-        iyb = [];
-    end
+if size(M.lead_lag_incidence,1) > 1
+    ny0 = nnz(M.lead_lag_incidence(2,:));    % Number of variables at current period
+    nyb = nnz(M.lead_lag_incidence(1,:));    % Number of variables at previous period
+    iyb = find(M.lead_lag_incidence(1,:)>0); % Indices of variables at previous period
+else
+    ny0 = nnz(M.lead_lag_incidence(1,:));    % Number of variables at current period
+    nyb = 0;
+    iyb = [];
+end
         
 
-    if ny0 ~= M_.endo_nbr
-        error('SIMUL: all endogenous variables must appear at the current period')
-    end
+if ny0 ~= M.endo_nbr
+    error('All endogenous variables must appear at the current period!')
+end
     
-    model_dynamic = str2func([M_.fname,'_dynamic']);
+dynamicmodel = str2func([M.fname,'_dynamic']);
 
-    oo_.deterministic_simulation.status = 1;
+info.status = 1;
 
-    for it = 2:options_.periods+1
-        yb = oo_.endo_simul(:,it-1); % Values at previous period, also used as guess value for current period
-        yb1 = yb(iyb);
-       
-        [tmp, check] = solve1(model_dynamic, [yb1; yb], 1:M_.endo_nbr, nyb+1:nyb+ ...
-                              M_.endo_nbr, 1, options_.gstep, ...
-                              options_.solve_tolf,options_.solve_tolx, ...
-                              options_.simul.maxit,options_.debug,oo_.exo_simul, ...
-                              M_.params, oo_.steady_state, it+M_.maximum_lag-1);
-
-        if check
-            oo_.deterministic_simulation.status = 0;
-        end
-
-        oo_.endo_simul(:,it) = tmp(nyb+1:nyb+M_.endo_nbr);
+for it = 2:options.periods+1
+    yb = endogenousvariables(:,it-1);        % Values at previous period, also used as guess value for current period
+    yb1 = yb(iyb);
+    [tmp, check] = solve1(dynamicmodel, [yb1; yb], 1:M.endo_nbr, nyb+1:nyb+M.endo_nbr, ...
+                          1, options.gstep, options.solve_tolf, options.solve_tolx, ...
+                          options.simul.maxit, options.debug, exogenousvariables, ...
+                          M.params, steadystate, it+M.maximum_lag-1);
+    if check
+        info.status = 0;
     end
+    endogenousvariables(:,it) = tmp(nyb+1:nyb+M.endo_nbr);
+end

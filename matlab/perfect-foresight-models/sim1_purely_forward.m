@@ -1,4 +1,4 @@
-function oo_ = sim1_purely_forward(options_, M_, oo_)
+function [endogenousvariables, info] = sim1_purely_forward(endogenousvariables, exogenousvariables, steadystate, M, options)
 % Performs deterministic simulation of a purely forward model
 
 % Copyright (C) 2012-2015 Dynare Team
@@ -18,30 +18,27 @@ function oo_ = sim1_purely_forward(options_, M_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    ny0 = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at current period
-    iyf = find(M_.lead_lag_incidence(2,:)>0); % Indices of variables at next period
+ny0 = nnz(M.lead_lag_incidence(1,:));    % Number of variables at current period
+iyf = find(M.lead_lag_incidence(2,:)>0); % Indices of variables at next period
 
-    if ny0 ~= M_.endo_nbr
-        error('SIMUL: all endogenous variables must appear at the current period')
-    end
+if ny0 ~= M.endo_nbr
+    error('All endogenous variables must appear at the current period!')
+end
     
-    model_dynamic = str2func([M_.fname,'_dynamic']);
+dynamicmodel = str2func([M.fname,'_dynamic']);
 
-    oo_.deterministic_simulation.status = 1;
+info.status = 1;
 
-    for it = options_.periods:-1:1
-        yf = oo_.endo_simul(:,it+1); % Values at next period, also used as guess value for current period
-        yf1 = yf(iyf);
-       
-        [tmp, info] = solve1(model_dynamic, [yf; yf1], 1:M_.endo_nbr, 1:M_.endo_nbr, ...
-                             1, options_.gstep, options_.solve_tolf, ...
-                             options_.solve_tolx, options_.simul.maxit, ...
-                             options_.debug,oo_.exo_simul, M_.params, oo_.steady_state, ...
-                             it+M_.maximum_lag);
-
-        if info
-            oo_.deterministic_simulation.status = 0;
-        end
-
-        oo_.endo_simul(:,it) = tmp(1:M_.endo_nbr);
+for it = options.periods:-1:1
+    yf = endogenousvariables(:,it+1); % Values at next period, also used as guess value for current period
+    yf1 = yf(iyf);
+    [tmp, check] = solve1(dynamicmodel, [yf; yf1], 1:M.endo_nbr, 1:M.endo_nbr, ...
+                          1, options.gstep, options.solve_tolf, ...
+                          options.solve_tolx, options.simul.maxit, ...
+                          options.debug, exogenousvariables, M.params, steadystate, ...
+                          it+M.maximum_lag);
+    if check
+        info.status = 0;
     end
+    endogenousvariables(:,it) = tmp(1:M.endo_nbr);
+end
