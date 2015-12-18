@@ -515,6 +515,11 @@ M_.xref1.endo = {};
 M_.xref1.exo = {};
 M_.xref1.exo_det = {};
 
+M_.xref2.params = {};
+M_.xref2.endo = {};
+M_.xref2.exo = {};
+M_.xref2.exo_det = {};
+
 % homotopy for steady state
 options_.homotopy_mode = 0;
 options_.homotopy_steps = 1;
