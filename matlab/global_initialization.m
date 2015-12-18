@@ -510,6 +510,11 @@ M_.Correlation_matrix = [];
 M_.Correlation_matrix_ME = [];
 M_.parameter_used_with_lead_lag = false;
 
+M_.xref1.params = {};
+M_.xref1.endo = {};
+M_.xref1.exo = {};
+M_.xref1.exo_det = {};
+
 % homotopy for steady state
 options_.homotopy_mode = 0;
 options_.homotopy_steps = 1;
