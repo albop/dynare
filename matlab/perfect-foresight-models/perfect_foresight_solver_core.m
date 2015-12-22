@@ -18,6 +18,11 @@ function [oo_, maxerror] = perfect_foresight_solver_core(M_, options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if options_.lmmcp.status
+    options_.stack_solve_algo=7;
+    options_.solve_algo = 10;
+end
+
 if options_.linear_approximation && ~(isequal(options_.stack_solve_algo,0) || isequal(options_.stack_solve_algo,7))
     error('perfect_foresight_solver: Option linear_approximation is only available with option stack_solve_algo equal to 0.')
 end

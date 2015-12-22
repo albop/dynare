@@ -758,7 +758,7 @@ options_.convergence.geweke.taper_steps=[4 8 15];
 options_.convergence.geweke.geweke_interval=[0.2 0.5];
 
 % Options for lmmcp solver
-options_.lmmcp = [];
+options_.lmmcp.status = 0;
 
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
