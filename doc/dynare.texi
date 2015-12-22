@@ -1809,6 +1809,24 @@ used outside. A model local variable declaration looks like:
 # @var{VARIABLE_NAME} = @var{MODEL_EXPRESSION};
 @end example
 
+It is possible to tag equations written in the model block. A tag can serve
+different purposes by allowing the user to attach arbitrary informations to each
+equation and to recover them at runtime. For instance, it is possible to name the
+equations, using a syntax like:
+@example
+mode;
+    ...
+    [name = 'Budget constraint']
+    c + k = k^theta*A;
+    ...
+end;
+@end example
+If all the equations of a model are tagged with a name, the @code{resid} command
+will display the names of the equations (which may be more informative than the
+equation numbers). More informations are available on the @uref{http://www.dynare.org/DynareWiki/EquationTags, DynareWiki
+wiki}.
+
+
 @optionshead
 
 @table @code
