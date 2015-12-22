@@ -66,11 +66,9 @@ periods 1;
 values -4;
 end;
 
-options_.solve_algo = 10;
-options_.mcp = 1;
 perfect_foresight_setup(periods=100);    
 
-perfect_foresight_solver(stack_solve_algo=7);
+perfect_foresight_solver(stack_solve_algo=7, solve_algo=10);
 
 rplot Investment;
 

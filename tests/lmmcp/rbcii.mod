@@ -1,4 +1,4 @@
-var Capital, Output, Labour, Consumption,  Investment, Efficiency, efficiency;
+var Capital, Output, Labour, Consumption,  Investment, Efficiency, efficiency, residual, marginal_utility;
 
 varexo EfficiencyInnovation;
 
@@ -25,7 +25,9 @@ model;
   Efficiency = effstar*exp(efficiency);
 
   [mcp = 'Investment > 0']
- -(((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption + beta*((((Consumption(+1)^theta)*((1-Labour(+1))^(1-theta)))^(1-tau))/Consumption(+1))*(alpha*((Output(+1)/Capital)^(1-psi))+1-delta);
+  -(((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption + beta*((((Consumption(+1)^theta)*((1-Labour(+1))^(1-theta)))^(1-tau))/Consumption(+1))*(alpha*((Output(+1)/Capital)^(1-psi))+1-delta);
+
+  residual =   (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - beta*((((Consumption(+1)^theta)*((1-Labour(+1))^(1-theta)))^(1-tau))/Consumption(+1))*(alpha*((Output(+1)/Capital)^(1-psi))+1-delta);
 
   ((1-theta)/theta)*(Consumption/(1-Labour)) - (1-alpha)*(Output/Labour)^(1-psi);
 
@@ -35,6 +37,7 @@ model;
 
   Investment = Capital - (1-delta)*Capital(-1);
 
+  marginal_utility = (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption;
 end;
 
 steady_state_model;
@@ -61,10 +64,10 @@ periods 1;
 values -4;
 end;
 
-options_.solve_algo = 10;
-options_.mcp = 1;
-perfect_foresight_setup(periods=100);    
+perfect_foresight_setup(periods=100);
 
-perfect_foresight_solver(stack_solve_algo=7);
+perfect_foresight_solver(stack_solve_algo=7, solve_algo=10);
 
 rplot Investment;
+
+rplot residual;
