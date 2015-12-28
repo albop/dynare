@@ -1,14 +1,42 @@
-function oo_ = sim1_linear(options_, M_, oo_)
+function [endogenousvariables, info] = sim1_linear(endogenousvariables, exogenousvariables, steadystate_y, steadystate_x, M, options)
 
-% Solves a linear approximation of a perfect foresight model susing sparse matrix.
+% Solves a linear approximation of a perfect foresight model using sparse matrix.
 %
 % INPUTS 
-% - options_ [struct] contains various options.
-% - M_       [struct] contains a description of the model.
-% - oo_      [struct] contains results.
+% - endogenousvariables [double] N*T array, paths for the endogenous variables (initial guess).
+% - exogenousvariables  [double] T*M array, paths for the exogenous variables.
+% - steadystate_y       [double] N*1 array, steady state for the endogenous variables.
+% - steadystate_x       [double] M*1 array, steady state for the exogenous variables.
+% - M                   [struct] contains a description of the model.
+% - options             [struct] contains various options.
 %
 % OUTPUTS 
-% - oo_
+% - endogenousvariables [double] N*T array, paths for the endogenous variables (solution of the perfect foresight model).
+% - info                [struct] contains informations about the results.
+%
+% NOTATIONS 
+% - N is the number of endogenous variables.
+% - M is the number of innovations.
+% - T is the number of periods (including initial and/or terminal conditions).
+%
+% REMARKS 
+% - The structure `M` describing the structure of the model, must contain the
+% following informations:
+%  + lead_lag_incidence, incidence matrix (given by the preprocessor).
+%  + endo_nbr, number of endogenous variables (including aux. variables).
+%  + exo_nbr, number of innovations.
+%  + maximum_lag,
+%  + maximum_endo_lag,
+%  + params, values of model's parameters.
+%  + fname, name of the model.
+%  + NNZDerivatives, number of non zero elements in the jacobian of the dynamic model.
+% - The structure `options`, must contain the following options:
+%  + verbosity, controls the quantity of information displayed.
+%  + periods, the number of periods in the perfect foresight model.
+%  + debug.
+% - The steady state of the exogenous variables is required because we need
+% to center the variables around the deterministic steady state to solve the
+% perfect foresight model.
 
 % Copyright (C) 2015 Dynare Team
 %
@@ -27,29 +55,25 @@ function oo_ = sim1_linear(options_, M_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-verbose = options_.verbosity;
+verbose = options.verbosity;
 
-lead_lag_incidence = M_.lead_lag_incidence;
+lead_lag_incidence = M.lead_lag_incidence;
 
-ny = M_.endo_nbr;
-nx = M_.exo_nbr;
+ny = M.endo_nbr;
+nx = M.exo_nbr;
 
-maximum_lag = M_.maximum_lag;
-max_lag = M_.maximum_endo_lag;
+maximum_lag = M.maximum_lag;
+max_lag = M.maximum_endo_lag;
 
-nyp = nnz(lead_lag_incidence(1,:)) ;
-ny0 = nnz(lead_lag_incidence(2,:)) ;
-nyf = nnz(lead_lag_incidence(3,:)) ;
+nyp = nnz(lead_lag_incidence(1,:));
+ny0 = nnz(lead_lag_incidence(2,:));
+nyf = nnz(lead_lag_incidence(3,:));
 
 nd = nyp+ny0+nyf; % size of y (first argument passed to the dynamic file).
 
-periods = options_.periods;
-y_steady_state = oo_.steady_state;
-x_steady_state = oo_.exo_steady_state;
+periods = options.periods;
 
-params = M_.params;
-endo_simul = oo_.endo_simul;
-exo_simul = oo_.exo_simul;
+params = M.params;
 
 % Indices in A.
 ip   = find(lead_lag_incidence(1,:)');
@@ -71,10 +95,10 @@ jendo = transpose(1:nd);
 i_upd = maximum_lag*ny+(1:periods*ny);
 
 % Center the endogenous and exogenous variables around the deterministic steady state.
-endo_simul = bsxfun(@minus,endo_simul,y_steady_state);
-exo_simul =bsxfun(@minus,exo_simul,transpose(x_steady_state));
+endogenousvariables = bsxfun(@minus,endogenousvariables,steadystate_y);
+exogenousvariables =bsxfun(@minus,exogenousvariables,transpose(steadystate_x));
 
-Y = endo_simul(:);
+Y = endogenousvariables(:);
 
 if verbose
     skipline()
@@ -83,11 +107,11 @@ if verbose
     skipline()
 end
 
-model_dynamic = str2func([M_.fname,'_dynamic']);
-z = y_steady_state([ip; ic; in]);
+dynamicmodel = str2func([M.fname,'_dynamic']);
+z = steadystate_y([ip; ic; in]);
 
 % Evaluate the Jacobian of the dynamic model at the deterministic steady state.
-[d1,jacobian] = model_dynamic(z,transpose(x_steady_state), params, y_steady_state,1);
+[d1,jacobian] = dynamicmodel(z, transpose(steadystate_x), params, steadystate_y, 1);
 
 % Check that the dynamic model was evaluated at the steady state.
 if max(abs(d1))>1e-12
@@ -103,12 +127,12 @@ iv1 = 1:length(v1);
 iv  = 1:length(vv);
 
 % Initialize the vector of residuals.
-res = zeros(periods*ny,1);
+res = zeros(periods*ny, 1);
 
 % Initialize the sparse Jacobian.
-iA = zeros(periods*M_.NNZDerivatives(1),3);
+iA = zeros(periods*M.NNZDerivatives(1), 3);
 
-h2 = clock ;
+h2 = clock;
 i_rows = (1:ny)';
 i_cols_A = ipcn;
 i_cols = ipcn+(maximum_lag-1)*ny;
@@ -125,7 +149,7 @@ for it = (maximum_lag+1):(maximum_lag+periods)
         iA(iv+m,:) = [i_rows(rr),i_cols_A(cc),vv];
     end
     z(jendo) = Y(i_cols);
-    z(jexog) = transpose(exo_simul(it,:));
+    z(jexog) = transpose(exogenousvariables(it,:));
     res(i_rows) = jacobian*z;
     m = m + nv;
     i_rows = i_rows + ny;
@@ -138,8 +162,8 @@ end
 % Evaluation of the maximum residual at the initial guess (steady state for the endogenous variables).
 err = max(abs(res));
 
-if options_.debug
-    fprintf('\nLargest absolute residual at iteration %d: %10.3f\n',1,err);
+if options.debug
+    fprintf('\nLargest absolute residual at iteration %d: %10.3f\n', 1, err);
     if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
         fprintf('\nWARNING: NaN or Inf detected in the residuals or endogenous variables.\n');
     end
@@ -150,7 +174,7 @@ if options_.debug
 end
 
 iA = iA(1:m,:);
-A = sparse(iA(:,1),iA(:,2),iA(:,3),periods*ny,periods*ny);
+A = sparse(iA(:,1),iA(:,2),iA(:,3), periods*ny, periods*ny);
 
 % Try to update the vector of endogenous variables.
 try
@@ -158,9 +182,9 @@ try
 catch
     % Normally, because the model is linear, the solution of the perfect foresight model should
     % be obtained in one Newton step. This is not the case if the model is singular.
-    oo_.deterministic_simulation.status = false;
-    oo_.deterministic_simulation.error = NaN;
-    oo_.deterministic_simulation.iterations = 1;
+    info.status = false;
+    info.error = NaN;
+    info.iterations = 1;
     if verbose
         skipline()
         disp('Singularity problem! The jacobian matrix of the stacked model cannot be inverted.')
@@ -172,7 +196,7 @@ i_cols = ipcn+(maximum_lag-1)*ny;
 i_rows = (1:ny)';
 for it = (maximum_lag+1):(maximum_lag+periods)
     z(jendo) = Y(i_cols);
-    z(jexog) = transpose(exo_simul(it,:));
+    z(jexog) = transpose(exogenousvariables(it,:));
     m = m + nv;
     res(i_rows) = jacobian*z;
     i_rows = i_rows + ny;
@@ -182,15 +206,15 @@ end
 ERR = max(abs(res));
 
 if verbose
-    fprintf('Iter: %s,\t Initial err. = %s,\t err. = %s,\t time = %s\n',num2str(1),num2str(err),num2str(ERR), num2str(etime(clock,h2)));
+    fprintf('Iter: %s,\t Initial err. = %s,\t err. = %s,\t time = %s\n', num2str(1), num2str(err), num2str(ERR), num2str(etime(clock,h2)));
     printline(80);
 end
 
 if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y)) || ~isreal(res) || ~isreal(Y)
-    oo_.deterministic_simulation.status = false;% NaN or Inf occurred
-    oo_.deterministic_simulation.error = ERR;
-    oo_.deterministic_simulation.iterations = 1;
-    oo_.endo_simul = reshape(Y,ny,periods+maximum_lag+M_.maximum_lead);
+    info.status = false;% NaN or Inf occurred
+    info.error = ERR;
+    info.iterations = 1;
+    endogenousvariables = reshape(Y, ny, periods+maximum_lag+M.maximum_lead);
     if verbose
         skipline()
         if ~isreal(res) || ~isreal(Y)
@@ -201,10 +225,10 @@ if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y)) || ~isre
         disp('There is most likely something wrong with your model. Try model_diagnostics or another simulation method.')
     end
 else
-    oo_.deterministic_simulation.status = true;% Convergency obtained.
-    oo_.deterministic_simulation.error = ERR;
-    oo_.deterministic_simulation.iterations = 1;
-    oo_.endo_simul = bsxfun(@plus,reshape(Y,ny,periods+maximum_lag+M_.maximum_lead),y_steady_state);
+    info.status = true;% Convergency obtained.
+    info.error = ERR;
+    info.iterations = 1;
+    endogenousvariables = bsxfun(@plus, reshape(Y, ny, periods+maximum_lag+M.maximum_lead), steadystate_y);
 end
 
 if verbose

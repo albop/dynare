@@ -71,7 +71,8 @@ else
         else % General case
             if options_.stack_solve_algo == 0
                 if options_.linear_approximation
-                    oo_ = sim1_linear(options_, M_, oo_);
+                    [oo_.endo_simul, oo_.deterministic_simulation] = ...
+                        sim1_linear(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, oo_.exo_steady_state, M_, options_);
                 else
                     [oo_.endo_simul, oo_.deterministic_simulation] = ...
                         sim1(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, M_, options_);
