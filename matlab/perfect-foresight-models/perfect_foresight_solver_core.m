@@ -74,7 +74,8 @@ else
             [oo_.endo_simul, oo_.deterministic_simulation] = ...
                 sim1_purely_forward(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, M_, options_);
         else % General case
-            if options_.stack_solve_algo == 0
+            switch options_.stack_solve_algo
+              case 0
                 if options_.linear_approximation
                     [oo_.endo_simul, oo_.deterministic_simulation] = ...
                         sim1_linear(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, oo_.exo_steady_state, M_, options_);
@@ -82,17 +83,25 @@ else
                     [oo_.endo_simul, oo_.deterministic_simulation] = ...
                         sim1(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, M_, options_);
                 end
-            elseif options_.stack_solve_algo == 6
+              case 6
+                if option_.linear_approximation
+                    error('Invalid value of stack_solve_algo option!')
+                end
                 [oo_.endo_simul, oo_.deterministic_simulation] = ...
                     sim1_lbj(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, M_, options_);
-            elseif options_.stack_solve_algo == 7
+              case 7
                 if options_.linear_approximation
+                    if isequal(options_.solve_algo, 10)
+                        warning('It would be more efficient to set option solve_algo equal to 0!')
+                    end
                     [oo_.endo_simul, oo_.deterministic_simulation] = ...
                         solve_stacked_linear_problem(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, oo_.exo_steady_state, M_, options_);
                 else
                     [oo_.endo_simul, oo_.deterministic_simulation] = ...
                         solve_stacked_problem(oo_.endo_simul, oo_.exo_simul, oo_.steady_state, M_, options_);
                 end
+              otherwise
+                error('Invalid value of stack_solve_algo option!')
             end
         end
     end
