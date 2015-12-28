@@ -68,7 +68,7 @@ end;
 
 perfect_foresight_setup(periods=100);    
 
-perfect_foresight_solver(stack_solve_algo=7, solve_algo=10);
+perfect_foresight_solver(lmmcp);
 
 rplot Investment;
 
