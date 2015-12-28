@@ -121,7 +121,6 @@ endo_simul_0 = oo_.endo_simul;
 simul(linear_approximation,periods=300);
 endo_simul_1 = oo_.endo_simul;
 
-max(abs(endo_simul_0(:)-endo_simul_1(:)))
 if max(abs(endo_simul_0(:)-endo_simul_1(:)))>.01*options_.dynatol.f
     error('Something is wrong!')
 end
