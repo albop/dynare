@@ -243,6 +243,8 @@ MODFILES = \
         deterministic_simulations/linear_approximation/lbj/rbc.mod \
         lmmcp/rbc.mod \
         lmmcp/rbcii.mod \
+	lmmcp/sw_lmmcp.mod \
+	lmmcp/sw_newton.mod \
         walsh.mod \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
@@ -431,6 +433,9 @@ observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter_first_obs.m.
 observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter_first_obs.o.trs: observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter.o.trs
 observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter.m.trs: observation_trends_and_prefiltering/ML/Trend_no_prefilter.m.trs
 observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter.o.trs: observation_trends_and_prefiltering/ML/Trend_no_prefilter.o.trs
+
+lmmcp/sw_newton.m.trs: lmmcp/sw_lmmcp.m.trs
+lmmcp/sw_newton.o.trs: lmmcp/sw_lmmcp.o.trs
 
 # Matlab TRS Files
 M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
