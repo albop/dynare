@@ -537,7 +537,7 @@ end
 
 I1a         = I(Indexset==1 & alpha_l==1);
 if any(I1a)
-  H2(I1a,:) = bsxfun(@times,x(I1a)-lb(I1a),DFx(I1a,:))+...
+    H2(I1a,:) = spdiags(x(I1a)-lb(I1a), 0, length(I1a), length(I1a))*DFx(I1a,:) +...
               sparse(1:length(I1a),I1a,Fx(I1a),length(I1a),n,length(I1a));
 end
 
@@ -619,7 +619,7 @@ if any(I3a)
               sparse(1:length(I3a),I3a,Fx(I3a),length(I3a),n,length(I3a));
 end
 
-H1 = bsxfun(@times,Db,DFx);
-H1 = spdiags(diag(H1)+Da,0,H1);
+H1 = spdiags(Db,0,length(Db),length(Db))*DFx;
+H1 = H1 + spdiags(Da, 0, length(Da), length(Da));
 
 H  = [lambda1*H1; lambda2*H2];
