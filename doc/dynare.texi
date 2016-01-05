@@ -3574,6 +3574,17 @@ slower than @code{stack_solve_algo=0}, but may be less memory consuming
 on big models (not available with @code{bytecode} and/or @code{block}
 options).
 
+@item 7
+Allows the user to solve the perfect foresight model with the solvers available
+through option @code{solve_algo} (@xref{solve_algo} for a list of possible
+values, note that values 5, 6, 7 and 8, which require @code{bytecode} and/or
+@code{block} options, are not allowed). For instance, the following commands:
+@example
+perfect_foresight_setup(periods=400);
+perfect_foresight_solver(stack_solve_algo=7, solve_algo=9)
+@end example
+trigger the computation of the solution with a trust region algorithm.
+
 @end table
 
 @item no_homotopy
@@ -3592,6 +3603,32 @@ Specify the minimal number of periods where the model has to be
 solved, before using a constant set of operations for the remaining
 periods. Only used when @code{stack_solve_algo = 5}. Default: @code{1}.
 
+@item lmmcp
+Solves the perfect foresight model with a mixed complementarity problem solver,
+which allows to consider inequality constraints on the endogenous variables
+(such as a ZLB on the nominal interest rate or a model with irreversible
+investment). This option is equivalent to @code{stack_solve_algo=7} @strong{and}
+@code{solve_algo=10}. The inequality constraints on the endogenous variables
+have to be specified with an equation tag @pxref{Model declaration}. For instance,
+a ZLB on the nominal interest rate would be specified as follows in the model block:
+@example
+model;
+   ...
+   [mcp = 'r > -1.94478']
+   r = rho*r(-1) + (1-rho)*(gpi*Infl+gy*YGap) + e;
+   ...
+end;
+@end example
+where 1.94478 is the steady state level of the nominal interest rate and
+@code{r} is the nominal interest rate in deviation to the steady state. In the
+current implementation, the content of the equation tag is not parsed by the
+preprocessor. The inequalities must be as simple as possible: an endogenous
+variable, followed by a relational operator, followed by a number (not a
+variable, parameter or expression). Note also that the constraint on an
+endogenous variable must be associated to an equation and that the mixed
+complementarity solver may fail or perform poorly if the constraint is
+associated with an equation not directly related to the restricted variable.
+
 @item endogenous_terminal_period
 The  number of  periods is  not constant  across Newton  iterations when
 solving the perfect foresight model. The size of the nonlinear system of
@@ -3604,7 +3641,8 @@ the reported value  of the maximum absolute error).  Only available with
 option @code{stack_solve_algo==0}.
 
 @item linear_approximation
-Solves the linearized version of the perfect foresight model. The model must be stationary. Only available with option @code{stack_solve_algo==0}.
+Solves the linearized version of the perfect foresight model. The model must be
+stationary. Only available with option @code{stack_solve_algo==0}.
 
 @end table
 
@@ -3631,7 +3669,6 @@ Accepts all the options of @code{perfect_foresight_setup} and
 @code{perfect_foresight_solver}.
 
 @end deffn
-
 @anchor{oo_.endo_simul}
 @defvr {MATLAB/Octave variable} oo_.endo_simul
 This variable stores the result of a deterministic simulation (computed by
