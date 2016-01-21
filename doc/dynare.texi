@@ -2672,9 +2672,9 @@ Specifies the correlation of two variables.
 @end table
 
 In an estimation context, it is also possible to specify variances and
-covariances on endogenous variables: in that case, these values are
-interpreted as the calibration of the measurement errors on these
-variables. This requires the @code{var_obs}-command to be specified before the @code{shocks}-block.
+covariances on endogenous variables: in that case, these values are interpreted
+as the calibration of the measurement errors on these variables. This requires
+the @code{varobs} command to be specified before the @code{shocks} block.
 
 Here is an example:
 
