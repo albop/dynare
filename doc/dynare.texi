@@ -13108,7 +13108,7 @@ Problem Solving from Nature PPSN VIII, Proceedings}, Berlin: Springer, 282--291
 
 @item
 Herbst, Edward (2015):
-``Using the “Chandrasekhar Recursions” for Likelihood Evaluation of DSGE
+``Using the ``Chandrasekhar Recursions'' for Likelihood Evaluation of DSGE
 Models,'' @i{Computational Economics}, 45(4), 693--705.
 
 @item
