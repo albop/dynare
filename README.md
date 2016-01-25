@@ -114,10 +114,15 @@ Alternatively, you can disable the compilation of MEX files for MATLAB with the 
 
 You may need to specify additional options to the configure script, see the platform specific instructions below.
 
-Note that if you don't want to compile with debugging information, you can specify the `CFLAGS` and `CXXFLAGS` variables to configure, such as:
+Note that if you don't want to compile the C/C++ programs with debugging information, you can specify the `CFLAGS` and `CXXFLAGS` variables to the configure script, such as:
 ```
 ./configure CFLAGS="-O3" CXXFLAGS="-O3"
 ```
+To remove debugging information for Matlab mex functions, the analagous call would be:
+```
+./configure MATLAB_MEX_CFLAGS="-O3" MATLAB_MEX_CXXFLAGS="-O3"
+```
+
 If you want to give a try to the parallelized versions of some mex files (`A_times_B_kronecker_C` and `sparse_hessian_times_B_kronecker_C` used to get the reduced form of the second order approximation of the model) you can add the `--enable-openmp` flag, for instance:
 ```
 ./configure --with-matlab=/usr/local/matlab78 MATLAB_VERSION=7.8 --enable-openmp
