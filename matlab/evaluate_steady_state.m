@@ -48,7 +48,9 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 
     if length(M.aux_vars) > 0
         h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);
-        ys_init = h_set_auxiliary_variables(ys_init,exo_ss,M.params);
+        if ~steadystate_flag
+            ys_init = h_set_auxiliary_variables(ys_init,exo_ss,M.params);
+        end
     end
 
     if options.ramsey_policy
