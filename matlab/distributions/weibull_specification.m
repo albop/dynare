@@ -1,4 +1,4 @@
-function [scale, shape] = weibull_specification(mu, sigma2, lb, name)   % --*-- Unitary tests --*--
+function [shape, scale] = weibull_specification(mu, sigma2, lb, name)   % --*-- Unitary tests --*--
 
 % Returns the hyperparameters of the Weibull distribution given the expectation and variance.
 %
@@ -95,7 +95,7 @@ scale = mu/gamma(1+1/shape);
 %$               disp(sprintf('... mu=%s and s2=%s', num2str(mu(j,i)),num2str(s2(j,i))))
 %$           end
 %$           if ~isnan(mu(j,i)) && ~isnan(s2(j,i)) && ~isinf(mu(j,i)) && ~isinf(s2(j,i))
-%$               [scale, shape] = weibull_specification(mu(j,i), s2(j,i));
+%$               [shape, scale] = weibull_specification(mu(j,i), s2(j,i));
 %$               if isnan(scale)
 %$                  t = false;
 %$               else
@@ -105,7 +105,7 @@ scale = mu/gamma(1+1/shape);
 %$                      t = false;
 %$                  end
 %$               end
-%$               if ~t
+%$               if ~t && debug
 %$                  failed1 = [failed1; mu(j,i) s2(j,i)];
 %$                  failed1_ = [failed1_; shapes(i) scales(j)];
 %$                  error('UnitTest','Cannot compute scale and shape hyperparameters for mu=%s and s2=%s', num2str(mu(j,i)), num2str(s2(j,i)))

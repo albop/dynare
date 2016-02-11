@@ -4,8 +4,8 @@ function [ldens,Dldens,D2ldens] = lpdfgweibull(x,a,b,c)  % --*-- Unitary tests -
 %
 % INPUTS 
 % - x       [double]  m*n matrix of points where the (logged) density will be evaluated,
-% - a       [double]  m*n matrix of First Weibull distribution parameters, 
-% - b       [double]  m*n matrix of Second Weibull distribution parameters, 
+% - a       [double]  m*n matrix of First Weibull distribution parameters (shape parameter, k),
+% - b       [double]  m*n matrix of Second Weibull distribution parameters (scale parameter, λ),
 % - c       [double]  m*n matrix of Third Weibull distribution parameters (location parameter, default is 0).
 %
 % OUTPUTS 

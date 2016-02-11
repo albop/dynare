@@ -58,6 +58,8 @@ switch shape
         m = m*(hyperparameters(4)-hyperparameters(3)) + hyperparameters(3) ;
     end
   case 2
+    % a = hyperparameters(1) [shape parameter]
+    % b = hyperparameters(2) [scale parameter]
     if hyperparameters(1)<1
         m = 0;
     else
@@ -85,12 +87,12 @@ switch shape
         m = m + hyperparameters(3) ;
     end
   case 8
-    % s = hyperparameters(1) [scale parameter]
-    % k = hyperparameters(2) [shape parameter]
-    if hyperparameters(2)<=1
+    % k = hyperparameters(1) [shape parameter]
+    % s = hyperparameters(2) [scale parameter]
+    if hyperparameters(1)<=1
         m = 0;
     else
-        m = hyperparameters(1)*((hyperparameters(2)-1)/hyperparameters(2))^(1/hyperparameters(2));
+        m = hyperparameters(2)*((hyperparameters(1)-1)/hyperparameters(1))^(1/hyperparameters(1));
     end
     if length(hyperparameters)>2
         % Add location parameter
@@ -212,7 +214,7 @@ end
 %$ % Weibull density
 %$ try
 %$     m1 = compute_prior_mode([1 1],8);
-%$     m2 = compute_prior_mode([1 2 1],8); % Wolfram Alpha: WeibullDistribution[2,1]
+%$     m2 = compute_prior_mode([2 1 1],8); % Wolfram Alpha: WeibullDistribution[2,1]
 %$     t(1) = true;
 %$ catch
 %$     t(1) = false;

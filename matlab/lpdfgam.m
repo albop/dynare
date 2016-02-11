@@ -3,8 +3,8 @@ function  [ldens,Dldens,D2ldens] = lpdfgam(x,a,b);
 %
 % INPUTS     
 %    x     [double]  m*n matrix of locations,
-%    a     [double]  m*n matrix or scalar, First GAMMA distribution parameters, 
-%    b     [double]  m*n matrix or scalar, Second GAMMA distribution parameters, 
+%    a     [double]  m*n matrix or scalar, First GAMMA distribution parameters (shape),
+%    b     [double]  m*n matrix or scalar, Second GAMMA distribution parameters (scale),
 %
 % OUTPUTS
 %    ldens [double]  m*n matrix of logged GAMMA densities evaluated at x.

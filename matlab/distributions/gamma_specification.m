@@ -9,8 +9,8 @@ function [a, b] = gamma_specification(mu, sigma2, lb, name)   % --*-- Unitary te
 % - name   [string]   Name of the parameter (or random variable).
 %
 % OUTPUTS 
-% - a      [double]   First hyperparameter of the Gamma density.
-% - b      [double]   Second hyperparameter of the Gamma density.
+% - a      [double]   First hyperparameter of the Gamma density (shape).
+% - b      [double]   Second hyperparameter of the Gamma density (scale).
 
 % Copyright (C) 2015 Dynare Team
 %
