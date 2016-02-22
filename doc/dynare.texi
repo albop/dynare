@@ -12546,7 +12546,7 @@ with the same base name as specified by @ref{tableName} with the ending
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphBar, graphBarColor, graphBarFillColor, graphBarWidth, graphFanShadeColor, graphFanShadeOpacity, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
+@defmethod Report addSeries data, graphBar, graphBarColor, graphBarFillColor, graphBarWidth, graphFanShadeColor, graphFanShadeOpacity, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNaNSymb, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}. NB: Options specific
 to graphs begin with `@code{graph}' while options specific to tables begin with
 `@code{table}'.
@@ -12662,6 +12662,9 @@ For values less than @math{-1*@code{tableMarkerLimit}}, mark the cell
 with the color denoted by @ref{tableNegColor}. For those greater than
 @code{tableMarkerLimit}, mark the cell with the color denoted by
 @ref{tablePosColor}. Default: @code{1e-4}
+
+@item tableNaNSymb, @code{STRING}
+Replace @code{NaN} values with the text in this option. Default: @code{NaN}
 
 @anchor{tableNegColor}
 @item tableNegColor, @code{LATEX_COLOR}
