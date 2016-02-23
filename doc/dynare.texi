@@ -879,6 +879,10 @@ Instructs Dynare not to write parameter assignments to parameter names
 in the @file{.m} file produced by the preprocessor. This is
 potentially useful when running @code{dynare} on a large @file{.mod}
 file that runs into workspace size limitations imposed by MATLAB.
+
+@item compute_xrefs
+Tells Dynare to compute the equation cross references, writing them to the
+output @file{.m} file.
 @end table
 
 @outputhead
