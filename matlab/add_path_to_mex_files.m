@@ -1,6 +1,6 @@
 function mexpath = add_path_to_mex_files(dynareroot, modifypath)
     
-% Copyright (C) 2015 Dynare Team
+% Copyright (C) 2015-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
