@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2015 Dynare Team
+% Copyright (C) 2003-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -510,12 +510,12 @@ M_.Correlation_matrix = [];
 M_.Correlation_matrix_ME = [];
 M_.parameter_used_with_lead_lag = false;
 
-M_.xref1.params = {};
+M_.xref1.param = {};
 M_.xref1.endo = {};
 M_.xref1.exo = {};
 M_.xref1.exo_det = {};
 
-M_.xref2.params = {};
+M_.xref2.param = {};
 M_.xref2.endo = {};
 M_.xref2.exo = {};
 M_.xref2.exo_det = {};
