@@ -1,5 +1,5 @@
-function [x,f,fvec,check]=lnsrch1(xold,fold,g,p,stpmax,func,j1,j2,varargin)
-% function [x,f,fvec,check]=lnsrch1(xold,fold,g,p,stpmax,func,j1,j2,varargin)
+function [x,f,fvec,check]=lnsrch1(xold, fold, g, p, stpmax, func, j1, j2, tolx, varargin)
+% function [x,f,fvec,check]=lnsrch1(xold,fold,g,p,stpmax,func,j1,j2,tolx,varargin)
 % Computes the optimal step by minimizing the residual sum of squares
 %
 % INPUTS
@@ -11,6 +11,7 @@ function [x,f,fvec,check]=lnsrch1(xold,fold,g,p,stpmax,func,j1,j2,varargin)
 %   func:     name of the function
 %   j1:       equations index to be solved
 %   j2:       unknowns index
+%   tolx:     tolerance parameter
 %   varargin: list of arguments following j2
 %
 % OUTPUTS
@@ -23,7 +24,7 @@ function [x,f,fvec,check]=lnsrch1(xold,fold,g,p,stpmax,func,j1,j2,varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2010 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,15 +41,13 @@ function [x,f,fvec,check]=lnsrch1(xold,fold,g,p,stpmax,func,j1,j2,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global options_
-
 alf = 1e-4 ;
-tolx = options_.solve_tolx;
 alam = 1;
 
 x = xold;
 nn = length(j2);
-summ = sqrt(sum(p.*p)) ;
+summ = sqrt(p'*p);
+
 if ~isfinite(summ)
     eq_number_string=[];
     for ii=1:length(j1)-1
@@ -73,7 +72,7 @@ if ~isfinite(summ)
 end
 
 if summ > stpmax
-    p=p.*stpmax/summ ;
+    p = p*stpmax/summ ;
 end
 
 slope = g'*p ;
@@ -90,19 +89,16 @@ while 1
         check = 1 ;
         return
     end
-    
     x(j2) = xold(j2) + (alam*p) ;
     fvec = feval(func,x,varargin{:}) ;
     fvec = fvec(j1);
-    f = 0.5*fvec'*fvec ;
-
+    f = 0.5*(fvec'*fvec) ;
     if any(isnan(fvec))
         alam = alam/2 ;
         alam2 = alam ;
         f2 = f ;
         fold2 = fold ;
     else
-
         if f <= fold+alf*alam*slope
             check = 0;
             break ;
@@ -124,15 +120,11 @@ while 1
                     else
                         tmplam = (-b+sqrt(disc))/(3*a) ;
                     end
-
                 end
-
                 if tmplam > 0.5*alam
                     tmplam = 0.5*alam;
                 end
-
             end
-
             alam2 = alam ;
             f2 = f ;
             fold2 = fold ;

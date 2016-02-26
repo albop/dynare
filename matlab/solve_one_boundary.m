@@ -55,7 +55,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, steady_state, ...
 %   none.
 %  
 
-% Copyright (C) 1996-2015 Dynare Team
+% Copyright (C) 1996-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -247,10 +247,10 @@ for it_=start:incr:finish
                 if is_dynamic
                     [ya,f,r,check]=lnsrch1(y(it_,:)',f,g,p,stpmax, ...
                                            'lnsrch1_wrapper_one_boundary',nn, ...
-                                           y_index_eq, y_index_eq, fname, y, x, params, steady_state, it_);
+                                           y_index_eq, options.solve_tolx, y_index_eq, fname, y, x, params, steady_state, it_);
                     dx = ya' - y(it_, :);
                 else
-                    [ya,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, ...
+                    [ya,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq, options.solve_tolx, x, ...
                                            params, steady_state,0);
                     dx = ya - y(y_index_eq);
                 end
