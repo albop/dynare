@@ -101,14 +101,18 @@ y = NaN(length(idx)+ny1,1);
 DynareOutput.endo_simul = NaN(DynareModel.endo_nbr,sample_size+1);
 DynareOutput.endo_simul(:,1) = DynareOutput.steady_state;
 
+Y = DynareOutput.endo_simul;
+
 % Simulations (call a Newton-like algorithm for each period).
 for it = 2:sample_size+1
-    y(jdx) = DynareOutput.endo_simul(:,it-1); % A good guess for the initial conditions is the previous values for the endogenous variables.
+    y(jdx) = Y(:,it-1);                       % A good guess for the initial conditions is the previous values for the endogenous variables.
     y(hdx) = y(jdx(iy1));                     % Set lagged variables.
-    y(jdx) = solve1(model_dynamic, y, idx, jdx, 1, DynareOptions.gstep, ...
+    z = solve1(model_dynamic, y, idx, jdx, 1, DynareOptions.gstep, ...
                     DynareOptions.solve_tolf,DynareOptions.solve_tolx, ...
                     DynareOptions.simul.maxit,DynareOptions.debug, ...
                     DynareOutput.exo_simul, DynareModel.params, ...
                     DynareOutput.steady_state, it);
-    DynareOutput.endo_simul(:,it) = y(jdx);
+    Y(:,it) = z(jdx);
 end
+
+DynareOuput.endo_simul = Y;
