@@ -1,4 +1,4 @@
-function DynareOutput = simul_backward_nonlinear_model(sample_size,DynareOptions,DynareModel,DynareOutput)
+function DynareOutput = simul_backward_nonlinear_model(sample_size, DynareOptions, DynareModel, DynareOutput)
 
 %@info:
 %! @deftypefn {Function File} {@var{DynareOutput} =} simul_backward_nonlinear_model (@var{sample_size},@var{DynareOptions}, @var{DynareModel}, @var{DynareOutput})
@@ -115,4 +115,4 @@ for it = 2:sample_size+1
     Y(:,it) = z(jdx);
 end
 
-DynareOuput.endo_simul = Y;
+DynareOutput.endo_simul = Y;
