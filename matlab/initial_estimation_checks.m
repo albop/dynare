@@ -66,6 +66,10 @@ if DynareOptions.TaRB.use_TaRB && (DynareOptions.TaRB.new_block_probability<0 ||
     error(['initial_estimation_checks:: The tarb_new_block_probability must be between 0 and 1!'])
 end
 
+if (any(BayesInfo.pshape  >0 ) && DynareOptions.mh_replic) && DynareOptions.mh_nblck<1
+    error(['initial_estimation_checks:: Bayesian estimation cannot be conducted with mh_nblocks=0.'])    
+end
+
 old_steady_params=Model.params; %save initial parameters for check if steady state changes param values
 
 % % check if steady state solves static model (except if diffuse_filter == 1)
