@@ -60,7 +60,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
                                                            options);
             %test whether it solves model conditional on the instruments
             resids = evaluate_static_model(ys,exo_ss,params,M,options);
-            n_multipliers=M.endo_nbr-M.orig_endo_nbr;
+            n_multipliers=M.ramsey_eq_nbr;
             nan_indices=find(isnan(resids(n_multipliers+1:end)));
 
             if ~isempty(nan_indices)
