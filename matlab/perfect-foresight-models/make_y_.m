@@ -1,18 +1,22 @@
-function make_y_()
-% function make_y_
+function oo_=make_y_(M_,options_,oo_)
+% function oo_=make_y_(M_,options_,oo_)
 % forms oo_.endo_simul as guess values for deterministic simulations
 %  
 % INPUTS
-%   ...
+%   M_:           Dynare model structure
+%   options_:     Dynare options structure
+%   oo_:          Dynare results structure
+%    
 % OUTPUTS
-%   ...
+%   oo_:          Dynare results structure
+% 
 % ALGORITHM
 %   ...
 % SPECIAL REQUIREMENTS
 %   none
 %  
 
-% Copyright (C) 1996-2014 Dynare Team
+% Copyright (C) 1996-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,7 +33,7 @@ function make_y_()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_ ys0_ 
+global ys0_ 
 
 if options_.steadystate_flag
     [oo_.steady_state,M_.params,check] = ...

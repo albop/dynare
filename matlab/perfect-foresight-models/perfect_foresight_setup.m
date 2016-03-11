@@ -12,7 +12,7 @@ function perfect_foresight_setup()
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 1996-2014 Dynare Team
+% Copyright (C) 1996-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -53,8 +53,8 @@ end
 
 if ~options_.initval_file
     if isempty(options_.datafile)
-        make_ex_;
-        make_y_;
+        oo_=make_ex_(M_,options_,oo_);
+        oo_=make_y_(M_,options_,oo_);
     else
         read_data_;
     end
