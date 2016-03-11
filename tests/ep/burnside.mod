@@ -50,15 +50,15 @@ options_.ep.stochastic.nodes = 2;
 options_.console_mode = 0;
 
 set_dynare_seed('default');
-ts = extended_path([],5000);
+ts = extended_path([], 5000, options_, M_, oo_);
 
 options_.ep.stochastic.order = 2;
 options_.ep.IntegrationAlgorithm='Tensor-Gaussian-Quadrature';
 set_dynare_seed('default');
-ts1_4 = extended_path([],5000);
+ts1_4 = extended_path([], 5000, options_, M_, oo_);
 
 set_dynare_seed('default');
-ytrue=exact_solution(M_,oo_,800);
+ytrue=exact_solution(M_,oo_, 800);
 
 disp('True mean and standard deviation')
 disp(mean(ytrue(101:end)))
