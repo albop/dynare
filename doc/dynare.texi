@@ -7097,8 +7097,10 @@ This command accepts the following options:
 
 @table @code
 
+@anchor{planner_discount}
 @item planner_discount = @var{EXPRESSION}
-Declares the discount factor of the central planner. Default: @code{1.0}
+Declares or reassigns the discount factor of the central planner
+@code{optimal_policy_discount_factor}. Default: @code{1.0}
 
 @item instruments = (@var{VARIABLE_NAME},@dots{})
 Declares instrument variables for the computation of the steady state
@@ -7191,7 +7193,7 @@ This command accepts all options of @code{stoch_simul}, plus:
 @table @code
 
 @item planner_discount = @var{EXPRESSION}
-Declares the discount factor of the central planner. Default: @code{1.0}
+@xref{planner_discount}
 
 @item instruments = (@var{VARIABLE_NAME},@dots{})
 Declares instrument variables for the computation of the steady state
