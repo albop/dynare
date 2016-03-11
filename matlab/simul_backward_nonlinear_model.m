@@ -34,7 +34,7 @@ function DynareOutput = simul_backward_nonlinear_model(sample_size, DynareOption
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

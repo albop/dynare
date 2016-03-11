@@ -1,6 +1,6 @@
 function map_calibration(OutputDirectoryName, Model, DynareOptions, DynareResults, EstimatedParameters, BayesInfo)
 
-% Copyright (C) 2014 Dynare Team
+% Copyright (C) 2014-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
