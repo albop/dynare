@@ -1,4 +1,4 @@
-function [x,check] = trust_region(fcn,x0,j1,j2,jacobian_flag,gstep,tolf,tolx,maxiter,debug,varargin)
+function [x,check,info] = trust_region(fcn,x0,j1,j2,jacobian_flag,gstep,tolf,tolx,maxiter,debug,varargin)
 % Solves systems of non linear equations of several variables, using a
 % trust-region method.
 %
@@ -20,7 +20,7 @@ function [x,check] = trust_region(fcn,x0,j1,j2,jacobian_flag,gstep,tolf,tolx,max
 % OUTPUTS
 %    x:               results
 %    check=1:         the model can not be solved
-%
+%    info:            detailed exitcode
 % SPECIAL REQUIREMENTS
 %    none
 
