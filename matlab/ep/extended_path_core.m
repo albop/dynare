@@ -75,7 +75,7 @@ if flag
                 solve_stochastic_perfect_foresight_model(endo_simul,exo_simul,pfm,ep.stochastic.quadrature.nodes,ep.stochastic.order);
           case 1
             [flag,endo_simul] = ...
-                solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,options_,pfm,ep.stochastic.order);
+                solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,options,pfm,ep.stochastic.order);
         end
         tmp.endo_simul = endo_simul;
         info_convergence = ~flag;
