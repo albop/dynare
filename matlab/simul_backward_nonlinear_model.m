@@ -1,4 +1,4 @@
-function DynareOutput = simul_backward_nonlinear_model(sample_size, DynareOptions, DynareModel, DynareOutput)
+function DynareOutput = simul_backward_nonlinear_model(initial_conditions, sample_size, DynareOptions, DynareModel, DynareOutput)
 
 %@info:
 %! @deftypefn {Function File} {@var{DynareOutput} =} simul_backward_nonlinear_model (@var{sample_size},@var{DynareOptions}, @var{DynareModel}, @var{DynareOutput})
@@ -97,8 +97,11 @@ y = NaN(length(idx)+ny1,1);
 
 % initialization of the returned simulations.
 DynareOutput.endo_simul = NaN(DynareModel.endo_nbr,sample_size+1);
-DynareOutput.endo_simul(:,1) = DynareOutput.steady_state;
-
+if isempty(initial_conditions)
+    DynareOutput.endo_simul(:,1) = DynareOutput.steady_state;
+else
+    DynareOutput.endo_simul(:,1) = initial_conditions;
+end
 Y = DynareOutput.endo_simul;
 
 % Simulations (call a Newton-like algorithm for each period).
