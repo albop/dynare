@@ -1,4 +1,4 @@
-function [ts,results] = extended_path(initial_conditions,sample_size, DynareOptions, DynareModel, DynareResults)
+function [ts,results] = extended_path(initial_conditions,sample_size, exogenousvariables, DynareOptions, DynareModel, DynareResults)
 % Stochastic simulation of a non linear DSGE model using the Extended Path method (Fair and Taylor 1983). A time
 % series of size T  is obtained by solving T perfect foresight models.
 %
@@ -62,7 +62,6 @@ if isempty(initial_conditions)
     end
 end
 
-
 % Set the number of periods for the perfect foresight model
 periods = ep.periods;
 pfm.periods = periods;
@@ -97,12 +96,14 @@ DynareOptions.minimal_solving_period = 100;%DynareOptions.ep.periods;
 time_series = zeros(DynareModel.endo_nbr,sample_size);
 
 % Set the covariance matrix of the structural innovations.
-variances = diag(DynareModel.Sigma_e);
-positive_var_indx = find(variances>0);
-effective_number_of_shocks = length(positive_var_indx);
-stdd = sqrt(variances(positive_var_indx));
-covariance_matrix = DynareModel.Sigma_e(positive_var_indx,positive_var_indx);
-covariance_matrix_upper_cholesky = chol(covariance_matrix);
+if isempty(exogenousvariables)
+    variances = diag(DynareModel.Sigma_e);
+    positive_var_indx = find(variances>0);
+    effective_number_of_shocks = length(positive_var_indx);
+    stdd = sqrt(variances(positive_var_indx));
+    covariance_matrix = DynareModel.Sigma_e(positive_var_indx,positive_var_indx);
+    covariance_matrix_upper_cholesky = chol(covariance_matrix);
+end
 
 % (re)Set exo_nbr
 %exo_nbr = effective_number_of_shocks;
@@ -118,27 +119,35 @@ bytecode_flag = ep.use_bytecode;
 replic_nbr = ep.replic_nbr;
 
 % Simulate shocks.
-switch ep.innovation_distribution
-  case 'gaussian'
-    shocks = transpose(transpose(covariance_matrix_upper_cholesky)* ...
-                       randn(effective_number_of_shocks,sample_size* ...
-                             replic_nbr));
-    shocks(:,positive_var_indx) = shocks;
-  case 'calibrated'
-    replic_nbr = 1;
-    shocks = zeros(sample_size,DynareModel.exo_nbr);
-    for i = 1:length(DynareModel.unanticipated_det_shocks)
-        k = DynareModel.unanticipated_det_shocks(i).periods;
-        ivar = DynareModel.unanticipated_det_shocks(i).exo_id;
-        v = DynareModel.unanticipated_det_shocks(i).value;
-        if ~DynareModel.unanticipated_det_shocks(i).multiplicative
-            shocks(k,ivar) = v;
-        else
-            socks(k,ivar) = shocks(k,ivar) * v;
+if isempty(exogenousvariables)
+    switch ep.innovation_distribution
+      case 'gaussian'
+        shocks = transpose(transpose(covariance_matrix_upper_cholesky)* ...
+                           randn(effective_number_of_shocks,sample_size* ...
+                                 replic_nbr));
+        shocks(:,positive_var_indx) = shocks;
+      case 'calibrated'
+        replic_nbr = 1;
+        shocks = zeros(sample_size,DynareModel.exo_nbr);
+        for i = 1:length(DynareModel.unanticipated_det_shocks)
+            k = DynareModel.unanticipated_det_shocks(i).periods;
+            ivar = DynareModel.unanticipated_det_shocks(i).exo_id;
+            v = DynareModel.unanticipated_det_shocks(i).value;
+            if ~DynareModel.unanticipated_det_shocks(i).multiplicative
+                shocks(k,ivar) = v;
+            else
+                socks(k,ivar) = shocks(k,ivar) * v;
+            end
         end
+      otherwise
+        error(['extended_path:: ' ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
     end
-  otherwise
-    error(['extended_path:: ' ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
+else
+    shocks = exogenousvariables;
+    testnonzero = abs(shocks)>0;
+    testnonzero = sum(testnonzero);
+    positive_var_indx = find(testnonzero);
+    effective_number_of_shocks = length(positive_var_indx);
 end
 
 % Set waitbar (graphic or text  mode)

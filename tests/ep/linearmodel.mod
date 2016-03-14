@@ -33,13 +33,13 @@ options_.ep.order = 0;
 options_.ep.nnodes = 0;
 options_.console_mode = 0;
 
-ts = extended_path([], 10, options_, M_, oo_);
+ts = extended_path([], 10, [], options_, M_, oo_);
 
 options_.ep.stochastic.status = 1;
 options_.ep.IntegrationAlgorithm='Tensor-Gaussian-Quadrature';
 options_.ep.order = 1;
 options_.ep.nnodes = 3;
-sts = extended_path([], 10, options_, M_, oo_);
+sts = extended_path([], 10, [], options_, M_, oo_);
 
 if max(max(abs(ts.data-sts.data))) > 1e-12
    error('extended path algorithm fails in ./tests/ep/linearmodel.mod')
