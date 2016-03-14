@@ -174,7 +174,6 @@ if ep.stochastic.order > 0
     pfm.nodes = nodes;
     pfm.weights = weights; 
     pfm.nnodes = nnodes;
-
     % compute number of blocks
     [block_nbr,pfm.world_nbr] = get_block_world_nbr(ep.stochastic.algo,nnodes,ep.stochastic.order,ep.periods);
 else
@@ -202,9 +201,10 @@ for k = 1:replic_nbr
     results{k} = zeros(endo_nbr,sample_size+1);
     results{k}(:,1) = initial_conditions;
 end
-%make_ex_;
+
 exo_simul_ = zeros(maximum_lag+sample_size+maximum_lead,exo_nbr);
 exo_simul_(1:size(DynareResults.exo_simul,1),1:size(DynareResults.exo_simul,2)) = DynareResults.exo_simul;
+
 % Main loop.
 while (t <= sample_size)
     if ~mod(t,10)
@@ -216,9 +216,7 @@ while (t <= sample_size)
     if replic_nbr > 1 && ep.parallel_1
         parfor k = 1:replic_nbr
             exo_simul = repmat(DynareResults.exo_steady_state',periods+2,1);
-            %            exo_simul(1:sample_size+3-t,:) = exo_simul_(t:end,:);
-            exo_simul(2,:) = exo_simul_(DynareModel.maximum_lag+t,:) + ...
-                shocks((t-2)*replic_nbr+k,:);
+            exo_simul(2,:) = exo_simul_(DynareModel.maximum_lag+t,:) + shocks((t-2)*replic_nbr+k,:);
             initial_conditions = results{k}(:,t-1);
             [results{k}(:,t), info_convergence] = extended_path_core(ep.periods,endo_nbr,exo_nbr,positive_var_indx, ...
                                                               exo_simul,ep.init,initial_conditions,...
@@ -229,12 +227,8 @@ while (t <= sample_size)
         end
     else
         for k = 1:replic_nbr
-            exo_simul = repmat(DynareResults.exo_steady_state',periods+maximum_lag+ ...
-                            maximum_lead,1);
-            %            exo_simul(1:sample_size+maximum_lag+maximum_lead-t+1,:) = ...
-            %                exo_simul_(t:end,:);
-            exo_simul(maximum_lag+1,:) = ...
-                exo_simul_(maximum_lag+t,:) + shocks((t-2)*replic_nbr+k,:);
+            exo_simul = repmat(DynareResults.exo_steady_state',periods+maximum_lag+ maximum_lead,1);
+            exo_simul(maximum_lag+1,:) = exo_simul_(maximum_lag+t,:) + shocks((t-2)*replic_nbr+k,:);
             initial_conditions = results{k}(:,t-1);
             [results{k}(:,t), info_convergence] = extended_path_core(ep.periods,endo_nbr,exo_nbr,positive_var_indx, ...
                                                               exo_simul,ep.init,initial_conditions,...
