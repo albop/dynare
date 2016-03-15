@@ -29,6 +29,10 @@ function bvar_density(maxnlags)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+global oo_
+
+oo_.bvar.log_marginal_data_density=NaN(maxnlags,1);
+
 for nlags = 1:maxnlags
     [ny, nx, posterior, prior] = bvar_toolbox(nlags);
     
@@ -38,6 +42,8 @@ for nlags = 1:maxnlags
     lik_nobs = posterior.df - prior.df;
     
     log_dnsty = posterior_int - prior_int - 0.5*ny*lik_nobs*log(2*pi);
+    
+    oo_.bvar.log_marginal_data_density(nlags)=log_dnsty;
     
     skipline()
     fprintf('The marginal log density of the BVAR(%g) model is equal to %10.4f\n', ...
