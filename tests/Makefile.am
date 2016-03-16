@@ -7,6 +7,9 @@ MODFILES = \
 	estimation/fs2000_model_comparison.mod \
 	estimation/fs2000_fast.mod \
 	estimation/MH_recover/fs2000_recover.mod \
+	estimation/MH_recover/fs2000_recover_2.mod \
+	estimation/MH_recover/fs2000_recover_3.mod \
+	estimation/MH_recover/fs2000_recover_tarb.mod \
 	estimation/t_proposal/fs2000_student.mod \
 	estimation/TaRB/fs2000_tarb.mod \
 	moments/example1_var_decomp.mod \
@@ -464,6 +467,7 @@ EXTRA_DIST = \
 	optimal_policy/Ramsey/oo_ramsey_policy_initval.mat \
 	optimizers/optimizer_function_wrapper.m \
 	optimizers/fs2000.common.inc \
+	estimation/MH_recover/fs2000.common.inc \
 	prior_posterior_function/posterior_function_demo.m
 
 
