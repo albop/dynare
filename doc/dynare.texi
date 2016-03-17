@@ -7160,11 +7160,10 @@ end;
 This command computes the first order approximation of the policy that
 maximizes the policy maker's objective function subject to the
 constraints provided by the equilibrium path of the private economy and under 
-commitment to this optimal policy. Following @cite{Woodford (1999)}, the Ramsey 
-policy is computed using a timeless perspective. That is, the government forgoes 
-its first-period advantage and does not exploit the preset privates sector expectations 
-(which are the source of the well-known time inconsistency that requires the 
-assumption of commitment). Rather, it acts as if the initial multipliers had 
+commitment to this optimal policy. The Ramsey policy is computed is computed 
+by approximating the equilibrium system around the perturbation point where the 
+Lagrange multipliers are at their steady state, i.e. where the Ramsey planner acts 
+as if the initial multipliers had 
 been set to 0 in the distant past, giving them time to converge to their steady 
 state value. Consequently, the optimal decision rules are computed around this steady state 
 of the endogenous variables and the Lagrange multipliers.
@@ -7219,8 +7218,7 @@ In addition, it stores the value of planner objective function under
 Ramsey policy in @code{oo_.planner_objective_value}, given the initial values 
 of the endogenous state variables. If not specified with @code{histval}, they are 
 taken to be at their steady state values. The result is a 1 by 2 
-vector, where the first entry stores the value of the planner objective under 
-the timeless perspective to Ramsey policy, i.e. where the initial Lagrange
+vector, where the first entry stores the value of the planner objective when the initial Lagrange
 multipliers associated with the planner's problem are set to their steady state
 values (@pxref{ramsey_policy}).
 In contrast, the second entry stores the value of the planner objective with 
@@ -13249,11 +13247,6 @@ Economies}, Eds. Ramon Marimon and Andrew Scott, Oxford University Press, 30--61
 Villemot, Sébastien (2011): ``Solving rational expectations models at
 first order: what Dynare does,'' @i{Dynare Working Papers}, 2,
 CEPREMAP
-
-@item
-Woodford, Michael (2011): ``Commentary: How Should Monetary Policy Be 
-Conducted in an Era of Price Stability?'' @i{Proceedings - Economic Policy Symposium - Jackson Hole}, 
-277-316
 
 
 @end itemize
