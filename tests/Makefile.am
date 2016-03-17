@@ -203,6 +203,7 @@ MODFILES = \
 	deterministic_simulations/rbc_det5.mod \
 	deterministic_simulations/rbc_det6.mod \
 	deterministic_simulations/homotopy.mod \
+	deterministic_simulations/homotopy_histval.mod \
 	deterministic_simulations/rbc_det_exo_lag_2a.mod \
 	deterministic_simulations/rbc_det_exo_lag_2b.mod \
 	deterministic_simulations/rbc_det_exo_lag_2c.mod \
@@ -215,6 +216,9 @@ MODFILES = \
 	deterministic_simulations/multiple_lead_lags/sim_lead_lag.mod \
 	deterministic_simulations/lola_solve_one_boundary.mod \
 	deterministic_simulations/linear_approximation/sw.mod \
+	deterministic_simulations/multiple_lead_lags/AR2.mod \
+	deterministic_simulations/multiple_lead_lags/AR2_forward.mod \
+	deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.mod \
 	walsh.mod \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
@@ -363,6 +367,9 @@ deterministic_simulations/multiple_lead_lags/sim_lead_lag_aux_vars.o.trs: determ
 
 deterministic_simulations/multiple_lead_lags/sim_lead_lag.m.trs: deterministic_simulations/multiple_lead_lags/sim_base.m.trs deterministic_simulations/multiple_lead_lags/sim_lead_lag_aux_vars.m.trs
 deterministic_simulations/multiple_lead_lags/sim_lead_lag.o.trs: deterministic_simulations/multiple_lead_lags/sim_base.o.trs deterministic_simulations/multiple_lead_lags/sim_lead_lag_aux_vars.o.trs
+
+deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.m.trs: ramst.m.trs 
+deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.o.trs: ramst.o.trs
 
 # Matlab TRS Files
 M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
