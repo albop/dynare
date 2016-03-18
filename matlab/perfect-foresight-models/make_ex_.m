@@ -1,18 +1,20 @@
-function make_ex_()
+function oo_=make_ex_(M_,options_,oo_)
 % forms oo_.exo_simul and oo_.exo_det_simul
 %
 % INPUTS
-%   none
+%   M_:           Dynare model structure
+%   options_:     Dynare options structure
+%   oo_:          Dynare results structure
 %    
 % OUTPUTS
-%   none
+%   oo_:          Dynare results structure
 %
 % ALGORITHM
 %   
 % SPECIAL REQUIREMENTS
 %  
 
-% Copyright (C) 1996-2014 Dynare Team
+% Copyright (C) 1996-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,7 +31,7 @@ function make_ex_()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_ ex0_
+global ex0_
 
 if isempty(oo_.exo_steady_state)
     oo_.exo_steady_state = zeros(M_.exo_nbr,1);

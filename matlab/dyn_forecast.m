@@ -5,6 +5,9 @@ function [forecast,info] = dyn_forecast(var_list,M,options,oo,task)
 %
 % INPUTS
 %   var_list:    list of variables (character matrix)
+%   M:           Dynare model structure
+%   options:     Dynare options structure
+%   oo:          Dynare results structure
 %   task:        indicates how to initialize the forecast
 %                either 'simul' or 'smoother'
 % OUTPUTS
@@ -16,7 +19,7 @@ function [forecast,info] = dyn_forecast(var_list,M,options,oo,task)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2015 Dynare Team
+% Copyright (C) 2003-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,7 +38,7 @@ function [forecast,info] = dyn_forecast(var_list,M,options,oo,task)
 
 info = 0;
 
-make_ex_;
+oo=make_ex_(M,options,oo);
 
 maximum_lag = M.maximum_lag;
 
