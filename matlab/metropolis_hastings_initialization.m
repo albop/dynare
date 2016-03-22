@@ -113,6 +113,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
     fprintf(fidlog,' \n');
     % Find initial values for the nblck chains...
     if nblck > 1% Case 1: multiple chains
+        set_dynare_seed('default');
         fprintf(fidlog,['  Initial values of the parameters:\n']);
         disp('Estimation::mcmc: Searching for initial values...')
         ix2 = zeros(nblck,npar);
