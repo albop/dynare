@@ -109,6 +109,7 @@ proposal_covariance_Cholesky_decomposition = d*diag(bayestopt_.jscale);
 block_iter=0;
 
 for curr_block = fblck:nblck,
+    LastSeeds=[];
     block_iter=block_iter+1;
     try
         % This will not work if the master uses a random number generator not
@@ -171,7 +172,8 @@ for curr_block = fblck:nblck,
             dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(curr_block) '/' int2str(options_.mh_nblck) ') ' sprintf('Current acceptance ratio %4.3f', accepted_draws_this_chain/draw_iter)]);
         end
         if (draw_index_current_file == InitSizeArray(curr_block)) || (draw_iter == nruns(curr_block)) % Now I save the simulations, either because the current file is full or the chain is done
-            save([BaseName '_mh' int2str(NewFile(curr_block)) '_blck' int2str(curr_block) '.mat'],'x2','logpo2');
+            [LastSeeds.(['file' int2str(NewFile(curr_block))]).Unifor, LastSeeds.(['file' int2str(NewFile(curr_block))]).Normal] = get_dynare_random_generator_state();
+            save([BaseName '_mh' int2str(NewFile(curr_block)) '_blck' int2str(curr_block) '.mat'],'x2','logpo2','LastSeeds');
             fidlog = fopen([MetropolisFolder '/metropolis.log'],'a');
             fprintf(fidlog,['\n']);
             fprintf(fidlog,['%% Mh' int2str(NewFile(curr_block)) 'Blck' int2str(curr_block) ' (' datestr(now,0) ')\n']);

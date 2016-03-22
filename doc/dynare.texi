@@ -4986,8 +4986,12 @@ Metropolis-Hastings chain. Default: 2*@code{mh_scale}
 
 @item mh_recover
 @anchor{mh_recover} Attempts to recover a Metropolis-Hastings
-simulation that crashed prematurely. Shouldn't be used together with
-@code{load_mh_file}
+simulation that crashed prematurely, starting with the last available saved 
+@code{mh}-file. Shouldn't be used together with
+@code{load_mh_file} or a different @code{mh_replic} than in the crashed run. 
+To assure a neat continuation of the chain with the same proposal density, you should 
+provide the @code{mode_file} used in the previous 
+run or the same user-defined @code{mcmc_jumping_covariance} when using this option.
 
 @item mh_mode = @var{INTEGER}
 @dots{}
