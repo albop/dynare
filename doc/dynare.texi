@@ -5624,8 +5624,7 @@ using a standard Kalman filter.
 @xref{irf}. Only used if @ref{bayesian_irf} is passed.
 
 @item irf_shocks = ( @var{VARIABLE_NAME} [[,] @var{VARIABLE_NAME} @dots{}] )
-@xref{irf_shocks}. Only used if @ref{bayesian_irf} is passed. Cannot be used
-with @ref{dsge_var}.
+@xref{irf_shocks}. Only used if @ref{bayesian_irf} is passed.
 
 @item irf_plot_threshold = @var{DOUBLE}
 @xref{irf_plot_threshold}. Only used if @ref{bayesian_irf} is passed.
