@@ -1,7 +1,7 @@
 function [forecast,info] = dyn_forecast(var_list,M,options,oo,task,dataset_info)
 % function dyn_forecast(var_list,M,options,oo,task,dataset_info)
 %   computes mean forecast for a given value of the parameters
-%   computes also confidence band for the forecast    
+%   compues also confidence band for the forecast    
 %
 % INPUTS
 %   var_list:    list of variables (character matrix)
@@ -38,7 +38,7 @@ function [forecast,info] = dyn_forecast(var_list,M,options,oo,task,dataset_info)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<3 && options_.prefilter
+if nargin<3 && options.prefilter
     error('The prefiltering option is not allowed without providing a dataset')
 elseif nargin==3 
     mean_varobs=dataset_info.descriptive.mean';
@@ -87,7 +87,7 @@ switch task
         % 2. Subtract mean/steady state and add steady state; takes care of prefiltering        
         if isfield(oo.Smoother,'Constant') && isfield(oo.Smoother.Constant,v_name)
             y0(i,:)=y0(i,:)-oo.Smoother.Constant.(v_name)(end-maximum_lag+1:end); %subtract mean or steady state
-            if options_.loglinear
+            if options.loglinear
                 y0(i,:)=y0(i,:)+log(oo.dr.ys(strmatch(v_name,deblank(M.endo_names),'exact')));
             else
                 y0(i,:)=y0(i,:)+oo.dr.ys(strmatch(v_name,deblank(M.endo_names),'exact'));
@@ -119,7 +119,7 @@ switch task
             end
         end
     else
-        trend_coeffs=zeros(length(options_.varobs),1);
+        trend_coeffs=zeros(length(options.varobs),1);
     end
   otherwise
     error('Wrong flag value')
