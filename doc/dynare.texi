@@ -3977,6 +3977,12 @@ Default value: @code{1e-6}.
 Saves the contemporaneous correlation between the endogenous variables in @code{oo_.contemporaneous_correlation}.
 Requires the @code{nocorr}-option not to be set.
 
+@item spectral_density 
+@anchor{spectral_density} 
+Triggers the computation and display of the theoretical spectral density of the (filtered) model variables. 
+Results are stored in @code{oo_.SpectralDensity}, defined below.
+Default: do not request spectral density estimates
+
 @end table
 
 @outputhead
@@ -4112,6 +4118,13 @@ After a run of @code{stoch_simul} with the
 and simulated contemporaneous correlations otherwise. The variables are arranged in declaration order.
 @end defvr
 
+@anchor{oo_.SpectralDensity}
+@defvr {MATLAB/Octave variable} oo_.SpectralDensity
+After a run of @code{stoch_simul} with option @code{spectral_density} contains the spectral density
+of the model variables. There will be a @code{nvars} by @code{nfrequencies} subfield
+@code{freqs} storing the respective frequency grid points ranging from 0 to 2*pi and a 
+same sized subfield @code{density} storing the corresponding density.
+@end defvr
 
 @defvr {MATLAB/Octave variable} oo_.irfs
 After a run of @code{stoch_simul} with option @code{irf} different
