@@ -38,9 +38,9 @@ function [forecast,info] = dyn_forecast(var_list,M,options,oo,task,dataset_info)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<3 && options.prefilter
+if nargin<6 && options.prefilter
     error('The prefiltering option is not allowed without providing a dataset')
-elseif nargin==3 
+elseif nargin==6
     mean_varobs=dataset_info.descriptive.mean';
 end
     
@@ -152,7 +152,7 @@ if options.loglinear == 1
     end
 else
     if options.prefilter == 1 %subtract steady state and add mean for observables
-        yf(i_var_obs,:)=yf(i_var_obs,:)-repmat(oo.dr.ys(i_var_obs),1,horizon+M.maximum_lag)+ repmat(bayestopt_.mean_varobs,1,horizon+M.maximum_lag);
+        yf(i_var_obs,:)=yf(i_var_obs,:)-repmat(oo.dr.ys(i_var_obs),1,horizon+M.maximum_lag)+ repmat(mean_varobs,1,horizon+M.maximum_lag);
     end    
 end
 
