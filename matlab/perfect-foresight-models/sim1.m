@@ -178,7 +178,7 @@ end
 
 
 if stop
-    if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y)) || ~isreal(res) || ~isreal(Y)
+    if any(isnan(res)) || any(isinf(res)) || any(isnan(Y)) || any(isinf(Y))
         oo.deterministic_simulation.status = false;% NaN or Inf occurred
         oo.deterministic_simulation.error = err;
         oo.deterministic_simulation.iterations = iter;
@@ -187,11 +187,7 @@ if stop
         if verbose
             skipline()
             disp(sprintf('Total time of simulation: %s.', num2str(etime(clock,h1))))
-            if ~isreal(res) || ~isreal(Y)
-                disp('Simulation terminated with imaginary parts in the residuals or endogenous variables.')
-            else
-                disp('Simulation terminated with NaN or Inf in the residuals or endogenous variables.')
-            end
+            disp('Simulation terminated with NaN or Inf in the residuals or endogenous variables.')
             disp('There is most likely something wrong with your model. Try model_diagnostics or another simulation method.')
             printline(105)
         end
