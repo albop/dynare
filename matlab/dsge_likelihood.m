@@ -307,14 +307,8 @@ end
 
 % Define the deterministic linear trend of the measurement equation.
 if BayesInfo.with_trend
-    trend_coeff = zeros(DynareDataset.vobs,1);
-    t = DynareOptions.trend_coeffs;
-    for i=1:length(t)
-        if ~isempty(t{i})
-            trend_coeff(i) = evalin('base',t{i});
-        end
-    end
-    trend = repmat(constant,1,DynareDataset.nobs)+trend_coeff*[1:DynareDataset.nobs];
+    [trend_addition, trend_coeff]=compute_trend_coefficients(Model,DynareOptions,DynareDataset.vobs,DynareDataset.nobs);
+    trend = repmat(constant,1,DynareDataset.nobs)+trend_addition;
 else
    trend_coeff = zeros(DynareDataset.vobs,1);
    trend = repmat(constant,1,DynareDataset.nobs);
@@ -496,7 +490,7 @@ switch DynareOptions.lik_init
     indx_unstable = find(sum(abs(V),2)>1e-5);
     stable = find(sum(abs(V),2)<1e-5);
     nunit = length(eigenv) - nstable;
-    Pstar = options_.Harvey_scale_factor*eye(np);
+    Pstar = DynareOptions.Harvey_scale_factor*eye(nunit);
     if kalman_algo ~= 2
         kalman_algo = 1;
     end
@@ -513,6 +507,8 @@ switch DynareOptions.lik_init
     end    
     Pstar(stable, stable) = Pstar_tmp;
     Pinf  = [];
+    a = zeros(mm,1);
+    Zflag = 0;
   otherwise
     error('dsge_likelihood:: Unknown initialization approach for the Kalman filter!')
 end

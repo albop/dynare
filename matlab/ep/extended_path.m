@@ -42,6 +42,10 @@ options_.simul.maxit = ep.maxit;
 % Prepare a structure needed by the matlab implementation of the perfect foresight model solver
 pfm = setup_stochastic_perfect_foresight_model_solver(M_,options_,oo_);
 
+if M_.exo_det_nbr~=0
+    error('ep: Extended path does not support varexo_det.')
+end
+
 endo_nbr = M_.endo_nbr;
 exo_nbr = M_.exo_nbr;
 maximum_lag = M_.maximum_lag;

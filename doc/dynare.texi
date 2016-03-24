@@ -3977,6 +3977,12 @@ Default value: @code{1e-6}.
 Saves the contemporaneous correlation between the endogenous variables in @code{oo_.contemporaneous_correlation}.
 Requires the @code{nocorr}-option not to be set.
 
+@item spectral_density 
+@anchor{spectral_density} 
+Triggers the computation and display of the theoretical spectral density of the (filtered) model variables. 
+Results are stored in @code{oo_.SpectralDensity}, defined below.
+Default: do not request spectral density estimates
+
 @end table
 
 @outputhead
@@ -4112,6 +4118,13 @@ After a run of @code{stoch_simul} with the
 and simulated contemporaneous correlations otherwise. The variables are arranged in declaration order.
 @end defvr
 
+@anchor{oo_.SpectralDensity}
+@defvr {MATLAB/Octave variable} oo_.SpectralDensity
+After a run of @code{stoch_simul} with option @code{spectral_density} contains the spectral density
+of the model variables. There will be a @code{nvars} by @code{nfrequencies} subfield
+@code{freqs} storing the respective frequency grid points ranging from 0 to 2*pi and a 
+same sized subfield @code{density} storing the corresponding density.
+@end defvr
 
 @defvr {MATLAB/Octave variable} oo_.irfs
 After a run of @code{stoch_simul} with option @code{irf} different
@@ -4857,7 +4870,7 @@ first observation of the rolling window.
 @item prefilter = @var{INTEGER}
 @anchor{prefilter}
 A value of @code{1} means that the estimation procedure will demean
-each data series by its empirical mean. Default: @code{0}, @i{i.e.} no prefiltering
+each data series by its empirical mean. If the (@ref{loglinear}) option without the (@ref{logdata}) option is requested, the data will first be logged and then demeaned. Default: @code{0}, @i{i.e.} no prefiltering
 
 @item presample = @var{INTEGER}
 @anchor{presample}
@@ -4917,13 +4930,19 @@ variables
 
 @item 2
 For nonstationary models: a wide prior is used with an initial matrix
-of variance of the error of forecast diagonal with 10 on the diagonal
+of variance of the error of forecast diagonal with 10 on the diagonal 
+(follows the suggestion of @cite{Harvey and Phillips(1979)})
 
 @item 3
 For nonstationary models: use a diffuse filter (use rather the @code{diffuse_filter} option)
 
 @item 4
 The filter is initialized with the fixed point of the Riccati equation
+
+@item 5
+Use i) option 2 for the non-stationary elements by setting their initial variance in the 
+forecast error matrix to 10 on the diagonal and all covariances to 0 and ii) option 1 for the stationary elements.
+
 @end table
 
 @noindent
@@ -4986,8 +5005,12 @@ Metropolis-Hastings chain. Default: 2*@code{mh_scale}
 
 @item mh_recover
 @anchor{mh_recover} Attempts to recover a Metropolis-Hastings
-simulation that crashed prematurely. Shouldn't be used together with
-@code{load_mh_file}
+simulation that crashed prematurely, starting with the last available saved 
+@code{mh}-file. Shouldn't be used together with
+@code{load_mh_file} or a different @code{mh_replic} than in the crashed run. 
+To assure a neat continuation of the chain with the same proposal density, you should 
+provide the @code{mode_file} used in the previous 
+run or the same user-defined @code{mcmc_jumping_covariance} when using this option.
 
 @item mh_mode = @var{INTEGER}
 @dots{}
@@ -5624,8 +5647,7 @@ using a standard Kalman filter.
 @xref{irf}. Only used if @ref{bayesian_irf} is passed.
 
 @item irf_shocks = ( @var{VARIABLE_NAME} [[,] @var{VARIABLE_NAME} @dots{}] )
-@xref{irf_shocks}. Only used if @ref{bayesian_irf} is passed. Cannot be used
-with @ref{dsge_var}.
+@xref{irf_shocks}. Only used if @ref{bayesian_irf} is passed.
 
 @item irf_plot_threshold = @var{DOUBLE}
 @xref{irf_plot_threshold}. Only used if @ref{bayesian_irf} is passed.
@@ -13129,6 +13151,11 @@ of Statistical Functions with Simulated Annealing,'' @i{Journal of Econometrics}
 Hansen, Nikolaus and Stefan Kern (2004): ``Evaluating the CMA Evolution Strategy 
 on Multimodal Test Functions''. In: @i{Eighth International Conference on Parallel 
 Problem Solving from Nature PPSN VIII, Proceedings}, Berlin: Springer, 282--291 
+
+@item
+Harvey, Andrew C. and Garry D.A. Phillips (1979): ``Maximum likelihood estimation of 
+regression models with autoregressive-moving average disturbances,''
+@i{Biometrika}, 66(1), 49--58
 
 @item
 Herbst, Edward (2015):
