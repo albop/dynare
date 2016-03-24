@@ -19,7 +19,7 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2012 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,11 +36,14 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+    debug = false;
+
     ys = [];
-    params = [];
-    info = 0; 
     params = M.params;
+    info = 0;
+
     fname = M.fname;
+
     if options.steadystate_flag == 1
         % old format
         assignin('base','tmp_00_',params);
@@ -88,13 +91,46 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
 
     % adding values for auxiliary variables
     if length(M.aux_vars) > 0 && ~options.ramsey_policy
+        if debug
+            ys0 = ys;
+        end
         ys = h_set_auxiliary_variables(ys,exo_ss,params);
+        if debug
+            ys1 = ys;
+        end
+        ys = h_set_auxiliary_variables(ys,exo_ss,params);
+        if debug
+            ys2 = ys;
+        end
+        if debug
+            ys = h_set_auxiliary_variables(ys,exo_ss,params);
+            ys3 = ys;
+            idx = find(abs(ys0-ys1)>0);
+            if ~isempty(idx)
+                M.endo_names(idx,:)
+            else
+                disp('1-invariant')
+            end
+            idx = find(abs(ys2-ys1)>0);
+            if ~isempty(idx)
+                M.endo_names(idx,:)
+            else
+                disp('2-invariant')
+            end
+            idx = find(abs(ys3-ys3)>0);
+            if ~isempty(idx)
+                M.endo_names(idx,:)
+            else
+                disp('3-invariant')
+            end
+            pause
+        end
     end
 
     check1 = 0;
     if ~options.steadystate.nocheck
         % Check whether the steady state obtained from the _steadystate file is a steady state.
-        [residuals,check] = evaluate_static_model(ys,exo_ss,params,M,options);
+        [residuals, check] = evaluate_static_model(ys, exo_ss, params, M, options);
         if check
             info(1) = 19;
             info(2) = check; % to be improved

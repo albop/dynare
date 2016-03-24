@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2015 Dynare Team
+ * Copyright (C) 2003-2016 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -2112,26 +2112,34 @@ DynamicModel::writeSparseDynamicMFile(const string &dynamic_basename, const stri
 void
 DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia) const
 {
-  ostringstream model_output;    // Used for storing model
-  ostringstream model_eq_output; // Used for storing model equations
-  ostringstream jacobian_output; // Used for storing jacobian equations
-  ostringstream hessian_output;  // Used for storing Hessian equations
-  ostringstream third_derivatives_output;
+  ostringstream model_local_vars_output;  // Used for storing model local vars
+  ostringstream model_output;             // Used for storing model temp vars and equations
+  ostringstream jacobian_output;          // Used for storing jacobian equations
+  ostringstream hessian_output;           // Used for storing Hessian equations
+  ostringstream third_derivatives_output; // Used for storing third order derivatives equations
 
   ExprNodeOutputType output_type = (use_dll ? oCDynamicModel :
                                     julia ? oJuliaDynamicModel : oMatlabDynamicModel);
 
   deriv_node_temp_terms_t tef_terms;
-  writeModelLocalVariables(model_output, output_type, tef_terms);
+  temporary_terms_t temp_term_union = temporary_terms_res;
 
-  writeTemporaryTerms(temporary_terms, model_output, output_type, tef_terms);
+  writeModelLocalVariables(model_local_vars_output, output_type, tef_terms);
 
-  writeModelEquations(model_eq_output, output_type);
+  writeTemporaryTerms(temporary_terms_res, model_output, output_type, tef_terms);
+
+  writeModelEquations(model_output, output_type);
 
   int nrows = equations.size();
   int hessianColsNbr = dynJacobianColsNbr * dynJacobianColsNbr;
 
   // Writing Jacobian
+  temp_term_union.insert(temporary_terms_g1.begin(), temporary_terms_g1.end());
+  if (!first_derivatives.empty())
+    if (julia)
+      writeTemporaryTerms(temp_term_union, jacobian_output, output_type, tef_terms);
+    else
+      writeTemporaryTerms(temporary_terms_g1, jacobian_output, output_type, tef_terms);
   for (first_derivatives_t::const_iterator it = first_derivatives.begin();
        it != first_derivatives.end(); it++)
     {
@@ -2141,11 +2149,17 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
 
       jacobianHelper(jacobian_output, eq, getDynJacobianCol(var), output_type);
       jacobian_output << "=";
-      d1->writeOutput(jacobian_output, output_type, temporary_terms, tef_terms);
+      d1->writeOutput(jacobian_output, output_type, temp_term_union, tef_terms);
       jacobian_output << ";" << endl;
     }
 
   // Writing Hessian
+  temp_term_union.insert(temporary_terms_g2.begin(), temporary_terms_g2.end());
+  if (!second_derivatives.empty())
+    if (julia)
+      writeTemporaryTerms(temp_term_union, hessian_output, output_type, tef_terms);
+    else
+      writeTemporaryTerms(temporary_terms_g2, hessian_output, output_type, tef_terms);
   int k = 0; // Keep the line of a 2nd derivative in v2
   for (second_derivatives_t::const_iterator it = second_derivatives.begin();
        it != second_derivatives.end(); it++)
@@ -2166,7 +2180,7 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
         {
           for_sym << "g2[" << eq + 1 << "," << col_nb + 1 << "]";
           hessian_output << "  @inbounds " << for_sym.str() << " = ";
-          d2->writeOutput(hessian_output, output_type, temporary_terms, tef_terms);
+          d2->writeOutput(hessian_output, output_type, temp_term_union, tef_terms);
           hessian_output << endl;
         }
       else
@@ -2179,7 +2193,7 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
 
           sparseHelper(2, hessian_output, k, 2, output_type);
           hessian_output << "=";
-          d2->writeOutput(hessian_output, output_type, temporary_terms, tef_terms);
+          d2->writeOutput(hessian_output, output_type, temp_term_union, tef_terms);
           hessian_output << ";" << endl;
 
           k++;
@@ -2208,6 +2222,12 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
     }
 
   // Writing third derivatives
+  temp_term_union.insert(temporary_terms_g3.begin(), temporary_terms_g3.end());
+  if (!third_derivatives.empty())
+    if (julia)
+      writeTemporaryTerms(temp_term_union, third_derivatives_output, output_type, tef_terms);
+    else
+      writeTemporaryTerms(temporary_terms_g3, third_derivatives_output, output_type, tef_terms);
   k = 0; // Keep the line of a 3rd derivative in v3
   for (third_derivatives_t::const_iterator it = third_derivatives.begin();
        it != third_derivatives.end(); it++)
@@ -2230,7 +2250,7 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
         {
           for_sym << "g3[" << eq + 1 << "," << ref_col + 1 << "]";
           third_derivatives_output << "  @inbounds " << for_sym.str() << " = ";
-          d3->writeOutput(third_derivatives_output, output_type, temporary_terms, tef_terms);
+          d3->writeOutput(third_derivatives_output, output_type, temp_term_union, tef_terms);
           third_derivatives_output << endl;
         }
       else
@@ -2243,7 +2263,7 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
 
           sparseHelper(3, third_derivatives_output, k, 2, output_type);
           third_derivatives_output << "=";
-          d3->writeOutput(third_derivatives_output, output_type, temporary_terms, tef_terms);
+          d3->writeOutput(third_derivatives_output, output_type, temp_term_union, tef_terms);
           third_derivatives_output << ";" << endl;
         }
 
@@ -2287,8 +2307,8 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
                     << "%" << endl
                     << endl
                     << "residual = zeros(" << nrows << ", 1);" << endl
+                    << model_local_vars_output.str()
                     << model_output.str()
-                    << model_eq_output.str()
         // Writing initialization instruction for matrix g1
                     << "if nargout >= 2," << endl
                     << "  g1 = zeros(" << nrows << ", " << dynJacobianColsNbr << ");" << endl
@@ -2298,10 +2318,10 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
                     << "  %" << endl
                     << endl
                     << jacobian_output.str()
-                    << "end" << endl;
+                    << endl
 
       // Initialize g2 matrix
-      DynamicOutput << "if nargout >= 3," << endl
+                    << "if nargout >= 3," << endl
                     << "  %" << endl
                     << "  % Hessian matrix" << endl
                     << "  %" << endl
@@ -2312,7 +2332,6 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
                       << "  g2 = sparse(v2(:,1),v2(:,2),v2(:,3)," << nrows << "," << hessianColsNbr << ");" << endl;
       else // Either hessian is all zero, or we didn't compute it
         DynamicOutput << "  g2 = sparse([],[],[]," << nrows << "," << hessianColsNbr << ");" << endl;
-      DynamicOutput << "end" << endl;
 
       // Initialize g3 matrix
       DynamicOutput << "if nargout >= 4," << endl
@@ -2328,7 +2347,9 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
       else // Either 3rd derivatives is all zero, or we didn't compute it
         DynamicOutput << "  g3 = sparse([],[],[]," << nrows << "," << ncols << ");" << endl;
 
-      DynamicOutput << "end" << endl;
+      DynamicOutput << "end" << endl
+                    << "end" << endl
+                    << "end" << endl;
     }
   else if (output_type == oCDynamicModel)
     {
@@ -2337,33 +2358,30 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
                     << "  double lhs, rhs;" << endl
                     << endl
                     << "  /* Residual equations */" << endl
+                    << model_local_vars_output.str()
                     << model_output.str()
-                    << model_eq_output.str()
                     << "  /* Jacobian  */" << endl
                     << "  if (g1 == NULL)" << endl
                     << "    return;" << endl
-                    << "  else" << endl
-                    << "    {" << endl
+                    << endl
                     << jacobian_output.str()
-                    << "    }" << endl;
+                    << endl;
 
       if (second_derivatives.size())
         DynamicOutput << "  /* Hessian for endogenous and exogenous variables */" << endl
                       << "  if (v2 == NULL)" << endl
                       << "    return;" << endl
-                      << "  else" << endl
-                      << "    {" << endl
+                      << endl
                       << hessian_output.str()
-                      << "    }" << endl;
+                      << endl;
 
       if (third_derivatives.size())
         DynamicOutput << "  /* Third derivatives for endogenous and exogenous variables */" << endl
                       << "  if (v3 == NULL)" << endl
                       << "    return;" << endl
-                      << "  else" << endl
-                      << "    {" << endl
+                      << endl
                       << third_derivatives_output.str()
-                      << "    }" << endl;
+                      << endl;
 
       DynamicOutput << "}" << endl << endl;
     }
@@ -2396,8 +2414,8 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
                     << "  #" << endl
                     << "  # Model equations" << endl
                     << "  #" << endl
+                    << model_local_vars_output.str()
                     << model_output.str()
-                    << model_eq_output.str()
                     << "end" << endl << endl
                     << "function dynamic!(y::Vector{Float64}, x::Matrix{Float64}, "
                     << "params::Vector{Float64}," << endl
@@ -2413,7 +2431,7 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
                     << "  @assert size(g1) == (" << nrows << ", " << dynJacobianColsNbr << ")" << endl
                     << "  fill!(g1, 0.0)" << endl
                     << "  dynamic!(y, x, params, steady_state, it_, residual)" << endl
-                    << model_output.str()
+                    << model_local_vars_output.str()
                     << "  #" << endl
                     << "  # Jacobian matrix" << endl
                     << "  #" << endl
@@ -2433,7 +2451,7 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
                     << "  @assert size(g2) == (" << nrows << ", " << hessianColsNbr << ")" << endl
                     << "  dynamic!(y, x, params, steady_state, it_, residual, g1)" << endl;
       if (second_derivatives.size())
-        DynamicOutput << model_output.str()
+        DynamicOutput << model_local_vars_output.str()
                       << "  #" << endl
                       << "  # Hessian matrix" << endl
                       << "  #" << endl
@@ -2456,7 +2474,7 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
                     << "  @assert size(g3) == (" << nrows << ", " << ncols << ")" << endl
                     << "  dynamic!(y, x, params, steady_state, it_, residual, g1, g2)" << endl;
       if (third_derivatives.size())
-        DynamicOutput << model_output.str()
+        DynamicOutput << model_local_vars_output.str()
                       << "  #" << endl
                       << "  # Third order derivatives" << endl
                       << "  #" << endl
@@ -2466,7 +2484,7 @@ DynamicModel::writeDynamicModel(ostream &DynamicOutput, bool use_dll, bool julia
 }
 
 void
-DynamicModel::writeOutput(ostream &output, const string &basename, bool block_decomposition, bool byte_code, bool use_dll, int order, bool estimation_present, bool julia) const
+DynamicModel::writeOutput(ostream &output, const string &basename, bool block_decomposition, bool byte_code, bool use_dll, int order, bool estimation_present, bool compute_xrefs, bool julia) const
 {
   /* Writing initialisation for M_.lead_lag_incidence matrix
      M_.lead_lag_incidence is a matrix with as many columns as there are
@@ -3049,6 +3067,9 @@ DynamicModel::writeOutput(ostream &output, const string &basename, bool block_de
   output << modstruct << "params = " << (julia ? "fill(NaN, " : "NaN(")
          << symbol_table.param_nbr() << ", 1);" << endl;
 
+  if (compute_xrefs)
+    writeXrefs(output);
+
   // Write number of non-zero derivatives
   // Use -1 if the derivatives have not been computed
   output << modstruct << (julia ? "nnzderivatives" : "NNZDerivatives")
@@ -3092,7 +3113,8 @@ DynamicModel::runTrendTest(const eval_context_t &eval_context)
 
 void
 DynamicModel::computingPass(bool jacobianExo, bool hessian, bool thirdDerivatives, bool paramsDerivatives,
-                            const eval_context_t &eval_context, bool no_tmp_terms, bool block, bool use_dll, bool bytecode)
+                            const eval_context_t &eval_context, bool no_tmp_terms, bool block, bool use_dll,
+                            bool bytecode, bool compute_xrefs)
 {
   assert(jacobianExo || !(hessian || thirdDerivatives || paramsDerivatives));
 
@@ -3200,6 +3222,9 @@ DynamicModel::computingPass(bool jacobianExo, bool hessian, bool thirdDerivative
         if (bytecode)
           computeTemporaryTermsMapping();
       }
+
+  if (compute_xrefs)
+    computeXrefs();
 }
 
 map<pair<pair<int, pair<int, int> >, pair<int, int> >, int>
@@ -4235,6 +4260,40 @@ DynamicModel::substituteLeadLagInternal(aux_var_t type, bool deterministic_model
       BinaryOpNode *substeq = dynamic_cast<BinaryOpNode *>(subst);
       assert(substeq != NULL);
       equations[i] = substeq;
+    }
+
+
+  // Substitute in aux_equations
+  // Without this loop, the auxiliary equations in equations
+  // will diverge from those in aux_equations
+  for (int i = 0; i < (int) aux_equations.size(); i++)
+    {
+      expr_t subst;
+      switch (type)
+        {
+        case avEndoLead:
+          subst = aux_equations[i]->substituteEndoLeadGreaterThanTwo(subst_table,
+                                                                     neweqs, deterministic_model);
+          break;
+        case avEndoLag:
+          subst = aux_equations[i]->substituteEndoLagGreaterThanTwo(subst_table, neweqs);
+          break;
+        case avExoLead:
+          subst = aux_equations[i]->substituteExoLead(subst_table, neweqs, deterministic_model);
+          break;
+        case avExoLag:
+          subst = aux_equations[i]->substituteExoLag(subst_table, neweqs);
+          break;
+        case avDiffForward:
+          subst = aux_equations[i]->differentiateForwardVars(subset, subst_table, neweqs);
+          break;
+        default:
+          cerr << "DynamicModel::substituteLeadLagInternal: impossible case" << endl;
+          exit(EXIT_FAILURE);
+        }
+      BinaryOpNode *substeq = dynamic_cast<BinaryOpNode *>(subst);
+      assert(substeq != NULL);
+      aux_equations[i] = substeq;
     }
 
   // Add new equations

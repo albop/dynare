@@ -236,7 +236,8 @@ for curr_chain = fblck:nblck,
             dyn_waitbar(prtfrc,hh,[ 'MH (' int2str(curr_chain) '/' int2str(options_.mh_nblck) ') ' sprintf('Current acceptance ratio %4.3f', accepted_draws_this_chain/blocked_draws_counter_this_chain)]);
         end
         if (draw_index_current_file == InitSizeArray(curr_chain)) || (draw_iter == nruns(curr_chain)) % Now I save the simulations, either because the current file is full or the chain is done
-            save([BaseName '_mh' int2str(NewFile(curr_chain)) '_blck' int2str(curr_chain) '.mat'],'x2','logpo2');
+            [LastSeeds.(['file' int2str(NewFile(curr_chain))]).Unifor, LastSeeds.(['file' int2str(NewFile(curr_chain))]).Normal] = get_dynare_random_generator_state();
+            save([BaseName '_mh' int2str(NewFile(curr_chain)) '_blck' int2str(curr_chain) '.mat'],'x2','logpo2','LastSeeds');
             fidlog = fopen([MetropolisFolder '/metropolis.log'],'a');
             fprintf(fidlog,['\n']);
             fprintf(fidlog,['%% Mh' int2str(NewFile(curr_chain)) 'Blck' int2str(curr_chain) ' (' datestr(now,0) ')\n']);

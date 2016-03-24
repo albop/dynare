@@ -32,6 +32,13 @@ dr = oo.dr;
 exo_nbr = M.exo_nbr;
 nstatic = M.nstatic;
 nspred = M.nspred;
+if nspred > 180
+    disp(' ')
+    disp(['WARNING in evaluate_planner_objective: model too large, can''t evaluate planner ' ...
+          'objective'])
+    planner_objective_value = NaN;
+    return
+end
 beta = get_optimal_policy_discount_factor(M.params,M.param_names);
     
 Gy = dr.ghx(nstatic+(1:nspred),:);

@@ -168,18 +168,7 @@ bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 k1 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p4(k(k1)) = ones(length(k1),1);
 for i=1:length(k)
-    if (bayestopt_.p1(k(i))<bayestopt_.p3(k(i))) || (bayestopt_.p1(k(i))>bayestopt_.p4(k(i)))
-        error(['The prior mean of ' bayestopt_.name{k(i)} ' has to be between the lower (' num2str(bayestopt_.p3(k(i))) ') and upper (' num2str(bayestopt_.p4(k(i))) ') bounds of the beta prior density!']);
-    end
-    mu = (bayestopt_.p1(k(i))-bayestopt_.p3(k(i)))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
-    stdd = bayestopt_.p2(k(i))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
-    if stdd^2 > (1-mu)*mu
-        error(sprintf(['Error in prior for %s: in a beta distribution with ' ...
-                       'mean %f, the standard error can''t be larger than' ...
-                       ' %f.'], bayestopt_.name{k(i)},mu,sqrt((1-mu)*mu)))
-    end
-    bayestopt_.p6(k(i)) = (1-mu)*mu^2/stdd^2 - mu ;
-    bayestopt_.p7(k(i)) = bayestopt_.p6(k(i))*(1/mu-1) ;
+    [bayestopt_.p6(k(i)), bayestopt_.p7(k(i))] = beta_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), bayestopt_.p4(k(i)), bayestopt_.name{k(i)});
     m = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) , bayestopt_.p4(k(i)) ],1);
     if length(m)==1
         bayestopt_.p5(k(i)) = m;
@@ -196,29 +185,19 @@ k2 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
-    if (bayestopt_.p1(k(i))<bayestopt_.p3(k(i))) || (bayestopt_.p1(k(i))>bayestopt_.p4(k(i)))
-        error(['The prior mean of ' bayestopt_.name{k(i)} ' has to be above the lower (' num2str(bayestopt_.p3(k(i))) ') bound of the Gamma prior density!']);
-    end
-    if isinf(bayestopt_.p2(k(i)))
-        error(['Infinite prior standard deviation for parameter ' bayestopt_.name{k(i)}  ' is not allowed (Gamma prior)!'])
-    end
-    mu = bayestopt_.p1(k(i))-bayestopt_.p3(k(i));
-    bayestopt_.p7(k(i)) = bayestopt_.p2(k(i))^2/mu ;
-    bayestopt_.p6(k(i)) = mu/bayestopt_.p7(k(i)) ;  
+    [bayestopt_.p6(k(i)), bayestopt_.p7(k(i))] = gamma_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), bayestopt_.name{k(i)});
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 2) ;
 end
 
 % truncation parameters by default for normal distribution
 k  = find(bayestopt_.pshape == 3);
 k1 = find(isnan(bayestopt_.p3(k)));
+k2 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p3(k(k1)) = -Inf*ones(length(k1),1);
-k1 = find(isnan(bayestopt_.p4(k)));
-bayestopt_.p4(k(k1)) = Inf*ones(length(k1),1);
-for i=1:length(k)
-    bayestopt_.p6(k(i)) = bayestopt_.p1(k(i)) ; 
-    bayestopt_.p7(k(i)) = bayestopt_.p2(k(i)) ;
-    bayestopt_.p5(k(i)) = bayestopt_.p1(k(i)) ;
-end
+bayestopt_.p4(k(k2)) = Inf*ones(length(k2),1);
+bayestopt_.p6(k) = bayestopt_.p1(k);
+bayestopt_.p7(k) = bayestopt_.p2(k);
+bayestopt_.p5(k) = bayestopt_.p1(k);
 
 % inverse gamma distribution (type 1)
 k = find(bayestopt_.pshape == 4);
@@ -227,13 +206,9 @@ k2 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
-    if (bayestopt_.p1(k(i))<bayestopt_.p3(k(i))) || (bayestopt_.p1(k(i))>bayestopt_.p4(k(i)))
-        error(['The prior mean of ' bayestopt_.name{k(i)} ' has to be above the lower (' num2str(bayestopt_.p3(k(i))) ') bound of the Inverse Gamma prior density!']);
-    end
-    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = ...
-        inverse_gamma_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)),bayestopt_.p2(k(i)),1,0) ;
-    bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 4) ;
-end  
+    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = inverse_gamma_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), 1, false, bayestopt_.name{k(i)});
+    bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 4);
+end
 
 % uniform distribution
 k = find(bayestopt_.pshape == 5);
@@ -252,12 +227,20 @@ k2 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
-    if (bayestopt_.p1(k(i))<bayestopt_.p3(k(i))) || (bayestopt_.p1(k(i))>bayestopt_.p4(k(i)))
-        error(['The prior mean of ' bayestopt_.name{k(i)} ' has to be above the lower (' num2str(bayestopt_.p3(k(i))) ') bound of the Inverse Gamma II prior density!']);
-    end
     [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = ...
-        inverse_gamma_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)),bayestopt_.p2(k(i)),2,0);
+        inverse_gamma_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), 2, false, bayestopt_.name{k(i)});
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 6) ;
+end
+
+% Weibull distribution
+k = find(bayestopt_.pshape == 8);
+k1 = find(isnan(bayestopt_.p3(k)));
+k2 = find(isnan(bayestopt_.p4(k)));
+bayestopt_.p3(k(k1)) = zeros(length(k1),1);
+bayestopt_.p4(k(k2)) = Inf(length(k2),1);
+for i=1:length(k)
+    [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = weibull_specification(bayestopt_.p1(k(i)), bayestopt_.p2(k(i))^2, bayestopt_.p3(k(i)), bayestopt_.name{k(i)});
+    bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 8) ;
 end
 
 k = find(isnan(xparam1));
@@ -272,6 +255,8 @@ if options_.initialize_estimated_parameters_with_the_prior_mode
         xparam1(k) = bayestopt_.p1(k);
     end
 end
+
+
 
 % I create subfolder M_.dname/prior if needed.
 CheckPath('prior',M_.dname);

@@ -30,13 +30,14 @@ function collect_LaTeX_Files(M_)
 f_name_binder=[M_.fname,'_TeX_binder.TeX'];
 fid=fopen(f_name_binder,'w+');
 fprintf(fid,'%s \n','\documentclass[12pt]{article}');
+fprintf(fid,'%s \n','\usepackage[margin=2cm]{geometry}');
 fprintf(fid,'%s \n','\usepackage{psfrag}');
 fprintf(fid,'%s \n','\usepackage{graphicx}');
 fprintf(fid,'%s \n','\usepackage{epstopdf}');
-fprintf(fid,'%s \n','\usepackage{longtable}');
+fprintf(fid,'%s \n','\usepackage{longtable,booktabs}');
 fprintf(fid,'%s \n','\usepackage{amsfonts}');
 fprintf(fid,'%s \n','\usepackage{breqn}');
-fprintf(fid,'%s \n','\usepackage{float}');
+fprintf(fid,'%s \n','\usepackage{float,morefloats,caption}');
 fprintf(fid,'%s \n','\begin{document}');
 
 %% Root directory
@@ -60,12 +61,30 @@ for ii=1:length(TeX_Files)
     end
 end
 
-%5 graphs directory
+%% graphs directory
 TeX_Files=dir([M_.dname filesep 'graphs' filesep  M_.fname '*.TeX']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
         fprintf(fid,'%s \n',['\include{', M_.dname '/graphs' '/',f_name,'}']);    
+    end
+end
+
+%% Identification directory
+TeX_Files=dir([M_.dname filesep 'identification' filesep  M_.fname '*.TeX']);
+for ii=1:length(TeX_Files)
+    [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
+    if ~strcmp(TeX_Files(ii).name,f_name_binder)
+        fprintf(fid,'%s \n',['\include{', M_.dname '/identification' '/',f_name,'}']);    
+    end
+end
+
+%% GSA directory
+TeX_Files=dir([M_.dname filesep 'gsa' filesep  M_.fname '*.TeX']);
+for ii=1:length(TeX_Files)
+    [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
+    if ~strcmp(TeX_Files(ii).name,f_name_binder)
+        fprintf(fid,'%s \n',['\include{', M_.dname '/gsa' '/',f_name,'}']);    
     end
 end
 

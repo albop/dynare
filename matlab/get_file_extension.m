@@ -11,7 +11,7 @@ function ext = get_file_extension(file)
 % REMARKS 
 %  If the provided file name has no extension, the routine will return an empty array.
     
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,15 +28,9 @@ function ext = get_file_extension(file)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Clean-up path
-file = strrep(file, '../', '');
-file = strrep(file, './', '');
+[dir, fname, ext] = fileparts(file);
 
-remain = file;
-while ~isempty(remain)
-    [ext, remain] = strtok(remain,'.');
-end
-
-if strcmp(ext,file)
-    ext = [];
+if ~isempty(ext)
+    % Removes the leading dot.
+    ext = ext(2:end);
 end

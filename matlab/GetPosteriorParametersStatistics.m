@@ -1,4 +1,4 @@
-function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_)
+function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_, pnames)
 % This function prints and saves posterior estimates after the mcmc
 % (+updates of oo_ & TeX output). 
 % 
@@ -8,6 +8,7 @@ function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bay
 %   options_         [structure]
 %   bayestopt_       [structure]
 %   oo_              [structure]
+%   pnames           [char]        Array of char, names of the prior shapes available
 %  
 % OUTPUTS 
 %   oo_              [structure]  
@@ -15,7 +16,7 @@ function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bay
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -59,7 +60,6 @@ FirstMhFile = record.KeepedDraws.FirstMhFile;
 NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 clear record;
 
-pnames=['     ';'beta ';'gamma';'norm ';'invg ';'unif ';'invg2'];
 header_width = row_header_width(M_,estim_params_,bayestopt_);
 hpd_interval=[num2str(options_.mh_conf_sig*100), '% HPD interval'];
 tit2 = sprintf('%-*s %12s %12s %23s %8s %12s\n',header_width,' ','prior mean','post. mean',hpd_interval,'prior','pstdev');
@@ -336,22 +336,23 @@ fprintf(fidTeX,['%% ' datestr(now,0)]);
 fprintf(fidTeX,' \n');
 fprintf(fidTeX,' \n');
 fprintf(fidTeX,'\\begin{center}\n');
-fprintf(fidTeX,'\\begin{longtable}{l|lcccccc} \n');
+fprintf(fidTeX,'\\begin{longtable}{llcccccc} \n');
 fprintf(fidTeX,['\\caption{Results from Metropolis-Hastings (' title ')}\n ']);
 fprintf(fidTeX,['\\label{Table:MHPosterior:' int2str(fnum)  '}\\\\\n']);
-fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-fprintf(fidTeX,['  & Prior distribution & Prior mean  & Prior ' ...
-                's.d. & Posterior mean & Posterior s.d.  & HPD inf & HPD sup\\\\ \n']);
-fprintf(fidTeX,'\\hline \\endfirsthead \n');
-fprintf(fidTeX,['\\caption{(continued)}']);
-fprintf(fidTeX,['\\label{Table:MHPosterior:' int2str(fnum)  '}\\\\\n']);
-fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-fprintf(fidTeX,['  & Prior distribution & Prior mean  & Prior ' ...
-                's.d. & Posterior mean & Posterior s.d.  & HPD inf & HPD sup\\\\ \n']);
-fprintf(fidTeX,'\\hline \\endhead \n');
+fprintf(fidTeX,'\\toprule \n');
+fprintf(fidTeX,'  & \\multicolumn{3}{c}{Prior}  &  \\multicolumn{4}{c}{Posterior} \\\\\n');
+fprintf(fidTeX,'  \\cmidrule(r{.75em}){2-4} \\cmidrule(r{.75em}){5-8}\n');
+fprintf(fidTeX,'  & Dist. & Mean  & Stdev. & Mean & Stdev. & HPD inf & HPD sup\\\\\n');
+fprintf(fidTeX,'\\midrule \\endfirsthead \n');
+fprintf(fidTeX,['\\caption{(continued)}\\\\']);
+fprintf(fidTeX,'\\toprule \n');
+fprintf(fidTeX,'  & \\multicolumn{3}{c}{Prior}  &  \\multicolumn{4}{c}{Posterior} \\\\\n');
+fprintf(fidTeX,'  \\cmidrule(r{.75em}){2-4} \\cmidrule(r{.75em}){5-8}\n');
+fprintf(fidTeX,'  & Dist. & Mean  & Stdev. & Mean & Stdev. & HPD inf & HPD sup\\\\\n');
+fprintf(fidTeX,'\\midrule \\endhead \n');
 
-fprintf(fidTeX,'\\hline \\multicolumn{8}{r}{(Continued on next page)} \\\\ \\hline \\endfoot \n');
-fprintf(fidTeX,'\\hline \\hline \\endlastfoot \n');
+fprintf(fidTeX,'\\bottomrule \\multicolumn{8}{r}{(Continued on next page)} \\endfoot \n');
+fprintf(fidTeX,'\\bottomrule \\endlastfoot \n');
 
 
 fid = fidTeX;

@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2015 Dynare Team
+% Copyright (C) 2003-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -407,7 +407,7 @@ options_.filtered_vars = 0;
 options_.first_obs = NaN;
 options_.nobs = NaN;
 options_.kalman_algo = 0;
-options_.fast_kalman = 0;
+options_.fast_kalman_filter = 0;
 options_.kalman_tol = 1e-10;
 options_.diffuse_kalman_tol = 1e-6;
 options_.use_univariate_filters_if_singularity_is_detected = 1;
@@ -509,6 +509,16 @@ M_.exo_det_histval = [];
 M_.Correlation_matrix = [];
 M_.Correlation_matrix_ME = [];
 M_.parameter_used_with_lead_lag = false;
+
+M_.xref1.param = {};
+M_.xref1.endo = {};
+M_.xref1.exo = {};
+M_.xref1.exo_det = {};
+
+M_.xref2.param = {};
+M_.xref2.endo = {};
+M_.xref2.exo = {};
+M_.xref2.exo_det = {};
 
 % homotopy for steady state
 options_.homotopy_mode = 0;

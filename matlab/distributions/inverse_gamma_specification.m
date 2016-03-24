@@ -1,50 +1,25 @@
-function [s,nu] = inverse_gamma_specification(mu,sigma,type,use_fzero_flag)
+function [s,nu] = inverse_gamma_specification(mu, sigma2, lb, type, use_fzero_flag, name) % --*-- Unitary tests --*--
+
 % Computes the inverse Gamma hyperparameters from the prior mean and standard deviation.
+%
+% INPUTS 
+% - mu               [double]   scalar, prior mean.
+% - sigma2           [double]   positive scalar, prior variance.
+% - type             [integer]  scalar equal to 1 or 2, type of the inverse gamma distribution
+% - use_fzero_flag   [logical]  scalar, Use (matlab/octave's implementation of) fzero to solve for nu if true, use
+%                               dynare's implementation of the secant method otherwise.
+% - name             [string]   name of the parameter or random variable.
+%
+% OUTPUS 
+% - s                [double]    scalar, first hyperparameter.
+% - nu               [double]    scalar, second hyperparameter.
+%
+% REMARK 
+% The call to the matlab's implementation of the secant method is here for testing purpose and should not be used. This routine fails
+% more often in finding an interval for nu containing a signe change because it expands the interval on both sides and eventually
+% violates  the condition nu>2.
 
-%@info:
-%! @deftypefn {Function File} {[@var{s}, @var{nu} ]=} colon (@var{mu}, @var{sigma}, @var{type}, @var{use_fzero_flag})
-%! @anchor{distributions/inverse_gamma_specification}
-%! @sp 1
-%! Computes the inverse Gamma (type 1 or 2) hyperparameters from the prior mean (@var{mu}) and standard deviation (@var{sigma}).
-%! @sp 2
-%! @strong{Inputs}
-%! @sp 1
-%! @table @ @var
-%! @item mu
-%! Double scalar, prior mean.
-%! @item sigma
-%! Positive double scalar, prior standard deviation.
-%! @item type
-%! Integer scalar equal to one or two, type of the Inverse-Gamma distribution.
-%! @item use_fzero_flag
-%! Integer scalar equal to 0 (default) or 1. Use (matlab/octave's implementation of) fzero to solve for @var{nu} if equal to 1, use
-%! dynare's implementation of the secant method otherwise.
-%! @end table
-%! @sp 1
-%! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item s
-%! Positive double scalar (greater than two), first hypermarameter of the Inverse-Gamma prior.
-%! @item nu
-%! Positive double scala, second hypermarameter of the Inverse-Gamma prior.
-%! @end table
-%! @sp 2
-%! @strong{This function is called by:}
-%! @sp 1
-%! @ref{set_prior}
-%! @sp 2
-%! @strong{This function calls:}
-%! @sp 2
-%! @strong{Remark:}
-%! The call to the matlab's implementation of the secant method is here for testing purpose and should not be used. This routine fails
-%! more often in finding an interval for nu containing a signe change because it expands the interval on both sides and eventually 
-%! violates  the condition nu>2.
-%! 
-%! @end deftypefn
-%@eod:
-
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -61,16 +36,54 @@ function [s,nu] = inverse_gamma_specification(mu,sigma,type,use_fzero_flag)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-check_solution_flag = 1;
+if nargin<4
+    error('At least four input arguments are required!')
+end
+
+if ~isnumeric(mu) || ~isscalar(mu) || ~isreal(mu)
+    error('First input argument must be a real scalar!')
+end
+
+if ~isnumeric(sigma2) || ~isscalar(sigma2) || ~isreal(sigma2) || sigma2<=0
+    error('Second input argument must be a real positive scalar!')
+end
+
+if ~isnumeric(lb) || ~isscalar(lb) || ~isreal(lb)
+    error('Third input argument must be a real scalar!')
+end
+
+if ~isnumeric(type) || ~isscalar(type) || ~ismember(type, [1, 2])
+    error('Fourth input argument must be equal to 1 or 2!')
+end
+
+if nargin==4 || isempty(use_fzero_flag)
+    use_fzero_flag = false;
+else
+    if ~isscalar(use_fzero_flag) || ~islogical(use_fzero_flag)
+        error('Fourth input argument must be a scalar logical!')
+    end
+end
+
+if nargin>5 && (~ischar(name) || size(name, 1)>1)
+    error('Sixth input argument must be a string!')
+else
+    name = '';
+end
+
+if ~isempty(name)
+    name = sprintf(' for %s', name);
+end
+
+if mu<=lb
+    error('The prior mean%s (%f) must be above the lower bound (%f)of the Inverse Gamma (type %d) prior distribution!', mu, lb, name, type);
+end
+
+check_solution_flag = true;
 s = [];
 nu = [];
 
-if nargin==3
-    use_fzero_flag = 0;
-end
-
-sigma2 = sigma^2;
-mu2 = mu^2;
+sigma = sqrt(sigma2);
+mu2 = mu*mu;
 
 if type == 2;       % Inverse Gamma 2
     nu   = 2*(2+mu2/sigma2);
@@ -120,7 +133,7 @@ elseif type == 1;   % Inverse Gamma 1
             if abs(log(mu)-log(sqrt(s/2))-gammaln((nu-1)/2)+gammaln(nu/2))>1e-7
                 error('inverse_gamma_specification:: Failed in solving for the hyperparameters!');
             end
-            if abs(sigma-sqrt(s/(nu-2)-mu^2))>1e-7
+            if abs(sigma-sqrt(s/(nu-2)-mu*mu))>1e-7
                 error('inverse_gamma_specification:: Failed in solving for the hyperparameters!');
             end
         end
@@ -133,17 +146,61 @@ else
 end
 
 %@test:1
+%$ try
+%$    [s, nu] = inverse_gamma_specification(.5, .05, 0, 1);
+%$    t(1) = true;
+%$ catch
+%$    t(1) = false;
+%$ end
 %$
-%$ [s0,nu0] = inverse_gamma_specification(.75,.2,1,0);
-%$ [s1,nu1] = inverse_gamma_specification(.75,.2,1,1);
-%$ [s3,nu3] = inverse_gamma_specification(.75,.1,1,0);
-%$ [s4,nu4] = inverse_gamma_specification(.75,.1,1,1);
-%$ % Check the results.
-%$ t(1) = dassert(s0,s1,1e-6);
-%$ t(2) = dassert(nu0,nu1,1e-6);
-%$ t(3) = isnan(s4);
-%$ t(4) = isnan(nu4);
-%$ t(5) = dassert(s3,16.240907971002265,1e-6);;
-%$ t(6) = dassert(nu3,30.368398202624046,1e-6);;
+%$ if t(1)
+%$    t(2) = abs(0.5-sqrt(.5*s)*gamma(.5*(nu-1))/gamma(.5*nu))<1e-12;
+%$    t(3) = abs(0.05-s/(nu-2)+.5^2)<1e-12;
+%$ end
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ try
+%$    [s, nu] = inverse_gamma_specification(.5, .05, 0, 2);
+%$    t(1) = true;
+%$ catch
+%$    t(1) = false;
+%$ end
+%$
+%$ if t(1)
+%$    t(2) = abs(0.5-s/(nu-2))<1e-12;
+%$    t(3) = abs(0.05-2*.5^2/(nu-4))<1e-12;
+%$ end
+%$ T = all(t);
+%@eof:2
+
+%@test:3
+%$ try
+%$    [s, nu] = inverse_gamma_specification(.5, Inf, 0, 1);
+%$    t(1) = true;
+%$ catch
+%$    t(1) = false;
+%$ end
+%$
+%$ if t(1)
+%$    t(2) = abs(0.5-sqrt(.5*s)*gamma(.5*(nu-1))/gamma(.5*nu))<1e-12;
+%$    t(3) = isequal(nu, 2); %abs(0.05-2*.5^2/(nu-4))<1e-12;
+%$ end
+%$ T = all(t);
+%@eof:3
+
+%@test:4
+%$ try
+%$    [s, nu] = inverse_gamma_specification(.5, Inf, 0, 2);
+%$    t(1) = true;
+%$ catch
+%$    t(1) = false;
+%$ end
+%$
+%$ if t(1)
+%$    t(2) = abs(0.5-s/(nu-2))<1e-12;
+%$    t(3) = isequal(nu, 4);
+%$ end
+%$ T = all(t);
+%@eof:4

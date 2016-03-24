@@ -19,7 +19,7 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2015 Dynare Team
+% Copyright (C) 2003-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -39,6 +39,10 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 %get maximum number of simultaneously observed variables for stochastic
 %singularity check
 maximum_number_non_missing_observations=max(sum(~isnan(DynareDataset.data),2));
+
+if DynareOptions.order>1 && any(any(isnan(DynareDataset.data)))
+    error('initial_estimation_checks:: particle filtering does not support missing observations')
+end
 
 if maximum_number_non_missing_observations>Model.exo_nbr+EstimatedParameters.nvn
     error(['initial_estimation_checks:: Estimation can''t take place because there are less declared shocks than observed variables!'])
@@ -62,6 +66,10 @@ if DynareOptions.TaRB.use_TaRB && (DynareOptions.TaRB.new_block_probability<0 ||
     error(['initial_estimation_checks:: The tarb_new_block_probability must be between 0 and 1!'])
 end
 
+if (any(BayesInfo.pshape  >0 ) && DynareOptions.mh_replic) && DynareOptions.mh_nblck<1
+    error(['initial_estimation_checks:: Bayesian estimation cannot be conducted with mh_nblocks=0.'])    
+end
+
 old_steady_params=Model.params; %save initial parameters for check if steady state changes param values
 
 % % check if steady state solves static model (except if diffuse_filter == 1)
@@ -78,7 +86,7 @@ if isfield(EstimatedParameters,'param_vals') && ~isempty(EstimatedParameters.par
 
     if ~isempty(changed_par_indices)
         fprintf('\nThe steady state file internally changed the values of the following estimated parameters:\n')
-        disp(Model.param_names(changed_par_indices,:));
+        disp(Model.param_names(EstimatedParameters.param_vals(changed_par_indices,1),:));
         fprintf('This will override the parameter values drawn from the proposal density and may lead to wrong results.\n')
         fprintf('Check whether this is really intended.\n')    
         warning('The steady state file internally changes the values of the estimated parameters.')
@@ -153,10 +161,12 @@ if info(1) > 0
     print_info(info, DynareOptions.noprint, DynareOptions)
 end
 
-if any(abs(DynareResults.steady_state(BayesInfo.mfys))>1e-9) && (DynareOptions.prefilter==1)
-    disp(['You are trying to estimate a model with a non zero steady state for the observed endogenous'])
-    disp(['variables using demeaned data!'])
-    error('You should change something in your mod file...')
+if DynareOptions.prefilter==1
+    if (~DynareOptions.loglinear && any(abs(DynareResults.steady_state(BayesInfo.mfys))>1e-9)) || (DynareOptions.loglinear && any(abs(log(DynareResults.steady_state(BayesInfo.mfys)))>1e-9))
+        disp(['You are trying to estimate a model with a non zero steady state for the observed endogenous'])
+        disp(['variables using demeaned data!'])
+        error('You should change something in your mod file...')
+    end
 end
 
 if ~isequal(DynareOptions.mode_compute,11)

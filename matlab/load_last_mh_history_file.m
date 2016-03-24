@@ -10,7 +10,7 @@ function info = load_last_mh_history_file(MetropolisFolder, ModelName)
 % Notes: The record structure is written to the caller workspace via an
 % assignin statement.
 
-% Copyright (C) 2013 Dynare Team
+% Copyright (C) 2013-16 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -53,6 +53,7 @@ if format_mh_history_file %needed to preserve backward compatibility
     record.AcceptanceRatio = record.AcceptationRates;
     record.InitialSeeds = NaN; % This information is forever lost...
     record.MCMCConcludedSuccessfully = NaN; % This information is forever lost...
+    record.MAX_nruns=NaN(size(record.MhDraws,1),1); % This information is forever lost...
     record = rmfield(record,'LastLogLiK');
     record = rmfield(record,'InitialLogLiK');
     record = rmfield(record,'Seeds');
@@ -63,6 +64,9 @@ else
     % add fields that have later been introduced
     if ~isfield(record,'MCMCConcludedSuccessfully')
         record.MCMCConcludedSuccessfully = NaN; % This information is forever lost...    
+    end
+    if ~isfield(record,'MAX_nruns')
+        record.MAX_nruns=NaN(size(record.MhDraws,1),1); % This information is forever lost...
     end
 end
 

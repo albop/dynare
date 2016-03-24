@@ -77,7 +77,7 @@ if options_.dsge_var
     NumberOfLagsTimesNvobs = myinputs.NumberOfLagsTimesNvobs;
     Companion_matrix = myinputs.Companion_matrix;
     stock_irf_bvardsge = zeros(options_.irf,nvobs,M_.exo_nbr,MAX_nirfs_dsgevar);
-    bounds = prior_bounds(bayestopt_,options_);
+    bounds = prior_bounds(bayestopt_,options_.prior_trunc);
 end
 
 

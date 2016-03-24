@@ -1,8 +1,5 @@
 function pdraw = prior_draw_gsa(init,rdraw)
-% Draws from the prior distributions 
-% Adapted by M. Ratto from prior_draw (of DYNARE, copyright M. Juillard), 
-% for use with Sensitivity Toolbox for DYNARE
-% 
+% Draws from the prior distributions for use with Sensitivity Toolbox for DYNARE
 % 
 % INPUTS
 %   o init           [integer]  scalar equal to 1 (first call) or 0.
@@ -25,7 +22,7 @@ function pdraw = prior_draw_gsa(init,rdraw)
 % Reference:
 % M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -58,7 +55,7 @@ if init
     [junk1,junk2,junk3,lb,ub,junk4] = set_prior(estim_params_,M_,options_); %Prepare bounds
     if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
         % Set prior bounds
-        bounds = prior_bounds(bayestopt_,options_);
+        bounds = prior_bounds(bayestopt_, options_.prior_trunc);
         bounds.lb = max(bounds.lb,lb);
         bounds.ub = min(bounds.ub,ub);
     else  % estimated parameters but no declared priors
@@ -90,6 +87,9 @@ if init
           % TO BE CHECKED
           lbcum(i) = gamcdf(1/(bounds.ub(i)-p3(i)),p7(i)/2,2/p6(i));
           ubcum(i) = gamcdf(1/(bounds.lb(i)-p3(i)),p7(i)/2,2/p6(i));
+        case 8
+          lbcum(i) = weibcdf(bounds.lb(i)-p3(i),p6(i),p7(i));
+          ubcum(i) = weibcdf(bounds.ub(i)-p3(i),p6(i),p7(i));
         otherwise
           % Nothing to do here.
       end
@@ -115,6 +115,8 @@ for i = 1:npar
       case 6% INV-GAMMA2 distribution  
         % TO BE CHECKED
         pdraw(:,i) =  1./gaminv(rdraw(:,i),p7(i)/2,2/p6(i))+p3(i);
+      case 8
+        pdraw(:,i) =  wblinv(rdraw(:,i),p6(i),p7(i))+p3(i);
       otherwise
         % Nothing to do here.
     end

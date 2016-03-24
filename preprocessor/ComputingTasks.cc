@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2015 Dynare Team
+ * Copyright (C) 2003-2016 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -239,7 +239,7 @@ ForecastStatement::writeOutput(ostream &output, const string &basename, bool min
 {
   options_list.writeOutput(output);
   symbol_list.writeOutput("var_list_", output);
-  output << "info = dyn_forecast(var_list_,'simul');" << endl;
+  output << "[oo_.forecast,info] = dyn_forecast(var_list_,M_,options_,oo_,'simul');" << endl;
 }
 
 RamseyModelStatement::RamseyModelStatement(const SymbolList &symbol_list_arg,
@@ -559,13 +559,6 @@ EstimationStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsoli
 
   it = options_list.num_options.find("dsge_var");
   if (it != options_list.num_options.end())
-    // Ensure that irf_shocks & dsge_var have not both been passed
-    if (options_list.symbol_list_options.find("irf_shocks") != options_list.symbol_list_options.end())
-      {
-        cerr << "The irf_shocks and dsge_var options may not both be passed to estimation." << endl;
-        exit(EXIT_FAILURE);
-      }
-    else
       // Fill in mod_file_struct.dsge_var_calibrated
       mod_file_struct.dsge_var_calibrated = it->second;
 
@@ -1021,7 +1014,7 @@ ObservationTrendsStatement::ObservationTrendsStatement(const trend_elements_t &t
 void
 ObservationTrendsStatement::writeOutput(ostream &output, const string &basename, bool minimal_workspace) const
 {
-  output << "options_.trend_coeff_ = {};" << endl;
+  output << "options_.trend_coeff = {};" << endl;
 
   trend_elements_t::const_iterator it;
 
@@ -3166,8 +3159,7 @@ ExtendedPathStatement::writeOutput(ostream &output, const string &basename, bool
       output << "options_." << it->first << " = " << it->second << ";" << endl;
 
   output << "extended_path([], " << options_list.num_options.find("periods")->second
-         << ");" << endl
-         << "oo_.exo_simul = oo_.ep.shocks;" << endl;
+         << ");" << endl;
 }
 
 ModelDiagnosticsStatement::ModelDiagnosticsStatement()

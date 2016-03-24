@@ -23,7 +23,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,gstep,tolf,tolx,maxit,deb
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2014 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,7 +62,7 @@ if ~isempty(i)
     return;
 end
 
-f = 0.5*fvec'*fvec ;
+f = 0.5*(fvec'*fvec) ;
 
 if max(abs(fvec)) < tolf
     return ;
@@ -108,7 +108,7 @@ for its = 1:maxit
     xold = x ;
     fold = f ;
 
-    [x,f,fvec,check]=lnsrch1(xold,fold,g,p,stpmax,func,j1,j2,varargin{:});
+    [x, f, fvec, check] = lnsrch1(xold, fold, g, p, stpmax, func, j1, j2, tolx, varargin{:});
 
     if debug
         disp([its f])

@@ -149,9 +149,9 @@ options_ident.analytic_derivation_mode = options_.analytic_derivation_mode;
 if prior_exist
     if any(bayestopt_.pshape > 0)
         if options_ident.prior_range
-            prior_draw(1,1);
+            prior_draw(bayestopt_, options_.prior_trunc, true);
         else
-            prior_draw(1);
+            prior_draw(bayestopt_, options_.prior_trunc, false);
         end
     else
         options_ident.prior_mc=1;
@@ -234,37 +234,44 @@ if iload <=0,
         params = set_prior(estim_params_,M_,options_)';
         if all(bayestopt_.pshape == 0)
             parameters = 'ML_Starting_value';
+            parameters_TeX = 'ML starting value';
             disp('Testing ML Starting value')
         else
-        switch parameters
-            case 'posterior_mode'
-                disp('Testing posterior mode')
-                params(1,:) = get_posterior_parameters('mode');
-            case 'posterior_mean'
-                disp('Testing posterior mean')
-                params(1,:) = get_posterior_parameters('mean');
-            case 'posterior_median'
-                disp('Testing posterior median')
-                params(1,:) = get_posterior_parameters('median');
-            case 'prior_mode'
-                disp('Testing prior mode')
-                params(1,:) = bayestopt_.p5(:);
-            case 'prior_mean'
-                disp('Testing prior mean')
-                params(1,:) = bayestopt_.p1;
-            otherwise
-                disp('The option parameter_set has to be equal to:')
-                disp('                   ''posterior_mode'', ')
-                disp('                   ''posterior_mean'', ')
-                disp('                   ''posterior_median'', ')
-                disp('                   ''prior_mode'' or')
-                disp('                   ''prior_mean''.')
-                error;
-        end
+            switch parameters
+                case 'posterior_mode'
+                    parameters_TeX = 'Posterior mode';
+                    disp('Testing posterior mode')
+                    params(1,:) = get_posterior_parameters('mode');
+                case 'posterior_mean'
+                    parameters_TeX = 'Posterior mean';
+                    disp('Testing posterior mean')
+                    params(1,:) = get_posterior_parameters('mean');
+                case 'posterior_median'
+                    parameters_TeX = 'Posterior median';
+                    disp('Testing posterior median')
+                    params(1,:) = get_posterior_parameters('median');
+                case 'prior_mode'
+                    parameters_TeX = 'Prior mode';
+                    disp('Testing prior mode')
+                    params(1,:) = bayestopt_.p5(:);
+                case 'prior_mean'
+                    parameters_TeX = 'Prior mean';                    
+                    disp('Testing prior mean')
+                    params(1,:) = bayestopt_.p1;
+                otherwise
+                    disp('The option parameter_set has to be equal to:')
+                    disp('                   ''posterior_mode'', ')
+                    disp('                   ''posterior_mean'', ')
+                    disp('                   ''posterior_median'', ')
+                    disp('                   ''prior_mode'' or')
+                    disp('                   ''prior_mean''.')
+                    error;
+            end
         end
     else
         params = [sqrt(diag(M_.Sigma_e))', M_.params'];
         parameters = 'Current_params';
+        parameters_TeX = 'Current parameter values';
         disp('Testing current parameter values')
     end
     [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point, info] = ...
@@ -339,7 +346,7 @@ if iload <=0,
     save([IdentifDirectoryName '/' M_.fname '_' parameters '_identif.mat'], 'idehess_point', 'idemoments_point','idemodel_point', 'idelre_point','store_options_ident')
     disp_identification(params, idemodel_point, idemoments_point, name, advanced);
     if ~options_.nograph,
-        plot_identification(params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName);
+        plot_identification(params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName,parameters_TeX);
     end
 
     if SampleSize > 1,
@@ -541,7 +548,7 @@ if SampleSize > 1,
                 disp_identification(pdraws(jmax,:), idemodel_max, idemoments_max, name,1);
                 close all,
                 if ~options_.nograph,
-                    plot_identification(pdraws(jmax,:),idemoments_max,idehess_max,idemodel_max,idelre_max,1,tittxt,name,IdentifDirectoryName);
+                    plot_identification(pdraws(jmax,:),idemoments_max,idehess_max,idemodel_max,idelre_max,1,tittxt,name,IdentifDirectoryName,tittxt);
                 end
                 [dum,jmin]=min(idemoments.cond);
                 fprintf('\n')
@@ -556,7 +563,7 @@ if SampleSize > 1,
                 disp_identification(pdraws(jmin,:), idemodel_min, idemoments_min, name,1);
                 close all,
                 if ~options_.nograph,
-                    plot_identification(pdraws(jmin,:),idemoments_min,idehess_min,idemodel_min,idelre_min,1,tittxt,name,IdentifDirectoryName);
+                    plot_identification(pdraws(jmin,:),idemoments_min,idehess_min,idemodel_min,idelre_min,1,tittxt,name,IdentifDirectoryName,tittxt);
                 end
             else
                 for j=1:length(jcrit),
@@ -570,7 +577,7 @@ if SampleSize > 1,
                     disp_identification(pdraws(jcrit(j),:), idemodel_(j), idemoments_(j), name,1);
                     close all,
                     if ~options_.nograph,
-                        plot_identification(pdraws(jcrit(j),:),idemoments_(j),idehess_(j),idemodel_(j),idelre_(j),1,tittxt,name,IdentifDirectoryName);
+                        plot_identification(pdraws(jcrit(j),:),idemoments_(j),idehess_(j),idemodel_(j),idelre_(j),1,tittxt,name,IdentifDirectoryName,tittxt);
                     end
                 end
                 if ~iload,

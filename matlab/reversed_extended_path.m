@@ -14,7 +14,7 @@ function innovation_paths = reversed_extended_path(controlled_variable_names, co
 %
 % SPECIAL REQUIREMENTS
 
-% Copyright (C) 2010-2011 Dynare Team.
+% Copyright (C) 2010-2016 Dynare Team.
 %
 % This file is part of Dynare.
 %
@@ -56,10 +56,10 @@ options_.order = old_options_order;
 options_.periods = 100;
 
 % Set-up oo_.exo_simul.
-make_ex_;
+oo_=make_ex_(M_,options_,oo_);
 
 % Set-up oo_.endo_simul.
-make_y_;
+oo_=make_y_(M_,options_,oo_);
 
 % Get indices of the controlled endogenous variables in endo_simul.
 n  = length(controlled_variable_names);

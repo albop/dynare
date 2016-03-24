@@ -1,7 +1,7 @@
 function trace_plot(options_,M_,estim_params_,type,blck,name1,name2)
 % This function builds trace plot for the Metropolis-Hastings draws.
 %
-% INPUTS 
+% INPUTS
 %
 %   options_        [structure]    Dynare structure.
 %   M_              [structure]    Dynare structure (related to model definition).
@@ -11,11 +11,11 @@ function trace_plot(options_,M_,estim_params_,type,blck,name1,name2)
 %                                  or 'PosteriorDensity (for posterior density)'
 %   blck            [integer]      Number of the mh chain.
 %   name1           [string]       Object name.
-%   name2           [string]       Object name. 
-%    
-% OUTPUTS 
+%   name2           [string]       Object name.
+%
+% OUTPUTS
 %   None
-%        
+%
 % SPECIAL REQUIREMENTS
 
 % Copyright (C) 2003-2015 Dynare Team
@@ -40,7 +40,7 @@ if strcmpi(type,'PosteriorDensity')
     column=0;
     name1='';
 else
-    if nargin<7    
+    if nargin<7
         column = name2index(options_, M_, estim_params_, type, name1);
     else
         column = name2index(options_, M_, estim_params_, type, name1, name2);
@@ -92,7 +92,7 @@ else
 end
 
 if options_.mh_nblck>1
-    FigureName = [ FigureName , ' (block number ' int2str(blck)  ').']; 
+    FigureName = [ FigureName , ' (block number ' int2str(blck)  ').'];
 end
 
 hh=dyn_figure(options_,'Name',FigureName);
@@ -107,7 +107,7 @@ first = N+1;
 last = TotalNumberOfMhDraws-N;
 
 for t=first:last
-    MovingAverage(t) = mean(PosteriorDraws(t-N:t+N)); 
+    MovingAverage(t) = mean(PosteriorDraws(t-N:t+N));
 end
 
 hold on
@@ -129,5 +129,41 @@ if strcmpi(type,'PosteriorDensity')
 else
     plot_name=get_the_name(column,0,M_,estim_params_,options_);
 end
+
 dyn_saveas(hh,[M_.fname, filesep, 'graphs', filesep, 'TracePlot_' plot_name],options_)
+
+if options_.TeX
+    fid=fopen([M_.fname,'/graphs/',M_.fname,'_TracePlot_' plot_name,'.TeX'],'w+');
+    
+    if strcmpi(type,'DeepParameter')
+        tex_names=M_.param_names_tex;
+        base_names=M_.param_names;
+    elseif strcmpi(type,'StructuralShock')
+        tex_names=M_.exo_names_tex;
+        base_names=M_.exo_names;
+    elseif strcmpi(type,'MeasurementError')
+        tex_names=M_.endo_names_tex;
+        base_names=M_.endo_names;
+    end
+    
+    if strcmpi(type,'PosteriorDensity')
+        FigureName = ['Trace plot for ' TYPE name1];
+    else
+        if nargin<7
+            FigureName = ['Trace plot for ' TYPE '$' deblank(tex_names(strmatch(name1,base_names,'exact'),:)) '$'];
+        else
+            FigureName = ['Trace plot for ' TYPE '$' deblank(tex_names(strmatch(name1,base_names,'exact'),:)) '$ and $' deblank(tex_names(strmatch(name2,base_names,'exact'),:)) '$'];
+        end
+    end
+    if options_.mh_nblck>1
+        FigureName = [ FigureName , ' (block number ' int2str(blck)  ').'];
+    end
+    
+    fprintf(fid,'%-s\n','\begin{figure}[H]');
+    fprintf(fid,'%-s\n','\centering');
+    fprintf(fid,'%-s\n',['  \includegraphics[scale=0.5]{',[M_.fname, '/graphs/TracePlot_' plot_name],'}\\']);
+    fprintf(fid,'%-s\n',['    \caption{',FigureName,'}']);
+    fprintf(fid,'%-s\n','\end{figure}');
+    fclose(fid);
+end
 

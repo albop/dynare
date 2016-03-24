@@ -315,7 +315,7 @@ if ~isempty(estim_params_) && ~all(strcmp(fieldnames(estim_params_),'full_calibr
             plot_priors(bayestopt_,M_,estim_params_,options_)
         end
         % Set prior bounds
-        bounds = prior_bounds(bayestopt_,options_);
+        bounds = prior_bounds(bayestopt_, options_.prior_trunc);
         bounds.lb = max(bounds.lb,lb);
         bounds.ub = min(bounds.ub,ub);
     else  % estimated parameters but no declared priors
@@ -375,13 +375,11 @@ if ~isfield(options_,'trend_coeffs') % No!
 else% Yes!
     bayestopt_.with_trend = 1;
     bayestopt_.trend_coeff = {};
-    trend_coeffs = options_.trend_coeffs;
-    nt = length(trend_coeffs);
     for i=1:options_.number_of_observed_variables
-        if i > length(trend_coeffs)
+        if i > length(options_.trend_coeffs)
             bayestopt_.trend_coeff{i} = '0';
         else
-            bayestopt_.trend_coeff{i} = trend_coeffs{i};
+            bayestopt_.trend_coeff{i} = options_.trend_coeffs{i};
         end
     end
 end
@@ -530,11 +528,11 @@ end
 
 [dataset_, dataset_info, newdatainterfaceflag] = makedataset(options_, options_.dsge_var*options_.dsge_varlag, gsa_flag);
 
-% Set options_.nobs if needed
-if newdatainterfaceflag
+%set options for old interface from the ones for new interface
+if ~isempty(dataset_)
     options_.nobs = dataset_.nobs;
+    options_.first_obs=double(dataset_.init);
 end
-
 % setting steadystate_check_flag option
 if options_.diffuse_filter
     steadystate_check_flag = 0;
@@ -558,7 +556,7 @@ if info(1)
     print_info(info, 0, options_);
 end
 
-if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
+if (~options_.loglinear && all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)) || (options_.loglinear && all(abs(log(oo_.steady_state(bayestopt_.mfys)))<1e-9))
     options_.noconstant = 1;
 else
     options_.noconstant = 0;
@@ -573,3 +571,28 @@ else
         error('The option "prefilter" is inconsistent with the non-zero mean measurement equations in the model.')
     end
 end
+
+%% get the non-zero rows and columns of Sigma_e and H
+
+H_non_zero_rows=find(~all(M_.H==0,1));
+H_non_zero_columns=find(~all(M_.H==0,2));
+if ~isequal(H_non_zero_rows,H_non_zero_columns')
+    error('Measurement error matrix not symmetric')
+end
+if isfield(estim_params_,'nvn_observable_correspondence')
+    estim_params_.H_entries_to_check_for_positive_definiteness=union(H_non_zero_rows,estim_params_.nvn_observable_correspondence(:,1));
+else
+    estim_params_.H_entries_to_check_for_positive_definiteness=H_non_zero_rows;
+end
+
+Sigma_e_non_zero_rows=find(~all(M_.Sigma_e==0,1));
+Sigma_e_non_zero_columns=find(~all(M_.Sigma_e==0,2));
+if ~isequal(Sigma_e_non_zero_rows,Sigma_e_non_zero_columns')
+    error('Structual error matrix not symmetric')
+end
+if isfield(estim_params_,'var_exo') && ~isempty(estim_params_.var_exo)
+    estim_params_.Sigma_e_entries_to_check_for_positive_definiteness=union(Sigma_e_non_zero_rows,estim_params_.var_exo(:,1));
+else
+    estim_params_.Sigma_e_entries_to_check_for_positive_definiteness=Sigma_e_non_zero_rows;
+end
+

@@ -1,8 +1,23 @@
-function rval = strjoin (c, varargin)
-%function rval = strjoin (c, varargin)
+function str = writematrixofchar(m)
 
-% Copyright (C) 2007 Muthiah Annamalai <muthiah.annamalai@uta.edu>
-% Copyright (C) 2013 Dynare Team
+% Writes a matrix of char in a string.
+%
+% INPUTS 
+% - m   [char] matrix of char.
+%
+% OUTPUTS 
+% - str [char]
+%
+% EXAMPLE 
+% >> writematrixofchar(['a'; 'b'])
+%
+% ans =
+%
+% ['a'; 'b']
+%
+% where the returned argument is a string which can be evaluated or printed.
+    
+% Copyright (C) 2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -19,18 +34,15 @@ function rval = strjoin (c, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(iscellstr(c), 'strjoin: first argument is a cell array of strings');
-assert(nargin <= 2, 'strjoin: takes one or two arguments');
-delimiter = ' ';
-if nargin == 2
-    delimiter = varargin{1};
-    assert(ischar(delimiter), 'strjoin: second argument must be a char');
+if ~(ischar(m) && ismatrix(m))
+    error('Input has to be a matrix of char!')
 end
 
-rval = '';
-L = length(c);
-for idx = 1:(L-1)
-    rval = [rval c{idx} delimiter];
+str = '[';
+for i=1:size(m, 1)
+    str = sprintf('%s''%s''', str, m(i,:));
+    if i<size(m, 1)
+        str = sprintf('%s; ', str);
+    end
 end
-rval = [rval c{L}];
-end
+str = sprintf('%s]', str);

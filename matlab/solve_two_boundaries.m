@@ -46,7 +46,7 @@ function [y, oo]= solve_two_boundaries(fname, y, x, params, steady_state, y_inde
 %   none.
 %  
 
-% Copyright (C) 1996-2015 Dynare Team
+% Copyright (C) 1996-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -307,7 +307,7 @@ while ~(cvg==1 || iter>maxit_)
             g = (ra'*g1a)';
             f = 0.5*ra'*ra;
             p = -g1a\ra;
-            [yn,f,ra,check]=lnsrch1(ya,f,g,p,stpmax,'lnsrch1_wrapper_two_boundaries',nn,nn,  fname, y, y_index,x, params, steady_state, periods, y_kmin, Blck_size,options.periods);
+            [yn,f,ra,check]=lnsrch1(ya,f,g,p,stpmax,'lnsrch1_wrapper_two_boundaries',nn,nn, options.solve_tolx, fname, y, y_index,x, params, steady_state, periods, y_kmin, Blck_size,options.periods);
             dx = ya - yn;
             y(1+y_kmin:periods+y_kmin,y_index)=reshape(yn',length(y_index),periods)';
         end

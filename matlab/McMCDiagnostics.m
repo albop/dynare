@@ -90,22 +90,26 @@ if nblck == 1 % Brooks and Gelman tests need more than one block
     last_obs_begin_sample = first_obs_begin_sample+round(options_.convergence.geweke.geweke_interval(1)*NumberOfDraws*(1-options_.mh_drop));
     first_obs_end_sample = first_obs_begin_sample+round(options_.convergence.geweke.geweke_interval(2)*NumberOfDraws*(1-options_.mh_drop));
     param_name=[];
-    for jj=1:npar
-        param_name = strvcat(param_name,get_the_name(jj,options_.TeX,M_,estim_params_,options_));
+    if options_.TeX
+        param_name_tex=[];    
+    end
+    for jj=1:npar        
+        if options_.TeX
+            [param_name_temp, param_name_tex_temp]= get_the_name(jj,options_.TeX,M_,estim_params_,options_);
+            param_name_tex = strvcat(param_name_tex,strrep(param_name_tex_temp,'$',''));
+            param_name = strvcat(param_name,param_name_temp);
+        else
+            param_name_temp = get_the_name(jj,options_.TeX,M_,estim_params_,options_);
+            param_name = strvcat(param_name,param_name_temp);
+        end
     end
     fprintf('\nGeweke (1992) Convergence Tests, based on means of draws %d to %d vs %d to %d.\n',first_obs_begin_sample,last_obs_begin_sample,first_obs_end_sample,NumberOfDraws);
     fprintf('p-values are for Chi2-test for equality of means.\n');    
-    Geweke_header={'Parameter', 'Post. Mean', 'Post. Std', 'p-val No Taper'};
-    print_string=['%',num2str(size(param_name,2)+3),'s \t %12.3f \t %12.3f \t %12.3f'];
-    print_string_header=['%',num2str(size(param_name,2)+3),'s \t %12s \t %12s \t %12s'];    
+    Geweke_header=char('Parameter', 'Post. Mean', 'Post. Std', 'p-val No Taper');
     for ii=1:length(options_.convergence.geweke.taper_steps)
-        Geweke_header=[Geweke_header, ['p-val ' num2str(options_.convergence.geweke.taper_steps(ii)),'% Taper']];
-        print_string=[print_string,'\t %12.3f'];
-        print_string_header=[print_string_header,'\t %12s'];
+        Geweke_header=char(Geweke_header,['p-val ' num2str(options_.convergence.geweke.taper_steps(ii)),'% Taper']);
     end
-    print_string=[print_string,'\n'];
-    print_string_header=[print_string_header,'\n'];
-    fprintf(print_string_header,Geweke_header{1,:});
+    datamat=NaN(npar,3+length(options_.convergence.geweke.taper_steps));
     for jj=1:npar
         startline=0;
         for n = 1:NumberOfMcFilesPerBlock
@@ -124,7 +128,21 @@ if nblck == 1 % Brooks and Gelman tests need more than one block
         
         results_struct = geweke_chi2_test(results_vec1,results_vec2,results_struct,options_);
         eval(['oo_.convergence.geweke.',param_name(jj,:),'=results_struct;'])
-        fprintf(print_string,param_name(jj,:),results_struct.posteriormean,results_struct.posteriorstd,results_struct.prob_chi2_test)
+        datamat(jj,:)=[results_struct.posteriormean,results_struct.posteriorstd,results_struct.prob_chi2_test];
+    end
+    lh = size(param_name,2)+2;
+    dyntable('',Geweke_header,param_name,datamat,lh,12,3);
+    if options_.TeX
+        Geweke_tex_header=char('Parameter', 'Mean', 'Std', 'No\ Taper');
+        additional_header={[' & \multicolumn{2}{c}{Posterior} & \multicolumn{',num2str(1+length(options_.convergence.geweke.taper_steps)),'}{c}{p-values} \\'],
+            ['\cmidrule(r{.75em}){2-3} \cmidrule(r{.75em}){4-',num2str(4+length(options_.convergence.geweke.taper_steps)),'}']};
+        for ii=1:length(options_.convergence.geweke.taper_steps)
+            Geweke_tex_header=char(Geweke_tex_header,[num2str(options_.convergence.geweke.taper_steps(ii)),'\%%\ Taper']);
+        end
+        headers = char(Geweke_tex_header);
+        lh = size(param_name_tex,2)+2;
+        my_title=sprintf('Geweke (1992) Convergence Tests, based on means of draws %d to %d vs %d to %d. p-values are for $\\\\chi^2$-test for equality of means.',first_obs_begin_sample,last_obs_begin_sample,first_obs_end_sample,NumberOfDraws);
+        dyn_latex_table(M_,my_title,'geweke',headers,param_name_tex,datamat,lh,12,4,additional_header);    
     end
     skipline(2);
     return;

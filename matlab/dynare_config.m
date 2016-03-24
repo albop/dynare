@@ -15,7 +15,7 @@ function dynareroot = dynare_config(path_to_dynare,verbose)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2015 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -98,12 +98,6 @@ end
 % corrcoef with two outputs is missing in Octave (ticket #796)
 if isoctave && ~user_has_octave_forge_package('nan')
     addpath([dynareroot '/missing/corrcoef'])
-end
-
-% strjoin is missing in older versions of MATLAB and in Octave < 3.8
-if (isoctave && octave_ver_less_than('3.8')) || ...
-        (~isoctave && matlab_ver_less_than('8.1'))
-    addpath([dynareroot '/missing/strjoin'])
 end
 
 % nanmean is in Octave Forge Statistics package and in MATLAB Statistics

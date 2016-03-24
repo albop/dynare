@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2015 Dynare Team
+ * Copyright (C) 2003-2016 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -131,19 +131,19 @@ ParsingDriver::warning(const string &m)
 }
 
 void
-ParsingDriver::declare_symbol(const string *name, SymbolType type, const string *tex_name, const string *long_name)
+ParsingDriver::declare_symbol(const string *name, SymbolType type, const string *tex_name, const pair<string *, string *> *partition_value)
 {
   try
     {
-      if (tex_name == NULL && long_name == NULL)
+      if (tex_name == NULL && partition_value == NULL)
         mod_file->symbol_table.addSymbol(*name, type);
       else
         if (tex_name == NULL)
-          mod_file->symbol_table.addSymbol(*name, type, "", *long_name);
-        else if (long_name == NULL)
-          mod_file->symbol_table.addSymbol(*name, type, *tex_name, "");
+          mod_file->symbol_table.addSymbol(*name, type, "", partition_value);
+        else if (partition_value == NULL)
+          mod_file->symbol_table.addSymbol(*name, type, *tex_name, NULL);
         else
-          mod_file->symbol_table.addSymbol(*name, type, *tex_name, *long_name);
+          mod_file->symbol_table.addSymbol(*name, type, *tex_name, partition_value);
     }
   catch (SymbolTable::AlreadyDeclaredException &e)
     {
@@ -155,47 +155,63 @@ ParsingDriver::declare_symbol(const string *name, SymbolType type, const string 
 }
 
 void
-ParsingDriver::declare_endogenous(string *name, string *tex_name, string *long_name)
+ParsingDriver::declare_endogenous(string *name, string *tex_name, pair<string *, string *> *partition_value)
 {
-  declare_symbol(name, eEndogenous, tex_name, long_name);
+  declare_symbol(name, eEndogenous, tex_name, partition_value);
   delete name;
   if (tex_name != NULL)
     delete tex_name;
-  if (long_name != NULL)
-    delete long_name;
+  if (partition_value != NULL)
+    {
+      delete partition_value->first;
+      delete partition_value->second;
+      delete partition_value;
+    }
 }
 
 void
-ParsingDriver::declare_exogenous(string *name, string *tex_name, string *long_name)
+ParsingDriver::declare_exogenous(string *name, string *tex_name, pair<string *, string *> *partition_value)
 {
-  declare_symbol(name, eExogenous, tex_name, long_name);
+  declare_symbol(name, eExogenous, tex_name, partition_value);
   delete name;
   if (tex_name != NULL)
     delete tex_name;
-  if (long_name != NULL)
-    delete long_name;
+  if (partition_value != NULL)
+    {
+      delete partition_value->first;
+      delete partition_value->second;
+      delete partition_value;
+    }
 }
 
 void
-ParsingDriver::declare_exogenous_det(string *name, string *tex_name, string *long_name)
+ParsingDriver::declare_exogenous_det(string *name, string *tex_name, pair<string *, string *> *partition_value)
 {
-  declare_symbol(name, eExogenousDet, tex_name, long_name);
+  declare_symbol(name, eExogenousDet, tex_name, partition_value);
   delete name;
   if (tex_name != NULL)
     delete tex_name;
-  if (long_name != NULL)
-    delete long_name;
+  if (partition_value != NULL)
+    {
+      delete partition_value->first;
+      delete partition_value->second;
+      delete partition_value;
+    }
 }
 
 void
-ParsingDriver::declare_parameter(string *name, string *tex_name, string *long_name)
+ParsingDriver::declare_parameter(string *name, string *tex_name, pair<string *, string *> *partition_value)
 {
-  declare_symbol(name, eParameter, tex_name, long_name);
+  declare_symbol(name, eParameter, tex_name, partition_value);
   delete name;
   if (tex_name != NULL)
     delete tex_name;
-  if (long_name != NULL)
-    delete long_name;
+  if (partition_value != NULL)
+    {
+      delete partition_value->first;
+      delete partition_value->second;
+      delete partition_value;
+    }
 }
 
 void
@@ -213,8 +229,6 @@ ParsingDriver::declare_optimal_policy_discount_factor_parameter(expr_t exprnode)
 {
   string *optimalParName_declare = new string("optimal_policy_discount_factor");
   string *optimalParName_init = new string("optimal_policy_discount_factor");
-  if (mod_file->symbol_table.exists(*optimalParName_declare))
-    error("Symbol optimal_policy_discount_factor is needed by Dynare when using a ramsey_model, a ramsey_policy or a discretionary_policy statement");
   declare_parameter(optimalParName_declare, NULL);
   init_param(optimalParName_init, exprnode);
 }
@@ -356,25 +370,29 @@ ParsingDriver::add_expression_variable(string *name)
 }
 
 void
-ParsingDriver::declare_nonstationary_var(string *name, string *tex_name, string *long_name)
+ParsingDriver::declare_nonstationary_var(string *name, string *tex_name, pair<string *, string *> *partition_value)
 {
-  if (tex_name == NULL && long_name == NULL)
+  if (tex_name == NULL && partition_value == NULL)
     declare_endogenous(new string(*name));
   else
     if (tex_name == NULL)
-      declare_endogenous(new string(*name), NULL, new string(*long_name));
-    else if (long_name == NULL)
+      declare_endogenous(new string(*name), NULL, new pair<string *, string *>(*partition_value));
+    else if (partition_value == NULL)
       declare_endogenous(new string(*name), new string(*tex_name));
     else
-      declare_endogenous(new string(*name), new string(*tex_name), new string(*long_name));
+      declare_endogenous(new string(*name), new string(*tex_name), new pair<string *, string *>(*partition_value));
 
   declared_nonstationary_vars.push_back(mod_file->symbol_table.getID(*name));
   mod_file->nonstationary_variables = true;
   delete name;
   if (tex_name != NULL)
     delete tex_name;
-  if (long_name != NULL)
-    delete long_name;
+  if (partition_value != NULL)
+    {
+      delete partition_value->first;
+      delete partition_value->second;
+      delete partition_value;
+    }
 }
 
 void

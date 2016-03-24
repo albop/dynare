@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 Dynare Team
+ * Copyright (C) 2008-2016 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -188,7 +188,11 @@ CONT \\\\
                                 }
                               else
                                 {
+#if (YY_FLEX_MAJOR_VERSION > 2) || (YY_FLEX_MAJOR_VERSION == 2 && YY_FLEX_MINOR_VERSION >= 6)
+                                  yyout << endl;
+#else
                                   *yyout << endl;
+#endif
                                   BEGIN(INITIAL);
                                 }
                               return token::EOL;
@@ -245,7 +249,7 @@ CONT \\\\
 <STMT>echo                  { return token::ECHO_DIR; }
 <STMT>error                 { return token::ERROR; }
 
-<STMT,EXPR>[A-Za-z_\x80-\xf3][A-Za-z0-9_\x80-\xf3]* {
+<STMT,EXPR>[A-Za-z_][A-Za-z0-9_]* {
                               yylval->string_val = new string(yytext);
                               return token::NAME;
                             }
@@ -383,7 +387,13 @@ CONT \\\\
                             }
 
  /* We don't use echo, because under Cygwin it will add an extra \r */
-<INITIAL>{EOL}              { yylloc->lines(1); yylloc->step(); *yyout << endl; }
+<INITIAL>{EOL}              { yylloc->lines(1); yylloc->step();
+#if (YY_FLEX_MAJOR_VERSION > 2) || (YY_FLEX_MAJOR_VERSION == 2 && YY_FLEX_MINOR_VERSION >= 6)
+                              yyout << endl;
+#else
+                              *yyout << endl;
+#endif
+                            }
 
  /* Copy everything else to output */
 <INITIAL>.                  { yylloc->step(); ECHO; }
@@ -401,8 +411,13 @@ void
 MacroFlex::output_line(Macro::parser::location_type *yylloc) const
 {
   if (!no_line_macro)
-    *yyout << endl << "@#line \"" << *yylloc->begin.filename << "\" "
-           << yylloc->begin.line << endl;
+#if (YY_FLEX_MAJOR_VERSION > 2) || (YY_FLEX_MAJOR_VERSION == 2 && YY_FLEX_MINOR_VERSION >= 6)
+    const_cast<ostream&>(yyout)
+#else
+    *yyout
+#endif
+     << endl << "@#line \"" << *yylloc->begin.filename << "\" "
+     << yylloc->begin.line << endl;
 }
 
 void

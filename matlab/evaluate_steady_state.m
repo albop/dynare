@@ -22,7 +22,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2013 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,7 +48,9 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 
     if length(M.aux_vars) > 0
         h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);
-        ys_init = h_set_auxiliary_variables(ys_init,exo_ss,M.params);
+        if ~steadystate_flag
+            ys_init = h_set_auxiliary_variables(ys_init,exo_ss,M.params);
+        end
     end
 
     if options.ramsey_policy
@@ -58,7 +60,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
                                                            options);
             %test whether it solves model conditional on the instruments
             resids = evaluate_static_model(ys,exo_ss,params,M,options);
-            n_multipliers=M.endo_nbr-M.orig_endo_nbr;
+            n_multipliers=M.ramsey_eq_nbr;
             nan_indices=find(isnan(resids(n_multipliers+1:end)));
 
             if ~isempty(nan_indices)

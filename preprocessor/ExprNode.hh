@@ -37,8 +37,6 @@ class BinaryOpNode;
 
 typedef class ExprNode *expr_t;
 
-struct Model_Block;
-
 struct ExprNodeLess;
 
 //! Type for set of temporary terms
@@ -159,7 +157,18 @@ protected:
 
   //! Cost of computing current node
   /*! Nodes included in temporary_terms are considered having a null cost */
+  virtual int cost(int cost, bool is_matlab) const;
   virtual int cost(const temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual int cost(const map<NodeTreeReference, temporary_terms_t> &temp_terms_map, bool is_matlab) const;
+
+  //! For creating equation cross references
+  struct EquationInfo
+  {
+    set<int> param;
+    set<int> endo;
+    set<int> exo;
+    set<int> exo_det;
+  };
 
 public:
   ExprNode(DataTree &datatree_arg);
@@ -186,7 +195,9 @@ public:
 
   //! Fills temporary_terms set, using reference counts
   /*! A node will be marked as a temporary term if it is referenced at least two times (i.e. has at least two parents), and has a computing cost (multiplied by reference count) greater to datatree.min_cost */
-  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, pair<int, NodeTreeReference> > &reference_count,
+                                     map<NodeTreeReference, temporary_terms_t> &temp_terms_map,
+                                     bool is_matlab, NodeTreeReference tr) const;
 
   //! Writes output of node, using a Txxx notation for nodes in temporary_terms, and specifiying the set of already written external functions
   /*!
@@ -281,6 +292,12 @@ public:
     adds the result in the static_datatree argument (and not in the original datatree), and returns it.
   */
   virtual expr_t toStatic(DataTree &static_datatree) const = 0;
+
+  /*!
+    Compute cross references for equations
+   */
+  //  virtual void computeXrefs(set<int> &param, set<int> &endo, set<int> &exo, set<int> &exo_det) const = 0;
+  virtual void computeXrefs(EquationInfo &ei) const = 0;
   //! Try to normalize an equation linear in its endogenous variable
   virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > > &List_of_Op_RHS) const = 0;
 
@@ -460,6 +477,7 @@ public:
   virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException);
   virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
   virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual void computeXrefs(EquationInfo &ei) const;
   virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
   virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
@@ -502,7 +520,7 @@ public:
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual bool containsExternalFunction() const;
   virtual void collectDynamicVariables(SymbolType type_arg, set<pair<int, int> > &result) const;
-  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
+  virtual void computeTemporaryTerms(map<expr_t, int > &reference_count,
                                      temporary_terms_t &temporary_terms,
                                      map<expr_t, pair<int, int> > &first_occurence,
                                      int Curr_block,
@@ -512,6 +530,7 @@ public:
   virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException);
   virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
   virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual void computeXrefs(EquationInfo &ei) const;
   SymbolType
   get_type() const
   {
@@ -559,13 +578,17 @@ private:
   const int param1_symb_id, param2_symb_id;
   const UnaryOpcode op_code;
   virtual expr_t computeDerivative(int deriv_id);
+  virtual int cost(int cost, bool is_matlab) const;
   virtual int cost(const temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual int cost(const map<NodeTreeReference, temporary_terms_t> &temp_terms_map, bool is_matlab) const;
   //! Returns the derivative of this node if darg is the derivative of the argument
   expr_t composeDerivatives(expr_t darg, int deriv_id);
 public:
   UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const expr_t arg_arg, int expectation_information_set_arg, int param1_symb_id_arg, int param2_symb_id_arg);
   virtual void prepareForDerivation();
-  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, pair<int, NodeTreeReference> > &reference_count,
+                                     map<NodeTreeReference, temporary_terms_t> &temp_terms_map,
+                                     bool is_matlab, NodeTreeReference tr) const;
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual bool containsExternalFunction() const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
@@ -599,6 +622,7 @@ public:
     return (op_code);
   };
   virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual void computeXrefs(EquationInfo &ei) const;
   virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
   virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
@@ -633,7 +657,9 @@ private:
   const expr_t arg1, arg2;
   const BinaryOpcode op_code;
   virtual expr_t computeDerivative(int deriv_id);
+  virtual int cost(int cost, bool is_matlab) const;
   virtual int cost(const temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual int cost(const map<NodeTreeReference, temporary_terms_t> &temp_terms_map, bool is_matlab) const;
   //! Returns the derivative of this node if darg1 and darg2 are the derivatives of the arguments
   expr_t composeDerivatives(expr_t darg1, expr_t darg2);
   const int powerDerivOrder;
@@ -644,7 +670,9 @@ public:
                BinaryOpcode op_code_arg, const expr_t arg2_arg, int powerDerivOrder);
   virtual void prepareForDerivation();
   virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms) const;
-  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, pair<int, NodeTreeReference> > &reference_count,
+                                     map<NodeTreeReference, temporary_terms_t> &temp_terms_map,
+                                     bool is_matlab, NodeTreeReference tr) const;
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual bool containsExternalFunction() const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
@@ -690,6 +718,7 @@ public:
     return powerDerivOrder;
   }
   virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual void computeXrefs(EquationInfo &ei) const;
   virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
   virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
@@ -731,7 +760,9 @@ private:
   const expr_t arg1, arg2, arg3;
   const TrinaryOpcode op_code;
   virtual expr_t computeDerivative(int deriv_id);
+  virtual int cost(int cost, bool is_matlab) const;
   virtual int cost(const temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual int cost(const map<NodeTreeReference, temporary_terms_t> &temp_terms_map, bool is_matlab) const;
   //! Returns the derivative of this node if darg1, darg2 and darg3 are the derivatives of the arguments
   expr_t composeDerivatives(expr_t darg1, expr_t darg2, expr_t darg3);
 public:
@@ -739,7 +770,9 @@ public:
                 TrinaryOpcode op_code_arg, const expr_t arg2_arg, const expr_t arg3_arg);
   virtual void prepareForDerivation();
   virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms) const;
-  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, pair<int, NodeTreeReference> > &reference_count,
+                                     map<NodeTreeReference, temporary_terms_t> &temp_terms_map,
+                                     bool is_matlab, NodeTreeReference tr) const;
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual bool containsExternalFunction() const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
@@ -761,6 +794,7 @@ public:
   virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException);
   virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
   virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual void computeXrefs(EquationInfo &ei) const;
   virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
   virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
@@ -811,7 +845,9 @@ public:
   AbstractExternalFunctionNode(DataTree &datatree_arg, int symb_id_arg,
                                const vector<expr_t> &arguments_arg);
   virtual void prepareForDerivation();
-  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const = 0;
+  virtual void computeTemporaryTerms(map<expr_t, pair<int, NodeTreeReference> > &reference_count,
+                                     map<NodeTreeReference, temporary_terms_t> &temp_terms_map,
+                                     bool is_matlab, NodeTreeReference tr) const = 0;
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const = 0;
   virtual bool containsExternalFunction() const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
@@ -837,6 +873,7 @@ public:
 
   virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const = 0;
   virtual expr_t toStatic(DataTree &static_datatree) const = 0;
+  virtual void computeXrefs(EquationInfo &ei) const = 0;
   virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
   virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
@@ -871,7 +908,9 @@ private:
 public:
   ExternalFunctionNode(DataTree &datatree_arg, int symb_id_arg,
                        const vector<expr_t> &arguments_arg);
-  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, pair<int, NodeTreeReference> > &reference_count,
+                                     map<NodeTreeReference, temporary_terms_t> &temp_terms_map,
+                                     bool is_matlab, NodeTreeReference tr) const;
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
                                            const temporary_terms_t &temporary_terms,
@@ -888,6 +927,7 @@ public:
                                      int equation) const;
   virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
   virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual void computeXrefs(EquationInfo &ei) const;
   virtual expr_t buildSimilarExternalFunctionNode(vector<expr_t> &alt_args, DataTree &alt_datatree) const;
   virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const;
 };
@@ -902,7 +942,9 @@ public:
                                  int top_level_symb_id_arg,
                                  const vector<expr_t> &arguments_arg,
                                  int inputIndex_arg);
-  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, pair<int, NodeTreeReference> > &reference_count,
+                                     map<NodeTreeReference, temporary_terms_t> &temp_terms_map,
+                                     bool is_matlab, NodeTreeReference tr) const;
   virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
                                      temporary_terms_t &temporary_terms,
                                      map<expr_t, pair<int, int> > &first_occurence,
@@ -922,6 +964,7 @@ public:
                                              const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
                                              deriv_node_temp_terms_t &tef_terms) const;
   virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual void computeXrefs(EquationInfo &ei) const;
   virtual expr_t buildSimilarExternalFunctionNode(vector<expr_t> &alt_args, DataTree &alt_datatree) const;
   virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const;
 };
@@ -938,7 +981,9 @@ public:
                                   const vector<expr_t> &arguments_arg,
                                   int inputIndex1_arg,
                                   int inputIndex2_arg);
-  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, pair<int, NodeTreeReference> > &reference_count,
+                                     map<NodeTreeReference, temporary_terms_t> &temp_terms_map,
+                                     bool is_matlab, NodeTreeReference tr) const;
   virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
                                      temporary_terms_t &temporary_terms,
                                      map<expr_t, pair<int, int> > &first_occurence,
@@ -958,6 +1003,7 @@ public:
                                              const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
                                              deriv_node_temp_terms_t &tef_terms) const;
   virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual void computeXrefs(EquationInfo &ei) const;
   virtual expr_t buildSimilarExternalFunctionNode(vector<expr_t> &alt_args, DataTree &alt_datatree) const;
   virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const;
 };

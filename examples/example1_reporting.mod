@@ -1,13 +1,30 @@
-// Example 1 from Collard's guide to Dynare
+/*
+ * Example 1 from F. Collard (2001): "Stochastic simulations with DYNARE:
+ * A practical guide" (see "guide.pdf" in the documentation directory).
+ */
+
+/*
+ * Copyright (C) 2001-2015 Dynare Team
+ *
+ * This file is part of Dynare.
+ *
+ * Dynare is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Dynare is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 var y, c, k, a, h, b;
 varexo e, u;
-
-verbatim;
-% I want these comments included in
-% example1.m
-%
-var = 1;
-end;
 
 parameters beta, rho, alpha, delta, theta, psi, tau;
 

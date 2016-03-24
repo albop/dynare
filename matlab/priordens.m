@@ -1,4 +1,4 @@
-function [logged_prior_density, dlprior, d2lprior, info] = priordens(x, pshape, p6, p7, p3, p4,initialization)
+function [logged_prior_density, dlprior, d2lprior, info] = priordens(x, pshape, p6, p7, p3, p4, initialization) % --*-- Unitary tests --*--
 % Computes a prior density for the structural parameters of DSGE models
 %
 % INPUTS 
@@ -15,7 +15,7 @@ function [logged_prior_density, dlprior, d2lprior, info] = priordens(x, pshape, 
 %    info                  [double]  error code for index of Inf-prior parameter
 %
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,49 +32,54 @@ function [logged_prior_density, dlprior, d2lprior, info] = priordens(x, pshape, 
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-persistent id1 id2 id3 id4 id5 id6
-persistent tt1 tt2 tt3 tt4 tt5 tt6
+persistent id1 id2 id3 id4 id5 id6 id8
+persistent tt1 tt2 tt3 tt4 tt5 tt6 tt8
 
 info=0;
 
-if nargin > 6  && initialization == 1
+if nargin > 6  && initialization
     % Beta indices.
-    tt1 = 1;
+    tt1 = true;
     id1 = find(pshape==1);
     if isempty(id1)
-        tt1 = 0;
+        tt1 = false;
     end
     % Gamma indices.
-    tt2 = 1;
+    tt2 = true;
     id2 = find(pshape==2);
     if isempty(id2)
-        tt2 = 0;
+        tt2 = false;
     end
     % Gaussian indices.
-    tt3 = 1;
+    tt3 = true;
     id3 = find(pshape==3);
     if isempty(id3)
-        tt3 = 0;
+        tt3 = false;
     end
     % Inverse-Gamma-1 indices.
-    tt4 = 1;
+    tt4 = true;
     id4 = find(pshape==4);
     if isempty(id4)
-        tt4 = 0;
+        tt4 = false;
     end
     % Uniform indices.
-    tt5 = 1;
+    tt5 = true;
     id5 = find(pshape==5);
     if isempty(id5)
-        tt5 = 0;
+        tt5 = false;
     end
     % Inverse-Gamma-2 indices.
-    tt6 = 1;
+    tt6 = true;
     id6 = find(pshape==6);
     if isempty(id6)
-        tt6 = 0;
+        tt6 = false;
     end
-    pflag = 1;
+    % Weibull indices.
+    tt8 = true;
+    id8 = find(pshape==8);
+    if isempty(id8)
+        tt8 = false;
+    end
 end
 
 logged_prior_density = 0.0;
@@ -167,6 +172,104 @@ if tt6
     end
 end
 
+if tt8
+    logged_prior_density = logged_prior_density + sum(lpdfgweibull(x(id8),p6(id8),p7(id8)));
+    if isinf(logged_prior_density)
+        if nargout ==4 
+            info=id8(isinf(log(lpdfgweibull(x(id8),p6(id8),p7(id8)))));
+        end
+        return
+    end
+    if nargout==2
+        [tmp, dlprior(id8)] = lpdfgweibull(x(id8),p6(id8),p7(id8))
+    elseif nargout==3
+        [tmp, dlprior(id8), ds2lprior(id8)] = lpdfgweibull(x(id8),p6(id8),p7(id8))
+    end
+end
+
 if nargout==3,
     d2lprior = diag(d2lprior);
 end
+
+%@test:1
+%$ % Fill global structures with required fields...
+%$ prior_trunc = 1e-10;
+%$ p0 = repmat([1; 2; 3; 4; 5; 6; 8], 2, 1);    % Prior shape
+%$ p1 = .4*ones(14,1);                          % Prior mean
+%$ p2 = .2*ones(14,1);                          % Prior std.
+%$ p3 = NaN(14,1);
+%$ p4 = NaN(14,1);
+%$ p5 = NaN(14,1);
+%$ p6 = NaN(14,1);
+%$ p7 = NaN(14,1);
+%$
+%$ for i=1:14
+%$     switch p0(i)
+%$       case 1
+%$         % Beta distribution
+%$         p3(i) = 0;
+%$         p4(i) = 1;
+%$         [p6(i), p7(i)] = beta_specification(p1(i), p2(i)^2, p3(i), p4(i));
+%$         p5(i) = compute_prior_mode([p6(i) p7(i)], 1);
+%$       case 2
+%$         % Gamma distribution
+%$         p3(i) = 0;
+%$         p4(i) = Inf;
+%$         [p6(i), p7(i)] = gamma_specification(p1(i), p2(i)^2, p3(i), p4(i));
+%$         p5(i) = compute_prior_mode([p6(i) p7(i)], 2);
+%$       case 3
+%$         % Normal distribution
+%$         p3(i) = -Inf;
+%$         p4(i) = Inf;
+%$         p6(i) = p1(i);
+%$         p7(i) = p2(i);
+%$         p5(i) = p1(i);
+%$       case 4
+%$         % Inverse Gamma (type I) distribution
+%$         p3(i) = 0;
+%$         p4(i) = Inf;
+%$         [p6(i), p7(i)] = inverse_gamma_specification(p1(i), p2(i)^2, p3(i), 1, false);
+%$         p5(i) = compute_prior_mode([p6(i) p7(i)], 4);
+%$       case 5
+%$         % Uniform distribution
+%$         [p1(i), p2(i), p6(i), p7(i)] = uniform_specification(p1(i), p2(i), p3(i), p4(i));
+%$         p3(i) = p6(i);
+%$         p4(i) = p7(i);
+%$         p5(i) = compute_prior_mode([p6(i) p7(i)], 5);
+%$       case 6
+%$         % Inverse Gamma (type II) distribution
+%$         p3(i) = 0;
+%$         p4(i) = Inf;
+%$         [p6(i), p7(i)] = inverse_gamma_specification(p1(i), p2(i)^2, p3(i), 2, false);
+%$         p5(i) = compute_prior_mode([p6(i) p7(i)], 6);
+%$       case 8
+%$         % Weibull distribution
+%$         p3(i) = 0;
+%$         p4(i) = Inf;
+%$         [p6(i), p7(i)] = weibull_specification(p1(i), p2(i)^2, p3(i));
+%$         p5(i) = compute_prior_mode([p6(i) p7(i)], 8);
+%$       otherwise
+%$         error('This density is not implemented!')
+%$     end
+%$ end
+%$
+%$ % Call the tested routine
+%$ try
+%$     % Initialization of priordens.
+%$     lpdstar = priordens(p5, p0, p6, p7, p3, p4, true);
+%$     % Do simulations in a loop and estimate recursively the mean and teh variance.
+%$     LPD = NaN(10000,1);
+%$     for i = 1:10000
+%$          draw = p5+randn(size(p5))*.02;
+%$          LPD(i) = priordens(p5, p0, p6, p7, p3, p4);
+%$     end
+%$     t(1) = true;
+%$ catch
+%$     t(1) = false;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = all(LPD<=lpdstar);
+%$ end
+%$ T = all(t);
+%@eof:1

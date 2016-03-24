@@ -60,6 +60,9 @@ else
     var2 = var1;
 end
 
+var1=deblank(var1);
+var2=deblank(var2);
+
 if isfield(oo_,[ TYPE 'TheoreticalMoments'])
     temporary_structure = oo_.([TYPE, 'TheoreticalMoments']); 
     if isfield(temporary_structure,'dsge')

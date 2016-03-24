@@ -21,7 +21,7 @@ function osr_res = osr(var_list,params,i_var,W)
 % SPECIAL REQUIREMENTS
 %   none.
 %  
-% Copyright (C) 2001-2012 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -46,7 +46,7 @@ if isempty(options_.qz_criterium)
     options_.qz_criterium = 1+1e-6;
 end
 
-make_ex_;
+oo_=make_ex_(M_,options_,oo_);
 
 np = size(params,1);
 i_params = zeros(np,1);

@@ -31,7 +31,7 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_,estim_params_
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Initialization.
-prior_draw(1);
+prior_draw(bayestopt_, options_.prior_trunc);
 PriorDirectoryName = CheckPath('prior/draws',M_.dname);
 work = ~drsave;
 iteration = 0;

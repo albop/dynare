@@ -77,7 +77,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   GlobalTemporaryTerms = GlobalTemporaryTerms_arg;
   print_error = print_error_arg;
   //steady_state = steady_state_arg;
-  //print_it = print_it_arg;
+  print_it = print_it_arg;
 
 }
 
@@ -850,16 +850,18 @@ Interpreter::extended_path(string file_name, string bin_basename, bool evaluate,
 
   int endo_name_length_l = endo_name_length;
   for (int j = 0; j < col_x* nb_row_x; j++)
-    x_save[j] = x[j];
+    {
+      x_save[j] = x[j];
+      x[j] = 0;
+    }
+  for (int j = 0; j < col_x; j++)
+    x[y_kmin + j * nb_row_x] = x_save[1 + y_kmin + j * nb_row_x];
   for (int i = 0; i < (y_size*(periods + y_kmax + y_kmin)); i++)
     y_save[i]  = y[i];
   if (endo_name_length_l < 8)
     endo_name_length_l = 8;
-  //mexPrintf("endo_name_length = %d\n",endo_name_length_l);
+  bool old_print_it = print_it;
   print_it = false;
-  //print_it = true;
-  mexPrintf("\nExtended Path simulation:\n");
-  mexPrintf("-------------------------\n");
   ostringstream res1;
   res1 << std::scientific << 2.54656875434865131;
   int real_max_length = res1.str().length();
@@ -868,16 +870,24 @@ Interpreter::extended_path(string file_name, string bin_basename, bool evaluate,
   string line;
   line.insert(line.begin(),table_length,'-');
   line.insert(line.length(),"\n");
-  mexPrintf(line.c_str());
-  string title = "|" + elastic("date",date_length+2, false) + "|" + elastic("variable",endo_name_length_l+2, false) + "|" + elastic("max. value",real_max_length+2, false) + "| iter. |" + elastic("cvg",5, false) + "|\n";
-  mexPrintf(title.c_str());
-  mexPrintf(line.c_str());
+  if (old_print_it)
+    {
+       mexPrintf("\nExtended Path simulation:\n");
+       mexPrintf("-------------------------\n");
+       mexPrintf(line.c_str());
+       string title = "|" + elastic("date",date_length+2, false) + "|" + elastic("variable",endo_name_length_l+2, false) + "|" + elastic("max. value",real_max_length+2, false) + "| iter. |" + elastic("cvg",5, false) + "|\n";
+       mexPrintf(title.c_str());
+       mexPrintf(line.c_str());
+    }
   for (int t = 0; t < nb_periods; t++)
     {
       nb_blocks = 0;
       previous_block_exogenous.clear();
-      mexPrintf("|%s|",elastic(dates[t], date_length+2, false).c_str());
-      mexEvalString("drawnow;");
+      if (old_print_it)
+        {
+          mexPrintf("|%s|",elastic(dates[t], date_length+2, false).c_str());
+          mexEvalString("drawnow;");
+        }
       for (vector<s_plan>::const_iterator it = sextended_path.begin(); it != sextended_path.end(); it++)
         x[y_kmin + (it->exo_num - 1) * (periods + y_kmax + y_kmin)] = it->value[t];
       it_code = Init_Code;
@@ -897,18 +907,22 @@ Interpreter::extended_path(string file_name, string bin_basename, bool evaluate,
       for (int j = 0; j < col_x; j++)
         {
           x_save[t + y_kmin + j * nb_row_x] = x[y_kmin + j * nb_row_x];
-          x[y_kmin + j * nb_row_x] = 0;
+          x[y_kmin + j * nb_row_x] = x_save[t + 1 + y_kmin + j * nb_row_x];
         }
         
-      ostringstream res, res1;
-      for (unsigned int i = 0; i < endo_name_length; i++)
-        if (P_endo_names[CHAR_LENGTH*(max_res_idx+i*y_size)] != ' ')
-          res << P_endo_names[CHAR_LENGTH*(max_res_idx+i*y_size)];
-      res1 << std::scientific << max_res;
-      mexPrintf("%s|%s| %4d  |  x  |\n",elastic(res.str(),endo_name_length_l+2, true).c_str(), elastic(res1.str(), real_max_length+2, false).c_str(), iter);
-      mexPrintf(line.c_str());
-      mexEvalString("drawnow;");
+      if (old_print_it)
+        {
+          ostringstream res, res1;
+          for (unsigned int i = 0; i < endo_name_length; i++)
+            if (P_endo_names[CHAR_LENGTH*(max_res_idx+i*y_size)] != ' ')
+              res << P_endo_names[CHAR_LENGTH*(max_res_idx+i*y_size)];
+           res1 << std::scientific << max_res;
+          mexPrintf("%s|%s| %4d  |  x  |\n",elastic(res.str(),endo_name_length_l+2, true).c_str(), elastic(res1.str(), real_max_length+2, false).c_str(), iter);
+          mexPrintf(line.c_str());
+          mexEvalString("drawnow;");
+        }
     }
+  print_it = old_print_it;
   for (int j = 0; j < y_size; j++)
     {
       for(int k = nb_periods; k < periods; k++)

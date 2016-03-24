@@ -1,4 +1,4 @@
-function bounds = prior_bounds(bayestopt,options)
+function bounds = prior_bounds(bayestopt, prior_trunc)
 
 %@info:
 %! @deftypefn {Function File} {@var{bounds} =} prior_bounds (@var{bayesopt},@var{option})
@@ -69,7 +69,6 @@ p3 = bayestopt.p3;
 p4 = bayestopt.p4;
 p6 = bayestopt.p6;
 p7 = bayestopt.p7;
-prior_trunc = options.prior_trunc;
 
 bounds.lb = zeros(length(p6),1);
 bounds.ub = zeros(length(p6),1);
@@ -150,6 +149,14 @@ for i=1:length(p6)
                     rethrow(lasterror)
                 end
             end
+        end
+      case 8
+        if prior_trunc == 0
+            bounds.lb(i) = p3(i);
+            bounds.ub(i) = Inf;
+        else
+            bounds.lb(i) = p3(i)+wblinv(prior_trunc,p6(i),p7(i));
+            bounds.ub(i) = p3(i)+wblinv(1-prior_trunc,p6(i),p7(i));
         end
       otherwise
         error(sprintf('prior_bounds: unknown distribution shape (index %d, type %d)', i, pshape(i)));

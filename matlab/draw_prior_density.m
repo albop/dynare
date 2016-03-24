@@ -100,6 +100,12 @@ switch pshape(indx)
     end
     abscissa = linspace(infbound,supbound,steps);
     dens = exp(lpdfig2(abscissa-p3(indx),p6(indx),p7(indx)));
+  case 8
+    density = @(x,a,b,c) exp(lpdfgweibull(x, a, b, c));
+    infbound = p3(indx)+wblinv(truncprior,p6(indx),p7(indx));
+    supbound = p3(indx)+wblinv(1-truncprior,p6(indx),p7(indx));
+    abscissa = linspace(infbound,supbound,steps);
+    dens = density(abscissa,p6(indx),p7(indx),p3(indx));
   otherwise
     error(sprintf('draw_prior_density: unknown distribution shape (index %d, type %d)', indx, pshape(indx)));
 end 

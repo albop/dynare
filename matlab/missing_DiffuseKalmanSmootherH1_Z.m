@@ -39,7 +39,7 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKal
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2015 Dynare Team
+% Copyright (C) 2004-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -116,7 +116,7 @@ while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
                         alphahat = Inf;
                         return
                     else
-                        a(:,:,t+1) = T*a(:,:,t);
+                        a(:,t+1) = T*a(:,t);
                         Pstar(:,:,t+1) = T*Pstar(:,:,t)*transpose(T)+QQ;
                         Pinf(:,:,t+1)  = T*Pinf(:,:,t)*transpose(T);
                     end
@@ -125,7 +125,7 @@ while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
                     Kstar(:,:,t)  = Pstar(:,:,t)*ZZ'*iFstar(:,:,t);
                     Pinf(:,:,t+1)   = T*Pinf(:,:,t)*transpose(T);
                     Pstar(:,:,t+1)  = T*(Pstar(:,:,t)-Pstar(:,:,t)*ZZ'*Kstar(:,:,t)')*T'+QQ;
-                    a(:,:,t+1)        = T*(a(:,:,t)+Kstar(:,:,t)*v(:,t));
+                    a(:,t+1)        = T*(a(:,t)+Kstar(:,:,t)*v(:,t));
                 end
             end
         else

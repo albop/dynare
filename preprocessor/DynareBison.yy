@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2015 Dynare Team
+ * Copyright (C) 2003-2016 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -52,6 +52,7 @@ class ParsingDriver;
   SymbolType symbol_type_val;
   vector<string *> *vector_string_val;
   vector<int> *vector_int_val;
+  pair<string *, string *> *string_pair_val;
   PriorDistributions prior_distributions_val;
 };
 
@@ -101,7 +102,7 @@ class ParsingDriver;
 %token IDENTIFICATION INF_CONSTANT INITVAL INITVAL_FILE BOUNDS JSCALE INIT INFILE INVARS
 %token <string_val> INT_NUMBER
 %token INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF IRF_SHOCKS IRF_PLOT_THRESHOLD IRF_CALIBRATION
-%token KALMAN_ALGO KALMAN_TOL DIFFUSE_KALMAN_TOL SUBSAMPLES OPTIONS TOLF
+%token FAST_KALMAN_FILTER KALMAN_ALGO KALMAN_TOL DIFFUSE_KALMAN_TOL SUBSAMPLES OPTIONS TOLF
 %token LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_IDENT_FILES LOAD_MH_FILE LOAD_PARAMS_AND_STEADY_STATE LOGLINEAR LOGDATA LYAPUNOV LINEAR_APPROXIMATION
 %token LYAPUNOV_FIXED_POINT_TOL LYAPUNOV_DOUBLING_TOL LYAPUNOV_SQUARE_ROOT_SOLVER_TOL LOG_DEFLATOR LOG_TREND_VAR LOG_GROWTH_FACTOR MARKOWITZ MARGINAL_DENSITY MAX MAXIT
 %token MFS MH_CONF_SIG MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER POSTERIOR_MAX_SUBSAMPLE_DRAWS MIN MINIMAL_SOLVING_PERIODS
@@ -127,7 +128,7 @@ class ParsingDriver;
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL USEAUTOCORR GSA_SAMPLE_FILE USE_UNIVARIATE_FILTERS_IF_SINGULARITY_IS_DETECTED
 %token VALUES VAR VAREXO VAREXO_DET VAROBS PREDETERMINED_VARIABLES
 %token WRITE_LATEX_DYNAMIC_MODEL WRITE_LATEX_STATIC_MODEL WRITE_LATEX_ORIGINAL_MODEL
-%token XLS_SHEET XLS_RANGE LONG_NAME LMMCP OCCBIN BANDPASS_FILTER
+%token XLS_SHEET XLS_RANGE LMMCP OCCBIN BANDPASS_FILTER
 %left COMMA
 %left EQUAL_EQUAL EXCLAMATION_EQUAL
 %left LESS GREATER LESS_EQUAL GREATER_EQUAL
@@ -178,8 +179,9 @@ class ParsingDriver;
 %type <string_val> non_negative_number signed_number signed_integer date_str
 %type <string_val> filename symbol vec_of_vec_value vec_value_list date_expr
 %type <string_val> vec_value_1 vec_value signed_inf signed_number_w_inf
-%type <string_val> range vec_value_w_inf vec_value_1_w_inf named_var
+%type <string_val> range vec_value_w_inf vec_value_1_w_inf
 %type <string_val> integer_range signed_integer_range
+%type <string_pair_val> named_var
 %type <symbol_type_val> change_type_arg
 %type <vector_string_val> change_type_var_list subsamples_eq_opt prior_eq_opt options_eq_opt calibration_range
 %type <vector_int_val> vec_int_elem vec_int_1 vec_int vec_int_number
@@ -370,8 +372,11 @@ predetermined_variables : PREDETERMINED_VARIABLES predetermined_variables_list '
 
 parameters : PARAMETERS parameter_list ';';
 
-named_var : '(' LONG_NAME EQUAL QUOTED_STRING ')'
-            { $$ = $4; }
+named_var : '(' symbol EQUAL QUOTED_STRING ')'
+            {
+              pair<string *, string *> *pr = new pair<string *, string *>($2, $4);
+              $$ = pr;
+            }
           ;
 
 var_list : var_list symbol
@@ -1698,6 +1703,7 @@ estimation_options : o_datafile
                    | o_moments_varendo
                    | o_contemporaneous_correlation
                    | o_filtered_vars
+                   | o_fast_kalman_filter
                    | o_kalman_algo
                    | o_kalman_tol
 		   | o_diffuse_kalman_tol
@@ -2475,6 +2481,7 @@ calib_smoother_option : o_filtered_vars
                       | o_prefilter
                       | o_loglinear
                       | o_first_obs
+                      | o_filter_decomposition
                       ;
 
 extended_path : EXTENDED_PATH ';'
@@ -2746,6 +2753,7 @@ o_moments_varendo : MOMENTS_VARENDO { driver.option_num("moments_varendo", "1");
 o_contemporaneous_correlation : CONTEMPORANEOUS_CORRELATION { driver.option_num("contemporaneous_correlation", "1"); };
 o_filtered_vars : FILTERED_VARS { driver.option_num("filtered_vars", "1"); };
 o_relative_irf : RELATIVE_IRF { driver.option_num("relative_irf", "1"); };
+o_fast_kalman_filter : FAST_KALMAN_FILTER  { driver.option_num("fast_kalman_filter", "1"); };
 o_kalman_algo : KALMAN_ALGO EQUAL INT_NUMBER { driver.option_num("kalman_algo", $3); };
 o_kalman_tol : KALMAN_TOL EQUAL non_negative_number { driver.option_num("kalman_tol", $3); };
 o_diffuse_kalman_tol : DIFFUSE_KALMAN_TOL EQUAL non_negative_number { driver.option_num("diffuse_kalman_tol", $3); };
@@ -3085,7 +3093,6 @@ o_outvars : OUTVARS EQUAL '(' symbol_list ')' { driver.option_symbol_list("outva
 o_lmmcp : LMMCP {driver.option_num("lmmcp", "1"); }; 
 o_occbin : OCCBIN {driver.option_num("occbin", "1"); };
 o_function : FUNCTION EQUAL filename { driver.option_str("function", $3); };
-o_prior : PRIOR { driver.option_num("prior", "1"); };
 o_sampling_draws : SAMPLING_DRAWS EQUAL INT_NUMBER { driver.option_num("sampling_draws",$3); };
 
 range : symbol ':' symbol

@@ -38,7 +38,7 @@ function x0 = stab_map_(OutputDirectoryName,opt_gsa)
 % Reference:
 % M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
 
-% Copyright (C) 2012-2013 Dynare Team
+% Copyright (C) 2012-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -99,7 +99,7 @@ p4 = bayestopt_.p4(nshock+1:end);
 [junk1,junk2,junk3,lb,ub,junk4] = set_prior(estim_params_,M_,options_); %Prepare bounds
 if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
     % Set prior bounds
-    bounds = prior_bounds(bayestopt_,options_);
+    bounds = prior_bounds(bayestopt_, options_.prior_trunc);
     bounds.lb = max(bounds.lb,lb);
     bounds.ub = min(bounds.ub,ub);
 else  % estimated parameters but no declared priors
@@ -130,7 +130,6 @@ options_.periods=0;
 options_.nomoments=1;
 options_.irf=0;
 options_.noprint=1;
-options_.simul=0;
 if fload==0,
     %   if prepSA
     %     T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam/2);
@@ -660,9 +659,7 @@ if isfield(opt,'nomoments'),
 end
 options_.irf=opt.irf;
 options_.noprint=opt.noprint;
-if isfield(opt,'simul'),
-    options_.simul=opt.simul;
-end
+
 
 
 

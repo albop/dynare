@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2015 Dynare Team
+ * Copyright (C) 2003-2016 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -226,6 +226,103 @@ ModelTree::computeNonSingularNormalization(jacob_map_t &contemporaneous_jacobian
     {
       cerr << "No normalization could be computed. Aborting." << endl;
       exit(EXIT_FAILURE);
+    }
+}
+
+void
+ModelTree::computeXrefs()
+{
+  int i = 0;
+  for (vector<BinaryOpNode *>::iterator it = equations.begin();
+       it != equations.end(); it++)
+    {
+      ExprNode::EquationInfo ei;
+      (*it)->computeXrefs(ei);
+      xrefs[i++] = ei;
+    }
+
+  i = 0;
+  for (map<int, ExprNode::EquationInfo>::const_iterator it = xrefs.begin();
+       it != xrefs.end(); it++, i++)
+    {
+      computeRevXref(xref_param, it->second.param, i);
+      computeRevXref(xref_endo, it->second.endo, i);
+      computeRevXref(xref_exo, it->second.exo, i);
+      computeRevXref(xref_exo_det, it->second.exo_det, i);
+    }
+}
+
+void
+ModelTree::computeRevXref(map<int, set<int> > &xrefset, const set<int> &eiref, int eqn)
+{
+  for (set<int>::const_iterator it1 = eiref.begin();
+       it1 != eiref.end(); it1++)
+    {
+      set<int> eq;
+      if (xrefset.find(symbol_table.getTypeSpecificID(*it1)) != xrefset.end())
+        eq = xrefset[symbol_table.getTypeSpecificID(*it1)];
+      eq.insert(eqn);
+      xrefset[symbol_table.getTypeSpecificID(*it1)] = eq;
+    }
+}
+
+void
+ModelTree::writeXrefs(ostream &output) const
+{
+  output << "M_.xref1.param = cell(1, M_.eq_nbr);" << endl
+         << "M_.xref1.endo = cell(1, M_.eq_nbr);" << endl
+         << "M_.xref1.exo = cell(1, M_.eq_nbr);" << endl
+         << "M_.xref1.exo_det = cell(1, M_.eq_nbr);" << endl
+         << "M_.xref2.param = cell(1, M_.eq_nbr);" << endl
+         << "M_.xref2.endo = cell(1, M_.eq_nbr);" << endl
+         << "M_.xref2.exo = cell(1, M_.eq_nbr);" << endl
+         << "M_.xref2.exo_det = cell(1, M_.eq_nbr);" << endl;
+  int i = 1;
+  for (map<int, ExprNode::EquationInfo>::const_iterator it = xrefs.begin();
+       it != xrefs.end(); it++, i++)
+    {
+      output << "M_.xref1.param{" << i << "} = [ ";
+      for (set<int>::const_iterator it1 = it->second.param.begin();
+           it1 != it->second.param.end(); it1++)
+        output << symbol_table.getTypeSpecificID(*it1) + 1 << " ";
+      output << "];" << endl;
+
+      output << "M_.xref1.endo{" << i << "} = [ ";
+      for (set<int>::const_iterator it1 = it->second.endo.begin();
+           it1 != it->second.endo.end(); it1++)
+        output << symbol_table.getTypeSpecificID(*it1) + 1 << " ";
+      output << "];" << endl;
+
+      output << "M_.xref1.exo{" << i << "} = [ ";
+      for (set<int>::const_iterator it1 = it->second.exo.begin();
+           it1 != it->second.exo.end(); it1++)
+        output << symbol_table.getTypeSpecificID(*it1) + 1 << " ";
+      output << "];" << endl;
+
+      output << "M_.xref1.exo_det{" << i << "} = [ ";
+      for (set<int>::const_iterator it1 = it->second.exo_det.begin();
+           it1 != it->second.exo_det.end(); it1++)
+        output << symbol_table.getTypeSpecificID(*it1) + 1 << " ";
+      output << "];" << endl;
+    }
+
+  writeRevXrefs(output, xref_param, "param");
+  writeRevXrefs(output, xref_endo, "endo");
+  writeRevXrefs(output, xref_exo, "exo");
+  writeRevXrefs(output, xref_exo_det, "exo_det");
+}
+
+void
+ModelTree::writeRevXrefs(ostream &output, const map<int, set<int> > &xrefmap, const string &type) const
+{
+  for (map<int, set<int> >::const_iterator it = xrefmap.begin();
+       it != xrefmap.end(); it++)
+    {
+      output << "M_.xref2." << type << "{" << it->first + 1 << "} = [ ";
+      for (set<int>::const_iterator it1 = it->second.begin();
+           it1 != it->second.end(); it1++)
+        output << *it1 + 1 << " ";
+      output << "];" << endl;
     }
 }
 
@@ -1092,24 +1189,50 @@ ModelTree::computeThirdDerivatives(const set<int> &vars)
 void
 ModelTree::computeTemporaryTerms(bool is_matlab)
 {
-  map<expr_t, int> reference_count;
+  map<expr_t, pair<int, NodeTreeReference> > reference_count;
   temporary_terms.clear();
+  temporary_terms_res.clear();
+  temporary_terms_g1.clear();
+  temporary_terms_g2.clear();
+  temporary_terms_g3.clear();
+  map<NodeTreeReference, temporary_terms_t> temp_terms_map;
+  temp_terms_map[eResiduals]=temporary_terms_res;
+  temp_terms_map[eFirstDeriv]=temporary_terms_g1;
+  temp_terms_map[eSecondDeriv]=temporary_terms_g2;
+  temp_terms_map[eThirdDeriv]=temporary_terms_g3;
 
   for (vector<BinaryOpNode *>::iterator it = equations.begin();
        it != equations.end(); it++)
-    (*it)->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
+    (*it)->computeTemporaryTerms(reference_count,
+                                 temp_terms_map,
+                                 is_matlab, eResiduals);
 
   for (first_derivatives_t::iterator it = first_derivatives.begin();
        it != first_derivatives.end(); it++)
-    it->second->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
+    it->second->computeTemporaryTerms(reference_count,
+                                      temp_terms_map,
+                                      is_matlab, eFirstDeriv);
 
   for (second_derivatives_t::iterator it = second_derivatives.begin();
        it != second_derivatives.end(); it++)
-    it->second->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
+    it->second->computeTemporaryTerms(reference_count,
+                                      temp_terms_map,
+                                      is_matlab, eSecondDeriv);
 
   for (third_derivatives_t::iterator it = third_derivatives.begin();
        it != third_derivatives.end(); it++)
-    it->second->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
+    it->second->computeTemporaryTerms(reference_count,
+                                      temp_terms_map,
+                                      is_matlab, eThirdDeriv);
+
+  for (map<NodeTreeReference, temporary_terms_t>::const_iterator it = temp_terms_map.begin();
+       it != temp_terms_map.end(); it++)
+    temporary_terms.insert(it->second.begin(), it->second.end());
+
+  temporary_terms_res = temp_terms_map[eResiduals];
+  temporary_terms_g1  = temp_terms_map[eFirstDeriv];
+  temporary_terms_g2  = temp_terms_map[eSecondDeriv];
+  temporary_terms_g3  = temp_terms_map[eThirdDeriv];
 }
 
 void
@@ -1118,7 +1241,6 @@ ModelTree::writeTemporaryTerms(const temporary_terms_t &tt, ostream &output,
 {
   // Local var used to keep track of temp nodes already written
   temporary_terms_t tt2;
-
   for (temporary_terms_t::const_iterator it = tt.begin();
        it != tt.end(); it++)
     {
@@ -1213,6 +1335,12 @@ ModelTree::writeModelLocalVariables(ostream &output, ExprNodeOutputType output_t
 void
 ModelTree::writeModelEquations(ostream &output, ExprNodeOutputType output_type) const
 {
+  temporary_terms_t temp_terms;
+  if (IS_JULIA(output_type))
+    temp_terms = temporary_terms_res;
+  else
+    temp_terms = temporary_terms;
+
   for (int eq = 0; eq < (int) equations.size(); eq++)
     {
       BinaryOpNode *eq_node = equations[eq];
@@ -1234,13 +1362,13 @@ ModelTree::writeModelEquations(ostream &output, ExprNodeOutputType output_type) 
           if (IS_JULIA(output_type))
             output << "  @inbounds ";
           output << "lhs =";
-          lhs->writeOutput(output, output_type, temporary_terms);
+          lhs->writeOutput(output, output_type, temp_terms);
           output << ";" << endl;
 
           if (IS_JULIA(output_type))
             output << "  @inbounds ";
           output << "rhs =";
-          rhs->writeOutput(output, output_type, temporary_terms);
+          rhs->writeOutput(output, output_type, temp_terms);
           output << ";" << endl;
 
           if (IS_JULIA(output_type))
@@ -1258,7 +1386,7 @@ ModelTree::writeModelEquations(ostream &output, ExprNodeOutputType output_type) 
                  << eq + ARRAY_SUBSCRIPT_OFFSET(output_type)
                  << RIGHT_ARRAY_SUBSCRIPT(output_type)
                  << " = ";
-          lhs->writeOutput(output, output_type, temporary_terms);
+          lhs->writeOutput(output, output_type, temp_terms);
           output << ";" << endl;
         }
     }
@@ -1580,28 +1708,54 @@ ModelTree::computeParamsDerivatives()
 void
 ModelTree::computeParamsDerivativesTemporaryTerms()
 {
-  map<expr_t, int> reference_count;
+  map<expr_t, pair<int, NodeTreeReference > > reference_count;
   params_derivs_temporary_terms.clear();
+  map<NodeTreeReference, temporary_terms_t> temp_terms_map;
+  temp_terms_map[eResidualsParamsDeriv]=params_derivs_temporary_terms_res;
+  temp_terms_map[eJacobianParamsDeriv]=params_derivs_temporary_terms_g1;
+  temp_terms_map[eResidualsParamsSecondDeriv]=params_derivs_temporary_terms_res2;
+  temp_terms_map[eJacobianParamsSecondDeriv]=params_derivs_temporary_terms_g12;
+  temp_terms_map[eHessianParamsDeriv]=params_derivs_temporary_terms_g2;
 
   for (first_derivatives_t::iterator it = residuals_params_derivatives.begin();
        it != residuals_params_derivatives.end(); it++)
-    it->second->computeTemporaryTerms(reference_count, params_derivs_temporary_terms, true);
+    it->second->computeTemporaryTerms(reference_count,
+                                      temp_terms_map,
+                                      true, eResidualsParamsDeriv);
 
   for (second_derivatives_t::iterator it = jacobian_params_derivatives.begin();
        it != jacobian_params_derivatives.end(); it++)
-    it->second->computeTemporaryTerms(reference_count, params_derivs_temporary_terms, true);
+    it->second->computeTemporaryTerms(reference_count,
+                                      temp_terms_map,
+                                      true, eJacobianParamsDeriv);
 
   for (second_derivatives_t::const_iterator it = residuals_params_second_derivatives.begin();
        it != residuals_params_second_derivatives.end(); ++it)
-    it->second->computeTemporaryTerms(reference_count, params_derivs_temporary_terms, true);
+    it->second->computeTemporaryTerms(reference_count,
+                                      temp_terms_map,
+                                      true, eResidualsParamsSecondDeriv);
 
   for (third_derivatives_t::const_iterator it = jacobian_params_second_derivatives.begin();
        it != jacobian_params_second_derivatives.end(); ++it)
-    it->second->computeTemporaryTerms(reference_count, params_derivs_temporary_terms, true);
+    it->second->computeTemporaryTerms(reference_count,
+                                      temp_terms_map,
+                                      true, eJacobianParamsSecondDeriv);
 
   for (third_derivatives_t::const_iterator it = hessian_params_derivatives.begin();
        it != hessian_params_derivatives.end(); ++it)
-    it->second->computeTemporaryTerms(reference_count, params_derivs_temporary_terms, true);
+    it->second->computeTemporaryTerms(reference_count,
+                                      temp_terms_map,
+                                      true, eHessianParamsDeriv);
+
+  for (map<NodeTreeReference, temporary_terms_t>::const_iterator it = temp_terms_map.begin();
+       it != temp_terms_map.end(); it++)
+    params_derivs_temporary_terms.insert(it->second.begin(), it->second.end());
+
+  params_derivs_temporary_terms_res  = temp_terms_map[eResidualsParamsDeriv];
+  params_derivs_temporary_terms_g1   = temp_terms_map[eJacobianParamsDeriv];
+  params_derivs_temporary_terms_res2 = temp_terms_map[eResidualsParamsSecondDeriv];
+  params_derivs_temporary_terms_g12  = temp_terms_map[eJacobianParamsSecondDeriv];
+  params_derivs_temporary_terms_g2   = temp_terms_map[eHessianParamsDeriv];
 }
 
 bool ModelTree::isNonstationary(int symb_id) const

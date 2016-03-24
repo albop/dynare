@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009-2014 Dynare Team
+dnl Copyright (C) 2009-2016 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -96,6 +96,32 @@ if test "$ax_mexopts_ok" = "yes"; then
   AC_MSG_RESULT([ok])
 else
   AC_MSG_RESULT([unknown])
+fi
+
+# Allow user to override default Matlab compilation flags
+# Github ticket #1121
+if test "x$MATLAB_MEX_CPPFLAGS" != "x"; then
+  MATLAB_CPPFLAGS="$MATLAB_CPPFLAGS $MATLAB_MEX_CPPFLAGS"
+fi
+
+if test "x$MATLAB_MEX_DEFS" != "x"; then
+  MATLAB_DEFS="$MATLAB_DEFS $MATLAB_MEX_DEFS"
+fi
+
+if test "x$MATLAB_MEX_CFLAGS" != "x"; then
+  MATLAB_CFLAGS="$MATLAB_CFLAGS $MATLAB_MEX_CFLAGS"
+fi
+
+if test "x$MATLAB_MEX_CXXFLAGS" != "x"; then
+  MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS $MATLAB_MEX_CXXFLAGS"
+fi
+
+if test "x$MATLAB_MEX_LDFLAGS" != "x"; then
+  MATLAB_LDFLAGS="$MATLAB_LDFLAGS $MATLAB_MEX_LDFLAGS"
+fi
+
+if test "x$MATLAB_MEX_LIBS" != "x"; then
+  MATLAB_LIBS="$MATLAB_LIBS $MATLAB_MEX_LIBS"
 fi
 
 AC_SUBST([MATLAB_CPPFLAGS])

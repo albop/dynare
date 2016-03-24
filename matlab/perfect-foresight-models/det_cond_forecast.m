@@ -12,7 +12,7 @@ function data_set = det_cond_forecast(varargin)
 %  dataset                [dseries]     Returns a dseries containing the forecasted endgenous variables and shocks
 %
 %
-% Copyright (C) 2013-2014 Dynare Team
+% Copyright (C) 2013-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,8 +33,9 @@ global options_ oo_ M_
 pp = 2;
 initial_conditions = oo_.steady_state;
 verbosity = options_.verbosity;
-options_.verbosity = 0;
-
+if options_.periods == 0
+	options_.periods = 25;
+end;
 %We have to get an initial guess for the conditional forecast 
 % and terminal conditions for the non-stationary variables, we
 % use the first order approximation of the rational expectation solution.
@@ -104,7 +105,14 @@ else
             
             sym_dset = dset(dates(-range(1)):dates(range(range.ndat)));
             periods = options_.periods + M_.maximum_lag + M_.maximum_lead;
-            oo_.exo_simul = repmat(oo_.exo_steady_state',max(range.ndat + 1, periods),1);
+            if isfield(oo_, 'exo_simul')
+                if size(oo_.exo_simul, 1) ~= max(range.ndat + 1, periods)
+                    oo_.exo_simul = repmat(oo_.exo_steady_state',max(range.ndat + 1, periods),1);
+                end
+            else
+                oo_.exo_simul = repmat(oo_.exo_steady_state',max(range.ndat + 1, periods),1);
+            end
+            
             oo_.endo_simul = repmat(oo_.steady_state, 1, max(range.ndat + 1, periods));
             
             for i = 1:sym_dset.vobs
@@ -134,10 +142,18 @@ else
                     oo_.endo_simul(M_.aux_vars(i).endo_index, 1:sym_dset.nobs) = repmat(oo_.steady_state(M_.aux_vars(i).endo_index), 1, range.ndat + 1);
                 end
             end
-            %Compute the initial path using the first order solution around the
+            %Compute the initial path using the the steady-state
             % steady-state
             for jj = 2 : (options_.periods + 2)
               oo_.endo_simul(:, jj) = oo_.steady_state;  
+            end
+            missings = isnan(oo_.endo_simul(:,1));
+            if any(missings)
+                for jj = 1:M_.endo_nbr
+                    if missings(jj)
+                        oo_.endo_simul(jj,1) = oo_.steady_state(jj,1);
+                    end
+                end
             end
 
             if options_.bytecode
@@ -165,6 +181,15 @@ else
                     end
                 end
                 data_set = [dset(dset.dates(1):(plan.date(1)-1)) ; data_set];
+                for i=1:M_.exo_nbr
+                    pos = find(strcmp(strtrim(M_.exo_names(i,:)),dset.name));
+                    if isempty(pos)
+                        data_set{strtrim(M_.exo_names(i,:))} = dseries(exo(1+M_.maximum_lag:end,i), plan.date(1), strtrim(M_.exo_names(i,:)));
+                    else
+                        data_set{strtrim(M_.exo_names(i,:))}(plan.date(1):plan.date(1)+ (size(exo, 1) - M_.maximum_lag)) = exo(1+M_.maximum_lag:end,i);
+                    end
+                end
+                data_set = merge(dset(dset.dates(1):(plan.date(1)-1)), data_set);
                 return;
                 union_names = union(data_set.name, dset.name);
                 dif = setdiff(union_names, data_set.name);
@@ -387,8 +412,8 @@ if pf && ~surprise
         indx_endo(col_count : col_count + constrained_periods - 1) = constrained_vars(j) + (time_index_constraint - 1) * ny;
         col_count = col_count + constrained_periods;
     end;
-    make_ex_;
-    make_y_;
+    oo_=make_ex_(M_,options_,oo_);
+    oo_=make_y_(M_,options_,oo_);
     it = 1;
     convg = 0;
     normra = 1e+50;
@@ -588,13 +613,13 @@ else
         disp(['t=' int2str(t) ' conditional (surprise=' int2str(surprise) ' perfect foresight=' int2str(pf) ') unconditional (surprise=' int2str(b_surprise) ' perfect foresight=' int2str(b_pf) ')']);
         disp('===============================================================================================');
         if t == 1
-            make_ex_;
+            oo_=make_ex_(M_,options_,oo_);
             if maximum_lag > 0
                 exo_init = oo_.exo_simul;
             else
                 exo_init = zeros(size(oo_.exo_simul));
             end
-            make_y_;
+            oo_=make_y_(M_,options_,oo_);
         end;
         %exo_init
         oo_.exo_simul = exo_init;

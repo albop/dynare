@@ -85,7 +85,7 @@ notsteady   = 1;
 F_singular  = 1;
 s = 0;
 
-while notsteady & t<=last
+while notsteady && t<=last
     s  = t-start+1;
     d_index = data_index{t};
     if isempty(d_index)
