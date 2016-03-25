@@ -38,7 +38,7 @@ global ys0_
 if options_.steadystate_flag
     [oo_.steady_state,M_.params,check] = ...
         evaluate_steady_state_file(oo_.steady_state,oo_.exo_steady_state,M_, ...
-                                   options_);
+                                   options_,~options_.steadystate.nocheck);
 end
 
 if isempty(oo_.steady_state)

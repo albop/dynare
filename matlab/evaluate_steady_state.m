@@ -57,7 +57,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         if steadystate_flag
             % explicit steady state file
             [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M, ...
-                                                           options);
+                                                           options,steadystate_check_flag);
             %test whether it solves model conditional on the instruments
             resids = evaluate_static_model(ys,exo_ss,params,M,options);
             n_multipliers=M.ramsey_eq_nbr;
@@ -186,7 +186,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
     elseif steadystate_flag
         % explicit steady state file
         [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M, ...
-                                                       options);
+                                                       options,steadystate_check_flag);
         if size(ys,2)>size(ys,1)
             error('STEADY: steady_state-file must return a column vector, not a row vector.')
         end

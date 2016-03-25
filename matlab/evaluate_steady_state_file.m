@@ -1,5 +1,5 @@
-function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
-% function [ys,params1,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
+function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options,steady_state_checkflag)
+% function [ys,params1,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options,steady_state_checkflag)
 % Evaluates steady state files 
 %  
 % INPUTS
@@ -8,7 +8,7 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
 %   exo_ss                    vector           exogenous steady state
 %   M                         struct           model parameters
 %   options                   struct           options
-%  
+%   steady_state_checkflag    boolean          indicator whether to check steady state returned  
 % OUTPUTS
 %   ys                        vector           steady state
 %   params1                   vector           model parameters possibly
@@ -128,7 +128,7 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
     end
 
     check1 = 0;
-    if ~options.steadystate.nocheck
+    if steady_state_checkflag
         % Check whether the steady state obtained from the _steadystate file is a steady state.
         [residuals, check] = evaluate_static_model(ys, exo_ss, params, M, options);
         if check
