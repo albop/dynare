@@ -1,5 +1,5 @@
 function DynareResults = initial_estimation_checks(objective_function,xparam1,DynareDataset,DatasetInfo,Model,EstimatedParameters,DynareOptions,BayesInfo,BoundsInfo,DynareResults)
-% function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
+% function DynareResults = initial_estimation_checks(objective_function,xparam1,DynareDataset,DatasetInfo,Model,EstimatedParameters,DynareOptions,BayesInfo,BoundsInfo,DynareResults)
 % Checks data (complex values, ML evaluation, initial values, BK conditions,..)
 %
 % INPUTS
@@ -11,6 +11,7 @@ function DynareResults = initial_estimation_checks(objective_function,xparam1,Dy
 %   EstimatedParameters [structure] characterizing parameters to be estimated
 %   DynareOptions       [structure] describing the options
 %   BayesInfo           [structure] describing the priors
+%   BoundsInfo          [structure] containing prior bounds
 %   DynareResults       [structure] storing the results
 %
 % OUTPUTS
