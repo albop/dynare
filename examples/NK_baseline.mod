@@ -1,6 +1,6 @@
 /*
  * This file implements the Baseline New Keynesian DSGE model described in 
- * much detail in Jesús Fernández-Villaverde (2006): "A Baseline DSGE 
+ * much detail in Jesús Fernández-Villaverde and Juan F. Rubio-Ramírez (2006): "A Baseline DSGE 
  * Model", available at http://economics.sas.upenn.edu/~jesusfv/benchmark_DSGE.pdf
  *
  * The parametrization is based on the estimated version of this model in 
