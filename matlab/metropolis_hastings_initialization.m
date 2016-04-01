@@ -157,6 +157,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
             end
             if trial > 10 && ~validate
                 disp(['Estimation::mcmc: I''m unable to find a starting value for block ' int2str(j)])
+                fclose(fidlog);
                 return
             end
         end
@@ -179,6 +180,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
         else
             disp('Estimation::mcmc: Initialization failed...')
             disp('Estimation::mcmc: The posterior mode lies outside the prior bounds.')
+            fclose(fidlog);
             return
         end
         fprintf(fidlog,' \n');
