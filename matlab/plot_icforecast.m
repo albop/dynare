@@ -59,13 +59,9 @@ end
 function build_figure(name,cci1,cci2,mm1,mm2,options_,graphoptions)
 hh = dyn_figure(options_,'Name',['Conditional forecast (' graphoptions.title ,'): ' name '.']);
 H = length(mm1);
-h1 = area(1:H,cci1(2,1:H));
-set(h1,'BaseValue',min([min(cci1(1,:)),min(cci2(1,:))]))
-set(h1,'FaceColor',[.9 .9 .9])
+h1 = area(1:H,cci1(2,1:H),'BaseValue',min([min(cci1(1,:)),min(cci2(1,:))]),'FaceColor',[.9 .9 .9]);
 hold on
-h2 = area(1:H,cci1(1,1:H));
-set(h2,'BaseValue',min([min(cci1(1,:)),min(cci2(1,:))]))
-set(h2,'FaceColor',[1 1 1])
+h2 = area(1:H,cci1(1,1:H),'BaseValue',min([min(cci1(1,:)),min(cci2(1,:))]),'FaceColor',[1 1 1]);
 plot(1:H,mm1,'-k','linewidth',3)
 plot(1:H,mm2,'--k','linewidth',3)
 plot(1:H,cci2(1,:),'--k','linewidth',1)
