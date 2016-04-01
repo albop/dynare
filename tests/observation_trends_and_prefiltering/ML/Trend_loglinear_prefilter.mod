@@ -21,3 +21,4 @@ y_forecast_100_periods=loaded_par.orig_params(strmatch('const_y',loaded_par.para
 p_forecast_100_periods=loaded_par.orig_params(strmatch('const_p',loaded_par.param_names,'exact'))+(options_.first_obs+options_.nobs-1+options_.forecast)*loaded_par.orig_params(strmatch('g_p',loaded_par.param_names,'exact'));
 
 @#include "../Trend_diagnostics_ML_common.inc" 
+
