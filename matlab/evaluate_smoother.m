@@ -1,4 +1,4 @@
-function oo_=evaluate_smoother(parameters,var_list)
+function [oo_, Smoothed_variables_declaration_order_deviation_form]=evaluate_smoother(parameters,var_list)
 % Evaluate the smoother at parameters.
 %
 % INPUTS
@@ -11,12 +11,17 @@ function oo_=evaluate_smoother(parameters,var_list)
 %    o oo       [structure]  results:
 %                              - SmoothedVariables
 %                              - SmoothedShocks
-%                              - SmoothedVariables
-%                              - SmoothedVariables
-%                              - SmoothedVariables
-%                              - SmoothedVariables
-%                              - SmoothedVariables
-%                              - SmoothedVariables
+%                              - FilteredVariablesShockDecomposition
+%                              - UpdatedVariables
+%                              - FilteredVariables
+%                              - SmoothedMeasurementErrors
+%                              - FilteredVariablesKStepAhead
+%                              - FilteredVariablesKStepAheadVariances
+%    o Smoothed_variables_declaration_order_deviation_form
+%                           Smoothed variables from the Kalman smoother in
+%                           order of declaration of variables (M_.endo_names)
+%                           in deviations from their respective mean, i.e.
+%                           without trend and constant part (used for shock_decomposition)
 %
 % SPECIAL REQUIREMENTS
 %    None
@@ -90,3 +95,7 @@ end
 [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp,Trend] = ...
     DsgeSmoother(parameters,dataset_.nobs,transpose(dataset_.data),dataset_info.missing.aindex,dataset_info.missing.state);
 [oo_]=write_smoother_results(M_,oo_,options_,bayestopt_,dataset_,dataset_info,atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,P,PK,decomp,Trend);
+
+if nargout==2
+   Smoothed_variables_declaration_order_deviation_form=atT(oo_.dr.inv_order_var(bayestopt_.smoother_var_list),:);
+end
