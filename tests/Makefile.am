@@ -299,8 +299,7 @@ MODFILES = \
 	observation_trends_and_prefiltering/calib_smoother/Tr_no_prefilter_loglin_calib_smoother.mod \
 	observation_trends_and_prefiltering/calib_smoother/Tr_no_prefil_f_obs_loglin_cal_smoother.mod \
 	observation_trends_and_prefiltering/calib_smoother/Tr_prefilter_loglin_calib_smoother.mod \
-	observation_trends_and_prefiltering/calib_smoother/Tr_prefil_f_obs_loglin_cal_smoother.mod \
-	reporting/example1.mod
+	observation_trends_and_prefiltering/calib_smoother/Tr_prefil_f_obs_loglin_cal_smoother.mod
 
 XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value_xfail.mod \
