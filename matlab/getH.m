@@ -142,14 +142,7 @@ if nargout>5,
     [df, gpx, d2f] = feval([M_.fname,'_static_params_derivs'],oo_.dr.ys, oo_.exo_steady_state', ...
         M_.params);%, oo_.dr.ys, 1, dyssdtheta*0, d2yssdtheta);
     d2f = get_all_resid_2nd_derivs(d2f,length(oo_.dr.ys),M_.param_nbr);
-% $$$     gpx = zeros(nr,nr,M_.param_nbr);
-% $$$     for j=1:nr,
-% $$$         for i=1:nr,
-% $$$             inx = I == i;
-% $$$             gpx(j,i,:)=sum(gp(j,inx,:),2);
-% $$$         end
-% $$$     end
-%     d2f = d2f(:,indx,indx);
+
     if isempty(find(gg2)),
         for j=1:M_.param_nbr,
         d2yssdtheta(:,:,j) = -gg1\d2f(:,:,j);
