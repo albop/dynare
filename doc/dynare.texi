@@ -6308,8 +6308,11 @@ Posterior probability of the respective model
 
 @descriptionhead
 
-This command computes and displays shock decomposition according to
-the model for a given sample.
+This command computes the historical shock decomposition for a given sample based on 
+the Kalman smoother, i.e. it decomposes the historical deviations of the endogenous 
+variables from their respective steady state values into the contribution coming 
+from the various shocks. The @code{variable_names} provided govern for which 
+variables the decomposition is plotted.
 
 Note that this command must come after either @code{estimation} (in case
 of an estimated model) or @code{stoch_simul} (in case of a calibrated
@@ -6335,12 +6338,13 @@ calibrated model.
 
 @vindex oo_.shock_decomposition
 The results are stored in the field @code{oo_.shock_decomposition}, which is a three
-dimensional array. The first dimension contains the endogenous variables for
-which the shock decomposition has been requested. The second dimension stores
+dimensional array. The first dimension contains the @code{M_.endo_nbr} endogenous variables. 
+The second dimension stores
 in the first @code{M_.exo_nbr} columns the contribution of the respective shocks.
 Column @code{M_.exo_nbr+1} stores the contribution of the initial conditions,
 while column @code{M_.exo_nbr+2} stores the smoothed value of the respective
-endogenous variable. The third dimension stores the time periods. Both the variables 
+endogenous variable in deviations from their steady state, i.e. the mean and trends are
+subtracted. The third dimension stores the time periods. Both the variables 
 and shocks are stored in the order of declaration, i.e. @code{M_.endo_names} and 
 @code{M_.exo_names}, respectively.
 
