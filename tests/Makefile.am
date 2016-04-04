@@ -211,6 +211,7 @@ MODFILES = \
 	second_order/ds1.mod \
 	second_order/ds2.mod \
 	ep/rbc.mod \
+	ep/rbc_mc.mod \
 	ep/rbc2.mod \
 	ep/rbcii.mod \
 	ep/linearmodel0.mod \
