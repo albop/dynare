@@ -208,7 +208,7 @@ ep.solve_algo = 9;
 % Number of replications
 ep.replic_nbr = 1;
 % Parallel execution of replications
-ep.parallel_1 = false;
+ep.parallel = false;
 % Stochastic extended path related options.
 ep.stochastic.method = '';
 ep.stochastic.algo = 0;
