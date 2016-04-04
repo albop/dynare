@@ -143,8 +143,8 @@ end
 % the auxiliary variables before the Lagrange multipliers are treated
 % as ordinary endogenous variables
 aux_eq = [1:orig_endo_aux_nbr, orig_endo_aux_nbr+orig_eq_nbr+1:size(fJ,1)];
-A = fJ(1:orig_endo_nbr,orig_endo_nbr+find(aux_vars_type==6));
-y = res(1:orig_endo_nbr);
+A = fJ(1:orig_endo_aux_nbr,orig_endo_nbr+find(aux_vars_type==6));
+y = res(1:orig_endo_aux_nbr);
 mult = -A\y;
 
 resids1 = y+A*mult;
