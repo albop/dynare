@@ -125,7 +125,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         %check whether steady state really solves the model
         resids = evaluate_static_model(ys,exo_ss,params,M,options);
 
-        n_multipliers=M.endo_nbr-M.orig_endo_nbr;
+        n_multipliers=M.orig_eq_nbr;
         nan_indices_multiplier=find(isnan(resids(1:n_multipliers)));
         nan_indices=find(isnan(resids(n_multipliers+1:end)));
 
@@ -196,9 +196,12 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
     elseif (options.bytecode == 0 && options.block == 0)
         if options.linear == 0
             % non linear model
-            [ys,check] = dynare_solve([M.fname '_static'],...
+            static_model = str2func([M.fname '_static']);
+            [ys,check] = dynare_solve(@static_problem,...
                                       ys_init,...
-                                      options, exo_ss, params);
+                                      options, exo_ss, params,...
+                                      M.orig_endo_nbr,...
+                                      static_model);
         else
             % linear model
             fh_static = str2func([M.fname '_static']);
@@ -294,3 +297,8 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         info(2) = NaN;
         return
     end
+
+function [resids,jac] = static_problem(y,x,params,nvar,fh_static_model)
+    [r,j] = fh_static_model(y,x,params);
+    resids = r(1:nvar);
+    jac = j(1:nvar,1:nvar);

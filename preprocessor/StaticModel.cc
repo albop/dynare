@@ -1051,12 +1051,31 @@ StaticModel::computingPass(const eval_context_t &eval_context, bool no_tmp_terms
 {
   initializeVariablesAndEquations();
 
+  vector<BinaryOpNode *> neweqs;
+  for (unsigned int eq = 0; eq < equations.size() - aux_equations.size(); eq++)
+    {
+      expr_t eq_tmp = equations[eq]->substituteStaticAuxiliaryVariable();
+      neweqs.push_back(dynamic_cast<BinaryOpNode *>(eq_tmp->toStatic(*this)));
+    }
+
+  for (unsigned int eq = 0; eq < aux_equations.size();  eq++)
+    {
+      expr_t eq_tmp = aux_equations[eq]->substituteStaticAuxiliaryDefinition();
+      neweqs.push_back(dynamic_cast<BinaryOpNode *>(eq_tmp->toStatic(*this)));
+    }
+      
+  equations.clear();
+  copy(neweqs.begin(),neweqs.end(),back_inserter(equations));
   // Compute derivatives w.r. to all endogenous, and possibly exogenous and exogenous deterministic
   set<int> vars;
 
   for (int i = 0; i < symbol_table.endo_nbr(); i++)
-    vars.insert(getDerivID(symbol_table.getID(eEndogenous, i), 0));
-
+    {
+      int id = symbol_table.getID(eEndogenous, i);
+      //      if (!symbol_table.isAuxiliaryVariableButNotMultiplier(id))
+      vars.insert(getDerivID(id, 0));
+    }        
+ 
   // Launch computations
   cout << "Computing static model derivatives:" << endl
        << " - order 1" << endl;
@@ -1076,7 +1095,7 @@ StaticModel::computingPass(const eval_context_t &eval_context, bool no_tmp_terms
       computeThirdDerivatives(vars);
     }
 
-if (paramsDerivatives)
+  if (paramsDerivatives)
     {
       cout << " - derivatives of Jacobian/Hessian w.r. to parameters" << endl;
       computeParamsDerivatives();
@@ -1720,7 +1739,7 @@ StaticModel::writeStaticFile(const string &basename, bool block, bool bytecode, 
     writeStaticJuliaFile(basename);
   else
     writeStaticMFile(basename);
-  writeAuxVarRecursiveDefinitions(basename, julia);
+  writeSetAuxiliaryVariables(basename, julia);
 }
 
 void
@@ -2080,8 +2099,9 @@ StaticModel::writeAuxVarInitval(ostream &output, ExprNodeOutputType output_type)
     }
 }
 
-void StaticModel::writeAuxVarRecursiveDefinitions(const string &basename, const bool julia) const
+void StaticModel::writeSetAuxiliaryVariables(const string &basename, const bool julia) const
 {
+  
   string func_name = basename + "_set_auxiliary_variables";
   string filename = julia ? func_name + ".jl" : func_name + ".m";
   string comment = julia ? "#" : "%";
@@ -2108,10 +2128,17 @@ void StaticModel::writeAuxVarRecursiveDefinitions(const string &basename, const 
     if (dynamic_cast<ExprNode *>(aux_equations[i])->containsExternalFunction())
       dynamic_cast<ExprNode *>(aux_equations[i])->writeExternalFunctionOutput(output, oMatlabStaticModel,
                                                                               temporary_terms, tef_terms);
+  writeAuxVarRecursiveDefinitions(output, oMatlabStaticModel);
+}
 
+void
+StaticModel::writeAuxVarRecursiveDefinitions(ostream &output, ExprNodeOutputType output_type) const
+{
+  deriv_node_temp_terms_t tef_terms;
+  temporary_terms_t temporary_terms;
   for (int i = 0; i < (int) aux_equations.size(); i++)
     {
-      dynamic_cast<ExprNode *>(aux_equations[i])->writeOutput(output, oMatlabStaticModel, temporary_terms, tef_terms);
+      dynamic_cast<ExprNode *>(aux_equations[i]->substituteStaticAuxiliaryDefinition())->writeOutput(output, output_type, temporary_terms, tef_terms);
       output << ";" << endl;
     }
 }
