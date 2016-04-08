@@ -1,8 +1,38 @@
 function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,options_,kronflag,indx,indexo,iv)
-
+% function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,options_,kronflag,indx,indexo,iv)
 % computes derivative of reduced form linear model w.r.t. deep params
 %
-% Copyright (C) 2010-2012 Dynare Team
+% Inputs:
+%   A:              Transition matrix of lagged states from Kalman filter
+%   B:              Matrix in state transition equation mapping shocks today to
+%                   states today
+%   M_:             structure storing the model information
+%   oo_:            structure storing the results
+%   options_:       structure storing the options
+%   kronflag:       Indicator whether to rely on Kronecker products (1) or
+%                   not (-1 or -2)
+%   indx:           Index of estimated parameters in M_.params
+%   indexo:         Index of estimated standard deviations in M_.exo_names
+%   iv:             Index of considered variables           
+% 
+% Outputs:
+%   H:              dTAU/dTHETA: Jacobian of TAU, vectorized form of
+%                   linearized reduced form state space model, given ys [steady state],
+%                   A [transition matrix], B [matrix of shocks], Sigma [covariance of shocks]
+%                   TAU = [ys; vec(A); dyn_vech(B*Sigma*B')]. 
+%   dA:             [endo_nbr by endo_nbr by (indx+indexo)] Jacobian of transition matrix A            
+%   dOm:            [endo_nbr by endo_nbr by (indx+indexo)] Jacobian of Omega = (B*Sigma*B')
+%   Hss:            [endo_nbr by (indx)] Jacobian of steady state with respect to estimated
+%                   structural parameters only (indx)
+%   gp:             Jacobian of linear rational expectation matrices [i.e.
+%                   Jacobian of dynamic model] with respect to estimated
+%                   structural parameters only (indx)
+%   d2A:            Hessian of transition matrix A
+%   d2Om:           Hessian of Omega
+%   H2s:            Hessian of steady state with respect to estimated
+%                   structural parameters only (indx)
+
+% Copyright (C) 2010-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

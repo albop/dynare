@@ -7,11 +7,12 @@ function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = i
 %    o indx               [array] index of estimated parameters
 %    o indexo             [array] index of estimated shocks
 %    o options_ident      [structure] identification options
-%    o data_info          [structure] data info for Kalman Filter
+%    o dataset_           [structure] the dataset after required transformation
+%    o dataset_info       [structure] Various informations about the dataset (descriptive statistics and missing observations) info for Kalman Filter
 %    o prior_exist        [integer] 
 %                           =1 when prior exists and indentification is checked only for estimated params and shocks
 %                           =0 when prior is not defined and indentification is checked for all params and shocks
-%    o nem_tex            [char] list of tex names
+%    o name_tex           [char] list of tex names
 %    o init               [integer] flag  for initialization of persistent vars
 %    
 % OUTPUTS
@@ -25,7 +26,7 @@ function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = i
 % SPECIAL REQUIREMENTS
 %    None
 
-% Copyright (C) 2008-2013 Dynare Team
+% Copyright (C) 2008-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

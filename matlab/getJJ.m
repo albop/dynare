@@ -1,6 +1,43 @@
 function [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
+% function [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
+% computes derivatives of 1st and 2nd order moments of observables with
+% respect to estimated parameters
+% 
+% Inputs:
+%   A:              Transition matrix of lagged states from Kalman filter
+%   B:              Matrix in state transition equation mapping shocks today to
+%                   states today
+%   M_:             structure storing the model information
+%   oo_:            structure storing the results
+%   options_:       structure storing the options
+%   kronflag:       Indicator whether to rely on Kronecker products (1) or
+%                   not (-1 or -2)
+%   indx:           Index of estimated parameters in M_.params
+%   indexo:         Index of estimated standard deviations in M_.exo_names
+%   mf:             Index of observed variables
+%   nlags:          Number of lags to consider for covariances and
+%                   correlations
+%   useautocorr:    Indicator on whether to use correlations (1) instead of
+%                   covariances (0)
+% 
+% Outputs:
+%   JJ:             Jacobian of 1st and 2nd order moments of observables, i.e.  dgam/dTHETA 
+%                   (see below for definition of gam)
+%   H:              dTAU/dTHETA: Jacobian of TAU, vectorized form of
+%                   linearized reduced form state space model, given ys [steady state],
+%                   A [transition matrix], B [matrix of shocks], Sigma [covariance of shocks]
+%                   TAU = [ys; vec(A); dyn_vech(B*Sigma*B')].
+%   gam:            vector of theoretical moments of observed variables mf [JJ is the Jacobian of gam]. 
+%                   gam = [ys(mf); dyn_vech(GAM{1}); vec(GAM{j+1})]; for j=1:ar and where 
+%                   GAM is the first output of th_autocovariances
+%   gp:             Jacobian of linear rational expectation matrices [i.e.
+%                   Jacobian of dynamic model] with respect to estimated
+%                   structural parameters only (indx)
+%   dA:             [endo_nbr by endo_nbr by (indx+indexo)] Jacobian of transition matrix A           
+%   dOm:            Jacobian of Omega = (B*Sigma*B')
+%   dYss            Jacobian of steady state with respect to estimated structural parameters only (indx)
 
-% Copyright (C) 2010-2012 Dynare Team
+% Copyright (C) 2010-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

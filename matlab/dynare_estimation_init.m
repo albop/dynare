@@ -1,6 +1,6 @@
 function [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_, bounds] = dynare_estimation_init(var_list_, dname, gsa_flag, M_, options_, oo_, estim_params_, bayestopt_)
 
-% function dynare_estimation_init(var_list_, gsa_flag)
+% function [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_, bounds] = dynare_estimation_init(var_list_, dname, gsa_flag, M_, options_, oo_, estim_params_, bayestopt_)
 % performs initialization tasks before estimation or
 % global sensitivity analysis
 %
@@ -14,7 +14,6 @@ function [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_,
 %   estim_params_:  structure storing information about estimated
 %                   parameters
 %   bayestopt_:     structure storing information about priors
-%   optim:          structure storing optimization bounds
     
 % OUTPUTS
 %   dataset_:       the dataset after required transformation
@@ -28,6 +27,7 @@ function [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_,
 %   estim_params_:  structure storing information about estimated
 %                   parameters
 %   bayestopt_:     structure storing information about priors
+%   bounds:         structure containing prior bounds
 % 
 % SPECIAL REQUIREMENTS
 %   none
