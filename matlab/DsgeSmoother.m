@@ -8,23 +8,35 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,de
 %   o data_index    [cell]      1*smpl cell of column vectors of indices.
 %   o missing_value 1 if missing values, 0 otherwise
 %  
-% OUTPUTS 
-%   o alphahat      [double]  (m*T) matrix, smoothed endogenous variables (a_{t|T})
-%   o etahat        [double]  (r*T) matrix, smoothed structural shocks (r>n is the umber of shocks).
+% OUTPUTS
+%   o alphahat      [double]  (m*T) matrix, smoothed endogenous variables (a_{t|T})  (decision-rule order)
+%   o etahat        [double]  (r*T) matrix, smoothed structural shocks (r>=n is the number of shocks).
 %   o epsilonhat    [double]  (n*T) matrix, smoothed measurement errors.
-%   o ahat          [double]  (m*T) matrix, updated (endogenous) variables (a_{t|t})
-%   o SteadyState   [double]  (m*1) vector specifying the steady state level of each endogenous variable.
+%   o ahat          [double]  (m*T) matrix, updated (endogenous) variables (a_{t|t}) (decision-rule order)
+%   o SteadyState   [double]  (m*1) vector specifying the steady state level of each endogenous variable (declaration order)
 %   o trend_coeff   [double]  (n*1) vector, parameters specifying the slope of the trend associated to each observed variable.
-%   o aK            [double]  (K,n,T+K) array, k (k=1,...,K) steps ahead filtered (endogenous) variables.
+%   o aK            [double]  (K,n,T+K) array, k (k=1,...,K) steps ahead
+%                                   filtered (endogenous) variables  (decision-rule order)
 %   o T and R       [double]  Matrices defining the state equation (T is the (m*m) transition matrix).
-%   o P:            3D array of one-step ahead forecast error variance
-%                       matrices
-%   o PK:           4D array of k-step ahead forecast error variance
-%                       matrices (meaningless for periods 1:d)
-%   o decomp        4D array of shock decomposition of k-step ahead
-%                       filtered variables
-%   o trend_addition [double] (n_observed_series*T) pure trend component; stored in options_.varobs order         
+%   o P:            (m*m*(T+1)) 3D array of one-step ahead forecast error variance
+%                       matrices (decision-rule order)
+%   o PK:           (K*m*m*(T+K)) 4D array of k-step ahead forecast error variance
+%                       matrices (meaningless for periods 1:d) (decision-rule order)
+%   o decomp        (K*m*r*(T+K)) 4D array of shock decomposition of k-step ahead
+%                       filtered variables (decision-rule order)
+%   o trend_addition [double] (n*T) pure trend component; stored in options_.varobs order         
 %  
+% Notes:
+%   m:  number of endogenous variables (M_.endo_nbr)
+%   T:  number of Time periods (options_.nobs)
+%   r:  number of strucural shocks (M_.exo_nbr)
+%   n:  number of observables (length(options_.varobs))
+%   K:  maximum forecast horizon (max(options_.nk))
+% 
+%   To get variables that are stored in decision rule order in order of declaration
+%   as in M_.endo_names, ones needs code along the lines of:
+%   variables_declaration_order(dr.order_var,:) = alphahat
+% 
 % ALGORITHM 
 %   Diffuse Kalman filter (Durbin and Koopman)       
 %
@@ -107,9 +119,9 @@ mf    = bayestopt_.smoother_mf;
 %  3. Initial condition of the Kalman filter
 % ------------------------------------------------------------------------------
 % 
-%  C'est ici qu'il faut déterminer Pinf et Pstar. Si le modèle est stationnaire,
-%  alors il suffit de poser Pstar comme la solution de l'éuation de Lyapounov et
-%  Pinf=[].
+%  Here, Pinf and Pstar are determined. If the model is stationary, determine 
+%  Pstar as the solution of the Lyapunov equation and set Pinf=[] (Notation follows
+%  Koopman/Durbin (2003), Journal of Time Series Analysis 24(1))
 %
 Q = M_.Sigma_e;
 H = M_.H;

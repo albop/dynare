@@ -1,7 +1,7 @@
 function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag)
 
 % function [alphahat,epsilonhat,etahat,a,aK,PK,decomp] = DiffuseKalmanSmoother1(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag)
-% Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix 
+% Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix.
 %
 % INPUTS
 %    T:        mm*mm matrix
@@ -34,6 +34,11 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKal
 %              matrices (meaningless for periods 1:d)
 %    decomp:   decomposition of the effect of shocks on filtered values
 %  
+% Notes:
+%   Outputs are stored in decision-rule order, i.e. to get variables in order of declaration
+%   as in M_.endo_names, ones needs code along the lines of:
+%   variables_declaration_order(dr.order_var,:) = alphahat
+% 
 % SPECIAL REQUIREMENTS
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
