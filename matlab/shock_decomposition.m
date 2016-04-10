@@ -112,4 +112,21 @@ end
 
 oo_.shock_decomposition = z;
 
-graph_decomp(z,M_.exo_names,M_.endo_names,i_var,options_.initial_date,M_,options_)
+if options_.use_shock_groups
+    shock_groups = M_.shock_groups.(options_.use_shock_groups);
+    shock_names = fieldnames(shock_groups);
+    ngroups = length(shock_names);
+    zz = zeros(endo_nbr,ngroups+2,gend);
+    for i=1:length(shock_names)
+        for j = shock_groups.(shock_names{i})
+            k = find(strcmp(j,cellstr(M_.exo_names)));
+            zz(:,i,:) = zz(:,i,:) + z(:,k,:);
+        end
+    end
+    zz(:,ngroups+(1:2),:) = z(:,nshocks+(1:2),:);
+    z = zz;
+else
+    shock_names = M_.exo_names;
+end
+        
+graph_decomp(z,shock_names,M_.endo_names,i_var,options_.initial_date,M_,options_)
