@@ -8,28 +8,50 @@ function [oo_, yf]=write_smoother_results(M_,oo_,options_,bayestopt_,dataset_,da
 %   options_        [structure]     storing the options
 %   bayestopt_      [structure]     storing information about priors
 %   dataset_        [structure]     storing the dataset
-%   atT             [double]    (m*T) matrix, smoothed endogenous variables (a_{t|T})
+%   atT             [double]    (m*T) matrix, smoothed endogenous variables (a_{t|T})  (decision-rule order)
 %   innov           [double]    (r*T) matrix, smoothed structural shocks (r>n is the umber of shocks).
 %   measurement_error [double]  (n*T) matrix, smoothed measurement errors.
-%   updated_variables [double]  (m*T) matrix, updated (endogenous) variables (a_{t|T})
-%   ys              [double]    (m*1) vector specifying the steady state level of each endogenous variable.
+%   updated_variables [double]  (m*T) matrix, updated (endogenous) variables (a_{t|t}) (decision-rule order)
+%   ys              [double]    (m*1) vector specifying the steady state
+%                                   level of each endogenous variable (declaration order)
 %   trend_coeff     [double]    (n*1) vector, parameters specifying the slope of the trend associated to each observed variable.
-%   aK              [double]    (K,n,T+K) array, k (k=1,...,K) steps ahead filtered (endogenous) variables.
-%   P               [3D array]  of one-step ahead forecast error variance
-%                   matrices
-%   PK              [4D array]  of k-step ahead forecast error variance
-%                               matrices (meaningless for periods 1:d)
-%   decomp
+%   aK              [double]    (K,n,T+K) array, k (k=1,...,K) steps ahead
+%                                   filtered (endogenous) variables  (decision-rule order)
+%   P               [3D array]  (m*m*(T+1)) array of one-step ahead forecast error variance
+%                                   matrices (decision-rule order)
+%   PK              [4D array]  (K*m*m*(T+K)) 4D array of k-step ahead forecast error variance
+%                                   matrices (meaningless for periods 1:d) (decision-rule order)
+%   decomp          [4D array]  (K*m*r*(T+K)) 4D array of shock decomposition of k-step ahead
+%                                   filtered variables (decision-rule order)
 %   Trend           [double]    [nvarobs*T] matrix of trends in observables
 %
 % Outputs:
-%   oo_             [structure] storing the results
-%   yf              [double]    (nvarobs*T) matrix storing the smoothed observed variables   
+%   oo_             [structure] storing the results:
+%                   oo_.Smoother.SteadyState: Steady states (declaration order)
+%                   oo_.Smoother.TrendCoeffs: trend coefficients (order of options_.varobs)
+%                   oo_.Smoother.Variance: one-step ahead forecast error variance (declaration order)
+%                   oo_.Smoother.Constant: structure storing the constant term of the smoother
+%                   oo_.Smoother.Trend: structure storing the trend term of the smoother
+%                   oo_.FilteredVariablesKStepAhead: k-step ahead forecast error variance matrices (decision-rule order)
+%                   oo_.FilteredVariablesShockDecomposition: shock decomposition of k-step ahead filtered variables (decision-rule order)
+%                   oo_.FilteredVariables: structure storing the filtered variables
+%                   oo_.UpdatedVariables: structure storing the updated variables
+%                   oo_.SmoothedShocks: structure storing the smoothed shocks
+%                   oo_.SmoothedMeasurementErrors: structure storing the smoothed measurement errors
+
+%   yf              [double]    (nvarobs*T) matrix storing the smoothed observed variables (order of options_.varobs)  
 % 
-% Notes: first all smoothed variables are saved without trend and constant.
+% Notes: 
+%   m:  number of endogenous variables (M_.endo_nbr)
+%   T:  number of Time periods (options_.nobs)
+%   r:  number of strucural shocks (M_.exo_nbr)
+%   n:  number of observables (length(options_.varobs))
+%   K:  maximum forecast horizon (max(options_.nk))
+% 
+%   First all smoothed variables are saved without trend and constant.
 %       Then trend and constant are added for the observed variables.
 %
-% Copyright (C) 2014 Dynare Team
+% Copyright (C) 2014-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -88,35 +110,35 @@ if options_.filter_covariance
     oo_.Smoother.Variance = P;
 end
 
-%get indicees of smoothed variables
-i_endo = bayestopt_.smoother_saved_var_list;
+%get indices of smoothed variables
+i_endo_in_dr = bayestopt_.smoother_saved_var_list;
 
 if ~isempty(options_.nk) && options_.nk ~= 0 && (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file)))
     %write deviations from steady state, add constant for observables later
-    oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo,:);    
+    oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo_in_dr,:);    
     if ~isempty(PK) %get K-step ahead variances
         oo_.FilteredVariablesKStepAheadVariances = ...
-            PK(options_.filter_step_ahead,i_endo,i_endo,:);
+            PK(options_.filter_step_ahead,i_endo_in_dr,i_endo_in_dr,:);
     end
     if ~isempty(decomp) %get decomposition
         oo_.FilteredVariablesShockDecomposition = ...
-            decomp(options_.filter_step_ahead,i_endo,:,:);
+            decomp(options_.filter_step_ahead,i_endo_in_dr,:,:);
     end
 end
 
-for i=bayestopt_.smoother_saved_var_list'
-    i1 = oo_.dr.order_var(bayestopt_.smoother_var_list(i)); %get indices of smoothed variables in name vector
+for dr_index=bayestopt_.smoother_saved_var_list'
+    i1 = oo_.dr.order_var(bayestopt_.smoother_var_list(dr_index)); %get indices of smoothed variables in name vector
     %% Compute constant
     if  options_.loglinear == 1 %logged steady state must be used
         constant_current_variable=repmat(log(ys(i1)),gend,1);
     elseif options_.loglinear == 0 %unlogged steady state must be used
         constant_current_variable=repmat((ys(i1)),gend,1);
     end
-    oo_.SmoothedVariables.(deblank(M_.endo_names(i1,:)))=atT(i,:)'+constant_current_variable;
+    oo_.SmoothedVariables.(deblank(M_.endo_names(i1,:)))=atT(dr_index,:)'+constant_current_variable;
     if ~isempty(options_.nk) && options_.nk > 0 && ~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file))
-        oo_.FilteredVariables.(deblank(M_.endo_names(i1,:)))=squeeze(aK(1,i,2:end-(options_.nk-1)));
+        oo_.FilteredVariables.(deblank(M_.endo_names(i1,:)))=squeeze(aK(1,dr_index,2:end-(options_.nk-1)));
     end
-    oo_.UpdatedVariables.(deblank(M_.endo_names(i1,:)))=updated_variables(i,:)'+constant_current_variable;
+    oo_.UpdatedVariables.(deblank(M_.endo_names(i1,:)))=updated_variables(dr_index,:)'+constant_current_variable;
 end
     
 %% Add trend and constant for observed variables
@@ -141,8 +163,8 @@ for pos_iter=1:length(bayestopt_.mf)
 end
 
 %% get smoothed shocks
-for i=1:M_.exo_nbr
-    oo_.SmoothedShocks.(deblank(M_.exo_names(i,:)))=innov(i,:)';
+for exo_iter=1:M_.exo_nbr
+    oo_.SmoothedShocks.(deblank(M_.exo_names(exo_iter,:)))=innov(exo_iter,:)';
 end
 
 %%  Smoothed measurement errors
