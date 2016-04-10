@@ -32,7 +32,7 @@ function [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_,
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2014 Dynare Team
+% Copyright (C) 2003-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -394,7 +394,16 @@ nstatic = M_.nstatic;          % Number of static variables.
 npred = M_.nspred;             % Number of predetermined variables.
 nspred = M_.nspred;            % Number of predetermined variables in the state equation.
 
-% Setting resticted state space (observed + predetermined variables)
+%% Setting resticted state space (observed + predetermined variables)
+% oo_.dr.restrict_var_list: location of union of observed and state variables in decision rules (decision rule order)
+% bayestopt_.mfys: position of observables in oo_.dr.ys (declaration order)
+% bayestopt_.mf0: position of state variables in restricted state vector (oo_.dr.restrict_var_list)
+% bayestopt_.mf1: positions of observed variables in decision rules (oo_.dr.restrict_var_list)
+% bayestopt_.mf2: positions of observed variables in decision rules (decision rule order)
+% bayestopt_.smoother_var_list: positions of observed variables and requested smoothed variables in decision rules (decision rule order)
+% bayestopt_.smoother_saved_var_list: positions of requested smoothed variables in bayestopt_.smoother_var_list
+% bayestopt_.smoother_restrict_columns: positions of states in observed variables and requested smoothed variables in decision rules (decision rule order)
+% bayestopt_.smoother_mf: positions of observed variables and requested smoothed variables in bayestopt_.smoother_var_list
 var_obs_index_dr = [];
 k1 = [];
 for i=1:options_.number_of_observed_variables
