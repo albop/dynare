@@ -37,6 +37,10 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,de
 %   as in M_.endo_names, ones needs code along the lines of:
 %   variables_declaration_order(dr.order_var,:) = alphahat
 % 
+%   Defines bayestopt_.mf = bayestopt_.smoother_mf (positions of observed variables 
+%   and requested smoothed variables in decision rules (decision rule order)) and 
+%   passes it back via global variable
+% 
 % ALGORITHM 
 %   Diffuse Kalman filter (Durbin and Koopman)       
 %
