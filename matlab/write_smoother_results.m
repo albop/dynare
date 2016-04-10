@@ -111,55 +111,86 @@ if options_.filter_covariance
 end
 
 %get indices of smoothed variables
-i_endo_in_dr = bayestopt_.smoother_saved_var_list;
-
-if ~isempty(options_.nk) && options_.nk ~= 0 && (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file)))
+i_endo_in_bayestopt_smoother_varlist = bayestopt_.smoother_saved_var_list;
+i_endo_in_dr_matrices=bayestopt_.smoother_var_list(i_endo_in_bayestopt_smoother_varlist);
+if ~isempty(options_.nk) && options_.nk ~= 0 
     %write deviations from steady state, add constant for observables later
-    oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo_in_dr,:);    
+    oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo_in_dr_matrices,:);    
     if ~isempty(PK) %get K-step ahead variances
         oo_.FilteredVariablesKStepAheadVariances = ...
-            PK(options_.filter_step_ahead,i_endo_in_dr,i_endo_in_dr,:);
+            PK(options_.filter_step_ahead,i_endo_in_dr_matrices,i_endo_in_dr_matrices,:);
     end
     if ~isempty(decomp) %get decomposition
         oo_.FilteredVariablesShockDecomposition = ...
-            decomp(options_.filter_step_ahead,i_endo_in_dr,:,:);
+            decomp(options_.filter_step_ahead,i_endo_in_dr_matrices,:,:);
     end
 end
 
-for dr_index=bayestopt_.smoother_saved_var_list'
-    i1 = oo_.dr.order_var(bayestopt_.smoother_var_list(dr_index)); %get indices of smoothed variables in name vector
+for i_endo_in_bayestopt_smoother_varlist=bayestopt_.smoother_saved_var_list'
+    i_endo_in_dr=bayestopt_.smoother_var_list(i_endo_in_bayestopt_smoother_varlist);
+    i_endo_declaration_order = oo_.dr.order_var(i_endo_in_dr); %get indices of smoothed variables in name vector
     %% Compute constant
     if  options_.loglinear == 1 %logged steady state must be used
-        constant_current_variable=repmat(log(ys(i1)),gend,1);
+        constant_current_variable=repmat(log(ys(i_endo_declaration_order)),gend,1);
     elseif options_.loglinear == 0 %unlogged steady state must be used
-        constant_current_variable=repmat((ys(i1)),gend,1);
+        constant_current_variable=repmat((ys(i_endo_declaration_order)),gend,1);
     end
-    oo_.SmoothedVariables.(deblank(M_.endo_names(i1,:)))=atT(dr_index,:)'+constant_current_variable;
+    oo_.SmoothedVariables.(deblank(M_.endo_names(i_endo_declaration_order,:)))=atT(i_endo_in_dr,:)'+constant_current_variable;
     if ~isempty(options_.nk) && options_.nk > 0 && ~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file))
-        oo_.FilteredVariables.(deblank(M_.endo_names(i1,:)))=squeeze(aK(1,dr_index,2:end-(options_.nk-1)));
+        oo_.FilteredVariables.(deblank(M_.endo_names(i_endo_declaration_order,:)))=squeeze(aK(1,i_endo_in_dr,2:end-(options_.nk-1)));
     end
-    oo_.UpdatedVariables.(deblank(M_.endo_names(i1,:)))=updated_variables(dr_index,:)'+constant_current_variable;
+    oo_.UpdatedVariables.(deblank(M_.endo_names(i_endo_declaration_order,:)))=updated_variables(i_endo_in_dr,:)'+constant_current_variable;
 end
     
 %% Add trend and constant for observed variables
 for pos_iter=1:length(bayestopt_.mf)
     oo_.Smoother.Constant.(deblank(M_.endo_names(bayestopt_.mfys(pos_iter),:)))=constant_part(pos_iter,:);
-    oo_.SmoothedVariables.(deblank(M_.endo_names(bayestopt_.mfys(pos_iter),:)))=yf(pos_iter,:)';   
-    if ~isempty(options_.nk) && options_.nk > 0 && ~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file))
-        %filtered variable E_t(y_t+1) requires to shift trend by 1 period
-        oo_.FilteredVariables.(deblank(M_.endo_names(bayestopt_.mfys(pos_iter),:)))=...
-            squeeze(aK(1,bayestopt_.mf(pos_iter),2:end-(options_.nk-1)))...
-            +trend_constant_observables_filtered.filter_ahead_1(pos_iter,:)';
-        for filter_iter=1:length(options_.filter_step_ahead)
-            filter_step=options_.filter_step_ahead(filter_iter);
-            oo_.FilteredVariablesKStepAhead(filter_iter,bayestopt_.mf(pos_iter),1+filter_step:end-(max(options_.filter_step_ahead)-filter_step)) = ...
-                squeeze(aK(filter_step,bayestopt_.mf(pos_iter),1+filter_step:end-(max(options_.filter_step_ahead)-filter_step)))...
-                +trend_constant_observables_filtered.(['filter_ahead_' num2str(filter_step)])(pos_iter,:)';    
+    if ismember(bayestopt_.mf(pos_iter),bayestopt_.smoother_var_list(bayestopt_.smoother_saved_var_list))
+        oo_.SmoothedVariables.(deblank(M_.endo_names(bayestopt_.mfys(pos_iter),:)))=yf(pos_iter,:)';   
+        if ~isempty(options_.nk) && options_.nk > 0 
+            %filtered variable E_t(y_t+1) requires to shift trend by 1 period
+            oo_.FilteredVariables.(deblank(M_.endo_names(bayestopt_.mfys(pos_iter),:)))=...
+                squeeze(aK(1,bayestopt_.mf(pos_iter),2:end-(options_.nk-1)))...
+                +trend_constant_observables_filtered.filter_ahead_1(pos_iter,:)';
+            for filter_iter=1:length(options_.filter_step_ahead)
+                filter_step=options_.filter_step_ahead(filter_iter);
+                oo_.FilteredVariablesKStepAhead(filter_iter,find(i_endo_in_dr_matrices==bayestopt_.mf(pos_iter)),1+filter_step:end-(max(options_.filter_step_ahead)-filter_step)) = ...
+                    squeeze(aK(filter_step,bayestopt_.mf(pos_iter),1+filter_step:end-(max(options_.filter_step_ahead)-filter_step)))...
+                    +trend_constant_observables_filtered.(['filter_ahead_' num2str(filter_step)])(pos_iter,:)';    
+            end
+        end
+        %updated variables are E_t(y_t) so no trend shift is required
+        oo_.UpdatedVariables.(deblank(M_.endo_names(bayestopt_.mfys(pos_iter),:)))=...
+            updated_variables(bayestopt_.mf(pos_iter),:)'+trend_constant_observables(pos_iter,:)';
+    end
+end
+
+%% resort fields that are in decision rule order to declaration order
+if ~isempty(options_.nk) && options_.nk ~= 0
+    positions_in_declaration_order=oo_.dr.order_var(bayestopt_.smoother_var_list(bayestopt_.smoother_saved_var_list));
+    if ~(options_.selected_variables_only && ~(options_.forecast > 0)) %happens only when selected_variables_only is not used
+        oo_.FilteredVariablesKStepAhead(:,positions_in_declaration_order,:)=oo_.FilteredVariablesKStepAhead;
+        if ~isempty(PK) %get K-step ahead variances
+            oo_.FilteredVariablesKStepAheadVariances(:,positions_in_declaration_order,positions_in_declaration_order,:)=oo_.FilteredVariablesKStepAheadVariances;
+        end
+        if ~isempty(decomp)
+            oo_.FilteredVariablesShockDecomposition(:,positions_in_declaration_order,:,:)=oo_.FilteredVariablesShockDecomposition;
+        end
+    else
+        positions_in_declaration_order=oo_.dr.order_var(bayestopt_.smoother_var_list(bayestopt_.smoother_saved_var_list));
+        [junk,sorted_index_declaration_order]=sort(positions_in_declaration_order);
+        oo_.FilteredVariablesKStepAhead(:,sorted_index_declaration_order,:)=oo_.FilteredVariablesKStepAhead;
+        if ~isempty(PK) %get K-step ahead variances
+            oo_.FilteredVariablesKStepAheadVariances(:,sorted_index_declaration_order,sorted_index_declaration_order,:)=oo_.FilteredVariablesKStepAheadVariances;
+        end
+        if ~isempty(decomp)
+            oo_.FilteredVariablesShockDecomposition(:,sorted_index_declaration_order,:,:)=oo_.FilteredVariablesShockDecomposition;
         end
     end
-    %updated variables are E_t(y_t) so no trend shift is required
-    oo_.UpdatedVariables.(deblank(M_.endo_names(bayestopt_.mfys(pos_iter),:)))=...
-        updated_variables(bayestopt_.mf(pos_iter),:)'+trend_constant_observables(pos_iter,:)';
+end
+
+if options_.filter_covariance
+    oo_.Smoother.Variance(oo_.dr.order_var,oo_.dr.order_var,:)=oo_.Smoother.Variance;
 end
 
 %% get smoothed shocks
