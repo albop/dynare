@@ -402,21 +402,6 @@ for i=1:options_.number_of_observed_variables
     k1 = [k1; strmatch(options_.varobs{i},M_.endo_names, 'exact')];
 end
 
-% Define union of observed and state variables
-k2 = union(var_obs_index_dr,[M_.nstatic+1:M_.nstatic+M_.nspred]', 'rows');
-% Set restrict_state to postion of observed + state variables in expanded state vector.
-oo_.dr.restrict_var_list = k2;
-% set mf0 to positions of state variables in restricted state vector for likelihood computation.
-[junk,bayestopt_.mf0] = ismember([M_.nstatic+1:M_.nstatic+M_.nspred]',k2);
-% Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
-[junk,bayestopt_.mf1] = ismember(var_obs_index_dr,k2);
-% Set mf2 to positions of observed variables in expanded state vector for filtering and smoothing.
-bayestopt_.mf2  = var_obs_index_dr;
-bayestopt_.mfys = k1;
-
-[junk,ic] = intersect(k2,nstatic+(1:npred)');
-oo_.dr.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
-
 k3 = [];
 k3p = [];
 if options_.selected_variables_only
@@ -456,6 +441,7 @@ if options_.block == 1
     bayestopt_.smoother_restrict_columns = ic;
     [junk,bayestopt_.smoother_mf] = ismember(k1, bayestopt_.smoother_var_list);
 else
+    % Define union of observed and state variables
     k2 = union(var_obs_index_dr,[M_.nstatic+1:M_.nstatic+M_.nspred]', 'rows');
     % Set restrict_state to postion of observed + state variables in expanded state vector.
     oo_.dr.restrict_var_list = k2;
