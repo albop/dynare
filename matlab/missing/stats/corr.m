@@ -115,75 +115,70 @@ end
 
 
 %@test:1
-%$test
 %$ x = rand (10);
-%$ cc1 = corr (x);
-%$ cc2 = corr (x, x);
-%$ t(1)=dassert(size(cc1),[10, 10]); 
-%$ t(2)=dassert(size (cc2),[10, 10]);
-%$ t(3)=dassert(cc1, cc2, sqrt (eps));
+%$ cc1 = corr(x);
+%$ cc2 = corr(x, x);
+%$ t(1) = dassert(size(cc1),[10, 10]);
+%$ t(2) = dassert(size (cc2),[10, 10]);
+%$ t(3) = dassert(cc1, cc2, sqrt (eps));
+%$ T = all(t);
 %@eof:1
 
 %@test:2
 %$ x = [1:3]';
 %$ y = [3:-1:1]';
-%$ t(4)=dassert(corr (x, y), -1, 5*eps);
-%$ t(5)=dassert(corr (x, flipud (y)), 1, 5*eps);
-%$ t(6)=dassert(corr ([x, y]), [1 -1; -1 1], 5*eps);
+%$ t = zeros(3,1);
+%$ t(1) = dassert(corr(x, y), -1, 5*eps);
+%$ t(2) = dassert(corr(x, flipud (y)), 1, 5*eps);
+%$ t(3) = dassert(corr([x, y]), [1 -1; -1 1], 5*eps);
+%$ T = all(t);
 %@eof:2
 
 %@test:3
-%$t(7)=dassert (corr (5), NaN);
-%$t(8)=dassert (corr([1 2 3],5),NaN(3,1));
-%$t(9)=dassert (corr(5,[1 2 3]),NaN(1,3));
+%$ t = zeros(3,1);
+%$ t(1) = dassert(corr(5), NaN);
+%$ t(2) = dassert(corr([1 2 3],5),NaN(3,1));
+%$ t(3) = dassert(corr(5,[1 2 3]),NaN(1,3));
+%$ T = all(t);
 %@eof:3
 
 %@test:4
-%$ Test input validation
+%$ t = zeros(6,1);
 %$ try
-%$     corr ()
-%$     t(10) = false;
+%$     corr()
+%$     t(1) = false;
 %$ catch
-%$     t(10) = true;
+%$     t(1) = true;
 %$ end
+%$ try
+%$     corr(1, 2, 3)
+%$     t(2) = false;
+%$ catch
+%$     t(2) = true;
+%$ end
+%$ try
+%$     corr([1; 2], ['A', 'B'])
+%$     t(3) = false;
+%$ catch
+%$     t(3) = true;
+%$ end
+%$ try
+%$     corr([1; 2], ['A', 'B'])
+%$     t(4) = false;
+%$ catch
+%$     t(4) = true;
+%$ end
+%$ try
+%$     corr(ones (2,2,2))
+%$     t(5) = false;
+%$ catch
+%$     t(5) = true;
+%$ end
+%$ try
+%$     corr(ones (2,2), ones (2,2,2))
+%$     t(6) = false;
+%$ catch
+%$     t(6) = true;
+%$ end
+%$ T = all(t);
 %@eof:4
-
-%@test:5
-%$ Test input validation
-%$ try
-%$     corr (1, 2, 3)
-%$     t(11) = false;
-%$ catch
-%$     t(11) = true;
-%$ end
-%@eof:5
-
-%@test:6
-%$ Test input validation
-%$ try
-%$     corr ([1; 2], ['A', 'B'])
-%$     t(12) = false;
-%$ catch
-%$     t(12) = true;
-%$ end
-%@eof:6
-
-%@test:7
-%$ Test input validation
-%$ try
-%$     corr (ones (2,2,2))
-%$     t(13) = false;
-%$ catch
-%$     t(13) = true;
-%$ end
-%@eof:7
-
-%@test:8
-%$ Test input validation
-%$ try
-%$     corr (ones (2,2), ones (2,2,2))
-%$     t(14) = false;
-%$ catch
-%$     t(14) = true;
-%$ end
-%@eof:8
