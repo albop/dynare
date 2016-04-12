@@ -57,6 +57,8 @@ s2 = mean(y.*y);
 s = sqrt(s2);
 oo_.mean = transpose(m);
 oo_.var = y'*y/size(y,1);
+oo_.skewness = (mean(y.^3)./s2.^1.5)'; 
+oo_.kurtosis = (mean(y.^4)./(s2.*s2)-3)';
 
 labels = deblank(M_.endo_names(ivar,:));
 labels_TeX = deblank(M_.endo_names_tex(ivar,:));

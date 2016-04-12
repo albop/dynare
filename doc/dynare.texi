@@ -3990,7 +3990,8 @@ Default: do not request spectral density estimates
 This command sets @code{oo_.dr}, @code{oo_.mean}, @code{oo_.var} and
 @code{oo_.autocorr}, which are described below.
 
-If option @code{periods} is present, sets @code{oo_.endo_simul}
+If option @code{periods} is present, sets @code{oo_.skewness}, 
+@code{oo_.kurtosis}, and @code{oo_.endo_simul}
 (@pxref{oo_.endo_simul}), and also saves the simulated variables in
 MATLAB/Octave vectors of the global workspace with the same name as
 the endogenous variables.
@@ -4041,6 +4042,18 @@ the endogenous variables. Contains theoretical variance if the
 @code{periods} option is not present (or an approximation thereof for @code{order=2}), 
 and simulated variance
 otherwise. The variables are arranged in declaration order.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.skewness
+After a run of @code{stoch_simul} contains the skewness (standardized third moment)
+of the simulated variables if the @code{periods} option is present. 
+The variables are arranged in declaration order.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.kurtosis
+After a run of @code{stoch_simul} contains the kurtosis (standardized fourth moment)
+of the simulated variables if the @code{periods} option is present. 
+The variables are arranged in declaration order.
 @end defvr
 
 @anchor{oo_.autocorr}
