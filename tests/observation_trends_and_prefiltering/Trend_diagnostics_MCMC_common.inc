@@ -31,17 +31,17 @@ if max(abs(squeeze(oo_.FilteredVariablesKStepAhead(1,1,2:end-(options_.nk-1)))-o
     error('FilteredVariablesKStepAhead is wrong')
 end
         
-if abs(oo_.PointForecast.Mean.Y_obs(end)- y_forecast_100_periods)>2e-4 || abs(oo_.PointForecast.Mean.P_obs(end)- p_forecast_100_periods)>2e-4
+if abs(oo_.PointForecast.Mean.Y_obs(end)- y_forecast_100_periods)>5e-4 || abs(oo_.PointForecast.Mean.P_obs(end)- p_forecast_100_periods)>5e-4
     error('Mean Point Forecasts do not match')
 end
-if abs(oo_.PointForecast.Median.Y_obs(end)- y_forecast_100_periods)>2e-4 || abs(oo_.PointForecast.Median.P_obs(end)- p_forecast_100_periods)>2e-4
+if abs(oo_.PointForecast.Median.Y_obs(end)- y_forecast_100_periods)>5e-4 || abs(oo_.PointForecast.Median.P_obs(end)- p_forecast_100_periods)>5e-4
     error('Median Point Forecasts do not match')
 end
 
-if abs(oo_.MeanForecast.Mean.Y_obs(end)- y_forecast_100_periods)>2e-4 || abs(oo_.MeanForecast.Mean.P_obs(end)- p_forecast_100_periods)>2e-4
+if abs(oo_.MeanForecast.Mean.Y_obs(end)- y_forecast_100_periods)>5e-4 || abs(oo_.MeanForecast.Mean.P_obs(end)- p_forecast_100_periods)>5e-4
     error('Mean Mean Forecasts do not match')
 end
-if abs(oo_.MeanForecast.Median.Y_obs(end)- y_forecast_100_periods)>2e-4 || abs(oo_.MeanForecast.Median.P_obs(end)- p_forecast_100_periods)>1e-3
+if abs(oo_.MeanForecast.Median.Y_obs(end)- y_forecast_100_periods)>5e-4 || abs(oo_.MeanForecast.Median.P_obs(end)- p_forecast_100_periods)>5e-3
     error('Median Mean Forecasts do not match')
 end
 

@@ -3,7 +3,7 @@
 addpath('..');
 generate_trend_stationary_AR1;
 
-estimation(order=1,datafile='AR1_trend_data_with_constant',mh_replic=2000,mode_compute=4,
+estimation(order=1,datafile='AR1_trend_data_with_constant',mh_replic=400,mode_compute=4,
     first_obs=1,smoother,prefilter=1,
     mh_nblocks=1,mh_jscale=1e-4,
     filtered_vars, filter_step_ahead = [1,2,4],
