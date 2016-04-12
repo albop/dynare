@@ -275,7 +275,7 @@ MODFILES = \
 	optimizers/fs2000_w.mod \
 	differentiate_forward_vars/RBC_differentiate_forward.mod \
 	TeX/fs2000_corr_ME.mod \
-	prior_posterior_function/fs2000_prior_posterior_function.mod
+	prior_posterior_function/fs2000_prior_posterior_function.mod \
 	observation_trends_and_prefiltering/MCMC/Trend_loglin_no_prefilt_first_obs_MC.mod \
 	observation_trends_and_prefiltering/MCMC/Trend_loglin_prefilt_first_obs_MC.mod \
 	observation_trends_and_prefiltering/MCMC/Trend_loglinear_no_prefilter_MC.mod \
@@ -299,8 +299,7 @@ MODFILES = \
 	observation_trends_and_prefiltering/calib_smoother/Tr_no_prefilter_loglin_calib_smoother.mod \
 	observation_trends_and_prefiltering/calib_smoother/Tr_no_prefil_f_obs_loglin_cal_smoother.mod \
 	observation_trends_and_prefiltering/calib_smoother/Tr_prefilter_loglin_calib_smoother.mod \
-	observation_trends_and_prefiltering/calib_smoother/Tr_prefil_f_obs_loglin_cal_smoother.mod \
-	reporting/example1.mod
+	observation_trends_and_prefiltering/calib_smoother/Tr_prefil_f_obs_loglin_cal_smoother.mod
 
 XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value_xfail.mod \
@@ -524,7 +523,8 @@ EXTRA_DIST = \
 	observation_trends_and_prefiltering/Trend_exp_model_calib_no_prefilter_common.inc \
 	observation_trends_and_prefiltering/Trend_model_calib_prefilter_common.inc \
 	observation_trends_and_prefiltering/Trend_model_calib_no_prefilter_common.inc \
-	observation_trends_and_prefiltering/Trend_load_data_common.inc 
+	observation_trends_and_prefiltering/Trend_load_data_common.inc \
+	observation_trends_and_prefiltering/Trend_no_prefilter_conditional_forecast.inc \
 	optimal_policy/Ramsey/oo_ramsey_policy_initval.mat \
 	optimizers/optimizer_function_wrapper.m \
 	optimizers/fs2000.common.inc \

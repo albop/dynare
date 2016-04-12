@@ -68,6 +68,9 @@ else
 end
 
 if estimated_model
+    if options_.prefilter
+        error('imcforecast:: Conditional forecasting does not support the prefiltering option')
+    end
     if ischar(options_cond_fcst.parameter_set)
         switch options_cond_fcst.parameter_set
           case 'posterior_mode'
@@ -107,18 +110,37 @@ if estimated_model
     data_index = dataset_info.missing.aindex;
     gend = dataset_.nobs;
     missing_value = dataset_info.missing.state;
-    [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data,data_index,missing_value);
-    trend = repmat(ys,1,options_cond_fcst.periods+1);
-    for i=1:M_.endo_nbr
-        j = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
-        if ~isempty(j)
-            trend(i,:) = trend(i,:)+trend_coeff(j)*(gend+(0:options_cond_fcst.periods));
+    [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff,aK,T,R,P,PK,decomp,trend_addition] = DsgeSmoother(xparam,gend,data,data_index,missing_value);
+    %get constant part
+    if options_.noconstant
+        constant = zeros(size(ys,1),options_cond_fcst.periods+1);
+    else
+        if options_.loglinear
+            constant = repmat(log(ys),1,options_cond_fcst.periods+1);
+        else
+            constant = repmat(ys,1,options_cond_fcst.periods+1);
         end
     end
-    trend = trend(oo_.dr.order_var,:);
+    %get trend part (which also takes care of prefiltering); needs to
+    %include the last period
+    if bayestopt_.with_trend == 1
+        [trend_addition] =compute_trend_coefficients(M_,options_,size(bayestopt_.smoother_mf,1),gend+options_cond_fcst.periods);
+        trend_addition = trend_addition(:,gend:end);
+    else
+        trend_addition=zeros(size(bayestopt_.smoother_mf,1),1+options_cond_fcst.periods);
+    end
+    % add trend to constant
+    for obs_iter=1:length(options_.varobs)
+        j = strmatch(options_.varobs{obs_iter},M_.endo_names,'exact');
+        constant(j,:) = constant(j,:)+trend_addition(obs_iter,:);        
+    end
+    trend = constant(oo_.dr.order_var,:);
     InitState(:,1) = atT(:,end);
 else
     graph_title='Calibration';
+    if ~isfield(oo_.dr,'kstate')
+        error('You need to call stoch_simul before conditional_forecast')
+    end
 end
 
 if isempty(options_.qz_criterium)
@@ -178,7 +200,10 @@ end
 % number of periods with constrained values
 cL = size(constrained_paths,2);
 
-constrained_paths = bsxfun(@minus,constrained_paths,trend(idx,1:cL));
+%transform constrained periods into deviations from steady state; note that
+%trend includes last actual data point and therefore we need to start in
+%period 2
+constrained_paths = bsxfun(@minus,constrained_paths,trend(idx,2:1+cL));
 
 FORCS1_shocks = zeros(n1,cL,options_cond_fcst.replic);
 
@@ -202,17 +227,15 @@ forecasts.controlled_variables = constrained_vars;
 forecasts.instruments = options_cond_fcst.controlled_varexo;
 
 for i = 1:EndoSize
-    eval(['forecasts.cond.Mean.' deblank(M_.endo_names(oo_.dr.order_var(i),:)) ' = mFORCS1(i,:)'';']);
+    forecasts.cond.Mean.(deblank(M_.endo_names(oo_.dr.order_var(i),:)))= mFORCS1(i,:)';
     tmp = sort(squeeze(FORCS1(i,:,:))');
-    eval(['forecasts.cond.ci.' deblank(M_.endo_names(oo_.dr.order_var(i),:)) ...
-          ' = [tmp(t1,:)'' ,tmp(t2,:)'' ]'';']);
+    forecasts.cond.ci.(deblank(M_.endo_names(oo_.dr.order_var(i),:))) = [tmp(t1,:)' ,tmp(t2,:)' ]';
 end
 
 for i = 1:n1
-    eval(['forecasts.controlled_exo_variables.Mean.' deblank(options_cond_fcst.controlled_varexo(i,:)) ' = mFORCS1_shocks(i,:)'';']);
+    forecasts.controlled_exo_variables.Mean.(deblank(options_cond_fcst.controlled_varexo(i,:))) = mFORCS1_shocks(i,:)';
     tmp = sort(squeeze(FORCS1_shocks(i,:,:))');
-    eval(['forecasts.controlled_exo_variables.ci.' deblank(options_cond_fcst.controlled_varexo(i,:))  ...
-          ' = [tmp(t1,:)'' ,tmp(t2,:)'' ]'';']);
+    forecasts.controlled_exo_variables.ci.(deblank(options_cond_fcst.controlled_varexo(i,:))) = [tmp(t1,:)' ,tmp(t2,:)' ]';
 end
 
 clear FORCS1 mFORCS1_shocks;
@@ -231,10 +254,9 @@ end
 mFORCS2 = mean(FORCS2,3);
 
 for i = 1:EndoSize
-    eval(['forecasts.uncond.Mean.' deblank(M_.endo_names(oo_.dr.order_var(i),:)) ' = mFORCS2(i,:)'';']);
+    forecasts.uncond.Mean.(deblank(M_.endo_names(oo_.dr.order_var(i),:)))= mFORCS2(i,:)';
     tmp = sort(squeeze(FORCS2(i,:,:))');
-    eval(['forecasts.uncond.ci.' deblank(M_.endo_names(oo_.dr.order_var(i),:)) ...
-          ' = [tmp(t1,:)'' ,tmp(t2,:)'' ]'';']);
+    forecasts.uncond.ci.(deblank(M_.endo_names(oo_.dr.order_var(i),:))) = [tmp(t1,:)' ,tmp(t2,:)' ]';
 end
 forecasts.graph.title=graph_title;
 forecasts.graph.fname=M_.fname;

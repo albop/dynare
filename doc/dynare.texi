@@ -2458,7 +2458,7 @@ in @ref{stoch_simul}, if the @code{periods} option is specified. Note that this 
 in @ref{forecast} as the initial point at which the forecasts are computed
 
 @item
-in @ref{conditional_forecast} as the initial point at which the conditional forecasts are computed
+in @ref{conditional_forecast} for a calibrated model as the initial point at which the conditional forecasts are computed
 
 @item 
 in @ref{Ramsey} policy, where it also specifies the values of the endogenous states at 
@@ -4480,7 +4480,9 @@ varobs
 @descriptionhead
 
 This block specifies @emph{linear} trends for observed variables as
-functions of model parameters.
+functions of model parameters. In case the @code{loglinear}-option is used,
+this corresponds to a linear trend in the logged observables, i.e. an exponential
+trend in the level of the observables.
 
 Each line inside of the block should be of the form:
 
@@ -4489,7 +4491,7 @@ Each line inside of the block should be of the form:
 @end example
 
 In most cases, variables shouldn't be centered when
-@code{observation_trends} is used.
+@code{observation_trends} is used. 
 
 @examplehead
 
@@ -6661,7 +6663,7 @@ Use @code{plot_conditional_forecast} to graph the results.
 
 @item parameter_set = @code{calibration} | @code{prior_mode} | @code{prior_mean} | @code{posterior_mode} | @code{posterior_mean} | @code{posterior_median}
 Specify the parameter set to use for the forecasting. No default
-value, mandatory option.
+value, mandatory option. Note that in case of estimated models, @code{conditional_forecast} does not support the @code{prefilter}-option.
 
 @item controlled_varexo = (@var{VARIABLE_NAME}@dots{})
 Specify the exogenous variables to use as control variables. No
@@ -6770,6 +6772,8 @@ variables between the first and last specified period. If an intermediate period
 is not specified, a value of 0 is assumed. That is, if you specify only 
 values for periods 1 and 3, the values for period 2 will be 0. Currently, it is not 
 possible to have uncontrolled intermediate periods.
+In case of the presence of @code{observation_trends}, the specified controlled path for 
+these variables needs to include the trend component.
 
 
 @end deffn

@@ -19,7 +19,7 @@ function oo_ = shock_decomposition(M_,oo_,options_,varlist)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2009-2013 Dynare Team
+% Copyright (C) 2009-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,7 +62,7 @@ if isempty(parameter_set)
     end
 end
 
-oo = evaluate_smoother(parameter_set,varlist);
+[oo,Smoothed_Variables_deviation_from_mean] = evaluate_smoother(parameter_set,varlist);
 
 % reduced form
 dr = oo.dr;
@@ -77,16 +77,15 @@ A = dr.ghx;
 B = dr.ghu;
 
 % initialization
-gend = eval(['size(oo.SmoothedShocks.' M_.exo_names(1,:),',1)']);
+gend = size(oo.SmoothedShocks.(M_.exo_names(1,:)),1);
 epsilon=NaN(nshocks,gend);
 for i=1:nshocks
-    epsilon(i,:) = eval(['oo.SmoothedShocks.' M_.exo_names(i,:)]);
+    epsilon(i,:) = oo.SmoothedShocks.(M_.exo_names(i,:));
 end
 
 z = zeros(endo_nbr,nshocks+2,gend);
-for i=1:endo_nbr
-    z(i,end,:) = eval(['oo.SmoothedVariables.' M_.endo_names(i,:)]);
-end
+
+z(:,end,:) = Smoothed_Variables_deviation_from_mean;
 
 maximum_lag = M_.maximum_lag;
 lead_lag_incidence = M_.lead_lag_incidence;
