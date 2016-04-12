@@ -98,7 +98,9 @@ oo_.dr.restrict_columns = bayestopt_.smoother_restrict_columns;
 oo_.dr.restrict_var_list = oldoo.restrict_var_list;
 oo_.dr.restrict_columns = oldoo.restrict_columns;
 
-bayestopt_.mf = bayestopt_.smoother_mf;
+%get location of observed variables and requested smoothed variables in
+%decision rules
+bayestopt_.mf = bayestopt_.smoother_var_list(bayestopt_.smoother_mf);
 if options_.noconstant
     constant = zeros(vobs,1);
 else
@@ -118,7 +120,7 @@ else
 end
 start = options_.presample+1;
 np    = size(T,1);
-mf    = bayestopt_.smoother_mf;
+mf    = bayestopt_.mf;
 % ------------------------------------------------------------------------------
 %  3. Initial condition of the Kalman filter
 % ------------------------------------------------------------------------------
