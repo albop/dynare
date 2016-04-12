@@ -4,7 +4,7 @@ addpath('..');
 generate_trend_stationary_AR1;
 
 estimation(order=1,datafile='AR1_trend_data_with_constant',
-        mh_replic=2000,mode_compute=4,first_obs=1000,smoother,forecast=100,prefilter=0,
+        mh_replic=400,mode_compute=4,first_obs=1000,smoother,forecast=100,prefilter=0,
         mcmc_jumping_covariance='MCMC_jump_covar',
         filtered_vars, filter_step_ahead = [1,2,4],
         mh_nblocks=1,mh_jscale=0.3) P_obs Y_obs junk2;
