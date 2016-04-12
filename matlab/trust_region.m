@@ -1,4 +1,4 @@
-function [x,check] = trust_region(fcn,x0,j1,j2,jacobian_flag,gstep,tolf,tolx,maxiter,debug,varargin)
+function [x,check,info] = trust_region(fcn,x0,j1,j2,jacobian_flag,gstep,tolf,tolx,maxiter,debug,varargin)
 % Solves systems of non linear equations of several variables, using a
 % trust-region method.
 %
@@ -20,12 +20,12 @@ function [x,check] = trust_region(fcn,x0,j1,j2,jacobian_flag,gstep,tolf,tolx,max
 % OUTPUTS
 %    x:               results
 %    check=1:         the model can not be solved
-%
+%    info:            detailed exitcode
 % SPECIAL REQUIREMENTS
 %    none
 
 % Copyright (C) 2008-2012 VZLU Prague, a.s.
-% Copyright (C) 2014 Dynare Team
+% Copyright (C) 2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -82,7 +82,6 @@ while (niter < maxiter && ~info)
             xdh(j2(j)) = xdh(j2(j))+dh(j) ;
             t = fcn(xdh,varargin{:});
             fjac(:,j) = (t(j1) - fvec)./dh(j) ;
-            g(j) = fvec'*fjac(:,j) ;
         end
     end
 

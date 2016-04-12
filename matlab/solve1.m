@@ -118,7 +118,13 @@ for its = 1:maxit
     if check > 0
         den = max([f;0.5*nn]) ;
         if max(abs(g).*max([abs(x(j2)') ones(1,nn)])')/den < tolmin
-            return
+            if max(abs(x(j2)-xold(j2))./max([abs(x(j2)') ones(1,nn)])') < tolx
+                disp (' ')
+                disp (['SOLVE: Iteration ' num2str(its)])
+                disp (['Convergence on dX.'])
+                disp (x)
+                return
+            end
         else
             disp (' ')
             disp (['SOLVE: Iteration ' num2str(its)])
@@ -127,13 +133,6 @@ for its = 1:maxit
             return
         end
 
-        if max(abs(x(j2)-xold(j2))./max([abs(x(j2)') ones(1,nn)])') < tolx
-            disp (' ')
-            disp (['SOLVE: Iteration ' num2str(its)])
-            disp (['Convergence on dX.'])
-            disp (x)
-            return
-        end
     elseif max(abs(fvec)) < tolf
         return
     end
