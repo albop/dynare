@@ -10,14 +10,14 @@ function [A,B,ys,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
-%! @item check_flag
-%! Integer scalar, equal to 0 if all the approximation is required, positive if only the eigenvalues are to be computed.
 %! @item Model
 %! Matlab's structure describing the model (initialized by dynare, see @ref{M_}).
 %! @item DynareOptions
 %! Matlab's structure describing the options (initialized by dynare, see @ref{options_}).
 %! @item DynareResults
 %! Matlab's structure gathering the results (initialized by dynare, see @ref{oo_}).
+%! @item mode
+%! Passed argument if restricted state-space is required, not passed otherwise
 %! @end table
 %! @sp 2
 %! @strong{Outputs}
@@ -28,7 +28,7 @@ function [A,B,ys,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,
 %! @item B
 %! Matrix of doubles, matrix relating the endogenous variables to the innovations in the state equation.
 %! @item ys
-%! Vector of doubles, steady state level of the endogenous variables in the state equation.
+%! Vector of doubles, steady state level of the endogenous variables in declaration order
 %! @item info
 %! Integer scalar, error code as given by @ref{resol}.
 %! @item Model
@@ -49,7 +49,7 @@ function [A,B,ys,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2001-2012 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -13,7 +13,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 %                                              static model
 %
 % OUTPUTS
-%   ys                        vector           steady state
+%   ys                        vector           steady state (in declaration order)
 %   params                    vector           model parameters possibly
 %                                              modified by user steadystate
 %                                              function

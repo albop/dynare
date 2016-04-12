@@ -1810,7 +1810,7 @@ used outside. A model local variable declaration looks like:
 @item linear
 Declares the model as being linear. It spares oneself from having to
 declare initial values for computing the steady state of a stationary
-linear model. This options can't be used with non-linear models, it will
+linear model. This option can't be used with non-linear models, it will
 NOT trigger linearization of the model.
 
 @item use_dll
@@ -5601,7 +5601,8 @@ recursions as described by @cite{Herbst, 2015}. This setting is only used with
 
 @item filter_covariance
 @anchor{filter_covariance} Saves the series of one step ahead error of
-forecast covariance matrices.
+forecast covariance matrices in @ref{oo_.Smoother.Variance}. Not available 
+with Metropolis.
 
 @item filter_step_ahead = [@var{INTEGER1}:@var{INTEGER2}]
 See below.
@@ -5637,7 +5638,7 @@ Note that the nonstationary variables in the model must be integrated processes 
 @item selected_variables_only
 @anchor{selected_variables_only}
 Only run the classical smoother on the variables listed just after the
-@code{estimation} command. This options is incompatible with requesting classical 
+@code{estimation} command. This option is incompatible with requesting classical 
 frequentist forecasts and will be overridden in this case. When using Bayesian estimation,
 the smoother is by default only run on the declared endogenous variables.
 Default: run the smoother on all the
@@ -6070,6 +6071,61 @@ After an estimation without Metropolis, or if computed by
 After an estimation with Metropolis, fields are of the form:
 @example
 @code{oo_.UpdatedVariables.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.Smoother.Variance
+@anchor{oo_.Smoother.Variance}
+Three-dimensional array set by the @code{estimation} command (if used with the
+@code{smoother}) without Metropolis, 
+or by the @code{calib_smoother} command, if the @code{filter_covariance} option
+has been requested.
+Contains the series of one-step ahead forecast error covariance matrices
+from the Kalman smoother. The @code{M_.endo_nbr} times @code{M_.endo_nbr} times
+@code{T+1} array contains the variables in declaration order along the first 
+two dimensions. The third dimension of the array provides the
+observation for which the forecast has been made.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.Smoother.SteadyState
+@anchor{oo_.Smoother.SteadyState}
+Variable set by the @code{estimation} command (if used with the
+@code{smoother}) without Metropolis, 
+or by the @code{calib_smoother} command.
+Contains the steady state component of the endogenous variables used in the
+smoother in order of variable declaration.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.Smoother.TrendCoeffs
+@anchor{oo_.Smoother.TrendCoeffs}
+Variable set by the @code{estimation} command (if used with the
+@code{smoother}) without Metropolis, 
+or by the @code{calib_smoother} command.
+Contains the trend coefficients of the observed variables used in the
+smoother in order of declaration of the observed variables.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.Smoother.Trend
+Variable set by the @code{estimation} command (if used with the
+@code{smoother} option), or by the @code{calib_smoother} command.
+Contains the trend component of the observed variables used in the
+smoother.
+
+Fields are of the form:
+@example
+@code{oo_.Smoother.Trend.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.Smoother.Constant
+Variable set by the @code{estimation} command (if used with the
+@code{smoother} option), or by the @code{calib_smoother} command.
+Contains the constant part of the endogenous variables used in the
+smoother.
+
+Fields are of the form:
+@example
+@code{oo_.Smoother.Constant.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 

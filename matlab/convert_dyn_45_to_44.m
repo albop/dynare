@@ -1,19 +1,19 @@
-function oo_ = convert_dyn_45_to_44(M_, options_, oo_)
-%function oo_ = convert_dyn_45_to_44(M_, options_, oo_
+function oo_ = convert_dyn_45_to_44(M_, options_, oo_,bayestopt_)
+%function oo_ = convert_dyn_45_to_44(M_, options_, oo_,bayestopt_)
 % Converts oo_ from 4.5 to 4.4
 %
 % INPUTS
 %    M_          [struct]    dynare model struct
 %    options_    [struct]    dynare options struct
 %    oo_         [struct]    dynare output struct
-%
+%    bayestopt_  [struct]    structure storing information about priors
 % OUTPUTS
 %    oo_         [struct]    dynare output struct
 %
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2015 Dynare Team
+% Copyright (C) 2015-16 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -142,6 +142,31 @@ if isfield(oo_,'FilteredVariables')
         end
     end
 end
+
+%% resort fields that are in declaration order to decision rule order (previous undocumented behavior)
+if ~isempty(options_.nk) && options_.nk ~= 0
+    if ~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape> 0) && options_.load_mh_file)) %no Bayesian estimation
+        positions_in_decision_order=oo_.dr.inv_order_var(bayestopt_.smoother_var_list(bayestopt_.smoother_saved_var_list));
+        if ~(options_.selected_variables_only && ~(options_.forecast > 0)) %happens only when selected_variables_only is not used
+            oo_.FilteredVariablesKStepAhead(:,positions_in_decision_order,:)=oo_.FilteredVariablesKStepAhead;
+            if ~isempty(PK) %get K-step ahead variances
+                oo_.FilteredVariablesKStepAheadVariances(:,positions_in_decision_order,positions_in_decision_order,:)=oo_.FilteredVariablesKStepAheadVariances;
+            end
+            if ~isempty(decomp)
+                oo_.FilteredVariablesShockDecomposition(:,positions_in_decision_order,:,:)=oo_.FilteredVariablesShockDecomposition;
+            end
+        else
+            fprintf('\nconvert_dyn_45_to_44:: Due to a bug in Dynare 4.4.3 with the selected_variables_only option, the previous behavior\n')
+            fprintf('convert_dyn_45_to_44:: cannot be restored for FilteredVariablesKStepAhead, FilteredVariablesKStepAheadVariances, and\n')
+            fprintf('convert_dyn_45_to_44:: FilteredVariablesShockDecomposition\n')
+        end
+    end
+end
+
+if options_.filter_covariance
+    oo_.Smoother.Variance(oo_.dr.inv_order_var,oo_.dr.inv_order_var,:)=oo_.Smoother.Variance;
+end
+
 
 %% set old field posterior_std and remove new field posterior_std_at_mode
 if isfield(oo_,'posterior_std_at_mode')

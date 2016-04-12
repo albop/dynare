@@ -34,6 +34,11 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSm
 %              matrices (meaningless for periods 1:d)
 %    decomp:   decomposition of the effect of shocks on filtered values
 %
+% Notes:
+%   Outputs are stored in decision-rule order, i.e. to get variables in order of declaration
+%   as in M_.endo_names, ones needs code along the lines of:
+%   variables_declaration_order(dr.order_var,:) = alphahat
+% 
 % SPECIAL REQUIREMENTS
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
