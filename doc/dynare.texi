@@ -1810,7 +1810,7 @@ used outside. A model local variable declaration looks like:
 @item linear
 Declares the model as being linear. It spares oneself from having to
 declare initial values for computing the steady state of a stationary
-linear model. This options can't be used with non-linear models, it will
+linear model. This option can't be used with non-linear models, it will
 NOT trigger linearization of the model.
 
 @item use_dll
@@ -5622,7 +5622,7 @@ Note that the nonstationary variables in the model must be integrated processes 
 @item selected_variables_only
 @anchor{selected_variables_only}
 Only run the classical smoother on the variables listed just after the
-@code{estimation} command. This options is incompatible with requesting classical 
+@code{estimation} command. This option is incompatible with requesting classical 
 frequentist forecasts and will be overridden in this case. When using Bayesian estimation,
 the smoother is by default only run on the declared endogenous variables.
 Default: run the smoother on all the
@@ -6092,7 +6092,7 @@ smoother in order of declaration of the observed variables.
 @defvr {MATLAB/Octave variable} oo_.Smoother.Trend
 Variable set by the @code{estimation} command (if used with the
 @code{smoother} option), or by the @code{calib_smoother} command.
-Contains the trend component of the endogenous variables used in the
+Contains the trend component of the observed variables used in the
 smoother.
 
 Fields are of the form:
