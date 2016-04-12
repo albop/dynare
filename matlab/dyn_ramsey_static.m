@@ -1,20 +1,24 @@
 function [steady_state,params,check] = dyn_ramsey_static(ys_init,M,options_,oo)
 
-% function  [steady_state,params,check] = dyn_ramsey_static_(x)
-% Computes the static first order conditions for optimal policy
+% function  [steady_state,params,check] = dyn_ramsey_static_(ys_init,M,options_,oo)
+% Computes the steady state for optimal policy
 %
 % INPUTS
-%    x:         vector of endogenous variables or instruments
-%
+%    ys_init:       vector of endogenous variables or instruments
+%    M:             Dynare model structure
+%    options:       Dynare options structure
+%    oo:            Dynare results structure
+% 
 % OUTPUTS
-%    resids:    residuals of non linear equations
-%    rJ:        Jacobian
-%    mult:      Lagrangian multipliers
+%    steady_state:  steady state value
+%    params:        parameters at steady state, potentially updated by
+%                   steady_state file
+%    check:         Lagrangian multipliers
 %
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2015 Dynare Team
+% Copyright (C) 2003-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,7 +38,7 @@ function [steady_state,params,check] = dyn_ramsey_static(ys_init,M,options_,oo)
 
 params = M.params;
 check = 0;
-options_.steadystate.nocheck = 1; %disable checking because Lagrange multipliers are not accounted for in evaluate_steady_state_file
+options_.steadystate.nocheck = 1; %locally disable checking because Lagrange multipliers are not accounted for in evaluate_steady_state_file
 % dyn_ramsey_static_1 is a subfunction
 nl_func = @(x) dyn_ramsey_static_1(x,M,options_,oo);
 
@@ -62,7 +66,7 @@ elseif options_.steadystate_flag
     end
     ys_init(k_inst) = inst_val;
     exo_ss = [oo.exo_steady_state oo.exo_det_steady_state];
-    [xx,params,check] = evaluate_steady_state_file(ys_init,exo_ss,M,options_); %run steady state file again to update parameters
+    [xx,params,check] = evaluate_steady_state_file(ys_init,exo_ss,M,options_,~options_.steadystate.nocheck); %run steady state file again to update parameters
     [junk,junk,steady_state] = nl_func(inst_val); %compute and return steady state
 else
     n_var = M.orig_endo_nbr;
@@ -105,7 +109,7 @@ if options_.steadystate_flag
     [x,params,check] = evaluate_steady_state_file(ys_init,... %returned x now has size endo_nbr as opposed to input size of n_instruments
                                                   [oo.exo_steady_state; ...
                                                   oo.exo_det_steady_state], ...
-                                                  M,options_);
+                                                  M,options_,~options_.steadystate.nocheck);
 end
 
 xx = zeros(endo_nbr,1); %initialize steady state vector
