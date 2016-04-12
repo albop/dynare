@@ -176,7 +176,7 @@ end
 if oo_.deterministic_simulation.status == 1
     disp('Perfect foresight solution found.')
 else
-    warning('Failed to solve perfect foresight model')
+    disp('Failed to solve perfect foresight model')
 end
 
 skipline()

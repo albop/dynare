@@ -63,6 +63,7 @@ options_.minimal_workspace = 0;
 options_.dp.maxit = 3000;
 options_.steady.maxit = 50;
 options_.simul.maxit = 50;
+options_.simul.robust_lin_solve = 0;
 
 options_.mode_check.status = 0;
 options_.mode_check.neighbourhood_size = .5;

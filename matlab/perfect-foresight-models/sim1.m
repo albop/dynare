@@ -162,9 +162,17 @@ for iter = 1:options.simul.maxit
 
     if endogenous_terminal_period && iter>1
         dy = ZERO;
-        dy(1:i_rows(end)) = -A(1:i_rows(end),1:i_rows(end))\res(1:i_rows(end));
+        if options.simul.robust_lin_solve
+            dy(1:i_rows(end)) = -lin_solve_robust( A(1:i_rows(end),1:i_rows(end)), res(1:i_rows(end)),verbose );            
+        else
+            dy(1:i_rows(end)) = -lin_solve( A(1:i_rows(end),1:i_rows(end)), res(1:i_rows(end)), verbose );
+        end
     else
-        dy = -A\res;
+        if options.simul.robust_lin_solve
+            dy = -lin_solve_robust( A, res, verbose );            
+        else
+            dy = -lin_solve( A, res, verbose );
+        end
     end
 
     Y(i_upd) =   Y(i_upd) + dy;
@@ -223,3 +231,84 @@ end
 if verbose
     skipline();
 end
+
+function x = lin_solve( A, b,verbose)
+    if norm( b ) < sqrt( eps ) % then x = 0 is a solution
+        x = 0;
+        return
+    end
+    
+    x = A\b;
+    x( ~isfinite( x ) ) = 0;
+    relres = norm( b - A * x ) / norm( b );
+    if relres > 1e-6 && verbose
+        fprintf( 'WARNING : Failed to find a solution to the linear system.\n' );
+    end
+    
+function [ x, flag, relres ] = lin_solve_robust( A, b , verbose)
+    if norm( b ) < sqrt( eps ) % then x = 0 is a solution
+        x = 0;
+        flag = 0;
+        relres = 0;
+        return
+    end
+    
+    x = A\b;
+    x( ~isfinite( x ) ) = 0;
+    [ x, flag, relres ] = bicgstab( A, b, [], [], [], [], x ); % returns immediately if x is a solution
+    if flag == 0
+        return
+    end
+
+    disp( relres );
+
+    if verbose
+        fprintf( 'Initial bicgstab failed, trying alternative start point.\n' );
+    end
+    old_x = x;
+    old_relres = relres;
+    [ x, flag, relres ] = bicgstab( A, b );
+    if flag == 0
+        return
+    end
+
+    if verbose
+        fprintf( 'Alternative start point also failed with bicgstab, trying gmres.\n' );
+    end
+    if old_relres < relres
+        x = old_x;
+    end
+    [ x, flag, relres ] = gmres( A, b, [], [], [], [], [], x );
+    if flag == 0
+        return
+    end
+
+    if verbose
+        fprintf( 'Initial gmres failed, trying alternative start point.\n' );
+    end
+    old_x = x;
+    old_relres = relres;
+    [ x, flag, relres ] = gmres( A, b );
+    if flag == 0
+        return
+    end
+
+    if verbose
+        fprintf( 'Alternative start point also failed with gmres, using the (SLOW) Moore-Penrose Pseudo-Inverse.\n' );
+    end
+    if old_relres < relres
+        x = old_x;
+        relres = old_relres;
+    end
+    old_x = x;
+    old_relres = relres;
+    x = pinv( full( A ) ) * b;
+    relres = norm( b - A * x ) / norm( b );
+    if old_relres < relres
+        x = old_x;
+        relres = old_relres;
+    end
+    flag = relres > 1e-6;
+    if flag ~= 0 && verbose
+        fprintf( 'WARNING : Failed to find a solution to the linear system\n' );
+    end

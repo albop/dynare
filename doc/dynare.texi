@@ -2879,6 +2879,9 @@ add new variables one by one.
 Determines the maximum number of iterations used in the non-linear solver. The
 default value of @code{maxit} is 50. 
 
+@item robust_lin_solve
+Triggers the use of a robust linear solver for the default @code{solve_algo=4}. 
+
 @item solve_algo = @var{INTEGER}
 @anchor{solve_algo}
 Determines the non-linear solver to use. Possible values for the option are:
