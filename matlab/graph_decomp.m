@@ -28,6 +28,8 @@ function []=graph_decomp(z,shock_names,endo_names,i_var,initial_date,DynareModel
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+new_colormap = DynareOptions.colormap;
+
 % number of components equals number of shocks + 1 (initial conditions)
 comp_nbr = size(z,2)-1;
 
@@ -98,6 +100,9 @@ for j=1:nvar
         y1 = y1 + height;
     end
 
+    if ~isempty(new_colormap)
+        colormap(new_colormap)
+    end
     dyn_saveas(fhandle,[DynareModel.fname,'_shock_decomposition_',deblank(endo_names(i_var(j),:))],DynareOptions);
     hold off
     if DynareOptions.TeX && any(strcmp('eps',cellstr(DynareOptions.graph_format)))
