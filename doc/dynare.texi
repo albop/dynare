@@ -6429,6 +6429,13 @@ Metropolis has been run, else @code{posterior_mode}.
 @xref{datafile}. Useful when computing the shock decomposition on a
 calibrated model.
 
+@item use_shock_groups [= @var{SHOCK_GROUPS_NAME}]
+@anchor{use_shock_groups}. Uses groups of shocks instead of individual shocks in
+the decomposition. Groups of shocks are defined in @xref{shock_groups} block.
+
+@item colormap = @var{COLORMAP_NAME}
+@anchor{colormap}. Controls the colormap used for the shocks decomposition
+graphs. See @code{colormap} in Matlab/Octave manual.
 @end table
 
 @vindex oo_.shock_decomposition
@@ -6445,6 +6452,47 @@ and shocks are stored in the order of declaration, i.e. @code{M_.endo_names} and
 
 @end deffn
 
+@deffn Block shock_groups;
+@deffnx Block shock_groups(@var{OPTIONS}@dots{});
+
+@anchor{shock_groups} Shocks can be regrouped for the purpose of shock decomposition. The composition
+of the shock groups is written in a block delimited by @code{shock_groups} and
+@code{end}.
+
+Each line defines a group of shock as a list of exogenous variables:
+
+@example
+SHOCK_GROUP_NAME =  VARIABLE_1 [[,] VARIABLE_2 [,]@dots{}];
+@end example
+
+@optionshead
+
+@table @code
+
+@item name = @var{NAME}
+Specifies a name for the following definition of shock groups. It is possible
+to use several @code{shock_groups} blocks in a model file, each grouping being
+identified by a different name. This name must in turn be used in the
+@code{shocks_decomposition} command.
+
+@end table
+
+@examplehead
+
+@example
+varexo e_a, e_b, e_c, e_d;
+
+@dots{}
+
+shock_groups(name=group1);
+supply = e_a, e_b;
+demand = e_c, e_d;
+end;
+
+shocks_decomposition(use_shock_groups=group1);
+@end example
+
+@end deffn
 
 @deffn Command unit_root_vars @var{VARIABLE_NAME}@dots{};
 
