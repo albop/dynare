@@ -144,7 +144,7 @@ else
 end
 
 % Set priors over the estimated parameters.
-if ~isempty(estim_params_)
+if ~isempty(estim_params_) && ~(isfield(estim_params_,'nvx') && sum(estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.np)==0)
     [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
 end
 
@@ -158,7 +158,7 @@ if exist([M_.fname '_prior_restrictions.m'])
 end
 
 % Check that the provided mode_file is compatible with the current estimation settings.
-if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
+if ~isempty(estim_params_) && ~(isfield(estim_params_,'nvx') && sum(estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.np)==0) && ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
     number_of_estimated_parameters = length(xparam1);
     mode_file = load(options_.mode_file);
     if number_of_estimated_parameters>length(mode_file.xparam1)
@@ -289,7 +289,7 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
 end
 
 %check for calibrated covariances before updating parameters
-if ~isempty(estim_params_)
+if ~isempty(estim_params_) && ~(isfield(estim_params_,'nvx') && sum(estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.np)==0)
     estim_params_=check_for_calibrated_covariances(xparam1,estim_params_,M_);
 end
 
@@ -308,7 +308,7 @@ if options_.use_calibration_initialization %set calibration as starting values
     end
 end
 
-if ~isempty(estim_params_) && ~all(strcmp(fieldnames(estim_params_),'full_calibration_detected'))
+if ~isempty(estim_params_) && ~(all(strcmp(fieldnames(estim_params_),'full_calibration_detected'))  || (isfield(estim_params_,'nvx') && sum(estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.np)==0))
     if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
         % Plot prior densities.
         if ~options_.nograph && options_.plot_priors
@@ -339,7 +339,7 @@ if ~isempty(estim_params_) && ~all(strcmp(fieldnames(estim_params_),'full_calibr
     end        
 end
 
-if isempty(estim_params_) || all(strcmp(fieldnames(estim_params_),'full_calibration_detected'))% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
+if isempty(estim_params_) || all(strcmp(fieldnames(estim_params_),'full_calibration_detected')) || (isfield(estim_params_,'nvx') && sum(estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.np)==0) % If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
     if ~options_.smoother
         error('Estimation: the ''estimated_params'' block is mandatory (unless you are running a smoother)')
     end
