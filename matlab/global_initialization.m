@@ -169,6 +169,7 @@ options_.nofunctions = false;
 
 options_.bandpass.indicator = 0;
 options_.bandpass.passband = [6; 32];
+options_.bandpass.K=12;
 
 % Extended path options
 %
