@@ -77,10 +77,10 @@ A = dr.ghx;
 B = dr.ghu;
 
 % initialization
-gend = size(oo.SmoothedShocks.(M_.exo_names(1,:)),1);
+gend = size(oo.SmoothedShocks.(deblank(M_.exo_names(1,:))),1);
 epsilon=NaN(nshocks,gend);
 for i=1:nshocks
-    epsilon(i,:) = oo.SmoothedShocks.(M_.exo_names(i,:));
+    epsilon(i,:) = oo.SmoothedShocks.(deblank(M_.exo_names(i,:)));
 end
 
 z = zeros(endo_nbr,nshocks+2,gend);
