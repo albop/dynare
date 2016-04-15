@@ -66,16 +66,13 @@ var e, u = phi*0.009*0.009;
 end;
 
 steady(solve_algo=4,maxit=1000);
-options_.hp_ngrid=2048*4;
-options_.bandpass.indicator=0;
-options_.bandpass.passband=[6 32];
 
-stoch_simul(order=1,nofunctions,hp_filter=1600,irf=0);
+stoch_simul(order=1,nofunctions,hp_filter=1600,irf=0,hp_ngrid=8192);
 
 total_var_filtered=diag(oo_.var);
 oo_filtered_all_shocks=oo_;
 
-stoch_simul(order=1,nofunctions,hp_filter=0,periods=5000000,nomoments);
+stoch_simul(order=1,nofunctions,hp_filter=0,periods=2500000,nomoments);
 options_.nomoments=0;
 oo_unfiltered_all_shocks=oo_;
 
@@ -87,8 +84,8 @@ oo_unfiltered_all_shocks=oo_;
 [junk, b_filtered]=sample_hp_filter(b,1600);
 
 verbatim;
-total_std_all_shocks_filtered_sim=std([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered])
-cov_filtered_all_shocks=cov([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered])
+total_std_all_shocks_filtered_sim=std([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered]);
+cov_filtered_all_shocks=cov([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered]);
 acf = zeros(6);
 [junk, acf(:,1)] = sample_autocovariance([y_filtered ],5);
 [junk, acf(:,2)] = sample_autocovariance([c_filtered ],5);
@@ -110,7 +107,7 @@ stoch_simul(order=1,nofunctions,hp_filter=1600,irf=0,periods=0);
 total_var_filtered_one_shock=diag(oo_.var);
 oo_filtered_one_shock=oo_;
 
-stoch_simul(order=1,nofunctions,hp_filter=0,periods=5000000,nomoments);
+stoch_simul(order=1,nofunctions,hp_filter=0,periods=2500000,nomoments);
 oo_unfiltered_one_shock=oo_;
 
 [junk, y_filtered]=sample_hp_filter(y,1600);
@@ -121,8 +118,8 @@ oo_unfiltered_one_shock=oo_;
 [junk, b_filtered]=sample_hp_filter(b,1600);
 
 verbatim;
-total_std_one_shock_filtered_sim=std([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered])
-cov_filtered_one_shock=cov([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered])
+total_std_one_shock_filtered_sim=std([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered]);
+cov_filtered_one_shock=cov([y_filtered c_filtered k_filtered a_filtered h_filtered b_filtered]);
 acf = zeros(6);
 [junk, acf(:,1)] = sample_autocovariance([y_filtered ],5);
 [junk, acf(:,2)] = sample_autocovariance([c_filtered ],5);

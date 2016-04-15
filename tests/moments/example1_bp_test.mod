@@ -29,9 +29,9 @@ varexo e, u;
 parameters beta, rho, alpha, delta, theta, psi, tau;
 
 alpha = 0.36;
-rho   = 0.95;
+rho   = 0.5;
 tau   = 0.025;
-beta  = 0.99;
+beta  = 0.98;
 delta = 0.025;
 psi   = 0;
 theta = 2.95;
@@ -84,7 +84,7 @@ stoch_simul(order=1,nofunctions,irf=0,periods=0);
 
 oo_filtered_one_shock_theoretical=oo_;
 
-stoch_simul(order=1,nofunctions,periods=5000000);
+stoch_simul(order=1,nofunctions,periods=1000000);
 oo_filtered_one_shock_simulated=oo_;
 
 
@@ -92,11 +92,11 @@ if max(abs((1-diag(oo_filtered_one_shock_simulated.var)./(diag(oo_filtered_all_s
     error('Variance Decomposition wrong')
 end
 
-if max(max(abs(oo_filtered_all_shocks_simulated.var-oo_filtered_all_shocks_theoretical.var)))>2e-4;
+if max(max(abs(oo_filtered_all_shocks_simulated.var-oo_filtered_all_shocks_theoretical.var)))>5e-4;
     error('Covariance wrong')
 end
 
-if max(max(abs(oo_filtered_one_shock_simulated.var-oo_filtered_one_shock_theoretical.var)))>1e-4;
+if max(max(abs(oo_filtered_one_shock_simulated.var-oo_filtered_one_shock_theoretical.var)))>5e-4;
     error('Covariance wrong')
 end
 
@@ -107,10 +107,10 @@ for ii=1:options_.ar
     autocorr_model_one_shock_theoretical(:,ii)=diag(oo_filtered_one_shock_theoretical.autocorr{ii});
 end
 
-if max(max(abs(autocorr_model_all_shocks_simulated-autocorr_model_all_shocks_theoretical)))>2e-2;
+if max(max(abs(autocorr_model_all_shocks_simulated-autocorr_model_all_shocks_theoretical)))>0.05;
     error('Correlation wrong')
 end
 
-if max(max(abs(autocorr_model_one_shock_simulated-autocorr_model_one_shock_theoretical)))>2e-2;
+if max(max(abs(autocorr_model_one_shock_simulated-autocorr_model_one_shock_theoretical)))>0.05;
     error('Correlation wrong')
 end
