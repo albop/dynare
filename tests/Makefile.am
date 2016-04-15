@@ -244,6 +244,7 @@ MODFILES = \
 	shock_decomposition/example1_calib_shock_decomp.mod \
 	shock_decomposition/fs2000_est.mod \
 	shock_decomposition/fs2000_est_varlist.mod \
+	shock_decomposition/fs2000_cal_groups.mod \
 	stochastic_purely_forward/stochastic_purely_forward.mod \
 	stochastic_purely_forward/stochastic_purely_forward_with_static.mod \
 	forecast/Hansen_exo_det_forecast.mod \
