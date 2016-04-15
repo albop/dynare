@@ -119,6 +119,6 @@ Y_obs (gam);
 end;
 
 data(file='../../fs2000/fsdat_simul.m');
-
+options_.diffuse_filter=1;
 [dataset_, dataset_info, xparam1, hh, M_, options_, oo_, estim_params_, bayestopt_, bounds] = ...
     dynare_estimation_init(char(), M_.fname, [], M_, options_, oo_, estim_params_, bayestopt_);
