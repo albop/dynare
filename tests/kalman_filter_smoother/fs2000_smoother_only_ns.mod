@@ -35,7 +35,7 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var m P c e W R k d n l gy_obs gp_obs y dA;
+var m P c e W R k d n l gy_obs gp_obs Y_obs P_obs y dA;
 varexo e_a e_m;
 
 parameters alp bet gam mst rho psi del;
@@ -63,6 +63,8 @@ e = exp(e_a);
 y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a));
 gy_obs = dA*y/y(-1);
 gp_obs = (P/P(-1))*m(-1)/dA;
+Y_obs/Y_obs(-1) = gy_obs;
+P_obs/P_obs(-1) = gp_obs;
 end;
 
 steady_state_model;
@@ -89,6 +91,8 @@ steady_state_model;
   
   gp_obs = m/dA;
   gy_obs = dA;
+  Y_obs = gy_obs;
+  P_obs = gp_obs;
 end;
 
 shocks;
@@ -96,15 +100,16 @@ var e_a; stderr 0.014;
 var e_m; stderr 0.005;
 end;
 
-check;
+varobs P_obs Y_obs;
 
-varobs gp_obs gy_obs;
+observation_trends;
+P_obs (log(mst)-gam);
+Y_obs (gam);
+end;
 
-estimation(order=1, datafile=fsdat_simul, mode_compute=0,nobs=192, loglinear, smoother) m P c e W R k d n l gy_obs gp_obs y dA;
-estimation(order=1, datafile=fsdat_simul, mode_compute=0,nobs=192, loglinear, smoother,kalman_algo=1) m P c e W R k d n l gy_obs gp_obs y dA;
-estimation(order=1, datafile=fsdat_simul, mode_compute=0,nobs=192, loglinear, smoother,kalman_algo=2) m P c e W R k d n l gy_obs gp_obs y dA;
-estimation(order=1, datafile=fsdat_simul, mode_compute=0,nobs=192, loglinear, smoother,kalman_algo=3) m P c e W R k d n l gy_obs gp_obs y dA;
-estimation(order=1, datafile=fsdat_simul, mode_compute=0,nobs=192, loglinear, smoother,kalman_algo=4) m P c e W R k d n l gy_obs gp_obs y dA;
+estimation(order=1, datafile=fsdat_simul, mode_compute=0,nobs=192, loglinear,diffuse_filter, smoother) m P c e W R k d n l gy_obs gp_obs y dA;
+estimation(order=1, datafile=fsdat_simul, mode_compute=0,nobs=192, loglinear,diffuse_filter, smoother,kalman_algo=3) m P c e W R k d n l gy_obs gp_obs y dA;
+estimation(order=1, datafile=fsdat_simul, mode_compute=0,nobs=192, loglinear,diffuse_filter, smoother,kalman_algo=4) m P c e W R k d n l gy_obs gp_obs y dA;
 
 /*
  * The following lines were used to generate the data file. If you want to

@@ -192,6 +192,7 @@ MODFILES = \
 	kalman_filter_smoother/fs2000_2.mod \
 	kalman_filter_smoother/fs2000a.mod \
 	kalman_filter_smoother/fs2000_smoother_only.mod \
+	kalman_filter_smoother/fs2000_smoother_only_ns.mod \
 	kalman_filter_smoother/check_variable_dimensions/fs2000.mod \
 	kalman_filter_smoother/check_variable_dimensions/fs2000_ML.mod \
 	kalman/likelihood_from_dynare/fs2000_corr_ME.mod \

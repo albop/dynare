@@ -112,6 +112,7 @@ llik = zeros(smpl,pp);
 
 newRank = rank(Pinf,diffuse_kalman_tol);
 l2pi = log(2*pi);
+s=0;
 
 while newRank && (t<=last)
     s = t-start+1;
