@@ -77,8 +77,10 @@ function [dr,info]=AIM_first_order_solver(jacobia,M,dr,qz_criterium)
         info(2) = 1.0e+8;
         return
     end
-    [A,B] =transition_matrix(dr);
+    A = kalman_transition_matrix(dr,M.nstatic+(1:M.nspred), 1:M.nspred,...
+                                 M.exo_nbr);
     dr.eigval = eig(A);
+    disp(dr.eigval)
     nd = size(dr.kstate,1);
     nba = nd-sum( abs(dr.eigval) < qz_criterium );
 
