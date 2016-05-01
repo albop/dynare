@@ -107,12 +107,12 @@ if any(BayesInfo.pshape) % if Bayesian estimation
     offset = nvx+nvn;
     ncx=EstimatedParameters.ncx; 
     if ncx && (any(BayesInfo.p3(1+offset:offset+ncx)<-1) || any(BayesInfo.p4(1+offset:offset+ncx)>1)) 
-        warning('Your prior allows for correlations between measurement errors larger than +-1 and will not integrate to 1 due to truncation. Please change your prior')
+        warning('Your prior allows for correlations between structural shocks larger than +-1 and will not integrate to 1 due to truncation. Please change your prior')
     end
     offset = nvx+nvn+ncx;
     ncn=EstimatedParameters.ncn; 
     if ncn && (any(BayesInfo.p3(1+offset:offset+ncn)<-1) || any(BayesInfo.p4(1+offset:offset+ncn)>1)) 
-        warning('Your prior allows for correlations between structural shocks larger than +-1 and will not integrate to 1 due to truncation. Please change your prior')
+        warning('Your prior allows for correlations between measurement errors larger than +-1 and will not integrate to 1 due to truncation. Please change your prior')
     end
 end
 
