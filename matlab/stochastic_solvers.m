@@ -334,12 +334,16 @@ end
 
 if options_.loglinear
     % this needs to be extended for order=2,3
-    k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
-    klag = dr.kstate(k,[1 2]);
-    k1 = dr.order_var;
-    dr.ghx = repmat(1./dr.ys(k1),1,size(dr.ghx,2)).*dr.ghx.* ...
-             repmat(dr.ys(k1(klag(:,1)))',size(dr.ghx,1),1);
-    dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
+    k = get_all_variables_but_lagged_leaded_exogenous(M_);
+    [ik,k1] = rm_lagged_leaded_exogenous_variables(dr.order_var,M_);
+    [iklag,klag1] = rm_lagged_leaded_exogenous_variables(dr.order_var(M_.nstatic+(1:M_.nspred)),M_);
+    if ~isempty(ik)
+        if M_.maximum_endo_lag > 0
+            dr.ghx(ik,iklag) = repmat(1./dr.ys(k1),1,length(klag1)).*dr.ghx(ik,iklag).* ...
+                repmat(dr.ys(klag1)',length(ik),1);
+        end
+        dr.ghu(ik,:) = repmat(1./dr.ys(k1),1,M_.exo_nbr).*dr.ghu(ik,:);
+    end
     if options_.order>1
        error('Loglinear options currently only works at order 1')
     end

@@ -88,7 +88,7 @@ switch task
         if isfield(oo.Smoother,'Constant') && isfield(oo.Smoother.Constant,v_name)
             y0(i,:)=y0(i,:)-oo.Smoother.Constant.(v_name)(end-maximum_lag+1:end); %subtract mean or steady state
             if options.loglinear
-                y0(i,:)=y0(i,:)+log(oo.dr.ys(strmatch(v_name,deblank(M.endo_names),'exact')));
+                y0(i,:)=y0(i,:)+log_variable(i,oo.dr.ys,M);
             else
                 y0(i,:)=y0(i,:)+oo.dr.ys(strmatch(v_name,deblank(M.endo_names),'exact'));
             end
