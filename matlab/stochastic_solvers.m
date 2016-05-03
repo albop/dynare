@@ -334,15 +334,21 @@ end
 
 if options_.loglinear
     % this needs to be extended for order=2,3
-    k = get_all_variables_but_lagged_leaded_exogenous(M_);
-    [ik,k1] = rm_lagged_leaded_exogenous_variables(dr.order_var,M_);
-    [iklag,klag1] = rm_lagged_leaded_exogenous_variables(dr.order_var(M_.nstatic+(1:M_.nspred)),M_);
+    [il,il1,ik,k1] = indices_lagged_leaded_exogenous_variables(dr.order_var,M_);
+    [illag,illag1,iklag,klag1] = indices_lagged_leaded_exogenous_variables(dr.order_var(M_.nstatic+(1:M_.nspred)),M_);
     if ~isempty(ik)
-        if M_.maximum_endo_lag > 0
+        if M_.nspred > 0
             dr.ghx(ik,iklag) = repmat(1./dr.ys(k1),1,length(klag1)).*dr.ghx(ik,iklag).* ...
                 repmat(dr.ys(klag1)',length(ik),1);
+            dr.ghx(ik,illag) = repmat(1./dr.ys(k1),1,length(illag)).*dr.ghx(ik,illag)
         end
-        dr.ghu(ik,:) = repmat(1./dr.ys(k1),1,M_.exo_nbr).*dr.ghu(ik,:);
+        if M_.exo_nbr > 0
+            dr.ghu(ik,:) = repmat(1./dr.ys(k1),1,M_.exo_nbr).*dr.ghu(ik,:);
+        end
+    end
+    if ~isempty(il) && M_.nspred > 0
+        dr.ghx(il,iklag) = dr.ghx(il,iklag).*repmat(dr.ys(klag1)', ...
+                                                    length(il),1);
     end
     if options_.order>1
        error('Loglinear options currently only works at order 1')
