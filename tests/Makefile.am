@@ -258,6 +258,8 @@ MODFILES = \
 	filter_step_ahead/fs2000_filter_step_ahead_bayesian.mod \
 	filter_step_ahead/fs2000_filter_step_ahead_ML.mod \
 	loglinear/example4_loglinear.mod \
+	loglinear/example4_loglinear_lagged_exogenous.mod \
+	loglinear/example4_loglinear_lagged_exogenous_a.mod \
 	smoother2histval/fs2000_simul.mod \
 	smoother2histval/fs2000_smooth.mod \
 	smoother2histval/fs2000_smooth_stoch_simul.mod \
@@ -414,6 +416,8 @@ deterministic_simulations/multiple_lead_lags/sim_lead_lag.o.trs: deterministic_s
 
 deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.m.trs: ramst.m.trs 
 deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.o.trs: ramst.o.trs
+
+loglinear/example4_loglinear_lagged_exogenous_a.m.trs: example4_loglinear_lagged_exogenous.m.trs 
 
 # Matlab TRS Files
 M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
