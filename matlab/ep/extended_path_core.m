@@ -22,6 +22,7 @@ function [y, info_convergence, endogenousvariablespaths] = extended_path_core(pe
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 ep = options.ep;
+
 if init% Compute first order solution (Perturbation)...
     endo_simul = simult_(initial_conditions,oo.dr,exo_simul(2:end,:),1);
 else
@@ -40,9 +41,9 @@ if debug
 end
 
 if bytecode_flag && ~ep.stochastic.order
-    [flag,tmp] = bytecode('dynamic',endo_simul,exo_simul, M_.params, endo_simul, periods);
+    [flag, tmp] = bytecode('dynamic', endo_simul, exo_simul, M_.params, endo_simul, periods);
 else
-    flag = 1;
+    flag = true;
 end
 
 if flag
@@ -67,11 +68,9 @@ if flag
             endo_simul = repmat(steady_state,1,periods+1);
             for i = 1:10
                 weight = i/10;
-                oo.endo_simul = [weight*initial_conditions + (1-weight)*steady_state ...
-                                 endo_simul];
-                oo.exo_simul = repmat((1-weight)*oo.exo_steady_state', ...
-                                      size(oo.exo_simul,1),1) + weight*exo_orig;
-                [tmp,flag] = perfect_foresight_solver_core(M,options,oo);
+                oo.endo_simul = [weight*initial_conditions + (1-weight)*steady_state endo_simul];
+                oo.exo_simul = repmat((1-weight)*oo.exo_steady_state', size(oo.exo_simul,1),1) + weight*exo_orig;
+                [tmp, flag] = perfect_foresight_solver_core(M, options, oo);
                 disp([i,flag])
                 if ~flag
                     break
@@ -83,16 +82,17 @@ if flag
     else
         switch(algo)
           case 0
-            [flag,endo_simul] = ...
-                solve_stochastic_perfect_foresight_model(endo_simul,exo_simul,pfm,ep.stochastic.quadrature.nodes,ep.stochastic.order);
+            [flag, endo_simul] = ...
+                solve_stochastic_perfect_foresight_model(endo_simul, exo_simul, pfm, ep.stochastic.quadrature.nodes, ep.stochastic.order);
           case 1
-            [flag,endo_simul] = ...
-                solve_stochastic_perfect_foresight_model_1(endo_simul,exo_simul,options,pfm,ep.stochastic.order);
+            [flag, endo_simul] = ...
+                solve_stochastic_perfect_foresight_model_1(endo_simul, exo_simul, options, pfm, ep.stochastic.order);
         end
         tmp.endo_simul = endo_simul;
         info_convergence = ~flag;
     end
 end
+
 if info_convergence
     y = tmp.endo_simul(:,2);
 else
