@@ -1,4 +1,4 @@
-function o = SIMPSAGET(options,name,default,flag)
+function o = simpsaget(options,name,default,flag)
 %SIMPSAGET Get SIMPSA OPTIONS parameters.
 %   VAL = SIMPSAGET(OPTIONS,'NAME') extracts the value of the named parameter
 %   from optimization options structure OPTIONS, returning an empty matrix if
@@ -18,7 +18,8 @@ function o = SIMPSAGET(options,name,default,flag)
 %   See also SIMPSASET, SIMPSA
 
 % Copyright (C) 2006 Brecht Donckels, BIOMATH, brecht.donckels@ugent.be
-% 
+% Copyright (C) 2013-2016 Dynare Team.
+%
 % This file is part of Dynare.
 %
 % Dynare is free software: you can redistribute it and/or modify
