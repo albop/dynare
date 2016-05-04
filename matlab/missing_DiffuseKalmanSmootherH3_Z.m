@@ -44,7 +44,7 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSm
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2015 Dynare Team
+% Copyright (C) 2004-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

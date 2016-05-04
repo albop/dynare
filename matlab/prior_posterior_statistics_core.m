@@ -24,7 +24,7 @@ function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMa
 % SPECIAL REQUIREMENTS.
 %   None.
 
-% Copyright (C) 2005-2013 Dynare Team
+% Copyright (C) 2005-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

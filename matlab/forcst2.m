@@ -11,7 +11,7 @@ function yf=forcst2(y0,horizon,dr,n)
 % Outputs:
 %   - yf        [horizon+ykmin_ by endo_nbr by n]   array of forecasts
 % 
-% Copyright (C) 2008-2010 Dynare Team
+% Copyright (C) 2008-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -10,7 +10,7 @@ function plot_icforecast(Variables,periods,options_)
 % SPECIAL REQUIREMENTS
 %  This routine has to be called after imcforecast.m.
 
-% Copyright (C) 2006-2014 Dynare Team
+% Copyright (C) 2006-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

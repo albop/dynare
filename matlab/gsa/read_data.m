@@ -7,7 +7,7 @@ function [gend, data] = read_data()
 % Reference:
 % M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012-2015 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2014 Dynare Team
+dnl Copyright (C) 2009-2016 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl

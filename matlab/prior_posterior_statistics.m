@@ -19,7 +19,7 @@ function prior_posterior_statistics(type,dataset,dataset_info)
 % See the comments in the random_walk_metropolis_hastings.m funtion.
 % 
 % 
-% Copyright (C) 2005-2013 Dynare Team
+% Copyright (C) 2005-2015 Dynare Team
 %
 % This file is part of Dynare.
 %
