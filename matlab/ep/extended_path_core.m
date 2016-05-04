@@ -59,38 +59,25 @@ if flag
         options.stack_solve_algo = stack_solve_algo;
         [tmp, maxerror] = perfect_foresight_solver_core(M, options, oo);
         if maxerror>options.dynatol.f
-            flag = false;
+            info_convergence = false;
         else
-            flag = true;
+            info_convergence = true;
         end
-        if ~flag && ~options.no_homotopy
-            exo_orig = oo.exo_simul;
-            endo_simul = repmat(steady_state,1,periods+1);
-            for i = 1:10
-                weight = i/10;
-                oo.endo_simul = [weight*initial_conditions + (1-weight)*steady_state endo_simul];
-                oo.exo_simul = repmat((1-weight)*oo.exo_steady_state', size(oo.exo_simul,1),1) + weight*exo_orig;
-                [tmp, flag] = perfect_foresight_solver_core(M, options, oo);
-                disp([i,flag])
-                if ~flag
-                    break
-                end
-                endo_simul = tmp.endo_simul;
-            end
-        end
-        info_convergence = flag;
     else
         switch(algo)
           case 0
-            [flag, endo_simul] = ...
+            [flag, tmp.endo_simul] = ...
                 solve_stochastic_perfect_foresight_model(endo_simul, exo_simul, pfm, ep.stochastic.quadrature.nodes, ep.stochastic.order);
           case 1
-            [flag, endo_simul] = ...
+            [flag, tmp.endo_simul] = ...
                 solve_stochastic_perfect_foresight_model_1(endo_simul, exo_simul, options, pfm, ep.stochastic.order);
         end
-        tmp.endo_simul = endo_simul;
         info_convergence = ~flag;
     end
+end
+
+if ~info_convergence && ~options.no_homotopy
+    [info_convergence, tmp.endo_simul] = extended_path_homotopy(endo_simul, exo_simul, M, options, oo, pfm, ep, order, algo, 2, debug);
 end
 
 if info_convergence
@@ -98,3 +85,5 @@ if info_convergence
 else
     y = NaN(size(endo_nbr,1));
 end
+
+endogenousvariablespaths = tmp.endo_simul;
