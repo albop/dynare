@@ -760,6 +760,18 @@ options_.convergence.geweke.geweke_interval=[0.2 0.5];
 % Options for lmmcp solver
 options_.lmmcp.status = 0;
 
+% Options for lcppath solver
+options_.lcppath.A = [];
+options_.lcppath.b = [];
+options_.lcppath.t = [];
+options_.lcppath.mu0 = [];
+
+% Options for mcppath solver
+options_.mcppath.A = [];
+options_.mcppath.b = [];
+options_.mcppath.t = [];
+options_.mcppath.mu0 = [];
+
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
 % initialize persistent variables in dyn_first_order_solver()

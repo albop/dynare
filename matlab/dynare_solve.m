@@ -184,6 +184,7 @@ elseif options.solve_algo == 3
         [x,info] = csolve(func,x,[],1e-6,500,varargin{:});
     end
 elseif options.solve_algo == 10
+    % LMMCP
     olmmcp = options.lmmcp;
 
     [x,fval,exitflag] = lmmcp(func,x,olmmcp.lb,olmmcp.ub,olmmcp,varargin{:});
@@ -192,7 +193,34 @@ elseif options.solve_algo == 10
     else
         info = 1;
     end
+elseif options.solve_algo == 11
+    % PATH linear mixed complementary problem
+    if ~exist('lcppath')
+        error(['PATH can''t be provided with Dynare. You need to install it ' ...
+               'yourself and add its location to Matlab/Octave path before ' ...
+               'running Dynare'])
+    end
+    if options.linear ~= 1
+        error(['solve_algo==11 (linear complementarity problem) requires ' ...
+               'linear  option in model instruction']);
+    end
+    olcppath = options.lcppath;
+    [junk,M] = func(x,varargin{:});
+    [x,mu] = pathlcp(fjac,olcppath.q,olcppath.lb,olcppath.ub,x,olcppath.A,olcppath.b,olcppath.t,olcppath.mu0);
+elseif options.solve_algo == 12
+    % PATH mixed complementary problem
+    % PATH linear mixed complementary problem
+    if ~exist('mcppath')
+        error(['PATH can''t be provided with Dynare. You need to install it ' ...
+               'yourself and add its location to Matlab/Octave path before ' ...
+               'running Dynare'])
+    end
+    omcppath = options.mcppath;
+    global mcp_data
+    mcp_data.func = func;
+    mcp_data.args = varargin;
+    [x,mu] = pathmcp(x,omcppath.lb,omcppath.ub,'mcp_func',omcppath.A,omcppath.b,omcppath.t,omcppath.mu0);
 else
-    error('DYNARE_SOLVE: option solve_algo must be one of [0,1,2,3,4,9,10]')
+    error('DYNARE_SOLVE: option solve_algo must be one of [0,1,2,3,4,9,10:12]')
 end
 
