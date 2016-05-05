@@ -446,8 +446,14 @@ for i = 1:Size;
                 disp(data(i).eigval);
             end;
             if info1
-                info(1) = 2;
-                info(2) = info1;
+                if info1 == -30
+                    % one eigenvalue is close to 0/0
+                    info(1) = 7;
+                else
+                    info(1) = 2;
+                    info(2) = info1;
+                    info(3) = size(E,2);
+                end
                 return
             end
             nba = nd-sdim;
