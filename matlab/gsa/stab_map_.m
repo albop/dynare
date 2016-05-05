@@ -241,7 +241,11 @@ if fload==0,
         %             end
         %         end
         %load([fname_,'_mode'])
+        if neighborhood_width>0 && isempty(options_.mode_file),
+            xparam1 = get_all_parameters(estim_params_,M_);
+        else
         eval(['load ' options_.mode_file '.mat;']);
+        end
         if neighborhood_width>0,
             for j=1:nshock,
                 lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube

@@ -48,6 +48,8 @@ if isfield(options_gsa,'graph_format'),
 end
 if isfield(options_gsa,'mode_file'),
     options_.mode_file=options_gsa.mode_file;
+elseif isfield(options_gsa,'neighborhood_width') && options_gsa_.neighborhood_width>0,
+    options_.mode_file='';    
 end
 
 options_.order = 1;
