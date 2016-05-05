@@ -33,7 +33,7 @@ orig_endo_nbr = M.orig_endo_nbr;
 aux_vars = M.aux_vars;
 
 y = zeros(length(ivar),1);
-for i = ivar(:)'
+for i = 1:length(ivar)
     % Does ivar(i) refer to a lag/lead exogenous variable?
     if ivar(i) > orig_endo_nbr
         av = aux_vars(ivar(i) - orig_endo_nbr);
