@@ -238,6 +238,10 @@ if iload <=0,
             disp('Testing ML Starting value')
         else
             switch parameters
+                case 'calibration'
+                    parameters_TeX = 'Calibration';
+                    disp('Testing calibration')
+                    params(1,:) = get_all_parameters(estim_params_,M_);;
                 case 'posterior_mode'
                     parameters_TeX = 'Posterior mode';
                     disp('Testing posterior mode')

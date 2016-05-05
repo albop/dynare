@@ -472,17 +472,24 @@ if iload==0,
         mkdir(xdir)
     end
     nrun=length(y0);
-    nest=min(250,nrun);
+    nest=max(50,nrun/2);
+    nest=min(250,nest);
     nfit=min(1000,nrun);
     %   dotheplots = (nfit<=nest);
 %     gsa_ = gsa_sdp(y0(1:nest), x0(1:nest,:), 2, [],[-1 -1 -1 -1 -1 0],[],0,[fname,'_est'], pnames);
     [ys,is] = sort(y0);
     istep = ceil(nrun/nest);
+    if istep>1,
     iest = is(floor(istep/2):istep:end);
     nest = length(iest);
     irest = is(setdiff([1:nrun],[floor(istep/2):istep:nrun]));
     istep = ceil(length(irest)/(nfit-nest));
     ifit = union(iest, irest(1:istep:end));
+    else
+        warning('the number of samples is too small for ANOVA estimation')
+        si=nan(np,1);
+        return
+    end
     if ~ismember(irest(end),ifit),
         ifit = union(ifit, irest(end));
     end
