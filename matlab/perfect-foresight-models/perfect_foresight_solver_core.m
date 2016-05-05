@@ -1,7 +1,7 @@
 function [oo_, maxerror] = perfect_foresight_solver_core(M_, options_, oo_)
-%function [oo_, maxerror] = simulation_core(M_, options_, oo_)
+%function [oo_, maxerror] = perfect_foresight_solver_core(M_, options_, oo_)
 
-% Copyright (C) 2015 Dynare Team
+% Copyright (C) 2015-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,7 +31,7 @@ if options_.block
         try
             [info, tmp] = bytecode('dynamic', oo_.endo_simul, oo_.exo_simul, M_.params, repmat(oo_.steady_state,1,options_.periods+2), options_.periods);
         catch
-            info = 0;
+            info = 1;
         end
         if info
             oo_.deterministic_simulation.status = false;
@@ -50,7 +50,7 @@ else
         try
             [info, tmp] = bytecode('dynamic', oo_.endo_simul, oo_.exo_simul, M_.params, repmat(oo_.steady_state,1,options_.periods+2), options_.periods);
         catch
-            info = 0;
+            info = 1;
         end
         if info
             oo_.deterministic_simulation.status = false;
