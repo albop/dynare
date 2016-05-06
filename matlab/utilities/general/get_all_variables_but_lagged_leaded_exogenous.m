@@ -30,6 +30,6 @@ if isempty(M.aux_vars)
     k = 1:M.endo_nbr;
 else
     type = [M.aux_vars.type];
-    k = [1:M.orig_endo_nbr; M.orig_endo_nbr+find((type ~= 2) & ...
-                                                 (type ~= 3))']; 
+    k = [1:M.orig_endo_nbr, M.orig_endo_nbr ...
+         + find((type ~= 2) & (type ~= 3))]; 
 end
