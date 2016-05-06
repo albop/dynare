@@ -51,7 +51,7 @@ else
             end
         else
             ik = [ik; j];
-            k1 = [k1; k(j)]
+            k1 = [k1; k(j)];
         end
     end
 end

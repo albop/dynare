@@ -340,7 +340,7 @@ if options_.loglinear
         if M_.nspred > 0
             dr.ghx(ik,iklag) = repmat(1./dr.ys(k1),1,length(klag1)).*dr.ghx(ik,iklag).* ...
                 repmat(dr.ys(klag1)',length(ik),1);
-            dr.ghx(ik,illag) = repmat(1./dr.ys(k1),1,length(illag)).*dr.ghx(ik,illag)
+            dr.ghx(ik,illag) = repmat(1./dr.ys(k1),1,length(illag)).*dr.ghx(ik,illag);
         end
         if M_.exo_nbr > 0
             dr.ghu(ik,:) = repmat(1./dr.ys(k1),1,M_.exo_nbr).*dr.ghu(ik,:);
