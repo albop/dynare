@@ -417,7 +417,8 @@ deterministic_simulations/multiple_lead_lags/sim_lead_lag.o.trs: deterministic_s
 deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.m.trs: ramst.m.trs 
 deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.o.trs: ramst.o.trs
 
-loglinear/example4_loglinear_lagged_exogenous_a.m.trs: example4_loglinear_lagged_exogenous.m.trs 
+loglinear/example4_loglinear_lagged_exogenous_a.m.trs: loglinear/example4_loglinear_lagged_exogenous.m.trs 
+loglinear/example4_loglinear_lagged_exogenous_a.o.trs: loglinear/example4_loglinear_lagged_exogenous.o.trs 
 
 # Matlab TRS Files
 M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
