@@ -1,6 +1,6 @@
 function info=stoch_simul(var_list)
 
-% Copyright (C) 2001-2015 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2001-2010 Dynare Team
+ * Copyright (C) 2001-2016 Dynare Team
  *
  * This file is part of Dynare.
  *
