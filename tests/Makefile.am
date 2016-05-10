@@ -420,6 +420,11 @@ deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.o.trs: rams
 loglinear/example4_loglinear_lagged_exogenous_a.m.trs: loglinear/example4_loglinear_lagged_exogenous.m.trs 
 loglinear/example4_loglinear_lagged_exogenous_a.o.trs: loglinear/example4_loglinear_lagged_exogenous.o.trs 
 
+observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter_first_obs.m.trs: observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter.m.trs
+observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter_first_obs.o.trs: observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter.o.trs
+observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter.m.trs: observation_trends_and_prefiltering/ML/Trend_no_prefilter.m.trs
+observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter.o.trs: observation_trends_and_prefiltering/ML/Trend_no_prefilter.o.trs
+
 # Matlab TRS Files
 M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
 M_TRS_FILES += run_block_byte_tests_matlab.m.trs run_reporting_test_matlab.m.trs run_all_unitary_tests.m.trs
