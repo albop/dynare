@@ -484,7 +484,7 @@ if options_.analytic_derivation,
         M=M_;
         M.params(estim_params_.param_vals(:,1)) = xparam1(estim_params_.nvx+estim_params_.ncx+estim_params_.nvn+estim_params_.ncn+1:end); %set parameters
         M.params(estim_params_.param_vals(:,1)) = M.params(estim_params_.param_vals(:,1))*1.01; %vary parameters
-        if options_.diffuse_filter
+        if options_.diffuse_filter || options_.steadystate.nocheck
             steadystate_check_flag = 0;
         else
             steadystate_check_flag = 1;
@@ -528,7 +528,7 @@ if ~isempty(dataset_)
     options_.first_obs=double(dataset_.init);
 end
 % setting steadystate_check_flag option
-if options_.diffuse_filter
+if options_.diffuse_filter || options_.steadystate.nocheck
     steadystate_check_flag = 0;
 else
     steadystate_check_flag = 1;
