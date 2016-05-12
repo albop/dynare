@@ -781,6 +781,10 @@ line numbering directives.
 Instructs Dynare to no create a logfile of this run in
 @file{@var{FILENAME}.log}. The default is to create the logfile.
 
+@item no_2nd_order_params_derivs
+Instructs Dynare not to compute the second order derivative of the jacobian or
+the derivative of the hessian with respect to the parameters.
+
 @item nowarn
 Suppresses all warnings.
 
