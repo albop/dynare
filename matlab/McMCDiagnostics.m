@@ -78,23 +78,11 @@ FirstMhFile = record.KeepedDraws.FirstMhFile;
 NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 
 param_name=[];
-for jj=1:npar   
-    param_name = strvcat(param_name,get_the_name(jj,options_.TeX,M_,estim_params_,options_));
-end
-fprintf('\nMCMC Inefficiency factors per block.\n');
-IFAC_header={'Parameter'};
-print_string=['%',num2str(size(param_name,2)+3),'s'];
-print_string_header=['%',num2str(size(param_name,2)+3),'s'];
-for j=1:nblck,
-    IFAC_header=[IFAC_header, {['block ' int2str(j)]}];
-    print_string=[print_string,' \t %12.3f'];
-    print_string_header=[print_string_header,' \t %12s'];
-end
-print_string=[print_string,'\n'];
-print_string_header=[print_string_header,'\n'];
-fprintf(print_string_header,IFAC_header{1,:});
-
-for jj=1:npar   
+param_name_tex=[];
+for jj=1:npar
+    [par_name_temp,par_name_tex_temp]=get_the_name(jj,options_.TeX,M_,estim_params_,options_);
+    param_name = strvcat(param_name,par_name_temp);
+    param_name_tex = strvcat(param_name_tex,par_name_tex_temp);
     Draws = GetAllPosteriorDraws(jj,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
     Draws = reshape(Draws,[NumberOfDraws nblck]);
     Nc = min(1000, NumberOfDraws/2);
@@ -102,9 +90,23 @@ for jj=1:npar
         Ifac(ll,jj) = mcmc_ifac(Draws(:,ll), Nc);
     end
     tmp = num2cell(Ifac(:,jj));
-    fprintf(print_string,param_name(jj,:),tmp{:})
 end
+
+my_title='MCMC Inefficiency factors per block';
+IFAC_header='Parameter';
+IFAC_header_tex='Parameter';
+for j=1:nblck,
+    IFAC_header = char(IFAC_header,['Block ' int2str(j)]);
+    IFAC_header_tex = char(IFAC_header_tex,['Block~' int2str(j)]);
+end
+
+lh = size(param_name,2)+2;
+dyntable(my_title,IFAC_header,param_name,Ifac',lh,12,3);
 skipline()
+
+if options_.TeX
+    dyn_latex_table(M_,my_title,'MCMC_inefficiency_factors',IFAC_header_tex,param_name_tex,Ifac',lh,12,3);
+end
 record.InefficiencyFactorsPerBlock = Ifac;
 update_last_mh_history_file(MetropolisFolder, ModelName, record);
 
