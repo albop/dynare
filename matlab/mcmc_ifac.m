@@ -1,6 +1,6 @@
 function Ifac = mcmc_ifac(X, Nc)
 % function Ifac = mcmc_ifac(X, Nc)
-% Compute inefficiency factor of a MCMC sample X
+% Compute inefficiency factor of a MCMC sample X based on a Parzen Window
 %
 % INPUTS
 %   X:       time series
@@ -11,8 +11,32 @@ function Ifac = mcmc_ifac(X, Nc)
 %
 % SPECIAL REQUIREMENTS
 %   none
+% ALGORITHM:
+%   Inefficiency factors are computed as
+%   \[
+%       Ifac = 1 + 2\sum\limits_{i=1}^{Nc} {\hat \rho(i)} 
+%   \]
+%   where $\hat \rho(i)$ denotes the autocorrelation at lag i and the terms
+%   of the sum are truncated using a Parzen window.
+%   
+%   For inefficiency factors, see Section 6.1 of Paolo Giordani, Michael Pitt, and Robert Kohn (2011): 
+%   "Bayesian Inference for Time Series State Space Models" in : John Geweke, Gary Koop,
+%   Herman van Dijk (editors): "The Oxford Handbook of Bayesian
+%   Econometrics", Oxford University Press
+%
+%   The Parzen-Window is given by
+%  \[
+%   k(x) = \left\{ {\begin{array}{*{20}{c}}
+%        {1 - 6{x^2} + 6|x|^3} \text{ for } 0 \leqslant |x| \leqslant \frac{1}{2}} \\
+%        {2(1-|x|^3) \text{ for } \frac{1}{2} \leqslant |x| \leqslant 1} \\
+%        {0 \text{ otherwise}}
+%        \end{array}} \right.
+%  \]
+% See Donald W.K Andrews (1991): "Heteroskedasticity and autocorrelation
+% consistent covariance matrix estimation", Econometrica, 59(3), p. 817-858
 
-% Copyright (C) 2015 Dynare Team
+
+% Copyright (C) 2015-16 Dynare Team
 %
 % This file is part of Dynare.
 %
