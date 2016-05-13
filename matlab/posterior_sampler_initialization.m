@@ -202,7 +202,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
     fprintf(['Estimation::mcmc: Write details about the MCMC... ']);
     AnticipatedNumberOfFiles = ceil(nruns(1)/MAX_nruns);
     AnticipatedNumberOfLinesInTheLastFile = nruns(1) - (AnticipatedNumberOfFiles-1)*MAX_nruns;
-    record.Sampler = options_.posterior_sampling_method;
+    record.Sampler = options_.posterior_sampler_options.posterior_sampling_method;
     record.Nblck = NumberOfBlocks;
     record.MhDraws = zeros(1,3);
     record.MhDraws(1,1) = nruns(1);

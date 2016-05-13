@@ -420,15 +420,16 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
     if options_.mh_replic
         ana_deriv_old = options_.analytic_derivation;
         options_.analytic_derivation = 0;
-        posterior_sampler_options = options_.posterior_sampler_options;
-        posterior_sampler_options.bounds = bounds;
+        posterior_sampler_options = options_.posterior_sampler_options.current_options;
         posterior_sampler_options.invhess = invhess;
         [posterior_sampler_options, options_] = check_posterior_sampler_options(posterior_sampler_options, options_);
-        if strcmpi(options_.posterior_sampling_method,'adaptive_metropolis_hastings'), % keep old form only for this ...
+        % store current options in global
+        options_.posterior_sampler_options.current_options = posterior_sampler_options;
+        if strcmpi(options_.posterior_sampler_options.posterior_sampling_method,'adaptive_metropolis_hastings'), % keep old form only for this ...
             invhess = posterior_sampler_options.invhess;
             feval(options_.posterior_sampling_method,objective_function,options_.proposal_distribution,xparam1,invhess,bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_);
         else
-            posterior_sampler(objective_function,options_.proposal_distribution,xparam1,posterior_sampler_options,bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_);
+            posterior_sampler(objective_function,posterior_sampler_options.proposal_distribution,xparam1,posterior_sampler_options,bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_);
         end
         options_.analytic_derivation = ana_deriv_old;
     end

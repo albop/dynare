@@ -435,11 +435,6 @@ options_.MCMC_jumping_covariance='hessian';
 options_.use_calibration_initialization = 0;
 options_.endo_vars_for_moment_computations_in_estimation=[];
 
-% Tailored Random Block Metropolis-Hastings
-options_.TaRB.use_TaRB = 0;
-options_.TaRB.mode_compute=4;
-options_.TaRB.new_block_probability=0.25; %probability that next parameter belongs to new block
-
 % Run optimizer silently
 options_.silent_optimizer=0;
 
@@ -460,15 +455,32 @@ options_.prior_trunc = 1e-10;
 options_.smoother = 0;
 options_.posterior_max_subsample_draws = 1200;
 options_.sub_draws = [];
-options_.use_mh_covariance_matrix = 0;
+% options_.use_mh_covariance_matrix = 0;
 options_.gradient_method = 2; %used by csminwel and newrat
 options_.gradient_epsilon = 1e-6; %used by csminwel and newrat
-options_.posterior_sampler_options = []; %extended set of options for individual posterior samplers
+options_.posterior_sampler_options.sampling_opt = []; %extended set of options for individual posterior samplers
+% Random Walk Metropolis-Hastings
 options_.posterior_sampler_options.posterior_sampling_method = 'random_walk_metropolis_hastings';
 options_.posterior_sampler_options.rwmh.proposal_distribution = 'rand_multivariate_normal';
 options_.posterior_sampler_options.rwmh.student_degrees_of_freedom = 3;
+options_.posterior_sampler_options.rwmh.use_mh_covariance_matrix=0;
+% Tailored Random Block Metropolis-Hastings
 options_.posterior_sampler_options.tarb.proposal_distribution = 'rand_multivariate_normal';
 options_.posterior_sampler_options.tarb.student_degrees_of_freedom = 3;
+options_.posterior_sampler_options.tarb.mode_compute=4;
+options_.posterior_sampler_options.tarb.new_block_probability=0.25; %probability that next parameter belongs to new block
+% Slice
+options_.posterior_sampler_options.slice.proposal_distribution = '';
+options_.posterior_sampler_options.slice.rotated=0;
+options_.posterior_sampler_options.slice.slice_initialize_with_mode=0;
+options_.posterior_sampler_options.slice.use_mh_covariance_matrix=0;
+options_.posterior_sampler_options.slice.WR=[];
+options_.posterior_sampler_options.slice.mode_files=[];
+options_.posterior_sampler_options.slice.initial_step_size=0.8;
+% Independent Metropolis-Hastings
+options_.posterior_sampler_options.imh.proposal_distribution = 'rand_multivariate_normal';
+options_.posterior_sampler_options.imh.use_mh_covariance_matrix=0;
+
 options_.trace_plot_ma = 200;
 options_.mh_autocorrelation_function_size = 30;
 options_.plot_priors = 1;

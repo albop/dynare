@@ -89,11 +89,6 @@ load_last_mh_history_file(MetropolisFolder, ModelName);
 % on many cores). The mandatory variables for local/remote parallel
 % computing are stored in the localVars struct.
 
-if options_.TaRB.use_TaRB
-    options_.silent_optimizer=1; %locally set optimizer to silent mode
-    sampler_options.posterior_sampling_method='tailored_random_block_metropolis_hastings';
-end
-
 localVars =   struct('TargetFun', TargetFun, ...
                      'ProposalFun', ProposalFun, ...
                      'xparam1', xparam1, ...
@@ -120,6 +115,9 @@ localVars =   struct('TargetFun', TargetFun, ...
                      'oo_', oo_,...
                      'varargin',[]);
 
+if strcmp(sampler_options.posterior_sampling_method,'tailored_random_block_metropolis_hastings');
+    localVars.options_.silent_optimizer=1; %locally set optimizer to silent mode
+end
 
 % User doesn't want to use parallel computing, or wants to compute a
 % single chain compute Random walk Metropolis-Hastings algorithm sequentially.
@@ -145,11 +143,7 @@ else
     end
     % from where to get back results
     %     NamFileOutput(1,:) = {[M_.dname,'/metropolis/'],'*.*'};
-    if options_.TaRB.use_TaRB
-        [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'TaRB_metropolis_hastings_core', localVars, globalVars, options_.parallel_info);        
-    else    
-        [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'posterior_sampler_core', localVars, globalVars, options_.parallel_info);
-    end
+    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'posterior_sampler_core', localVars, globalVars, options_.parallel_info);
     for j=1:totCPU,
         offset = sum(nBlockPerCPU(1:j-1))+fblck-1;
         record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastLogPost(offset+1:sum(nBlockPerCPU(1:j)));
