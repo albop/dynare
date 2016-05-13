@@ -429,16 +429,15 @@ If you want to give a URL, use the address of the Dynare website:
 
 Packaged versions of Dynare are available for Windows XP/Vista/7/8,
 @uref{http://www.debian.org,Debian GNU/Linux},
-@uref{http://www.ubuntu.com/,Ubuntu} and Mac OS X Leopard/Snow
-Leopard.  Dynare should work on other systems, but some compilation
-steps are necessary in that case.
+@uref{http://www.ubuntu.com/,Ubuntu} and Mac OS X 10.8 or later.  Dynare should
+work on other systems, but some compilation steps are necessary in that case.
 
 In order to run Dynare, you need one of the following:
 
 @itemize
 
 @item
-MATLAB version 7.5 (R2007b) or above;
+MATLAB version 7.5 (R2007b) or above (MATLAB R2009b 64-bit for Mac OS X);
 
 @item
 GNU Octave version 3.6 or above.
