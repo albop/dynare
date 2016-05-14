@@ -84,7 +84,7 @@ if init,
                             options_.use_mh_covariance_matrix = options_list{i,2};
                             
                         otherwise
-                            warning(['imh_sampler: Unknown option (' options_list{i,1} ')!'])
+                            warning(['rwmh_sampler: Unknown option (' options_list{i,1} ')!'])
                     end
                 end
             end
@@ -134,6 +134,7 @@ if init,
                             end
                             
                         otherwise
+                            warning(['tarb_sampler: Unknown option (' options_list{i,1} ')!'])
                             
                     end
                     
