@@ -115,7 +115,7 @@ end;
 varobs gp_obs gy_obs;
 
 estimation(order=1, datafile='../fsdat_simul',nobs=192, loglinear, mh_replic=30, mh_nblocks=2, mh_jscale=0.5,mode_compute=4,
-posterior_sampling_method='tarb',
-posterior_sampler_options=('tarb_mode_compute',4,'tarb_new_block_probability',0.3),
+posterior_sampling_method='tailored_random_block_metropolis_hastings',
+posterior_sampler_options=('mode_compute',4,'new_block_probability',0.3,'optim',('NumgradEpsilon',1e-6,'NumgradAlgorithm',3,'MaxIter',10)),
 silent_optimizer
 );
