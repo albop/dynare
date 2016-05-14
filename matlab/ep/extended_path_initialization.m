@@ -128,7 +128,15 @@ end
 
 % set boundaries if mcp
 [lb,ub,pfm.eq_index] = get_complementarity_conditions(DynareModel, DynareOptions.ramsey_policy);
-DynareOptions.lmmcp.lb = repmat(lb,block_nbr,1);
-DynareOptions.lmmcp.ub = repmat(ub,block_nbr,1);
+if DynareOptions.ep.solve_algo == 10
+    DynareOptions.lmmcp.lb = repmat(lb,block_nbr,1);
+    DynareOptions.lmmcp.ub = repmat(ub,block_nbr,1);
+elseif DynareOptions.ep.solve_algo == 11
+    DynareOptions.lcppath.lb = repmat(lb,block_nbr,1);
+    DynareOptions.lcppath.ub = repmat(ub,block_nbr,1);
+elseif DynareOptions.ep.solve_algo == 12
+    DynareOptions.mcppath.lb = repmat(lb,block_nbr,1);
+    DynareOptions.mcppath.ub = repmat(ub,block_nbr,1);
+end;
 pfm.block_nbr = block_nbr;
 
