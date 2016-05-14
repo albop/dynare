@@ -57,7 +57,7 @@ Nc = floor(min(Nc, length(X)/2));
 if mod(Nc,2),
     Nc=Nc-1;
 end
-AcorrXSIM = autocorr(X(:), Nc);
+AcorrXSIM = dyn_autocorr(X(:), Nc);
 %
 %Calculate the Parzen Weight
 Parzen=zeros(Nc+1,1);
