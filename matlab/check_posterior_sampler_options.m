@@ -304,10 +304,10 @@ if init,
             %     options_.mh_posterior_mode_estimation = 0;
             % this is done below, but perhaps preprocessing should do this?
             
-            if ~isfield(posterior_sampler_options,'mode'),
-                posterior_sampler_options.mode = [];
-            else % multimodal case
+            if ~isempty(posterior_sampler_options.mode)
+                % multimodal case
                 posterior_sampler_options.rotated = 1;
+                posterior_sampler_options.WR=[];
             end
             %     posterior_sampler_options = set_default_option(posterior_sampler_options,'mode_files',[]);
             

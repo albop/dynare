@@ -476,6 +476,7 @@ options_.posterior_sampler_options.slice.slice_initialize_with_mode=0;
 options_.posterior_sampler_options.slice.use_mh_covariance_matrix=0;
 options_.posterior_sampler_options.slice.WR=[];
 options_.posterior_sampler_options.slice.mode_files=[];
+options_.posterior_sampler_options.slice.mode=[];
 options_.posterior_sampler_options.slice.initial_step_size=0.8;
 % Independent Metropolis-Hastings
 options_.posterior_sampler_options.imh.proposal_distribution = 'rand_multivariate_normal';
