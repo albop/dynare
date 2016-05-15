@@ -126,6 +126,9 @@ if init,
                         case 'mode_compute'
                             posterior_sampler_options.mode_compute=options_list{i,2};
                             
+                        case 'optim'
+                            posterior_sampler_options.optim_opt=options_list{i,2};
+
                         case 'new_block_probability'
                             if options_list{i,2}<0 || options_list{i,2}>1
                                 error('check_posterior_sampler_options:: The tarb new_block_probability must be between 0 and 1!')
@@ -333,7 +336,7 @@ if init,
             end
             
         otherwise
-            
+            error('check_posterior_sampler_options:: Unknown posterior_sampling_method option %s ',posterior_sampler_options.posterior_sampling_method);
     end
     
     return

@@ -469,6 +469,7 @@ options_.posterior_sampler_options.tarb.proposal_distribution = 'rand_multivaria
 options_.posterior_sampler_options.tarb.student_degrees_of_freedom = 3;
 options_.posterior_sampler_options.tarb.mode_compute=4;
 options_.posterior_sampler_options.tarb.new_block_probability=0.25; %probability that next parameter belongs to new block
+options_.posterior_sampler_options.tarb.optim_opt=''; %probability that next parameter belongs to new block
 % Slice
 options_.posterior_sampler_options.slice.proposal_distribution = '';
 options_.posterior_sampler_options.slice.rotated=0;

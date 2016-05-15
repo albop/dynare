@@ -117,6 +117,9 @@ localVars =   struct('TargetFun', TargetFun, ...
 
 if strcmp(sampler_options.posterior_sampling_method,'tailored_random_block_metropolis_hastings');
     localVars.options_.silent_optimizer=1; %locally set optimizer to silent mode
+    if ~isempty(sampler_options.optim_opt)
+        localVars.options_.optim_opt=sampler_options.optim_opt; %locally set options for optimizer
+    end
 end
 
 % User doesn't want to use parallel computing, or wants to compute a
