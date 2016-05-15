@@ -13,5 +13,3 @@ if isreal(res)
 else
     domer = 1;
 end
-
-disp(x'*res)
