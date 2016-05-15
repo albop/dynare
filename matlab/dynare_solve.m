@@ -205,8 +205,8 @@ elseif options.solve_algo == 11
                'linear  option in model instruction']);
     end
     olcppath = options.lcppath;
-    [junk,M] = func(x,varargin{:});
-    [x,mu,status] = pathlcp(fjac,olcppath.q,olcppath.lb,olcppath.ub,x,olcppath.A,olcppath.b,olcppath.t,olcppath.mu0);
+    [q,M] = func(zeros(size(x)),varargin{:});
+    [x,mu,status] = pathlcp(M,q,olcppath.lb,olcppath.ub,x,olcppath.A,olcppath.b,olcppath.t,olcppath.mu0);
     info = ~status;
 elseif options.solve_algo == 12
     % PATH mixed complementary problem
