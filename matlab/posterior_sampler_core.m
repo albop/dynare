@@ -99,7 +99,7 @@ if strcmpi(ProposalFun,'rand_multivariate_normal')
     sampler_options.n = npar;
     sampler_options.ProposalDensity = 'multivariate_normal_pdf';
 elseif strcmpi(ProposalFun,'rand_multivariate_student')
-    sampler_options.n = options_.student_degrees_of_freedom;
+    sampler_options.n = sampler_options.student_degrees_of_freedom;
     sampler_options.ProposalDensity = 'multivariate_student_pdf';
 end
 

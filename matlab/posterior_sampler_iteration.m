@@ -70,7 +70,7 @@ switch posterior_sampling_method
         %% randomize indices for blocking in this iteration
         global objective_function_penalty_base
         indices=randperm(npar)';
-        blocks=[1; (1+cumsum((rand(length(indices)-1,1)>(1-options_.TaRB.new_block_probability))))];
+        blocks=[1; (1+cumsum((rand(length(indices)-1,1)>(1-sampler_options.new_block_probability))))];
         nblocks=blocks(end,1); %get number of blocks this iteration
         current_draw=last_draw'; %get starting point for current draw for updating
         blocked_draws_counter=0;
@@ -79,7 +79,7 @@ switch posterior_sampling_method
             blocked_draws_counter=blocked_draws_counter+1;
             nxopt=length(indices(blocks==block_iter,1)); %get size of current block
             par_start_current_block=current_draw(indices(blocks==block_iter,1));
-            [xopt_current_block, fval, exitflag, hess_mat_optimizer, options_, Scale] = dynare_minimize_objective(@TaRB_optimizer_wrapper,par_start_current_block,options_.TaRB.mode_compute,options_,[mh_bounds.lb(indices(blocks==block_iter,1),1) mh_bounds.ub(indices(blocks==block_iter,1),1)],bayestopt_.name,bayestopt_,[],...
+            [xopt_current_block, fval, exitflag, hess_mat_optimizer, options_, Scale] = dynare_minimize_objective(@TaRB_optimizer_wrapper,par_start_current_block,sampler_options.mode_compute,options_,[mh_bounds.lb(indices(blocks==block_iter,1),1) mh_bounds.ub(indices(blocks==block_iter,1),1)],bayestopt_.name,bayestopt_,[],...
                 current_draw,indices(blocks==block_iter,1),TargetFun,...% inputs for wrapper
                 varargin{:}); %inputs for objective           
             objective_function_penalty_base=Inf; %reset penalty that may have been changed by optimizer
