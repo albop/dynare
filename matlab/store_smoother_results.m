@@ -38,7 +38,7 @@ function [oo_, yf]=store_smoother_results(M_,oo_,options_,bayestopt_,dataset_,da
 %                   oo_.UpdatedVariables: structure storing the updated variables
 %                   oo_.SmoothedShocks: structure storing the smoothed shocks
 %                   oo_.SmoothedMeasurementErrors: structure storing the smoothed measurement errors
-
+%
 %   yf              [double]    (nvarobs*T) matrix storing the smoothed observed variables (order of options_.varobs)  
 % 
 % Notes: 
