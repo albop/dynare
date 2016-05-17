@@ -87,7 +87,7 @@ if kronflag == -1,
     dA = reshape(H(M_.orig_endo_nbr+[1:numel(A)],:),[size(A),size(H,2)]);
     dOm = dA*0;
     for j=1:size(H,2),
-        dOm(:,:,j) = dyn_unvech(H(M_.orig_endo_nbr+numel(A)+1:end,j));
+        dOm(:,:,j) = dyn_unvech(H(M_.endo_nbr+numel(A)+1:end,j));
     end
     assignin('base','M_', M_);
     assignin('base','oo_', oo_);
