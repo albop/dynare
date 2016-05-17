@@ -181,23 +181,32 @@ if info(1)==0,
 %             deltaM = deltaM.*abs(params');
             flag_score=1;
         catch,
+%             replic = max([replic, nparam*(nparam+1)/2*10]);
             replic = max([replic, length(indJJ)*3]);
             cmm = simulated_moment_uncertainty(indJJ, periods, replic);
-%             MIM=siJ(:,indok)'*(cmm\siJ(:,indok));
-%           look for independent moments!
+%             [V,D,W]=eig(cmm);
             sd=sqrt(diag(cmm));
             cc=cmm./(sd*sd');
-            ix=[];
-            for jc=1:length(cmm),
-                jcheck=find(abs(cc(:,jc))>(1-1.e-6));
-                ix=[ix; jcheck(jcheck>jc)];
-            end
-            iy=find(~ismember([1:length(cmm)],ix));
-            indJJ=indJJ(iy);
-            GAM=GAM(iy);
-            cmm=cmm(iy,iy);
-            siJ = (JJ(indJJ,:));
-            MIM=siJ'*(cmm\siJ);
+            [V,D,W]=eig(cc);
+            id=find(diag(D)>1.e-8);
+            siTMP=siJ./repmat(sd,[1 nparam]);
+            MIM=(siTMP'*V(:,id))*(D(id,id)\(W(:,id)'*siTMP));
+            clear siTMP;
+%           MIM=siJ(:,indok)'*(cmm\siJ(:,indok));
+%           look for independent moments!
+% % %             sd=sqrt(diag(cmm));
+% % %             cc=cmm./(sd*sd');
+% % %             ix=[];
+% % %             for jc=1:length(cmm),
+% % %                 jcheck=find(abs(cc(:,jc))>(1-1.e-6));
+% % %                 ix=[ix; jcheck(jcheck>jc)];
+% % %             end
+% % %             iy=find(~ismember([1:length(cmm)],ix));
+% % %             indJJ=indJJ(iy);
+% % %             GAM=GAM(iy);
+% % %             cmm=cmm(iy,iy);
+% % %             siJ = (JJ(indJJ,:));
+% % %             MIM=siJ'*(cmm\siJ);
             ide_hess.AHess= MIM;
             deltaM = sqrt(diag(MIM));
             iflag=any((deltaM.*deltaM)==0);
