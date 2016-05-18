@@ -780,9 +780,12 @@ line numbering directives.
 Instructs Dynare to no create a logfile of this run in
 @file{@var{FILENAME}.log}. The default is to create the logfile.
 
-@item no_2nd_order_params_derivs
-Instructs Dynare not to compute the second order derivative of the jacobian or
-the derivative of the hessian with respect to the parameters.
+@item params_derivs_order=0|1|2
+When @ref{identification}, @ref{dynare_sensitivity} (with identification), or
+@ref{estimation_cmd} are present, this option is used to limit the order of the
+derivatives with respect to the parameters that are calculated by the
+preprocessor. @code{0} means no derivatives, @code{1} means first derivatives,
+and @code{2} means second derivatives. Default: @code{2}
 
 @item nowarn
 Suppresses all warnings.
@@ -7514,6 +7517,7 @@ estimation environment is set up.
 @node Performing sensitivity analysis
 @subsection Performing sensitivity analysis
 
+@anchor{dynare_sensitivity}
 @deffn Command dynare_sensitivity ;
 @deffnx Command dynare_sensitivity (@var{OPTIONS}@dots{});
 
@@ -7828,6 +7832,7 @@ end;
 @node Performing identification analysis
 @subsection Performing identification analysis
 
+@anchor{identification}
 @deffn Command identification ;
 @deffnx Command identification (@var{OPTIONS}@dots{});
 
