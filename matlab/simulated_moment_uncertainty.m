@@ -25,6 +25,7 @@ mm=zeros(length(indx),replic);
 disp('Evaluating simulated moment uncertainty ... please wait')
 disp(['Doing ',int2str(replic),' replicas of length ',int2str(periods),' periods.'])
 noprint0 = options_.noprint;
+h = dyn_waitbar(0,'Simulated moment uncertainty ...');
 for j=1:replic;
     options_.irf = 0;
     options_.noprint = 1;
@@ -37,8 +38,9 @@ for j=1:replic;
         dum=[dum; vec(oo_.autocorr{i}.*(sd*sd'))];
     end
     mm(:,j)=dum(indx);
+    dyn_waitbar(j/replic,h,['Simulated moment uncertainty. Replic  ',int2str(j),'/',int2str(replic)])
 end;
-
+dyn_waitbar_close(h);
 options_.noprint = noprint0;
 cmm = cov(mm');
 disp('Simulated moment uncertainty ... done!')

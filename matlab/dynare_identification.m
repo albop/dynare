@@ -66,8 +66,10 @@ else
         warning('IDENTIFICATION:: Previously the diffuse_filter option was used, but it was not passed to the identification command. This may result in problems if your model contains unit roots.')
     end
     if isfield(options_ident,'lik_init') 
+        options_.lik_init=options_ident.lik_init; %make options_ inherit lik_init
         if options_ident.lik_init==3 %user specified diffuse filter using the lik_init option
             options_ident.analytic_derivation=0; %diffuse filter not compatible with analytic derivation
+            options_.analytic_derivation=0; %diffuse filter not compatible with analytic derivation
         end
     end
 end
@@ -144,7 +146,7 @@ options_.mode_compute = 0;
 options_.plot_priors = 0;
 options_.smoother=1;
 [dataset_,dataset_info,xparam1,hh, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
-options_ident.analytic_derivation_mode = options_.analytic_derivation_mode;
+options_ident = set_default_option(options_ident,'analytic_derivation_mode',options_.analytic_derivation_mode); % if not set by user, inherit default global one
 
 if prior_exist
     if any(bayestopt_.pshape > 0)
