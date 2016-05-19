@@ -206,4 +206,4 @@ mex/build/matlab/run_m2html.m
 tests/reporting/tmpRepDir
 
 # Julia Tests
-/tests/**/*.jl
+tests/julia/rbc/rbc*.jl
