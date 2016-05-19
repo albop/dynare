@@ -151,8 +151,8 @@ switch posterior_sampling_method
         ProposalDensity = sampler_options.ProposalDensity;
         proposal_covariance_Cholesky_decomposition = sampler_options.proposal_covariance_Cholesky_decomposition;
         n = sampler_options.n;
-        xparam1 = sampler_options.xparam1;
-        par = feval(ProposalFun, sampler_options.xparam1, proposal_covariance_Cholesky_decomposition, n);
+        xparam1 = sampler_options.xparam1';
+        par = feval(ProposalFun, xparam1, proposal_covariance_Cholesky_decomposition, n);
         if all( par(:) > mh_bounds.lb ) && all( par(:) < mh_bounds.ub )
             try
                 logpost = - feval(TargetFun, par(:),varargin{:});
