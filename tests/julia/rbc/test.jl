@@ -10,4 +10,15 @@ end
 importall Dynare
 
 # Compile the rbc.mod file -> produce a module with the model definition.
-@dynare "rbc.mod"
+
+
+@dynare "rbc1.mod" "rbc2.mod"
+
+# The previous command is equivalent to:
+#
+#  @compile "rbc.mod"
+#  using rbc
+
+
+print(rbc1.model.fname)
+print(rbc2.model.fname)
