@@ -57,7 +57,7 @@ for indPC=1:length(Parallel),
                 if isoctave % Patch for peculiar behaviour of ls under Linux.
                     % It is necessary to manage the jolly char '*'!
 
-                    FindAst=strfind(NamFileInput{jfil,2},'comp_status_random_walk_metropolis_hastings_core*');
+                    FindAst=strfind(NamFileInput{jfil,2},'comp_status_posterior_sampler_core*');
                     
                     if isempty (FindAst)
 
