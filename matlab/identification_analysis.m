@@ -1,4 +1,4 @@
-function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = identification_analysis(params,indx,indexo,options_ident,dataset_,dataset_info, prior_exist, name_tex, init)
+function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info, options_ident] = identification_analysis(params,indx,indexo,options_ident,dataset_,dataset_info, prior_exist, name_tex, init)
 % function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = identification_analysis(params,indx,indexo,options_ident,data_info, prior_exist, name_tex, init)
 % given the parameter vector params, wraps all identification analyses
 %
@@ -88,6 +88,8 @@ if info(1)==0,
         indJJ = (find(max(abs(JJ'),[],1)>1.e-8));
         if isempty(indJJ) && any(any(isnan(JJ)))
             error('There are NaN in the JJ matrix. Please check whether your model has units roots and you forgot to set diffuse_filter=1.' )
+        elseif any(any(isnan(gam)))
+            error('There are NaN''s in the theoretical moments: make sure that for non-stationary models stationary transformations of non-stationary observables are used for checking identification. [TIP: use first differences].')
         end
         while length(indJJ)<nparam && nlags<10,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
@@ -97,14 +99,14 @@ if info(1)==0,
             derivatives_info.DT=dA;
             derivatives_info.DOm=dOm;
             derivatives_info.DYss=dYss;
-            evalin('caller',['options_ident.ar=',int2str(nlags),';']);
+            options_.ar=nlags;
             indJJ = (find(max(abs(JJ'),[],1)>1.e-8));
         end
         if length(indJJ)<nparam,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
             disp('up to 10 lags: check your model')           
             disp('Either further increase ar or reduce the list of estimated parameters')           
-            error('IDETooManyParams',''),
+            error('identification_analysis: there are not enough moments and too many parameters'),
         end
         indH = (find(max(abs(H'),[],1)>1.e-8));
         indLRE = (find(max(abs(gp'),[],1)>1.e-8));
@@ -154,7 +156,7 @@ if info(1)==0,
             options_.analytic_derivation = analytic_derivation;
             AHess=-AHess;
             if min(eig(AHess))<0,
-                error('Analytic Hessian is not positive semi-definite!')
+                error('identification_analysis: Analytic Hessian is not positive semi-definite!')
             end
 %             chol(AHess);
             ide_hess.AHess= AHess;
@@ -183,7 +185,7 @@ if info(1)==0,
         catch,
 %             replic = max([replic, nparam*(nparam+1)/2*10]);
             replic = max([replic, length(indJJ)*3]);
-            cmm = simulated_moment_uncertainty(indJJ, periods, replic);
+            cmm = simulated_moment_uncertainty(indJJ, periods, replic,options_,M_,oo_);
 %             [V,D,W]=eig(cmm);
             sd=sqrt(diag(cmm));
             cc=cmm./(sd*sd');
