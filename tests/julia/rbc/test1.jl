@@ -13,4 +13,4 @@ importall Dynare
 
 @dynare "rbc1.mod"
 
-print(model.fname)
+print(model_.fname)

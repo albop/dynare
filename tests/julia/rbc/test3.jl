@@ -19,5 +19,5 @@ importall Dynare
 #  @compile "rbc1.mod"
 #  using rbc1
 
-print(rbc1.model.fname)
-print(rbc2.model.fname)
+print(rbc1.model_.fname)
+print(rbc2.model_.fname)
