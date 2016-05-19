@@ -1,10 +1,10 @@
 function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMatlab)
 % PARALLEL CONTEXT
 % Core functionality for prior_posterior.m function, which can be parallelized.
-% See also the comment in random_walk_metropolis_hastings_core.m funtion.
+% See also the comment in posterior_sampler_core.m funtion.
 %
 % INPUTS
-%   See See the comment in random_walk_metropolis_hastings_core.m funtion.
+%   See the comment in posterior_sampler_core.m funtion.
 %
 % OUTPUTS
 % o myoutput  [struc]
@@ -24,7 +24,7 @@ function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMa
 % SPECIAL REQUIREMENTS.
 %   None.
 
-% Copyright (C) 2005-2015 Dynare Team
+% Copyright (C) 2005-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

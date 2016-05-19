@@ -1,12 +1,12 @@
 function myoutput = posterior_sampler_core(myinputs,fblck,nblck,whoiam, ThisMatlab)
 % function myoutput = posterior_sampler_core(myinputs,fblck,nblck,whoiam, ThisMatlab)
 % Contains the most computationally intensive portion of code in
-% random_walk_metropolis_hastings (the 'for xxx = fblck:nblck' loop). The branches in  that 'for'
+% posterior_sampler (the 'for xxx = fblck:nblck' loop). The branches in  that 'for'
 % cycle are completely independent to be suitable for parallel execution.
 %
 % INPUTS
 %   o myimput            [struc]     The mandatory variables for local/remote
-%                                    parallel computing obtained from random_walk_metropolis_hastings.m
+%                                    parallel computing obtained from posterior_sampler.m
 %                                    function.
 %   o fblck and nblck    [integer]   The Metropolis-Hastings chains.
 %   o whoiam             [integer]   In concurrent programming a modality to refer to the different threads running in parallel is needed.
@@ -27,16 +27,16 @@ function myoutput = posterior_sampler_core(myinputs,fblck,nblck,whoiam, ThisMatl
 %                               OutputFileName
 %
 % ALGORITHM
-%   Portion of Metropolis-Hastings.
+%   Portion of Posterior Sampler.
 %
 % SPECIAL REQUIREMENTS.
 %   None.
 % 
 % PARALLEL CONTEXT
-% See the comments in the random_walk_metropolis_hastings.m funtion.
+% See the comments in the posterior_sampler.m funtion.
 
 
-% Copyright (C) 2006-2015 Dynare Team
+% Copyright (C) 2006-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

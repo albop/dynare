@@ -4,19 +4,16 @@ function myoutput=pm3_core(myinputs,fpar,nvar,whoiam, ThisMatlab)
 % Core functionality for pm3.m function, which can be parallelized.
 
 % INPUTS 
-% See the comment in random_walk_metropolis_hastings_core.m funtion.
+% See the comment in posterior_sampler_core.m funtion.
 
 % OUTPUTS
 % o myoutput  [struc]
 %
 %
-% ALGORITHM 
-%   Portion of McMCDiagnostics.m function.       
-%
 % SPECIAL REQUIREMENTS.
 %   None.
 
-% Copyright (C) 2007-2012 Dynare Team
+% Copyright (C) 2007-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

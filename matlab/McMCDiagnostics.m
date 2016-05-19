@@ -14,9 +14,9 @@ function oo_ = McMCDiagnostics(options_, estim_params_, M_, oo_)
 %   none
 %
 % PARALLEL CONTEXT
-% See the comment in random_walk_metropolis_hastings.m funtion.
+% See the comment in posterior_sampler.m funtion.
 
-% Copyright (C) 2005-2013 Dynare Team
+% Copyright (C) 2005-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

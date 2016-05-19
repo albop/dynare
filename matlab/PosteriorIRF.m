@@ -14,9 +14,9 @@ function PosteriorIRF(type)
 % PARALLEL CONTEXT
 % This funtion has been parallelized in two different points. Then we have two core
 % functions associated with it(the _core1 and _core2).
-% See also the comments random_walk_metropolis_hastings.m funtion.
+% See also the comments posterior_sampler.m funtion.
 
-% Copyright (C) 2006-2015 Dynare Team
+% Copyright (C) 2006-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

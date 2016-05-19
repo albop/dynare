@@ -5,12 +5,12 @@ function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam,ThisMatlab)
 % 
 % PARALLEL CONTEXT
 % Performs in parallel execution a portion of the PosteriorIRF.m code.
-% For more information, see the comment in random_walk_metropolis_hastings_core.m 
+% For more information, see the comment in posterior_sampler_core.m 
 % function.
 %
 % INPUTS
 %   o myimput            [struc]     The mandatory variables for local/remote
-%                                    parallel computing obtained from random_walk_metropolis_hastings.m
+%                                    parallel computing obtained from posterior_sampler.m
 %                                    function.
 %   o fblck and nblck    [integer]   The Metropolis-Hastings chains.
 %   o whoiam             [integer]   In concurrent programming a modality to refer to the differents thread running in parallel is needed.
@@ -30,7 +30,7 @@ function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam,ThisMatlab)
 % SPECIAL REQUIREMENTS.
 %   None.
 %
-% Copyright (C) 2006-2015 Dynare Team
+% Copyright (C) 2006-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

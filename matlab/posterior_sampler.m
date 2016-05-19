@@ -19,9 +19,6 @@ function posterior_sampler(TargetFun,ProposalFun,xparam1,sampler_options,mh_boun
 %   o bayestopt_            estimation options structure
 %   o oo_                   outputs structure
 %
-% ALGORITHM 
-%   Random-Walk Metropolis-Hastings.       
-%
 % SPECIAL REQUIREMENTS
 %   None.
 %
@@ -29,7 +26,7 @@ function posterior_sampler(TargetFun,ProposalFun,xparam1,sampler_options,mh_boun
 % The most computationally intensive part of this function may be executed
 % in parallel. The code suitable to be executed in
 % parallel on multi core or cluster machine (in general a 'for' cycle)
-% has been removed from this function and been placed in the random_walk_metropolis_hastings_core.m funtion.
+% has been removed from this function and been placed in the posterior_sampler_core.m funtion.
 % 
 % The DYNARE parallel packages comprise a i) set of pairs of Matlab functions that can be executed in
 % parallel and called name_function.m and name_function_core.m and ii) a second set of functions used
@@ -40,7 +37,7 @@ function posterior_sampler(TargetFun,ProposalFun,xparam1,sampler_options,mh_boun
 % Then the comments write here can be used for all the other pairs of
 % parallel functions and also for management functions.
 
-% Copyright (C) 2006-2015 Dynare Team
+% Copyright (C) 2006-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -63,7 +60,7 @@ global objective_function_penalty_base
 objective_function_penalty_base = Inf;
 
 vv = sampler_options.invhess;
-% Initialization of the random walk metropolis-hastings chains.
+% Initialization of the sampler
 [ ix2, ilogpo2, ModelName, MetropolisFolder, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
     posterior_sampler_initialization(TargetFun, xparam1, vv, mh_bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_);
 
@@ -123,7 +120,7 @@ if strcmp(sampler_options.posterior_sampling_method,'tailored_random_block_metro
 end
 
 % User doesn't want to use parallel computing, or wants to compute a
-% single chain compute Random walk Metropolis-Hastings algorithm sequentially.
+% single chain compute sequentially.
 
 if isnumeric(options_.parallel) || (nblck-fblck)==0,
     fout = posterior_sampler_core(localVars, fblck, nblck, 0);

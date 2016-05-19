@@ -7,10 +7,10 @@ function myoutput=PosteriorIRF_core1(myinputs,fpar,B,whoiam, ThisMatlab)
 %   'while' loop! The parallelization of 'while' loop (when possible) is a more
 %   sophisticated procedure.
 %
-%   See also the comment in random_walk_metropolis_hastings_core.m funtion.
+%   See also the comment in posterior_sampler_core.m funtion.
 %
 % INPUTS
-%   See the comment in random_walk_metropolis_hastings_core.m funtion.
+%   See the comment in posterior_sampler_core.m funtion.
 %
 % OUTPUTS
 % o myoutput  [struc]
@@ -23,7 +23,7 @@ function myoutput=PosteriorIRF_core1(myinputs,fpar,B,whoiam, ThisMatlab)
 % SPECIAL REQUIREMENTS.
 %   None.
 %
-% Copyright (C) 2006-2013 Dynare Team
+% Copyright (C) 2006-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

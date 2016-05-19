@@ -22,10 +22,10 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
 %                   matrix
 
 % PARALLEL CONTEXT
-% See also the comment in random_walk_metropolis_hastings.m funtion.
+% See also the comment in posterior_sampler.m funtion.
 
 
-% Copyright (C) 2007-2014 Dynare Team
+% Copyright (C) 2007-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
