@@ -242,8 +242,8 @@ Stochastic solution and simulation
 Sensitivity and identification analysis
 
 * Performing sensitivity analysis::
-* Performing identification analysis::
 * IRF/Moment calibration::
+* Performing identification analysis::
 * Types of analysis and output files::
 
 Types of analysis and output files
@@ -7488,7 +7488,7 @@ This command accepts all options of @code{stoch_simul}, plus:
 @table @code
 
 @item planner_discount = @var{EXPRESSION}
-@xref{planner_discount}
+@xref{planner_discount}.
 
 @item instruments = (@var{VARIABLE_NAME},@dots{})
 Declares instrument variables for the computation of the steady state
@@ -7614,8 +7614,8 @@ estimation environment is set up.
 
 @menu
 * Performing sensitivity analysis::
-* Performing identification analysis::
 * IRF/Moment calibration::
+* Performing identification analysis::
 * Types of analysis and output files::
 @end menu
 
@@ -13220,10 +13220,10 @@ distribution. Results returned in @var{oo_.posterior_function_results}
 @table @code
 
 @item function = @var{FUNCTION_NAME}
-@xref{prior_function_function}
+@xref{prior_function_function}.
 
 @item sampling_draws = @var{INTEGER}
-@xref{prior_function_sampling_draws}
+@xref{prior_function_sampling_draws}.
 
 @end table
 
