@@ -5508,7 +5508,8 @@ Use the Independent Metropolis-Hastings algorithm where the proposal distributio
 Random Walk Metropolis-Hastings algorithm - does not depend on the state of the chain.
 
 @item 'slice'
-Instructs Dynare to use the Slice sampler. Note that @code{'slice'} is incompatible with
+Instructs Dynare to use the Slice sampler of @cite{Planas, Ratto, and Rossi (2015)}.
+Note that @code{'slice'} is incompatible with
 @code{prior_trunc=0}.
 
 @end table
@@ -13543,6 +13544,10 @@ to the solution and estimation of DSGE models''
 Pearlman, Joseph, David Currie, and Paul Levine (1986): ``Rational
 expectations models with partial information,'' @i{Economic
 Modelling}, 3(2), 90--105
+
+@item
+Planas, Christophe, Marco Ratto and Alessandro Rossi (2015): ``Slice sampling in Bayesian estimation
+of DSGE models''
 
 @item
 Pfeifer, Johannes (2013): ``A Guide to Specifying Observation Equations for the Estimation of DSGE Models''
