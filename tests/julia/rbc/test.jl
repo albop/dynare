@@ -16,8 +16,8 @@ importall Dynare
 
 # The previous command is equivalent to:
 #
-#  @compile "rbc.mod"
-#  using rbc
+#  @compile "rbc1.mod"
+#  using rbc1
 
 
 print(rbc1.model.fname)
