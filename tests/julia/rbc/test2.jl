@@ -1,6 +1,3 @@
-#clear workspace
-workspace()
-
 # Modification of the path (for packages). Should be done in ~/.juliarc.jl with a fixed path instead.
 if isempty(findin([abspath("../../../julia")], LOAD_PATH))
     unshift!(LOAD_PATH, abspath("../../../julia"))
