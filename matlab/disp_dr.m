@@ -253,7 +253,7 @@ error(sprintf('Could not find aux var: %s', M_.endo_names(aux_index, :)))
 end
 
 function [str,flag]=get_print_string(str,x,value_format_zero,value_format_float,flag,options_)
-    if abs(x) > options_.dr_display_tol
+    if abs(x) >= options_.dr_display_tol
         flag = 1;
         str = [str sprintf(value_format_float,x)];
     else
