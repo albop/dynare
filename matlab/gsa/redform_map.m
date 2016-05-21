@@ -395,7 +395,7 @@ for j=1:size(anamendo,1)
                     title([logflag,' ',namendo,' vs ',namlagendo,'(-1)'],'interpreter','none')
                     if iplo==9,
                         dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);
-                        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],[logflag,' ',namendo,' vs ',namlagendo,'(-1)'],[redform_', namendo,'_vs_lags_',logflag,':',num2str(ifig)])
+                        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],[logflag,' ',namendo,' vs ',namlagendo,'(-1)'],['redform_', namendo,'_vs_lags_',logflag,':',num2str(ifig)])
                     end
                 end
                 
@@ -404,7 +404,7 @@ for j=1:size(anamendo,1)
     end
     if iplo<9 && iplo>0 && ifig && ~options_.nograph,
         dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);
-        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],[logflag,' ',namendo,' vs ',namlagendo,'(-1)'],[redform_', namendo,'_vs_lags_',logflag,':',num2str(ifig)])
+        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],[logflag,' ',namendo,' vs ',namlagendo,'(-1)'],['redform_', namendo,'_vs_lags_',logflag,':',num2str(ifig)])
     end
 end
 
