@@ -14,9 +14,9 @@ function oo_ = McMCDiagnostics(options_, estim_params_, M_, oo_)
 %   none
 %
 % PARALLEL CONTEXT
-% See the comment in random_walk_metropolis_hastings.m funtion.
+% See the comment in posterior_sampler.m funtion.
 
-% Copyright (C) 2005-2013 Dynare Team
+% Copyright (C) 2005-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -68,6 +68,48 @@ end
 if issue_an_error_message
     error('Estimation::mcmc::diagnostics: I cannot proceed because some MCMC files are missing. Check your MCMC files...')
 end
+
+% compute inefficiency factor
+FirstMhFile = record.KeepedDraws.FirstMhFile;
+FirstLine = record.KeepedDraws.FirstLine;
+TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
+TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
+FirstMhFile = record.KeepedDraws.FirstMhFile;
+NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+
+param_name=[];
+param_name_tex=[];
+for jj=1:npar
+    [par_name_temp,par_name_tex_temp]=get_the_name(jj,options_.TeX,M_,estim_params_,options_);
+    param_name = strvcat(param_name,par_name_temp);
+    param_name_tex = strvcat(param_name_tex,par_name_tex_temp);
+    Draws = GetAllPosteriorDraws(jj,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+    Draws = reshape(Draws,[NumberOfDraws nblck]);
+    Nc = min(1000, NumberOfDraws/2);
+    for ll=1:nblck
+        Ifac(ll,jj) = mcmc_ifac(Draws(:,ll), Nc);
+    end
+    tmp = num2cell(Ifac(:,jj));
+end
+
+my_title='MCMC Inefficiency factors per block';
+IFAC_header='Parameter';
+IFAC_header_tex='Parameter';
+for j=1:nblck,
+    IFAC_header = char(IFAC_header,['Block ' int2str(j)]);
+    IFAC_header_tex = char(IFAC_header_tex,['Block~' int2str(j)]);
+end
+
+lh = size(param_name,2)+2;
+dyntable(my_title,IFAC_header,param_name,Ifac',lh,12,3);
+skipline()
+
+if options_.TeX
+    dyn_latex_table(M_,my_title,'MCMC_inefficiency_factors',IFAC_header_tex,param_name_tex,Ifac',lh,12,3);
+end
+record.InefficiencyFactorsPerBlock = Ifac;
+update_last_mh_history_file(MetropolisFolder, ModelName, record);
+
 
 PastDraws = sum(record.MhDraws,1);
 LastFileNumber = PastDraws(2);
@@ -437,3 +479,4 @@ if TeX && any(strcmp('eps',cellstr(options_.graph_format)))
     fprintf(fidTeX,'% End Of TeX file.');
     fclose(fidTeX);
 end
+

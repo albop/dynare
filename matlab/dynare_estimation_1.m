@@ -352,6 +352,7 @@ end
 
 oo_.posterior.optimization.mode = xparam1;
 oo_.posterior.optimization.Variance = [];
+invhess=[];
 if ~options_.mh_posterior_mode_estimation
     if options_.cova_compute
         invhess = inv(hh);
@@ -366,6 +367,8 @@ else
     xparam1 = bayestopt_.p5;
     idNaN = isnan(xparam1);
     xparam1(idNaN) = bayestopt_.p1(idNaN);
+    outside_bound_pars=find(xparam1 < bounds.lb | xparam1 > bounds.ub);
+    xparam1(outside_bound_pars) = bayestopt_.p1(outside_bound_pars);
 end
 
 if ~options_.cova_compute
@@ -415,30 +418,28 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
     end
     % runs MCMC
     if options_.mh_replic
-        if options_.load_mh_file && options_.use_mh_covariance_matrix
-            invhess = compute_mh_covariance_matrix;
-        end
         ana_deriv_old = options_.analytic_derivation;
         options_.analytic_derivation = 0;
-        if options_.cova_compute
-            feval(options_.posterior_sampling_method,objective_function,options_.proposal_distribution,xparam1,invhess,bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_);
-        else
-            error('I Cannot start the MCMC because the Hessian of the posterior kernel at the mode was not computed.')
-        end
+        posterior_sampler_options = options_.posterior_sampler_options.current_options;
+        posterior_sampler_options.invhess = invhess;
+        [posterior_sampler_options, options_] = check_posterior_sampler_options(posterior_sampler_options, options_);
+        % store current options in global
+        options_.posterior_sampler_options.current_options = posterior_sampler_options;
+        posterior_sampler(objective_function,posterior_sampler_options.proposal_distribution,xparam1,posterior_sampler_options,bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_);
         options_.analytic_derivation = ana_deriv_old;
     end
+    %% Here I discard first mh_drop percent of the draws:
+    CutSample(M_, options_, estim_params_);
     if options_.mh_posterior_mode_estimation
-        CutSample(M_, options_, estim_params_);
         return
     else
         if ~options_.nodiagnostic && options_.mh_replic>0
             oo_= McMCDiagnostics(options_, estim_params_, M_,oo_);
         end
-        %% Here I discard first mh_drop percent of the draws:
-        CutSample(M_, options_, estim_params_);
+
         %% Estimation of the marginal density from the Mh draws:
         if options_.mh_replic
-            [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
+            [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_, bayestopt_);
             % Store posterior statistics by parameter name
             oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_, pnames);
             if ~options_.nograph
@@ -482,7 +483,7 @@ end
 if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape ...
                                                       > 0) && options_.load_mh_file)) ...
     || ~options_.smoother ) && options_.partial_information == 0  % to be fixed
-    %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
+    %% ML estimation, or posterior mode without Metropolis-Hastings or Metropolis without Bayesian smoothes variables
     [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp,Trend] = DsgeSmoother(xparam1,dataset_.nobs,transpose(dataset_.data),dataset_info.missing.aindex,dataset_info.missing.state);
     [oo_,yf]=store_smoother_results(M_,oo_,options_,bayestopt_,dataset_,dataset_info,atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,P,PK,decomp,Trend);
 

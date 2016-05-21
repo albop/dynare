@@ -16,10 +16,10 @@ function prior_posterior_statistics(type,dataset,dataset_info)
 %    none
 % 
 % PARALLEL CONTEXT
-% See the comments in the random_walk_metropolis_hastings.m funtion.
+% See the comments in the posterior_sampler.m funtion.
 % 
 % 
-% Copyright (C) 2005-2015 Dynare Team
+% Copyright (C) 2005-2016 Dynare Team
 %
 % This file is part of Dynare.
 %

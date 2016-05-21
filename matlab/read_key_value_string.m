@@ -4,7 +4,7 @@ function c = read_key_value_string(s)
 % estimation command) into a cell (first column for the option name ans second column for the
 % option value).
 
-% Copyright (C) 2011-2013 Dynare Team
+% Copyright (C) 2011-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -21,7 +21,28 @@ function c = read_key_value_string(s)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+i_opening_bracket = strfind(s,'(');
+i_closing_bracket = strfind(s,')');
+
+if ~isequal(length(i_opening_bracket),length(i_closing_bracket))
+    error('read_key_value_string: The number of opening and closing brackets does not match!')
+end
+
+%deal with sublists
+i_begin_sublist = strfind(s,'''(');
+i_end_sublist = strfind(s,')''');
+
+if ~isequal(length(i_begin_sublist),length(i_end_sublist))
+    error('read_key_value_string: Sublists could not be identified!')
+end
+
 iComma = strfind(s,',');
+
+%delete commata in sublists from further checks
+for sublist_iter=length(i_begin_sublist):-1:1
+   iComma(iComma>=i_begin_sublist(sublist_iter) & iComma<=i_end_sublist(sublist_iter))=[];
+end
+
 nComma = length(iComma);
 
 if iseven(nComma)
@@ -32,7 +53,9 @@ c = cell((nComma+1)/2,2);
 
 for i = 1:nComma
     j = comma2opt(i);
-    if j>0, continue, end
+    if j>0
+        continue
+    end
     if isequal(i,1)
         i1 = 1;
         i2 = iComma(i)-1;
@@ -50,7 +73,11 @@ for i = 1:nComma
     c(-j,1) = {s(i1+1:i2-1)};
     tmp = str2num(s(i3:i4));
     if isempty(tmp)
-        c(-j,2) = {s(i3+1:i4-1)};
+        if strcmp(s(i3:i3+1),'''(') && strcmp(s(i4-1:i4),')''') %sublist, delete brackets
+            c(-j,2) = {s(i3+2:i4-2)};
+        else
+            c(-j,2) = {s(i3+1:i4-1)};
+        end
     else
         c(-j,2) = {tmp};
     end

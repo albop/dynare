@@ -590,3 +590,8 @@ else
     estim_params_.Sigma_e_entries_to_check_for_positive_definiteness=Sigma_e_non_zero_rows;
 end
 
+
+if options_.mh_replic
+    [current_options, options_] = check_posterior_sampler_options([], options_, bounds);
+    options_.posterior_sampler_options.current_options = current_options;
+end

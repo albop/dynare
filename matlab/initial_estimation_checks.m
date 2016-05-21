@@ -53,20 +53,6 @@ if maximum_number_non_missing_observations>length(find(diag(Model.Sigma_e)))+Est
     error(['initial_estimation_checks:: Estimation can''t take place because too many shocks have been calibrated with a zero variance!'])
 end
 
-if ~(strcmpi(DynareOptions.proposal_distribution, 'rand_multivariate_student') || ...
-     strcmpi(DynareOptions.proposal_distribution, 'rand_multivariate_normal'))
-    error(['initial_estimation_checks:: the proposal_distribution option to estimation takes either ' ...
-        'rand_multivariate_student or rand_multivariate_normal as options']);
-end
-
-if DynareOptions.student_degrees_of_freedom <= 0
-    error('initial_estimation_checks:: the student_degrees_of_freedom takes a positive integer argument');
-end
-
-if DynareOptions.TaRB.use_TaRB && (DynareOptions.TaRB.new_block_probability<0 || DynareOptions.TaRB.new_block_probability>1)
-    error(['initial_estimation_checks:: The tarb_new_block_probability must be between 0 and 1!'])
-end
-
 if (any(BayesInfo.pshape  >0 ) && DynareOptions.mh_replic) && DynareOptions.mh_nblck<1
     error(['initial_estimation_checks:: Bayesian estimation cannot be conducted with mh_nblocks=0.'])    
 end

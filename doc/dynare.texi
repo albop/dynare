@@ -242,8 +242,8 @@ Stochastic solution and simulation
 Sensitivity and identification analysis
 
 * Performing sensitivity analysis::
-* Performing identification analysis::
 * IRF/Moment calibration::
+* Performing identification analysis::
 * Types of analysis and output files::
 
 Types of analysis and output files
@@ -4759,7 +4759,11 @@ marginal log data density
 posterior mean and highest posterior density interval (shortest credible set) from posterior simulation
 
 @item
-Metropolis-Hastings convergence graphs that still need to be documented
+convergence diagnostic table when only one MCM chain is used or Metropolis-Hastings convergence graphs documented in @cite{Pfeifer (2014)} 
+in case of multiple MCM chains
+
+@item
+table with numerical inefficiency factors of the MCMC
 
 @item
 graphs with prior, posterior, and mode
@@ -4811,7 +4815,7 @@ set_dynare_seed('clock');
 
 @algorithmshead
 
-The Monte  Carlo Markov  Chain (MCMC) diagnostics  are generated  by the
+The Monte  Carlo Markov  Chain (MCMC) diagnostics are generated  by the
 estimation command if @ref{mh_replic} is  larger than 2000 and if option
 @ref{nodiagnostic} is not used. If @ref{mh_nblocks} is equal to one, the
 convergence diagnostics  of @cite{Geweke  (1992,1999)} is  computed.  It
@@ -4833,6 +4837,11 @@ function instead of the individual  parameters.  The posterior kernel is
 used  to  aggregate  the  parameters   into  a  scalar  statistic  whose
 convergence is  then checked using  the @cite{Brooks and  Gelman (1998)}
 univariate convergence diagnostic.
+
+The inefficiency factors are computed as in @cite{Giordano et al. (2011)} based on 
+Parzen windows as in e.g. @cite{Andrews (1991)}.
+
+based on Parzen 
 
 @optionshead
 
@@ -5480,7 +5489,18 @@ deprecated and will be removed in a future release of Dynare.
 model. Default: @code{4}.
 
 
-@item use_tarb
+
+@item posterior_sampling_method=@var{NAME}
+@anchor{posterior_sampling_method}
+Selects the sampler used to sample from the posterior distribution during Bayesian 
+estimation. Default: 'random_walk_metropolis_hastings'
+
+@table @code
+@item 'random_walk_metropolis_hastings'
+Instructs Dynare to use the Random-Walk Metropolis-Hastings. In this algorithm, the proposal density is
+recentered to the previous draw in every step.
+
+@item 'tailored_random_block_metropolis_hastings'
 Instructs Dynare to use the Tailored randomized block (TaRB) Metropolis-Hastings algorithm 
 proposed by @cite{Chib and Ramamurthy (2010)} instead of the standard Random-Walk Metropolis-Hastings. 
 In this algorithm, at each iteration the estimated parameters are randomly assigned to different 
@@ -5492,18 +5512,114 @@ the autocorrelation in the MH draws and thus reduces the number of draws require
 representatively sample from the posterior. However, this comes at a computational costs as the 
 algorithm takes more time to run.
 
-@item tarb_new_block_probability = @var{DOUBLE}
+@item 'independent_metropolis_hastings'
+Use the Independent Metropolis-Hastings algorithm where the proposal distribution - in contrast to the
+Random Walk Metropolis-Hastings algorithm - does not depend on the state of the chain.
+
+@item 'slice'
+Instructs Dynare to use the Slice sampler of @cite{Planas, Ratto, and Rossi (2015)}.
+Note that @code{'slice'} is incompatible with
+@code{prior_trunc=0}.
+
+@end table
+
+
+@item posterior_sampler_options = (@var{NAME}, @var{VALUE}, ...)
+@anchor{posterior_sampler_options}
+A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the posterior sampling methods.
+The set of available options depends on the selected posterior sampling routine 
+(i.e. on the value of option @ref{posterior_sampling_method}):
+
+@table @code
+
+@item 'random_walk_metropolis_hastings'
+
+Available options are:
+
+@table @code
+
+@item 'proposal_distribution'
+@anchor{proposal_distribution}
+Specifies the statistical distribution used for the proposal density.
+
+@table @code
+@item 'rand_multivariate_normal'
+Use a multivariate normal distribution
+
+@item 'rand_multivariate_student'
+Use a multivariate student distribution
+
+@end table
+
+@item 'student_degrees_of_freedom'
+@anchor{student_degrees_of_freedom}
+Specifies the degrees of freedom to be used with the multivariate student distribution
+
+@item 'use_mh_covariance_matrix'
+@anchor{use_mh_covariance_matrix}
+Indicates to use the covariance matrix of the draws from a previous MCMC run to define the 
+covariance of the proposal distribution. Requires the @ref{load_mh_file}-option to be specified.
+
+@end table
+
+@item 'independent_metropolis_hastings'
+
+Takes the same options as in the case of @code{random_walk_metropolis_hastings}
+
+@item 'slice'
+
+@table @code
+
+@item 'rotated'
+Triggers rotated slice iterations using a covariance matrix from initial burn-in iterations. 
+Requires either  @code{use_mh_covariance_matrix} or @code{slice_initialize_with_mode}. Default: 0
+
+@item 'mode'
+For multimodal posteriors, provide the list of modes as a matrix, ordered by column, i.e. @code{[x1 x2 x3]} for three
+modes x1 x2 x3. This option will automatically trigger the @code{rotated}-option. Default = @code{[]};
+
+@item 'mode_files'
+For multimodal posteriors, provide a list of mode files with one per mode. With this info, 
+the code will automatically trigger the @code{rotated} and @code{mode} options. The mode files need only to
+contain the xparam1 variable. Default: @code{[]}.
+
+@item 'slice_initialize_with_mode'
+The default for slice is to set @code{mode_compute = 0} and start the chain(s) from a random 
+location in the prior space. This option first runs the mode-finder and then starts the
+chain from the mode. Together with @code{rotated}, it will use the inverse Hessian from the 
+mode to perform rotated slice iterations. Default: 0
+
+@item 'initial_step_size'
+Sets the initial size of the interval in the stepping-out procedure as fraction of the prior support
+i.e. the size will be initial_step_size*(UB-LB). @code{initial_step_size} must be a real number in the interval [0, 1]. 
+Default: 0.8
+
+@item 'use_mh_covariance_matrix'
+@xref{use_mh_covariance_matrix}. Must be used with @code{'rotated'}. Default: 0
+
+@end table
+
+@item 'tailored_random_block_metropolis_hastings'
+
+@table @code
+
+@item new_block_probability = @var{DOUBLE}
 Specifies the probability of the next parameter belonging to a new block when the random blocking in the TaRB 
 Metropolis-Hastings algorithm is conducted. The higher this number, the smaller is the average block size and the 
 more random blocks are formed during each parameter sweep. Default: @code{0.25}. 
 
-@item tarb_mode_compute = @var{INTEGER}
+@item mode_compute = @var{INTEGER}
 Specifies the mode-finder run in every iteration for every block of the 
 TaRB Metropolis-Hastings algorithm. @xref{mode_compute}. Default: @code{4}. 
 
-@item tarb_optim = @var{INTEGER}
+@item optim = (@var{NAME}, @var{VALUE}, ...)
 Specifies the options for the mode-finder used in the TaRB 
 Metropolis-Hastings algorithm. @xref{optim}. 
+
+@end table
+
+@end table
+
 
 @item moments_varendo
 @anchor{moments_varendo} Triggers the computation of the posterior
@@ -7382,7 +7498,7 @@ This command accepts all options of @code{stoch_simul}, plus:
 @table @code
 
 @item planner_discount = @var{EXPRESSION}
-@xref{planner_discount}
+@xref{planner_discount}.
 
 @item instruments = (@var{VARIABLE_NAME},@dots{})
 Declares instrument variables for the computation of the steady state
@@ -7508,8 +7624,8 @@ estimation environment is set up.
 
 @menu
 * Performing sensitivity analysis::
-* Performing identification analysis::
 * IRF/Moment calibration::
+* Performing identification analysis::
 * Types of analysis and output files::
 @end menu
 
@@ -13114,10 +13230,10 @@ distribution. Results returned in @var{oo_.posterior_function_results}
 @table @code
 
 @item function = @var{FUNCTION_NAME}
-@xref{prior_function_function}
+@xref{prior_function_function}.
 
 @item sampling_draws = @var{INTEGER}
-@xref{prior_function_sampling_draws}
+@xref{prior_function_sampling_draws}.
 
 @end table
 
@@ -13259,6 +13375,10 @@ Cycles: The Cycle is the Trend,'' @i{NBER Working Paper}, 10734
 Andreasen, Martin M., Jesús Fernández-Villaverde, and Juan Rubio-Ramírez (2013): ``The Pruned State-Space System for Non-Linear DSGE Models: Theory and Empirical Applications,'' @i{NBER Working Paper}, 18983
 
 @item
+Andrews, Donald W.K (1991): ``Heteroskedasticity and autocorrelation consistent covariance matrix estimation'', 
+@i{Econometrica}, 59(3), 817--858
+
+@item
 Backus, David K., Patrick J. Kehoe, and Finn E. Kydland (1992):
 ``International Real Business Cycles,'' @i{Journal of Political
 Economy}, 100(4), 745--775
@@ -13353,6 +13473,11 @@ International Meeting on Bayesian Statistics, pp. 169--194, Oxford University Pr
 Geweke, John (1999): ``Using simulation methods for Bayesian econometric models:
 Inference, development and communication,'' @i{Econometric Reviews}, 18(1), 1--73
 
+@item
+Giordani, Paolo, Michael Pitt, and Robert Kohn (2011): ``Bayesian Inference for Time Series State Space Models''
+in: @i{The Oxford Handbook of Bayesian Econometrics}, ed. by John Geweke, Gary Koop, and Herman van Dijk,
+Oxford University Press, 61--124
+
 @item 
 Goffe, William L., Gary D. Ferrier, and John Rogers (1994): ``Global Optimization 
 of Statistical Functions with Simulated Annealing,'' @i{Journal of Econometrics}, 60(1/2), 
@@ -13439,7 +13564,14 @@ expectations models with partial information,'' @i{Economic
 Modelling}, 3(2), 90--105
 
 @item
+Planas, Christophe, Marco Ratto and Alessandro Rossi (2015): ``Slice sampling in Bayesian estimation
+of DSGE models''
+
+@item
 Pfeifer, Johannes (2013): ``A Guide to Specifying Observation Equations for the Estimation of DSGE Models''
+
+@item
+Pfeifer, Johannes (2014): ``An Introduction to Graphs in Dynare''
 
 @item
 Rabanal, Pau and Juan Rubio-Ramirez (2003): ``Comparing New Keynesian

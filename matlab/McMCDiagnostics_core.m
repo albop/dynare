@@ -5,11 +5,11 @@ function myoutput = McMCDiagnostics_core(myinputs,fpar,npar,whoiam, ThisMatlab)
 % 
 % PARALLEL CONTEXT
 % Core functionality for MCMC Diagnostics, which can be parallelized.
-% See also the comment in random_walk_metropolis_hastings_core.m funtion.
+% See also the comment in posterior_sampler_core.m funtion.
 % 
 % 
 % INPUTS
-%   See See the comment in random_walk_metropolis_hastings_core.m funtion.
+%   See See the comment in posterior_sampler_core.m funtion.
 
 % OUTPUTS
 % o myoutput  [struc]
@@ -33,7 +33,7 @@ function myoutput = McMCDiagnostics_core(myinputs,fpar,npar,whoiam, ThisMatlab)
 % SPECIAL REQUIREMENTS.
 %   None.
 
-% Copyright (C) 2006-2014 Dynare Team
+% Copyright (C) 2006-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
