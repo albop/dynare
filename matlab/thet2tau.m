@@ -1,4 +1,4 @@
-function tau = thet2tau(params, M_, oo_, indx, indexo, flagmoments,mf,nlags,useautocorr,iv)
+function tau = thet2tau(params, estim_params_, M_, oo_, indx, indexo, flagmoments,mf,nlags,useautocorr,iv)
 
 %
 % Copyright (C) 2011-2012 Dynare Team
@@ -25,20 +25,24 @@ if nargin==1,
     indexo = [];
 end
 
-if nargin<6,
+if nargin<7,
     flagmoments=0;
 end
-if nargin<9 || isempty(useautocorr),
+if nargin<10 || isempty(useautocorr),
     useautocorr=0;
 end
-if nargin<10 || isempty(iv),
+if nargin<11 || isempty(iv),
     iv=[1:M_.endo_nbr];
 end
 
-M_.params(indx) = params(length(indexo)+1:end);
-if ~isempty(indexo)
-    M_.Sigma_e(indexo,indexo) = diag(params(1:length(indexo)).^2);
+if length(params)>length(indx),
+    M_ = set_all_parameters(params,estim_params_,M_);
+else
+    M_.params(indx) = params;
 end
+% if ~isempty(indexo)
+%     M_.Sigma_e(indexo,indexo) = diag(params(1:length(indexo)).^2);
+% end
 [A,B,tele,tubbies,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 if flagmoments==0,
     ys=oo_.dr.ys(oo_.dr.order_var);

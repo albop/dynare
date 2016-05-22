@@ -187,10 +187,18 @@ if prior_exist,
     name = bayestopt_.name;
     name_tex = char(M_.exo_names_tex(indexo,:),M_.param_names_tex(indx,:));
 
-    offset = estim_params_.nvx;
-    offset = offset + estim_params_.nvn;
-    offset = offset + estim_params_.ncx;
-    offset = offset + estim_params_.ncn;
+    if estim_params_.nvn || estim_params_.ncn,
+        error('Identification does not support measurement errors. Instead, define them explicitly in measurement equations in model definition.')
+    else
+        offset = estim_params_.nvx;
+        %offset = offset + estim_params_.nvn;
+        offset = offset + estim_params_.ncx;
+        if estim_params_.ncx
+            options_ident.analytic_derivation=0;
+            options_ident.analytic_derivation_mode=-1;
+        end
+        %offset = offset + estim_params_.ncn;
+    end
 else
     indx = [1:M_.param_nbr];
     indexo = [1:M_.exo_nbr];

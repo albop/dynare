@@ -546,10 +546,10 @@ if analytic_derivation,
         end
 
         if full_Hess,
-            [dum, DT, DOm, DYss, dum2, D2T, D2Om, D2Yss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo,iv);
+            [dum, DT, DOm, DYss, dum2, D2T, D2Om, D2Yss] = getH(A, B, EstimatedParameters, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo,iv);
             clear dum dum2;
         else
-            [dum, DT, DOm, DYss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo,iv);
+            [dum, DT, DOm, DYss] = getH(A, B, EstimatedParameters, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo,iv);
         end
     else
         DT = derivatives_info.DT(iv,iv,:);
