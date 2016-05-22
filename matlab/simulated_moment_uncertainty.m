@@ -67,6 +67,8 @@ if options_.logged_steady_state %if steady state was previously logged, undo thi
     options_.logged_steady_state=0;
     logged_steady_state_indicator=1;
     evalin('base','options_.logged_steady_state=0;')
+else 
+    logged_steady_state_indicator=0;
 end
 
 [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
