@@ -1,5 +1,5 @@
-function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,options_,kronflag,indx,indexo,iv)
-% function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,options_,kronflag,indx,indexo,iv)
+function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, estim_params_,M_,oo_,options_,kronflag,indx,indexo,iv)
+% function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, estim_params_,M_,oo_,options_,kronflag,indx,indexo,iv)
 % computes derivative of reduced form linear model w.r.t. deep params
 %
 % Inputs:
@@ -49,16 +49,16 @@ function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,options_,kro
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<6 || isempty(kronflag)
+if nargin<7 || isempty(kronflag)
     kronflag = 0; 
 end
-if nargin<7 || isempty(indx)
+if nargin<8 || isempty(indx)
     indx = []; 
 end
-if nargin<8 || isempty(indexo)
+if nargin<9 || isempty(indexo)
     indexo = []; 
 end
-if nargin<9 || isempty(iv)
+if nargin<10 || isempty(iv)
     iv = (1:length(A))'; 
 end
 
@@ -96,7 +96,7 @@ if kronflag==-1, % perturbation
     end
     if nargout>5,
         H2 = hessian_sparse('thet2tau',[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)], ...
-            options_.gstep,M_, oo_, indx,indexo,0,[],[],[],iv);
+            options_.gstep,estim_params_,M_, oo_, indx,indexo,0,[],[],[],iv);
         H2ss = zeros(m1,tot_param_nbr,tot_param_nbr);
         iax=find(triu(rand(tot_param_nbr,tot_param_nbr)));
         H2 = H2(:,iax);
@@ -126,7 +126,7 @@ if kronflag==-2,
     if nargout>5,
         [residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
             M_.params, oo_.dr.ys, 1);
-        g22 = hessian_sparse('thet2tau',[M_.params(indx)],options_.gstep,M_, oo_, indx,[],-1);
+        g22 = hessian_sparse('thet2tau',[M_.params(indx)],options_.gstep,estim_params_,M_, oo_, indx,[],-1);
         H2ss=full(g22(1:M_.endo_nbr,:));
         H2ss = reshape(H2ss,[M_.endo_nbr param_nbr param_nbr]);
         for j=1:M_.endo_nbr,
@@ -147,7 +147,7 @@ if kronflag==-2,
         [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
             M_.params, oo_.dr.ys, 1);        
     end
-    gp = fjaco('thet2tau',[M_.params(indx)],M_, oo_, indx,[],-1);
+    gp = fjaco('thet2tau',[M_.params(indx)],estim_params_,M_, oo_, indx,[],-1);
     Hss=gp(1:M_.endo_nbr,:);
     gp=gp(M_.endo_nbr+1:end,:);
     gp = reshape(gp,[size(g1) param_nbr]);

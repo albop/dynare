@@ -230,10 +230,10 @@ if init,
                             end
                             
                         case 'mode_files'
-                            % for multimodal posteriors provide a list of mode files,
-                            % one per mode. With this info, the code will automatically
-                            % set the <mode> option. The mode files need only to
-                            % contain the xparam1 variable.
+                            % for multimodal posteriors provide the name of
+                            % a file containing a variable array xparams = [nparam * nmodes]
+                            % one column per mode. With this info, the code will automatically
+                            % set the <mode> option. 
                             % This will automatically trigger <rotated>
                             % default = []
                             posterior_sampler_options.mode_files = options_list{i,2};
@@ -326,9 +326,12 @@ if init,
             
             if ~isempty(posterior_sampler_options.mode_files), % multimodal case
                 modes = posterior_sampler_options.mode_files; % these can be also mean files from previous parallel slice chains
-                for j=1:length( modes ),
-                    load(modes{j}, 'xparam1')
-                    mode(j).m=xparam1;
+                load(modes, 'xparams')
+                if size(xparams,2)<2,
+                    error(['check_posterior_sampler_options:: Variable xparams loaded in file <' modes '> has size [' int2str(size(xparams,1)) 'x' int2str(size(xparams,2)) ']: it must contain at least two columns, to allow multi-modal sampling.'])
+                end
+                for j=1:size(xparams,2),
+                    mode(j).m=xparams(:,j);
                 end
                 posterior_sampler_options.mode = mode;
                 posterior_sampler_options.rotated = 1;

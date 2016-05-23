@@ -80,7 +80,7 @@ if info(1)==0,
         oo_.dr.ys, 1);
     vg1 = [oo_.dr.ys(oo_.dr.order_var); vec(g1)];
 
-    [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,kron_flag,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+    [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, estim_params_, M_,oo0,options_,kron_flag,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
     derivatives_info.DT=dA;
     derivatives_info.DOm=dOm;
     derivatives_info.DYss=dYss;
@@ -95,7 +95,7 @@ if info(1)==0,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
             disp(['Try increasing ar = ', int2str(nlags+1)])           
             nlags=nlags+1;
-            [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,kron_flag,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+            [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, estim_params_, M_,oo0,options_,kron_flag,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
             derivatives_info.DT=dA;
             derivatives_info.DOm=dOm;
             derivatives_info.DYss=dYss;
@@ -126,6 +126,9 @@ if info(1)==0,
                 normaliz1 = estim_params_.var_exo(:,7)'; % normalize with prior standard deviation
             else
                 normaliz1=[];
+            end
+            if ~isempty(estim_params_.corrx),
+                normaliz1 = [normaliz1 estim_params_.corrx(:,8)']; % normalize with prior standard deviation
             end
             if ~isempty(estim_params_.param_vals),
                 normaliz1 = [normaliz1 estim_params_.param_vals(:,7)']; % normalize with prior standard deviation

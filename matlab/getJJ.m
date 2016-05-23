@@ -1,5 +1,5 @@
-function [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
-% function [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
+function [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, estim_params_, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
+% function [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, estim_params_, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
 % computes derivatives of 1st and 2nd order moments of observables with
 % respect to estimated parameters
 % 
@@ -54,16 +54,16 @@ function [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo_,options_,kronflag,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<7 || isempty(indx)
+if nargin<8 || isempty(indx)
 %     indx = [1:M_.param_nbr];
 end,
-if nargin<8 || isempty(indexo)
+if nargin<9 || isempty(indexo)
     indexo = [];
 end,
-if nargin<10 || isempty(nlags)
+if nargin<11 || isempty(nlags)
     nlags=3; 
 end
-if nargin<11 || isempty(useautocorr)
+if nargin<12 || isempty(useautocorr)
     useautocorr=0; 
 end
 
@@ -73,15 +73,16 @@ warning('off','MATLAB:divideByZero')
 if kronflag == -1,
     fun = 'thet2tau';
     params0 = M_.params;
-    JJ = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],M_, oo_, indx,indexo,1,mf,nlags,useautocorr);
+    para0 = get_all_parameters(estim_params_, M_);
+    JJ = fjaco(fun,para0,estim_params_,M_, oo_, indx,indexo,1,mf,nlags,useautocorr);
     M_.params = params0;
     params0 = M_.params;
-    H = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],M_, oo_, indx,indexo,0,mf,nlags,useautocorr);
+    H = fjaco(fun,para0,estim_params_,M_, oo_, indx,indexo,0,mf,nlags,useautocorr);
     M_.params = params0;
     params0 = M_.params;
-    gp = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],M_, oo_, indx,indexo,-1);
+    gp = fjaco(fun,para0,estim_params_,M_, oo_, indx,indexo,-1);
     M_.params = params0;
-    offset = length(indexo);
+    offset = length(para0)-length(indx);
     gp = gp(:,offset+1:end);
     dYss = H(1:M_.endo_nbr,offset+1:end);
     dA = reshape(H(M_.orig_endo_nbr+[1:numel(A)],:),[size(A),size(H,2)]);
@@ -92,7 +93,7 @@ if kronflag == -1,
     assignin('base','M_', M_);
     assignin('base','oo_', oo_);
 else
-    [H, dA, dOm, dYss, gp] = getH(A, B, M_,oo_,options_,kronflag,indx,indexo);
+    [H, dA, dOm, dYss, gp] = getH(A, B, estim_params_,M_,oo_,options_,kronflag,indx,indexo);
     gp = reshape(gp,size(gp,1)*size(gp,2),size(gp,3));
     gp = [dYss; gp];
     %   if isempty(H),
