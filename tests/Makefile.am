@@ -242,7 +242,7 @@ MODFILES = \
 	deterministic_simulations/multiple_lead_lags/AR2.mod \
 	deterministic_simulations/multiple_lead_lags/AR2_forward.mod \
 	deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.mod \
-        deterministic_simulations/linear_approximation/lbj/rbc.mod \
+        deterministic_simulations/lbj/rbc.mod \
         lmmcp/rbc.mod \
         lmmcp/rbcii.mod \
 	lmmcp/sw_lmmcp.mod \
