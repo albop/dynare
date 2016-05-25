@@ -69,8 +69,22 @@ end;
 
 simul(periods=1000);
 
+newton_solution_is_wrong = abs(evaluate_max_dynamic_residual(str2func('sw_newton_dynamic'), oo_.endo_simul, oo_.exo_simul, M_.params, oo_.steady_state, 1000, size(oo_.endo_simul, 1), 1, M_.lead_lag_incidence))>options_.dynatol.f;
+
 lmmcp = load('sw_lmmcp_results');
 
-if max(max(abs(lmmcp.oo_.endo_simul-oo_.endo_simul)))>options_.dynatol.x
-    error('LMMCP and Newton algorithms return different results!')
+lmmcp_solution_is_wrong = abs(evaluate_max_dynamic_residual(str2func('sw_newton_dynamic'), lmmcp.oo_.endo_simul, lmmcp.oo_.exo_simul, M_.params, oo_.steady_state, 1000, size(oo_.endo_simul, 1), 1, M_.lead_lag_incidence))>options_.dynatol.f;
+
+solutions_are_different = max(max(abs(lmmcp.oo_.endo_simul-oo_.endo_simul)))>options_.dynatol.x;
+
+if newton_solution_is_wrong
+   error('Failed to solve SW with ZLB (using Newton algorithm on stacked model)')
+end
+
+if solutions_are_different && ~lmmcp_solution_is_wrong
+   error('Solutions with Newton and LMMCP algorithms are different!')
+end
+
+if lmmcp_solution_is_wrong
+   error('Failed to solve SW with ZLB (using LMMCP algorithm on stacked model)!')
 end
