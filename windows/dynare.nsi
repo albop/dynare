@@ -128,7 +128,10 @@ Section "Documentation and examples (Dynare and Dynare++)"
  CreateShortcut "${SMLOC}\Documentation.lnk" "$INSTDIR\doc"
 
  SetOutPath $INSTDIR\examples
- File ..\examples\*
+ File ..\examples\*.mod ..\examples\*.m
+
+ SetOutPath $INSTDIR\examples\dynare++
+ File ..\examples\dynare++\example1.mod ..\examples\dynare++\README.txt
 
  CreateShortcut "${SMLOC}\Examples.lnk" "$INSTDIR\examples"
 
