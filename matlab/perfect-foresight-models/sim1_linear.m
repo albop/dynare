@@ -95,8 +95,8 @@ jendo = transpose(1:nd);
 i_upd = maximum_lag*ny+(1:periods*ny);
 
 % Center the endogenous and exogenous variables around the deterministic steady state.
-endogenousvariables = bsxfun(@minus,endogenousvariables,steadystate_y);
-exogenousvariables =bsxfun(@minus,exogenousvariables,transpose(steadystate_x));
+endogenousvariables = bsxfun(@minus, endogenousvariables, steadystate_y);
+exogenousvariables = bsxfun(@minus, exogenousvariables, transpose(steadystate_x));
 
 Y = endogenousvariables(:);
 
@@ -118,10 +118,12 @@ if max(abs(d1))>1e-12
     error('Jacobian is not evaluated at the steady state!')
 end
 
+[r0,c0,v0] = find(jacobian(:,jc));
 [rT,cT,vT] = find(jacobian(:,jpc));
 [r1,c1,v1] = find(jacobian(:,jcn));
 [rr,cc,vv] = find(jacobian(:,jendo));
 
+iv0 = 1:length(v0);
 ivT = 1:length(vT);
 iv1 = 1:length(v1);
 iv  = 1:length(vv);
@@ -138,12 +140,15 @@ i_cols_A = ipcn;
 i_cols = ipcn+(maximum_lag-1)*ny;
 m = 0;
 for it = (maximum_lag+1):(maximum_lag+periods)
-    if it == maximum_lag+periods
+    if isequal(it, maximum_lag+periods) && isequal(it, maximum_lag+1)
+        nv = length(v0);
+        iA(iv0+m,:) = [i_rows(r0),ic(c0),v0];
+    elseif isequal(it, maximum_lag+periods)
         nv = length(vT);
-        iA(ivT+m,:) = [i_rows(rT),i_cols_A(jpc(cT)),vT];
-    elseif it == maximum_lag+1
+        iA(ivT+m,:) = [i_rows(rT), i_cols_A(jpc(cT)), vT];
+    elseif isequal(it, maximum_lag+1)
         nv = length(v1);
-        iA(iv1+m,:) = [i_rows(r1),icn(c1),v1];
+        iA(iv1+m,:) = [i_rows(r1), icn(c1), v1];
     else
         nv = length(vv);
         iA(iv+m,:) = [i_rows(rr),i_cols_A(cc),vv];
@@ -174,7 +179,7 @@ if options.debug
 end
 
 iA = iA(1:m,:);
-A = sparse(iA(:,1),iA(:,2),iA(:,3), periods*ny, periods*ny);
+A = sparse(iA(:,1), iA(:,2), iA(:,3), periods*ny, periods*ny);
 
 % Try to update the vector of endogenous variables.
 try
