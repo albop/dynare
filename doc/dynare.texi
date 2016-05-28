@@ -1823,7 +1823,7 @@ end;
 @end example
 If all the equations of a model are tagged with a name, the @code{resid} command
 will display the names of the equations (which may be more informative than the
-equation numbers). More informations are available on the @uref{http://www.dynare.org/DynareWiki/EquationTags, DynareWiki
+equation numbers). More informations are available on the @uref{http://www.dynare.org/DynareWiki/EquationsTags, DynareWiki
 wiki}.
 
 
