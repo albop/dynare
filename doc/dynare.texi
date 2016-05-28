@@ -5629,14 +5629,11 @@ Takes the same options as in the case of @code{random_walk_metropolis_hastings}
 Triggers rotated slice iterations using a covariance matrix from initial burn-in iterations. 
 Requires either  @code{use_mh_covariance_matrix} or @code{slice_initialize_with_mode}. Default: 0
 
-@item 'mode'
-For multimodal posteriors, provide the list of modes as a matrix, ordered by column, i.e. @code{[x1 x2 x3]} for three
-modes x1 x2 x3. This option will automatically trigger the @code{rotated}-option. Default = @code{[]};
-
 @item 'mode_files'
-For multimodal posteriors, provide a list of mode files with one per mode. With this info, 
-the code will automatically trigger the @code{rotated} and @code{mode} options. The mode files need only to
-contain the xparam1 variable. Default: @code{[]}.
+For multimodal posteriors, provide the name of a file containing a @code{nparam by nmodes} variable called 
+@code{xparams} storing the different modes. This array must have one column vector per mode and the estimated 
+parameters along the row dimension. With this info, 
+the code will automatically trigger the @code{rotated} and @code{mode} options. Default: @code{[]}.
 
 @item 'slice_initialize_with_mode'
 The default for slice is to set @code{mode_compute = 0} and start the chain(s) from a random 
