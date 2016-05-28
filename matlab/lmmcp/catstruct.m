@@ -48,6 +48,7 @@ function A = catstruct(varargin)
 
 % Copyright (C) 2005 Jos van der Geest <jos@jasen.nl>
 % Copyright (C) 2013 Christophe Gouel
+% Copyright (C) 2016 Dynare Team
 %
 % Redistribution and use in source and binary forms, with or without
 % modification, are permitted provided that the following conditions are
@@ -83,14 +84,16 @@ function A = catstruct(varargin)
 %                  (thanks to Tor Inge Birkenes for pointing this out).
 %                  Rephrased the help section as well.
 
-error(nargchk(1,Inf,nargin)) ;
+narginchk(1, Inf);
 N = nargin ;
 
 if ~isstruct(varargin{end}),
     if isequal(varargin{end},'sorted'),
         sorted = 1 ;
         N = N-1 ;
-        error(nargchk(1,Inf,N)) ;
+        if N<1
+            error('catstruct: wrong number of input arguments') ;
+        end
     else
         error('catstruct:InvalidArgument','Last argument should be a structure, or the string "sorted".') ;
     end
