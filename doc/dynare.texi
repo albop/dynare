@@ -1812,7 +1812,7 @@ used outside. A model local variable declaration looks like:
 It is possible to tag equations written in the model block. A tag can serve
 different purposes by allowing the user to attach arbitrary informations to each
 equation and to recover them at runtime. For instance, it is possible to name the
-equations, using a syntax like:
+equations with a @code{name}-tag, using a syntax like:
 @example
 mode;
     ...
@@ -1821,9 +1821,20 @@ mode;
     ...
 end;
 @end example
-If all the equations of a model are tagged with a name, the @code{resid} command
+Here, @code{name} is the keyword indicating that the tag names the equation. If all the equations 
+of a model are tagged with a name, the @code{resid} command
 will display the names of the equations (which may be more informative than the
-equation numbers). More informations are available on the @uref{http://www.dynare.org/DynareWiki/EquationsTags, DynareWiki
+equation numbers). Several tags for one equation can be separated using a comma. 
+@example
+mode;
+    ...
+   [name='Taylor rule',mcp = 'r > -1.94478']
+   r = rho*r(-1) + (1-rho)*(gpi*Infl+gy*YGap) + e;
+    ...
+end;
+@end example
+
+More information on tags is available on the @uref{http://www.dynare.org/DynareWiki/EquationsTags, DynareWiki
 wiki}.
 
 
@@ -2951,6 +2962,10 @@ option, @pxref{Model declaration})
 
 @item 9
 Trust-region algorithm on the entire model.
+
+@item 10
+Levenberg-Marquardt mixed complementarity problem (LMMCP) solver
+(@cite{Kanzow and Petra 2004})
 @end table
 
 @noindent
@@ -3587,6 +3602,9 @@ trigger the computation of the solution with a trust region algorithm.
 
 @end table
 
+@item solve_algo
+@xref{qz_zero_threshold}. Allows selecting the solver used with @code{stack_solve_algo=7}.
+
 @item no_homotopy
 By default, the perfect foresight solver uses a homotopy technique if it cannot
 solve the problem. Concretely, it divides the problem into smaller steps by
@@ -3604,12 +3622,13 @@ solved, before using a constant set of operations for the remaining
 periods. Only used when @code{stack_solve_algo = 5}. Default: @code{1}.
 
 @item lmmcp
-Solves the perfect foresight model with a mixed complementarity problem solver,
-which allows to consider inequality constraints on the endogenous variables
+Solves the perfect foresight model with a Levenberg-Marquardt mixed complementarity problem (LMMCP) solver
+(@cite{Kanzow and Petra 2004}), which allows to consider inequality constraints on the endogenous variables
 (such as a ZLB on the nominal interest rate or a model with irreversible
 investment). This option is equivalent to @code{stack_solve_algo=7} @strong{and}
 @code{solve_algo=10}. The inequality constraints on the endogenous variables
-have to be specified with an equation tag @pxref{Model declaration}. For instance,
+have to be specified with an equation tag @pxref{Model declaration}. The tag has to use 
+the @code{mcp} keyword. For instance,
 a ZLB on the nominal interest rate would be specified as follows in the model block:
 @example
 model;
@@ -3620,9 +3639,9 @@ model;
 end;
 @end example
 where 1.94478 is the steady state level of the nominal interest rate and
-@code{r} is the nominal interest rate in deviation to the steady state. In the
-current implementation, the content of the equation tag is not parsed by the
-preprocessor. The inequalities must be as simple as possible: an endogenous
+@code{r} is the nominal interest rate in deviation from the steady state. In the
+current implementation, the content of the @code{mcp} equation tag is not parsed by the
+preprocessor. The inequalities must therefore be as simple as possible: an endogenous
 variable, followed by a relational operator, followed by a number (not a
 variable, parameter or expression). Note also that the constraint on an
 endogenous variable must be associated to an equation and that the mixed
@@ -13603,6 +13622,10 @@ a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602
 Kim, Jinill and Sunghyun Kim (2003): ``Spurious welfare reversals in 
 international business cycle models,'' @i{Journal of International
 Economics}, 60, 471--500
+
+@item
+Kanzow, Christian and Stefania Petra (2004): ``On a semismooth least squares formulation of
+complementarity problems with gap reduction,'' @i{Optimization Methods and Software},19 507--525
 
 @item
 Kim, Jinill, Sunghyun Kim, Ernst Schaumburg, and Christopher A. Sims
