@@ -194,21 +194,6 @@ elseif options.solve_algo == 10
         info = 1;
     end
 elseif options.solve_algo == 11
-    % PATH linear mixed complementary problem
-    if ~exist('lcppath')
-        error(['PATH can''t be provided with Dynare. You need to install it ' ...
-               'yourself and add its location to Matlab/Octave path before ' ...
-               'running Dynare'])
-    end
-    if options.linear ~= 1
-        error(['solve_algo==11 (linear complementarity problem) requires ' ...
-               'linear  option in model instruction']);
-    end
-    olcppath = options.lcppath;
-    [q,M] = func(zeros(size(x)),varargin{:});
-    [x,mu,status] = pathlcp(M,q,olcppath.lb,olcppath.ub,x,olcppath.A,olcppath.b,olcppath.t,olcppath.mu0);
-    info = ~status;
-elseif options.solve_algo == 12
     % PATH mixed complementary problem
     % PATH linear mixed complementary problem
     if ~exist('mcppath')
@@ -223,6 +208,6 @@ elseif options.solve_algo == 12
     [x,fval,jac,mu,status] = pathmcp(x,omcppath.lb,omcppath.ub,'mcp_func',omcppath.A,omcppath.b,omcppath.t,omcppath.mu0);
     info = ~status;
 else
-    error('DYNARE_SOLVE: option solve_algo must be one of [0,1,2,3,4,9,10:12]')
+    error('DYNARE_SOLVE: option solve_algo must be one of [0,1,2,3,4,9,10:11]')
 end
 
