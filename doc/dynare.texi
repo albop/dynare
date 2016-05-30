@@ -273,6 +273,7 @@ The Configuration File
 
 * Dynare Configuration::
 * Parallel Configuration::
+* Windows Step-by-Step Guide::
 
 Time Series
 
@@ -1812,7 +1813,7 @@ used outside. A model local variable declaration looks like:
 It is possible to tag equations written in the model block. A tag can serve
 different purposes by allowing the user to attach arbitrary informations to each
 equation and to recover them at runtime. For instance, it is possible to name the
-equations, using a syntax like:
+equations with a @code{name}-tag, using a syntax like:
 @example
 mode;
     ...
@@ -1821,9 +1822,20 @@ mode;
     ...
 end;
 @end example
-If all the equations of a model are tagged with a name, the @code{resid} command
-will display the names of the equations (which may be more informative than the
-equation numbers). More informations are available on the @uref{http://www.dynare.org/DynareWiki/EquationTags, DynareWiki
+Here, @code{name} is the keyword indicating that the tag names the equation. If an equation 
+of the model is tagged with a name, the @code{resid} command
+will display the name of the equations (which may be more informative than the
+equation numbers) in addition to the equation number. Several tags for one equation can be separated using a comma. 
+@example
+mode;
+    ...
+   [name='Taylor rule',mcp = 'r > -1.94478']
+   r = rho*r(-1) + (1-rho)*(gpi*Infl+gy*YGap) + e;
+    ...
+end;
+@end example
+
+More information on tags is available on the @uref{http://www.dynare.org/DynareWiki/EquationsTags, DynareWiki
 wiki}.
 
 
@@ -2951,6 +2963,10 @@ option, @pxref{Model declaration})
 
 @item 9
 Trust-region algorithm on the entire model.
+
+@item 10
+Levenberg-Marquardt mixed complementarity problem (LMMCP) solver
+(@cite{Kanzow and Petra 2004})
 @end table
 
 @noindent
@@ -3587,6 +3603,9 @@ trigger the computation of the solution with a trust region algorithm.
 
 @end table
 
+@item solve_algo
+@xref{solve_algo}. Allows selecting the solver used with @code{stack_solve_algo=7}.
+
 @item no_homotopy
 By default, the perfect foresight solver uses a homotopy technique if it cannot
 solve the problem. Concretely, it divides the problem into smaller steps by
@@ -3604,12 +3623,13 @@ solved, before using a constant set of operations for the remaining
 periods. Only used when @code{stack_solve_algo = 5}. Default: @code{1}.
 
 @item lmmcp
-Solves the perfect foresight model with a mixed complementarity problem solver,
-which allows to consider inequality constraints on the endogenous variables
+Solves the perfect foresight model with a Levenberg-Marquardt mixed complementarity problem (LMMCP) solver
+(@cite{Kanzow and Petra 2004}), which allows to consider inequality constraints on the endogenous variables
 (such as a ZLB on the nominal interest rate or a model with irreversible
 investment). This option is equivalent to @code{stack_solve_algo=7} @strong{and}
 @code{solve_algo=10}. The inequality constraints on the endogenous variables
-have to be specified with an equation tag @pxref{Model declaration}. For instance,
+have to be specified with an equation tag @pxref{Model declaration}. The tag has to use 
+the @code{mcp} keyword. For instance,
 a ZLB on the nominal interest rate would be specified as follows in the model block:
 @example
 model;
@@ -3620,9 +3640,9 @@ model;
 end;
 @end example
 where 1.94478 is the steady state level of the nominal interest rate and
-@code{r} is the nominal interest rate in deviation to the steady state. In the
-current implementation, the content of the equation tag is not parsed by the
-preprocessor. The inequalities must be as simple as possible: an endogenous
+@code{r} is the nominal interest rate in deviation from the steady state. In the
+current implementation, the content of the @code{mcp} equation tag is not parsed by the
+preprocessor. The inequalities must therefore be as simple as possible: an endogenous
 variable, followed by a relational operator, followed by a number (not a
 variable, parameter or expression). Note also that the constraint on an
 endogenous variable must be associated to an equation and that the mixed
@@ -5629,14 +5649,11 @@ Takes the same options as in the case of @code{random_walk_metropolis_hastings}
 Triggers rotated slice iterations using a covariance matrix from initial burn-in iterations. 
 Requires either  @code{use_mh_covariance_matrix} or @code{slice_initialize_with_mode}. Default: 0
 
-@item 'mode'
-For multimodal posteriors, provide the list of modes as a matrix, ordered by column, i.e. @code{[x1 x2 x3]} for three
-modes x1 x2 x3. This option will automatically trigger the @code{rotated}-option. Default = @code{[]};
-
 @item 'mode_files'
-For multimodal posteriors, provide a list of mode files with one per mode. With this info, 
-the code will automatically trigger the @code{rotated} and @code{mode} options. The mode files need only to
-contain the xparam1 variable. Default: @code{[]}.
+For multimodal posteriors, provide the name of a file containing a @code{nparam by nmodes} variable called 
+@code{xparams} storing the different modes. This array must have one column vector per mode and the estimated 
+parameters along the row dimension. With this info, 
+the code will automatically trigger the @code{rotated} and @code{mode} options. Default: @code{[]}.
 
 @item 'slice_initialize_with_mode'
 The default for slice is to set @code{mode_compute = 0} and start the chain(s) from a random 
@@ -10050,6 +10067,7 @@ Is @code{true} or @code{false}.
 @menu
 * Dynare Configuration::
 * Parallel Configuration::
+* Windows Step-by-Step Guide::
 @end menu
 
 @node Dynare Configuration
@@ -10133,7 +10151,7 @@ The following routines are currently parallelized:
 @itemize
 
 @item
-the Metropolis-Hastings algorithm;
+the posterior sampling algorithms when using multiple chains;
 
 @item
 the Metropolis-Hastings diagnostics;
@@ -10169,13 +10187,15 @@ slaves):
 a standard Windows network (SMB) must be in place;
 
 @item
-@uref{http://technet.microsoft.com/en-us/sysinternals/bb896649.aspx,
+@uref{https://technet.microsoft.com/sysinternals/pstools.aspx,
 PsTools} must be installed in the path of the master Windows machine;
 
 @item
 the Windows user on the master machine has to be user of any other
 slave machine in the cluster, and that user will be used for the
 remote computations.
+
+@item Detailed step-by-step setup instructions can be found in @xref{Windows Step-by-Step Guide}.
 
 @end itemize
 
@@ -10194,7 +10214,8 @@ to the slaves can be done without passwords, or using an SSH agent
 
 @end table
 
-We now turn to the description of the configuration directives:
+We now turn to the description of the configuration directives. Note that comments in
+the configuration file can be provided by separate lines starting with a hashtag (#).
 
 @deffn {Configuration block} [cluster]
 
@@ -10332,6 +10353,77 @@ MatlabOctavePath = matlab
 @end example
 
 @end deffn
+
+@node Windows Step-by-Step Guide
+@section Windows Step-by-Step Guide
+
+This section outlines the steps necessary on most Windows systems to set up Dynare for parallel execution. 
+
+@enumerate
+@item Write a configuration file containing the options you want. A mimimum working 
+    example setting up a cluster consisting of two local CPU cores that allows for e.g. running
+    two Monte Carlo Markov Chains in parallel is shown below.
+@item Save the configuration file somwhere. The name and file ending do not matter 
+    if you are providing it with the @code{conffile} command line option. The only restrictions are that the 
+    path must be a valid filename, not contain non-alpha-numeric characters, and not contain any whitespaces.
+    For the configuration file to be accessible without providing an explicit path at the command line, you must save it 
+    under the name @file{dynare.ini} into your user account's @code{Application Data} folder.
+@item Install the @file{PSTools} from @uref{https://technet.microsoft.com/sysinternals/pstools.aspx} 
+    to your system, e.g. into @file{C:\PSTools}.
+@item Set the Windows System Path to the @file{PSTools}-folder (e.g. using something along the line of pressing Windows Key+Pause to 
+    open the System Configuration, then go to Advanced -> Environment Variables -> Path, see also @uref{https://technet.microsoft.com/sysinternals/pstools.aspx}).
+@item Restart your computer to make the path change effective.
+@item Open Matlab and type into the command window 
+    
+    @code{!psexec}
+
+    This executes the 
+    @file{psexec.exe} of the @file{PSTools} on your system and 
+    shows whether Dynare will be able to locate it. If Matlab complains at this stage, 
+    you did not correctly set your Windows system path for the @file{PSTools}-folder.
+@item If @file{psexec.exe} was located in the previous step, a popup will show up, asking 
+    for confirmation of the license agreement. 
+    Confirm this copyright notice of @file{psexec} (this needs to be done only once). 
+    After this, Dynare should be ready for parallel execution.
+@item Call Dynare on your mod-file invoking the @code{parallel} option and providing the path to your configuration file 
+    with the @code{conffile}-option (if you did not save it as @file{%APPDATA%\dynare.ini} in step 2 
+    where it should be detected automatically)
+    
+    @example
+    dynare ls2003 parallel conffile='C:\Users\Dynare~1\parallel\conf_file.ini'
+    @end example
+
+    Please keep in mind that no whitespaces or names longer than 8 characters are allowed in the @code{conffile}-path. 
+    The 8 character restriction can be circumvented
+    by using the tilde Windows path notation as in the above example.
+@end enumerate
+
+@examplehead
+
+@example
+#cluster needs to always be defined first
+[cluster] 
+#Provide a name for the cluster
+Name=Local
+#declare the nodes being member of the cluster
+Members=n1 
+
+#declare nodes (they need not all be part of a cluster)
+[node] 
+#name of the node
+Name=n1 
+#name of the computer (localhost for the current machine)
+ComputerName=localhost 
+#cores to be included from this node
+CPUnbr=[1:2]
+#path to matlab.exe; on Windows, Matlab's bin folder is in the system path 
+#so we only need to provide the name of the exe file
+MatlabOctavePath=matlab 
+#Dynare path you are using
+DynarePath=C:\dynare\2016-05-10\matlab 
+
+@end example
+
 
 @node Time Series
 @chapter Time Series
@@ -13606,6 +13698,10 @@ a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602
 Kim, Jinill and Sunghyun Kim (2003): ``Spurious welfare reversals in 
 international business cycle models,'' @i{Journal of International
 Economics}, 60, 471--500
+
+@item
+Kanzow, Christian and Stefania Petra (2004): ``On a semismooth least squares formulation of
+complementarity problems with gap reduction,'' @i{Optimization Methods and Software},19 507--525
 
 @item
 Kim, Jinill, Sunghyun Kim, Ernst Schaumburg, and Christopher A. Sims

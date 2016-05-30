@@ -24,7 +24,7 @@ model;
 
   Efficiency = effstar*exp(efficiency);
 
-  [mcp = 'Investment > 0']
+  [mcp = 'Investment > 0',name='Investment Euler Equation']
   -(((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption + beta*((((Consumption(+1)^theta)*((1-Labour(+1))^(1-theta)))^(1-tau))/Consumption(+1))*(alpha*((Output(+1)/Capital)^(1-psi))+1-delta);
 
   residual =   (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - beta*((((Consumption(+1)^theta)*((1-Labour(+1))^(1-theta)))^(1-tau))/Consumption(+1))*(alpha*((Output(+1)/Capital)^(1-psi))+1-delta);
@@ -56,6 +56,7 @@ residual = 0;
 marginal_utility = (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption;
 end;
 
+resid;
 steady;
 
 shocks;
