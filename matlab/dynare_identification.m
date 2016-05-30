@@ -184,8 +184,6 @@ if prior_exist,
 
     nparam = length(bayestopt_.name);
     np = estim_params_.np;
-    name = bayestopt_.name;
-    name_tex = char(M_.exo_names_tex(indexo,:),M_.param_names_tex(indx,:));
 
     if estim_params_.nvn || estim_params_.ncn,
         error('Identification does not support measurement errors. Instead, define them explicitly in measurement equations in model definition.')
@@ -199,14 +197,35 @@ if prior_exist,
         end
         %offset = offset + estim_params_.ncn;
     end
+    name=cell(nparam,1);
+    name_tex=cell(nparam,1);
+    for jj=1:nparam        
+        if options_.TeX
+            [param_name_temp, param_name_tex_temp]= get_the_name(jj,options_.TeX,M_,estim_params_,options_);
+            name_tex{jj,1} = strrep(param_name_tex_temp,'$','');
+            name{jj,1} = param_name_temp;
+        else
+            param_name_temp = get_the_name(jj,options_.TeX,M_,estim_params_,options_);
+            name{jj,1} = param_name_temp;
+        end
+    end
+    if options_.TeX
+        name_tex=char(name_tex);
+    end
 else
     indx = [1:M_.param_nbr];
     indexo = [1:M_.exo_nbr];
     offset = M_.exo_nbr;
     np = M_.param_nbr;
     nparam = np+offset;
-    name = [cellstr(M_.exo_names); cellstr(M_.param_names)];
-    name_tex = [cellstr(M_.exo_names_tex); cellstr(M_.param_names_tex)];
+    name = [cellstr([repmat('SE_',size(M_.exo_names_tex)),M_.exo_names_tex]); cellstr(M_.param_names)];
+    name_tex = [cellstr([repmat('$ SE_',size(M_.exo_names_tex)),M_.exo_names_tex,repmat('}$',size(M_.exo_names_tex))]); cellstr(M_.param_names_tex)];
+    if ~isequal(M_.H,0)
+        fprintf('\ndynare_identification:: Identification does not support measurement errors and will ignore them in the following. To test their identifiability, instead define them explicitly in measurement equations in the model definition.\n')
+    end
+    if ~isdiagonal(M_.Sigma_e)
+        fprintf('\ndynare_identification:: Identification without specifying estimated_params does not support correlated errors. The diagonal entries of the covariance matrix will be ignored in the following.\n')
+    end
 end
 
 skipline()
