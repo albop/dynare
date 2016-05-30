@@ -1,4 +1,5 @@
-//Tests Identification command with ML and unit roots/diffuse filter option
+//Tests Identification command with ML and unit roots/diffuse filter option;
+//Should not work because of observed unit root variable
 
 var y delta_y x z;
 
@@ -33,7 +34,7 @@ end;
 
 steady;
 check;
-varobs delta_y; 
+varobs y delta_y; 
 stoch_simul(order=1,irf=0);
 
 
