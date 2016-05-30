@@ -273,6 +273,7 @@ The Configuration File
 
 * Dynare Configuration::
 * Parallel Configuration::
+* Windows Step-by-Step Guide::
 
 Time Series
 
@@ -10066,6 +10067,7 @@ Is @code{true} or @code{false}.
 @menu
 * Dynare Configuration::
 * Parallel Configuration::
+* Windows Step-by-Step Guide::
 @end menu
 
 @node Dynare Configuration
@@ -10149,7 +10151,7 @@ The following routines are currently parallelized:
 @itemize
 
 @item
-the Metropolis-Hastings algorithm;
+the posterior sampling algorithms when using multiple chains;
 
 @item
 the Metropolis-Hastings diagnostics;
@@ -10185,13 +10187,15 @@ slaves):
 a standard Windows network (SMB) must be in place;
 
 @item
-@uref{http://technet.microsoft.com/en-us/sysinternals/bb896649.aspx,
+@uref{https://technet.microsoft.com/sysinternals/pstools.aspx,
 PsTools} must be installed in the path of the master Windows machine;
 
 @item
 the Windows user on the master machine has to be user of any other
 slave machine in the cluster, and that user will be used for the
 remote computations.
+
+@item Detailed step-by-step setup instructions can be found in @xref{Windows Step-by-Step Guide}.
 
 @end itemize
 
@@ -10210,7 +10214,8 @@ to the slaves can be done without passwords, or using an SSH agent
 
 @end table
 
-We now turn to the description of the configuration directives:
+We now turn to the description of the configuration directives. Note that comments in
+the configuration file can be provided by separate lines starting with a hashtag (#).
 
 @deffn {Configuration block} [cluster]
 
@@ -10348,6 +10353,77 @@ MatlabOctavePath = matlab
 @end example
 
 @end deffn
+
+@node Windows Step-by-Step Guide
+@section Windows Step-by-Step Guide
+
+This section outlines the steps necessary on most Windows systems to set up Dynare for parallel execution. 
+
+@enumerate
+@item Write a configuration file containing the options you want. A mimimum working 
+    example setting up a cluster consisting of two local CPU cores that allows for e.g. running
+    two Monte Carlo Markov Chains in parallel is shown below.
+@item Save the configuration file somwhere. The name and file ending do not matter 
+    if you are providing it with the @code{conffile} command line option. The only restrictions are that the 
+    path must be a valid filename, not contain non-alpha-numeric characters, and not contain any whitespaces.
+    For the configuration file to be accessible without providing an explicit path at the command line, you must save it 
+    under the name @file{dynare.ini} into your user account's @code{Application Data} folder.
+@item Install the @file{PSTools} from @uref{https://technet.microsoft.com/sysinternals/pstools.aspx} 
+    to your system, e.g. into @file{C:\PSTools}.
+@item Set the Windows System Path to the @file{PSTools}-folder (e.g. using something along the line of pressing Windows Key+Pause to 
+    open the System Configuration, then go to Advanced -> Environment Variables -> Path, see also @uref{https://technet.microsoft.com/sysinternals/pstools.aspx}).
+@item Restart your computer to make the path change effective.
+@item Open Matlab and type into the command window 
+    
+    @code{!psexec}
+
+    This executes the 
+    @file{psexec.exe} of the @file{PSTools} on your system and 
+    shows whether Dynare will be able to locate it. If Matlab complains at this stage, 
+    you did not correctly set your Windows system path for the @file{PSTools}-folder.
+@item If @file{psexec.exe} was located in the previous step, a popup will show up, asking 
+    for confirmation of the license agreement. 
+    Confirm this copyright notice of @file{psexec} (this needs to be done only once). 
+    After this, Dynare should be ready for parallel execution.
+@item Call Dynare on your mod-file invoking the @code{parallel} option and providing the path to your configuration file 
+    with the @code{conffile}-option (if you did not save it as @file{%APPDATA%\dynare.ini} in step 2 
+    where it should be detected automatically)
+    
+    @example
+    dynare ls2003 parallel conffile='C:\Users\Dynare~1\parallel\conf_file.ini'
+    @end example
+
+    Please keep in mind that no whitespaces or names longer than 8 characters are allowed in the @code{conffile}-path. 
+    The 8 character restriction can be circumvented
+    by using the tilde Windows path notation as in the above example.
+@end enumerate
+
+@examplehead
+
+@example
+#cluster needs to always be defined first
+[cluster] 
+#Provide a name for the cluster
+Name=Local
+#declare the nodes being member of the cluster
+Members=n1 
+
+#declare nodes (they need not all be part of a cluster)
+[node] 
+#name of the node
+Name=n1 
+#name of the computer (localhost for the current machine)
+ComputerName=localhost 
+#cores to be included from this node
+CPUnbr=[1:2]
+#path to matlab.exe; on Windows, Matlab's bin folder is in the system path 
+#so we only need to provide the name of the exe file
+MatlabOctavePath=matlab 
+#Dynare path you are using
+DynarePath=C:\dynare\2016-05-10\matlab 
+
+@end example
+
 
 @node Time Series
 @chapter Time Series
