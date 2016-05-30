@@ -3604,7 +3604,7 @@ trigger the computation of the solution with a trust region algorithm.
 @end table
 
 @item solve_algo
-@xref{qz_zero_threshold}. Allows selecting the solver used with @code{stack_solve_algo=7}.
+@xref{solve_algo}. Allows selecting the solver used with @code{stack_solve_algo=7}.
 
 @item no_homotopy
 By default, the perfect foresight solver uses a homotopy technique if it cannot
