@@ -17,23 +17,24 @@ function [options, y0, yT, z, i_cols, i_cols_J1, i_cols_T, i_cols_j, i_cols_1, d
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
     
-if (options_.solve_algo == 10)
-    if ~isfield(options_.lmmcp,'lb')
-        [lb,ub,pfm.eq_index] = get_complementarity_conditions(M_,options_.ramsey_policy);
-        options_.lmmcp.lb = repmat(lb,periods,1);
-        options_.lmmcp.ub = repmat(ub,periods,1);
+periods = options.periods;
+if (options.solve_algo == 10)
+    if ~isfield(options.lmmcp,'lb')
+        [lb,ub,pfm.eq_index] = get_complementarity_conditions(M,options.ramsey_policy);
+        options.lmmcp.lb = repmat(lb,periods,1);
+        options.lmmcp.ub = repmat(ub,periods,1);
     end
-elseif (options_.solve_algo == 11)
-    if ~isfield(options_.mcppath,'lb')
-        [lb,ub,pfm.eq_index] = get_complementarity_conditions(M_,options_.ramsey_policy);
-        options_.mcppath.lb = repmat(lb,periods,1);
-        options_.mcppath.ub = repmat(ub,periods,1);
+elseif (options.solve_algo == 11)
+    if ~isfield(options.mcppath,'lb')
+        [lb,ub,pfm.eq_index] = get_complementarity_conditions(M,options.ramsey_policy);
+        options.mcppath.lb = repmat(lb,periods,1);
+        options.mcppath.ub = repmat(ub,periods,1);
     end
 end
 
 y0 = endogenousvariables(:,1);
-yT = endogenousvariables(:,options.periods+2);
-z = endogenousvariables(:,2:options.periods+1);
+yT = endogenousvariables(:,periods+2);
+z = endogenousvariables(:,2:periods+1);
 illi = M.lead_lag_incidence';
 [i_cols, junk,i_cols_j] = find(illi(:));
 illi = illi(:,2:3);
