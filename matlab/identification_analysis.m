@@ -1,5 +1,5 @@
-function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info, options_ident] = identification_analysis(params,indx,indexo,options_ident,dataset_,dataset_info, prior_exist, name_tex, init)
-% function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = identification_analysis(params,indx,indexo,options_ident,data_info, prior_exist, name_tex, init)
+function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info, options_ident] = identification_analysis(params,indx,indexo,options_ident,dataset_,dataset_info, prior_exist,name_tex,init,tittxt)
+% function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = identification_analysis(params,indx,indexo,options_ident,data_info, prior_exist,name_tex,init,analyis_type)
 % given the parameter vector params, wraps all identification analyses
 %
 % INPUTS
@@ -14,6 +14,8 @@ function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info, opt
 %                           =0 when prior is not defined and indentification is checked for all params and shocks
 %    o name_tex           [char] list of tex names
 %    o init               [integer] flag  for initialization of persistent vars
+%    o tittxt             [string]  string indicating the title text for
+%                                   graphs and figures
 %    
 % OUTPUTS
 %    o ide_hess           [structure] identification results using Asymptotic Hessian
@@ -348,6 +350,6 @@ if info(1)==0,
     
     indok = find(max(ide_moments.indno,[],1)==0);
     if advanced,
-        [ide_moments.pars, ide_moments.cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ,max_dim_cova_group,options_.TeX,name_tex);
+        [ide_moments.pars, ide_moments.cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ,max_dim_cova_group,options_.TeX,name_tex,tittxt);
     end
 end    
