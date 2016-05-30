@@ -148,6 +148,7 @@ MODFILES = \
 	identification/ident_unit_root/ident_unit_root.mod \
 	identification/rbc_ident/rbc_ident_std_as_structural_par.mod \
 	identification/rbc_ident/rbc_ident_varexo_only.mod \
+	identification/correlated_errors/fs2000_corr.mod \
 	simul/example1.mod \
 	simul/Solow_no_varexo.mod \
 	simul/simul_ZLB_purely_forward.mod \
