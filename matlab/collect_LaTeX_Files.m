@@ -9,7 +9,7 @@ function collect_LaTeX_Files(M_)
 %   - The packages loaded enable pdflatex to run
 %   - The _dynamic and _static TeX-model files are not included as they are standalone TeX-files
 
-% Copyright (C) 2015-2016 Dynare Team
+% Copyright (C) 2015-16 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -76,6 +76,16 @@ for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
         fprintf(fid,'%s \n',['\include{', M_.dname '/identification' '/',f_name,'}']);    
+    end
+end
+
+
+%% Identification/Output directory
+TeX_Files=dir([M_.dname filesep 'identification' filesep 'Output' filesep M_.fname '*.TeX']);
+for ii=1:length(TeX_Files)
+    [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
+    if ~strcmp(TeX_Files(ii).name,f_name_binder)
+        fprintf(fid,'%s \n',['\include{', M_.dname '/identification/Output' '/',f_name,'}']);    
     end
 end
 

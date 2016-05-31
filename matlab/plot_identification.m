@@ -1,4 +1,4 @@
-function plot_identification(params,idemoments,idehess,idemodel, idelre, advanced, tittxt, name, IdentifDirectoryName,tit_TeX)
+function plot_identification(params,idemoments,idehess,idemodel, idelre, advanced, tittxt, name, IdentifDirectoryName,tit_TeX,name_tex)
 % function plot_identification(params,idemoments,idehess,idemodel, idelre, advanced, tittxt, name, IdentifDirectoryName)
 %
 % INPUTS
@@ -12,7 +12,7 @@ function plot_identification(params,idemoments,idehess,idemodel, idelre, advance
 %    o name               [char] list of names
 %    o IdentifDirectoryName   [char] directory name
 %    o tittxt             [char] TeX-name of the results to plot 
-%    
+%    o name_tex           [char] TeX-names of the parameters
 % OUTPUTS
 %    None
 %    
@@ -38,6 +38,13 @@ function plot_identification(params,idemoments,idehess,idemodel, idelre, advance
 
 global M_ options_
 
+if nargin <10 || isempty(tit_TeX)
+    tit_TeX=tittxt;
+end
+    
+if nargin <11 
+    name_TeX=name;
+end
 
 [SampleSize, nparam]=size(params);
 siJnorm = idemoments.siJnorm;
@@ -358,6 +365,7 @@ else
         options_mcf.pvalue_corr = 0.001;
         options_mcf.alpha2 = 0;
         options_mcf.param_names = name;
+        options_mcf.param_names_tex = name_tex;
         options_mcf.fname_ = M_.fname;
         options_mcf.OutputDirectoryName = IdentifDirectoryName;
         options_mcf.beha_title = 'LOW condition nbr';
