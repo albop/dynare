@@ -10019,7 +10019,7 @@ Writes a @LaTeX{} file named @code{<<M_.fname>>_TeX_binder.tex} that collects al
 into a file. This file can be compiled using pdflatex and automatically tries to load all required packages. 
 Requires the following @LaTeX{} packages: @code{breqn}, @code{psfrag},
 @code{graphicx}, @code{epstopdf}, @code{longtable},  @code{booktabs},  @code{caption},
-@code{float}, and @code{morefloats}
+@code{float}, @code{amsmath}, @code{amsfonts}, and @code{morefloats}
 @end deffn
 
 
