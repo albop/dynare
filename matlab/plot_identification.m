@@ -187,6 +187,7 @@ if SampleSize == 1,
                 text(0.5,ip,name{ip},'rotation',0,'HorizontalAlignment','right','interpreter','none')
             end
             colorbar;
+            colormap('jet');
             ax=colormap;
             ax(1,:)=[0.9 0.9 0.9];
             colormap(ax);
