@@ -37,6 +37,9 @@ global bayestopt_ estim_params_ M_ options_ oo_
 
 % options_gsa_=options_.opt_gsa;
 vvarvecm = options_gsa_.var_rmse;
+if options_.TeX
+    vvarvecm_tex = options_gsa_.var_rmse_tex;
+end
 loadSA   = options_gsa_.load_rmse;
 pfilt    = options_gsa_.pfilt_rmse;
 alpha    = options_gsa_.alpha_rmse;
@@ -370,10 +373,10 @@ else
             else
                 if options_.opt_gsa.pprior
                     dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnprior',int2str(ifig) ],options_);
-                    create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_prior_lnprior')
+                    create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_prior_lnprior')
                 else
                     dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnprior',int2str(ifig) ],options_);
-                    create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_mc_lnprior')
+                    create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_mc_lnprior')
                 end
             end
         end
@@ -471,18 +474,17 @@ else
     end
     
     param_names=char(bayestopt_.name);
-%     param_names='';
-%     for j=1:npar+nshock,
-%         param_names=char(param_names, bayestopt_.name{j});
-%     end
-%     param_names=param_names(2:end,:);
     
     skipline()
-    disp('RMSE over the MC sample:')
-    disp('            min yr RMSE    max yr RMSE')
-    for j=1:size(vvarvecm,1),
-        disp([vvarvecm(j,:), sprintf('%15.5g',[(min(rmse_MC(:,j))) [(max(rmse_MC(:,j)))]])])
+    title_string='RMSE over the MC sample:';
+    data_mat=[min(rmse_MC)' max(rmse_MC)'];
+    headers=strvcat('Variable','min yr RMSE','max yr RMSE');
+    dyntable(options_,title_string,headers,vvarvecm,data_mat, 0, 15, 5);
+    if options_.TeX
+        headers_tex=strvcat('\text{Variable}','\text{min yr RMSE}','\text{max yr RMSE}');
+        dyn_latex_table(M_,options_,title_string,'RMSE_MC',headers_tex,vvarvecm_tex,data_mat,0,15,5);
     end
+    
     invar = find( std(rmse_MC)./mean(rmse_MC)<=0.0001 );
     if ~isempty(invar)
         skipline(2)
@@ -507,33 +509,71 @@ else
     
     skipline(2)
     disp('RMSE ranges after filtering:')
+    title_string='RMSE ranges after filtering:';
     if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
-        disp(['             best ',num2str(pfilt*100),'% filtered             remaining 90%'])
-        disp(['             min            max            min            max            posterior mode'])
+        headers_tex=strvcat('\text{Variable}','\text{min}','\text{max}','\text{min}','\text{max}','\text{posterior mode}');
     else
-        disp(['             best  filtered             remaining '])
-        disp(['             min            max            min            max            posterior mean'])
+        headers=strvcat('Variable','min','max','min','max','posterior mean');
+        headers_tex=strvcat('\text{Variable}','\text{min}','\text{max}','\text{min}','\text{max}','\text{posterior mean}');
     end
+    data_mat=NaN(size(vvarvecm,1),5);
     for j=1:size(vvarvecm,1),
-        disp([vvarvecm(j,:), sprintf('%15.5g',[min(rmse_MC(ixx(1:nfilt0(j),j),j)) ...
+        data_mat(j,:)=[min(rmse_MC(ixx(1:nfilt0(j),j),j)) ...
             max(rmse_MC(ixx(1:nfilt0(j),j),j))  ...
             min(rmse_MC(ixx(nfilt0(j)+1:end,j),j)) ...
             max(rmse_MC(ixx(nfilt0(j)+1:end,j),j)) ...
-            rmse_txt(j)])])
-        %   disp([vvarvecm(j,:), sprintf('%15.5g',[min(logpo2(ixx(1:nfilt,j))) ...
-        %         max(logpo2(ixx(1:nfilt,j)))  ...
-        %         min(logpo2(ixx(nfilt+1:end,j))) ...
-        %         max(logpo2(ixx(nfilt+1:end,j)))])])
+            rmse_txt(j)];
+    end
+    %get formatting for additional header line
+    val_width=15;
+    val_precis=5;
+    label_width = max(size(deblank(char(headers(1,:),vvarvecm)),2)+2,0);
+    label_format_leftbound  = sprintf('%%-%ds',label_width);
+    if all(~isfinite(data_mat))
+        values_length = 4;
+    else
+        values_length = max(ceil(max(max(log10(abs(data_mat(isfinite(data_mat))))))),1)+val_precis+1;
+    end
+    if any(data_mat) < 0 %add one character for minus sign
+        values_length = values_length+1;
     end
     
+    headers_length = max(size(deblank(headers(2:end,:)),2));
+    if ~isempty(val_width)
+        val_width = max(max(headers_length,values_length)+2,val_width);
+    else
+        val_width = max(headers_length,values_length)+2;
+    end
+    value_format  = sprintf('%%%d.%df',val_width,val_precis);
+    header_string_format  = sprintf('%%%ds',val_width);
+    
+    if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
+        optional_header=sprintf([label_format_leftbound,header_string_format,header_string_format,header_string_format,header_string_format],'','',['best ',num2str(pfilt*100),'% filtered'],'','remaining 90%');
+    else
+        optional_header=sprintf([label_format_leftbound,header_string_format,header_string_format,header_string_format,header_string_format],'','','best  filtered','','remaining');
+    end
+    dyntable(options_,title_string,headers,vvarvecm,data_mat, 0, val_width, val_precis,optional_header);
+    if options_.TeX
+        if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
+            optional_header={[' & \multicolumn{2}{c}{best ',num2str(pfilt*100),' filtered} & \multicolumn{2}{c}{remaining 90\%}\\']};
+        else
+            optional_header={[' & \multicolumn{2}{c}{best filtered} & \multicolumn{2}{c}{remaining}\\']};
+        end
+        dyn_latex_table(M_,options_,title_string,'RMSE_ranges_after_filtering',headers_tex,vvarvecm_tex,data_mat,0,val_width,val_precis,optional_header);
+    end
+
     %%%%% R2 table
     
-    skipline()
-    disp('R2 over the MC sample:')
-    disp('            min yr R2      max yr R2')
-    for j=1:size(vvarvecm,1),
-        disp([vvarvecm(j,:), sprintf('%15.5g',[(min(r2_MC(:,j))) [(max(r2_MC(:,j)))]])])
+    skipline()   
+    title_string='R2 over the MC sample:';
+    data_mat=[min(r2_MC)' max(r2_MC)'];
+    headers=strvcat('Variable','min yr R2','max yr R2');
+    dyntable(options_,title_string,headers,vvarvecm,data_mat, 0, 15, 5);
+    if options_.TeX
+        headers_tex=strvcat('\text{Variable}','\text{min yr R2}','\text{max yr R2}');
+        dyn_latex_table(M_,options_,title_string,'R2_MC',headers_tex,vvarvecm_tex,data_mat,0,15,5);
     end
+
     r2_MC=r2_MC(:,ivar);
     
     skipline()
@@ -541,20 +581,60 @@ else
     
     skipline()
     disp('R2 ranges after filtering:')
+    title_string='R2 ranges after filtering:';
     if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
-        disp(['             best ',num2str(pfilt*100),'% filtered             remaining 90%'])
-        disp(['             min            max            min            max            posterior mode'])
+        headers=strvcat('Variable','min','max','min','max','posterior mode');
+        headers_tex=strvcat('\text{Variable}','\text{min}','\text{max}','\text{min}','\text{max}','\text{posterior mode}');
     else
-        disp(['             best  filtered             remaining '])
-        disp(['             min            max            min            max            posterior mean'])
+        headers=strvcat('Variable','min','max','min','max','posterior mean');
+        headers_tex=strvcat('\text{Variable}','\text{min}','\text{max}','\text{min}','\text{max}','\text{posterior mean}');
     end
+    data_mat=NaN(size(vvarvecm,1),5);
     for j=1:size(vvarvecm,1),
-        disp([vvarvecm(j,:), sprintf('%15.5g',[min(r2_MC(ixx(1:nfilt0(j),j),j)) ...
+        data_mat(j,:)=[min(r2_MC(ixx(1:nfilt0(j),j),j)) ...
             max(r2_MC(ixx(1:nfilt0(j),j),j))  ...
             min(r2_MC(ixx(nfilt0(j)+1:end,j),j)) ...
             max(r2_MC(ixx(nfilt0(j)+1:end,j),j)) ...
-            r2_txt(j)])])
+            r2_txt(j)];
     end
+    %get formatting for additional header line
+    val_width=15;
+    val_precis=5;
+    label_width = max(size(deblank(char(headers(1,:),vvarvecm)),2)+2,0);
+    label_format_leftbound  = sprintf('%%-%ds',label_width);
+    if all(~isfinite(data_mat))
+        values_length = 4;
+    else
+        values_length = max(ceil(max(max(log10(abs(data_mat(isfinite(data_mat))))))),1)+val_precis+1;
+    end
+    if any(data_mat) < 0 %add one character for minus sign
+        values_length = values_length+1;
+    end
+    
+    headers_length = max(size(deblank(headers(2:end,:)),2));
+    if ~isempty(val_width)
+        val_width = max(max(headers_length,values_length)+2,val_width);
+    else
+        val_width = max(headers_length,values_length)+2;
+    end
+    value_format  = sprintf('%%%d.%df',val_width,val_precis);
+    header_string_format  = sprintf('%%%ds',val_width);
+    
+    if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
+        optional_header=sprintf([label_format_leftbound,header_string_format,header_string_format,header_string_format,header_string_format],'','',['best ',num2str(pfilt*100),'% filtered'],'','remaining 90%');
+    else
+        optional_header=sprintf([label_format_leftbound,header_string_format,header_string_format,header_string_format,header_string_format],'','','best  filtered','','remaining');
+    end
+    dyntable(options_,title_string,headers,vvarvecm,data_mat, 0, val_width, val_precis,optional_header);
+    if options_.TeX
+        if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
+            optional_header={[' & \multicolumn{2}{c}{best ',num2str(pfilt*100),' filtered} & \multicolumn{2}{c}{remaining 90\%}\\']};
+        else
+            optional_header={[' & \multicolumn{2}{c}{best filtered} & \multicolumn{2}{c}{remaining}\\']};
+        end
+        dyn_latex_table(M_,options_,title_string,'R2_ranges_after_filtering',headers_tex,vvarvecm_tex,data_mat,0,val_width,val_precis,optional_header);
+    end
+   
     
     %%%%  R2 table
     SP=zeros(npar+nshock,size(vvarvecm,1));

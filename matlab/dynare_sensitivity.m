@@ -157,6 +157,12 @@ options_gsa = set_default_option(options_gsa,'namexo',[]);
 % RMSE mapping
 options_gsa = set_default_option(options_gsa,'lik_only',0);
 options_gsa = set_default_option(options_gsa,'var_rmse',char(options_.varobs));
+%get corresponding TeX-names;
+options_gsa.var_rmse_tex='';
+for ii=1:size(options_gsa.var_rmse,1)
+    temp_name=M_.endo_names_tex(strmatch(deblank(options_gsa.var_rmse(ii,:)),M_.endo_names,'exact'),:);
+    options_gsa.var_rmse_tex=strvcat(options_gsa.var_rmse_tex,temp_name);
+end
 options_gsa = set_default_option(options_gsa,'pfilt_rmse',0.1);
 options_gsa = set_default_option(options_gsa,'istart_rmse',options_.presample+1);
 options_gsa = set_default_option(options_gsa,'alpha_rmse',0.001);
