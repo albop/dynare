@@ -18,7 +18,7 @@ function [endogenousvariables, info] = solve_stacked_linear_problem(endogenousva
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 [options, y0, yT, z, i_cols, i_cols_J1, i_cols_T, i_cols_j, i_cols_1, dynamicmodel] = ...
-    initialize_stacked_problem(endogenousvariables, options, M);
+    initialize_stacked_problem(endogenousvariables, options, M, steadystate_y);
 
 ip = find(M.lead_lag_incidence(1,:)');
 ic = find(M.lead_lag_incidence(2,:)');

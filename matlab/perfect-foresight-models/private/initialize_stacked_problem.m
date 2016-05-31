@@ -1,4 +1,5 @@
-function [options, y0, yT, z, i_cols, i_cols_J1, i_cols_T, i_cols_j, i_cols_1, dynamicmodel] = initialize_stack_solve_algo_7(endogenousvariables, options, M)
+function [options, y0, yT, z, i_cols, i_cols_J1, i_cols_T, i_cols_j, i_cols_1, ...
+          dynamicmodel] = initialize_stack_solve_algo_7(endogenousvariables, options, M, steadystate_y)
 
 % Copyright (C) 2015 Dynare Team
 %
@@ -21,12 +22,20 @@ periods = options.periods;
 if (options.solve_algo == 10)
     if ~isfield(options.lmmcp,'lb')
         [lb,ub,pfm.eq_index] = get_complementarity_conditions(M,options.ramsey_policy);
+        if options.linear_approximation
+            lb = lb - steadystate_y;
+            ub = ub - steadystate_y;
+        end
         options.lmmcp.lb = repmat(lb,periods,1);
         options.lmmcp.ub = repmat(ub,periods,1);
     end
 elseif (options.solve_algo == 11)
     if ~isfield(options.mcppath,'lb')
         [lb,ub,pfm.eq_index] = get_complementarity_conditions(M,options.ramsey_policy);
+        if options.linear_approximation
+            lb = lb - steadystate_y;
+            ub = ub - steadystate_y;
+        end
         options.mcppath.lb = repmat(lb,periods,1);
         options.mcppath.ub = repmat(ub,periods,1);
     end
