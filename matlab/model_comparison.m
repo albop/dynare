@@ -136,8 +136,21 @@ for model_iter=1:NumberOfModels
     end
 end
 
-dyntable(title,headers,labels,values, 0, 15, 6);
-
+dyntable(options_,title,headers,labels,values, 0, 15, 6);
+if options_.TeX
+    M_temp.fname=fname;
+    M_temp.dname=fname;
+    headers_tex='';
+    for ii=1:size(headers,1)
+        headers_tex=strvcat(headers_tex,strrep(headers(ii,:),'_', '\_'));
+    end
+    labels_tex='';
+    for ii=1:size(labels,1)
+        labels_tex=strvcat(labels_tex,strrep(labels(ii,:),' ', '\ '));
+    end
+    
+    dyn_latex_table(M_temp,options_,title,['model_comparison',type],headers_tex,labels_tex,values,0,16,6);
+end
 
 function name = get_model_name_without_path(modelname)
 idx = strfind(modelname,'\');
