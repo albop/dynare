@@ -57,8 +57,8 @@ if flag
         options.lmmcp = olmmcp;
         options.solve_algo = solve_algo;
         options.stack_solve_algo = stack_solve_algo;
-        [tmp, maxerror] = perfect_foresight_solver_core(M, options, oo);
-        if maxerror>options.dynatol.f
+        tmp = perfect_foresight_solver_core(M, options, oo);
+        if ~tmp.deterministic_simulation.status 
             info_convergence = false;
         else
             info_convergence = true;

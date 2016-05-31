@@ -18,10 +18,8 @@ function [info_convergence, endo_simul] = extended_path_homotopy(endo_simul, exo
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     
+endo_simul0 = endo_simul;
 if ismember(method, [1, 2])
-    if isequal(method, 2)
-        endo_simul0 = endo_simul;
-    end
     noconvergence = true;
     iteration = 0;
     weight = .1;
@@ -34,9 +32,10 @@ if ismember(method, [1, 2])
     while noconvergence
         iteration = iteration + 1;
         oo.endo_simul = endo_simul;
+        oo.endo_simul(:,1) = oo.steady_state + weight*(endo_simul0(:,1) - oo.steady_state);
         oo.exo_simul = bsxfun(@plus, weight*exo_simul, (1-weight)*transpose(oo.exo_steady_state));
         if order==0
-            [tmp, maxerror] = perfect_foresight_solver_core(M, options, oo);
+            tmp = perfect_foresight_solver_core(M, options, oo);
         else
             switch(algo)
               case 0
@@ -49,7 +48,7 @@ if ismember(method, [1, 2])
         end
         if isequal(order, 0)
             % Logical variable flag is false iff the solver fails.
-            flag = ~(maxerror>options.dynatol.f);
+            flag = ~tmp.deterministic_simulation.status;
         else
             % Fix convention issue on the value of flag.
             flag = ~flag;
@@ -105,7 +104,7 @@ if isequal(method, 3) || (isequal(method, 2) && noconvergence)
         oo.endo_simul = endo_simul;
         oo.exo_simul = bsxfun(@plus, weight*exo_simul, (1-weight)*transpose(oo.exo_steady_state));
         if order==0
-            [tmp, maxerror] = perfect_foresight_solver_core(M, options, oo);
+            tmp = perfect_foresight_solver_core(M, options, oo);
         else
             switch(algo)
               case 0
@@ -118,7 +117,7 @@ if isequal(method, 3) || (isequal(method, 2) && noconvergence)
         end
         if isequal(order, 0)
             % Logical variable flag is false iff the solver fails.
-            flag = ~(maxerror>options.dynatol.f);
+            flag = ~tmp.deterministic_simulation.status;
         else
             % Fix convention issue on the value of flag.
             flag = ~flag;
