@@ -664,7 +664,7 @@ else
         if isoctave
             legend(char('base',vvarvecm),'location','eastoutside');
         else
-            h0=legend(char('base',vvarvecm),0);
+            h0=legend(char('base',vvarvecm));
             set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
         end
         %h0=legend({'base',vnam{np}}',0);
@@ -725,7 +725,7 @@ else
         if isoctave
             legend(char('base',vvarvecm),'location','eastoutside');
         else
-            h0=legend(char('base',vvarvecm),0);
+            h0=legend(char('base',vvarvecm));
             set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
         end
         %h0=legend({'base',vnam{np}}',0);
