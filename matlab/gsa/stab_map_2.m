@@ -58,6 +58,7 @@ nshock = nshock + estim_params_.ncn;
 [c0, pvalue] = corrcoef(x);
 c00=tril(c0,-1);
 fig_nam_=[fname_,'_',fnam,'_corr_'];
+fig_nam_=strrep(fig_nam_,' ','_');
 
 ifig=0;
 j2=0;
@@ -69,10 +70,11 @@ if ishock==0
 else
   npar=estim_params_.np+nshock;
 end
-disp([' '])
-disp(['Correlation analysis for ',fnam])
+skipline();
+title=['Correlation analysis for ',fnam];
 
 indcorr = [];
+entry_iter=1;
 for j=1:npar,
     i2=find(abs(c00(:,j))>alpha2);
     if length(i2)>0,
@@ -81,14 +83,43 @@ for j=1:npar,
                 indcorr = [indcorr; [j i2(jx)]];
                 j2=j2+1;
                 if ishock,
-                    tmp_name = (['[',bayestopt_.name{j},',',bayestopt_.name{i2(jx)},']']);
+                    if options_.TeX
+                        [param_name_temp1, param_name_tex_temp1]= get_the_name(j,options_.TeX,M_,estim_params_,options_);
+                        param_name_tex_temp1 = strrep(param_name_tex_temp1,'$','');
+                        [param_name_temp2, param_name_tex_temp2]= get_the_name(i2(jx),options_.TeX,M_,estim_params_,options_);
+                        param_name_tex_temp2 = strrep(param_name_tex_temp2,'$','');
+                        tmp_name=(['[',param_name_temp1,',',param_name_temp2,']']);
+                        tmp_name_tex=(['[',param_name_tex_temp1,',',param_name_tex_temp2,']']);
+                        name{entry_iter,1}=tmp_name;
+                        name_tex{entry_iter,1}=tmp_name_tex;
+                    else
+                        [param_name_temp1]= get_the_name(j,options_.TeX,M_,estim_params_,options_);
+                        [param_name_temp2]= get_the_name(i2(jx),options_.TeX,M_,estim_params_,options_);
+                        tmp_name=(['[',param_name_temp1,',',param_name_temp2,']']);
+                        name{entry_iter,1}=tmp_name;
+                    end
                 else
-                    tmp_name = (['[',bayestopt_.name{j+nshock},',',bayestopt_.name{i2(jx)+nshock},']']);
-                end
-                fprintf(1,'%20s: corrcoef = %7.3f\n',tmp_name,c0(i2(jx),j));
-                    
+                    if options_.TeX
+                        [param_name_temp1, param_name_tex_temp1]= get_the_name(j+nshock,options_.TeX,M_,estim_params_,options_);
+                        param_name_tex_temp1 = strrep(param_name_tex_temp1,'$','');
+                        [param_name_temp2, param_name_tex_temp2]= get_the_name(i2(jx)+nshock,options_.TeX,M_,estim_params_,options_);
+                        param_name_tex_temp2 = strrep(param_name_tex_temp2,'$','');
+                        tmp_name=(['[',param_name_temp1,',',param_name_temp2,']']);
+                        tmp_name_tex=(['[',param_name_tex_temp1,',',param_name_tex_temp2,']']);
+                        name{entry_iter,1}=tmp_name;
+                        name_tex{entry_iter,1}=tmp_name_tex;
+                    else
+                        [param_name_temp1]= get_the_name(j+nshock,options_.TeX,M_,estim_params_,options_);
+                        [param_name_temp2]= get_the_name(i2(jx)+nshock,options_.TeX,M_,estim_params_,options_);
+                        tmp_name=(['[',param_name_temp1,',',param_name_temp2,']']);
+                        name{entry_iter,1}=tmp_name;
+                    end
+                end                
+                data_mat(entry_iter,1)=c0(i2(jx),j);
+                entry_iter=entry_iter+1;
+                
                 if ~nograph,
-                if mod(j2,12)==1,
+                    if mod(j2,12)==1,
                     ifig=ifig+1;
                     hh=dyn_figure(options_,'name',[figtitle,' sample bivariate projection ', num2str(ifig)]);
                 end
@@ -148,10 +179,16 @@ for j=1:npar,
             fprintf(fidTeX,'%% End Of TeX file. \n');
             fclose(fidTeX);
         end
-    end
-    
+    end    
 end
+
 if j2==0,
     disp(['No correlation term with pvalue <', num2str(pvalue_crit),' and |corr. coef.| >',num2str(alpha2),' found for ',fnam])
+else
+    headers=strvcat('Parameters','corrcoef');
+    dyntable(options_,title,headers,char(name),data_mat, 0, 7, 3);
+    if options_.TeX
+        dyn_latex_table(M_,options_,title,fig_nam_,headers,char(name_tex),data_mat,0,7,3);
+    end
 end
 %close all
