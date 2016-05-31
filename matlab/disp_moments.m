@@ -73,7 +73,7 @@ if options_.nomoments == 0
                  'KURTOSIS');
     dyntable(title,headers,labels,z,size(labels,2)+2,16,6);
     if options_.TeX
-        dyn_latex_table(M_,title,'sim_moments',headers,labels_TeX,z,size(labels,2)+2,16,6);
+        dyn_latex_table(M_,options_,title,'sim_moments',headers,labels_TeX,z,size(labels,2)+2,16,6);
     end
 end
 
@@ -92,7 +92,7 @@ if options_.nocorr == 0
         if options_.TeX
             headers = char('VARIABLE',M_.endo_names_tex(ivar,:));
             lh = size(labels,2)+2;
-            dyn_latex_table(M_,title,'sim_corr_matrix',headers,labels_TeX,corr,size(labels,2)+2,8,4);
+            dyn_latex_table(M_,options_,title,'sim_corr_matrix',headers,labels_TeX,corr,size(labels,2)+2,8,4);
         end
     end
 end
@@ -116,7 +116,7 @@ if ar > 0
         if options_.TeX
             headers = char('VARIABLE',int2str([1:ar]'));
             lh = size(labels,2)+2;
-            dyn_latex_table(M_,title,'sim_autocorr_matrix',headers,labels_TeX,autocorr,size(labels_TeX,2)+2,8,4);
+            dyn_latex_table(M_,options_,title,'sim_autocorr_matrix',headers,labels_TeX,autocorr,size(labels_TeX,2)+2,8,4);
         end
     end
     
@@ -165,7 +165,7 @@ if ~options_.nodecomposition
                 headers = char(' ',headers);
                 labels = deblank(M_.endo_names_tex(ivar,:));
                 lh = size(labels,2)+2;
-                dyn_latex_table(M_,title,'sim_var_decomp',char(headers,'Tot. lin. contr.'),labels_TeX,[oo_.variance_decomposition sum(oo_.variance_decomposition,2)],lh,8,2);
+                dyn_latex_table(M_,options_,title,'sim_var_decomp',char(headers,'Tot. lin. contr.'),labels_TeX,[oo_.variance_decomposition sum(oo_.variance_decomposition,2)],lh,8,2);
             end
 
             if options_.order == 1

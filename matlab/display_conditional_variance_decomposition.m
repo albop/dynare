@@ -60,6 +60,6 @@ for i=1:length(Steps)
          labels_TeX = deblank(M_.endo_names_tex(SubsetOfVariables,:));
          headers_TeX=char('',deblank(M_.exo_names_tex));
          lh = size(labels_TeX,2)+2;
-         dyn_latex_table(M_,[title,'; Period ' int2str(Steps(i))],['th_var_decomp_cond_h',int2str(Steps(i))],headers_TeX,labels_TeX,vardec_i,lh,8,2);
+         dyn_latex_table(M_,options_,[title,'; Period ' int2str(Steps(i))],['th_var_decomp_cond_h',int2str(Steps(i))],headers_TeX,labels_TeX,vardec_i,lh,8,2);
      end    
 end

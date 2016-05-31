@@ -105,7 +105,7 @@ dyntable(my_title,IFAC_header,param_name,Ifac',lh,12,3);
 skipline()
 
 if options_.TeX
-    dyn_latex_table(M_,my_title,'MCMC_inefficiency_factors',IFAC_header_tex,param_name_tex,Ifac',lh,12,3);
+    dyn_latex_table(M_,options_,my_title,'MCMC_inefficiency_factors',IFAC_header_tex,param_name_tex,Ifac',lh,12,3);
 end
 record.InefficiencyFactorsPerBlock = Ifac;
 update_last_mh_history_file(MetropolisFolder, ModelName, record);
@@ -184,7 +184,7 @@ if nblck == 1 % Brooks and Gelman tests need more than one block
         headers = char(Geweke_tex_header);
         lh = size(param_name_tex,2)+2;
         my_title=sprintf('Geweke (1992) Convergence Tests, based on means of draws %d to %d vs %d to %d. p-values are for $\\\\chi^2$-test for equality of means.',first_obs_begin_sample,last_obs_begin_sample,first_obs_end_sample,NumberOfDraws);
-        dyn_latex_table(M_,my_title,'geweke',headers,param_name_tex,datamat,lh,12,4,additional_header);    
+        dyn_latex_table(M_,options_,my_title,'geweke',headers,param_name_tex,datamat,lh,12,4,additional_header);    
     end
     skipline(2);
     return;

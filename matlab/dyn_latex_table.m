@@ -1,4 +1,4 @@
-function dyn_latex_table(M_,title,LaTeXtitle,headers,labels,values,label_width,val_width,val_precis,optional_header)
+function dyn_latex_table(M_,options_,title,LaTeXtitle,headers,labels,values,label_width,val_width,val_precis,optional_header)
 %function dyn_latex_table(M_,title,LaTeXtitle,headers,labels,values,label_width,val_width,val_precis,optional_header)
 
 % Copyright (C) 2015-2016 Dynare Team
@@ -17,6 +17,10 @@ function dyn_latex_table(M_,title,LaTeXtitle,headers,labels,values,label_width,v
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+if options_.noprint
+    return
+end
 
 OutputDirectoryName = CheckPath('Output',M_.dname);
 
@@ -71,7 +75,7 @@ fprintf(fidTeX,['\\caption{',title,'}\\\\\n ']);
 
 fprintf(fidTeX,['\\label{Table:',LaTeXtitle,'}\\\\\n']);
 fprintf(fidTeX,'\\toprule \n');
-if nargin==10
+if nargin==11
     for ii=1:size(optional_header,1)
         fprintf(fidTeX,'%s\n',optional_header{ii});
     end
@@ -80,7 +84,7 @@ fprintf(fidTeX,header_string);
 fprintf(fidTeX,'\\midrule \\endfirsthead \n');
 fprintf(fidTeX,'\\caption{(continued)}\\\\\n ');
 fprintf(fidTeX,'\\toprule \\\\ \n');
-if nargin==10
+if nargin==11
     for ii=1:size(optional_header,1)
         fprintf(fidTeX,'%s\n',optional_header{ii});
     end
