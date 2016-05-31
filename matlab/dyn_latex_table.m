@@ -55,7 +55,7 @@ header_string_format  = sprintf('$%%%ds$',val_width);
 
 %Create and print header string
 if length(headers) > 0
-    header_string = sprintf(label_format_leftbound ,deblank(headers(1,:)));
+    header_string = sprintf(label_format_leftbound ,strrep(deblank(headers(1,:)),'\','\\'));
     header_code_string='l';
     for i=2:size(headers,1)
         header_string  = [header_string '\t & \t ' sprintf(header_string_format,strrep(deblank(headers(i,:)),'\','\\'))];
