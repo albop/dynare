@@ -120,7 +120,24 @@ end
 options_mcf.pvalue_ks = pvalue_ks;
 options_mcf.pvalue_corr = pvalue_corr;
 options_mcf.alpha2 = alpha2;
-options_mcf.param_names = char(bayestopt_.name(nshock+1:end));
+
+name=cell(np,1);
+name_tex=cell(np,1);
+for jj=1:np        
+    if options_.TeX
+        [param_name_temp, param_name_tex_temp]= get_the_name(nshock+jj,options_.TeX,M_,estim_params_,options_);
+        name_tex{jj,1} = strrep(param_name_tex_temp,'$','');
+        name{jj,1} = param_name_temp;
+    else
+        param_name_temp = get_the_name(nshock+jj,options_.TeX,M_,estim_params_,options_);
+        name{jj,1} = param_name_temp;
+    end
+end
+if options_.TeX
+    options_mcf.param_names_tex=char(name_tex);
+end
+options_mcf.param_names = char(name);
+
 options_mcf.fname_ = fname_;
 options_mcf.OutputDirectoryName = OutputDirectoryName;
 options_mcf.xparam1 = [];
