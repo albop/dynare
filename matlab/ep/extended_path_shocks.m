@@ -24,8 +24,10 @@ if isempty(exogenousvariables)
         shocks = transpose(transpose(innovations.covariance_matrix_upper_cholesky)*randn(innovations.effective_number_of_shocks,sample_size));
         shocks(:,innovations.positive_var_indx) = shocks;
       case 'calibrated'
-        oo = make_ex_(DynareModel,DynareOptions,DynareResults);
-        shocks = oo.exo_simul;
+        options = DynareOptions;
+        options.periods = options.ep.periods;
+        oo = make_ex_(DynareModel,options,DynareResults);
+        shocks = oo.exo_simul(2:end,:);
       otherwise
         error(['extended_path:: ' ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
     end
