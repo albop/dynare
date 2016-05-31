@@ -1,6 +1,7 @@
-function dyntable(title,headers,labels,values,label_width,val_width,val_precis)
+function dyntable(options_,title,headers,labels,values,label_width,val_width,val_precis)
 % function dyntable(title,headers,labels,values,label_width,val_width,val_precis)
 % Inputs:
+%   options_    [structure]         Dynare options structure
 %   title       [string]            Table title
 %   headers     [n by nchar]        character array of labels for header row
 %   labels      [n by nchar]        character array of labels for label column
@@ -26,8 +27,6 @@ function dyntable(title,headers,labels,values,label_width,val_width,val_precis)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global options_
 
 if options_.noprint
     return

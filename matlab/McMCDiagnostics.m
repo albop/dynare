@@ -82,6 +82,7 @@ param_name_tex=[];
 for jj=1:npar
     [par_name_temp,par_name_tex_temp]=get_the_name(jj,options_.TeX,M_,estim_params_,options_);
     param_name = strvcat(param_name,par_name_temp);
+    par_name_tex_temp = strrep(par_name_tex_temp,'$','');
     param_name_tex = strvcat(param_name_tex,par_name_tex_temp);
     Draws = GetAllPosteriorDraws(jj,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
     Draws = reshape(Draws,[NumberOfDraws nblck]);
@@ -101,7 +102,7 @@ for j=1:nblck,
 end
 
 lh = size(param_name,2)+2;
-dyntable(my_title,IFAC_header,param_name,Ifac',lh,12,3);
+dyntable(options_,my_title,IFAC_header,param_name,Ifac',lh,12,3);
 skipline()
 
 if options_.TeX
@@ -173,7 +174,7 @@ if nblck == 1 % Brooks and Gelman tests need more than one block
         datamat(jj,:)=[results_struct.posteriormean,results_struct.posteriorstd,results_struct.prob_chi2_test];
     end
     lh = size(param_name,2)+2;
-    dyntable('',Geweke_header,param_name,datamat,lh,12,3);
+    dyntable(options_,'',Geweke_header,param_name,datamat,lh,12,3);
     if options_.TeX
         Geweke_tex_header=char('Parameter', 'Mean', 'Std', 'No\ Taper');
         additional_header={[' & \multicolumn{2}{c}{Posterior} & \multicolumn{',num2str(1+length(options_.convergence.geweke.taper_steps)),'}{c}{p-values} \\'],

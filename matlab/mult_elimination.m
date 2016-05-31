@@ -128,6 +128,6 @@ if nvar > 0 && options_.noprint == 0
         labels = char(labels,strcat(deblank(M_.exo_names(i,:)),'(-1)'));
     end
     lh = size(labels,2)+2;
-    dyntable(my_title,headers,labels,res_table,lh,10,6);
+    dyntable(options_,my_title,headers,labels,res_table,lh,10,6);
     skipline()
 end

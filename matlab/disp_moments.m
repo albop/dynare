@@ -71,7 +71,7 @@ if options_.nomoments == 0
     
     headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
                  'KURTOSIS');
-    dyntable(title,headers,labels,z,size(labels,2)+2,16,6);
+    dyntable(options_,title,headers,labels,z,size(labels,2)+2,16,6);
     if options_.TeX
         dyn_latex_table(M_,options_,title,'sim_moments',headers,labels_TeX,z,size(labels,2)+2,16,6);
     end
@@ -88,7 +88,7 @@ if options_.nocorr == 0
         title=add_filter_subtitle(title,options_);
 
         headers = char('VARIABLE',M_.endo_names(ivar,:));
-        dyntable(title,headers,labels,corr,size(labels,2)+2,8,4);
+        dyntable(options_,title,headers,labels,corr,size(labels,2)+2,8,4);
         if options_.TeX
             headers = char('VARIABLE',M_.endo_names_tex(ivar,:));
             lh = size(labels,2)+2;
@@ -112,7 +112,7 @@ if ar > 0
         title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
         title=add_filter_subtitle(title,options_);
         headers = char('VARIABLE',int2str([1:ar]'));
-        dyntable(title,headers,labels,autocorr,size(labels,2)+2,8,4);
+        dyntable(options_,title,headers,labels,autocorr,size(labels,2)+2,8,4);
         if options_.TeX
             headers = char('VARIABLE',int2str([1:ar]'));
             lh = size(labels,2)+2;
@@ -159,7 +159,7 @@ if ~options_.nodecomposition
             headers(M_.exo_names_orig_ord,:) = headers;
             headers = char(' ',headers);
             lh = size(deblank(M_.endo_names(ivar,:)),2)+2;
-            dyntable(title,char(headers,'Tot. lin. contr.'),deblank(M_.endo_names(ivar,:)),[oo_.variance_decomposition sum(oo_.variance_decomposition,2)],lh,8,2);
+            dyntable(options_,title,char(headers,'Tot. lin. contr.'),deblank(M_.endo_names(ivar,:)),[oo_.variance_decomposition sum(oo_.variance_decomposition,2)],lh,8,2);
             if options_.TeX
                 headers=M_.exo_names_tex;
                 headers = char(' ',headers);

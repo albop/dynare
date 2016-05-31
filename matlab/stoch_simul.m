@@ -108,7 +108,7 @@ if ~options_.noprint
     labels = deblank(M_.exo_names);
     headers = char('Variables',labels);
     lh = size(labels,2)+2;
-    dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
+    dyntable(options_,my_title,headers,labels,M_.Sigma_e,lh,10,6);
     if options_.TeX
         labels = deblank(M_.exo_names_tex);
         headers = char('Variables',labels);

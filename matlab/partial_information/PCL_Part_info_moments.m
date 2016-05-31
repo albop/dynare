@@ -153,7 +153,7 @@ if options_.nomoments == 0
     z = [ sqrt(diagCovYR0(ivar)) diagCovYR0(ivar) ]; 
     title='THEORETICAL MOMENTS';
     headers=char('VARIABLE','STD. DEV.','VARIANCE');
-    dyntable(title,headers,labels,z,size(labels,2)+2,16,10);
+    dyntable(options_,title,headers,labels,z,size(labels,2)+2,16,10);
 end
 if options_.nocorr == 0
     diagSqrtCovYR0=sqrt(diagCovYR0);
@@ -161,7 +161,7 @@ if options_.nocorr == 0
     COR_Y= DELTA*COV_YR0*DELTA;
     title = 'MATRIX OF CORRELATION';
     headers = char('VARIABLE',M_.endo_names(ivar,:));
-    dyntable(title,headers,labels,COR_Y(ivar,ivar),size(labels,2)+2,8,4);
+    dyntable(options_,title,headers,labels,COR_Y(ivar,ivar),size(labels,2)+2,8,4);
 else
     COR_Y=[];
 end
@@ -180,7 +180,7 @@ if ar > 0
     end
     title = 'COEFFICIENTS OF AUTOCORRELATION';
     headers = char('VARIABLE',int2str([1:ar]'));
-    dyntable(title,headers,labels,AutoCOR_YRk(ivar,:),size(labels,2)+2,8,4);
+    dyntable(options_,title,headers,labels,AutoCOR_YRk(ivar,:),size(labels,2)+2,8,4);
 else
     AutoCOR_YRk=[];
 end

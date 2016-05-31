@@ -1,4 +1,4 @@
-function disp_model_summary(M,dr)
+function disp_model_summary(M,dr,options)
 
 % function disp_model_summary(M)
 %     displays the model summary
@@ -6,8 +6,9 @@ function disp_model_summary(M,dr)
 % INPUTS
 %   M         [matlab structure] Definition of the model.           
 %   dr        [matlab structure] Decision rules
+%   options   [matlab structure] Options
 %
-% Copyright (C) 2001-2012 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,5 +39,5 @@ my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
 labels = deblank(M.exo_names);
 headers = char('Variables',labels);
 lh = size(labels,2)+2;
-dyntable(my_title,headers,labels,M.Sigma_e,lh,10,6);
+dyntable(options,my_title,headers,labels,M.Sigma_e,lh,10,6);
 

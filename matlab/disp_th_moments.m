@@ -66,7 +66,7 @@ if size(stationary_vars, 1) > 0
         headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE');
         labels = deblank(M_.endo_names(ivar,:));
         lh = size(labels,2)+2;
-        dyntable(title,headers,labels,z,lh,11,4);
+        dyntable(options_,title,headers,labels,z,lh,11,4);
         if options_.TeX
             labels = deblank(M_.endo_names_tex(ivar,:));
             lh = size(labels,2)+2;
@@ -85,7 +85,7 @@ if size(stationary_vars, 1) > 0
             headers(M_.exo_names_orig_ord,:) = headers;
             headers = char(' ',headers);
             lh = size(deblank(M_.endo_names(ivar(stationary_vars),:)),2)+2;
-            dyntable(title,headers,deblank(M_.endo_names(ivar(stationary_vars), ...
+            dyntable(options_,title,headers,deblank(M_.endo_names(ivar(stationary_vars), ...
                                                          :)),100* ...
                      oo_.gamma_y{options_.ar+2}(stationary_vars,:),lh,8,2);
             if options_.TeX
@@ -138,7 +138,7 @@ if options_.nocorr == 0 && size(stationary_vars, 1) > 0
         labels = deblank(M_.endo_names(ivar(i1),:));
         headers = char('Variables',labels);
         lh = size(labels,2)+2;
-        dyntable(title,headers,labels,corr,lh,8,4);
+        dyntable(options_,title,headers,labels,corr,lh,8,4);
         if options_.TeX
             labels = deblank(M_.endo_names_tex(ivar(i1),:));
             headers=char('Variables',labels);
@@ -164,7 +164,7 @@ if options_.ar > 0 && size(stationary_vars, 1) > 0
         labels = deblank(M_.endo_names(ivar(i1),:));      
         headers = char('Order ',int2str([1:options_.ar]'));
         lh = size(labels,2)+2;
-        dyntable(title,headers,labels,z,lh,8,4);
+        dyntable(options_,title,headers,labels,z,lh,8,4);
         if options_.TeX
             labels = deblank(M_.endo_names_tex(ivar(i1),:)); 
             headers=char('Order ',int2str([1:options_.ar]'));
