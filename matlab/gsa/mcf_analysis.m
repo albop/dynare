@@ -27,7 +27,14 @@ pvalue_ks = options_mcf.pvalue_ks;
 pvalue_corr = options_mcf.pvalue_corr;
 alpha2 = options_mcf.alpha2;
 param_names = options_mcf.param_names;
-param_names_tex = options_mcf.param_names_tex;
+
+if DynareOptions.TeX
+    if ~isfield(options_mcf,'param_names_tex')
+        param_names_tex = options_mcf.param_names;
+    else
+        param_names_tex = options_mcf.param_names_tex;
+    end
+end
 amcf_name = options_mcf.amcf_name;
 amcf_title = options_mcf.amcf_title;
 beha_title = options_mcf.beha_title;
