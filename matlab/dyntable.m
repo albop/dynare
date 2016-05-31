@@ -1,4 +1,4 @@
-function dyntable(options_,title,headers,labels,values,label_width,val_width,val_precis)
+function dyntable(options_,title,headers,labels,values,label_width,val_width,val_precis,optional_header)
 % function dyntable(title,headers,labels,values,label_width,val_width,val_precis)
 % Inputs:
 %   options_    [structure]         Dynare options structure
@@ -65,6 +65,9 @@ if length(title) > 0
     fprintf('\n\n%s\n',title);
 end
 %Create and print header string
+if nargin==9
+    disp(optional_header)
+end
 if length(headers) > 0
     hh = sprintf(label_format_leftbound ,deblank(headers(1,:)));
     for i=2:size(headers,1)
@@ -72,6 +75,7 @@ if length(headers) > 0
     end
     disp(hh);
 end
+
 for i=1:size(values,1)
     disp([sprintf(label_format_leftbound ,deblank(labels(i,:))) sprintf(value_format ,values(i,:))]);
 end
