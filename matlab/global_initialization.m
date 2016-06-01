@@ -282,6 +282,9 @@ particle.mixture_measurement_shocks = 1 ;
 % Online approach 
 particle.liu_west_delta = 0.99 ;
 particle.liu_west_chol_sigma_bar = .01 ;
+% Options for setting the weights in conditional particle filters.
+particle.cpf_weights_method.amisanotristani = 1;
+particle.cpf_weights_method.murrayjonesparslow = 0;
 % Copy ep structure in options_ global structure
 options_.particle = particle;
 options_.rwgmh.init_scale = 1e-4 ;
