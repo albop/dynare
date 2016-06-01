@@ -58,6 +58,7 @@ nshock = nshock + estim_params_.ncn;
 [c0, pvalue] = corrcoef(x);
 c00=tril(c0,-1);
 fig_nam_=[fname_,'_',fnam,'_corr_'];
+fig_nam_tex_table=strrep([fnam,'_corr'],' ','_');
 fig_nam_=strrep(fig_nam_,' ','_');
 
 ifig=0;
@@ -72,7 +73,7 @@ else
 end
 skipline();
 title_string=['Correlation analysis for ',fnam];
-title_string_tex=['Correlation analysis for ',strrep(fnam,'_','\_')];
+title_string_tex=['Correlation analysis for ',strrep(fnam,'_','\\_')];
 
 indcorr = [];
 entry_iter=1;
@@ -152,7 +153,7 @@ for j=1:npar,
                         fprintf(fidTeX,['%% ' datestr(now,0) '\n\n']);
                         fprintf(fidTeX,'\\begin{figure}[H]\n');
                         fprintf(fidTeX,'\\centering \n');
-                        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s}\n',[dirname,filesep,fig_nam_,int2str(ifig)]);
+                        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s}\n',strrep([dirname,'/',fig_nam_,int2str(ifig)],'\','/'));
                         fprintf(fidTeX,'\\caption{%s.}',[figtitle,' sample bivariate projection ', num2str(ifig)]);
                         fprintf(fidTeX,'\\label{Fig:%s:%u}\n',fig_nam_,ifig);
                         fprintf(fidTeX,'\\end{figure}\n\n');
@@ -173,7 +174,7 @@ for j=1:npar,
             fprintf(fidTeX,['%% ' datestr(now,0) '\n\n']);
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             fprintf(fidTeX,'\\centering \n');
-            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s}\n',[dirname,filesep,fig_nam_,int2str(ifig)]);
+            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s}\n',strrep([dirname,'/',fig_nam_,int2str(ifig)],'\','/'));
             fprintf(fidTeX,'\\caption{%s.}',[figtitle,' sample bivariate projection ', num2str(ifig)]);
             fprintf(fidTeX,'\\label{Fig:%s:%u}\n',fig_nam_,ifig);
             fprintf(fidTeX,'\\end{figure}\n\n');
@@ -189,7 +190,7 @@ else
     headers=strvcat('Parameters','corrcoef');
     dyntable(options_,title_string,headers,char(name),data_mat, 0, 7, 3);
     if options_.TeX
-        dyn_latex_table(M_,options_,title_string_tex,fig_nam_,headers,char(name_tex),data_mat,0,7,3);
+        dyn_latex_table(M_,options_,title_string_tex,fig_nam_tex_table,headers,char(name_tex),data_mat,0,7,3);
     end
 end
 %close all

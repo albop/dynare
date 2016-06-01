@@ -63,7 +63,7 @@ if ~isempty(indmcf)
         labels_TeX=param_names_tex(indmcf,:);
         M_temp.dname=OutputDirectoryName ;
         M_temp.fname=fname_;
-        dyn_latex_table(M_temp,options_temp,['Smirnov statistics in driving ', strrep(title,'_','\_')],amcf_name,headers,labels_TeX,data_mat,size(labels,2)+2,16,6);
+        dyn_latex_table(M_temp,options_temp,['Smirnov statistics in driving ', strrep(title,'_','\\_')],amcf_name,headers,labels_TeX,data_mat,size(labels,2)+2,16,6);
     end
 end
     
