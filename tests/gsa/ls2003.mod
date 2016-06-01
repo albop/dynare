@@ -1,7 +1,7 @@
-var y y_s R pie dq pie_s de A y_obs pie_obs R_obs;
-varexo e_R e_q e_ys e_pies e_A;
+var y y_s R pie dq pie_s de A y_obs pie_obs R_obs ${R^{obs}}$;
+varexo e_R ${e^R}$ e_q e_ys e_pies e_A;
 
-parameters psi1 psi2 psi3 rho_R tau alpha rr k rho_q rho_A rho_ys rho_pies;
+parameters psi1 psi2 psi3 rho_R ${\rho_R}$  tau alpha rr k rho_q rho_A rho_ys rho_pies;
 
 psi1 = 1.54;
 psi2 = 0.25;
