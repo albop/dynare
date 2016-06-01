@@ -250,9 +250,9 @@ particle.pruning = 0;
 % Set the Gaussian approximation method for particles distributions
 particle.approximation_method = 'unscented';
 % Set unscented parameters alpha, beta and kappa for gaussian approximation
-particle.unscented.alpha = .01;
+particle.unscented.alpha = 1;
 particle.unscented.beta = 2;
-particle.unscented.kappa = 0;
+particle.unscented.kappa = 1;
 % Configuration of resampling in case of particles
 particle.resampling.status.systematic = 1;
 particle.resampling.status.none = 0;
