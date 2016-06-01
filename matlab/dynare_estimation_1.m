@@ -81,6 +81,8 @@ if ~options_.dsge_var
             options_.particle.algorithm = 'gaussian_mixture_filter';
         elseif strcmpi(options_.particle.filter_algorithm, 'cpf')
             options_.particle.algorithm = 'conditional_particle_filter';
+        elseif strcmpi(options_.particle.filter_algorithm, 'nlkf')
+            options_.particle.algorithm = 'nonlinear_kalman_filter';
         else
             error(['Estimation: Unknown filter ' options_.particle.filter_algorithm])
         end
