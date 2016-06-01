@@ -127,10 +127,12 @@ if ~loadSA,
     gend = dataset_.nobs;
     data_index = dataset_info.missing.aindex;
     missing_value = dataset_info.missing.state;
-    for jx=1:gend, data_indx(jx,data_index{jx})=true; end
+    for jx=1:gend
+        data_indx(jx,data_index{jx})=true; 
+    end
     %stock_gend=data_info.gend;
     %stock_data = data_info.data;
-    load([DirectoryName filesep M_.fname '_data.mat']);    
+    load([DirectoryName filesep M_.fname '_data.mat']);
     filfilt = dir([DirectoryName filesep M_.fname '_filter_step_ahead*.mat']);
     filsmooth = dir([DirectoryName filesep M_.fname '_smooth*.mat']);
     filupdate = dir([DirectoryName filesep M_.fname '_update*.mat']);
@@ -160,46 +162,46 @@ if ~loadSA,
             js(i) = strmatch(vj,lgy_,'exact');
             yss(i,:,:)=repmat(sto_ys(:,js(i))',[gend,1]);
         end
-            if exist('xparam1','var')
-                [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value);
-                y0 = transpose( squeeze(aK(1,jxj,1:gend)));% + kron(ys_mode(js),ones(1,gend)));
-                yobs = transpose( ahat(jxj,:));% + kron(ys_mode(js),ones(1,gend)));
-                rmse_mode = sqrt(mean((yobs(istart:end,:)-y0(istart:end,:)).^2));
-                r2_mode = 1-sum((yobs(istart:end,:)-y0(istart:end,:)).^2)./sum(yobs(istart:end,:).^2);
-            end
-            y0=yss*0;
-            nbb=0;
-            for j=1:length(filfilt),
-                load([DirectoryName filesep M_.fname '_filter_step_ahead',num2str(j),'.mat']);
-                nb = size(stock,4);
-                y0(:,:,nbb+1:nbb+nb)=y0(:,:,nbb+1:nbb+nb)+squeeze(stock(1,js,1:gend,:));
-                nbb=nbb+nb;
-                clear stock;
-            end
-            yobs=-yss;
-            nbb=0;
-            for j=1:length(filupdate),
-                load([DirectoryName filesep M_.fname '_update',num2str(j),'.mat']);
-                nb = size(stock,3);
-                yobs(:,:,nbb+1:nbb+nb)=yobs(:,:,nbb+1:nbb+nb)+squeeze(stock(js,1:gend,:));
-                nbb=nbb+nb;
-                clear stock;
-            end
-            y0M=mean(y0,2);
-            rmse_MC=zeros(nruns,length(js));
-            r2_MC=zeros(nruns,length(js));
-            for j=1:nruns,
-                rmse_MC(j,:) = sqrt(mean((yobs(:,istart:end,j)'-y0(:,istart:end,j)').^2));
-                r2_MC(j,:) = 1-mean((yobs(:,istart:end,j)'-y0(:,istart:end,j)').^2)./mean((yobs(:,istart:end,j)').^2);
-            end
-            if exist('xparam1_mean','var')
-                %eval(['rmse_pmean(i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-y0M(istart:end-1)).^2));'])
-                [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1_mean,gend,Y,data_index,missing_value);
-                y0 = transpose( squeeze(aK(1,jxj,1:gend)));% + kron(ys_mean(js),ones(1,gend)));
-                yobs = transpose( ahat(jxj,:));% + kron(ys_mean(js),ones(1,gend)));
-                rmse_pmean = sqrt(mean((yobs(istart:end,:)-y0(istart:end,:)).^2));
-                r2_pmean = 1-mean((yobs(istart:end,:)-y0(istart:end,:)).^2)./mean(yobs(istart:end,:).^2);
-            end
+        if exist('xparam1','var')
+            [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value);
+            y0 = transpose( squeeze(aK(1,jxj,1:gend)));% + kron(ys_mode(js),ones(1,gend)));
+            yobs = transpose( ahat(jxj,:));% + kron(ys_mode(js),ones(1,gend)));
+            rmse_mode = sqrt(mean((yobs(istart:end,:)-y0(istart:end,:)).^2));
+            r2_mode = 1-sum((yobs(istart:end,:)-y0(istart:end,:)).^2)./sum(yobs(istart:end,:).^2);
+        end
+        y0=yss*0;
+        nbb=0;
+        for j=1:length(filfilt),
+            load([DirectoryName filesep M_.fname '_filter_step_ahead',num2str(j),'.mat']);
+            nb = size(stock,4);
+            y0(:,:,nbb+1:nbb+nb)=y0(:,:,nbb+1:nbb+nb)+squeeze(stock(1,js,1:gend,:));
+            nbb=nbb+nb;
+            clear stock;
+        end
+        yobs=-yss;
+        nbb=0;
+        for j=1:length(filupdate),
+            load([DirectoryName filesep M_.fname '_update',num2str(j),'.mat']);
+            nb = size(stock,3);
+            yobs(:,:,nbb+1:nbb+nb)=yobs(:,:,nbb+1:nbb+nb)+squeeze(stock(js,1:gend,:));
+            nbb=nbb+nb;
+            clear stock;
+        end
+        y0M=mean(y0,2);
+        rmse_MC=zeros(nruns,length(js));
+        r2_MC=zeros(nruns,length(js));
+        for j=1:nruns,
+            rmse_MC(j,:) = sqrt(mean((yobs(:,istart:end,j)'-y0(:,istart:end,j)').^2));
+            r2_MC(j,:) = 1-mean((yobs(:,istart:end,j)'-y0(:,istart:end,j)').^2)./mean((yobs(:,istart:end,j)').^2);
+        end
+        if exist('xparam1_mean','var')
+            %eval(['rmse_pmean(i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-y0M(istart:end-1)).^2));'])
+            [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1_mean,gend,Y,data_index,missing_value);
+            y0 = transpose( squeeze(aK(1,jxj,1:gend)));% + kron(ys_mean(js),ones(1,gend)));
+            yobs = transpose( ahat(jxj,:));% + kron(ys_mean(js),ones(1,gend)));
+            rmse_pmean = sqrt(mean((yobs(istart:end,:)-y0(istart:end,:)).^2));
+            r2_pmean = 1-mean((yobs(istart:end,:)-y0(istart:end,:)).^2)./mean(yobs(istart:end,:).^2);
+        end
         clear stock_filter;
     end
     for j=1:nruns,
@@ -254,7 +256,7 @@ if ~options_.opt_gsa.ppost && options_.opt_gsa.lik_only
         anam='rmse_mc_post';
         atitle='RMSE MC: Log Posterior Kernel';
     end
-
+    
     options_mcf.pvalue_ks = alpha;
     options_mcf.pvalue_corr = pvalue;
     options_mcf.alpha2 = alpha2;
@@ -281,7 +283,7 @@ if ~options_.opt_gsa.ppost && options_.opt_gsa.lik_only
     options_mcf.beha_title = 'better likelihood';
     options_mcf.nobeha_title = 'worse likelihood';
     mcf_analysis(x, ilik(1:nfilt), ilik(nfilt+1:end), options_mcf, options_);
-
+    
 else
     if options_.opt_gsa.ppost,
         rmse_txt=rmse_pmean;
@@ -329,9 +331,9 @@ else
                     %                 PP(j,i)=min(P,PP(j,i));
                     %                 PP(j,l)=min(P,PP(j,l));
                     %if P<P1
-%                     if SS(j,i)*SS(j,l)
-                        PPV(i,l,j) = P;
-%                     end
+                    %                     if SS(j,i)*SS(j,l)
+                    PPV(i,l,j) = P;
+                    %                     end
                 elseif l==i
                     PPV(i,l,j) = PP(j,i);
                 end
@@ -339,138 +341,138 @@ else
         end
     end
     if ~options_.nograph,
-    ifig=0;
-    for i=1:size(vvarvecm,1),
-        if options_.opt_gsa.ppost
-            temp_name='RMSE Posterior: Log Prior';
-        else
-            if options_.opt_gsa.pprior
-                temp_name='RMSE Prior: Log Prior';
-            else
-                temp_name='RMSE MC: Log Prior';
-            end
-        end
-        if mod(i,9)==1,
-            ifig=ifig+1;
-            hh=dyn_figure(options_,'name',[temp_name,' ',int2str(ifig)]);
-        end
-        subplot(3,3,i-9*(ifig-1))
-        h=cumplot(lnprior(ixx(1:nfilt0(i),i)));
-        set(h,'color','blue','linewidth',2)
-        hold on, h=cumplot(lnprior);
-        set(h,'color','k','linewidth',1)
-        h=cumplot(lnprior(ixx(nfilt0(i)+1:end,i)));
-        set(h,'color','red','linewidth',2)
-        title(vvarvecm(i,:),'interpreter','none')
-        if mod(i,9)==0 || i==size(vvarvecm,1)
-            if ~isoctave
-                annotation('textbox', [0.1,0,0.35,0.05],'String', 'Log-prior for BETTER R2','Color','Blue','horizontalalignment','center');
-                annotation('textbox', [0.55,0,0.35,0.05],'String', 'Log-prior for WORSE R2', 'Color','Red','horizontalalignment','center');
-            end
+        ifig=0;
+        for i=1:size(vvarvecm,1),
             if options_.opt_gsa.ppost
-                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnprior',int2str(ifig)],options_);
-                create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_post_lnprior')
+                temp_name='RMSE Posterior: Log Prior';
             else
                 if options_.opt_gsa.pprior
-                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnprior',int2str(ifig) ],options_);
-                    create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_prior_lnprior')
+                    temp_name='RMSE Prior: Log Prior';
                 else
-                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnprior',int2str(ifig) ],options_);
-                    create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_mc_lnprior')
+                    temp_name='RMSE MC: Log Prior';
+                end
+            end
+            if mod(i,9)==1,
+                ifig=ifig+1;
+                hh=dyn_figure(options_,'name',[temp_name,' ',int2str(ifig)]);
+            end
+            subplot(3,3,i-9*(ifig-1))
+            h=cumplot(lnprior(ixx(1:nfilt0(i),i)));
+            set(h,'color','blue','linewidth',2)
+            hold on, h=cumplot(lnprior);
+            set(h,'color','k','linewidth',1)
+            h=cumplot(lnprior(ixx(nfilt0(i)+1:end,i)));
+            set(h,'color','red','linewidth',2)
+            title(vvarvecm(i,:),'interpreter','none')
+            if mod(i,9)==0 || i==size(vvarvecm,1)
+                if ~isoctave
+                    annotation('textbox', [0.1,0,0.35,0.05],'String', 'Log-prior for BETTER R2','Color','Blue','horizontalalignment','center');
+                    annotation('textbox', [0.55,0,0.35,0.05],'String', 'Log-prior for WORSE R2', 'Color','Red','horizontalalignment','center');
+                end
+                if options_.opt_gsa.ppost
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnprior',int2str(ifig)],options_);
+                    create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_post_lnprior')
+                else
+                    if options_.opt_gsa.pprior
+                        dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnprior',int2str(ifig) ],options_);
+                        create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_prior_lnprior')
+                    else
+                        dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnprior',int2str(ifig) ],options_);
+                        create_TeX_loader(options_,[OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_mc_lnprior')
+                    end
                 end
             end
         end
-    end
-    ifig=0;
-    for i=1:size(vvarvecm,1),
-        if options_.opt_gsa.ppost
-            temp_name='RMSE Posterior: Log Likelihood';
-        else
-            if options_.opt_gsa.pprior
-                temp_name='RMSE Prior: Log Likelihood';
-            else
-                temp_name='RMSE MC: Log Likelihood';
-            end
-        end
-        if mod(i,9)==1,
-            ifig=ifig+1;
-            hh = dyn_figure(options_,'Name',[temp_name,' ',int2str(ifig)]);
-        end
-        subplot(3,3,i-9*(ifig-1))
-        h=cumplot(likelihood(ixx(1:nfilt0(i),i)));
-        set(h,'color','blue','linewidth',2)
-        hold on, h=cumplot(likelihood);
-        set(h,'color','k','linewidth',1)
-        h=cumplot(likelihood(ixx(nfilt0(i)+1:end,i)));
-        set(h,'color','red','linewidth',2)
-        title(vvarvecm(i,:),'interpreter','none')
-        if options_.opt_gsa.ppost==0,
-            set(gca,'xlim',[min( likelihood(ixx(1:nfilt0(i),i)) ) max( likelihood(ixx(1:nfilt0(i),i)) )])
-        end
-        if mod(i,9)==0 || i==size(vvarvecm,1)
-            if ~isoctave
-                annotation('textbox', [0.1,0,0.35,0.05],'String', 'Log-likelihood for BETTER R2','Color','Blue','horizontalalignment','center');
-                annotation('textbox', [0.55,0,0.35,0.05],'String', 'Log-likelihood for WORSE R2', 'Color','Red','horizontalalignment','center');
-            end
+        ifig=0;
+        for i=1:size(vvarvecm,1),
             if options_.opt_gsa.ppost
-                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnlik',int2str(ifig) ],options_);
+                temp_name='RMSE Posterior: Log Likelihood';
+            else
+                if options_.opt_gsa.pprior
+                    temp_name='RMSE Prior: Log Likelihood';
+                else
+                    temp_name='RMSE MC: Log Likelihood';
+                end
+            end
+            if mod(i,9)==1,
+                ifig=ifig+1;
+                hh = dyn_figure(options_,'Name',[temp_name,' ',int2str(ifig)]);
+            end
+            subplot(3,3,i-9*(ifig-1))
+            h=cumplot(likelihood(ixx(1:nfilt0(i),i)));
+            set(h,'color','blue','linewidth',2)
+            hold on, h=cumplot(likelihood);
+            set(h,'color','k','linewidth',1)
+            h=cumplot(likelihood(ixx(nfilt0(i)+1:end,i)));
+            set(h,'color','red','linewidth',2)
+            title(vvarvecm(i,:),'interpreter','none')
+            if options_.opt_gsa.ppost==0,
+                set(gca,'xlim',[min( likelihood(ixx(1:nfilt0(i),i)) ) max( likelihood(ixx(1:nfilt0(i),i)) )])
+            end
+            if mod(i,9)==0 || i==size(vvarvecm,1)
+                if ~isoctave
+                    annotation('textbox', [0.1,0,0.35,0.05],'String', 'Log-likelihood for BETTER R2','Color','Blue','horizontalalignment','center');
+                    annotation('textbox', [0.55,0,0.35,0.05],'String', 'Log-likelihood for WORSE R2', 'Color','Red','horizontalalignment','center');
+                end
+                if options_.opt_gsa.ppost
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnlik',int2str(ifig) ],options_);
                     create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_post_lnprior',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_post_lnprio')
-            else
-                if options_.opt_gsa.pprior
-                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnlik',int2str(ifig)],options_);
-                    create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_lnlik',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_prior_lnlik')
                 else
-                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnlik',int2str(ifig) ],options_);
-                    create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_lnlik',int2str(ifig) ],ifig,[temp_name,' ',int2str(ifig)],'rmse_mc_lnlik')
-               end
-            end
-        end
-    end
-    ifig=0;
-    for i=1:size(vvarvecm,1),
-        if options_.opt_gsa.ppost
-            temp_name='RMSE Posterior: Log Posterior';
-        else
-            if options_.opt_gsa.pprior
-                temp_name='RMSE Prior: Log Posterior';
-            else
-                temp_name='RMSE MC: Log Posterior';
-            end
-        end
-        if mod(i,9)==1,
-            ifig=ifig+1;
-            hh = dyn_figure(options_,'Name',[temp_name,' ',int2str(ifig)]);
-        end
-        subplot(3,3,i-9*(ifig-1))
-        h=cumplot(logpo2(ixx(1:nfilt0(i),i)));
-        set(h,'color','blue','linewidth',2)
-        hold on, h=cumplot(logpo2);
-        set(h,'color','k','linewidth',1)
-        h=cumplot(logpo2(ixx(nfilt0(i)+1:end,i)));
-        set(h,'color','red','linewidth',2)
-        title(vvarvecm(i,:),'interpreter','none')
-        if options_.opt_gsa.ppost==0,
-            set(gca,'xlim',[min( logpo2(ixx(1:nfilt0(i),i)) ) max( logpo2(ixx(1:nfilt0(i),i)) )])
-        end
-        if mod(i,9)==0 || i==size(vvarvecm,1)
-            if ~isoctave
-                annotation('textbox', [0.1,0,0.35,0.05],'String', 'Log-posterior for BETTER R2','Color','Blue','horizontalalignment','center');
-                annotation('textbox', [0.55,0,0.35,0.05],'String', 'Log-posterior for WORSE R2', 'Color','Red','horizontalalignment','center');
-            end
-            if options_.opt_gsa.ppost
-                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnpost',int2str(ifig) ],options_);
-                create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_post_lnpost',int2str(ifig) ],ifig,[temp_name,' ',int2str(ifig)],'rmse_post_lnpost')            
-            else
-                if options_.opt_gsa.pprior
-                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnpost',int2str(ifig)],options_);
-                    create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_lnpost',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_prior_lnpost')
-                else
-                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnpost',int2str(ifig)],options_);
-                    create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_lnpost',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_mc_lnpost')
+                    if options_.opt_gsa.pprior
+                        dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnlik',int2str(ifig)],options_);
+                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_lnlik',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_prior_lnlik')
+                    else
+                        dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnlik',int2str(ifig) ],options_);
+                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_lnlik',int2str(ifig) ],ifig,[temp_name,' ',int2str(ifig)],'rmse_mc_lnlik')
+                    end
                 end
             end
         end
-    end
+        ifig=0;
+        for i=1:size(vvarvecm,1),
+            if options_.opt_gsa.ppost
+                temp_name='RMSE Posterior: Log Posterior';
+            else
+                if options_.opt_gsa.pprior
+                    temp_name='RMSE Prior: Log Posterior';
+                else
+                    temp_name='RMSE MC: Log Posterior';
+                end
+            end
+            if mod(i,9)==1,
+                ifig=ifig+1;
+                hh = dyn_figure(options_,'Name',[temp_name,' ',int2str(ifig)]);
+            end
+            subplot(3,3,i-9*(ifig-1))
+            h=cumplot(logpo2(ixx(1:nfilt0(i),i)));
+            set(h,'color','blue','linewidth',2)
+            hold on, h=cumplot(logpo2);
+            set(h,'color','k','linewidth',1)
+            h=cumplot(logpo2(ixx(nfilt0(i)+1:end,i)));
+            set(h,'color','red','linewidth',2)
+            title(vvarvecm(i,:),'interpreter','none')
+            if options_.opt_gsa.ppost==0,
+                set(gca,'xlim',[min( logpo2(ixx(1:nfilt0(i),i)) ) max( logpo2(ixx(1:nfilt0(i),i)) )])
+            end
+            if mod(i,9)==0 || i==size(vvarvecm,1)
+                if ~isoctave
+                    annotation('textbox', [0.1,0,0.35,0.05],'String', 'Log-posterior for BETTER R2','Color','Blue','horizontalalignment','center');
+                    annotation('textbox', [0.55,0,0.35,0.05],'String', 'Log-posterior for WORSE R2', 'Color','Red','horizontalalignment','center');
+                end
+                if options_.opt_gsa.ppost
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnpost',int2str(ifig) ],options_);
+                    create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_post_lnpost',int2str(ifig) ],ifig,[temp_name,' ',int2str(ifig)],'rmse_post_lnpost')
+                else
+                    if options_.opt_gsa.pprior
+                        dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnpost',int2str(ifig)],options_);
+                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_lnpost',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_prior_lnpost')
+                    else
+                        dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnpost',int2str(ifig)],options_);
+                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_lnpost',int2str(ifig)],ifig,[temp_name,' ',int2str(ifig)],'rmse_mc_lnpost')
+                    end
+                end
+            end
+        end
     end
     
     param_names=char(bayestopt_.name);
@@ -561,10 +563,10 @@ else
         end
         dyn_latex_table(M_,options_,title_string,'RMSE_ranges_after_filtering',headers_tex,vvarvecm_tex,data_mat,0,val_width,val_precis,optional_header);
     end
-
+    
     %%%%% R2 table
     
-    skipline()   
+    skipline()
     title_string='R2 over the MC sample:';
     data_mat=[min(r2_MC)' max(r2_MC)'];
     headers=strvcat('Variable','min yr R2','max yr R2');
@@ -573,7 +575,7 @@ else
         headers_tex=strvcat('\text{Variable}','\text{min yr R2}','\text{max yr R2}');
         dyn_latex_table(M_,options_,title_string,'R2_MC',headers_tex,vvarvecm_tex,data_mat,0,15,5);
     end
-
+    
     r2_MC=r2_MC(:,ivar);
     
     skipline()
@@ -634,7 +636,7 @@ else
         end
         dyn_latex_table(M_,options_,title_string,'R2_ranges_after_filtering',headers_tex,vvarvecm_tex,data_mat,0,val_width,val_precis,optional_header);
     end
-   
+    
     
     %%%%  R2 table
     SP=zeros(npar+nshock,size(vvarvecm,1));
@@ -673,156 +675,156 @@ else
     
     % plot trade-offs
     if ~options_.nograph
-    a00=jet(size(vvarvecm,1));
-    if options_.opt_gsa.ppost
-        temp_name='RMSE Posterior Tradeoffs:';
-        atitle='RMSE Posterior Map:';
-        asname='rmse_post'; 
-    else
-        if options_.opt_gsa.pprior
-            temp_name='RMSE Prior Tradeoffs:';
-            atitle='RMSE Prior Map:';
-            asname='rmse_prior'; 
-        else
-            temp_name='RMSE MC Tradeoffs:';
-            atitle='RMSE MC Map:';
-            asname='rmse_mc';
-        end
-    end
-    % now I plot by observed variables
-    options_mcf.pvalue_ks = alpha;
-    options_mcf.pvalue_corr = pvalue;
-    options_mcf.alpha2 = alpha2;
-    options_mcf.param_names = char(bayestopt_.name);
-    options_mcf.fname_ = fname_;
-    options_mcf.OutputDirectoryName = OutDir;
-    for iy=1:size(vvarvecm,1),
-        options_mcf.amcf_name = [asname '_' deblank(vvarvecm(iy,:)) '_map' ];
-        options_mcf.amcf_title = [atitle ' ' deblank(vvarvecm(iy,:))];
-        options_mcf.beha_title = ['better fit of ' deblank(vvarvecm(iy,:))];
-        options_mcf.nobeha_title = ['worse fit of ' deblank(vvarvecm(iy,:))];
-        options_mcf.title = ['the fit of ' deblank(vvarvecm(iy,:))];
-        mcf_analysis(x, ixx(1:nfilt0(iy),iy), ixx(nfilt0(iy)+1:end,iy), options_mcf, options_);
-    end
-    for iy=1:size(vvarvecm,1),
-        ipar = find(any(squeeze(PPV(iy,:,:))<alpha));
-        for ix=1:ceil(length(ipar)/5),
-        hh = dyn_figure(options_,'name',[temp_name,' observed variable ',deblank(vvarvecm(iy,:))]);
-        for j=1+5*(ix-1):min(length(ipar),5*ix),
-            subplot(2,3,j-5*(ix-1))
-            %h0=cumplot(x(:,nsnam(j)+nshock));
-            h0=cumplot(x(:,ipar(j)));
-            set(h0,'color',[0 0 0])
-            hold on,
-            iobs=find(squeeze(PPV(iy,:,ipar(j)))<alpha);
-            for i=1:size(vvarvecm,1),
-                %h0=cumplot(x(ixx(1:nfilt,np(i)),nsnam(j)+nshock));
-%                 h0=cumplot(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)));
-                if any(iobs==i) || i==iy,
-                    h0=cumplot(x(ixx(1:nfilt0(i),i),ipar(j)));
-                    if ~isoctave
-                        hcmenu = uicontextmenu;
-                        uimenu(hcmenu,'Label',deblank(vvarvecm(i,:)));
-                        set(h0,'uicontextmenu',hcmenu)
-                    end
-                else
-                    h0=cumplot(x(ixx(1:nfilt0(i),i),ipar(j))*NaN);
-                end
-                set(h0,'color',a00(i,:),'linewidth',2)
-            end
-            ydum=get(gca,'ylim');
-            %xdum=xparam1(nshock+nsnam(j));
-            if exist('xparam1')
-                xdum=xparam1(ipar(j));
-                h1=plot([xdum xdum],ydum);
-                set(h1,'color',[0.85 0.85 0.85],'linewidth',2)
-            end
-            xlabel('')
-            title([pnam{ipar(j)}],'interpreter','none')
-        end
-        %subplot(3,2,6)
-        if isoctave
-            legend(char('base',vvarvecm),'location','eastoutside');
-        else
-            h0=legend(char('base',vvarvecm));
-            set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
-        end
-        %h0=legend({'base',vnam{np}}',0);
-        %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
+        a00=jet(size(vvarvecm,1));
         if options_.opt_gsa.ppost
-            dyn_saveas(hh,[ OutDir filesep fname_ '_rmse_post_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],options_);
-            create_TeX_loader(options_,[ OutDir filesep fname_ '_rmse_post_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],ix,[temp_name,' observed variable ',deblank(vvarvecm(iy,:))],['rmse_post_' deblank(vvarvecm(iy,:))])
+            temp_name='RMSE Posterior Tradeoffs:';
+            atitle='RMSE Posterior Map:';
+            asname='rmse_post';
         else
             if options_.opt_gsa.pprior
-                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_' deblank(vvarvecm(iy,:)) '_' int2str(ix) ],options_);
-                create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_' deblank(vvarvecm(iy,:)) '_' int2str(ix) ],ix,[temp_name,' observed variable ',deblank(vvarvecm(iy,:))],['rmse_prior_' deblank(vvarvecm(iy,:))])
+                temp_name='RMSE Prior Tradeoffs:';
+                atitle='RMSE Prior Map:';
+                asname='rmse_prior';
             else
-                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],options_);
-                create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],ix,[temp_name,' observed variable ',deblank(vvarvecm(iy,:))],['rmse_mc_' deblank(vvarvecm(iy,:))])
+                temp_name='RMSE MC Tradeoffs:';
+                atitle='RMSE MC Map:';
+                asname='rmse_mc';
             end
         end
+        % now I plot by observed variables
+        options_mcf.pvalue_ks = alpha;
+        options_mcf.pvalue_corr = pvalue;
+        options_mcf.alpha2 = alpha2;
+        options_mcf.param_names = char(bayestopt_.name);
+        options_mcf.fname_ = fname_;
+        options_mcf.OutputDirectoryName = OutDir;
+        for iy=1:size(vvarvecm,1),
+            options_mcf.amcf_name = [asname '_' deblank(vvarvecm(iy,:)) '_map' ];
+            options_mcf.amcf_title = [atitle ' ' deblank(vvarvecm(iy,:))];
+            options_mcf.beha_title = ['better fit of ' deblank(vvarvecm(iy,:))];
+            options_mcf.nobeha_title = ['worse fit of ' deblank(vvarvecm(iy,:))];
+            options_mcf.title = ['the fit of ' deblank(vvarvecm(iy,:))];
+            mcf_analysis(x, ixx(1:nfilt0(iy),iy), ixx(nfilt0(iy)+1:end,iy), options_mcf, options_);
         end
-    end
-    
-    % now I plot by individual parameters
-    for ix=1:ceil(length(nsnam)/5),
-        hh = dyn_figure(options_,'name',[temp_name,' estimated params and shocks ',int2str(ix)]);
-        for j=1+5*(ix-1):min(size(snam2,1),5*ix),
-            subplot(2,3,j-5*(ix-1))
-            %h0=cumplot(x(:,nsnam(j)+nshock));
-            h0=cumplot(x(:,nsnam(j)));
-            set(h0,'color',[0 0 0])
-            hold on,
-            npx=find(SP(nsnam(j),:)==0);
-            %a0=jet(nsp(nsnam(j)));
-%             a0=a00(np,:);
-            for i=1:size(vvarvecm,1),
-                %h0=cumplot(x(ixx(1:nfilt,np(i)),nsnam(j)+nshock));
-%                 h0=cumplot(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)));
-                if any(npx==i),
-                    h0=cumplot(x(ixx(1:nfilt0(i),i),nsnam(j))*NaN);
+        for iy=1:size(vvarvecm,1),
+            ipar = find(any(squeeze(PPV(iy,:,:))<alpha));
+            for ix=1:ceil(length(ipar)/5),
+                hh = dyn_figure(options_,'name',[temp_name,' observed variable ',deblank(vvarvecm(iy,:))]);
+                for j=1+5*(ix-1):min(length(ipar),5*ix),
+                    subplot(2,3,j-5*(ix-1))
+                    %h0=cumplot(x(:,nsnam(j)+nshock));
+                    h0=cumplot(x(:,ipar(j)));
+                    set(h0,'color',[0 0 0])
+                    hold on,
+                    iobs=find(squeeze(PPV(iy,:,ipar(j)))<alpha);
+                    for i=1:size(vvarvecm,1),
+                        %h0=cumplot(x(ixx(1:nfilt,np(i)),nsnam(j)+nshock));
+                        %                 h0=cumplot(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)));
+                        if any(iobs==i) || i==iy,
+                            h0=cumplot(x(ixx(1:nfilt0(i),i),ipar(j)));
+                            if ~isoctave
+                                hcmenu = uicontextmenu;
+                                uimenu(hcmenu,'Label',deblank(vvarvecm(i,:)));
+                                set(h0,'uicontextmenu',hcmenu)
+                            end
+                        else
+                            h0=cumplot(x(ixx(1:nfilt0(i),i),ipar(j))*NaN);
+                        end
+                        set(h0,'color',a00(i,:),'linewidth',2)
+                    end
+                    ydum=get(gca,'ylim');
+                    %xdum=xparam1(nshock+nsnam(j));
+                    if exist('xparam1')
+                        xdum=xparam1(ipar(j));
+                        h1=plot([xdum xdum],ydum);
+                        set(h1,'color',[0.85 0.85 0.85],'linewidth',2)
+                    end
+                    xlabel('')
+                    title([pnam{ipar(j)}],'interpreter','none')
+                end
+                %subplot(3,2,6)
+                if isoctave
+                    legend(char('base',vvarvecm),'location','eastoutside');
                 else
-                    h0=cumplot(x(ixx(1:nfilt0(i),i),nsnam(j)));
-                    if ~isoctave
-                        hcmenu = uicontextmenu;
-                        uimenu(hcmenu,'Label',deblank(vvarvecm(i,:)));
-                        set(h0,'uicontextmenu',hcmenu)
+                    h0=legend(char('base',vvarvecm));
+                    set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
+                end
+                %h0=legend({'base',vnam{np}}',0);
+                %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
+                if options_.opt_gsa.ppost
+                    dyn_saveas(hh,[ OutDir filesep fname_ '_rmse_post_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],options_);
+                    create_TeX_loader(options_,[ OutDir filesep fname_ '_rmse_post_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],ix,[temp_name,' observed variable ',deblank(vvarvecm(iy,:))],['rmse_post_' deblank(vvarvecm(iy,:))])
+                else
+                    if options_.opt_gsa.pprior
+                        dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_' deblank(vvarvecm(iy,:)) '_' int2str(ix) ],options_);
+                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_' deblank(vvarvecm(iy,:)) '_' int2str(ix) ],ix,[temp_name,' observed variable ',deblank(vvarvecm(iy,:))],['rmse_prior_' deblank(vvarvecm(iy,:))])
+                    else
+                        dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],options_);
+                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],ix,[temp_name,' observed variable ',deblank(vvarvecm(iy,:))],['rmse_mc_' deblank(vvarvecm(iy,:))])
                     end
                 end
-                set(h0,'color',a00(i,:),'linewidth',2)
             end
-            ydum=get(gca,'ylim');
-            %xdum=xparam1(nshock+nsnam(j));
-            if exist('xparam1')
-                xdum=xparam1(nsnam(j));
-                h1=plot([xdum xdum],ydum);
-                set(h1,'color',[0.85 0.85 0.85],'linewidth',2)
+        end
+        
+        % now I plot by individual parameters
+        for ix=1:ceil(length(nsnam)/5),
+            hh = dyn_figure(options_,'name',[temp_name,' estimated params and shocks ',int2str(ix)]);
+            for j=1+5*(ix-1):min(size(snam2,1),5*ix),
+                subplot(2,3,j-5*(ix-1))
+                %h0=cumplot(x(:,nsnam(j)+nshock));
+                h0=cumplot(x(:,nsnam(j)));
+                set(h0,'color',[0 0 0])
+                hold on,
+                npx=find(SP(nsnam(j),:)==0);
+                %a0=jet(nsp(nsnam(j)));
+                %             a0=a00(np,:);
+                for i=1:size(vvarvecm,1),
+                    %h0=cumplot(x(ixx(1:nfilt,np(i)),nsnam(j)+nshock));
+                    %                 h0=cumplot(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)));
+                    if any(npx==i),
+                        h0=cumplot(x(ixx(1:nfilt0(i),i),nsnam(j))*NaN);
+                    else
+                        h0=cumplot(x(ixx(1:nfilt0(i),i),nsnam(j)));
+                        if ~isoctave
+                            hcmenu = uicontextmenu;
+                            uimenu(hcmenu,'Label',deblank(vvarvecm(i,:)));
+                            set(h0,'uicontextmenu',hcmenu)
+                        end
+                    end
+                    set(h0,'color',a00(i,:),'linewidth',2)
+                end
+                ydum=get(gca,'ylim');
+                %xdum=xparam1(nshock+nsnam(j));
+                if exist('xparam1')
+                    xdum=xparam1(nsnam(j));
+                    h1=plot([xdum xdum],ydum);
+                    set(h1,'color',[0.85 0.85 0.85],'linewidth',2)
+                end
+                xlabel('')
+                title([pnam{nsnam(j)}],'interpreter','none')
             end
-            xlabel('')
-            title([pnam{nsnam(j)}],'interpreter','none')
-        end
-        %subplot(3,2,6)
-        if isoctave
-            legend(char('base',vvarvecm),'location','eastoutside');
-        else
-            h0=legend(char('base',vvarvecm));
-            set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
-        end
-        %h0=legend({'base',vnam{np}}',0);
-        %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
-        if options_.opt_gsa.ppost
-            dyn_saveas(hh,[ OutDir filesep fname_ '_rmse_post_params_' int2str(ix)],options_);
-            create_TeX_loader(options_,[ OutDir filesep fname_ '_rmse_post_params_' int2str(ix)],ix,[temp_name,' estimated params and shocks ',int2str(ix)],'rmse_post_params')            
-        else
-            if options_.opt_gsa.pprior
-                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_params_' int2str(ix) ],options_);
-                create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_params_' int2str(ix) ],ix,[temp_name,' estimated params and shocks ',int2str(ix)],'rmse_prior_params')            
+            %subplot(3,2,6)
+            if isoctave
+                legend(char('base',vvarvecm),'location','eastoutside');
             else
-                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_params_' int2str(ix)],options_);
-                create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_params_' int2str(ix)],ix,[temp_name,' estimated params and shocks ',int2str(ix)],'rmse_mc_params')            
+                h0=legend(char('base',vvarvecm));
+                set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
+            end
+            %h0=legend({'base',vnam{np}}',0);
+            %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
+            if options_.opt_gsa.ppost
+                dyn_saveas(hh,[ OutDir filesep fname_ '_rmse_post_params_' int2str(ix)],options_);
+                create_TeX_loader(options_,[ OutDir filesep fname_ '_rmse_post_params_' int2str(ix)],ix,[temp_name,' estimated params and shocks ',int2str(ix)],'rmse_post_params')
+            else
+                if options_.opt_gsa.pprior
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_params_' int2str(ix) ],options_);
+                    create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_params_' int2str(ix) ],ix,[temp_name,' estimated params and shocks ',int2str(ix)],'rmse_prior_params')
+                else
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_params_' int2str(ix)],options_);
+                    create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_params_' int2str(ix)],ix,[temp_name,' estimated params and shocks ',int2str(ix)],'rmse_mc_params')
+                end
             end
         end
-    end
     end
     
 %     for j=1:size(SP,2),

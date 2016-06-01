@@ -42,7 +42,7 @@ stderr 0.01;
 
 end;
 
-
+options_.TeX=1;
 
 steady;
 check;
