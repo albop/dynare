@@ -18,7 +18,22 @@ function map_calibration(OutputDirectoryName, Model, DynareOptions, DynareResult
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 fname_ = Model.fname;
-pnames = Model.param_names(EstimatedParameters.param_vals(:,1),:);
+
+np = EstimatedParameters.np;
+nshock = EstimatedParameters.nvx + EstimatedParameters.nvn + EstimatedParameters.ncx + EstimatedParameters.ncn;
+pnames=cell(np,1);
+pnames_tex=cell(np,1);
+for jj=1:np        
+    if options_.TeX
+        [param_name_temp, param_name_tex_temp]= get_the_name(nshock+jj,options_.TeX,M_,EstimatedParameters,options_);
+        pnames_tex{jj,1} = strrep(param_name_tex_temp,'$','');
+        pnames{jj,1} = param_name_temp;
+    else
+        param_name_temp = get_the_name(nshock+jj,options_.TeX,M_,EstimatedParameters,options_);
+        pnames{jj,1} = param_name_temp;
+    end
+end
+
 pvalue_ks = DynareOptions.opt_gsa.pvalue_ks;
 indx_irf = [];
 indx_moment = [];
@@ -28,7 +43,10 @@ init = ~DynareOptions.opt_gsa.load_stab;
 options_mcf.pvalue_ks = DynareOptions.opt_gsa.pvalue_ks;
 options_mcf.pvalue_corr = DynareOptions.opt_gsa.pvalue_corr;
 options_mcf.alpha2 = DynareOptions.opt_gsa.alpha2_stab;
-options_mcf.param_names = pnames;
+options_mcf.param_names = char(pnames);
+if options_.TeX
+    options_mcf.param_names_tex=char(pnames_tex);
+end
 options_mcf.fname_ = fname_;
 options_mcf.OutputDirectoryName = OutputDirectoryName;
 

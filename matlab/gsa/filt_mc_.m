@@ -256,11 +256,17 @@ if ~options_.opt_gsa.ppost && options_.opt_gsa.lik_only
         anam='rmse_mc_post';
         atitle='RMSE MC: Log Posterior Kernel';
     end
-    
     options_mcf.pvalue_ks = alpha;
     options_mcf.pvalue_corr = pvalue;
     options_mcf.alpha2 = alpha2;
-    options_mcf.param_names = char(bayestopt_.name);
+    if options_.TeX
+        [pnames,pnames_tex]=get_LaTeX_parameter_names(M_,options_,estim_params_,bayestopt_);
+        options_mcf.param_names = char(pnames);
+        options_mcf.param_names_tex = char(pnames_tex);
+    else
+        [pnames]=get_LaTeX_parameter_names(M_,options_,estim_params_,bayestopt_);
+        options_mcf.param_names = char(pnames);
+    end
     options_mcf.fname_ = fname_;
     options_mcf.OutputDirectoryName = OutDir;
     options_mcf.amcf_name = anam;
@@ -475,7 +481,15 @@ else
         end
     end
     
-    param_names=char(bayestopt_.name);
+    if options_.TeX
+        [pnames,pnames_tex]=get_LaTeX_parameter_names(M_,options_,estim_params_,bayestopt_);
+        param_names = char(pnames);
+        param_names_tex = char(pnames_tex);
+    else
+        [pnames]=get_LaTeX_parameter_names(M_,options_,estim_params_,bayestopt_);
+        param_names = char(pnames);
+    end
+
     
     skipline()
     title_string='RMSE over the MC sample:';
@@ -513,6 +527,7 @@ else
     disp('RMSE ranges after filtering:')
     title_string='RMSE ranges after filtering:';
     if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
+        headers=strvcat('Variable','min','max','min','max','posterior mode');
         headers_tex=strvcat('\text{Variable}','\text{min}','\text{max}','\text{min}','\text{max}','\text{posterior mode}');
     else
         headers=strvcat('Variable','min','max','min','max','posterior mean');
@@ -695,7 +710,8 @@ else
         options_mcf.pvalue_ks = alpha;
         options_mcf.pvalue_corr = pvalue;
         options_mcf.alpha2 = alpha2;
-        options_mcf.param_names = char(bayestopt_.name);
+        options_mcf.param_names = param_names;
+        options_mcf.param_names_tex = param_names_tex;
         options_mcf.fname_ = fname_;
         options_mcf.OutputDirectoryName = OutDir;
         for iy=1:size(vvarvecm,1),
@@ -753,14 +769,14 @@ else
                 %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
                 if options_.opt_gsa.ppost
                     dyn_saveas(hh,[ OutDir filesep fname_ '_rmse_post_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],options_);
-                    create_TeX_loader(options_,[ OutDir filesep fname_ '_rmse_post_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],ix,[temp_name,' observed variable ',deblank(vvarvecm(iy,:))],['rmse_post_' deblank(vvarvecm(iy,:))])
+                    create_TeX_loader(options_,[ OutDir filesep fname_ '_rmse_post_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],ix,[temp_name,' observed variable $',deblank(vvarvecm_tex(iy,:)) '$'],['rmse_post_' deblank(vvarvecm(iy,:))])
                 else
                     if options_.opt_gsa.pprior
                         dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_' deblank(vvarvecm(iy,:)) '_' int2str(ix) ],options_);
-                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_' deblank(vvarvecm(iy,:)) '_' int2str(ix) ],ix,[temp_name,' observed variable ',deblank(vvarvecm(iy,:))],['rmse_prior_' deblank(vvarvecm(iy,:))])
+                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_prior_' deblank(vvarvecm(iy,:)) '_' int2str(ix) ],ix,[temp_name,' observed variable $',deblank(vvarvecm_tex(iy,:)) '$'],['rmse_prior_' deblank(vvarvecm(iy,:))])
                     else
                         dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],options_);
-                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],ix,[temp_name,' observed variable ',deblank(vvarvecm(iy,:))],['rmse_mc_' deblank(vvarvecm(iy,:))])
+                        create_TeX_loader(options_,[OutDir filesep fname_ '_rmse_mc_' deblank(vvarvecm(iy,:)) '_' int2str(ix)],ix,[temp_name,' observed variable $',deblank(vvarvecm_tex(iy,:)) '$'],['rmse_mc_' deblank(vvarvecm(iy,:))])
                     end
                 end
             end
@@ -902,3 +918,19 @@ if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
     fprintf(fidTeX,'%% End Of TeX file. \n');
     fclose(fidTeX);
 end
+
+function [pnames,pnames_tex]=get_LaTeX_parameter_names(M_,options_,estim_params_,bayestopt_)
+np=size(bayestopt_.name,1);
+pnames=cell(np,1);
+pnames_tex=cell(np,1);    
+for ii=1:length(bayestopt_.name)
+    if options_.TeX
+        [param_name_temp, param_name_tex_temp]= get_the_name(ii,options_.TeX,M_,estim_params_,options_);
+        pnames_tex{ii,1} = strrep(param_name_tex_temp,'$','');
+        pnames{ii,1} = param_name_temp;
+    else
+        param_name_temp = get_the_name(ii,options_.TeX,M_,estim_params_,options_);
+        pnames{ii,1} = param_name_temp;
+    end
+end
+

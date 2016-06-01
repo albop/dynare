@@ -53,7 +53,22 @@ alpha2 = options_gsa_.alpha2_redform;
 alpha2=0;
 pvalue_ks = options_gsa_.ksstat_redform;
 pvalue_corr = options_gsa_.alpha2_redform;
-pnames = M_.param_names(estim_params_.param_vals(:,1),:);
+
+np = estim_params_.np;
+nshock = estim_params_.nvx + estim_params_.nvn + estim_params_.ncx + estim_params_.ncn;
+pnames=cell(np,1);
+pnames_tex=cell(np,1);
+for jj=1:np        
+    if options_.TeX
+        [param_name_temp, param_name_tex_temp]= get_the_name(nshock+jj,options_.TeX,M_,estim_params_,options_);
+        pnames_tex{jj,1} = strrep(param_name_tex_temp,'$','');
+        pnames{jj,1} = param_name_temp;
+    else
+        param_name_temp = get_the_name(nshock+jj,options_.TeX,M_,estim_params_,options_);
+        pnames{jj,1} = param_name_temp;
+    end
+end
+
 fname_ = M_.fname;
 
 bounds = prior_bounds(bayestopt_, options_.prior_trunc);
@@ -74,7 +89,10 @@ end
 options_mcf.pvalue_ks = options_gsa_.ksstat_redform;
 options_mcf.pvalue_corr = options_gsa_.alpha2_redform;
 options_mcf.alpha2 = options_gsa_.alpha2_redform;
-options_mcf.param_names = pnames;
+options_mcf.param_names = char(pnames);
+if options_.TeX
+    options_mcf.param_names_tex=char(pnames_tex);
+end
 options_mcf.fname_ = M_.fname;
 options_mcf.OutputDirectoryName = adir;
 
@@ -117,6 +135,9 @@ else
 end
 
 options_map.param_names = pnames;
+if options_.TeX
+    options_map.param_names_tex = pnames_tex;
+end
 options_map.fname_ = M_.fname;
 options_map.OutputDirectoryName = adir;
 options_map.iload = iload;
@@ -189,7 +210,7 @@ for j=1:size(anamendo,1)
                             hold off,
                             title([namendo,' vs ', namexo ' - threshold [' num2str(threshold(1)) ' ' num2str(threshold(2)) ']'],'interpreter','none')
                             dyn_saveas(hf,[xdir,filesep, fname_ '_' type '_' namendo,'_vs_', namexo],options_);
-                            create_TeX_loader(options_,[xdir,filesep, fname_ '_' type '_' namendo,'_vs_', namexo],['Reduced Form Mapping (Monte Carlo Filtering): ',namendo,' vs ', namexo],[type '_' namendo,'_vs_', namexo])
+                            create_TeX_loader(options_,[xdir,filesep, fname_ '_' type '_' namendo,'_vs_', namexo],['Reduced Form Mapping (Monte Carlo Filtering): ',strrep(namendo,'_','\_'),' vs ', strrep(namexo,'_','\_')],[type '_' namendo,'_vs_', namexo])
                         end
                         si(:,js) = NaN(np,1);
                         delete([xdir, '/*threshold*.*'])
@@ -258,7 +279,7 @@ for j=1:size(anamendo,1)
                     title([logflag,' ',namendo,' vs ',namexo],'interpreter','none')
                     if iplo==9 
                         dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);
-                        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],[logflag,' ',namendo,' vs ',namexo],['redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
+                        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],[logflag,' ',strrep(namendo,'_','\_'),' vs ',strrep(namexo,'_','\_')],['redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
                     end
                 end
                 
@@ -267,7 +288,7 @@ for j=1:size(anamendo,1)
     end
     if iplo<9 && iplo>0 && ifig && ~options_.nograph,
         dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);
-        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],[logflag,' ',namendo,' vs ',namexo],['redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
+        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],[logflag,' ',strrep(namendo,'_','\_'),' vs ',strrep(namexo,'_','\_')],['redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
     end
     ifig=0;
     iplo=0;
@@ -325,7 +346,7 @@ for j=1:size(anamendo,1)
                             hold off,
                             title([namendo,' vs lagged ', namlagendo ' - threshold [' num2str(threshold(1)) ' ' num2str(threshold(2)) ']'],'interpreter','none')
                             dyn_saveas(hf,[xdir,filesep, fname_ '_' type '_' namendo,'_vs_', namlagendo],options_);
-                            create_TeX_loader(options_,[xdir,filesep, fname_ '_' type '_' namendo,'_vs_', namlagendo],['Reduced Form Mapping (Monte Carlo Filtering): ',namendo,' vs lagged ', namlagendo],[type '_' namendo,'_vs_', namlagendo])
+                            create_TeX_loader(options_,[xdir,filesep, fname_ '_' type '_' namendo,'_vs_', namlagendo],['Reduced Form Mapping (Monte Carlo Filtering): ',strrep(namendo,'_','\_'),' vs lagged ', strrep(namlagendo,'_','\_')],[type '_' namendo,'_vs_', namlagendo])
                         end
                         
                         delete([xdir, '/*threshold*.*'])
@@ -395,7 +416,7 @@ for j=1:size(anamendo,1)
                     title([logflag,' ',namendo,' vs ',namlagendo,'(-1)'],'interpreter','none')
                     if iplo==9,
                         dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);
-                        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],[logflag,' ',namendo,' vs ',namlagendo,'(-1)'],['redform_', namendo,'_vs_lags_',logflag,':',num2str(ifig)])
+                        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],[logflag,' ',strrep(namendo,'_','\_'),' vs ',strrep(namlagendo,'_','\_'),'(-1)'],['redform_', namendo,'_vs_lags_',logflag,':',num2str(ifig)])
                     end
                 end
                 
@@ -404,7 +425,7 @@ for j=1:size(anamendo,1)
     end
     if iplo<9 && iplo>0 && ifig && ~options_.nograph,
         dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);
-        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],[logflag,' ',namendo,' vs ',namlagendo,'(-1)'],['redform_', namendo,'_vs_lags_',logflag,':',num2str(ifig)])
+        create_TeX_loader(options_,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],[logflag,' ',strrep(namendo,'_','\_'),' vs ',strrep(namlagendo,'_','\_'),'(-1)'],['redform_', namendo,'_vs_lags_',logflag,':',num2str(ifig)])
     end
 end
 
@@ -753,7 +774,7 @@ if ~isoctave
 end
 
 dyn_saveas(hfig,[options_mcf.OutputDirectoryName filesep options_mcf.fname_,'_',options_mcf.amcf_name],options_);
-create_TeX_loader(options_,[options_mcf.OutputDirectoryName filesep options_mcf.fname_,'_',options_mcf.amcf_name],options_mcf.amcf_title,[options_mcf.fname_,'_',options_mcf.amcf_name])
+create_TeX_loader(options_,[options_mcf.OutputDirectoryName filesep options_mcf.fname_,'_',options_mcf.amcf_name],strrep(options_mcf.amcf_title,'_','\_'),[options_mcf.fname_,'_',options_mcf.amcf_name])
         
 return
 
