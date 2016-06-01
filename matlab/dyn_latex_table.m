@@ -66,7 +66,9 @@ header_string=[header_string '\\\\\n'];
 
 filename = [OutputDirectoryName '/' M_.fname '_' LaTeXtitle '.tex'];
 fidTeX = fopen(filename,'w');
-fprintf(fidTeX,['%% ' datestr(now,0)]);
+
+stack = dbstack;
+fprintf(fidTeX,['%% ' datestr(now,0) ', created by ' stack(2).file]);
 fprintf(fidTeX,' \n');
 fprintf(fidTeX,' \n');
 fprintf(fidTeX,'\\begin{center}\n');
