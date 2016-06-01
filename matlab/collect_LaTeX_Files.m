@@ -107,6 +107,39 @@ for ii=1:length(TeX_Files)
     end
 end
 
+
+dirinfo_parent = dir([M_.dname filesep 'gsa' filesep 'redform*']);
+dirinfo_parent(~[dirinfo_parent.isdir]) = [];  %remove non-directories
+tf = ismember( {dirinfo_parent.name}, {'.', '..'});
+dirinfo_parent(tf) = [];  %remove current and parent directory.
+numsubdir_level1 = length(dirinfo_parent);
+for level1_iter = 1:numsubdir_level1
+    dirinfo_subfolder = dir([M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name]);
+    dirinfo_subfolder(~[dirinfo_subfolder.isdir]) = [];  %remove non-directories
+    tf = ismember( {dirinfo_subfolder.name}, {'.', '..'});
+    dirinfo_subfolder(tf) = [];  %remove current and parent directory.
+    numsubdir_level2 = length(dirinfo_subfolder);
+    for level2_iter = 1:numsubdir_level2
+        TeX_Files=dir([M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name filesep  dirinfo_subfolder(level2_iter).name filesep M_.fname '*.TeX']);
+        for ii=1:length(TeX_Files)
+            [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
+            if ~strcmp(TeX_Files(ii).name,f_name_binder)
+                fprintf(fid,'%s \n',['\include{', M_.dname '/gsa/',dirinfo_parent(level1_iter).name '/'  dirinfo_subfolder(level2_iter).name ,'/',f_name,'}']);
+            end
+        end
+        TeX_Files=dir([M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name filesep  dirinfo_subfolder(level2_iter).name filesep 'Output' filesep  M_.fname '*.TeX']);
+        for ii=1:length(TeX_Files)
+            [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
+            if ~strcmp(TeX_Files(ii).name,f_name_binder)
+                fprintf(fid,'%s \n',['\include{', M_.dname '/gsa/',dirinfo_parent(level1_iter).name '/'  dirinfo_subfolder(level2_iter).name ,'Output' '/',f_name,'}']);
+            end
+        end
+    end
+end
+
+
+
+
 %% Write footer
 fprintf(fid,'%s \n','\end{document}');
 
