@@ -2510,10 +2510,7 @@ of the Lagrange multipliers associated with the planner's problem cannot be set
 @table @code
 
 @item all_values_required
-@anchor{all_values_required}
-Issues an error and stops processing the @file{.mod} file if there is at least
-one endogenous or exogenous variable that has not been set in the @code{histval}
-block.
+@xref{all_values_required}.
 @end table
 
 
