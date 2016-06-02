@@ -2446,6 +2446,7 @@ jump from t=200 to t=201.
 @end deffn
 
 @deffn Block histval ;
+@deffnx Block histval (@var{OPTIONS}@dots{});
 @anchor{histval}
 @descriptionhead
 
@@ -2503,6 +2504,17 @@ of the Lagrange multipliers associated with the planner's problem cannot be set
 (@pxref{planner_objective_value}).
 
 @end itemize
+
+@optionshead
+
+@table @code
+
+@item all_values_required
+@anchor{all_values_required}
+Issues an error and stops processing the @file{.mod} file if there is at least
+one endogenous or exogenous variable that has not been set in the @code{histval}
+block.
+@end table
 
 
 @examplehead
