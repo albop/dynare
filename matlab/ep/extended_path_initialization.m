@@ -132,9 +132,6 @@ if DynareOptions.ep.solve_algo == 10
     DynareOptions.lmmcp.lb = repmat(lb,block_nbr,1);
     DynareOptions.lmmcp.ub = repmat(ub,block_nbr,1);
 elseif DynareOptions.ep.solve_algo == 11
-    DynareOptions.lcppath.lb = repmat(lb,block_nbr,1);
-    DynareOptions.lcppath.ub = repmat(ub,block_nbr,1);
-elseif DynareOptions.ep.solve_algo == 12
     DynareOptions.mcppath.lb = repmat(lb,block_nbr,1);
     DynareOptions.mcppath.ub = repmat(ub,block_nbr,1);
 end;
