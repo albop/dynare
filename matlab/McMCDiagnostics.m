@@ -80,10 +80,15 @@ NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws
 param_name=[];
 param_name_tex=[];
 for jj=1:npar
-    [par_name_temp,par_name_tex_temp]=get_the_name(jj,options_.TeX,M_,estim_params_,options_);
-    param_name = strvcat(param_name,par_name_temp);
-    par_name_tex_temp = strrep(par_name_tex_temp,'$','');
-    param_name_tex = strvcat(param_name_tex,par_name_tex_temp);
+    if options_.TeX
+        [par_name_temp,par_name_tex_temp]=get_the_name(jj,options_.TeX,M_,estim_params_,options_);
+        param_name = strvcat(param_name,par_name_temp);        
+        par_name_tex_temp = strrep(par_name_tex_temp,'$','');
+        param_name_tex = strvcat(param_name_tex,par_name_tex_temp);
+    else
+        [par_name_temp]=get_the_name(jj,options_.TeX,M_,estim_params_,options_);
+        param_name = strvcat(param_name,par_name_temp);            
+    end
     Draws = GetAllPosteriorDraws(jj,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
     Draws = reshape(Draws,[NumberOfDraws nblck]);
     Nc = min(1000, NumberOfDraws/2);
