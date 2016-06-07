@@ -160,7 +160,7 @@ stderr gy_obs, inv_gamma_pdf, 0.001, inf;
 corr gp_obs, gy_obs,normal_pdf, 0, 0.2;
 end;
 
-estimation(mode_compute=9,order=1,datafile='../fs2000/fsdat_simul',mode_check,smoother,filter_decomposition,mh_replic=4000, mh_nblocks=1, mh_jscale=0.8,forecast = 8,bayesian_irf,filtered_vars,filter_step_ahead=[1,3],irf=20,moments_varendo,contemporaneous_correlation) m P c e W R k d y;
+estimation(mode_compute=9,order=1,datafile='../fs2000/fsdat_simul',mode_check,smoother,filter_decomposition,mh_replic=4000, mh_nblocks=1, mh_jscale=0.8,forecast = 8,bayesian_irf,filtered_vars,filter_step_ahead=[1,3],irf=20,moments_varendo,contemporaneous_correlation,conditional_variance_decomposition=[1 2 4]) m P c e W R k d y;
 
 trace_plot(options_,M_,estim_params_,'PosteriorDensity',1);
 trace_plot(options_,M_,estim_params_,'StructuralShock',1,'eps_a')

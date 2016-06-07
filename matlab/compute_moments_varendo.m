@@ -63,6 +63,13 @@ else
     Steps = 0;
 end
 
+if options_.TeX
+    var_list_tex='';
+    for var_iter=1:size(var_list_,1)
+        var_list_tex=strvcat(var_list_tex,M_.endo_names_tex(strmatch(var_list_(var_iter,:),M_.endo_names,'exact'),:));
+    end
+end
+
 % COVARIANCE MATRIX.
 if posterior
     for i=1:NumberOfEndogenousVariables
@@ -98,35 +105,77 @@ end
 % VARIANCE DECOMPOSITION.
 if M_.exo_nbr > 1
     if ~NoDecomposition
+        temp=NaN(NumberOfEndogenousVariables,NumberOfExogenousVariables);
         if posterior
             for i=1:NumberOfEndogenousVariables
                 for j=1:NumberOfExogenousVariables
                     oo_ = posterior_analysis('decomposition',var_list_(i,:),M_.exo_names(j,:),[],options_,M_,oo_);
+                    temp(i,j)=oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.Mean.(deblank(var_list_(i,:))).(deblank(M_.exo_names(j,:)));
                 end
             end
+            title='Posterior mean variance decomposition (in percent)';
         else
             for i=1:NumberOfEndogenousVariables
                 for j=1:NumberOfExogenousVariables
                     oo_ = prior_analysis('decomposition',var_list_(i,:),M_.exo_names(j,:),[],options_,M_,oo_);
+                    temp(i,j)=oo_.PriorTheoreticalMoments.dsge.VarianceDecomposition.Mean.(deblank(var_list_(i,:))).(deblank(M_.exo_names(j,:)));
                 end
             end
+            title='Prior mean variance decomposition (in percent)';
         end
+        title=add_filter_subtitle(title,options_);
+        headers = M_.exo_names;
+        headers(M_.exo_names_orig_ord,:) = headers;
+        headers = char(' ',headers);
+        lh = size(deblank(var_list_),2)+2;
+        dyntable(options_,title,headers,deblank(var_list_),100* ...
+            temp,lh,8,2);
+        if options_.TeX
+            headers=M_.exo_names_tex;
+            headers = char(' ',headers);
+            labels = deblank(var_list_tex);
+            lh = size(labels,2)+2;
+            dyn_latex_table(M_,options_,title,'dsge_post_mean_var_decomp_uncond',headers,labels,100*temp,lh,8,2);
+        end
+        skipline();
     end
     % CONDITIONAL VARIANCE DECOMPOSITION.
     if Steps
+        temp=NaN(NumberOfEndogenousVariables,NumberOfExogenousVariables,length(Steps));
         if posterior
             for i=1:NumberOfEndogenousVariables
                 for j=1:NumberOfExogenousVariables
                     oo_ = posterior_analysis('conditional decomposition',i,M_.exo_names(j,:),Steps,options_,M_,oo_);
+                    temp(i,j,:)=oo_.PosteriorTheoreticalMoments.dsge.ConditionalVarianceDecomposition.Mean.(deblank(var_list_(i,:))).(deblank(M_.exo_names(j,:)));
                 end
             end
+            title='Posterior mean conditional variance decomposition (in percent)';
         else
             for i=1:NumberOfEndogenousVariables
                 for j=1:NumberOfExogenousVariables
                     oo_ = prior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
+                    temp(i,j,:)=oo_.PriorTheoreticalMoments.dsge.ConditionalVarianceDecomposition.Mean.(deblank(var_list_(i,:))).(deblank(M_.exo_names(j,:)));
                 end
             end
+            title='Prior mean conditional variance decomposition (in percent)';
         end
+        for step_iter=1:length(Steps)
+            title_print=[title, ' Period ' int2str(Steps(step_iter))];
+            headers = M_.exo_names;
+            headers(M_.exo_names_orig_ord,:) = headers;
+            headers = char(' ',headers);
+            lh = size(deblank(var_list_),2)+2;
+            dyntable(options_,title_print,headers,deblank(var_list_),100* ...
+                temp(:,:,step_iter),lh,8,2);
+            if options_.TeX
+                headers=M_.exo_names_tex;
+                headers = char(' ',headers);
+                labels = deblank(var_list_tex);
+                lh = size(labels,2)+2;
+                dyn_latex_table(M_,options_,title_print,['dsge_post_mean_var_decomp_cond_h',int2str(Steps(step_iter))],headers,labels,100*temp(:,:,step_iter),lh,8,2);
+            end
+        end
+        skipline();
     end
 end
 
