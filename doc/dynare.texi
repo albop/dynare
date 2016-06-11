@@ -8573,22 +8573,66 @@ SBVAR model.
 @table @code
 
 @item chain = @var{INTEGER}
-@anchor{ms_chain} The Markov chain. Default: @code{none}
+@anchor{ms_chain} The Markov chain considered. Default: @code{none} 
 
-@item state = @var{INTEGER}
-This state has duration equal to @code{duration}. Exactly one of
-@code{state} and @code{number_of_states} must be passed. Default:
-@code{none}
+@item number_of_regimes = @var{INTEGER}
+Specifies the total number of regimes in the Markov Chain. This is a required option.
 
-@item number_of_states = @var{INTEGER}
-Total number of states. Implies that all states have the same
-duration. Exactly one of @code{state} and @code{number_of_states} must
-be passed. Default: @code{none}
+@item duration = @var{DOUBLE} | @var{[ROW VECTOR OF DOUBLES]}
+The duration of the regimes or regimes. This is a required option. 
+When passed a scalar real number, it specifies the average duration for all regimes in 
+this chain. When passed a vector of size equal @code{number_of_regimes}, it specifies 
+the average duration of the associated regimes @code{(1:number_of_regimes)} in this chain.
+An absorbing state can be specified through the @ref{restrictions}-option.
 
-@item duration = @var{DOUBLE} | @code{inf}
-The duration of the state or states. Default: @code{none}
+@item restrictions = @var{[[ROW VECTOR OF 3 DOUBLES],[ROW VECTOR OF 3 DOUBLES],...]}
+@anchor{restrictions}
+Provides restrictions on this chain's regime transition matrix. 
+Its vector argument takes three inputs of the form: 
+@code{[current_period_regime, next_period_regime, transition_probability]} 
+
+The first two entries are positive integers, and the third is a non-negative real in the set [0,1]. 
+If restrictions are specified for every transition for a regime, the sum of the probabilities 
+must be 1. Otherwise, if restrictions are not provided for every transition for a given 
+regime the sum of the provided transition probabilities msut be <1. 
+Regardless of the number of lags, the restrictions are specified for parameters 
+at time @code{t} since the transition probability for a parameter at @code{t} is equal to 
+that of the parameter at @code{t-1}. 
 
 @end table
+
+In case of estimating a MS-DSGE model,@footnote{An example can be found at @uref{https://github.com/DynareTeam/dynare/blob/master/tests/ms-dsge/test_ms_dsge.mod}.} in addition the following options are allowed:
+
+@table @code
+
+@item parameters = @var{[LIST OF PARAMETERS]}
+This option specifies which parameters are controlled by this Markov Chai
+
+@item number_of_lags = @var{DOUBLE}
+Provides the number of lags that each parameter can take within each regime in this chain. 
+
+@end table
+
+@examplehead
+
+@example
+markov_switching(chain=1, duration=2.5, restrictions=[[1,3,0],[3,1,0]]);
+@end example
+Specifies a Markov-switching BVAR with a first chain with 3 regimes that all have a 
+duration of 2.5 periods. The probability of directly going from regime 1 to regime 3 and vice versa is 0.
+
+@examplehead
+
+@example
+markov_switching(chain=2, number_of_regimes=3, duration=[0.5, 2.5, 2.5],
+parameter=[alpha, rho], number_of_lags=2, restrictions=[[1,3,0],[3,3,1]]);
+@end example
+
+Specifies a Markov-switching DSGE model with a second chain with 3 regimes 
+that have durations of 0.5, 2.5, and 2.5 periods, respectively. The switching parameters
+are @code{alpha} and @code{rho}. The probability of directly going from 
+regime 1 to regime 3 is 0, while regime 3 is an absorbing state.
+
 @end deffn
 
 
