@@ -11,4 +11,6 @@ importall Dynare
 
 @dynare "rbc2.mod"
 
-print(model_.fname)
+importall SteadyState
+
+steady!(model_, oo_)
