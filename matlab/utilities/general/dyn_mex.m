@@ -15,7 +15,7 @@ function dyn_mex(win_compiler,basename,force)
 %
 
     
-% Copyright (C) 2015 Dynare Team
+% Copyright (C) 2015-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -49,8 +49,9 @@ if ~exist('OCTAVE_VERSION')
     if ispc
       if strcmp(win_compiler,'msvc')
           % MATLAB/Windows + Microsoft Visual C++
-          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Dynamic" ' basename '_dynamic.c ' basename '_dynamic_mex.c'])
-          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Static" ' basename '_static.c ' basename '_static_mex.c'])
+          % Add /TP flag as fix for #1227
+          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Dynamic" /TP ' basename '_dynamic.c ' basename '_dynamic_mex.c'])
+          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Static" /TP ' basename '_static.c ' basename '_static_mex.c'])
       elseif strcmp(win_compiler,'cygwin')
           % MATLAB/Windows + Cygwin g++
           eval(['mex -O PRELINK_CMDS1="echo EXPORTS > mex.def & echo ' ...
