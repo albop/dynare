@@ -131,7 +131,7 @@ for level1_iter = 1:numsubdir_level1
         for ii=1:length(TeX_Files)
             [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
             if ~strcmp(TeX_Files(ii).name,f_name_binder)
-                fprintf(fid,'%s \n',['\include{', M_.dname '/gsa/',dirinfo_parent(level1_iter).name '/'  dirinfo_subfolder(level2_iter).name ,'Output' '/',f_name,'}']);
+                fprintf(fid,'%s \n',['\include{', M_.dname '/gsa/', dirinfo_parent(level1_iter).name '/'  dirinfo_subfolder(level2_iter).name, filesep ,'Output' '/',f_name,'}']);
             end
         end
     end
