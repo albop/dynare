@@ -347,8 +347,8 @@ elseif all(bayestopt_.pshape == 0) && options_.TeX %% MLE and GMM Latex output
                     tstath(ip));
             ip = ip+1;
         end
-    end
     TeXEnd(fidTeX)
+    end
 end
 
 
