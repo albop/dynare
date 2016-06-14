@@ -60,7 +60,7 @@ if length(headers) > 0
 end
 header_string=[header_string '\\\\\n'];
 
-filename = [OutputDirectoryName '/' M_.fname '_' LaTeXtitle '.TeX'];
+filename = [OutputDirectoryName '/' M_.fname '_' LaTeXtitle '.tex'];
 fidTeX = fopen(filename,'w');
 fprintf(fidTeX,['%% ' datestr(now,0)]);
 fprintf(fidTeX,' \n');

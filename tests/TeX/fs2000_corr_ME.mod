@@ -14,7 +14,7 @@
  */
 
 /*
- * Copyright (C) 2004-2013 Dynare Team
+ * Copyright (C) 2004-2016 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -170,6 +170,6 @@ shock_decomposition y W R;
 collect_LaTeX_Files(M_);
 
 //identification(advanced=1,max_dim_cova_group=3,prior_mc=250);
-if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.TeX'])
+if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.tex'])
     error('TeX-File did not compile.')
 end

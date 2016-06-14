@@ -9,7 +9,7 @@ function collect_LaTeX_Files(M_)
 %   - The packages loaded enable pdflatex to run
 %   - The _dynamic and _static TeX-model files are not included as they are standalone TeX-files
 
-% Copyright (C) 2015 Dynare Team
+% Copyright (C) 2015-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -27,7 +27,7 @@ function collect_LaTeX_Files(M_)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 %% Write header
-f_name_binder=[M_.fname,'_TeX_binder.TeX'];
+f_name_binder=[M_.fname,'_TeX_binder.tex'];
 fid=fopen(f_name_binder,'w+');
 fprintf(fid,'%s \n','\documentclass[12pt]{article}');
 fprintf(fid,'%s \n','\usepackage[margin=2cm]{geometry}');
@@ -41,7 +41,7 @@ fprintf(fid,'%s \n','\usepackage{float,morefloats,caption}');
 fprintf(fid,'%s \n','\begin{document}');
 
 %% Root directory
-TeX_Files=dir([M_.fname,'*.TeX']);
+TeX_Files=dir([M_.fname,'*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder) && ...
@@ -53,7 +53,7 @@ for ii=1:length(TeX_Files)
 end
 
 %% Output directory
-TeX_Files=dir([M_.dname filesep 'Output' filesep  M_.fname '*.TeX']);
+TeX_Files=dir([M_.dname filesep 'Output' filesep  M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
@@ -62,7 +62,7 @@ for ii=1:length(TeX_Files)
 end
 
 %% graphs directory
-TeX_Files=dir([M_.dname filesep 'graphs' filesep  M_.fname '*.TeX']);
+TeX_Files=dir([M_.dname filesep 'graphs' filesep  M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
@@ -71,7 +71,7 @@ for ii=1:length(TeX_Files)
 end
 
 %% Identification directory
-TeX_Files=dir([M_.dname filesep 'identification' filesep  M_.fname '*.TeX']);
+TeX_Files=dir([M_.dname filesep 'identification' filesep  M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
@@ -80,7 +80,7 @@ for ii=1:length(TeX_Files)
 end
 
 %% GSA directory
-TeX_Files=dir([M_.dname filesep 'gsa' filesep  M_.fname '*.TeX']);
+TeX_Files=dir([M_.dname filesep 'gsa' filesep  M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)

@@ -18,7 +18,7 @@ function trace_plot(options_,M_,estim_params_,type,blck,name1,name2)
 %
 % SPECIAL REQUIREMENTS
 
-% Copyright (C) 2003-2015 Dynare Team
+% Copyright (C) 2003-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -133,7 +133,7 @@ end
 dyn_saveas(hh,[M_.fname, filesep, 'graphs', filesep, 'TracePlot_' plot_name],options_)
 
 if options_.TeX
-    fid=fopen([M_.fname,'/graphs/',M_.fname,'_TracePlot_' plot_name,'.TeX'],'w+');
+    fid=fopen([M_.fname,'/graphs/',M_.fname,'_TracePlot_' plot_name,'.tex'],'w+');
     
     if strcmpi(type,'DeepParameter')
         tex_names=M_.param_names_tex;

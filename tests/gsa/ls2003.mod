@@ -218,6 +218,6 @@ datafile='data_ca1.m',first_obs=8,nobs=79,prefilter=1,
 rmse=1,ppost=1);
 
 collect_LaTeX_Files(M_);
-if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.TeX'])
+if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.tex'])
     error('TeX-File did not compile.')
 end
