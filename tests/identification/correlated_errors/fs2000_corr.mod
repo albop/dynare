@@ -136,6 +136,6 @@ identification(advanced=1,max_dim_cova_group=3,prior_mc=250);
 
 collect_LaTeX_Files(M_);
 
-if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.TeX'])
+if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.tex'])
     error('TeX-File did not compile.')
 end

@@ -81,7 +81,7 @@ end
 
 
 %% Identification/Output directory
-TeX_Files=dir([M_.dname filesep 'identification' filesep 'Output' filesep M_.fname '*.TeX']);
+TeX_Files=dir([M_.dname filesep 'identification' filesep 'Output' filesep M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
@@ -99,7 +99,7 @@ for ii=1:length(TeX_Files)
 end
 
 %% GSA/Output directory
-TeX_Files=dir([M_.dname filesep 'gsa' filesep 'Output' filesep  M_.fname '*.TeX']);
+TeX_Files=dir([M_.dname filesep 'gsa' filesep 'Output' filesep  M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
@@ -120,14 +120,14 @@ for level1_iter = 1:numsubdir_level1
     dirinfo_subfolder(tf) = [];  %remove current and parent directory.
     numsubdir_level2 = length(dirinfo_subfolder);
     for level2_iter = 1:numsubdir_level2
-        TeX_Files=dir([M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name filesep  dirinfo_subfolder(level2_iter).name filesep M_.fname '*.TeX']);
+        TeX_Files=dir([M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name filesep  dirinfo_subfolder(level2_iter).name filesep M_.fname '*.tex']);
         for ii=1:length(TeX_Files)
             [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
             if ~strcmp(TeX_Files(ii).name,f_name_binder)
                 fprintf(fid,'%s \n',['\include{', M_.dname '/gsa/',dirinfo_parent(level1_iter).name '/'  dirinfo_subfolder(level2_iter).name ,'/',f_name,'}']);
             end
         end
-        TeX_Files=dir([M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name filesep  dirinfo_subfolder(level2_iter).name filesep 'Output' filesep  M_.fname '*.TeX']);
+        TeX_Files=dir([M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name filesep  dirinfo_subfolder(level2_iter).name filesep 'Output' filesep  M_.fname '*.tex']);
         for ii=1:length(TeX_Files)
             [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
             if ~strcmp(TeX_Files(ii).name,f_name_binder)
