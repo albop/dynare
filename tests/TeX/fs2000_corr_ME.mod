@@ -170,6 +170,6 @@ shock_decomposition y W R;
 collect_LaTeX_Files(M_);
 
 //identification(advanced=1,max_dim_cova_group=3,prior_mc=250);
-if system(['pdflatex -halt-on-error ' M_.fname '_TeX_binder.tex'])
+if system(['pdflatex -halt-on-error -interaction=batchmode ' M_.fname '_TeX_binder.tex'])
     error('TeX-File did not compile.')
 end
