@@ -1,11 +1,11 @@
 function collect_LaTeX_Files(M_)
 % function collect_LaTeX_Files(M_);
 % Creates TeX-File embedding all eps-loaders created for current mod-file
-% 
+%
 % Inputs:
 %   o M_                    model structure
-% 
-% Notes: 
+%
+% Notes:
 %   - The packages loaded enable pdflatex to run
 %   - The _dynamic and _static TeX-model files are not included as they are standalone TeX-files
 
@@ -48,7 +48,7 @@ for ii=1:length(TeX_Files)
         ~strcmp(TeX_Files(ii).name,[M_.fname,'_dynamic.tex']) && ...
         ~strcmp(TeX_Files(ii).name,[M_.fname,'_static.tex']) && ...
         ~strcmp(TeX_Files(ii).name,[M_.fname,'_original.tex'])
-        fprintf(fid,'%s \n',['\include{',f_name,'}']);    
+        fprintf(fid,'%s \n',['\include{',f_name,'}']);
     end
 end
 
@@ -57,7 +57,7 @@ TeX_Files=dir([M_.dname filesep 'Output' filesep  M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
-        fprintf(fid,'%s \n',['\include{', M_.dname '/Output' '/',f_name,'}']);    
+        fprintf(fid,'%s \n',['\include{' M_.dname filesep 'Output' filesep f_name '}']);
     end
 end
 
@@ -66,7 +66,7 @@ TeX_Files=dir([M_.dname filesep 'graphs' filesep  M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
-        fprintf(fid,'%s \n',['\include{', M_.dname '/graphs' '/',f_name,'}']);    
+        fprintf(fid,'%s \n',['\include{' M_.dname filesep 'graphs' filesep f_name '}']);
     end
 end
 
@@ -75,7 +75,7 @@ TeX_Files=dir([M_.dname filesep 'identification' filesep  M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
-        fprintf(fid,'%s \n',['\include{', M_.dname '/identification' '/',f_name,'}']);    
+        fprintf(fid,'%s \n',['\include{'  M_.dname filesep 'identification' filesep f_name '}']);
     end
 end
 
@@ -85,7 +85,7 @@ TeX_Files=dir([M_.dname filesep 'identification' filesep 'Output' filesep M_.fna
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
-        fprintf(fid,'%s \n',['\include{', M_.dname '/identification/Output' '/',f_name,'}']);    
+        fprintf(fid,'%s \n',['\include{' M_.dname filesep 'identification' filesep 'Output' filesep f_name '}']);
     end
 end
 
@@ -94,7 +94,7 @@ TeX_Files=dir([M_.dname filesep 'gsa' filesep  M_.fname '*.tex']);
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
-        fprintf(fid,'%s \n',['\include{', M_.dname '/gsa' '/',f_name,'}']);    
+        fprintf(fid,'%s \n',['\include{' M_.dname filesep 'gsa' filesep f_name '}']);
     end
 end
 
@@ -103,7 +103,7 @@ TeX_Files=dir([M_.dname filesep 'gsa' filesep 'Output' filesep  M_.fname '*.tex'
 for ii=1:length(TeX_Files)
     [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
     if ~strcmp(TeX_Files(ii).name,f_name_binder)
-        fprintf(fid,'%s \n',['\include{', M_.dname '/gsa/Output' '/',f_name,'}']);    
+        fprintf(fid,'%s \n',['\include{'  M_.dname filesep 'gsa' filesep 'Output' filesep f_name '}']);
     end
 end
 
@@ -124,14 +124,14 @@ for level1_iter = 1:numsubdir_level1
         for ii=1:length(TeX_Files)
             [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
             if ~strcmp(TeX_Files(ii).name,f_name_binder)
-                fprintf(fid,'%s \n',['\include{', M_.dname '/gsa/',dirinfo_parent(level1_iter).name '/'  dirinfo_subfolder(level2_iter).name ,'/',f_name,'}']);
+                fprintf(fid,'%s \n',['\include{' M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name filesep dirinfo_subfolder(level2_iter).name filesep f_name '}']);
             end
         end
         TeX_Files=dir([M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name filesep  dirinfo_subfolder(level2_iter).name filesep 'Output' filesep  M_.fname '*.tex']);
         for ii=1:length(TeX_Files)
             [pathstr,f_name,ext] = fileparts(TeX_Files(ii).name);
             if ~strcmp(TeX_Files(ii).name,f_name_binder)
-                fprintf(fid,'%s \n',['\include{', M_.dname '/gsa/', dirinfo_parent(level1_iter).name '/'  dirinfo_subfolder(level2_iter).name, filesep ,'Output' '/',f_name,'}']);
+                fprintf(fid,'%s \n',['\include{' M_.dname filesep 'gsa' filesep dirinfo_parent(level1_iter).name filesep dirinfo_subfolder(level2_iter).name filesep 'Output' filesep f_name '}']);
             end
         end
     end
