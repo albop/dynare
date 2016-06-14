@@ -1,6 +1,6 @@
-function [ ix2, ilogpo2, ModelName, MetropolisFolder, FirstBlock, FirstLine, npar, NumberOfBlocks, nruns, NewFile, MAX_nruns, d ] = ...
+function [ ix2, ilogpo2, ModelName, MetropolisFolder, FirstBlock, FirstLine, npar, NumberOfBlocks, nruns, NewFile, MAX_nruns, d, bayestopt_] = ...
     posterior_sampler_initialization(TargetFun, xparam1, vv, mh_bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_)
-% function [ ix2, ilogpo2, ModelName, MetropolisFolder, FirstBlock, FirstLine, npar, NumberOfBlocks, nruns, NewFile, MAX_nruns, d ] = ...
+% function [ ix2, ilogpo2, ModelName, MetropolisFolder, FirstBlock, FirstLine, npar, NumberOfBlocks, nruns, NewFile, MAX_nruns, d, bayestopt_] = ...
 %     metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_)
 % Metropolis-Hastings initialization.
 % 
@@ -33,6 +33,7 @@ function [ ix2, ilogpo2, ModelName, MetropolisFolder, FirstBlock, FirstLine, npa
 %                                       draws
 %   o MAX_nruns             [scalar]    maximum number of draws in each MH-file on the harddisk
 %   o d                     [double]   (p*p) matrix, Cholesky decomposition of the posterior covariance matrix (at the mode).
+%   o bayestopt_            [structure] estimation options structure
 %
 % SPECIAL REQUIREMENTS
 %   None.
@@ -224,6 +225,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
     record.LastFileNumber = AnticipatedNumberOfFiles ;
     record.LastLineNumber = AnticipatedNumberOfLinesInTheLastFile;
     record.MCMCConcludedSuccessfully = 0;
+    record.MCMC_sampler=options_.posterior_sampler_options.posterior_sampling_method;
     fprintf('Ok!\n');
     id = write_mh_history_file(MetropolisFolder, ModelName, record);
     disp(['Estimation::mcmc: Details about the MCMC are available in ' BaseName '_mh_history_' num2str(id) '.mat'])
@@ -283,6 +285,7 @@ elseif options_.load_mh_file && ~options_.mh_recover
     end
     ilogpo2 = record.LastLogPost;
     ix2 = record.LastParameters;
+    [d,bayestopt_]=set_proposal_density_to_previous_value(record,options_,bayestopt_);
     FirstBlock = 1;
     NumberOfPreviousSimulations = sum(record.MhDraws(:,1),1);
     fprintf('Estimation::mcmc: I am writing a new mh-history file... ');
@@ -363,7 +366,7 @@ elseif options_.mh_recover
         FirstLine = ones(NumberOfBlocks,1);
         LastFileFullIndicator=1;
     end
-    
+    [d,bayestopt_]=set_proposal_density_to_previous_value(record,options_,bayestopt_);
     %% Now find out what exactly needs to be redone
     % 1. Check if really something needs to be done 
     % How many mh files should we have ?
@@ -447,3 +450,21 @@ elseif options_.mh_recover
         write_mh_history_file(MetropolisFolder, ModelName, record);
     end
 end
+
+function [d,bayestopt_]=set_proposal_density_to_previous_value(record,options_,bayestopt_)
+    if isfield(record,'ProposalCovariance') && isfield(record,'ProposalCovariance')
+        if isfield(record,'MCMC_sampler')
+            if ~strcmp(record.MCMC_sampler,options_.posterior_sampler_options.posterior_sampling_method)
+                error(fprintf('Estimation::mcmc: The posterior_sampling_method differs from the one of the original chain. Please reset it to %s',record.MCMC_sampler))
+            end 
+        end
+        fprintf('Estimation::mcmc: Recovering the previous proposal density\n.')
+        d=record.ProposalCovariance;
+        bayestopt_.jscale=record.ProposalScaleVec;
+    else
+        if options_.mode_compute~=0
+            fprintf('Estimation::mcmc: No stored previous proposal density found, continuing with the one implied by mode_compute\n.');
+        elseif ~isempty(options_.mode_file)
+            fprintf('Estimation::mcmc: No stored previous proposal density found, continuing with the one implied by the mode_file\n.');
+        end
+    end

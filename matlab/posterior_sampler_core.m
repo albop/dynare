@@ -110,6 +110,9 @@ end
 sampler_options.xparam1 = xparam1;
 if ~isempty(d),
     sampler_options.proposal_covariance_Cholesky_decomposition = d*diag(bayestopt_.jscale);
+    %store information for load_mh_file
+    record.ProposalCovariance=d;
+    record.ProposalScaleVec=bayestopt_.jscale;
 end
 
 block_iter=0;

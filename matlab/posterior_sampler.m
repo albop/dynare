@@ -61,7 +61,7 @@ objective_function_penalty_base = Inf;
 
 vv = sampler_options.invhess;
 % Initialization of the sampler
-[ ix2, ilogpo2, ModelName, MetropolisFolder, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
+[ ix2, ilogpo2, ModelName, MetropolisFolder, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d, bayestopt_] = ...
     posterior_sampler_initialization(TargetFun, xparam1, vv, mh_bounds,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,oo_);
 
 InitSizeArray = min([repmat(MAX_nruns,nblck,1) fline+nruns-1],[],2);
