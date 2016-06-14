@@ -50,8 +50,8 @@ if ~exist('OCTAVE_VERSION')
       if strcmp(win_compiler,'msvc')
           % MATLAB/Windows + Microsoft Visual C++
           % Add /TP flag as fix for #1227
-          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Dynamic" /TP ' basename '_dynamic.c ' basename '_dynamic_mex.c'])
-          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Static" /TP ' basename '_static.c ' basename '_static_mex.c'])
+          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Dynamic" COMPFLAGS="/TP" ' basename '_dynamic.c ' basename '_dynamic_mex.c'])
+          eval(['mex -O LINKFLAGS="$LINKFLAGS /export:Static" COMPFLAGS="/TP" ' basename '_static.c ' basename '_static_mex.c'])
       elseif strcmp(win_compiler,'cygwin')
           % MATLAB/Windows + Cygwin g++
           eval(['mex -O PRELINK_CMDS1="echo EXPORTS > mex.def & echo ' ...
