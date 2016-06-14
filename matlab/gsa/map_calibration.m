@@ -24,12 +24,12 @@ nshock = EstimatedParameters.nvx + EstimatedParameters.nvn + EstimatedParameters
 pnames=cell(np,1);
 pnames_tex=cell(np,1);
 for jj=1:np        
-    if options_.TeX
-        [param_name_temp, param_name_tex_temp]= get_the_name(nshock+jj,options_.TeX,M_,EstimatedParameters,options_);
+    if DynareOptions.TeX
+        [param_name_temp, param_name_tex_temp]= get_the_name(nshock+jj, DynareOptions.TeX, Model, EstimatedParameters, DynareOptions);
         pnames_tex{jj,1} = strrep(param_name_tex_temp,'$','');
         pnames{jj,1} = param_name_temp;
     else
-        param_name_temp = get_the_name(nshock+jj,options_.TeX,M_,EstimatedParameters,options_);
+        param_name_temp = get_the_name(nshock+jj, DynareOptions.TeX, Model, EstimatedParameters, DynareOptions);
         pnames{jj,1} = param_name_temp;
     end
 end
@@ -44,7 +44,7 @@ options_mcf.pvalue_ks = DynareOptions.opt_gsa.pvalue_ks;
 options_mcf.pvalue_corr = DynareOptions.opt_gsa.pvalue_corr;
 options_mcf.alpha2 = DynareOptions.opt_gsa.alpha2_stab;
 options_mcf.param_names = char(pnames);
-if options_.TeX
+if DynareOptions.TeX
     options_mcf.param_names_tex=char(pnames_tex);
 end
 options_mcf.fname_ = fname_;
