@@ -10,6 +10,9 @@
 *.fig
 \#*\#
 TAGS
+*.mat
+*.xls
+*.xlsx
 
 # Build system rules
 .deps
@@ -116,7 +119,6 @@ mex/build/matlab/run_m2html.m
 /preprocessor/doc/
 
 # MATLAB dir
-/matlab/*.mat
 /matlab/preprocessor*
 /matlab/dynare_version.m
 
