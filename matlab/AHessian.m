@@ -8,7 +8,7 @@ function [AHess, DLIK, LIK] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,ka
 % NOTE: the derivative matrices (DT,DR ...) are 3-dim. arrays with last
 % dimension equal to the number of structural parameters
 
-% Copyright (C) 2011-2012 Dynare Team
+% Copyright (C) 2011-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -23,7 +23,7 @@ function [AHess, DLIK, LIK] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,ka
 % GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with Dynare.  If not, see <http://www.gnu.org/licen
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
     k = size(DT,3);                                 % number of structural parameters
