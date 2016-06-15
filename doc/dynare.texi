@@ -10071,8 +10071,9 @@ following @LaTeX{} packages: @code{longtable, booktabs}
 
 Writes descriptive statistics about the prior distribution to
 a @LaTeX{} table in a file named @code{<<M_.fname>>_latex_priors_table.tex}. The command writes the prior
-definitions currently stored. Thus, the command must be invoked after a call to @code{estimation}. Requires the
-following @LaTeX{} packages: @code{longtable, booktabs}
+definitions currently stored. Thus, the command must be invoked after the @code{estimated_params} block. The command
+returns an error if no prior densities are defined (ML estimation). Requires the following @LaTeX{}
+packages: @code{longtable, booktabs}
 @end deffn
 
 @deffn {MATLAB/Octave command} collect_LaTeX_Files (@code{M_}) ;
