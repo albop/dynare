@@ -713,3 +713,8 @@ clean-local:
 	rm -f estimation/test_matrix.mat
 
 	rm -f initval_file/ramst_initval_file_data_col_vec_mat.mat initval_file/ramst_initval_file_data_row_vec_mat.mat initval_file/ramst_initval_file_excel.xls
+
+	find . -name "*.tex" -type f -delete
+	find . -name "*.aux" -type f -delete
+	find . -name "*.log" -type f -delete
+	find . -name "*.eps" -type f -delete
