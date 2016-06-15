@@ -112,7 +112,6 @@ MODFILES = \
 	fs2000/fs2000c.mod \
 	fs2000/fs2000_calib.mod \
 	fs2000/fs2000_calib_dseries.mod \
-	fs2000/fs2000_analytic_derivation.mod \
 	fs2000/fs2000_missing_data.mod \
 	fs2000/fs2000_sd.mod \
 	fs2000/fs2000_dseries_a.mod \
