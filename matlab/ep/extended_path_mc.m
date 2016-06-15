@@ -69,7 +69,7 @@ if ep.parallel
     parfor i=1:replic
         innovations_ = innovations;
         DynareResults_ = DynareResults;
-        [shocks, spfm_exo_simul, innovations_, DynareResults_] = extended_path_shocks(innovations_, ep, exogenousvariables(:,:,i), samplesize, DynareResults_);
+        [shocks, spfm_exo_simul, innovations_, DynareResults_] = extended_path_shocks(innovations_, ep, exogenousvariables(:,:,i), samplesize, DynareModel, DynareOptions, DynareResults_);
         endogenous_variables_paths = NaN(DynareModel.endo_nbr,samplesize+1);
         endogenous_variables_paths(:,1) = initialconditions(:,1);
         exogenous_variables_paths = NaN(innovations_.effective_number_of_shocks,samplesize+1);
@@ -99,7 +99,7 @@ if ep.parallel
 else
     % Sequential approach.
     for i=1:replic
-        [shocks, spfm_exo_simul, innovations, DynareResults] = extended_path_shocks(innovations, ep, exogenousvariables(:,:,i), samplesize, DynareResults);
+        [shocks, spfm_exo_simul, innovations, DynareResults] = extended_path_shocks(innovations, ep, exogenousvariables(:,:,i), samplesize, DynareModel, DynareOptions, DynareResults);
         endogenous_variables_paths = NaN(DynareModel.endo_nbr,samplesize+1);
         endogenous_variables_paths(:,1) = initialconditions(:,1);
         exogenous_variables_paths = NaN(innovations.effective_number_of_shocks,samplesize+1);
