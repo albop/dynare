@@ -265,14 +265,22 @@ if fload==0,
         end
         if neighborhood_width>0,
             for j=1:nshock,
-                lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
+                if opt_gsa.morris ~= 1
+                   lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
+                end
                 ub=min([bounds.ub(j) xparam1(j)*(1+neighborhood_width)]);
                 lb=max([bounds.lb(j) xparam1(j)*(1-neighborhood_width)]);
                 lpmat0(:,j)=lpmat0(:,j).*(ub-lb)+lb;
             end
             for j=1:np,
-                ub=min([bounds.ub(j+nshock) xparam1(j+nshock)*(1+neighborhood_width)]);
-                lb=max([bounds.lb(j+nshock) xparam1(j+nshock)*(1-neighborhood_width)]);
+                ub=xparam1(j+nshock)*(1+sign(xparam1(j+nshock))*neighborhood_width);
+                lb=xparam1(j+nshock)*(1-sign(xparam1(j+nshock))*neighborhood_width);
+                if bounds.ub(j+nshock)>=xparam1(j) && bounds.lb(j)<=xparam1(j+nshock),
+                    ub=min([bounds.ub(j+nshock) ub]);
+                    lb=max([bounds.lb(j+nshock) lb]);
+                else
+                    fprintf('\nstab_map_:: the calibrated value of param %s for neighborhood_width sampling is outside prior bounds.\nWe allow violation of bounds for this parameter, but if this was not done on purpose, please change calibration before running neighborhood_width sampling\n', bayestopt_.name{j+nshock})
+                end
                 lpmat(:,j)=lpmat(:,j).*(ub-lb)+lb;
             end
         else
@@ -480,7 +488,7 @@ else
     end
     load(filetoload,'lpmat','lpmat0','irestriction','iunstable','istable','iindeterm','iwrong','ixun','egg','yys','nspred','nboth','nfwrd','infox')
     Nsam = size(lpmat,1);
-    if pprior==0,
+    if pprior==0 && ~isempty(options_.mode_file),
         eval(['load ' options_.mode_file '.mat;']);
     end
 

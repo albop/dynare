@@ -33,8 +33,12 @@ else
 end
 
 pnames = M_.param_names(estim_params_.param_vals(:,1),:);
+    if opt_gsa.pprior,
 
 filetoload=[OutputDirectoryName '/' fname_ '_prior'];
+    else
+filetoload=[OutputDirectoryName '/' fname_ '_mc'];
+    end
 load(filetoload,'lpmat','lpmat0','istable','T','yys','nspred','nboth','nfwrd')
 if ~isempty(lpmat0),
   lpmatx=lpmat0(istable,:);
