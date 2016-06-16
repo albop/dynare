@@ -44,6 +44,24 @@ global options_ M_ estim_params_ bayestopt_ oo_
 
 donesomething = false;
 
+if ~isbayes(estim_params_)
+    warning('No prior detected!')
+    return
+end
+
+if (size(estim_params_.var_endo,1) || size(estim_params_.corrn,1))
+    % Prior over measurement errors are defined...
+   if ((isfield(options_,'varobs') && isempty(options_.varobs)) || ~isfield(options_,'varobs'))
+       % ... But the list of observed variabled is not yet defined.
+       warning('Prior detected on measurement erros, but no list of observed variables (varobs is missing)!')
+       return
+   end
+end
+
+% Fill or update bayestopt_ structure
+[xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
+
+
 % Temporarly change qz_criterium option value
 changed_qz_criterium_flag  = 0;
 if isempty(options_.qz_criterium)
@@ -56,8 +74,6 @@ M_.dname = M_.fname;
 % Temporarly set options_.order equal to one
 order = options_.order;
 options_.order = 1;
-
-[xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
 
 if ismember('plot', varargin)
     plot_priors(bayestopt_,M_,estim_params_,options_)
