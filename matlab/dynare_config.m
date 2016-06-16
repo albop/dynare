@@ -83,10 +83,6 @@ if ~isoctave
         % Replacements for functions of the stats toolbox
         p{end+1} = '/missing/stats/';
     end
-    if isempty(ver('econ')),
-        % Replacements for functions of the econ toolbox
-        p{end+1} = '/missing/econ/';
-    end
 end
 
 % ordeig() doesn't exist in Octave
