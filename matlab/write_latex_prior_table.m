@@ -30,12 +30,24 @@ function write_latex_prior_table
 
 global M_ options_ bayestopt_ estim_params_
 
-if ~any(bayestopt_.pshape > 0)
+if ~isbayes(estim_params_)
     fprintf('\nwrite_latex_prior_table:: No prior distributions detected. Skipping table creation.\n')
     return
 end
-    
-% get untruncated bounds
+
+if (size(estim_params_.var_endo,1) || size(estim_params_.corrn,1))
+    % Prior over measurement errors are defined...
+   if ((isfield(options_,'varobs') && isempty(options_.varobs)) || ~isfield(options_,'varobs'))
+       % ... But the list of observed variabled is not yet defined.
+       fprintf(['\nwrite_latex_prior_table:: varobs should be declared before. Skipping table creation.\n'])
+       return
+   end
+end
+
+% Fill or update bayestopt_ structure
+[xparam1, estim_params_, bayestopt_, lb, ub, M_] = set_prior(estim_params_, M_, options_);
+
+% Get untruncated bounds
 bounds = prior_bounds(bayestopt_, options_.prior_trunc);
 lb=bounds.lb;
 ub=bounds.ub;
