@@ -110,9 +110,9 @@ end
 if ismember('moments', varargin) % Prior simulations (2nd order moments).
     % Set estimated parameters to the prior mode...
     xparam1 = BayesOptions.p5;
-    % ... Except for uniform priors!
+    % ... Except for uniform priors (use the prior mean)!
     k = find(isnan(xparam1));
-    xparam1(k) = BayesOptions.p5(k);
+    xparam1(k) = BayesOptions.p1(k);
     % Update vector of parameters and covariance matrices
     Model = set_all_parameters(xparam1, EstimatedParams, Model);
     % Check model.
