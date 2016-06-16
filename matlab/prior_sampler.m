@@ -57,6 +57,7 @@ NumberOfElementsPerFile = ceil(options_.MaxNumberOfBytes/NumberOfParameters/Numb
 
 if NumberOfSimulations <= NumberOfElementsPerFile
     TableOfInformations = [ 1 ,  NumberOfSimulations , 1] ;
+    NumberOfFiles = 1;
 else
     NumberOfFiles = ceil(NumberOfSimulations/NumberOfElementsPerFile) ;
     NumberOfElementsInTheLastFile = NumberOfSimulations - NumberOfElementsPerFile*(NumberOfFiles-1) ;
