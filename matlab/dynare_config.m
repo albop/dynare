@@ -45,74 +45,78 @@ if ~nargin || nargin==1
     verbose = 1;
 end
 
-addpath([dynareroot '/distributions/'])
-addpath([dynareroot '/kalman/'])
-addpath([dynareroot '/kalman/likelihood'])
-addpath([dynareroot '/AIM/'])
-addpath([dynareroot '/partial_information/'])
-addpath([dynareroot '/perfect-foresight-models/'])
-addpath([dynareroot '/ms-sbvar/'])
-addpath([dynareroot '/ms-sbvar/identification/'])
-addpath([dynareroot '../contrib/ms-sbvar/TZcode/MatlabFiles/'])
-addpath([dynareroot '/parallel/'])
-addpath([dynareroot '/particles/src'])
-addpath([dynareroot '/gsa/'])
-addpath([dynareroot '/ep/'])
-addpath([dynareroot '/cli/'])
-addpath([dynareroot '/lmmcp/'])
-addpath([dynareroot '/optimization/'])
-addpath([dynareroot '/modules/dates/src/'])
-addpath([dynareroot '/modules/dseries/src/'])
-addpath([dynareroot '/utilities/doc/'])
-addpath([dynareroot '/utilities/tests/src/'])
-addpath([dynareroot '/utilities/dataset/'])
-addpath([dynareroot '/utilities/general/'])
-addpath([dynareroot '/modules/reporting/src/'])
-addpath([dynareroot '/modules/reporting/macros/'])
+p = {'/distributions/' ; ...
+     '/kalman/' ; ...
+     '/kalman/likelihood' ; ...
+     '/AIM/' ; ...
+     '/partial_information/' ; ...
+     '/perfect-foresight-models/' ; ...
+     '/ms-sbvar/' ; ...
+     '/ms-sbvar/identification/' ; ...
+     '/../contrib/ms-sbvar/TZcode/MatlabFiles/' ; ...
+     '/parallel/' ; ...
+     '/particles/src' ; ...
+     '/gsa/' ; ...
+     '/ep/' ; ...
+     '/cli/' ; ...
+     '/lmmcp/' ; ...
+     '/optimization/' ; ...
+     '/modules/dates/src/' ; ...
+     '/modules/dseries/src/' ; ...
+     '/utilities/doc/' ; ...
+     '/utilities/tests/src/' ; ...
+     '/utilities/dataset/' ; ...
+     '/utilities/general/' ; ...
+     '/modules/reporting/src/' ; ...
+     '/modules/reporting/macros/'};
 
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions
 
 if ~isoctave
     % Replacements for rows(), columns() and issquare() (inexistent under MATLAB)
-    addpath([dynareroot '/missing/rows_columns'])
-    addpath([dynareroot '/missing/issquare'])
+    p{end+1} = '/missing/rows_columns';
+    p{end+1} = '/missing/issquare';
     % Replacement for vec() (inexistent under MATLAB)
-    addpath([dynareroot '/missing/vec'])
+    p{end+1} = '/missing/vec';
     if ~user_has_matlab_license('statistics_toolbox')
         % Replacements for functions of the stats toolbox
-        addpath([dynareroot '/missing/stats/'])
+        p{end+1} = '/missing/stats/';
     end
-    if isempty(ver('econ')), 
+    if isempty(ver('econ')),
         % Replacements for functions of the econ toolbox
-        addpath([dynareroot '/missing/econ/'])
+        p{end+1} = '/missing/econ/';
     end
 end
 
 % ordeig() doesn't exist in Octave
 if isoctave
-    addpath([dynareroot '/missing/ordeig'])
+    p{end+1} = '/missing/ordeig';
 end
 
 % ilu is missing in Octave < 4.0
 if isoctave && octave_ver_less_than('4.0')
-    addpath([dynareroot '/missing/ilu'])
+    p{end+1} = '/missing/ilu';
 end
 
 % corrcoef with two outputs is missing in Octave (ticket #796)
 if isoctave && ~user_has_octave_forge_package('nan')
-    addpath([dynareroot '/missing/corrcoef'])
+    p{end+1} = '/missing/corrcoef';
 end
 
 % nanmean is in Octave Forge Statistics package and in MATLAB Statistics
 % toolbox
 if (isoctave && ~user_has_octave_forge_package('statistics')) ...
     || (~isoctave && ~user_has_matlab_license('statistics_toolbox'))
-    addpath([dynareroot '/missing/nanmean'])
+    p{end+1} = '/missing/nanmean';
 end
 
-% Add path to MEX files
-add_path_to_mex_files(dynareroot);
+P = cellfun(@(c)[dynareroot c], p, 'uni',false);
+
+% Add mex files folder
+P(end+1) = add_path_to_mex_files(dynareroot, false);
+
+addpath(P{:});
 
 %% Set mex routine names
 mex_status = cell(1,3);
