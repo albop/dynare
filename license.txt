@@ -98,6 +98,12 @@ Copyright: 1995-2007 Kurt Hornik
            2008-2011 Dynare Team
 License: GPL-3+
 
+Files: matlab/missing/stats/quantile.m
+Copyright: 2014-2016 Christopher Hummersone
+           2016 Dynare Team
+License: GPL-3+
+
+
 Files: matlab/missing/stats/corr.m
 Copyright: 1993-1996 Kurt Hornik
            1996-2015 John W. Eaton
