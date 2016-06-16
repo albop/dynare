@@ -743,7 +743,7 @@ clear the globals and functions.
 
 @item onlyclearglobals
 By default, @code{dynare} will issue a @code{clear all} command to
-MATLAB or Octave, thereby deleting all workspace variables; this
+MATLAB versions before 2015b and to Octave, thereby deleting all workspace variables; this
 option instructs @code{dynare} to clear only the global variables
 (@i{i.e.} @code{M_}, @code{options_}, @code{oo_},
 @code{estim_params_}, @code{bayestopt_}, and @code{dataset_}), leaving
