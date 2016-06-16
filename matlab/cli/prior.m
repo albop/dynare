@@ -59,7 +59,7 @@ if (size(estim_params_.var_endo,1) || size(estim_params_.corrn,1))
 end
 
 % Fill or update bayestopt_ structure
-[xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
+[xparam1, EstimatedParams, BayesOptions, lb, ub, Model] = set_prior(estim_params_, M_, options_);
 
 
 % Temporarly change qz_criterium option value
@@ -69,24 +69,24 @@ if isempty(options_.qz_criterium)
     changed_qz_criterium_flag  = 1;
 end
 
-M_.dname = M_.fname;
+Model.dname = Model.fname;
 
 % Temporarly set options_.order equal to one
 order = options_.order;
 options_.order = 1;
 
 if ismember('plot', varargin)
-    plot_priors(bayestopt_,M_,estim_params_,options_)
+    plot_priors(BayesOptions, Model, EstimatedParams, options_)
     donesomething = true;
 end
 
 if ismember('table', varargin)
-    print_table_prior(lb, ub, options_, M_, bayestopt_, estim_params_);
+    print_table_prior(lb, ub, options_, Model, BayesOptions, EstimatedParams);
     donesomething = true;
 end
 
 if ismember('simulate', varargin) % Prior simulations (BK).
-    results = prior_sampler(0,M_,bayestopt_,options_,oo_,estim_params_);
+    results = prior_sampler(0, Model, BayesOptions, options_, oo_, EstimatedParams);
     % Display prior mass info
     skipline(2)
     disp(['Prior mass = ' num2str(results.prior.mass)])
@@ -103,26 +103,27 @@ if ismember('simulate', varargin) % Prior simulations (BK).
 end
 
 if ismember('optimize', varargin) % Prior optimization.
-    optimize_prior(options_, M_, oo_, bayestopt_, estim_params_);
+    optimize_prior(options_, Model, oo_, BayesOptions, EstimatedParams);
     donesomething = true;
 end
 
 if ismember('moments', varargin) % Prior simulations (2nd order moments).
     % Set estimated parameters to the prior mode...
-    xparam1 = bayestopt_.p5;
+    xparam1 = BayesOptions.p5;
     % ... Except for uniform priors!
     k = find(isnan(xparam1));
-    xparam1(k) = bayestopt_.p5(k);
+    xparam1(k) = BayesOptions.p5(k);
     % Update vector of parameters and covariance matrices
-    M_ = set_all_parameters(xparam1,estim_params_,M_);
+    Model = set_all_parameters(xparam1, EstimatedParams, Model);
     % Check model.
-    check_model(M_);
+    check_model(Model);
     % Compute state space representation of the model.
-    oo_.dr=set_state_space(oo_.dr, M_, options_);
+    oo__ = oo_;
+    oo__.dr = set_state_space(oo__.dr, Model, options_);
     % Solve model
-    [dr,info, M_ ,options_ , oo_] = resol(0, M_ , options_ ,oo_);
+    [dr, info, Model , options__ , oo__] = resol(0, Model , options_ ,oo__);
     % Compute and display second order moments
-    oo_=disp_th_moments(oo_.dr,[],M_,options_,oo_);
+    oo__ = disp_th_moments(oo__.dr, [], Model, options__, oo__);
     skipline(2)
     donesomething = true;
 end
@@ -137,7 +138,7 @@ if ~donesomething
     error('prior: Unexpected arguments!')
 end
 
-function format_string = build_format_string(PriorStandardDeviation,LowerBound,UpperBound)
+function format_string = build_format_string(PriorStandardDeviation, LowerBound, UpperBound)
 format_string = ['%s & %s & %6.4f &'];
 if ~isnumeric(PriorStandardDeviation)
     format_string = [ format_string , ' %s &'];
