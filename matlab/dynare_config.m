@@ -107,14 +107,18 @@ if (isoctave && ~user_has_octave_forge_package('statistics')) ...
     p{end+1} = '/missing/nanmean';
 end
 
-P = cellfun(@(c)[dynareroot c], p, 'uni',false);
+P = cellfun(@(c)[dynareroot(1:end-1) c], p, 'uni',false);
 
-% Add mex files folder
-P(end+1) = add_path_to_mex_files(dynareroot, false);
+% Get mex files folder(s)
+mexpaths = add_path_to_mex_files(dynareroot, false);
 
+% Add mex files folder(s)
+P(end+1:end+length(mexpaths)) = mexpaths;
+
+% Set matlab's path
 addpath(P{:});
 
-%% Set mex routine names
+% Set mex routine names
 mex_status = cell(1,3);
 mex_status(1,1) = {'mjdgges'};
 mex_status(1,2) = {'qz'};
@@ -132,9 +136,10 @@ mex_status(5,1) = {'local_state_space_iteration_2'};
 mex_status(5,2) = {'reduced_form_models/local_state_space_iteration_2'};
 mex_status(5,3) = {'Local state space iteration (second order)'};
 number_of_mex_files = size(mex_status,1);
-%% Remove some directories from matlab's path. This is necessary if the user has
-%% added dynare_v4/matlab with the subfolders. Matlab has to ignore these
-%% subfolders if valid mex files exist.
+
+% Remove some directories from matlab's path. This is necessary if the user has
+% added dynare_v4/matlab with the subfolders. Matlab has to ignore these
+% subfolders if valid mex files exist.
 matlab_path = path;
 for i=1:number_of_mex_files
     test = strfind(matlab_path,[dynareroot mex_status{i,2}]);
@@ -144,8 +149,9 @@ for i=1:number_of_mex_files
         matlab_path = path;
     end
 end
-%% Test if valid mex files are available, if a mex file is not available
-%% a matlab version of the routine is included in the path.
+
+% Test if valid mex files are available, if a mex file is not available
+% a matlab version of the routine is included in the path.
 if verbose
     skipline()
     disp('Configuring Dynare ...')

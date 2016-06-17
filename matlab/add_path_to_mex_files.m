@@ -69,7 +69,7 @@ else
     end
     % Add generic MATLAB path (with higher priority than the previous ones)
     if exist('mexpath')
-        mexpath = { mexpath, [dynareroot '../mex/matlab/'] };
+        mexpath = { mexpath; [dynareroot '../mex/matlab/'] };
     else
         mexpath = { [dynareroot '../mex/matlab/'] };
     end
