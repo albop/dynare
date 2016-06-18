@@ -167,7 +167,7 @@ int main(int argc, char **argv)
   /*
      Optional allow user provided preconditioner
    */
-  ierr = PetscOptionsHasName(NULL,"-user_precond",&flg);CHKERRQ(ierr);
+  ierr = PetscOptionsHasName(NULL,NULL,"-user_precond",&flg);CHKERRQ(ierr);
   if (flg) {
     KSP ksp;
     PC  pc;
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
   ierr = SNESGetKSP(snes,&ksp);CHKERRQ(ierr);
   ierr = KSPGetPC(ksp,&pc);CHKERRQ(ierr);
   ierr = PCSetType(pc,PCLU);CHKERRQ(ierr);
-  //  PetscOptionsSetValue("-pc_type","lu");
+  //  PetscOptionsSetValue(NULL,"-pc_type","lu");
   ierr = SNESSetFromOptions(snes);CHKERRQ(ierr);
 
   /*
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
      iterates that are determined by line search methods
   */
   ierr = SNESGetLineSearch(snes, &linesearch);CHKERRQ(ierr);
-  ierr = PetscOptionsHasName(NULL,"-post_check_iterates",&post_check);CHKERRQ(ierr);
+  ierr = PetscOptionsHasName(NULL,NULL,"-post_check_iterates",&post_check);CHKERRQ(ierr);
 
   if (post_check) {
     ierr = PetscPrintf(PETSC_COMM_WORLD,"Activating post step checking routine\n");CHKERRQ(ierr);
@@ -220,16 +220,16 @@ int main(int argc, char **argv)
     checkP.tolerance = 1.0;
     checkP.user      = &user;
 
-    ierr = PetscOptionsGetReal(NULL,"-check_tol",&checkP.tolerance,NULL);CHKERRQ(ierr);
+    ierr = PetscOptionsGetReal(NULL,NULL,"-check_tol",&checkP.tolerance,NULL);CHKERRQ(ierr);
   }
 
-  ierr = PetscOptionsHasName(NULL,"-post_setsubksp",&post_setsubksp);CHKERRQ(ierr);
+  ierr = PetscOptionsHasName(NULL,NULL,"-post_setsubksp",&post_setsubksp);CHKERRQ(ierr);
   if (post_setsubksp) {
     ierr = PetscPrintf(PETSC_COMM_WORLD,"Activating post setsubksp\n");CHKERRQ(ierr);
     ierr = SNESLineSearchSetPostCheck(linesearch,PostSetSubKSP,&checkP1);CHKERRQ(ierr);
   }
 
-  ierr = PetscOptionsHasName(NULL,"-pre_check_iterates",&pre_check);CHKERRQ(ierr);
+  ierr = PetscOptionsHasName(NULL,NULL,"-pre_check_iterates",&pre_check);CHKERRQ(ierr);
   if (pre_check) {
     ierr = PetscPrintf(PETSC_COMM_WORLD,"Activating pre step checking routine\n");CHKERRQ(ierr);
     ierr = SNESLineSearchSetPreCheck(linesearch,PreCheck,&checkP);CHKERRQ(ierr);
