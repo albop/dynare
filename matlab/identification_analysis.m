@@ -1,4 +1,4 @@
-function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info, options_ident] = identification_analysis(params,indx,indexo,options_ident,dataset_,dataset_info, prior_exist,name_tex,init,tittxt)
+function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info, options_ident] = identification_analysis(params,indx,indexo,options_ident,dataset_,dataset_info, prior_exist,name_tex,init,tittxt,bounds)
 % function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = identification_analysis(params,indx,indexo,options_ident,data_info, prior_exist,name_tex,init,analyis_type)
 % given the parameter vector params, wraps all identification analyses
 %
@@ -122,7 +122,7 @@ if info(1)==0,
     ide_strength_J=NaN(1,nparam);
     ide_strength_J_prior=NaN(1,nparam);
     if init, %~isempty(indok),
-        normaliz = abs(params);
+        normaliz = NaN(1,nparam);
         if prior_exist,
             if ~isempty(estim_params_.var_exo),
                 normaliz1 = estim_params_.var_exo(:,7)'; % normalize with prior standard deviation
@@ -155,12 +155,12 @@ if info(1)==0,
             info = stoch_simul(char(options_.varobs));
             dataset_ = dseries(oo_.endo_simul(options_.varobs_id,100+1:end)',dates('1Q1'), options_.varobs);            
             derivatives_info.no_DLIK=1;
-            bounds = prior_bounds(bayestopt_, options_.prior_trunc);
+            %bounds = prior_bounds(bayestopt_, options_.prior_trunc);
             [fval,info,cost_flag,DLIK,AHess,ys,trend_coeff,M_,options_,bayestopt_,oo_] = dsge_likelihood(params',dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_,derivatives_info);             
 %                 fval = DsgeLikelihood(xparam1,data_info,options_,M_,estim_params_,bayestopt_,oo_);
             options_.analytic_derivation = analytic_derivation;
             AHess=-AHess;
-            if min(eig(AHess))<0,
+            if min(eig(AHess))<-1.e-10,
                 error('identification_analysis: Analytic Hessian is not positive semi-definite!')
             end
 %             chol(AHess);
@@ -241,7 +241,7 @@ if info(1)==0,
         end
         ide_strength_J(indok) = (1./(normaliz(indok)'./abs(params(indok)')));
         ide_strength_J_prior(indok) = (1./(normaliz(indok)'./normaliz1(indok)'));
-        ide_strength_J(params==0)=ide_strength_J_prior(params==0);
+        ide_strength_J(params==0)=1./normaliz(params==0)';
         deltaM_prior = deltaM.*abs(normaliz1');
         deltaM = deltaM.*abs(params');
         deltaM(params==0)=deltaM_prior(params==0);
