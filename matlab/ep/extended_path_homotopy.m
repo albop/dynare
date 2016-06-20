@@ -56,9 +56,9 @@ if ismember(method, [1, 2])
         if debug
             disp(sprintf('%s\t %1.8f\t %s',int2str(iteration),weight,int2str(flag)))
         end
+        state(2:end) = state(1:end-1);
+        state(1) = flag;
         if flag
-            state(2:end) = state(1:end-1);
-            state(1) = flag;
             if isequal(weight, 1)
                 noconvergence = false;
                 break
@@ -72,8 +72,6 @@ if ismember(method, [1, 2])
             increase_flag = true;
             endo_simul = tmp.endo_simul;
         else
-            state(2:end) = state(1:end-1);
-            state(1) = flag;
             if increase_flag
                 weight = oldweight + (weight-oldweight)/100;
             else
