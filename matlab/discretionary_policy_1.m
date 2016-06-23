@@ -60,6 +60,12 @@ else
     lead_lag_incidence = M_.lead_lag_incidence;
 end
 
+%call steady_state_file if present to update parameters
+if options_.steadystate_flag
+    % explicit steady state file
+    [junk,M_.params,info] = evaluate_steady_state_file(oo_.steady_state,[oo_.exo_steady_state; oo_.exo_det_steady_state],M_, ...
+                                                   options_,0);
+end
 [U,Uy,W] = feval([M_.fname,'_objective_static'],zeros(endo_nbr,1),[], M_.params);
 if any(any(Uy~=0))
     error(['discretionary_policy: the objective function must have zero ' ...
