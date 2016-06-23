@@ -1107,9 +1107,9 @@ number @var{i} and the index in many loops. Rather, name investment @var{invest}
 
 Declarations of variables and parameters are made with the following commands:
 
-@deffn Command var @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING})] [(NAME=@var{QUOTED_STRING})]@dots{};
-@deffnx Command var (deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING})] [(NAME=@var{QUOTED_STRING})]@dots{};
-@deffnx Command var (log_deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING})] [(NAME=@var{QUOTED_STRING})]@dots{};
+@deffn Command var @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING}|NAME=@var{QUOTED_STRING}@dots{})]@dots{};
+@deffnx Command var (deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING}|NAME=@var{QUOTED_STRING}@dots{})]@dots{};
+@deffnx Command var (log_deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING}|NAME=@var{QUOTED_STRING}@dots{})]@dots{};
 
 @descriptionhead
 
@@ -1149,26 +1149,28 @@ multiplicative trend).
 @anchor{long_name}
 @item long_name = @var{QUOTED_STRING}
 This is the long version of the variable name. Its value is stored in
-@code{M_.endo_names_long}. Default: @var{VARIABLE_NAME}
+@code{M_.endo_names_long}. In case multiple @code{long_name} options are
+provided, the last one will be used. Default: @var{VARIABLE_NAME}
 
 @anchor{partitioning}
 @item NAME = @var{QUOTED_STRING}
 This is used to create a partitioning of variables. It results in the direct
-output in the @file{.m} file analogous to: @code{M_.endo_}@var{NAME}@code{ =
-}@var{QUOTED_STRING}@code{;}.
+output in the @file{.m} file analogous to:
+@code{M_.endo_partitions.}@var{NAME}@code{ = }@var{QUOTED_STRING}@code{;}.
 @end table
 
 @examplehead
 
 @example
-var c gnp q1 (country=`US') q2 (country=`FR');
+var c gnp cva (country=`US', state=`VA')
+          cca (country=`US', state=`CA', long_name=`Consumption CA');
 var(deflator=A) i b;
 var c $C$ (long_name=`Consumption');
 @end example
 
 @end deffn
 
-@deffn Command varexo @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING})] [(NAME=@var{QUOTED_STRING})]@dots{};
+@deffn Command varexo @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING}|NAME=@var{QUOTED_STRING}@dots{})]@dots{};
 
 @descriptionhead
 
@@ -1188,7 +1190,8 @@ will concatenate them.
 Like @ref{long_name} but value stored in @code{M_.exo_names_long}.
 
 @item NAME = @var{QUOTED_STRING}
-Like @ref{partitioning} but @var{QUOTED_STRING} stored in @code{M_.exo_}@var{NAME}.
+Like @ref{partitioning} but @var{QUOTED_STRING} stored in
+@code{M_.exo_partitions.}@var{NAME}.
 @end table
 
 @examplehead
@@ -1199,7 +1202,7 @@ varexo m gov;
 
 @end deffn
 
-@deffn Command varexo_det @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING})] [(NAME=@var{QUOTED_STRING})]@dots{};
+@deffn Command varexo_det @var{VARIABLE_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING}|NAME=@var{QUOTED_STRING}@dots{})]@dots{};
 
 @descriptionhead
 
@@ -1225,7 +1228,8 @@ Dynare will concatenate them.
 Like @ref{long_name} but value stored in @code{M_.exo_det_names_long}.
 
 @item NAME = @var{QUOTED_STRING}
-Like @ref{partitioning} but @var{QUOTED_STRING} stored in @code{M_.exo_det_}@var{NAME}.
+Like @ref{partitioning} but @var{QUOTED_STRING} stored in
+@code{M_.exo_det_partitions.}@var{NAME}.
 @end table
 
 @examplehead
@@ -1239,7 +1243,7 @@ varexo_det tau;
 
 @end deffn
 
-@deffn Command parameters @var{PARAMETER_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING})] [(NAME=@var{QUOTED_STRING})]@dots{};
+@deffn Command parameters @var{PARAMETER_NAME} [$@var{LATEX_NAME}$] [(long_name=@var{QUOTED_STRING}|NAME=@var{QUOTED_STRING}@dots{})]@dots{};
 
 @descriptionhead
 
@@ -1260,7 +1264,8 @@ Dynare will concatenate them.
 Like @ref{long_name} but value stored in @code{M_.param_names_long}.
 
 @item NAME = @var{QUOTED_STRING}
-Like @ref{partitioning} but @var{QUOTED_STRING} stored in @code{M_.param_}@var{NAME}.
+Like @ref{partitioning} but @var{QUOTED_STRING} stored in
+@code{M_.param_partitions.}@var{NAME}.
 @end table
 
 @examplehead
