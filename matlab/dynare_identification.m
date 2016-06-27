@@ -147,7 +147,7 @@ options_ = set_default_option(options_,'datafile','');
 options_.mode_compute = 0;
 options_.plot_priors = 0;
 options_.smoother=1;
-[dataset_,dataset_info,xparam1,hh, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
+[dataset_,dataset_info,xparam1,hh, M_, options_, oo_, estim_params_,bayestopt_,bounds]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
 options_ident = set_default_option(options_ident,'analytic_derivation_mode',options_.analytic_derivation_mode); % if not set by user, inherit default global one
 
 if prior_exist
@@ -310,7 +310,7 @@ if iload <=0,
         disp('Testing current parameter values')
     end
     [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point, info, options_ident] = ...
-        identification_analysis(params,indx,indexo,options_ident,dataset_, dataset_info, prior_exist, name_tex,1,parameters);
+        identification_analysis(params,indx,indexo,options_ident,dataset_, dataset_info, prior_exist, name_tex,1,parameters,bounds);
     if info(1)~=0,
         skipline()
         disp('----------- ')
@@ -353,7 +353,7 @@ if iload <=0,
                 kk=kk+1;
                 params = prior_draw();
                 [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point, info, options_ident] = ...
-                    identification_analysis(params,indx,indexo,options_ident,dataset_,dataset_info, prior_exist, name_tex,1,'Random_prior_params');
+                    identification_analysis(params,indx,indexo,options_ident,dataset_,dataset_info, prior_exist, name_tex,1,'Random_prior_params',bounds);
             end
         end
         if info(1)
@@ -407,7 +407,7 @@ if iload <=0,
             params = prior_draw();
         end
         [dum1, ideJ, ideH, ideGP, dum2 , info, options_MC] = ...
-            identification_analysis(params,indx,indexo,options_MC,dataset_, dataset_info, prior_exist, name_tex,0);
+            identification_analysis(params,indx,indexo,options_MC,dataset_, dataset_info, prior_exist, name_tex,0,[],bounds);
         if iteration==0 && info(1)==0,
             MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(size(ideH.siH,1)*nparam)/8));
             stoH = zeros([size(ideH.siH,1),nparam,MAX_tau]);

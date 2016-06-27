@@ -55,6 +55,29 @@ JJ1 = JJ(:,ind1);
 condJ= cond(JJ1);
 rankJ = rank(JJ);
 rankJJ = rankJ;
+icheck=0;
+if npar>0 && (rankJ<npar), 
+    % search for singular values associated to ONE individual parameter
+    ee0 = [rankJJ+1:length(ind1)];
+    ind11=ones(length(ind1),1);
+    for j=1:length(ee0),
+        if length(find(abs(ee1(:,ee0(j))) > 1.e-3))==1,
+            icheck=1;
+            ind11 = ind11.*(abs(ee1(:,ee0(j))) <= 1.e-3); % take non-zero columns
+        end
+    end
+    ind1 = ind1(find(ind11)); % take non-zero columns
+end
+
+if icheck,
+JJ1 = JJ(:,ind1);
+[eu,ee2,ee1] = svd( JJ1, 0 );
+condJ= cond(JJ1);
+rankJ = rank(JJ);
+rankJJ = rankJ;
+end    
+    
+
 % if hess_flag==0,
 %     rankJJ = rank(JJ'*JJ);
 % end   
