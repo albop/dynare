@@ -290,6 +290,7 @@ MODFILES = \
 	optimizers/fs2000_w.mod \
 	differentiate_forward_vars/RBC_differentiate_forward.mod \
 	TeX/fs2000_corr_ME.mod \
+	partitioning/partitions.mod \
 	prior_posterior_function/fs2000_prior_posterior_function.mod \
 	observation_trends_and_prefiltering/MCMC/Trend_loglin_no_prefilt_first_obs_MC.mod \
 	observation_trends_and_prefiltering/MCMC/Trend_loglin_prefilt_first_obs_MC.mod \
