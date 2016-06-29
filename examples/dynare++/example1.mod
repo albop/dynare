@@ -1,3 +1,10 @@
+/*
+ * This Dynare++ mod-file implements the RBC model with time-to-build
+ * described in Kamenik (2011): "DSGE Models with Dynare++. A Tutorial."
+ * Note that Dynare++ uses the same stock-at-the-end-of-period timing convention
+ * as the regular Dynare
+*/
+
 var Y, C, K, A, H, B;
 
 varexo EPS, NU;
