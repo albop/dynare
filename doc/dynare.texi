@@ -6046,7 +6046,7 @@ Use a standard (linear) Kalman filter algorithm with the nonlinear measurement a
 
 @item proposal_approximation = @var{OPTION}
 @anchor{proposal_approximation}
-Sets the method for approximating the proposal distribution. Possible values for @var{OPTION} are: @code{cubature}, @code{montecarlo} and @code{unscented}. Default value is @code{cubature}.
+Sets the method for approximating the proposal distribution. Possible values for @var{OPTION} are: @code{cubature}, @code{montecarlo} and @code{unscented}. Default value is @code{unscented}.
 
 @item distribution_approximation = @var{OPTION}
 @anchor{distribution_approximation}
