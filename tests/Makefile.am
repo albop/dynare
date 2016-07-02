@@ -242,7 +242,8 @@ MODFILES = \
 	deterministic_simulations/multiple_lead_lags/AR2.mod \
 	deterministic_simulations/multiple_lead_lags/AR2_forward.mod \
 	deterministic_simulations/multiple_lead_lags/ramst_augmented_histval.mod \
-        deterministic_simulations/lbj/rbc.mod \
+        deterministic_simulations/rbc_det.mod \
+        deterministic_simulations/rbc_det_stack_solve_algo_7.mod \
         lmmcp/rbc.mod \
         lmmcp/rbcii.mod \
 	lmmcp/sw_lmmcp.mod \
@@ -402,6 +403,8 @@ deterministic_simulations/rbc_det_exo_lag_2b.m.trs: deterministic_simulations/rb
 deterministic_simulations/rbc_det_exo_lag_2c.m.trs: deterministic_simulations/rbc_det_exo_lag_2a.m.trs
 deterministic_simulations/rbc_det_exo_lag_2b.o.trs: deterministic_simulations/rbc_det_exo_lag_2a.o.trs
 deterministic_simulations/rbc_det_exo_lag_2c.o.trs: deterministic_simulations/rbc_det_exo_lag_2a.o.trs
+deterministic_simulations/rbc_det_stack_solve_algo_7.m.trs: deterministic_simulations/rbc_det.m.trs
+deterministic_simulations/rbc_det_stack_solve_algo_7.o.trs: deterministic_simulations/rbc_det.o.trs
 
 initval_file/ramst_initval_file.m.trs: initval_file/ramst_initval_file_data.m.tls
 initval_file/ramst_initval_file.o.trs: initval_file/ramst_initval_file_data.o.tls

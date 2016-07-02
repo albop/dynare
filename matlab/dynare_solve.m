@@ -205,6 +205,7 @@ elseif options.solve_algo == 11
     global mcp_data
     mcp_data.func = func;
     mcp_data.args = varargin;
+
     [x,fval,jac,mu,status] = pathmcp(x,omcppath.lb,omcppath.ub,'mcp_func',omcppath.A,omcppath.b,omcppath.t,omcppath.mu0);
     info = ~status;
 else
