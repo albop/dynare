@@ -51,6 +51,16 @@ Sigma_e = M_.Sigma_e;
 M_.Sigma_e = zeros(size(Sigma_e));
 
 info = 0;
+if any(imag(oo_.steady_state))
+    imagrow=find(imag(oo_.steady_state));
+    if ~isempty(imagrow)
+        fprintf('\nresid: The initial values for the steady state of the following variables are complex:\n');
+        for iter=1:length(imagrow)
+            fprintf('%s\n',M_.endo_names(imagrow(iter),:));
+        end
+    end   
+end
+    
 if options_.steadystate_flag
     [oo_.steady_state,M_.params,info] = ...
         evaluate_steady_state(oo_.steady_state,M_,options_,oo_,0);
