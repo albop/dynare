@@ -232,7 +232,7 @@ public:
   void evaluateSystem(Vector &out, const Vector &yy, const Vector &xx) throw (DynareException);
   void evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
                       const Vector &yyp, const Vector &xx) throw (DynareException);
-  void calcDerivativesAtSteady() throw (DynareException);
+  void calcDerivativesAtSteady();
   DynamicModelAC *dynamicModelFile;
   DynamicModel *
   clone() const

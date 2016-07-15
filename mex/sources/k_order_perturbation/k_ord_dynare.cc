@@ -110,7 +110,7 @@ KordpDynare::evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
  * which performs actual calculation and reorders
  ***************************************************/
 void
-KordpDynare::calcDerivativesAtSteady() throw (DynareException)
+KordpDynare::calcDerivativesAtSteady()
 {
   if (g1p == NULL)
     {
@@ -139,6 +139,7 @@ KordpDynare::calcDerivativesAtSteady() throw (DynareException)
       LLxSteady(ySteady, llxSteady);
       
       dynamicModelFile->eval(llxSteady, xx, params, ySteady, out, g1p, g2p, g3p);
+                
     }
 
   populateDerivativesContainer(*g1p, 1, JacobianIndices);
