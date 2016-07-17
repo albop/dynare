@@ -198,6 +198,10 @@ the same. The difference is only numerical error.
 				 matD.getData().base(), &n, &sdim2, alphar.base(), alphai.base(),
 				 beta.base(), vsl.getData().base(), &n, vsr.getData().base(), &n,
 				 work.base(), &lwork, bwork, &info);
+        if(info){
+            throw KordException(__FILE__,__LINE__,
+                                "DGGES returns an error in FirstOrder::solve");
+        }
 	sdim = sdim2;
 	bk_cond = (sdim == ypart.nys());
 	delete[] bwork;
