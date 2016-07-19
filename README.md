@@ -200,7 +200,7 @@ We no longer support compilation on Windows. To use the unstable version of Dyna
 
 - Install the Xcode Command Line Tools:
     - Download "Command Line Tools (OS X 10.X) for Xcode," where 10.X corresponds to your OS X version, from https://developer.apple.com/downloads/index.action
-- Install the latest version of [MacTeX](http://www.tug.org/mactex/)
+- Install the latest version of [MacTeX](http://www.tug.org/mactex/), deselecting the option to install Ghostscript
 - Install [Homebrew](http://mxcl.github.io/homebrew/) by following the instructions on the website
 - Tap [Homebrew Science](https://github.com/Homebrew/homebrew-science) by opening Terminal and typing:
 - ```brew tap homebrew/science```
