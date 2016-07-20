@@ -203,7 +203,7 @@ We no longer support compilation on Windows. To use the unstable version of Dyna
 - Install the latest version of [MacTeX](http://www.tug.org/mactex/), deselecting the option to install Ghostscript
 - Install [Homebrew](http://mxcl.github.io/homebrew/) by following the instructions on the website
 - Tap [Homebrew Science](https://github.com/Homebrew/homebrew-science) by opening Terminal and typing:
-- ```brew tap homebrew/science```
+    - ```brew tap homebrew/science```
 - **(Optional)** To compile Dynare mex files for use on Octave:
     - ```brew install octave```
     - ```brew install suite-sparse```
