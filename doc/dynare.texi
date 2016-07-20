@@ -5240,6 +5240,7 @@ Instructs Dynare to run mode computing/optimization silently without displaying 
 saving files in between. Useful when running loops.
 
 @item mcmc_jumping_covariance = hessian|prior_variance|identity_matrix|@var{FILENAME}
+@anchor{MCMC_jumping_covariance}
 Tells Dynare which covariance to use for the proposal density of the MCMC sampler. @code{mcmc_jumping_covariance} can be one of the following:
 
 @table @code
@@ -6158,6 +6159,52 @@ based on the Laplace Approximation.
 Variable set by the @code{estimation} command, if it is used with
 @code{mh_replic > 0} or @code{load_mh_file} option. Stores the marginal data density 
 based on @cite{Geweke (1999)} Modified Harmonic Mean estimator.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior.optimization
+Variable set by the @code{estimation} command if mode-finding is used. Stores the results at the mode. 
+Fields are of the form 
+@example
+@code{oo_.posterior.optimization.@var{OBJECT}}
+@end example
+
+where @var{OBJECT} is one of the following:
+
+@table @code
+
+@item mode
+Parameter vector at the mode
+
+@item Variance
+Inverse Hessian matrix at the mode or MCMC jumping covariance matrix when used with the 
+@ref{MCMC_jumping_covariance} option
+
+@item log_density
+Log likelihood (ML)/log posterior density (Bayesian) at the mode when used with @code{mode_compute>0}
+
+@end table
+
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior.metropolis
+Variable set by the @code{estimation} command if @code{mh_replic>0} is used. 
+Fields are of the form 
+@example
+@code{oo_.posterior.metropolis.@var{OBJECT}}
+@end example
+
+where @var{OBJECT} is one of the following:
+
+@table @code
+
+@item mean
+Mean parameter vector from the MCMC
+
+@item Variance
+Covariance matrix of the parameter draws in the MCMC 
+
+@end table
+
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.FilteredVariables
