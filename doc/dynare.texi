@@ -7082,7 +7082,7 @@ cannot be less than the number of constrained periods.
 Number of simulations. Default: @code{5000}.
 
 @item conf_sig = @var{DOUBLE}
-Level of significance for confidence interval. Default: @code{0.80}
+Level of significance for confidence interval. Default: @code{0.90}
 
 @end table
 

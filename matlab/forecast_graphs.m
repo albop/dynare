@@ -74,7 +74,7 @@ for j= 1:nvar
             fprintf(fidTeX,'\\centering \n');
             fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s/graphs/forcst%d}\n',dname,n_fig);
             fprintf(fidTeX,'\\label{Fig:forcst:%d}\n',n_fig);
-            fprintf(fidTeX,'\\caption{Mean forecasts and %2.0f%% confidence intervals}\n',options_.conf_sig*100);
+            fprintf(fidTeX,'\\caption{Mean forecasts and %2.0f%% confidence intervals}\n',options_.forecasts.conf_sig*100);
             fprintf(fidTeX,'\\end{figure}\n');
             fprintf(fidTeX,' \n');
         end       
@@ -110,7 +110,7 @@ if m > 1
         fprintf(fidTeX,'\\centering \n');
         fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s/graphs/forcst%d}\n',dname,n_fig);
         fprintf(fidTeX,'\\label{Fig:forcst:%d}\n',n_fig);
-        fprintf(fidTeX,'\\caption{Mean forecasts and %2.0f\\%% confidence intervals}\n',options_.conf_sig*100);
+        fprintf(fidTeX,'\\caption{Mean forecasts and %2.0f\\%% confidence intervals}\n',options_.forecasts.conf_sig*100);
         fprintf(fidTeX,'\\end{figure}\n');
         fprintf(fidTeX,' \n');
     end

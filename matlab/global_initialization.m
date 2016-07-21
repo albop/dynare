@@ -109,6 +109,7 @@ options_.bvar_prior_mu = 2;
 options_.bvar_prior_omega = 1;
 options_.bvar_prior_flat = 0;
 options_.bvar_prior_train = 0;
+options_.bvar.conf_sig = 0.6;
 
 % Initialize the field that will contain the optimization algorigthm's options declared in the
 % estimation command (if anny).
@@ -305,6 +306,8 @@ options_.prior_draws = 10000;
 options_.sampling_draws = 500;
 
 options_.forecast = 0;
+options_.forecasts.conf_sig = 0.9;
+options_.conditional_forecast.conf_sig = 0.9;
 
 % Model
 options_.linear = 0;
@@ -513,7 +516,7 @@ options_.estimation.moments_posterior_density.gridpoints = 2^9;
 options_.estimation.moments_posterior_density.bandwidth = 0; % Rule of thumb optimal bandwidth parameter.
 options_.estimation.moments_posterior_density.kernel_function = 'gaussian'; % Gaussian kernel for Fast Fourrier Transform approximaton.
 % Misc
-options_.conf_sig = 0.6;
+% options_.conf_sig = 0.6;
 oo_.exo_simul = [];
 oo_.endo_simul = [];
 ys0_ = [];

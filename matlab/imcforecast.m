@@ -63,8 +63,8 @@ if ~isfield(options_cond_fcst,'periods') || isempty(options_cond_fcst.periods)
     options_cond_fcst.periods = 40;
 end
 
-if ~isfield(options_cond_fcst,'conf_sig') || isempty(options_cond_fcst.conf_sig)
-    options_cond_fcst.conf_sig = .8;
+if ~isfield(options_cond_fcst,'conditional_forecast') || ~isfield(options_cond_fcst.conditional_forecast,'conf_sig')  || isempty(options_cond_fcst.conditional_forecast.conf_sig)
+    options_cond_fcst.conditional_forecast.conf_sig = .8;
 end
 
 if isequal(options_cond_fcst.parameter_set,'calibration')
@@ -228,7 +228,7 @@ end
 mFORCS1 = mean(FORCS1,3);
 mFORCS1_shocks = mean(FORCS1_shocks,3);
 
-tt = (1-options_cond_fcst.conf_sig)/2;
+tt = (1-options_cond_fcst.conditional_forecast.conf_sig)/2;
 t1 = round(options_cond_fcst.replic*tt);
 t2 = round(options_cond_fcst.replic*(1-tt));
 

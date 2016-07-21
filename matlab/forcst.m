@@ -78,7 +78,7 @@ for i=1:horizon
     sigma_y = sigma_y+sigma_u;
 end
 
-fact = norminv((1-options_.conf_sig)/2,0,1);
+fact = norminv((1-options_.forecasts.conf_sig)/2,0,1);
 
 int_width = zeros(horizon,M_.endo_nbr);
 for i=1:nvar

@@ -102,7 +102,7 @@ posterior_mean_irfs = mean(sampled_irfs,4);
 posterior_variance_irfs = var(sampled_irfs, 1, 4);
 
 sorted_irfs = sort(sampled_irfs,4);
-sort_idx = round((0.5 + [-options_.conf_sig, options_.conf_sig, .0]/2) * options_.bvar_replic);
+sort_idx = round((0.5 + [-options_.bvar.conf_sig, options_.bvar.conf_sig, .0]/2) * options_.bvar_replic);
 
 posterior_down_conf_irfs = sorted_irfs(:,:,:,sort_idx(1));
 posterior_up_conf_irfs = sorted_irfs(:,:,:,sort_idx(2));
