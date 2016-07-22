@@ -7452,6 +7452,15 @@ Specifies the optimizer for minimizing the objective function. The same solvers 
 @item optim = (@var{NAME}, @var{VALUE}, ...)
 A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the optimization routines. The set of available options depends on the selected optimization routine (i.e. on the value of option @ref{opt_algo}). @xref{optim}.
 
+@item maxit = @var{INTEGER} 
+Determines the maximum number of iterations used in @code{opt_algo=4}.  This option is now deprecated and will be 
+removed in a future release of Dynare. Use @code{optim} instead to set optimizer-specific values. Default: @code{1000}
+
+@item tolf = @var{DOUBLE}
+Convergence criterion for termination based on the function value used in @code{opt_algo=4}. Iteration will cease when it proves impossible to
+improve the function value by more than tolf.  This option is now deprecated and will be 
+removed in a future release of Dynare. Use @code{optim} instead to set optimizer-specific values. Default: @code{e-7}
+
 @item silent_optimizer
 @pxref{silent_optimizer}
 

@@ -62,6 +62,27 @@ if any(isnan(M_.params(i_params)))
     error ('OSR: At least one of the initial parameter values for osr_params is NaN') ;
 end
 
+%restore backward compatibility with maxit and tolf
+if isfield(options_.osr,'maxit') || isfield(options_.osr,'tolf')
+    warning('OSR: The use of maxit and tolf is now deprecated. Please use the optim-option instead.')
+    if options_.osr.opt_algo~=4
+        error ('OSR: The maxit and tolf options are not supported when not using the default opt_algo=4. Use the optim-option instead.') ;
+    else
+        if isfield(options_.osr,'maxit')
+            if ~isempty(options_.optim_opt)
+                options_.optim_opt=[options_.optim_opt,','];
+            end
+            options_.optim_opt=[options_.optim_opt,'''MaxIter'',',num2str(options_.osr.maxit),''];
+        end
+        if isfield(options_.osr,'tolf')
+            if ~isempty(options_.optim_opt)
+                options_.optim_opt=[options_.optim_opt,','];
+            end
+            options_.optim_opt=[options_.optim_opt,'''TolFun'',',num2str(options_.osr.tolf),''];
+        end  
+    end
+end
+
 exe =zeros(M_.exo_nbr,1);
 
 oo_.dr = set_state_space(oo_.dr,M_,options_);
