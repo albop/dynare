@@ -687,6 +687,8 @@ clean-local:
 		k_order_perturbation/*.mat \
 		kalman_filter_smoother/data.mat
 
+	rm -f data_ca1_csv.csv
+
 	rm -rf ramsey_objective
 
 	rm -f fs2000_ssfile_steadystate.m
