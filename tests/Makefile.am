@@ -1,26 +1,47 @@
 MODFILES = \
+	walsh.mod \
+	optimizers/fs2000_6.mod \
+	moments/example1_hp_test.mod \
+	lmmcp/rbcii.mod \
+	ep/rbc_mc.mod \
+	estimation/TaRB/fs2000_tarb.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_loglin_no_prefilt_first_obs_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_loglinear_no_prefilter_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_no_prefilter_first_obs_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_no_prefilter_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_loglin_prefilt_first_obs_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_prefilter_MC.mod \
+	observation_trends_and_prefiltering/MCMC/Trend_prefilter_first_obs_MC.mod \
+	estimation/slice/fs2000_slice.mod \
+	optimizers/fs2000_9.mod \
+	optimizers/fs2000_10.mod \
+	analytic_derivatives/fs2000_analytic_derivation.mod \
+	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
+	TeX/fs2000_corr_ME.mod \
+	estimation/MH_recover/fs2000_recover_tarb.mod \
 	estimation/fs2000.mod \
-	estimation/fs2000_with_weibull_prior.mod \
+	gsa/ls2003a.mod \
+	optimizers/fs2000_8.mod \
+	optimizers/fs2000_8_with_optim.mod \
 	estimation/fs2000_MCMC_jumping_covariance.mod \
+	ms-sbvar/test_ms_variances_repeated_runs.mod \
+	fs2000/fs2000.mod \
+	ep/rbc.mod \
+	estimation/fs2000_with_weibull_prior.mod \
 	estimation/fs2000_initialize_from_calib.mod	\
 	estimation/fs2000_calibrated_covariance.mod \
 	estimation/fs2000_model_comparison.mod \
 	estimation/fs2000_fast.mod \
-	estimation/slice/fs2000_slice.mod \
 	estimation/independent_mh/fs2000_independent_mh.mod \
 	estimation/MH_recover/fs2000_recover.mod \
 	estimation/MH_recover/fs2000_recover_2.mod \
 	estimation/MH_recover/fs2000_recover_3.mod \
-	estimation/MH_recover/fs2000_recover_tarb.mod \
 	estimation/t_proposal/fs2000_student.mod \
-	estimation/TaRB/fs2000_tarb.mod \
 	moments/example1_var_decomp.mod \
-	moments/example1_hp_test.mod \
 	moments/example1_bp_test.mod \
 	moments/test_AR1_spectral_density.mod \
 	moments/example1_one_sided_hp_test.mod \
 	gsa/ls2003.mod \
-	gsa/ls2003a.mod \
 	gsa/cod_ML_morris/cod_ML_morris.mod \
 	gsa/morris/nk_est.mod \
 	ramst.mod \
@@ -106,8 +127,6 @@ MODFILES = \
 	arima/mod2b.mod \
 	arima/mod2c.mod \
 	data/mod1a.mod \
-	analytic_derivatives/fs2000_analytic_derivation.mod \
-	fs2000/fs2000.mod \
 	fs2000/fs2000a.mod \
 	fs2000/fs2000c.mod \
 	fs2000/fs2000_calib.mod \
@@ -169,7 +188,6 @@ MODFILES = \
 	ms-sbvar/test_upper_cholesky.mod \
 	ms-sbvar/test_upper_cholesky_nc.mod \
 	ms-sbvar/test_ms_variances.mod \
-	ms-sbvar/test_ms_variances_repeated_runs.mod \
 	ms-dsge/test_ms_dsge.mod \
 	kalman/lyapunov/fs2000_lyap.mod \
 	kalman/lik_init/fs2000_ns_lik_init_2.mod \
@@ -210,8 +228,6 @@ MODFILES = \
 	second_order/burnside_1.mod \
 	second_order/ds1.mod \
 	second_order/ds2.mod \
-	ep/rbc.mod \
-	ep/rbc_mc.mod \
 	ep/rbc2.mod \
 	ep/rbcii.mod \
 	ep/linearmodel0.mod \
@@ -245,11 +261,8 @@ MODFILES = \
         deterministic_simulations/rbc_det.mod \
         deterministic_simulations/rbc_det_stack_solve_algo_7.mod \
         lmmcp/rbc.mod \
-        lmmcp/rbcii.mod \
 	lmmcp/sw_lmmcp.mod \
 	lmmcp/sw_newton.mod \
-        walsh.mod \
-	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
 	trend_var/fs2000_log_nonstationary.mod \
 	decision_rules/third_order/FV2011.mod \
@@ -280,27 +293,14 @@ MODFILES = \
 	optimizers/fs2000_4.mod \
 	optimizers/fs2000_4_with_optim.mod \
 	optimizers/fs2000_5.mod \
-	optimizers/fs2000_6.mod \
 	optimizers/fs2000_7.mod \
-	optimizers/fs2000_8.mod \
-	optimizers/fs2000_8_with_optim.mod \
-	optimizers/fs2000_9.mod \
-	optimizers/fs2000_10.mod \
 	optimizers/fs2000_101.mod \
 	optimizers/fs2000_102.mod \
 	optimizers/fs2000_w.mod \
 	differentiate_forward_vars/RBC_differentiate_forward.mod \
-	TeX/fs2000_corr_ME.mod \
 	partitioning/partitions.mod \
 	prior_posterior_function/fs2000_prior_posterior_function.mod \
-	observation_trends_and_prefiltering/MCMC/Trend_loglin_no_prefilt_first_obs_MC.mod \
-	observation_trends_and_prefiltering/MCMC/Trend_loglin_prefilt_first_obs_MC.mod \
-	observation_trends_and_prefiltering/MCMC/Trend_loglinear_no_prefilter_MC.mod \
 	observation_trends_and_prefiltering/MCMC/Trend_loglinear_prefilter_MC.mod \
-	observation_trends_and_prefiltering/MCMC/Trend_no_prefilter_first_obs_MC.mod \
-	observation_trends_and_prefiltering/MCMC/Trend_no_prefilter_MC.mod \
-	observation_trends_and_prefiltering/MCMC/Trend_prefilter_first_obs_MC.mod \
-	observation_trends_and_prefiltering/MCMC/Trend_prefilter_MC.mod \
 	observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter.mod \
 	observation_trends_and_prefiltering/ML/Trend_loglinear_no_prefilter_first_obs.mod \
 	observation_trends_and_prefiltering/ML/Trend_loglinear_prefilter.mod \
