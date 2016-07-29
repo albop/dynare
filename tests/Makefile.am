@@ -333,6 +333,9 @@ MFILES = initval_file/ramst_initval_file_data.m
 example1_use_dll.m.trs: example1.m.trs
 example1_use_dll.o.trs: example1.o.trs
 
+estimation/MH_recover/fs2000_recover_tarb.m.trs: estimation/MH_recover/fs2000_recover.m.trs
+estimation/MH_recover/fs2000_recover_tarb.o.trs: estimation/MH_recover/fs2000_recover.o.trs
+
 k_order_perturbation/fs2000k_1_m.m.trs: k_order_perturbation/fs2000k2_m.m.trs
 k_order_perturbation/fs2000k2_m.m.trs k_order_perturbation/fs2000k3_m.m.trs k_order_perturbation/fs2000k2_use_dll.m.trs k_order_perturbation/fs2000k3_use_dll.m.trs: k_order_perturbation/fs2000k2a.m.trs
 k_order_perturbation/fs2000k_1_use_dll.m.trs: k_order_perturbation/fs2000k2_use_dll.m.trs
@@ -688,6 +691,9 @@ clean-local:
 		kalman_filter_smoother/data.mat
 
 	rm -f data_ca1_csv.csv
+
+	rm -f estimation/MH_recover/*.mat \
+		estimation/MH_recover/*.dat
 
 	rm -rf ramsey_objective
 
