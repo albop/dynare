@@ -35,6 +35,8 @@ oo_.bvar.log_marginal_data_density=NaN(maxnlags,1);
 
 for nlags = 1:maxnlags
     [ny, nx, posterior, prior] = bvar_toolbox(nlags);
+    oo_.bvar.posterior{nlags}=posterior;
+    oo_.bvar.prior{nlags}=prior;
     
     posterior_int = matrictint(posterior.S, posterior.df, posterior.XXi);
     prior_int = matrictint(prior.S, prior.df, prior.XXi);
