@@ -13218,8 +13218,11 @@ Use this option to draw a horizontal line at the given value. Default:
 
 @anchor{graphLegendName}
 @item graphLegendName, @code{STRING}
-The name to display in the legend for this series. Will be displayed only if
-the @ref{data} option has been set. Default: the @code{tex} name of the series
+The name to display in the legend for this series, passed as @LaTeX{}
+(@i{e.g.,} @code{GDP_@{US@}}, @code{$\alpha$},
+@code{\color@{red@}GDP\color@{black@}}). Will be displayed only if the
+@ref{data} and @ref{showLegend} options have been passed. Default: the
+@code{tex} name of the series
 
 @item graphLineColor, @code{STRING}
 Color to use for the series in a graph. See the explanation in @ref{shadeColor}
