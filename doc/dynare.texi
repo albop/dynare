@@ -12834,7 +12834,7 @@ The file name to use when saving this report. Default:
 @code{report.tex}
 
 @item header, @var{STRING}
-The @LaTeX{} code to be included in the report before
+The valid @LaTeX{} code to be included in the report before
 @code{\begin@{document@}}. Default: @code{empty}
 
 @item margin, @var{DOUBLE}
@@ -12872,11 +12872,11 @@ A footnote to be included at the bottom of this page. Default: @code{none}
 
 @anchor{latex}
 @item latex, @code{STRING}
-The @LaTeX{} code to be used for this page. Alows the user to create a
-page to be included in the report by passing @LaTeX{} code
-directly. If this option is passed, the page itself will be saved in
-the @ref{pageDirName} directory in the form @code{page_X.tex} where
-@code{X} refers to the page number. Default @code{empty}
+The valid @LaTeX{} code to be used for this page. Alows the user to create a
+page to be included in the report by passing @LaTeX{} code directly. If this
+option is passed, the page itself will be saved in the @ref{pageDirName}
+directory in the form @code{page_X.tex} where @code{X} refers to the page
+number. Default @code{empty}
 
 @item orientation, `landscape' | `portrait'
 @xref{orientation}.
@@ -12898,9 +12898,9 @@ page. Values passed must be valid @LaTeX{} code (@i{e.g.,} `%' must be
 
 @anchor{titleFormat}
 @item titleFormat, @code{STRING} | @code{CELL_ARRAY_STRINGS}
-A string representing the @LaTeX{} markup to use on @ref{title}. The
-number of cell array entries must be equal to that of the @ref{title}
-option if you do not want to use the default value for the title (and
+A string representing the valid @LaTeX{} markup to use on @ref{title}. The
+number of cell array entries must be equal to that of the @ref{title} option if
+you do not want to use the default value for the title (and
 subtitles). Default: @code{\large\bfseries}
 
 @item titleTruncate, @code{INTEGER}
@@ -13218,7 +13218,7 @@ Use this option to draw a horizontal line at the given value. Default:
 
 @anchor{graphLegendName}
 @item graphLegendName, @code{STRING}
-The name to display in the legend for this series, passed as @LaTeX{}
+The name to display in the legend for this series, passed as valid @LaTeX{}
 (@i{e.g.,} @code{GDP_@{US@}}, @code{$\alpha$},
 @code{\color@{red@}GDP\color@{black@}}). Will be displayed only if the
 @ref{data} and @ref{showLegend} options have been passed. Default: the
@@ -13337,13 +13337,13 @@ The number of columns for the @code{Paragraph}. Default: @code{1}
 
 @item heading, @code{STRING}
 The heading for the Paragraph (like a section heading). The string must be
-correct @LaTeX{} code. Default: @code{empty}
+valid @LaTeX{} code. Default: @code{empty}
 
 @item indent, @code{BOOLEAN}
 Whether or not to indent the paragraph. Default: @code{true}
 
 @item text, @code{STRING}
-The paragraph itself. The string must be correct @LaTeX{} code. Default:
+The paragraph itself. The string must be valid @LaTeX{} code. Default:
 @code{empty}
 
 @end table
