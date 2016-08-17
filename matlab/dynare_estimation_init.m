@@ -142,7 +142,7 @@ else
 end
 
 % Set priors over the estimated parameters.
-if ~isempty(estim_params_) && ~(isfield(estim_params_,'nvx') && sum(estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.np)==0)
+if ~isempty(estim_params_) && ~(isfield(estim_params_,'nvx') && (size(estim_params_.var_exo,1)+size(estim_params_.var_endo,1)+size(estim_params_.corrx,1)+size(estim_params_.corrn,1)+size(estim_params_.param_vals,1))==0)
     [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
 end
 
@@ -344,6 +344,7 @@ if isempty(estim_params_) || all(strcmp(fieldnames(estim_params_),'full_calibrat
     xparam1 = [];
     bayestopt_.jscale = [];
     bayestopt_.pshape = [];
+    bayestopt_.name =[];
     bayestopt_.p1 = [];
     bayestopt_.p2 = [];
     bayestopt_.p3 = [];
