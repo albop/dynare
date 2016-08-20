@@ -499,7 +499,7 @@ The syntax for computing the marginal density is:
 
 The options are those described above.
 
-The command will actually compute the marginal density for several models: first for the model with one lag, then with two lags, and so on up to \textit{max\_number\_of\_lags} lags. Results will be stored in a \textit{max\_number\_of\_lags} by 1 vector \texttt{oo\_.bvar.log\_marginal\_data\_density}.
+The command will actually compute the marginal density for several models: first for the model with one lag, then with two lags, and so on up to \textit{max\_number\_of\_lags} lags. Results will be stored in a \textit{max\_number\_of\_lags} by 1 vector \texttt{oo\_.bvar.log\_marginal\_data\_density}. The command will also store the prior and posterior information into \textit{max\_number\_of\_lags} by 1 cell arrays \texttt{oo\_.bvar.prior} and \texttt{oo\_.bvar.posterior}.
 
 \subsection{Forecasting}
 
