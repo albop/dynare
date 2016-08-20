@@ -194,7 +194,14 @@ if info(1)==0,
 %             [V,D,W]=eig(cmm);
             sd=sqrt(diag(cmm));
             cc=cmm./(sd*sd');
-            [V,D,W]=eig(cc);
+            if isoctave && octave_ver_less_than('8.3')                 
+                [V,D]=eig(cc);
+                %fix for older Matlab versions that do not support computing left eigenvalues, see http://mathworks.com/help/releases/R2012b/matlab/ref/eig.html
+                [W,junk] = eig(cc.'); 
+                W = conj(W);
+            else
+                [V,D,W]=eig(cc);
+            end
             id=find(diag(D)>1.e-8);
             siTMP=siJ./repmat(sd,[1 nparam]);
             MIM=(siTMP'*V(:,id))*(D(id,id)\(W(:,id)'*siTMP));
