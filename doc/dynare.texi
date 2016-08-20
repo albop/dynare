@@ -743,7 +743,7 @@ clear the globals and functions.
 
 @item onlyclearglobals
 By default, @code{dynare} will issue a @code{clear all} command to
-MATLAB or Octave, thereby deleting all workspace variables; this
+MATLAB versions before 2015b and to Octave, thereby deleting all workspace variables; this
 option instructs @code{dynare} to clear only the global variables
 (@i{i.e.} @code{M_}, @code{options_}, @code{oo_},
 @code{estim_params_}, @code{bayestopt_}, and @code{dataset_}), leaving
@@ -7588,6 +7588,32 @@ the objective under optimal policy.
 After an execution of the @code{osr} command, this variable contains the value of parameters
 at the optimum, stored in fields of the form
 @code{oo_.osr.optim_params.@var{PARAMETER_NAME}}.
+@end defvr
+
+@defvr {MATLAB/Octave variable} M_.osr.param_names 
+After an execution of the @code{osr} command, this cell contains the names of the parameters
+@end defvr
+
+@defvr {MATLAB/Octave variable} M_.osr.param_indices 
+After an execution of the @code{osr} command, this vector contains the indices of the OSR parameters
+in @var{M_.params}.
+@end defvr
+
+@defvr {MATLAB/Octave variable} M_.osr.param_bounds 
+After an execution of the @code{osr} command, this two by number of OSR parameters
+matrix contains the lower and upper bounds of the parameters in the first and second
+column, respectively.
+@end defvr
+
+@defvr {MATLAB/Octave variable} M_.osr.variable_weights 
+After an execution of the @code{osr} command, this sparse matrix
+contains the weighting matrix associated with the variables in the
+objective function.
+@end defvr
+
+@defvr {MATLAB/Octave variable} M_.osr.variable_indices 
+After an execution of the @code{osr} command, this vector contains the 
+indices of the variables entering the objective function in @code{M_.endo_names}.
 @end defvr
 
 @anchor{Ramsey}
