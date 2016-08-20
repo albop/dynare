@@ -48,7 +48,10 @@ for indPC=1:length(Parallel),
         end
         [NonServeS NonServeD]=system(['ssh ',ssh_token,' ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -f ',Parallel(indPC).RemoteDirectory,'/',pname,fname]);
     else
-        delete(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',pname,fname]);
+        fname_temp=['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',pname,fname];
+        if exist(fname_temp,'file')
+            delete(fname_temp);
+        end
     end
     
 end
