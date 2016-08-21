@@ -355,9 +355,14 @@ end
 
 oo_.posterior.optimization.mode = [];
 oo_.posterior.optimization.Variance = [];
+oo_.posterior.optimization.log_density=[];
+
 invhess=[];
 if ~options_.mh_posterior_mode_estimation
     oo_.posterior.optimization.mode = xparam1;
+    if exist('fval','var')
+        oo_.posterior.optimization.log_density=-fval;
+    end
     if options_.cova_compute
         invhess = inv(hh);
         stdh = sqrt(diag(invhess));
