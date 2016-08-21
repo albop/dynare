@@ -82,4 +82,21 @@ varobs gp_obs gy_obs;
 
 options_.solve_tolf = 1e-12;
 
-estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=3000,mh_nblocks=2,mh_jscale=0.8,moments_varendo,selected_variables_only,contemporaneous_correlation,smoother,forecast=8) y m;
+estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=3000,mh_nblocks=1,mh_jscale=0.8,moments_varendo,selected_variables_only,contemporaneous_correlation,smoother,forecast=8) y m;
+%test load_mh_file option
+options_.smoother=0;
+options_.moments_varendo=0;
+options_.forecast=0;   
+copyfile([M_.dname filesep 'metropolis' filesep M_.dname '_mh1_blck1.mat'],[M_.dname '_mh1_blck1.mat'])
+estimation(mode_compute=0,mode_file=fs2000_mode,order=1, datafile=fsdat_simul, nobs=192, loglinear, mh_replic=1500, mh_nblocks=1, mh_jscale=0.8);
+hh=eye(size(bayestopt_.name,1));
+save('fs2000_mode','hh','-append')
+estimation(mode_compute=0,mode_file=fs2000_mode,order=1, datafile=fsdat_simul, nobs=192, loglinear, mh_replic=1500, mh_nblocks=1, mh_jscale=10,load_mh_file);
+
+
+temp1=load([M_.dname '_mh1_blck1.mat']);
+temp2=load([M_.dname filesep 'metropolis' filesep M_.dname '_mh1_blck1.mat']);
+
+if max(max(abs(temp1.x2-temp2.x2)))>1e-10
+    error('Draws of unaffected chain are not the same')
+end

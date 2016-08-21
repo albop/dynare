@@ -5141,8 +5141,9 @@ Metropolis-Hastings chain. Default: 2*@code{mh_scale}
 @anchor{mh_recover} Attempts to recover a Metropolis-Hastings
 simulation that crashed prematurely, starting with the last available saved 
 @code{mh}-file. Shouldn't be used together with
-@code{load_mh_file} or a different @code{mh_replic} than in the crashed run. 
-To assure a neat continuation of the chain with the same proposal density, you should 
+@code{load_mh_file} or a different @code{mh_replic} than in the crashed run. Since Dynare 4.5
+the proposal density from the previous run will automatically be loaded. In older versions,
+to assure a neat continuation of the chain with the same proposal density, you should 
 provide the @code{mode_file} used in the previous 
 run or the same user-defined @code{mcmc_jumping_covariance} when using this option.
 
@@ -5311,7 +5312,12 @@ when finite values are required for computational reasons. Default: @code{1e7}
 @item load_mh_file
 @anchor{load_mh_file} Tells Dynare to add to previous
 Metropolis-Hastings simulations instead of starting from
-scratch. Shouldn't be used together with @code{mh_recover}
+scratch. Since Dynare 4.5
+the proposal density from the previous run will automatically be loaded. In older versions,
+to assure a neat continuation of the chain with the same proposal density, you should 
+provide the @code{mode_file} used in the previous 
+run or the same user-defined @code{mcmc_jumping_covariance} when using this option.
+Shouldn't be used together with @code{mh_recover}.
 
 @item optim = (@var{NAME}, @var{VALUE}, ...)
 @anchor{optim}
