@@ -678,9 +678,7 @@ options_.dr_logarithmic_reduction_tol = 1e-12;
 options_.dr_logarithmic_reduction_maxiter = 100;
 
 % dates for historical time series
-options_.initial_date.freq = 1;
-options_.initial_date.period = 1;
-options_.initial_date.subperiod = 0;
+options_.initial_date = dates();
 
 % discretionary policy
 options_.discretionary_policy = 0;

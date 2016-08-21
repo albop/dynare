@@ -34,9 +34,13 @@ new_colormap = DynareOptions.colormap;
 comp_nbr = size(z,2)-1;
 
 gend = size(z,3);
-freq = initial_date.freq;
-initial_period = initial_date.time(1) + initial_date.time(2)/freq;
-x = initial_period-1/freq:(1/freq):initial_period+(gend-1)/freq;
+if isempty(initial_date)
+    x = 0:gend;
+else
+    freq = initial_date.freq;
+    initial_period = initial_date.time(1) + initial_date.time(2)/freq;
+    x = initial_period-1/freq:(1/freq):initial_period+(gend-1)/freq;
+end
 
 nvar = length(i_var);
 
