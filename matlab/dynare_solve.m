@@ -1,5 +1,5 @@
-function [x,info] = dynare_solve(func,x,options,varargin)
-% function [x,info] = dynare_solve(func,x,options,varargin)
+function [x,info,fvec,fjac] = dynare_solve(func,x,options,varargin)
+% function [x,info,fvec,fjac] = dynare_solve(func,x,options,varargin)
 % proposes different solvers
 %
 % INPUTS
@@ -11,6 +11,8 @@ function [x,info] = dynare_solve(func,x,options,varargin)
 % OUTPUTS
 %    x:                solution
 %    info=1:           the model can not be solved
+%    fvec:             Function value (used for debugging when check=1)
+%    fjac:             Jacobian (used for debugging when check=1)
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -51,11 +53,9 @@ nn = size(x,1);
 if jacobian_flag
     [fvec,fjac] = feval(func,x,varargin{:});
     if any(any(isinf(fjac) | isnan(fjac)))
-        [infrow,infcol]=find(isinf(fjac) | isnan(fjac));
-        M=evalin('base','M_'); %get variable names from workspace
-        fprintf('\nSTEADY:  The Jacobian contains Inf or NaN. The problem arises from: \n\n')
-        display_problematic_vars_Jacobian(infrow,infcol,M,x,'static','STEADY: ')
-        error('An element of the Jacobian is not finite or NaN')
+        info=1;
+        x = NaN(size(fvec));
+        return
     end
 else
     fvec = feval(func,x,varargin{:});
@@ -65,12 +65,6 @@ end
 i = find(~isfinite(fvec));
 
 if ~isempty(i)
-    disp(['STEADY:  numerical initial values or parameters incompatible with the following' ...
-          ' equations'])
-    disp(i')
-    disp('Please check for example')
-    disp('   i) if all parameters occurring in these equations are defined')
-    disp('  ii) that no division by an endogenous variable initialized to 0 occurs')
     info = 1;
     x = NaN(size(fvec));
     return;

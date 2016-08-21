@@ -33,6 +33,7 @@ function []=display_problematic_vars_Jacobian(problemrow,problemcol,M_,x,type,ca
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+skipline();
 if nargin<6
     caller_string='';
 end
@@ -114,8 +115,8 @@ elseif strcmp(type,'static')
         end
     end
     fprintf('\n%s  The problem most often occurs, because a variable with\n',caller_string)
-    fprintf('%s exponent smaller than 1 has been initialized to 0. Taking the derivative\n',caller_string)
-    fprintf('%s and evaluating it at the steady state then results in a division by 0.\n',caller_string)
+    fprintf('%s  exponent smaller than 1 has been initialized to 0. Taking the derivative\n',caller_string)
+    fprintf('%s  and evaluating it at the steady state then results in a division by 0.\n',caller_string)
     fprintf('%s  If you are using model-local variables (# operator), check their values as well.\n',caller_string)
 else
     error('Unknown Type')    

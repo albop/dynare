@@ -213,6 +213,25 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
                                       options, exo_ss, params,...
                                       M.orig_endo_nbr,...
                                       static_model);
+            if check && options.debug
+                [ys,check,fvec,fjac] = dynare_solve(@static_problem,...
+                          ys_init,...
+                          options, exo_ss, params,...
+                          M.orig_endo_nbr,...
+                          static_model);
+                [infrow,infcol]=find(isinf(fjac) | isnan(fjac));
+                fprintf('\nSTEADY:  The Jacobian at the initial values contains Inf or NaN. The problem arises from: \n')
+                display_problematic_vars_Jacobian(infrow,infcol,M,ys_init,'static','STEADY: ')
+                
+                problematic_equation = find(~isfinite(fvec));                
+                if ~isempty(problematic_equation)
+                    fprintf('\nSTEADY:  numerical initial values or parameters incompatible with the following equations\n')
+                    disp(problematic_equation')
+                    fprintf('Please check for example\n')
+                    fprintf('   i) if all parameters occurring in these equations are defined\n')
+                    fprintf('  ii) that no division by an endogenous variable initialized to 0 occurs\n')
+                end
+            end
         else
             % linear model
             fh_static = str2func([M.fname '_static']);
