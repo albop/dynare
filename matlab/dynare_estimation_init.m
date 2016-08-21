@@ -352,6 +352,11 @@ if isempty(estim_params_) || all(strcmp(fieldnames(estim_params_),'full_calibrat
     bayestopt_.p5 = [];
     bayestopt_.p6 = [];
     bayestopt_.p7 = [];
+    estim_params_.var_exo=[];
+    estim_params_.var_endo=[];
+    estim_params_.corrx=[];
+    estim_params_.corrn=[];
+    estim_params_.param_vals=[];
     estim_params_.nvx = 0;
     estim_params_.nvn = 0;
     estim_params_.ncx = 0;
