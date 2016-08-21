@@ -103,7 +103,7 @@ end
 % Plot graphs
 sims_no_shock_mean = mean(sims_no_shock, 3);
 
-sort_idx = round((0.5 + [-options_.conf_sig, options_.conf_sig, 0]/2) * options_.bvar_replic);
+sort_idx = round((0.5 + [-options_.bvar.conf_sig, options_.bvar.conf_sig, 0]/2) * options_.bvar_replic);
 
 sims_no_shock_sort = sort(sims_no_shock, 3);
 sims_no_shock_down_conf = sims_no_shock_sort(:, :, sort_idx(1));
