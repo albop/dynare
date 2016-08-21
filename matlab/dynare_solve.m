@@ -1,5 +1,5 @@
 function [x,info,fvec,fjac] = dynare_solve(func,x,options,varargin)
-% function [x,info] = dynare_solve(func,x,options,varargin)
+% function [x,info,fvec,fjac] = dynare_solve(func,x,options,varargin)
 % proposes different solvers
 %
 % INPUTS
@@ -11,6 +11,8 @@ function [x,info,fvec,fjac] = dynare_solve(func,x,options,varargin)
 % OUTPUTS
 %    x:                solution
 %    info=1:           the model can not be solved
+%    fvec:             Function value (used for debugging when check=1)
+%    fjac:             Jacobian (used for debugging when check=1)
 %
 % SPECIAL REQUIREMENTS
 %    none
