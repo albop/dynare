@@ -33,4 +33,39 @@ if matlab_ver_less_than('7.12')
 else
     [hasLicense junk] = license('checkout',toolbox);
 end
+if ~hasLicense
+    return
+end
+switch toolbox
+    %use function unique to toolbox
+    case 'statistics_toolbox'
+        n = 'gppdf';
+    case 'optimization_toolbox'
+        n='fsolve';
+    case 'GADS_Toolbox'
+        n='simulannealbnd';
+    case 'control_toolbox'
+        n='dlyap';
+end
+hasInstallation=check_toolbox_installation(n);
+if ~hasInstallation
+    hasLicense=0;
+    return;
+end
+end
+
+function hasInstallation=check_toolbox_installation(n)
+if isempty(n)
+    hasInstallation=0;
+else
+    %follows description in ver-help
+    pat = '(?<=^.+[\\/]toolbox[\\/])[^\\/]+';
+    ver_string=regexp(which(n), pat, 'match', 'once');
+    a=ver(ver_string);
+    if isempty(a)
+        hasInstallation=0;
+    else 
+        hasInstallation=1;
+    end
+end
 end
