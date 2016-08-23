@@ -10,7 +10,7 @@
 
 \author{Ondra Kamen\'\i k}
 
-\date{February 2011}
+\date{February 2011, updated August 2016}
 \maketitle
 
 \tableofcontents
@@ -32,7 +32,7 @@ operating system path. This ensures that your OS will find the {\tt dynare++} ex
 
 \section{Sample Session}
 
-As an example, let us take a simple DSGE model whose dynamic
+As an example, let us take a simple DSGE model with time to build, whose dynamic
 equilibrium is described by the following first order conditions:
 
 \begin{align*}
@@ -46,6 +46,10 @@ equilibrium is described by the following first order conditions:
 \end{align*}
 
 \label{timing}
+The convention is that the timing of a variable reflects when this variable
+is decided. Dynare++ therefore uses a ``stock at the end of the
+period'' notation for predetermined state variables (see the Dynare manual for details).
+
 The timing of this model is that the exogenous shocks $\epsilon_t$,
 and $\nu_t$ are observed by agents in the beginning of period $t$ and
 before the end of period $t$ all endogenous variables with index $t$
