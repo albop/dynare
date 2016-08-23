@@ -171,6 +171,7 @@ Alternatively, if you want to build everything, manually install the following p
 - `texlive-extra-utils` (for CWEB)
 - `texlive-formats-extra` (for Eplain)
 - `texlive-latex-extra` (for fullpage.sty)
+- `texlive-fonts-extra` (for ccicons)
 - `latex-beamer`
 - `texinfo`
 - `texi2html`, `latex2html`
