@@ -134,7 +134,7 @@ if isfield(oo_.forecast,'HPDinf_ME')
                 fprintf(fidTeX,'\\centering \n');
                 fprintf(fidTeX,'\\includegraphics[width=%2.2f\\textwidth]{%s/graphs/forcst_ME%d}\n',options_.figures.textwidth*min((m-1)/nc,1),dname,n_fig);
                 fprintf(fidTeX,'\\label{Fig:forcst_ME:%d}\n',n_fig);
-                fprintf(fidTeX,'\\caption{Mean forecasts and %2.0f\\%% confidence intervals accounting for measurement error}\n',options_.conf_sig*100);
+                fprintf(fidTeX,'\\caption{Mean forecasts and %2.0f\\%% confidence intervals accounting for measurement error}\n',options_.forecasts.conf_sig*100);
                 fprintf(fidTeX,'\\end{figure}\n');
                 fprintf(fidTeX,' \n');
             end
@@ -164,7 +164,7 @@ if isfield(oo_.forecast,'HPDinf_ME')
             fprintf(fidTeX,'\\centering \n');          
             fprintf(fidTeX,'\\includegraphics[width=%2.2f\\textwidth]{%s/graphs/forcst_ME%d}\n',options_.figures.textwidth*min((m-1)/nc,1),dname,n_fig);
             fprintf(fidTeX,'\\label{Fig:forcst_ME:%d}\n',n_fig);
-            fprintf(fidTeX,'\\caption{Mean forecasts and %2.0f\\%% confidence intervals accounting for measurement error}\n',options_.conf_sig*100);
+            fprintf(fidTeX,'\\caption{Mean forecasts and %2.0f\\%% confidence intervals accounting for measurement error}\n',options_.forecasts.conf_sig*100);
             fprintf(fidTeX,'\\end{figure}\n');
             fprintf(fidTeX,' \n');
         end
