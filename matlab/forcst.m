@@ -86,8 +86,10 @@ end
 if nargout==3
     var_yf_ME=var_yf;
     [loc_H,loc_varlist]=ismember(options_.varobs',options_.varlist);
-    loc_varlist(loc_varlist==0)=[];    
-    var_yf_ME(:,loc_varlist)=var_yf(:,loc_varlist)+repmat(diag(M_.H(loc_H,loc_H))',horizon,1);
+    loc_varlist(loc_varlist==0)=[];
+    if ~isempty(loc_varlist)
+        var_yf_ME(:,loc_varlist)=var_yf(:,loc_varlist)+ repmat(diag(M_.H(loc_H,loc_H))',horizon,1);
+    end
     int_width_ME = zeros(horizon,nvar);
 end
 
