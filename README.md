@@ -152,6 +152,12 @@ The easiest way to install the pre-requisites in Debian is to use Debian's dynar
 ```
 apt-get build-dep dynare
 ```
+followed by (only for building the master branch):
+```
+apt-get install texlive-fonts-extra
+```
+which is missing in Debian's list of pre-requisites.
+
 Alternatively, if you want to build everything, manually install the following packages:
 
 - `build-essential` (for gcc, g++ and make)
