@@ -52,37 +52,18 @@ SmoothedShocks(:,:,6)=cell2mat(struct2cell(oo_.SmoothedShocks));
 SmoothedVariables(:,:,6)=cell2mat(struct2cell(oo_.SmoothedVariables));
 
 
-if matlab_ver_less_than('8.2')
-    if max(max(abs(SmoothedMeasurementErrors-repmat(SmoothedMeasurementErrors(:,:,1),[1,1,6]))))>1e-8
-        error('SmoothedMeasurementErrors do not match')
-    end
+if max(max(abs(SmoothedMeasurementErrors-repmat(SmoothedMeasurementErrors(:,:,1),[1,1,6]))))>1e-8
+    error('SmoothedMeasurementErrors do not match')
+end
 
-    if max(max(abs(SmoothedShocks-repmat(SmoothedShocks(:,:,1),[1,1,6]))))>1e-8
-        error('SmoothedShocks do not match')
-    end
+if max(max(abs(SmoothedShocks-repmat(SmoothedShocks(:,:,1),[1,1,6]))))>1e-8
+    error('SmoothedShocks do not match')
+end
 
-    if max(max(abs(SmoothedVariables-repmat(SmoothedVariables(:,:,1),[1,1,6]))))>1e-8
-        error('SmoothedVariables do not match')
-    end
+if max(max(abs(SmoothedVariables-repmat(SmoothedVariables(:,:,1),[1,1,6]))))>1e-8
+    error('SmoothedVariables do not match')
+end
 
-    if max(abs([fval_algo_2,fval_algo_3,fval_algo_4,fval_algo_5,fval_algo_6]-fval_algo_1))>1e-6
-        error('Likelihoods do not match')
-    end
-
-else
-    if max(max(abs(SmoothedMeasurementErrors-repmat(SmoothedMeasurementErrors(:,:,1),1,1,6))))>1e-8
-        error('SmoothedMeasurementErrors do not match')
-    end
-
-    if max(max(abs(SmoothedShocks-repmat(SmoothedShocks(:,:,1),1,1,6))))>1e-8
-        error('SmoothedShocks do not match')
-    end
-
-    if max(max(abs(SmoothedVariables-repmat(SmoothedVariables(:,:,1),1,1,6))))>1e-8
-        error('SmoothedVariables do not match')
-    end
-
-    if max(abs([fval_algo_2,fval_algo_3,fval_algo_4,fval_algo_5,fval_algo_6]-fval_algo_1))>1e-6
-        error('Likelihoods do not match')
-    end
+if max(abs([fval_algo_2,fval_algo_3,fval_algo_4,fval_algo_5,fval_algo_6]-fval_algo_1))>1e-6
+    error('Likelihoods do not match')
 end
