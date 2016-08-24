@@ -18,19 +18,38 @@ SmoothedMeasurementErrors(:,:,2)=cell2mat(struct2cell(oo_.SmoothedMeasurementErr
 SmoothedShocks(:,:,2)=cell2mat(struct2cell(oo_.SmoothedShocks));
 SmoothedVariables(:,:,2)=cell2mat(struct2cell(oo_.SmoothedVariables));
 
-if max(max(abs(SmoothedMeasurementErrors-repmat(SmoothedMeasurementErrors(:,:,1),1,1,2))))>1e-8
-    error('SmoothedMeasurementErrors do not match')
-end
+if matlab_ver_less_than('8.2')
+    if max(max(abs(SmoothedMeasurementErrors-repmat(SmoothedMeasurementErrors(:,:,1),[1,1,2]))))>1e-8
+        error('SmoothedMeasurementErrors do not match')
+    end
 
-if max(max(abs(SmoothedShocks-repmat(SmoothedShocks(:,:,1),1,1,2))))>1e-8
-    error('SmoothedShocks do not match')
-end
+    if max(max(abs(SmoothedShocks-repmat(SmoothedShocks(:,:,1),[1,1,2]))))>1e-8
+        error('SmoothedShocks do not match')
+    end
 
-if max(max(abs(SmoothedVariables-repmat(SmoothedVariables(:,:,1),1,1,2))))>1e-8
-    error('SmoothedVariables do not match')
-end
+    if max(max(abs(SmoothedVariables-repmat(SmoothedVariables(:,:,1),[1,1,2]))))>1e-8
+        error('SmoothedVariables do not match')
+    end
 
-if max(abs(fval_algo_2-fval_algo_4))>1e-6
-    fprintf('\nLikelihood difference: %4.3f\n',max(abs(fval_algo_2-fval_algo_4)))
-    error('Likelihoods do not match')
+    if max(abs(fval_algo_2-fval_algo_4))>1e-6
+        fprintf('\nLikelihood difference: %4.3f\n',max(abs(fval_algo_2-fval_algo_4)))
+        error('Likelihoods do not match')
+    end
+else
+    if max(max(abs(SmoothedMeasurementErrors-repmat(SmoothedMeasurementErrors(:,:,1),1,1,2))))>1e-8
+        error('SmoothedMeasurementErrors do not match')
+    end
+
+    if max(max(abs(SmoothedShocks-repmat(SmoothedShocks(:,:,1),1,1,2))))>1e-8
+        error('SmoothedShocks do not match')
+    end
+
+    if max(max(abs(SmoothedVariables-repmat(SmoothedVariables(:,:,1),1,1,2))))>1e-8
+        error('SmoothedVariables do not match')
+    end
+
+    if max(abs(fval_algo_2-fval_algo_4))>1e-6
+        fprintf('\nLikelihood difference: %4.3f\n',max(abs(fval_algo_2-fval_algo_4)))
+        error('Likelihoods do not match')
+    end
 end
