@@ -194,7 +194,7 @@ if info(1)==0,
 %             [V,D,W]=eig(cmm);
             sd=sqrt(diag(cmm));
             cc=cmm./(sd*sd');
-            if isoctave && octave_ver_less_than('8.3')                 
+            if isoctave || matlab_ver_less_than('8.3')
                 [V,D]=eig(cc);
                 %fix for older Matlab versions that do not support computing left eigenvalues, see http://mathworks.com/help/releases/R2012b/matlab/ref/eig.html
                 [W,junk] = eig(cc.'); 
