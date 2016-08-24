@@ -50,7 +50,7 @@ end
 
 % Check the dimension of the fourth input argument
 if isempty(exogenousvariables)
-    exogenousvariables = repmat(exogenousvariables, 1, 1, replic);
+    exogenousvariables = repmat(exogenousvariables, [1, 1, replic]);
 else
     if ~isequal(size(exogenousvariables, 3), replic)
         error('Wrong size. !')
