@@ -233,9 +233,10 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
                           M.orig_endo_nbr,...
                           static_model);
                 [infrow,infcol]=find(isinf(fjac) | isnan(fjac));
-                fprintf('\nSTEADY:  The Jacobian at the initial values contains Inf or NaN. The problem arises from: \n')
-                display_problematic_vars_Jacobian(infrow,infcol,M,ys_init,'static','STEADY: ')
-                
+                if ~isempty(infrow)
+                    fprintf('\nSTEADY:  The Jacobian at the initial values contains Inf or NaN. The problem arises from: \n')
+                    display_problematic_vars_Jacobian(infrow,infcol,M,ys_init,'static','STEADY: ')
+                end
                 problematic_equation = find(~isfinite(fvec));                
                 if ~isempty(problematic_equation)
                     fprintf('\nSTEADY:  numerical initial values or parameters incompatible with the following equations\n')
