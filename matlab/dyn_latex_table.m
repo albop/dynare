@@ -93,7 +93,7 @@ if nargin==11
 end
 fprintf(fidTeX,header_string);
 fprintf(fidTeX,'\\midrule \\endhead \n');
-fprintf(fidTeX,['\\bottomrule \\multicolumn{',num2str(size(headers,1)),'}{r}{(Continued on next page)} \\\\ \\hline \\endfoot \n']);
+fprintf(fidTeX,['\\midrule \\multicolumn{',num2str(size(headers,1)),'}{r}{(Continued on next page)} \\\\ \\bottomrule \\endfoot \n']);
 fprintf(fidTeX,'\\bottomrule \\endlastfoot \n');
 for i=1:size(values,1)
     fprintf(fidTeX,label_format_leftbound,deblank(labels(i,:)));
