@@ -160,8 +160,10 @@ end
 
 if ~isdiagonal(M_.Sigma_e)
     warning(sprintf('The innovations are correlated (the covariance matrix has non zero off diagonal elements), the results of the conditional forecasts will\ndepend on the ordering of the innovations (as declared after varexo) because a Cholesky decomposition is used to factorize the covariance matrix.\n\n=> It is preferable to declare the correlations in the model block (explicitly imposing the identification restrictions), unless you are satisfied\nwith the implicit identification restrictions implied by the Cholesky decomposition.'))
+    sQ = chol(M_.Sigma_e,'lower');
+else
+    sQ = sqrt(M_.Sigma_e);
 end
-sQ = chol(M_.Sigma_e,'lower');
 
 if ~estimated_model
     if isempty(M_.endo_histval)
@@ -172,7 +174,6 @@ if ~estimated_model
     InitState(:,1) = y0(oo_.dr.order_var)-ys(oo_.dr.order_var,:); %initial state in deviations from steady state
     trend = repmat(ys(oo_.dr.order_var,:),1,options_cond_fcst.periods+1); %trend needs to contain correct steady state
 end
-sQ = sqrt(M_.Sigma_e);
 
 
 
@@ -187,6 +188,7 @@ ExoSize = M_.exo_nbr;
 
 n1 = size(constrained_vars,1);
 n2 = size(options_cond_fcst.controlled_varexo,1);
+constrained_vars(:,1)=oo_.dr.inv_order_var(constrained_vars); % must be in decision rule order
 
 if n1 ~= n2
     error(['imcforecast:: The number of constrained variables doesn''t match the number of controlled shocks'])
@@ -196,7 +198,8 @@ idx = [];
 jdx = [];
 
 for i = 1:n1
-    idx = [idx ; oo_.dr.inv_order_var(constrained_vars(i,:))];
+    idx = [idx ; constrained_vars(i,:)];
+%     idx = [idx ; oo_.dr.inv_order_var(constrained_vars(i,:))];
     jdx = [jdx ; strmatch(deblank(options_cond_fcst.controlled_varexo(i,:)),M_.exo_names,'exact')];
 end
 mv = zeros(n1,NumberOfStates);
