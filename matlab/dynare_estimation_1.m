@@ -339,7 +339,8 @@ if ~options_.mh_posterior_mode_estimation
         oo_.posterior.optimization.log_density=-fval;
     end
     if options_.cova_compute
-        invhess = inv(hh);
+        hsd = sqrt(diag(hh));
+        invhess = inv(hh./(hsd*hsd'))./(hsd*hsd');
         stdh = sqrt(diag(invhess));
         oo_.posterior.optimization.Variance = invhess;
     end
@@ -365,8 +366,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
     % Laplace approximation to the marginal log density:
     if options_.cova_compute
         estim_params_nbr = size(xparam1,1);
-        scale_factor = -sum(log10(diag(invhess)));
-        log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
+        log_det_invhess = log(det(invhess./(stdh*stdh')))+2*sum(log(stdh));
         likelihood = feval(objective_function,xparam1,dataset_,dataset_info,options_,M_,estim_params_,bayestopt_,bounds,oo_);
         oo_.MarginalDensity.LaplaceApproximation = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess - likelihood;
         skipline()
