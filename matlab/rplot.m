@@ -85,6 +85,7 @@ if rplottype == 0
     plot(ix(i),y(:,i)) ;
     title (t,'Interpreter','none') ;
     xlabel('Periods') ;
+    xlim([min(ix(i)) max(ix(i))])
     if size(s1,1) > 1
         if isoctave
             legend(s1);
@@ -101,6 +102,7 @@ elseif rplottype == 1
     for j = 1:size(y,1)
         hh=dyn_figure(options_,'Name',['Simulated Trajectory']);
         plot(ix(i),y(j,i)) ;
+        xlim([min(ix(i)) max(ix(i))])
         title(['Plot of ' s1(j,:)],'Interpreter','none') ;
         xlabel('Periods') ;
         dyn_saveas(hh,[M_.fname, filesep, 'graphs', filesep, 'SimulatedTrajectory_' deblank(s1(j,:))],options_)

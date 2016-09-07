@@ -9699,8 +9699,11 @@ String literals have to be enclosed between @strong{double} quotes
 elements are separated by commas (like @code{[1,2,3]} or @code{["US",
 "EA"]}).
 
-Note that there is no boolean type: @emph{false} is
-represented by integer zero and @emph{true} is any non-null integer.
+Note that there is no boolean type: @emph{false} is represented by integer zero
+and @emph{true} is any non-null integer. Further note that, as the
+macro-processor cannot handle non-integer real numbers, integer division
+results in the quotient with the fractional part truncated (hence,
+@math{5/3=3/3=1}).
 
 The following operators can be used on integers:
 @itemize
