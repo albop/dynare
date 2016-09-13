@@ -17,7 +17,7 @@ function [x,info,fvec,fjac] = dynare_solve(func,x,options,varargin)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2015 Dynare Team
+% Copyright (C) 2001-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -103,7 +103,7 @@ if options.solve_algo == 0
         [x,fval,exitval,output] = fsolve(func,x,options4fsolve,varargin{:});
     else
         % Under Octave, use a wrapper, since fsolve() does not have a 4th arg
-        if isstring(func)
+        if ischar(func)
             func2 = str2func(func);
         else
             func2 = func;
@@ -121,7 +121,7 @@ if options.solve_algo == 0
     if exitval == 1
         info = 0;
     elseif exitval > 1
-        if isstring(func)
+        if ischar(func)
             func2 = str2func(func);
         else
             func2 = func;
