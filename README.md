@@ -52,6 +52,7 @@ at the MATLAB prompt: if it returns `PCWIN`, then you have a 32-bit MATLAB; if i
 1. [**Debian or Ubuntu**](#debian-or-ubuntu)
 1. [**Fedora**](#fedora)
 1. [**Windows**](#windows)
+1. [**Windows Subsystem for Linux**](#windows-subsystem-for-linux)
 1. [**Mac OS X**](#mac-os-x)
 
 ## General Instructions
@@ -144,6 +145,10 @@ The testsuites can be run with:
 ```
 make check
 ```
+
+Note that running the testsuite with Octave requires the additional packages
+`pstoedit`, `epstool`, `xfig`, and `gnuplot`.
+
 ## Debian or Ubuntu
 
 All the prerequisites are packaged.
@@ -203,6 +208,29 @@ Alternatively, if you want to build everything, manually install the following p
 
 We no longer support compilation on Windows. To use the unstable version of Dynare on a Windows system, please download it from the [Dynare website](http://www.dynare.org/download/dynare-unstable).
 
+## Windows Subsystem for Linux
+
+Dynare can also be compiled from source for the Windows Subsystem for Linux (WSL). The WSL offers Windows 10 Anniversary Update users easy access to a Linux environment. To install the WSL, see https://msdn.microsoft.com/en-us/commandline/wsl/install_guide
+To install most of the build dependencies, make sure that the local `rootfs/etc/apt/sources.list` contains
+```
+deb-src http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse
+deb-src http://archive.ubuntu.com/ubuntu trusty-updates main restricted universe multiverse
+deb-src http://security.ubuntu.com/ubuntu trusty-security main restricted universe multiverse
+```
+in addition to the regular ```deb``` entries. 
+NB: you cannot edit this file from Windows as this will make the file unreadable for the WSL (rendering WSL unable to detect any package). Therefore, use any Linux editor of your choice.
+
+After that, run 
+```
+apt update
+apt-get build-dep dynare
+```
+If you are building the unstable version, you might also need to install other packages required, e.g 
+```apt-get install texlive-fonts-extra```
+NB: it might be necessary to preface your calls by ```sudo``` in case you do not have root access with the current user
+
+After this, prepare the source and configure the build tree as described for Linux above.
+ 
 ## Mac OS X
 
 - Install the Xcode Command Line Tools:
