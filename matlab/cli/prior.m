@@ -11,7 +11,7 @@ function varargout = prior(varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2015 Dynare Team
+% Copyright (C) 2015-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -86,7 +86,11 @@ if ismember('table', varargin)
 end
 
 if ismember('simulate', varargin) % Prior simulations (BK).
-    results = prior_sampler(0, Model, BayesOptions, options_, oo_, EstimatedParams);
+    if ismember('moments(distribution)', varargin)
+        results = prior_sampler(1, Model, BayesOptions, options_, oo_, EstimatedParams);
+    else
+        results = prior_sampler(0, Model, BayesOptions, options_, oo_, EstimatedParams);
+    end
     % Display prior mass info
     skipline(2)
     disp(['Prior mass = ' num2str(results.prior.mass)])
@@ -128,6 +132,52 @@ if ismember('moments', varargin) % Prior simulations (2nd order moments).
     donesomething = true;
 end
 
+if ismember('moments(distribution)', varargin) % Prior simulations (BK).
+    if ~ismember('simulate', varargin)
+        results = prior_sampler(1, Model, BayesOptions, options_, oo_, EstimatedParams);
+    end
+    priorpath = [Model.dname filesep() 'prior' filesep() 'draws' filesep()];
+    list_of_files = dir([priorpath 'prior_draws*']);
+    FirstOrderMoments = NaN(Model.orig_endo_nbr, options_.prior_mc);
+    SecondOrderMoments = NaN(Model.orig_endo_nbr, Model.orig_endo_nbr, options_.prior_mc);
+    iter = 1;
+    noprint = options_.noprint;
+    options_.noprint = 1;
+    for i=1:length(list_of_files)
+        tmp = load([priorpath list_of_files(i).name]);
+        for j = 1:size(tmp.pdraws, 1)
+            if ~tmp.pdraws{j,2}
+                dr = tmp.pdraws{j,3};
+                oo__ = oo_;
+                oo__.dr = dr;
+                oo__ = disp_th_moments(oo__.dr, [], Model, options_, oo__);
+                FirstOrderMoments(:,iter) = oo__.mean;
+                SecondOrderMoments(:,:,iter) = oo__.var;
+                iter = iter+1;
+            end
+        end
+    end
+    save([M_.dname filesep() 'prior' filesep() M_.fname '_endogenous_variables_prior_draws.mat'], 'FirstOrderMoments', 'SecondOrderMoments')
+    skipline(2)
+    options_.noprint = noprint;
+    % First order moments
+    FirstOrderMoments = FirstOrderMoments(:,1:iter-1);
+    SecondOrderMoments = SecondOrderMoments(:,:,1:iter-1);
+    PriorExpectationOfFirstOrderMoments = mean(FirstOrderMoments, 2);
+    PriorVarianceOfFirstOrderMoments = ...
+        mean(bsxfun(@minus, FirstOrderMoments, PriorExpectationOfFirstOrderMoments).^2, 2);
+    % Second order moments
+    PriorExpectationOfSecondOrderMoments = mean(SecondOrderMoments, 3);
+    PriorVarianceOfSecondOrderMoments = ...
+        mean(bsxfun(@minus, SecondOrderMoments, PriorExpectationOfSecondOrderMoments).^2, 3);
+    % Display first and second order moments implied priors (expectation and variance)
+    print_moments_implied_prior(M_, PriorExpectationOfFirstOrderMoments, ...
+                                PriorVarianceOfFirstOrderMoments, ...
+                                PriorExpectationOfSecondOrderMoments, ...
+                                PriorVarianceOfSecondOrderMoments);
+    donesomething = true;
+end
+
 if changed_qz_criterium_flag
     options_.qz_criterium = [];
 end
@@ -137,22 +187,3 @@ options_.order = order;
 if ~donesomething
     error('prior: Unexpected arguments!')
 end
-
-function format_string = build_format_string(PriorStandardDeviation, LowerBound, UpperBound)
-format_string = ['%s & %s & %6.4f &'];
-if ~isnumeric(PriorStandardDeviation)
-    format_string = [ format_string , ' %s &'];
-else
-    format_string = [ format_string , ' %6.4f &'];
-end
-if ~isnumeric(LowerBound)
-    format_string = [ format_string , ' %s &'];
-else
-    format_string = [ format_string , ' %6.4f &'];
-end
-if ~isnumeric(UpperBound)
-    format_string = [ format_string , ' %s &'];
-else
-    format_string = [ format_string , ' %6.4f &'];
-end
-format_string = [ format_string , ' %6.4f & %6.4f \\\\ \n'];
