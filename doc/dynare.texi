@@ -6867,7 +6867,8 @@ of the shock groups is written in a block delimited by @code{shock_groups} and
 Each line defines a group of shock as a list of exogenous variables:
 
 @example
-SHOCK_GROUP_NAME =  VARIABLE_1 [[,] VARIABLE_2 [,]@dots{}];
+SHOCK_GROUP_NAME   = VARIABLE_1 [[,] VARIABLE_2 [,]@dots{}];
+`SHOCK GROUP NAME' = VARIABLE_1 [[,] VARIABLE_2 [,]@dots{}];
 @end example
 
 @optionshead
@@ -6891,7 +6892,7 @@ varexo e_a, e_b, e_c, e_d;
 
 shock_groups(name=group1);
 supply = e_a, e_b;
-demand = e_c, e_d;
+`aggregate demand' = e_c, e_d;
 end;
 
 shocks_decomposition(use_shock_groups=group1);
