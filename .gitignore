@@ -209,3 +209,6 @@ tests/reporting/tmpRepDir
 
 # Julia Tests
 tests/julia/rbc/rbc*.jl
+
+# Octave variables saved when Octave crashes
+octave-workspace
