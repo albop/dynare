@@ -116,11 +116,15 @@ oo_.shock_decomposition = z;
 
 if options_.use_shock_groups
     shock_groups = M_.shock_groups.(options_.use_shock_groups);
-    shock_names = fieldnames(shock_groups);
-    ngroups = length(shock_names);
+    shock_ind = fieldnames(shock_groups);
+    ngroups = length(shock_ind);
+    shock_names = shock_ind;
+    for i=1:ngroups,
+       shock_names{i} = (shock_groups.(shock_ind{i}).label);
+    end
     zz = zeros(endo_nbr,ngroups+2,gend);
-    for i=1:length(shock_names)
-        for j = shock_groups.(shock_names{i})
+    for i=1:ngroups
+        for j = shock_groups.(shock_ind{i}).shocks
             k = find(strcmp(j,cellstr(M_.exo_names)));
             zz(:,i,:) = zz(:,i,:) + z(:,k,:);
         end
