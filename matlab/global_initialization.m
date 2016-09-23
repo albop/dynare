@@ -780,6 +780,9 @@ options_.mcppath.mu0 = [];
 %Figure options
 options_.figures.textwidth=0.8;
 
+% Shock decomposition options
+options_.shock_decomp.nograph = 0;
+
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
 % initialize persistent variables in dyn_first_order_solver()
