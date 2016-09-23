@@ -90,7 +90,7 @@ options_.forecast=0;
 copyfile([M_.dname filesep 'metropolis' filesep M_.dname '_mh1_blck1.mat'],[M_.dname '_mh1_blck1.mat'])
 estimation(mode_compute=0,mode_file=fs2000_mode,order=1, datafile=fsdat_simul, nobs=192, loglinear, mh_replic=1500, mh_nblocks=1, mh_jscale=0.8);
 hh=eye(size(bayestopt_.name,1));
-save('fs2000_mode','hh','-append')
+save('fs2000_mode.mat','hh','-append')
 Laplace = oo_.MarginalDensity.LaplaceApproximation;
 estimation(mode_compute=0,mode_file=fs2000_mode,order=1, datafile=fsdat_simul, nobs=192, loglinear, mh_replic=1500, mh_nblocks=1, mh_jscale=10,load_mh_file);
 oo_.MarginalDensity.LaplaceApproximation = Laplace;
