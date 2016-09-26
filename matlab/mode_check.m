@@ -204,4 +204,4 @@ if TeX && any(strcmp('eps',cellstr(DynareOptions.graph_format)))
 end
 
 OutputDirectoryName = CheckPath('modecheck',Model.dname);
-save([OutputDirectoryName '/check_plot_data'],'mcheck');
+save([OutputDirectoryName '/check_plot_data.mat'],'mcheck');
