@@ -550,7 +550,7 @@ EXTRA_DIST = \
 	external_function/extFunWithFirstAndSecondDerivs.m \
 	expectations/expectation_ss_old_steadystate.m \
 	steady_state/walsh1_old_ss_steadystate.m \
-	data/test.xls \
+	data/test.xlsx \
 	gsa/morris/nk_est_data.m \
 	analytic_derivatives/fsdat_simul.m \
 	fs2000/fsdat_simul.m \

@@ -2592,13 +2592,10 @@ variable, the file must contain a row or column vector of the same name. Their l
 MAT-file (extension @file{.mat}): same as for M-files.
 
 @item
-Excel file (extension @file{.xls} or @file{.xlsx}): for each
-endogenous and exogenous, the file must contain a column of the same
-name (supported under Octave if the
-@uref{http://octave.sourceforge.net/io/,io} and
-@uref{http://octave.sourceforge.net/java/,java} packages from
-Octave-Forge are installed, along with a
-@uref{http://www.java.com/download,Java Runtime Environment}).
+Excel file (extension @file{.xls} or @file{.xlsx}): for each endogenous and
+exogenous, the file must contain a column of the same name. NB: Octave only
+supports the @file{.xlsx} file extension and must have the
+@uref{http://octave.sourceforge.net/io/,io} package installed (easily done via octave by typing `@code{pkg install -forge io}').
 @end itemize
 
 @customhead{Warning}
@@ -4968,13 +4965,11 @@ based on Parzen
 @item datafile = @var{FILENAME}
 @anchor{datafile} The datafile: a @file{.m} file, a @file{.mat} file, a
 @file{.csv} file, or a @file{.xls}/@file{.xlsx} file (under Octave, the
-@uref{http://octave.sourceforge.net/io/,io} from Octave-Forge is required for
-the @file{.csv}, @file{.xls} and @file{.xlsx} formats; in addition, for the
-@file{.xls} and @file{.xlsx} formats, the
-@uref{http://octave.sourceforge.net/java/,java} package is required, along with
-a @uref{http://www.java.com/download,Java Runtime Environment}). Note that the
-base name (ie without extension) of the datafile has to be different from the
-base name of the model file.
+@uref{http://octave.sourceforge.net/io/,io} package from Octave-Forge is
+required for the @file{.csv} and @file{.xlsx} formats and the @file{.xls} file
+extension is not supported). Note that the base name (@i{i.e.} without
+extension) of the datafile has to be different from the base name of the model
+file.
 
 @item dirname = @var{FILENAME}
 Directory in which to store @code{estimation} output. To pass a
@@ -11485,7 +11480,7 @@ Instantiates an empty @dseries object, with, if defined, an initial date given b
 
 @deftypefn {dseries} dseries (@var{FILENAME}[, @var{INITIAL_DATE}])
 
-Instantiates and populates a @dseries object with a data file specified by @var{FILENAME}, a string passed as input. Valid file types are @file{.m} file, @file{.mat} file, @file{.csv} file, and @file{.xls} file. A typical @file{.m} file will have the following form:
+Instantiates and populates a @dseries object with a data file specified by @var{FILENAME}, a string passed as input. Valid file types are @file{.m} file, @file{.mat} file, @file{.csv} file, and @file{.xls}/@file{.xlsx} file (Octave only supports @file{.xlsx} files and the @uref{http://octave.sourceforge.net/io/,io} package from Octave-Forge must be installed). A typical @file{.m} file will have the following form:
 
 @example
 INIT__ = '1994Q3';
