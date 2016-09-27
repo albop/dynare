@@ -87,7 +87,7 @@ if nnobs>1 || nfirstobs > 1
             M_.dname = [dname '_' int2str(first_obs(i))];
         end
         dynare_estimation_1(var_list,M_.dname);
-        if isequal(i,1)
+        if isequal(i,1) && options_.mode_compute ~= 0
             options_.mode_file = [M_.fname '_mode'];
         end
         if options_.recursive_estimation_restart
