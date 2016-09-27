@@ -141,11 +141,7 @@ switch minimizer_algorithm
             error('Optimization algorithm 3 requires the optim package')
         end
     elseif ~isoctave && ~user_has_matlab_license('optimization_toolbox')
-        try
-            pkg load optimization_toolbox
-        catch
-            error('Optimization algorithm 3 requires the Optimization Toolbox')
-        end
+        error('Optimization algorithm 3 requires the Optimization Toolbox')
     end
     % Set default optimization options for fminunc.
     optim_options = optimset('display','iter','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
