@@ -459,7 +459,7 @@ control system toolbox;
 @item
 If under GNU Octave, the following
 @uref{http://octave.sourceforge.net/,Octave-Forge} packages: optim,
-io, java, statistics, control.
+io, statistics, control.
 
 @end itemize
 
