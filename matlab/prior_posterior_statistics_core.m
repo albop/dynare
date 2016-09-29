@@ -247,7 +247,7 @@ for b=fpar:B
             %filtered variable E_t(y_t+k) requires to shift trend by k periods
             %write variables into declaration order
             if options_.loglinear %reads values from smoother results, which are in dr-order and put them into declaration order
-                constant_part=repmat(log(SteadyState(dr.order_var))',[length(options_.filter_step_ahead),1,gend+max(options_.filter_step_ahead)])
+                constant_part=repmat(log(SteadyState(dr.order_var))',[length(options_.filter_step_ahead),1,gend+max(options_.filter_step_ahead)]);
             else
                 constant_part=repmat(SteadyState(dr.order_var)',[length(options_.filter_step_ahead),1,gend+max(options_.filter_step_ahead)]);
             end       
