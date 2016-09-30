@@ -121,7 +121,7 @@ if options_.use_shock_groups
     zz = zeros(endo_nbr,ngroups+2,gend);
     for i=1:length(shock_names)
         for j = shock_groups.(shock_names{i})
-            k = find(strcmp(j.shocks{:}, cellstr(M_.exo_names)));
+            k = find(strcmp(j,cellstr(M_.exo_names)));
             zz(:,i,:) = zz(:,i,:) + z(:,k,:);
         end
     end
