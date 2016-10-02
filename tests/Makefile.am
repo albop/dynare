@@ -328,6 +328,7 @@ XFAIL_MODFILES = ramst_xfail.mod \
 	estim_param_in_shock_value_xfail.mod \
 	optimal_policy/Ramsey/ramsey_ex_wrong_ss_file_xfail.mod \
 	estimation/fs2000_mixed_ML_xfail.mod \
+	estimation/fs2000_stochastic_singularity_xfail.mod \
 	identification/ident_unit_root/ident_unit_root_xfail.mod \
 	steady_state/Linear_steady_state_xfail.mod
 
