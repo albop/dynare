@@ -458,7 +458,7 @@ function [d,bayestopt_]=set_proposal_density_to_previous_value(record,options_,b
                 error(fprintf('Estimation::mcmc: The posterior_sampling_method differs from the one of the original chain. Please reset it to %s',record.MCMC_sampler))
             end 
         end
-        fprintf('Estimation::mcmc: Recovering the previous proposal density\n.')
+        fprintf('Estimation::mcmc: Recovering the previous proposal density.\n')
         d=record.ProposalCovariance;
         bayestopt_.jscale=record.ProposalScaleVec;
     else
