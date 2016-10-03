@@ -34,7 +34,7 @@ function [mean,variance] = GetPosteriorMeanVariance(M,drop)
         for j=1:NbrFiles
             o = load([BaseName '_mh' int2str(j) '_blck' int2str(i)]);
             m = size(o.x2,1);
-            if n + m < drop*NbrDraws
+            if n + m <= drop*NbrDraws
                 n = n + m;
                 continue
             elseif n < drop*NbrDraws
