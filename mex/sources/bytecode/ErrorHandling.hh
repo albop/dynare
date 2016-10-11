@@ -37,6 +37,15 @@
 # define CHAR_LENGTH 2
 #endif
 
+//Work around for: https://sourceware.org/bugzilla/show_bug.cgi?id=19439
+#ifndef __builtin_isnan
+# define isnan(x) std::isnan(x)
+#endif
+
+#ifndef __builtin_isinf
+# define isinf(x) std::isinf(x)
+#endif
+
 #ifdef _MSC_VER
 #include <limits>
 #define M_E 2.71828182845904523536
