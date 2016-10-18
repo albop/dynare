@@ -181,7 +181,7 @@ if options_.hp_filter == 0 && ~options_.bandpass.indicator
         if M_.exo_nbr == 1
             Gamma_y{nar+2} = ones(nvar,1);
         else
-            Gamma_y{nar+2} = zeros(nvar,M_.exo_nbr);
+            Gamma_y{nar+2} = NaN(nvar,M_.exo_nbr);
             SS(exo_names_orig_ord,exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
             cs = chol(SS)';
             b1(:,exo_names_orig_ord) = ghu1;
