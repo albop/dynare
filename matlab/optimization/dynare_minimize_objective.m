@@ -274,9 +274,10 @@ switch minimizer_algorithm
     if ~isoctave
         [opt_par_values,fval,exitflag] = fminsearch(objective_function,start_par_value,optim_options,varargin{:});
     else
-        % Under Octave, use a wrapper, since fminsearch() does not have a 4th arg
+        % Under Octave, use a wrapper, since fminsearch() does not have a
+        % 4th arg, and only has two output args
         func = @(x) objective_function(x,varargin{:});
-        [opt_par_values,fval,exitflag] = fminsearch(func,start_par_value,optim_options);
+        [opt_par_values,fval] = fminsearch(func,start_par_value,optim_options);
     end
   case 8
     % Dynare implementation of the simplex algorithm.
