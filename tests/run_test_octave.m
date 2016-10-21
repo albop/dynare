@@ -1,4 +1,4 @@
-## Copyright (C) 2009-2014 Dynare Team
+## Copyright (C) 2009-2016 Dynare Team
 ##
 ## This file is part of Dynare.
 ##
@@ -20,6 +20,8 @@
 ## Before every call to Dynare, the contents of the workspace is saved in
 ## 'wsOct', and reloaded after Dynare has finished (this is necessary since
 ## Dynare does a 'clear -all').
+
+load_octave_packages
 
 top_test_dir = getenv('TOP_TEST_DIR');
 addpath(top_test_dir);
