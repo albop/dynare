@@ -15,14 +15,14 @@
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isoctave
-    load_octave_packages
-end
-
 top_test_dir = getenv('TOP_TEST_DIR');
 addpath(top_test_dir);
 addpath([top_test_dir filesep '..' filesep 'matlab']);
 dynare_config([], 0);
+
+if isoctave
+    load_octave_packages
+end
 
 % Test Dynare Version
 if ~strcmp(dynare_version(), getenv('DYNARE_VERSION'))
