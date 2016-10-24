@@ -31,11 +31,8 @@ endif
 ## with MATLAB
 putenv("GNUTERM", "dumb")
 
-try
-    ## To add default directories
-    dynare('non_existant_mod_file.mod', 'console');
-catch
-end
+## To add default directories, empty dseries objects
+dynare_config
 
 printf("\n***  TESTING:  run_reporting_test_octave.m ***\n");
 try
