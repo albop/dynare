@@ -33,7 +33,7 @@ endif
 putenv("GNUTERM", "dumb")
 
 ## To add default directories, empty dseries objects
-dynare_config
+dynare_config([], 0);
 
 printf("\n***  TESTING:  run_reporting_test_octave.m ***\n");
 try
