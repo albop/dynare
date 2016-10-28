@@ -87,7 +87,7 @@ while rank(Pinf,diffuse_kalman_tol) && (t<=last)
             else
                 iFstar = inv(Fstar);
                 dFstar = det(Fstar);
-                Kstar  = Pstar*Z'*iFstar;                               %(5.15) of DK (2012) with Kstar=K^(0)*T^{-1}
+                Kstar  = Pstar*Z'*iFstar;                               %(5.15) of DK (2012) with Kstar=T^{-1}*K^(0)
                 dlik(s)= log(dFstar) + v'*iFstar*v;                     %set w_t to bottom case in bottom equation page 172, DK (2012)
                 Pinf   = T*Pinf*transpose(T);                           % (5.16) DK (2012)
                 Pstar  = T*(Pstar-Pstar*Z'*Kstar')*T'+QQ;               % (5.17) DK (2012)
@@ -96,7 +96,7 @@ while rank(Pinf,diffuse_kalman_tol) && (t<=last)
         end
     else                                                                %F_{\infty,t} positive definite
         %To compare to DK (2012), this block makes use of the following transformation
-        %Kstar=K^{(1)}*T^{-1}=M_{*}*F^{(1)}+M_{\infty}*F^{(2)}
+        %Kstar=T^{-1}*K^{(1)}=M_{*}*F^{(1)}+M_{\infty}*F^{(2)}
         %     =P_{*}*Z'*F^{(1)}+P_{\infty}*Z'*((-1)*(F_{\infty}^{-1})*F_{*}*(F_{\infty}^{-1}))
         %     =[P_{*}*Z'-Kinf*F_{*})]*F^{(1)}
         %Make use of L^{0}'=(T-K^{(0)}*Z)'=(T-T*M_{\infty}*F^{(1)}*Z)'
@@ -106,7 +106,7 @@ while rank(Pinf,diffuse_kalman_tol) && (t<=last)
         %     =T*[(P_{\infty}*(-K^{(1)*Z}))+P_{*}*(I-Z'*Kinf')*T'+RQR]
         dlik(s)= log(det(Finf));                                        %set w_t to top case in bottom equation page 172, DK (2012)
         iFinf  = inv(Finf);
-        Kinf   = Pinf*Z'*iFinf;                                         %define Kinf=K_0*T^{-1} with M_{\infty}=Pinf*Z'
+        Kinf   = Pinf*Z'*iFinf;                                         %define Kinf=T^{-1}*K_0 with M_{\infty}=Pinf*Z'
         Fstar  = Z*Pstar*Z' + H;                                        %(5.7) DK(2012)
         Kstar  = (Pstar*Z'-Kinf*Fstar)*iFinf;                           %(5.12) DK(2012)
         Pstar  = T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;         %(5.14) DK(2012)
