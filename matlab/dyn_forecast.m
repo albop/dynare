@@ -58,7 +58,7 @@ i_var = [];
 for i = 1:size(var_list)
     tmp = strmatch(var_list(i,:),endo_names,'exact');
     if isempty(tmp)
-        error([var_list(i,:) ' isn''t and endogenous variable'])
+        error([var_list(i,:) ' isn''t an endogenous variable'])
     end
     i_var = [i_var; tmp];
 end
