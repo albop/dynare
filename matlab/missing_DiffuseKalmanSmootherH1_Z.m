@@ -132,7 +132,7 @@ while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
                     end
                 else
                     iFstar = inv(Fstar(:,:,t));
-                    Kstar(:,:,t)  = Pstar(:,:,t)*ZZ'*iFstar(:,:,t);         %(5.15) of DK (2012) with Kstar=T^{-1}*K^(0)
+                    Kstar(:,:,t)  = Pstar(:,:,t)*ZZ'*iFstar;                %(5.15) of DK (2012) with Kstar=T^{-1}*K^(0)
                     Pinf(:,:,t+1)   = T*Pinf(:,:,t)*transpose(T);           % DK (2012), 5.16
                     Pstar(:,:,t+1)  = T*(Pstar(:,:,t)-Pstar(:,:,t)*ZZ'*Kstar(:,:,t)')*T'+QQ;    % (5.17) DK (2012) with L_0 plugged in
                     a(:,t+1)        = T*(a(:,t)+Kstar(:,:,t)*v(:,t));       % (5.13) DK (2012)
