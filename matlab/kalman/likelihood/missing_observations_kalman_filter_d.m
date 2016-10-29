@@ -119,7 +119,7 @@ while rank(Pinf,diffuse_kalman_tol) && (t<=last)
             Kinf   = Pinf*ZZ'*iFinf;
             %see notes in kalman_filter_d.m for details of computations
             Fstar  = ZZ*Pstar*ZZ' + H(d_index,d_index);                     %(5.7) DK(2012)
-            Kstar  = (Pstar*ZZ'-Kinf*Fstar)*iFinf;                          %(5.12) DK(2012)
+            Kstar  = (Pstar*ZZ'-Kinf*Fstar)*iFinf;                          %(5.12) DK(2012); note that there is a typo in DK (2003) with "+ Kinf" instead of "- Kinf", but it is correct in their appendix
             Pstar  = T*(Pstar-Pstar*ZZ'*Kinf'-Pinf*ZZ'*Kstar')*T'+QQ;       %(5.14) DK(2012)
             Pinf   = T*(Pinf-Pinf*ZZ'*Kinf')*T';                            %(5.14) DK(2012)
             a      = T*(a+Kinf*v);                                          %(5.13) DK(2012)

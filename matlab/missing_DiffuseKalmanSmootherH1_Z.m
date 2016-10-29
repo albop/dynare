@@ -132,7 +132,7 @@ while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
                     end
                 else
                     iFstar = inv(Fstar(:,:,t));
-                    Kstar(:,:,t)  = Pstar(:,:,t)*ZZ'*iFstar;                %(5.15) of DK (2012) with Kstar=T^{-1}*K^(0)
+                    Kstar(:,:,t)  = Pstar(:,:,t)*ZZ'*iFstar;         %(5.15) of DK (2012) with Kstar=T^{-1}*K^(0)
                     Pinf(:,:,t+1)   = T*Pinf(:,:,t)*transpose(T);           % DK (2012), 5.16
                     Pstar(:,:,t+1)  = T*(Pstar(:,:,t)-Pstar(:,:,t)*ZZ'*Kstar(:,:,t)')*T'+QQ;    % (5.17) DK (2012) with L_0 plugged in
                     a(:,t+1)        = T*(a(:,t)+Kstar(:,:,t)*v(:,t));       % (5.13) DK (2012)
@@ -145,7 +145,7 @@ while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
             atilde(:,t)     = a(:,t) + Kinf(:,di,t)*v(di,t);
             Linf(:,:,t)     = T - T*Kinf(:,di,t)*ZZ;                        %L^(0) in DK (2012), eq. 5.12
             Fstar(di,di,t)  = ZZ*Pstar(:,:,t)*ZZ' + H(di,di);               %(5.7) DK(2012)
-            Kstar(:,di,t)   = (Pstar(:,:,t)*ZZ'-Kinf(:,di,t)*Fstar(di,di,t))*iFinf(di,di,t); %(5.12) DK(2012) with Kstar=T^{-1}*K^(1)
+            Kstar(:,di,t)   = (Pstar(:,:,t)*ZZ'-Kinf(:,di,t)*Fstar(di,di,t))*iFinf(di,di,t); %(5.12) DK(2012) with Kstar=T^{-1}*K^(1); note that there is a typo in DK (2003) with "+ Kinf" instead of "- Kinf", but it is correct in their appendix
             Pstar(:,:,t+1)  = T*(Pstar(:,:,t)-Pstar(:,:,t)*ZZ'*Kinf(:,di,t)'-Pinf(:,:,t)*ZZ'*Kstar(:,di,t)')*T' + QQ; %(5.14) DK(2012)
             Pinf(:,:,t+1)   = T*(Pinf(:,:,t)-Pinf(:,:,t)*ZZ'*Kinf(:,di,t)')*T';     %(5.14) DK(2012)
         end

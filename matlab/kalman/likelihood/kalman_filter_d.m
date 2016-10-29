@@ -97,7 +97,7 @@ while rank(Pinf,diffuse_kalman_tol) && (t<=last)
     else                                                                %F_{\infty,t} positive definite
         %To compare to DK (2012), this block makes use of the following transformation
         %Kstar=T^{-1}*K^{(1)}=M_{*}*F^{(1)}+M_{\infty}*F^{(2)}
-        %     =P_{*}*Z'*F^{(1)}+P_{\infty}*Z'*((-1)*(F_{\infty}^{-1})*F_{*}*(F_{\infty}^{-1}))
+        %     =P_{*}*Z'*F^{(1)}+P_{\infty}*Z'*((-1)*(-F_{\infty}^{-1})*F_{*}*(F_{\infty}^{-1}))
         %     =[P_{*}*Z'-Kinf*F_{*})]*F^{(1)}
         %Make use of L^{0}'=(T-K^{(0)}*Z)'=(T-T*M_{\infty}*F^{(1)}*Z)'
         %                  =(T-T*P_{\infty*Z'*F^{(1)}*Z)'=(T-T*Kinf*Z)'
@@ -108,7 +108,7 @@ while rank(Pinf,diffuse_kalman_tol) && (t<=last)
         iFinf  = inv(Finf);
         Kinf   = Pinf*Z'*iFinf;                                         %define Kinf=T^{-1}*K_0 with M_{\infty}=Pinf*Z'
         Fstar  = Z*Pstar*Z' + H;                                        %(5.7) DK(2012)
-        Kstar  = (Pstar*Z'-Kinf*Fstar)*iFinf;                           %(5.12) DK(2012)
+        Kstar  = (Pstar*Z'-Kinf*Fstar)*iFinf;                           %(5.12) DK(2012); note that there is a typo in DK (2003) with "+ Kinf" instead of "- Kinf", but it is correct in their appendix
         Pstar  = T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;         %(5.14) DK(2012)
         Pinf   = T*(Pinf-Pinf*Z'*Kinf')*T';                             %(5.14) DK(2012)
         a      = T*(a+Kinf*v);                                          %(5.13) DK(2012)
