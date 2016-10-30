@@ -80,15 +80,19 @@ aK              = zeros(nk,mm,smpl+nk);
 PK              = zeros(nk,mm,mm,smpl+nk);
 iF              = zeros(pp,pp,smpl);
 Fstar           = zeros(pp,pp,smpl);
+iFstar          = zeros(pp,pp,smpl);
 iFinf           = zeros(pp,pp,smpl);
 K               = zeros(mm,pp,smpl);
 L               = zeros(mm,mm,smpl);
 Linf            = zeros(mm,mm,smpl);
+Lstar           = zeros(mm,mm,smpl);
 Kstar           = zeros(mm,pp,smpl);
 Kinf            = zeros(mm,pp,smpl);
 P               = zeros(mm,mm,smpl+1);
-Pstar           = zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
-Pinf            = zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
+Pstar           = zeros(spstar(1),spstar(2),smpl+1); 
+Pstar(:,:,1)    = Pstar1;
+Pinf            = zeros(spinf(1),spinf(2),smpl+1); 
+Pinf(:,:,1)     = Pinf1;
 rr              = size(Q,1);
 QQ              = R*Q*transpose(R);
 QRt             = Q*transpose(R);
@@ -96,6 +100,7 @@ alphahat        = zeros(mm,smpl);
 etahat          = zeros(rr,smpl);
 epsilonhat      = zeros(rr,smpl);
 r               = zeros(mm,smpl+1);
+Finf_singular   = zeros(1,smpl);
 
 t = 0;
 while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
@@ -119,6 +124,7 @@ while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
                 alphahat = Inf;
                 return
             else                                                            %rank of F_{\infty,t} is 0
+                Finf_singular(1,t) = 1;
                 Fstar(:,:,t)  = ZZ*Pstar(:,:,t)*ZZ' + H(di,di);             % (5.7) in DK (2012)
                 if rcond(Fstar(:,:,t)) < kalman_tol                         %F_{*} is singular
                     if ~all(abs(Fstar(:,:,t))<kalman_tol)
@@ -131,10 +137,11 @@ while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
                         Pinf(:,:,t+1)  = T*Pinf(:,:,t)*transpose(T);
                     end
                 else
-                    iFstar          = inv(Fstar(:,:,t));
-                    Kstar(:,:,t)    = Pstar(:,:,t)*ZZ'*iFstar;         %(5.15) of DK (2012) with Kstar=T^{-1}*K^(0)
+                    iFstar(:,:,t)   = inv(Fstar(:,:,t));
+                    Kstar(:,:,t)    = Pstar(:,:,t)*ZZ'*iFstar(:,:,t);       %(5.15) of DK (2012) with Kstar=T^{-1}*K^(0)
                     Pinf(:,:,t+1)   = T*Pinf(:,:,t)*transpose(T);           % DK (2012), 5.16
-                    Pstar(:,:,t+1)  = T*(Pstar(:,:,t)-Pstar(:,:,t)*ZZ'*Kstar(:,:,t)')*T'+QQ;    % (5.17) DK (2012) with L_0 plugged in
+                    Lstar(:,:,t)    = T - T*Kstar(:,di,t)*ZZ;               %L^(0) in DK (2012), eq. 5.12
+                    Pstar(:,:,t+1)  = T*Pstar(:,:,t)*Lstar(:,:,t)'+QQ;      % (5.17) DK (2012)
                     a(:,t+1)        = T*(a(:,t)+Kstar(:,:,t)*v(:,t));       % (5.13) DK (2012)
                 end
             end
@@ -146,10 +153,10 @@ while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
             Linf(:,:,t)     = T - T*Kinf(:,di,t)*ZZ;                        %L^(0) in DK (2012), eq. 5.12
             Fstar(di,di,t)  = ZZ*Pstar(:,:,t)*ZZ' + H(di,di);               %(5.7) DK(2012)
             Kstar(:,di,t)   = (Pstar(:,:,t)*ZZ'-Kinf(:,di,t)*Fstar(di,di,t))*iFinf(di,di,t); %(5.12) DK(2012) with Kstar=T^{-1}*K^(1); note that there is a typo in DK (2003) with "+ Kinf" instead of "- Kinf", but it is correct in their appendix
-            Pstar(:,:,t+1)  = T*(Pstar(:,:,t)-Pstar(:,:,t)*ZZ'*Kinf(:,di,t)'-Pinf(:,:,t)*ZZ'*Kstar(:,di,t)')*T' + QQ; %(5.14) DK(2012)
-            Pinf(:,:,t+1)   = T*(Pinf(:,:,t)-Pinf(:,:,t)*ZZ'*Kinf(:,di,t)')*T';     %(5.14) DK(2012)
+            Pstar(:,:,t+1)  = T*Pstar(:,:,t)*Linf(:,:,t)'-T*Kinf(:,di,t)*Finf*Kstar(:,di,t)'*T' + QQ; %(5.14) DK(2012)
+            Pinf(:,:,t+1)   = T*Pinf(:,:,t)*Linf(:,:,t)';                   %(5.14) DK(2012)
         end
-        a(:,t+1)    = T*atilde(:,t);
+        a(:,t+1)            = T*atilde(:,t);
         aK(1,:,t+1)         = a(:,t+1);
         % isn't a meaningless as long as we are in the diffuse part? MJ
         for jnk=2:nk
@@ -160,7 +167,9 @@ end
 d = t;
 P(:,:,d+1) = Pstar(:,:,d+1);
 iFinf = iFinf(:,:,1:d);
+iFstar= iFstar(:,:,1:d);
 Linf  = Linf(:,:,1:d);
+Lstar = Lstar(:,:,1:d);
 Kstar = Kstar(:,:,1:d);
 Pstar = Pstar(:,:,1:d);
 Pinf  = Pinf(:,:,1:d);
@@ -224,17 +233,17 @@ end
 % $$$   PK(jnk,:,:,t+jnk) = Pf;
 % $$$     end
 % $$$ end
-%% backward pass
+%% backward pass; r_T and N_T, stored in entry (smpl+1) were initialized at 0
 t = smpl+1;
 while t>d+1
     t = t-1;
     di = data_index{t};
     if isempty(di)
         % in this case, L is simply T due to Z=0, so that DK (2012), eq. 4.93 obtains
-        r(:,t) = L(:,:,t)'*r(:,t+1);
+        r(:,t) = L(:,:,t)'*r(:,t+1);                                        %compute r_{t-1}, DK (2012), eq. 4.38 with Z=0
     else
         ZZ = Z(di,:);
-        r(:,t) = ZZ'*iF(di,di,t)*v(di,t) + L(:,:,t)'*r(:,t+1);              %DK (2012), eq. 4.38
+        r(:,t) = ZZ'*iF(di,di,t)*v(di,t) + L(:,:,t)'*r(:,t+1);              %compute r_{t-1}, DK (2012), eq. 4.38
     end
     alphahat(:,t)       = a(:,t) + P(:,:,t)*r(:,t);                         %DK (2012), eq. 4.35
     etahat(:,t) = QRt*r(:,t);                                               %DK (2012), eq. 4.63
@@ -242,19 +251,24 @@ end
 if d %diffuse periods
     % initialize r_d^(0) and r_d^(1) as below DK (2012), eq. 5.23
     r0 = zeros(mm,d+1); 
-    r0(:,d+1) = r(:,d+1);
-    r1 = zeros(mm,d+1);
+    r0(:,d+1) = r(:,d+1);   %set r0_{d}, i.e. shifted by one period
+    r1 = zeros(mm,d+1);     %set r1_{d}, i.e. shifted by one period
     for t = d:-1:1
-        r0(:,t) = Linf(:,:,t)'*r0(:,t+1);                                   % DK (2012), eq. 5.21 where L^(0) is named Linf 
         di = data_index{t};
         if isempty(di)
             r1(:,t) = Linf(:,:,t)'*r1(:,t+1);
         else
-            r1(:,t) = Z(di,:)'*(iFinf(di,di,t)*v(di,t)-Kstar(:,di,t)'*T'*r0(:,t+1)) ...
-                      + Linf(:,:,t)'*r1(:,t+1);                             % DK (2012), eq. 5.21, noting that i) F^(1)=(F^Inf)^(-1)(see 5.10), ii) where L^(0) is named Linf, and iii) Kstar=T^{-1}*K^(1)
+            if ~Finf_singular(1,t)
+                r0(:,t) = Linf(:,:,t)'*r0(:,t+1);                                   % DK (2012), eq. 5.21 where L^(0) is named Linf
+                r1(:,t) = Z(di,:)'*(iFinf(di,di,t)*v(di,t)-Kstar(:,di,t)'*T'*r0(:,t+1)) ...
+                    + Linf(:,:,t)'*r1(:,t+1);                                       % DK (2012), eq. 5.21, noting that i) F^(1)=(F^Inf)^(-1)(see 5.10), ii) where L^(0) is named Linf, and iii) Kstar=T^{-1}*K^(1)
+            else
+                r0(:,t) = Z(di,:)'*iFstar(di,di,t)*v(di,t)-Lstar(:,di,t)'*r0(:,t+1); % DK (2003), eq. (14)
+                r1(:,t) = T'*r1(:,t+1);                                             % DK (2003), eq. (14)
+            end
         end
-        alphahat(:,t)   = a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t); % DK (2012), eq. 5.23
-        etahat(:,t)     = QRt*r0(:,t); % DK (2012), p. 135
+        alphahat(:,t)   = a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t);      % DK (2012), eq. 5.23
+        etahat(:,t)     = QRt*r0(:,t);                                              % DK (2012), p. 135
     end
 end
 
