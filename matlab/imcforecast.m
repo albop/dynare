@@ -123,7 +123,9 @@ if estimated_model
     %store qz_criterium
     qz_criterium_old=options_.qz_criterium;
     options_=select_qz_criterium_value(options_);
+    options_state_uncertainty_old=options_.state_uncertainty;
     [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff,aK,T,R,P,PK,decomp,trend_addition] = DsgeSmoother(xparam,gend,data,data_index,missing_value);
+    options_.state_uncertainty=options_state_uncertainty_old;
     %get constant part
     if options_.noconstant
         constant = zeros(size(ys,1),options_cond_fcst.periods+1);

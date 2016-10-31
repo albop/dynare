@@ -1,5 +1,5 @@
-function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag)
-% function [alphahat,epsilonhat,etahat,a1,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag)
+function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp,V] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag,state_uncertainty_flag)
+% function [alphahat,epsilonhat,etahat,a1,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag,state_uncertainty_flag)
 % Computes the diffuse kalman smoother in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
 %
@@ -20,6 +20,8 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSm
 %    kalman_tol   tolerance for zero divider
 %    diffuse_kalman_tol   tolerance for zero divider
 %    decomp_flag  if true, compute filter decomposition
+%    state_uncertainty_flag     if true, compute uncertainty about smoothed
+%                               state estimate
 %
 % OUTPUTS
 %    alphahat: smoothed state variables (a_{t|T})
@@ -33,6 +35,7 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSm
 %    PK:       4D array of k-step ahead forecast error variance
 %              matrices (meaningless for periods 1:d)
 %    decomp:   decomposition of the effect of shocks on filtered values
+%    V:        3D array of state uncertainty matrices
 %
 % Notes:
 %   Outputs are stored in decision-rule order, i.e. to get variables in order of declaration
@@ -110,6 +113,12 @@ alphahat        = zeros(mm,smpl);
 etahat          = zeros(rr,smpl);
 epsilonhat      = zeros(rr,smpl);
 r               = zeros(mm,smpl);
+if state_uncertainty_flag
+    V               = zeros(mm,mm,smpl);
+    N               = zeros(mm,mm,smpl);
+else
+    V=[];
+end
 
 t = 0;
 icc=0;
@@ -242,42 +251,90 @@ end
 
 %% do backward pass
 ri=zeros(mm,1);
+if state_uncertainty_flag
+    Ni=zeros(mm,mm);
+end
 t = smpl+1;
 while t > d+1
     t = t-1;
     di = flipud(data_index{t})';
     for i = di
         if Fi(i,t) > kalman_tol
-            ri = Z(i,:)'/Fi(i,t)*v(i,t)+ri-Ki(:,i,t)'*ri/Fi(i,t)*Z(i,:)';   % DK (2012), 6.15, equation for r_{t,i-1} with L' plugged in
+            Li = eye(mm)-Ki(:,i,t)*Z(i,:)/Fi(i,t);
+            ri = Z(i,:)'/Fi(i,t)*v(i,t)+Li'*ri;                             % DK (2012), 6.15, equation for r_{t,i-1}
+            if state_uncertainty_flag
+                Ni = Z(i,:)'/Fi(i,t)*Z(i,:)+Li'*Ni*Li;                      % KD (2000), eq. (23)
+            end
         end
     end
     r(:,t) = ri;                                                            % DK (2012), below 6.15, r_{t-1}=r_{t,0} 
     alphahat(:,t) = a1(:,t) + P1(:,:,t)*r(:,t);
     etahat(:,t) = QRt*r(:,t);
-    ri = T'*ri;                                                             % DK (2012), 6.15, equation for r_{t,p_{t-1}} 
+    ri = T'*ri;                                                             % KD (2003), eq. (23), equation for r_{t-1,p_{t-1}} 
+    if state_uncertainty_flag
+        N(:,:,t) = Ni;                                                          % DK (2012), below 6.15, N_{t-1}=N_{t,0} 
+        V(:,:,t) = P1(:,:,t)-P1(:,:,t)*N(:,:,t)*P1(:,:,t);                      % KD (2000), eq. (7) with N_{t-1} stored in N(:,:,t)
+        Ni = T'*Ni*T;                                                           % KD (2000), eq. (23), equation for N_{t-1,p_{t-1}} 
+    end
 end
 if d
     r0 = zeros(mm,d); 
     r0(:,d) = ri;
     r1 = zeros(mm,d);
+    if state_uncertainty_flag
+        %N_0 at (d+1) is N(d+1), so we can use N for continuing and storing N_0-recursion
+        N_0=zeros(mm,mm,d);   %set N_1_{d}=0, below  KD (2000), eq. (24)
+        N_0(:,:,d) = Ni;
+        N_1=zeros(mm,mm,d);   %set N_1_{d}=0, below  KD (2000), eq. (24)
+        N_2=zeros(mm,mm,d);   %set N_2_{d}=0, below  KD (2000), eq. (24)
+    end
     for t = d:-1:1
         di = flipud(data_index{t})';
         for i = di
-            if Finf(i,t) > diffuse_kalman_tol 
+            if Finf(i,t) > diffuse_kalman_tol
+                % recursions need to be from highest to lowest term in order to not 
+                % overwrite lower terms still needed in thisstep
                 r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
                           (Kinf(:,i,t)'*Fstar(i,t)/Finf(i,t)-Kstar(:,i,t)')*r0(:,t)/Finf(i,t)*Z(i,:)' + ...
                           r1(:,t)-Kinf(:,i,t)'*r1(:,t)/Finf(i,t)*Z(i,:)';   % KD (2000), eq. (25) for r_1
                 r0(:,t) = r0(:,t)-Kinf(:,i,t)'*r0(:,t)/Finf(i,t)*Z(i,:)';   % KD (2000), eq. (25) for r_0
+                if state_uncertainty_flag
+                    Linf    = eye(mm) - Kinf(:,i,t)'/Finf(i,t);
+                    L0      = (Kinf(:,i,t)*(Fstar(i,t)/Finf(i,t))-Kstar(:,i,t))*Z(i,:)/Finf(i,t);            
+                    N_2(:,:,t)=Z(i,:)'/Finf(i,t)^2*Z(i,:)*Fstar(i,t) ...
+                        + Linf'*N_2(:,:,t)*Linf...
+                        + Linf'*N_1(:,:,t)*L0...
+                        + L0'*N_1(:,:,t)'*Linf...
+                        + L0'*N_0(:,:,t)*L0;                                    % DK (2012), eq. 5.29
+                    N_1(:,:,t)=Z(i,:)'/Finf(i,t)*Z(i,:)+Linf'*N_1(:,:,t)*Linf...
+                        +L0'*N_0(:,:,t)*Linf;                                   % DK (2012), eq. 5.29; note that, compared to DK (2003) this drops the term (L_1'*N(:,:,t+1)*Linf(:,:,t))' in the recursion due to it entering premultiplied by Pinf when computing V, and Pinf*Linf'*N=0
+                    N_0(:,:,t)=Linf'*N_0(:,:,t)*Linf;                           % DK (2012), eq. 5.19, noting that L^(0) is named Linf
+                end
             elseif Fstar(i,t) > kalman_tol % step needed whe Finf == 0
-                r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+r0(:,t)-(Kstar(:,i,t)'*r0(:,t))/Fstar(i,t)*Z(i,:)'; % propage r0 and keep r1 fixed
+                L_i=eye(mm) - Kstar(:,i,t)*Z(i,:)*Fstar(i,t);
+                r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+L_i'*r0(:,t);           % propagate r0 and keep r1 fixed
+                if state_uncertainty_flag
+                    N_0(:,:,t)=Z(i,:)'/Fstar(i,t)*Z(i,:)+L_i'*N_0(:,:,t)*L_i;   % propagate N_0 and keep N_1 and N_2 fixed
+                end
             end
         end
         alphahat(:,t) = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t); % KD (2000), eq. (26)
         r(:,t)        = r0(:,t);
         etahat(:,t)   = QRt*r(:,t);                                         % KD (2000), eq. (27)
+        if state_uncertainty_flag
+            V(:,:,t)=Pstar(:,:,t)-Pstar(:,:,t)*N_0(:,:,t)*Pstar(:,:,t)...
+                -(Pinf(:,:,t)*N_1(:,:,t)*Pstar(:,:,t))'...
+                - Pinf(:,:,t)*N_1(:,:,t)*Pstar(:,:,t)...
+                - Pinf(:,:,t)*N_2(:,:,t)*Pinf(:,:,t);                       % DK (2012), eq. 5.30
+        end
         if t > 1
-            r0(:,t-1) = T'*r0(:,t);                                         % KD (2000), below eq. (25) r_{t-1,p_{t-1}}=T*r_{t,0}
-            r1(:,t-1) = T'*r1(:,t);                                         % KD (2000), below eq. (25) r_{t-1,p_{t-1}}=T*r_{t,0}
+            r0(:,t-1) = T'*r0(:,t);                                         % KD (2000), below eq. (25) r_{t-1,p_{t-1}}=T'*r_{t,0}
+            r1(:,t-1) = T'*r1(:,t);                                         % KD (2000), below eq. (25) r_{t-1,p_{t-1}}=T'*r_{t,0}
+            if state_uncertainty_flag
+                N_0(:,:,t-1)= T'*N_0(:,t)*T;                                % KD (2000), below eq. (25) N_{t-1,p_{t-1}}=T'*N_{t,0}*T
+                N_1(:,:,t-1)= T'*N_1(:,t)*T;                                % KD (2000), below eq. (25) N^1_{t-1,p_{t-1}}=T'*N^1_{t,0}*T
+                N_2(:,:,t-1)= T'*N_2(:,t)*T;                                % KD (2000), below eq. (25) N^2_{t-1,p_{t-1}}=T'*N^2_{t,0}*T
+            end
         end
     end
 end

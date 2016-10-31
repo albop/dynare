@@ -1,6 +1,6 @@
-function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag)
+function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp,V] = missing_DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag,state_uncertainty_flag)
 
-% function [alphahat,epsilonhat,etahat,a,aK,PK,decomp] = DiffuseKalmanSmoother1(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag)
+% function [alphahat,epsilonhat,etahat,a,aK,PK,decomp] = DiffuseKalmanSmoother1(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,diffuse_kalman_tol,decomp_flag,state_uncertainty_flag)
 % Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix.
 %
 % INPUTS
@@ -20,6 +20,8 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKal
 %    kalman_tol   tolerance for reciprocal condition number
 %    diffuse_kalman_tol   tolerance for reciprocal condition number (for Finf) and the rank of Pinf
 %    decomp_flag  if true, compute filter decomposition
+%    state_uncertainty_flag     if true, compute uncertainty about smoothed
+%                               state estimate
 %             
 % OUTPUTS
 %    alphahat: smoothed variables (a_{t|T})
@@ -33,6 +35,7 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKal
 %    PK:       4D array of k-step ahead forecast error variance
 %              matrices (meaningless for periods 1:d)
 %    decomp:   decomposition of the effect of shocks on filtered values
+%    V:        3D array of state uncertainty matrices
 %  
 % Notes:
 %   Outputs are stored in decision-rule order, i.e. to get variables in order of declaration
@@ -101,6 +104,12 @@ etahat          = zeros(rr,smpl);
 epsilonhat      = zeros(rr,smpl);
 r               = zeros(mm,smpl+1);
 Finf_singular   = zeros(1,smpl);
+if state_uncertainty_flag
+    V               = zeros(mm,mm,smpl);
+    N               = zeros(mm,mm,smpl+1);
+else
+    V=[];
+end
 
 t = 0;
 while rank(Pinf(:,:,t+1),diffuse_kalman_tol) && t<smpl
@@ -241,18 +250,32 @@ while t>d+1
     if isempty(di)
         % in this case, L is simply T due to Z=0, so that DK (2012), eq. 4.93 obtains
         r(:,t) = L(:,:,t)'*r(:,t+1);                                        %compute r_{t-1}, DK (2012), eq. 4.38 with Z=0
+        if state_uncertainty_flag
+            N(:,:,t)=L(:,:,t)'*N(:,:,t+1)*L(:,:,t);                         %compute N_{t-1}, DK (2012), eq. 4.42 with Z=0
+        end
     else
         ZZ = Z(di,:);
         r(:,t) = ZZ'*iF(di,di,t)*v(di,t) + L(:,:,t)'*r(:,t+1);              %compute r_{t-1}, DK (2012), eq. 4.38
+        if state_uncertainty_flag
+            N(:,:,t)=ZZ'*iF(di,di,t)*ZZ+L(:,:,t)'*N(:,:,t+1)*L(:,:,t);      %compute N_{t-1}, DK (2012), eq. 4.42
+        end
     end
     alphahat(:,t)       = a(:,t) + P(:,:,t)*r(:,t);                         %DK (2012), eq. 4.35
     etahat(:,t) = QRt*r(:,t);                                               %DK (2012), eq. 4.63
+    if state_uncertainty_flag
+        V(:,:,t)    = P(:,:,t)-P(:,:,t)*N(:,:,t)*P(:,:,t);                      %DK (2012), eq. 4.43
+    end
 end
 if d %diffuse periods
     % initialize r_d^(0) and r_d^(1) as below DK (2012), eq. 5.23
     r0 = zeros(mm,d+1); 
     r0(:,d+1) = r(:,d+1);   %set r0_{d}, i.e. shifted by one period
     r1 = zeros(mm,d+1);     %set r1_{d}, i.e. shifted by one period
+    if state_uncertainty_flag
+        %N_0 at (d+1) is N(d+1), so we can use N for continuing and storing N_0-recursion
+        N_1=zeros(mm,mm,d+1);   %set N_1_{d}=0, i.e. shifted by one period, below  DK (2012), eq. 5.26
+        N_2=zeros(mm,mm,d+1);   %set N_2_{d}=0, i.e. shifted by one period, below  DK (2012), eq. 5.26
+    end
     for t = d:-1:1
         di = data_index{t};
         if isempty(di)
@@ -262,13 +285,36 @@ if d %diffuse periods
                 r0(:,t) = Linf(:,:,t)'*r0(:,t+1);                                   % DK (2012), eq. 5.21 where L^(0) is named Linf
                 r1(:,t) = Z(di,:)'*(iFinf(di,di,t)*v(di,t)-Kstar(:,di,t)'*T'*r0(:,t+1)) ...
                     + Linf(:,:,t)'*r1(:,t+1);                                       % DK (2012), eq. 5.21, noting that i) F^(1)=(F^Inf)^(-1)(see 5.10), ii) where L^(0) is named Linf, and iii) Kstar=T^{-1}*K^(1)
+                if state_uncertainty_flag
+                    L_1=(-T*Kstar(:,di,t)*Z(di,:));                                     % noting that Kstar=T^{-1}*K^(1)
+                    N(:,:,t)=Linf(:,:,t)'*N(:,:,t+1)*Linf(:,:,t);                       % DK (2012), eq. 5.19, noting that L^(0) is named Linf
+                    N_1(:,:,t)=Z(di,:)'*iFinf(di,di,t)*Z(di,:)+Linf(:,:,t)'*N_1(:,:,t+1)*Linf(:,:,t)...
+                        +L_1'*N(:,:,t+1)*Linf(:,:,t);                                   % DK (2012), eq. 5.29; note that, compared to DK (2003) this drops the term (L_1'*N(:,:,t+1)*Linf(:,:,t))' in the recursion due to it entering premultiplied by Pinf when computing V, and Pinf*Linf'*N=0
+                    N_2(:,:,t)=Z(di,:)'*(-iFinf(di,di,t)*Fstar(di,di,t)*iFinf(di,di,t))*Z(di,:) ...
+                        + Linf(:,:,t)'*N_2(:,:,t+1)*Linf(:,:,t)...
+                        + Linf(:,:,t)'*N_1(:,:,t+1)*L_1...
+                        + L_1'*N_1(:,:,t+1)'*Linf(:,:,t)...
+                        + L_1'*N(:,:,t+1)*L_1;                            % DK (2012), eq. 5.29
+                end
             else
                 r0(:,t) = Z(di,:)'*iFstar(di,di,t)*v(di,t)-Lstar(:,di,t)'*r0(:,t+1); % DK (2003), eq. (14)
                 r1(:,t) = T'*r1(:,t+1);                                             % DK (2003), eq. (14)
+                if state_uncertainty_flag
+                    N(:,:,t)=Z(di,:)'*iFstar(di,di,t)*Z(di,:)...
+                        +Lstar(:,:,t)'*N(:,:,t+1)*Lstar(:,:,t);                     % DK (2003), eq. (14)
+                    N_1(:,:,t)=T'*N_1(:,:,t+1)*Lstar(:,:,t);                            % DK (2003), eq. (14)
+                    N_2(:,:,t)=T'*N_2(:,:,t+1)*T';                                      % DK (2003), eq. (14)
+                end
             end
         end
         alphahat(:,t)   = a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t);      % DK (2012), eq. 5.23
         etahat(:,t)     = QRt*r0(:,t);                                              % DK (2012), p. 135
+        if state_uncertainty_flag
+            V(:,:,t)=Pstar(:,:,t)-Pstar(:,:,t)*N(:,:,t)*Pstar(:,:,t)...
+                -(Pinf(:,:,t)*N_1(:,:,t)*Pstar(:,:,t))'...
+                - Pinf(:,:,t)*N_1(:,:,t)*Pstar(:,:,t)...
+                - Pinf(:,:,t)*N_2(:,:,t)*Pinf(:,:,t);                                   % DK (2012), eq. 5.30
+        end
     end
 end
 
