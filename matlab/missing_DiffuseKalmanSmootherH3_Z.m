@@ -38,7 +38,16 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSm
 %   Outputs are stored in decision-rule order, i.e. to get variables in order of declaration
 %   as in M_.endo_names, ones needs code along the lines of:
 %   variables_declaration_order(dr.order_var,:) = alphahat
+%
+% Algorithm:
 % 
+%   Uses the univariate filter as described in Durbin/Koopman (2012): "Time
+%   Series Analysis by State Space Methods", Oxford University Press,
+%   Second Edition, Ch. 6.4 + 7.2.5
+%   and 
+%   Koopman/Durbin (2000): "Fast Filtering and Smoothing for Multivariatze State Space
+%   Models", in Journal of Time Series Analysis, vol. 21(3), pp. 281-296.
+%
 % SPECIAL REQUIREMENTS
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
 %   Models", S.J. Koopman and J. Durbin (2003), in Journal of Time Series 
@@ -84,17 +93,19 @@ Finf            = zeros(pp,smpl);
 Fi              = zeros(pp,smpl);
 Ki              = zeros(mm,pp,smpl);
 Kstar           = zeros(mm,pp,smpl);
+Kinf            = zeros(spstar(1),pp,smpl);
 P               = zeros(mm,mm,smpl+1);
 P1              = P;
 PK              = zeros(nk,mm,mm,smpl+nk);
-Pstar           = zeros(spstar(1),spstar(2),smpl); Pstar(:,:,1) = Pstar1;
-Pinf            = zeros(spinf(1),spinf(2),smpl); Pinf(:,:,1) = Pinf1;
+Pstar           = zeros(spstar(1),spstar(2),smpl); 
+Pstar(:,:,1)    = Pstar1;
+Pinf            = zeros(spinf(1),spinf(2),smpl); 
+Pinf(:,:,1)     = Pinf1;
 Pstar1          = Pstar;
 Pinf1           = Pinf;
-steady          = smpl;
 rr              = size(Q,1); % number of structural shocks
 QQ              = R*Q*transpose(R);
-QRt                     = Q*transpose(R);
+QRt             = Q*transpose(R);
 alphahat        = zeros(mm,smpl);
 etahat          = zeros(rr,smpl);
 epsilonhat      = zeros(rr,smpl);
@@ -111,23 +122,28 @@ while newRank && t < smpl
     di = data_index{t}';
     for i=di
         Zi = Z(i,:);
-        v(i,t)      = Y(i,t)-Zi*a(:,t);
-        Fstar(i,t)  = Zi*Pstar(:,:,t)*Zi' +H(i);
-        Finf(i,t)   = Zi*Pinf(:,:,t)*Zi';
-        Kstar(:,i,t) = Pstar(:,:,t)*Zi';
-        if Finf(i,t) > diffuse_kalman_tol && newRank
+        v(i,t)      = Y(i,t)-Zi*a(:,t);                                     % nu_{t,i} in 6.13 in DK (2012) 
+        Fstar(i,t)  = Zi*Pstar(:,:,t)*Zi' +H(i);                            % F_{*,t} in 5.7 in DK (2012), relies on H being diagonal
+        Finf(i,t)   = Zi*Pinf(:,:,t)*Zi';                                   % F_{\infty,t} in 5.7 in DK (2012)
+        Kstar(:,i,t) = Pstar(:,:,t)*Zi';                                    % KD (2000), eq. (15)
+        if Finf(i,t) > diffuse_kalman_tol && newRank                        % F_{\infty,t,i} = 0, use upper part of bracket on p. 175 DK (2012) for w_{t,i}
             icc=icc+1;
-            Kinf(:,i,t)       = Pinf(:,:,t)*Zi';
+            Kinf(:,i,t)       = Pinf(:,:,t)*Zi';                            % KD (2000), eq. (15)                         
             Kinf_Finf         = Kinf(:,i,t)/Finf(i,t);
-            a(:,t)            = a(:,t) + Kinf_Finf*v(i,t);
+            a(:,t)            = a(:,t) + Kinf_Finf*v(i,t);                  % KD (2000), eq. (16)
             Pstar(:,:,t)      = Pstar(:,:,t) + ...
                 Kinf(:,i,t)*Kinf_Finf'*(Fstar(i,t)/Finf(i,t)) - ...
                 Kstar(:,i,t)*Kinf_Finf' - ...
-                Kinf_Finf*Kstar(:,i,t)';
-            Pinf(:,:,t)       = Pinf(:,:,t) - Kinf(:,i,t)*Kinf(:,i,t)'/Finf(i,t);
+                Kinf_Finf*Kstar(:,i,t)';                                    % KD (2000), eq. (16)
+            Pinf(:,:,t)       = Pinf(:,:,t) - Kinf(:,i,t)*Kinf(:,i,t)'/Finf(i,t); % KD (2000), eq. (16)
         elseif Fstar(i,t) > kalman_tol 
-            a(:,t)            = a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);
-            Pstar(:,:,t)      = Pstar(:,:,t) - Kstar(:,i,t)*Kstar(:,i,t)'/Fstar(i,t);
+            a(:,t)            = a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);    % KD (2000), eq. (17)
+            Pstar(:,:,t)      = Pstar(:,:,t) - Kstar(:,i,t)*Kstar(:,i,t)'/Fstar(i,t);   % KD (2000), eq. (17)
+            % Pinf is passed through unaltered, see eq. (17) of
+            % Koopman/Durbin (2000)
+        else
+            % do nothing as a_{t,i+1}=a_{t,i} and P_{t,i+1}=P_{t,i}, see
+            % p. 157, DK (2012)        
         end
     end
     if newRank
@@ -142,8 +158,7 @@ while newRank && t < smpl
     end
     Pstar(:,:,t+1) = T*Pstar(:,:,t)*T'+ QQ;
     Pinf(:,:,t+1) = T*Pinf(:,:,t)*T';
-    P0=Pinf(:,:,t+1);
-    if newRank,
+    if newRank
         newRank       = rank(Pinf(:,:,t+1),diffuse_kalman_tol);
     end
     if oldRank ~= newRank
@@ -169,15 +184,18 @@ while notsteady && t<smpl
     di = data_index{t}';
     for i=di
         Zi = Z(i,:);
-        v(i,t)  = Y(i,t) - Zi*a(:,t);
-        Fi(i,t) = Zi*P(:,:,t)*Zi' + H(i);
-        Ki(:,i,t) = P(:,:,t)*Zi';
+        v(i,t)  = Y(i,t) - Zi*a(:,t);                                       % nu_{t,i} in 6.13 in DK (2012)
+        Fi(i,t) = Zi*P(:,:,t)*Zi' + H(i);                                   % F_{t,i} in 6.13 in DK (2012), relies on H being diagonal 
+        Ki(:,i,t) = P(:,:,t)*Zi';                                           % K_{t,i}*F_(i,t) in 6.13 in DK (2012)
         if Fi(i,t) > kalman_tol
-            a(:,t) = a(:,t) + Ki(:,i,t)*v(i,t)/Fi(i,t);
-            P(:,:,t) = P(:,:,t) - Ki(:,i,t)*Ki(:,i,t)'/Fi(i,t);
+            a(:,t) = a(:,t) + Ki(:,i,t)*v(i,t)/Fi(i,t);                     %filtering according to (6.13) in DK (2012)
+            P(:,:,t) = P(:,:,t) - Ki(:,i,t)*Ki(:,i,t)'/Fi(i,t);             %filtering according to (6.13) in DK (2012)
+        else
+            % do nothing as a_{t,i+1}=a_{t,i} and P_{t,i+1}=P_{t,i}, see
+            % p. 157, DK (2012)
         end
     end
-    a1(:,t+1) = T*a(:,t);
+    a1(:,t+1) = T*a(:,t);                                                   %transition according to (6.14) in DK (2012) 
     Pf          = P(:,:,t);
     aK(1,:,t+1) = a1(:,t+1); 
     for jnk=1:nk
@@ -187,7 +205,7 @@ while notsteady && t<smpl
             aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));    
         end
     end
-    P(:,:,t+1) = T*P(:,:,t)*T' + QQ;
+    P(:,:,t+1) = T*P(:,:,t)*T' + QQ;                                        %transition according to (6.14) in DK (2012) 
     %  notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<kalman_tol);
 end
 % $$$ P_s=tril(P(:,:,t))+tril(P(:,:,t),-1)';
@@ -221,6 +239,8 @@ end
 % $$$       PK(jnk,:,:,t+jnk) = Pf;
 % $$$   end
 % $$$ end
+
+%% do backward pass
 ri=zeros(mm,1);
 t = smpl+1;
 while t > d+1
@@ -228,13 +248,13 @@ while t > d+1
     di = flipud(data_index{t})';
     for i = di
         if Fi(i,t) > kalman_tol
-            ri = Z(i,:)'/Fi(i,t)*v(i,t)+ri-Ki(:,i,t)'*ri/Fi(i,t)*Z(i,:)';
+            ri = Z(i,:)'/Fi(i,t)*v(i,t)+ri-Ki(:,i,t)'*ri/Fi(i,t)*Z(i,:)';   % DK (2012), 6.15, equation for r_{t,i-1} with L' plugged in
         end
     end
-    r(:,t) = ri;
+    r(:,t) = ri;                                                            % DK (2012), below 6.15, r_{t-1}=r_{t,0} 
     alphahat(:,t) = a1(:,t) + P1(:,:,t)*r(:,t);
     etahat(:,t) = QRt*r(:,t);
-    ri = T'*ri;
+    ri = T'*ri;                                                             % DK (2012), 6.15, equation for r_{t,p_{t-1}} 
 end
 if d
     r0 = zeros(mm,d); 
@@ -246,18 +266,18 @@ if d
             if Finf(i,t) > diffuse_kalman_tol 
                 r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
                           (Kinf(:,i,t)'*Fstar(i,t)/Finf(i,t)-Kstar(:,i,t)')*r0(:,t)/Finf(i,t)*Z(i,:)' + ...
-                          r1(:,t)-Kinf(:,i,t)'*r1(:,t)/Finf(i,t)*Z(i,:)';
-                r0(:,t) = r0(:,t)-Kinf(:,i,t)'*r0(:,t)/Finf(i,t)*Z(i,:)';
+                          r1(:,t)-Kinf(:,i,t)'*r1(:,t)/Finf(i,t)*Z(i,:)';   % KD (2000), eq. (25) for r_1
+                r0(:,t) = r0(:,t)-Kinf(:,i,t)'*r0(:,t)/Finf(i,t)*Z(i,:)';   % KD (2000), eq. (25) for r_0
             elseif Fstar(i,t) > kalman_tol % step needed whe Finf == 0
-                r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+r0(:,t)-(Kstar(:,i,t)'*r0(:,t))/Fstar(i,t)*Z(i,:)';
+                r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+r0(:,t)-(Kstar(:,i,t)'*r0(:,t))/Fstar(i,t)*Z(i,:)'; % propage r0 and keep r1 fixed
             end
         end
-        alphahat(:,t) = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
+        alphahat(:,t) = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t); % KD (2000), eq. (26)
         r(:,t)        = r0(:,t);
-        etahat(:,t)   = QRt*r(:,t);
+        etahat(:,t)   = QRt*r(:,t);                                         % KD (2000), eq. (27)
         if t > 1
-            r0(:,t-1) = T'*r0(:,t);
-            r1(:,t-1) = T'*r1(:,t);
+            r0(:,t-1) = T'*r0(:,t);                                         % KD (2000), below eq. (25) r_{t-1,p_{t-1}}=T*r_{t,0}
+            r1(:,t-1) = T'*r1(:,t);                                         % KD (2000), below eq. (25) r_{t-1,p_{t-1}}=T*r_{t,0}
         end
     end
 end
