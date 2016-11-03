@@ -550,9 +550,11 @@ The syntax for computing impulse response functions is:
 
 The \textit{identification\_scheme} option has two potential values
 \begin{itemize}
-\item \texttt{'Cholesky'}: uses a lower triangular factorization of the covariance matrix (default)
-\item \texttt{'SquareRoot'}: uses the Matrix square root of the covariance matrix
+\item \texttt{'Cholesky'}: uses a lower triangular factorization of the covariance matrix (default),
+\item \texttt{'SquareRoot'}: uses the Matrix square root of the covariance matrix (\verb+sqrtm+ matlab's routine).
 \end{itemize}
+
+Keep in mind that the first factorization of the covariance matrix is sensible to the ordering of the variables (as declared in the mod file with \verb+var+). This is not the case of the second factorization, but its structural interpretation is, at best, unclear (the Matrix square root of a covariance matrix, $\Sigma$, is the unique symmetric matrix $A$ such that $\Sigma = AA$).\newline
 
 The mean, median, variance and confidence intervals for IRFs are saved in \texttt{oo\_.bvar.irf}
 
