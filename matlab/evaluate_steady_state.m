@@ -296,6 +296,10 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 
     if check
         info(1)= 20;
+        %make sure ys contains auxiliary variables in case of problem with dynare_solve
+        if length(M.aux_vars) > 0 && ~steadystate_flag
+            ys = h_set_auxiliary_variables(ys,exo_ss,M.params);
+        end
         resid = evaluate_static_model(ys,exo_ss,params,M,options);
         info(2) = resid'*resid ;
         if isnan(info(2))
