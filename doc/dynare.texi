@@ -6884,6 +6884,12 @@ Metropolis has been run, @code{mle_mode} if MLE has been run.
 @xref{datafile}. Useful when computing the shock decomposition on a
 calibrated model.
 
+@item first_obs = @var{INTEGER}
+@xref{first_obs}.
+
+@item nobs = @var{INTEGER}
+@xref{nobs}.
+
 @item use_shock_groups [= @var{SHOCK_GROUPS_NAME}]
 @anchor{use_shock_groups}. Uses groups of shocks instead of individual shocks in
 the decomposition. Groups of shocks are defined in @xref{shock_groups} block.
