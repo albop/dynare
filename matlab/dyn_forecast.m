@@ -140,7 +140,7 @@ else
                             repmat(oo.exo_det_steady_state',...
                                    horizon- ... 
                                    exo_det_length,1)];
-    elseif horizon < exo_det_length 
+    elseif horizon <= exo_det_length 
         ex = zeros(exo_det_length,M.exo_nbr); 
     end
     if isequal(M.H,0)
