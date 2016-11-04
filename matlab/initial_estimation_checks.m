@@ -136,10 +136,11 @@ if ~isequal(DynareOptions.mode_compute,11) || ...
     DynareOptions.use_univariate_filters_if_singularity_is_detected=0;
     [fval,info] = feval(objective_function,xparam1,DynareDataset,DatasetInfo,DynareOptions,Model,EstimatedParameters,BayesInfo,BoundsInfo,DynareResults);
     if info(1)==50
-        fprintf('\ninitial_estimation_checks:: The forecast error variance in the multivariate Kalman filter became singular.\n')    
-        fprintf('initial_estimation_checks:: This is often a sign of stochastic singularity, but can also sometimes happen by chance\n')    
-        fprintf('initial_estimation_checks:: for a particular combination of parameters and data realizations.\n')    
-        error('initial_estimation_checks:: The forecast error variance in the multivariate Kalman filter became singular.')    
+        fprintf('\ninitial_estimation_checks:: The forecast error variance in the multivariate Kalman filter became singular.\n')
+        fprintf('initial_estimation_checks:: This is often a sign of stochastic singularity, but can also sometimes happen by chance\n')
+        fprintf('initial_estimation_checks:: for a particular combination of parameters and data realizations.\n')
+        fprintf('initial_estimation_checks:: If you think the latter is the case, you should try with different initial values for the estimated parameters.\n')
+        error('initial_estimation_checks:: The forecast error variance in the multivariate Kalman filter became singular.')
     end
     %reset options 
     DynareOptions.use_univariate_filters_if_singularity_is_detected=use_univariate_filters_if_singularity_is_detected_old;
