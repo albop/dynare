@@ -6075,6 +6075,15 @@ the option is equal to @code{0}, Dynare will not automatically change
 the filter, but rather use a penalty value for the likelihood when
 such a singularity is encountered. Default: @code{1}.
 
+@item keep_kalman_algo_if_singularity_is_detected
+@anchor{keep_kalman_algo_if_singularity_is_detected}
+With the default @ref{use_univariate_filters_if_singularity_is_detected}=1, Dynare will switch 
+to the univariate Kalman filter when it encounters a singular forecast error variance
+matrix during Kalman filtering. Upon encountering such a singularity for the first time, all subsequent
+parameter draws and computations will automatically rely on univariate filter, i.e. Dynare will never try 
+the multivariate filter again. Use the @code{keep_kalman_algo_if_singularity_is_detected} option to have the 
+@code{use_univariate_filters_if_singularity_is_detected} only affect the behavior for the current draw/computation.
+
 @item qz_zero_threshold = @var{DOUBLE}
 @xref{qz_zero_threshold}.
 

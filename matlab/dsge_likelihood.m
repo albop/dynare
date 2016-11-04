@@ -894,8 +894,10 @@ if imag(fval)~=0
     return
 end
 
-% Update DynareOptions.kalman_algo.
-DynareOptions.kalman_algo = kalman_algo;
+if ~DynareOptions.kalman.keep_kalman_algo_if_singularity_is_detected
+    % Update DynareOptions.kalman_algo.
+    DynareOptions.kalman_algo = kalman_algo;
+end
 
 if analytic_derivation==0 && nargout>3,
     lik=lik(start:end,:);
