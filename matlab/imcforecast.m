@@ -119,6 +119,10 @@ if estimated_model
     data_index = dataset_info.missing.aindex;
     gend = dataset_.nobs;
     missing_value = dataset_info.missing.state;
+    
+    %store qz_criterium
+    qz_criterium_old=options_.qz_criterium;
+    options_=select_qz_criterium_value(options_);
     [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff,aK,T,R,P,PK,decomp,trend_addition] = DsgeSmoother(xparam,gend,data,data_index,missing_value);
     %get constant part
     if options_.noconstant
@@ -146,14 +150,14 @@ if estimated_model
     trend = constant(oo_.dr.order_var,:);
     InitState(:,1) = atT(:,end);
 else
+    qz_criterium_old=options_.qz_criterium;
+    if isempty(options_.qz_criterium)
+        options_.qz_criterium = 1+1e-6;
+    end
     graph_title='Calibration';
     if ~isfield(oo_.dr,'kstate')
         error('You need to call stoch_simul before conditional_forecast')
     end
-end
-
-if isempty(options_.qz_criterium)
-    options_.qz_criterium = 1+1e-6;
 end
 
 [T,R,ys,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
@@ -272,5 +276,8 @@ for i = 1:EndoSize
 end
 forecasts.graph.title=graph_title;
 forecasts.graph.fname=M_.fname;
+
+%reset qz_criterium
+options_.qz_criterium=qz_criterium_old;
 
 save('conditional_forecasts.mat','forecasts');

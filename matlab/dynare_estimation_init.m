@@ -123,22 +123,7 @@ if isequal(options_.diffuse_filter,1) || (options_.kalman_algo>2)
     end
 end
 
-% If options_.lik_init == 1
-%     set by default options_.qz_criterium to 1-1e-6
-%     and check options_.qz_criterium < 1-eps if options_.lik_init == 1
-% Else
-%     set by default options_.qz_criterium to 1+1e-6
-if isequal(options_.lik_init,1)
-    if isempty(options_.qz_criterium)
-        options_.qz_criterium = 1-1e-6;
-    elseif options_.qz_criterium > 1-eps
-        error(['Estimation: option qz_criterium is too large for estimating ' ...
-               'a stationary model. If your model contains unit roots, use ' ...
-               'option diffuse_filter'])
-    end
-elseif isempty(options_.qz_criterium)
-    options_.qz_criterium = 1+1e-6;
-end
+options_=select_qz_criterium_value(options_);
 
 % Set options related to filtered variables.
 if ~isequal(options_.filtered_vars,0) && isempty(options_.filter_step_ahead)
