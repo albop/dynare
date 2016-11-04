@@ -105,6 +105,9 @@ delete_stale_file([MhDirectoryName filesep M_.fname '_param_irf*.mat']);
 if strcmpi(type,'posterior')
     B = options_.sub_draws;
     options_.B = B;
+    if round((1-options_.mh_conf_sig)*B)<2
+        fprintf('\nPosteriorIRF:: options_.mh_conf_sig times options_.sub_draws is too small to generate HPDIs. I am omitting them.\n')
+    end
 elseif strcmpi(type,'gsa')
     RootDirectoryName = CheckPath('gsa',M_.dname);
     if options_.opt_gsa.pprior
