@@ -285,7 +285,7 @@ elseif options_.load_mh_file && ~options_.mh_recover
     end
     ilogpo2 = record.LastLogPost;
     ix2 = record.LastParameters;
-    [d,bayestopt_]=set_proposal_density_to_previous_value(record,options_,bayestopt_);
+    [d,bayestopt_]=set_proposal_density_to_previous_value(record,options_,bayestopt_,d);
     FirstBlock = 1;
     NumberOfPreviousSimulations = sum(record.MhDraws(:,1),1);
     fprintf('Estimation::mcmc: I am writing a new mh-history file... ');
@@ -451,7 +451,7 @@ elseif options_.mh_recover
     end
 end
 
-function [d,bayestopt_]=set_proposal_density_to_previous_value(record,options_,bayestopt_)
+function [d,bayestopt_]=set_proposal_density_to_previous_value(record,options_,bayestopt_,d)
     if isfield(record,'ProposalCovariance') && isfield(record,'ProposalCovariance')
         if isfield(record,'MCMC_sampler')
             if ~strcmp(record.MCMC_sampler,options_.posterior_sampler_options.posterior_sampling_method)
