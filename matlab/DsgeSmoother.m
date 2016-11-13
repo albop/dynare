@@ -1,4 +1,4 @@
-function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,decomp,trend_addition] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value)
+function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,decomp,trend_addition,state_uncertainty] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value)
 % Estimation of the smoothed variables and innovations. 
 % 
 % INPUTS 
@@ -25,6 +25,8 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,de
 %   o decomp        (K*m*r*(T+K)) 4D array of shock decomposition of k-step ahead
 %                       filtered variables (decision-rule order)
 %   o trend_addition [double] (n*T) pure trend component; stored in options_.varobs order         
+%   o state_uncertainty [double] (K,K,T) array, storing the uncertainty
+%                                   about the smoothed state (decision-rule order)
 %  
 % Notes:
 %   m:  number of endogenous variables (M_.endo_nbr)
@@ -233,10 +235,10 @@ ST = T;
 R1 = R;
 
 if kalman_algo == 1 || kalman_algo == 3
-    [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(ST, ...
+    [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp,state_uncertainty] = missing_DiffuseKalmanSmootherH1_Z(ST, ...
                                                       Z,R1,Q,H,Pinf,Pstar, ...
                                                       data1,vobs,np,smpl,data_index, ...
-                                                      options_.nk,kalman_tol,diffuse_kalman_tol,options_.filter_decomposition);
+                                                      options_.nk,kalman_tol,diffuse_kalman_tol,options_.filter_decomposition,options_.smoothed_state_uncertainty);
     if isinf(alphahat)
         if kalman_algo == 1
             kalman_algo = 2;
@@ -273,11 +275,11 @@ if kalman_algo == 2 || kalman_algo == 4
             end
         end
         
-    [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(ST, ...
+    [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp,state_uncertainty] = missing_DiffuseKalmanSmootherH3_Z(ST, ...
                                                       Z,R1,Q,diag(H), ...
                                                       Pinf,Pstar,data1,vobs,np,smpl,data_index, ...
                                                       options_.nk,kalman_tol,diffuse_kalman_tol, ...
-                                                      options_.filter_decomposition);
+                                                      options_.filter_decomposition,options_.smoothed_state_uncertainty);
 end
 
 
@@ -298,5 +300,8 @@ if expanded_state_vector_for_univariate_filter && (kalman_algo == 2 || kalman_al
     end
     if ~isempty(P)
         P = P(k,k,:);
+    end
+    if ~isempty(state_uncertainty)
+        state_uncertainty = state_uncertainty(k,k,:);
     end
 end

@@ -5919,7 +5919,7 @@ Use the Univariate Diffuse Kalman Filter
 Default value is @code{0}. In case of missing observations of single or all series, Dynare treats those missing values as unobserved states and uses the Kalman filter to infer their value (see e.g. @cite{Durbin and Koopman (2012), Ch. 4.10})
 This procedure has the advantage of being capable of dealing with observations where the forecast error variance matrix becomes singular for some variable(s).
 If this happens, the respective observation enters with a weight of zero in the log-likelihood, i.e. this observation for the respective variable(s) is dropped
-from the likelihood computations (for details see @cite{Durbin and Koopman (2012), Ch. 6.4 and 7.2.5}). If the use of a multivariate Kalman filter is specified and a
+from the likelihood computations (for details see @cite{Durbin and Koopman (2012), Ch. 6.4 and 7.2.5} and @cite{Koopman and Durbin (2000)}). If the use of a multivariate Kalman filter is specified and a
 singularity is encountered, Dynare by default automatically switches to the univariate Kalman filter for this parameter draw. This behavior can be changed via the
 @ref{use_univariate_filters_if_singularity_is_detected} option.
 
@@ -5954,12 +5954,16 @@ Triggers the computation k-step ahead filtered values, i.e. @math{E_{t}{y_{t+k}}
 @anchor{filter_decomposition} Triggers the computation of the shock
 decomposition of the above k-step ahead filtered values. Stores results in @code{oo_.FilteredVariablesShockDecomposition}.
 
+@item smoothed_state_uncertainty
+@anchor{smoothed_state_uncertainty} Triggers the computation of the variance of smoothed estimates, i.e.
+@code{Var_T(y_t)}. Stores results in @code{oo_.Smoother.State_uncertainty}.
 
 @item diffuse_filter
 @anchor{diffuse_filter}
 Uses the diffuse Kalman filter (as described in
 @cite{Durbin and Koopman (2012)} and @cite{Koopman and Durbin
-(2003)}) to estimate models with non-stationary observed variables.
+(2003)} for the multivariate and @cite{Koopman and Durbin
+(2000)} for the univariate filter) to estimate models with non-stationary observed variables.
 
 When @code{diffuse_filter} is used the @code{lik_init} option of
 @code{estimation} has no effect.
@@ -6510,6 +6514,19 @@ from the Kalman smoother. The @code{M_.endo_nbr} times @code{M_.endo_nbr} times
 @code{T+1} array contains the variables in declaration order along the first 
 two dimensions. The third dimension of the array provides the
 observation for which the forecast has been made.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.Smoother.State_uncertainty
+@anchor{oo_.Smoother.State_uncertainty}
+Three-dimensional array set by the @code{estimation} command (if used with the
+@code{smoother}) without Metropolis, 
+or by the @code{calib_smoother} command, if the @code{o_smoothed_state_uncertainty} option
+has been requested.
+Contains the series of covariance matrices for the state estimate given the full data
+from the Kalman smoother. The @code{M_.endo_nbr} times @code{M_.endo_nbr} times
+@code{T} array contains the variables in declaration order along the first 
+two dimensions. The third dimension of the array provides the
+observation for which the smoothed estimate has been made.
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.Smoother.SteadyState
@@ -14127,6 +14144,11 @@ Dynamics and Control}, 32(11), 3397--3414
 
 @item
 Koop, Gary (2003), @i{Bayesian Econometrics}, John Wiley & Sons
+
+@item
+Koopman, S. J. and J. Durbin (2000): ``Fast Filtering and Smoothing for 
+Multivariate State Space Models,'' @i{Journal of Time
+Series Analysis}, 21(3), 281--296
 
 @item
 Koopman, S. J. and J. Durbin (2003): ``Filtering and Smoothing of

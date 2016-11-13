@@ -413,6 +413,7 @@ options_.bayesian_th_moments = 0;
 options_.diffuse_filter = 0;
 options_.filter_step_ahead = [];
 options_.filtered_vars = 0;
+options_.smoothed_state_uncertainty = 0;
 options_.first_obs = NaN;
 options_.nobs = NaN;
 options_.kalman_algo = 0;
