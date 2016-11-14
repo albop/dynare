@@ -311,7 +311,7 @@ if d
                     N_0(:,:,t)=Linf'*N_0(:,:,t)*Linf;                           % DK (2012), eq. 5.19, noting that L^(0) is named Linf
                 end
             elseif Fstar(i,t) > kalman_tol % step needed whe Finf == 0
-                L_i=eye(mm) - Kstar(:,i,t)*Z(i,:)*Fstar(i,t);
+                L_i=eye(mm) - Kstar(:,i,t)*Z(i,:)/Fstar(i,t);
                 r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+L_i'*r0(:,t);           % propagate r0 and keep r1 fixed
                 if state_uncertainty_flag
                     N_0(:,:,t)=Z(i,:)'/Fstar(i,t)*Z(i,:)+L_i'*N_0(:,:,t)*L_i;   % propagate N_0 and keep N_1 and N_2 fixed
