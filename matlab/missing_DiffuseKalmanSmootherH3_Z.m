@@ -293,14 +293,14 @@ if d
         for i = di
             if Finf(i,t) > diffuse_kalman_tol
                 % recursions need to be from highest to lowest term in order to not 
-                % overwrite lower terms still needed in thisstep
+                % overwrite lower terms still needed in this step
+                Linf    = eye(mm) - Kinf(:,i,t)*Z(i,:)/Finf(i,t);
+                L0      = (Kinf(:,i,t)*(Fstar(i,t)/Finf(i,t))-Kstar(:,i,t))*Z(i,:)/Finf(i,t);            
                 r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
-                          (Kinf(:,i,t)'*Fstar(i,t)/Finf(i,t)-Kstar(:,i,t)')*r0(:,t)/Finf(i,t)*Z(i,:)' + ...
-                          r1(:,t)-Kinf(:,i,t)'*r1(:,t)/Finf(i,t)*Z(i,:)';   % KD (2000), eq. (25) for r_1
-                r0(:,t) = r0(:,t)-Kinf(:,i,t)'*r0(:,t)/Finf(i,t)*Z(i,:)';   % KD (2000), eq. (25) for r_0
+                          L0'*r0(:,t) + ...
+                          Linf'*r1(:,t);   % KD (2000), eq. (25) for r_1
+                r0(:,t) = Linf'*r0(:,t);   % KD (2000), eq. (25) for r_0
                 if state_uncertainty_flag
-                    Linf    = eye(mm) - Kinf(:,i,t)'/Finf(i,t);
-                    L0      = (Kinf(:,i,t)*(Fstar(i,t)/Finf(i,t))-Kstar(:,i,t))*Z(i,:)/Finf(i,t);            
                     N_2(:,:,t)=Z(i,:)'/Finf(i,t)^2*Z(i,:)*Fstar(i,t) ...
                         + Linf'*N_2(:,:,t)*Linf...
                         + Linf'*N_1(:,:,t)*L0...
