@@ -103,20 +103,15 @@ if i == nk+1
     c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
     Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
 end
-Z = QT(mf,:);
-
 
 % stochastic trends with no influence on observed variables are
 % arbitrarily initialized to zero
 Pinf = zeros(np,np);
 Pinf(1:nk,1:nk) = eye(nk);
-[QQ,RR,EE] = qr(Z*ST,0);
-k = find(abs(diag(RR)) < 1e-8);
-if length(k) > 0
-    k1 = EE(:,k);
-    dd =ones(nk,1);
-    dd(k1) = zeros(length(k1),1);
-    Pinf(1:nk,1:nk) = diag(dd);
+for k = 1:nk
+    if norm(QT(mf,k)) < 1e-8
+        Pinf(k,k) = 0;
+    end
 end
 
 
