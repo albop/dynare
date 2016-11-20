@@ -103,6 +103,7 @@ if i == nk+1
     c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
     Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
 end
+Z = QT(mf,:);
 
 % stochastic trends with no influence on observed variables are
 % arbitrarily initialized to zero
