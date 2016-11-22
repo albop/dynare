@@ -1,4 +1,4 @@
-function [Z,ST,R1,QT,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,qz_criterium, restrict_columns)
+function [Pstar,Pinf] = compute_Pinf_Pstar(mf,T,R,Q,qz_criterium, restrict_columns)
 % function [Z,ST,QT,R1,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,qz_criterium, restrict_columns)
 % Kitagawa transformation of state space system with a quasi-triangular
 % transition matrix with unit roots at the top, but excluding zero columns of the transition matrix. 
@@ -20,10 +20,6 @@ function [Z,ST,R1,QT,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,qz_c
 %   qz_criterium [double]     numerical criterium for unit roots   
 %  
 % OUTPUTS 
-%   Z            [double]     transformed matrix of measurement equation
-%   ST           [double]     tranformed matrix of transition
-%   R1           [double]     tranformed matrix of structural shock effects
-%   QT           [double]     matrix of Schur vectors
 %   Pstar        [double]     matrix of covariance of stationary part
 %   Pinf         [double]     matrix of covariance initialization for
 %                             nonstationary part    
@@ -103,7 +99,6 @@ if i == nk+1
     c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
     Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
 end
-Z = QT(mf,:);
 
 % stochastic trends with no influence on observed variables are
 % arbitrarily initialized to zero
@@ -115,4 +110,6 @@ for k = 1:nk
     end
 end
 
+Pinf = QT*Pinf*QT';
+Pstar = QT*Pstar*QT';
 

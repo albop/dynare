@@ -180,9 +180,7 @@ elseif options_.lik_init == 3           % Diffuse Kalman filter
             Z   = [Z, eye(vobs)];
         end
     end
-    [Ztmp,Stmp,Rtmp,QT,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,options_.qz_criterium,oo_.dr.restrict_var_list);
-    Pinf = QT*Pinf*QT';
-    Pstar = QT*Pstar*QT';
+    [Pstar,Pinf] = compute_Pinf_Pstar(mf,T,R,Q,options_.qz_criterium,oo_.dr.restrict_var_list);
 elseif options_.lik_init == 4           % Start from the solution of the Riccati equation.
     [err, Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(mf,np,vobs)),H);
     mexErrCheck('kalman_steady_state',err);
@@ -263,7 +261,7 @@ if kalman_algo == 2 || kalman_algo == 4
                 if kalman_algo == 4
                     %recompute Schur state space transformation with
                     %expanded state space
-                    [Ztmp,Ttmp,Rtmp,Qtmp,Pstar,Pinf] = schur_statespace_transformation(mf,ST,R1,Q,options_.qz_criterium);
+                    [Pstar,Pinf] = compute_Pinf_Pstar(mf,ST,R1,Q,options_.qz_criterium);
                 else
                     Pstar = blkdiag(Pstar,H);
                     Pinf  = blkdiag(Pinf,zeros(vobs));                    

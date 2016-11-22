@@ -111,7 +111,7 @@ function [fval,info,exit_flag,DLIK,Hess,SteadyState,trend_coeff,Model,DynareOpti
 %! @sp 2
 %! @strong{This function calls:}
 %! @sp 1
-%! @ref{dynare_resolve}, @ref{lyapunov_symm}, @ref{schur_statespace_transformation}, @ref{kalman_filter_d}, @ref{missing_observations_kalman_filter_d}, @ref{univariate_kalman_filter_d}, @ref{kalman_steady_state}, @ref{getH}, @ref{kalman_filter}, @ref{score}, @ref{AHessian}, @ref{missing_observations_kalman_filter}, @ref{univariate_kalman_filter}, @ref{priordens}
+%! @ref{dynare_resolve}, @ref{lyapunov_symm}, @ref{compute_Pinf_Pstar}, @ref{kalman_filter_d}, @ref{missing_observations_kalman_filter_d}, @ref{univariate_kalman_filter_d}, @ref{kalman_steady_state}, @ref{getH}, @ref{kalman_filter}, @ref{score}, @ref{AHessian}, @ref{missing_observations_kalman_filter}, @ref{univariate_kalman_filter}, @ref{priordens}
 %! @end deftypefn
 %@eod:
 
@@ -380,15 +380,11 @@ switch DynareOptions.lik_init
             error(['The model requires Diffuse filter, but you specified a different Kalman filter. You must set options_.kalman_algo ' ...
                    'to 0 (default), 3 or 4'])
     end
-    [Ztmp,Ttmp,Rtmp,QT,Pstar,Pinf] = schur_statespace_transformation(Z,T,R,Q,DynareOptions.qz_criterium,[1:length(T)]);
-    Pinf = QT*Pinf*QT';
-    Pstar = QT*Pstar*QT';
-    Z1=Ztmp*0;
-    for jz=1:length(Z)
-        Z1(jz,Z(jz))=1;
+    [Pstar,Pinf] = compute_Pinf_Pstar(Z,T,R,Q,DynareOptions.qz_criterium,[1:length(T)]);
+    Z =zeros(length(BayesInfo.mf),size(T,1));
+    for i = 1:length(BayesInfo.mf)
+        Z(i,BayesInfo.mf(i))=1;
     end
-    Z=Z1;
-    clear Ztmp Z1
     Zflag = 1;
     % Run diffuse kalman filter on first periods.
     if (kalman_algo==3)
