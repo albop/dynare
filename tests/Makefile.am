@@ -214,6 +214,8 @@ MODFILES = \
 	kalman_filter_smoother/fs2000a.mod \
 	kalman_filter_smoother/fs2000_smoother_only.mod \
 	kalman_filter_smoother/fs2000_smoother_only_ns.mod \
+	kalman_filter_smoother/test_compute_Pinf_Pstar_data.mod \
+	kalman_filter_smoother/test_compute_Pinf_Pstar.mod \
 	kalman_filter_smoother/check_variable_dimensions/fs2000.mod \
 	kalman_filter_smoother/check_variable_dimensions/fs2000_ML.mod \
 	kalman/likelihood_from_dynare/fs2000_corr_ME.mod \
@@ -363,6 +365,9 @@ kalman_filter_smoother/algoH2.o.trs: kalman_filter_smoother/algoH1.o.trs
 
 kalman_filter_smoother/algo4.m.trs: kalman_filter_smoother/algo3.m.trs
 kalman_filter_smoother/algo4.o.trs: kalman_filter_smoother/algo3.o.trs
+
+kalman_filter_smoother/test_compute_Pinf_Pstar.m.trs: kalman_filter_smoother/compute_Pinf_Pstar_data.m.trs
+kalman_filter_smoother/test_compute_Pinf_Pstar.o.trs: kalman_filter_smoother/compute_Pinf_Pstar_data.o.trs
 
 optimal_policy/nk_ramsey_expectation_a.m.trs: optimal_policy/nk_ramsey_expectation.m.trs
 optimal_policy/nk_ramsey_expectation_a.o.trs: optimal_policy/nk_ramsey_expectation.o.trs
