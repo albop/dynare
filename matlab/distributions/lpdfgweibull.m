@@ -262,7 +262,11 @@ end
 %$ end
 %$
 %$ if t(1)
-%$    t(2) = abs(s-1)<1e-6;
+%$        if isoctave()
+%$            t(2) = abs(s-1)<5e-5;
+%$        else
+%$            t(2) = abs(s-1)<1e-6;
+%$        end
 %$ end
 %$
 %$ T = all(t);
@@ -423,7 +427,11 @@ end
 %$    for i=1:n
 %$        x = .1*i;
 %$        q = 1-exp(-(x/scale)^shape);
-%$        t(i+1) = abs(s(i)-q)<1e-6;
+%$        if isoctave()
+%$            t(i+1) = abs(s(i)-q)<5e-5;
+%$        else
+%$            t(i+1) = abs(s(i)-q)<1e-6;
+%$        end
 %$    end
 %$ end
 %$
