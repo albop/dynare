@@ -366,8 +366,8 @@ kalman_filter_smoother/algoH2.o.trs: kalman_filter_smoother/algoH1.o.trs
 kalman_filter_smoother/algo4.m.trs: kalman_filter_smoother/algo3.m.trs
 kalman_filter_smoother/algo4.o.trs: kalman_filter_smoother/algo3.o.trs
 
-kalman_filter_smoother/test_compute_Pinf_Pstar.m.trs: kalman_filter_smoother/compute_Pinf_Pstar_data.m.trs
-kalman_filter_smoother/test_compute_Pinf_Pstar.o.trs: kalman_filter_smoother/compute_Pinf_Pstar_data.o.trs
+kalman_filter_smoother/test_compute_Pinf_Pstar.m.trs: kalman_filter_smoother/test_compute_Pinf_Pstar_data.m.trs
+kalman_filter_smoother/test_compute_Pinf_Pstar.o.trs: kalman_filter_smoother/test_compute_Pinf_Pstar_data.o.trs
 
 optimal_policy/nk_ramsey_expectation_a.m.trs: optimal_policy/nk_ramsey_expectation.m.trs
 optimal_policy/nk_ramsey_expectation_a.o.trs: optimal_policy/nk_ramsey_expectation.o.trs
