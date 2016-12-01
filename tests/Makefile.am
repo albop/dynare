@@ -238,6 +238,8 @@ MODFILES = \
 	ep/rbcii.mod \
 	ep/linearmodel0.mod \
 	ep/linearmodel1.mod \
+	stochastic-backward-models/solow_cd.mod \
+	stochastic-backward-models/solow_ces.mod \
 	deterministic_simulations/purely_forward/ar1.mod \
         deterministic_simulations/purely_forward/nk.mod \
 	deterministic_simulations/purely_backward/ar1.mod \
