@@ -2981,9 +2981,6 @@ default value of @code{maxit} is 50.
 Convergence criterion for termination based on the function value. Iteration will cease when the residuals are smaller
 than @code{tolf}. Default: @code{eps^(1/3)}
 
-@item robust_lin_solve
-Triggers the use of a robust linear solver for the default @code{solve_algo=4}. 
-
 @item solve_algo = @var{INTEGER}
 @anchor{solve_algo}
 Determines the non-linear solver to use. Possible values for the option are:
@@ -3683,6 +3680,9 @@ perfect_foresight_solver(stack_solve_algo=7, solve_algo=9)
 trigger the computation of the solution with a trust region algorithm.
 
 @end table
+
+@item robust_lin_solve
+Triggers the use of a robust linear solver for the default @code{stack_solve_algo=0}. 
 
 @item solve_algo
 @xref{solve_algo}. Allows selecting the solver used with @code{stack_solve_algo=7}.
