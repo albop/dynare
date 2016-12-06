@@ -1,20 +1,20 @@
-var Efficiency $A$
-    EfficiencyGrowth $X$
-    Population $L$
-    PopulationGrowth $N$
-    Output $Y$
-    PhysicalCapitalStock $K$ ;
+var Efficiency                  // $A$
+    EfficiencyGrowth            // $X$
+    Population                  // $L$
+    PopulationGrowth            // $N$
+    Output                      // $Y$
+    PhysicalCapitalStock ;      // $K$
 
-varexo e_x $\varepsilon_x$
-       e_n $\varepsilon_n$;
+varexo e_x   // $\varepsilon_x$
+       e_n ; // $\varepsilon_n$
 
-parameters alpha $\alpha$
-	   delta $\delta$
-	   s $s$
-           rho_x $\rho_x$
-           rho_n $\rho_n$
-           EfficiencyGrowth_ss $X^{\star}$
-           PopulationGrowth_ss $N^{\star}$ ;
+parameters alpha                               // $\alpha$
+	   delta                               // $\delta$
+	   s                                   // $s$
+           rho_x                               // $\rho_x$
+           rho_n                               // $\rho_n$
+           EfficiencyGrowth_ss                 // $X^{\star}$
+           PopulationGrowth_ss ;               // $N^{\star}$
 
 alpha = .33;
 delta = .02;

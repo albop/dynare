@@ -1,20 +1,28 @@
-var Efficiency $A$
-    EfficiencyGrowth $X$
-    Population $L$
-    PopulationGrowth $N$
-    Output $Y$
-    PhysicalCapitalStock $K$ ;
+var Efficiency                  // $A$
+    EfficiencyGrowth            // $X$
+    Population                  // $L$
+    PopulationGrowth            // $N$
+    Output                      // $Y$
+    PhysicalCapitalStock ;      // $K$
 
-varexo e_x $\varepsilon_x$
-       e_n $\varepsilon_n$;
+varexo e_x   // $\varepsilon_x$
+       e_n ; // $\varepsilon_n$
 
-parameters alpha $\alpha$
-	   delta $\delta$
-	   s $s$
-           rho_x $\rho_x$
-           rho_n $\rho_n$
-           EfficiencyGrowth_ss $X^{\star}$
-           PopulationGrowth_ss $N^{\star}$ ;
+parameters alpha                               // $\alpha$
+	   delta                               // $\delta$
+	   s                                   // $s$
+           rho_x                               // $\rho_x$
+           rho_n                               // $\rho_n$
+           EfficiencyGrowth_ss                 // $X^{\star}$
+           PopulationGrowth_ss ;               // $N^{\star}$
+
+alpha = .33;
+delta = .02;
+s     = .20;
+rho_x = .90;
+rho_n = .95;
+EfficiencyGrowth_ss = 1.00; // Do not change this calibration
+PopulationGrowth_ss = 1.00; // Do not change this calibration
 
 alpha = .33;
 delta = .02;
