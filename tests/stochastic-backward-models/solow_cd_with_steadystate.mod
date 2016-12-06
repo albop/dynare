@@ -35,10 +35,10 @@ end;
 
 histval;
     Efficiency(0) = .5;
-    EfficiencyGrowth(0) = 1.02;
+    EfficiencyGrowth(0) = 1.00;
     Population(0) = 1;
-    PopulationGrowth(0) = 1.02;
-    PhysicalCapitalStock(0) = 1;
+    PopulationGrowth(0) = 1.04;
+    PhysicalCapitalStock(0) = 15;
 end;
 
 LongRunEfficiency = M_.endo_histval(1)*M_.endo_histval(2)^(rho_x/(1-rho_x));
