@@ -2470,11 +2470,13 @@ simul(periods=200);
 
 @end example
 
-In this example, the problem is finding the optimal path for consumption
-and capital for the periods t=1 to T=200, given the path of the exogenous
-technology level @code{x}. @code{c} and @code{x} are forward-looking 
-variables, so we need terminal conditions for them, while @code{k} is a backward-looking (state)
-variable, so we need an initial condition for it.
+In this example, the problem is finding the optimal path for consumption and
+capital for the periods t=1 to T=200, given the path of the exogenous
+technology level @code{x}. @code{c} is a forward looking variable and the
+exogenous variable @code{x} appears with a lead in the expected return of
+phydical capital, so we need terminal conditions for them, while @code{k} is a
+purely backward-looking (state) variable, so we need an initial condition for
+it.
 
 Setting @code{x=1.1} in the @code{endval}-block without a @code{shocks}-block implies that technology
 is at 1.1 in t=1 and stays there forever, because @code{endval}
