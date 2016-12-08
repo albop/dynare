@@ -2471,38 +2471,38 @@ simul(periods=200);
 @end example
 
 In this example, the problem is finding the optimal path for consumption and
-capital for the periods t=1 to T=200, given the path of the exogenous
+capital for the periods @math{t=1} to @math{T=200}, given the path of the exogenous
 technology level @code{x}. @code{c} is a forward looking variable and the
 exogenous variable @code{x} appears with a lead in the expected return of
-phydical capital, so we need terminal conditions for them, while @code{k} is a
+physical capital, so we need terminal conditions for them, while @code{k} is a
 purely backward-looking (state) variable, so we need an initial condition for
 it.
 
 Setting @code{x=1.1} in the @code{endval}-block without a @code{shocks}-block implies that technology
-is at 1.1 in t=1 and stays there forever, because @code{endval}
+is at @math{1.1} in @math{t=1} and stays there forever, because @code{endval}
 is filling all entries of @code{oo_.endo_simul} and @code{oo_.exo_simul} except 
-for the very first one, which stores the initial conditions and was set to 0 by the @code{initval}-block when not 
+for the very first one, which stores the initial conditions and was set to @math{0} by the @code{initval}-block when not 
 explicitly specifying a value for it. 
 
 Because the law of motion for capital is backward-looking, we need an initial
-condition for @code{k} at time 0. Due to the presence of @code{endval}, this cannot be 
+condition for @code{k} at time @math{0}. Due to the presence of @code{endval}, this cannot be 
 done via a @code{histval}-block, but rather must be specified in the @code{initval}-block.
 Similarly, because the Euler equation is forward-looking, we need a
-terminal condition for @code{c} at t=201, which is specified in the
+terminal condition for @code{c} at @math{t=201}, which is specified in the
 @code{endval}-block. 
 
 As can be seen, it is not necessary to specify @code{c} and @code{x} in the @code{initval}-block and
 @code{k} in the @code{endval}-block, because they have no impact on the results. Due to 
 the optimization problem in the first period being to choose @code{c,k}
-at t=1 given the predetermined capital stock @code{k} inherited from t=0 as
+at @math{t=1} given the predetermined capital stock @code{k} inherited from @math{t=0} as
 well as the current and future values for technology @code{x}, the values for
-@code{c} and @code{x} at time t=0 play no role. The same applies to the choice of
-@code{c,k} at time t=200, which does not depend on @code{k} at t=201. As
+@code{c} and @code{x} at time @math{t=0} play no role. The same applies to the choice of
+@code{c,k} at time @math{t=200}, which does not depend on @code{k} at @math{t=201}. As
 the Euler equation shows, that choice only depends on current capital as
 well as future consumption @code{c} and technology @code{x}, but not on
 future capital @code{k}. The intuitive reason is that those variables are
-the consequence of optimization problems taking place in at periods t=0
-and t=201, respectively, which are not modeled here. 
+the consequence of optimization problems taking place in at periods @math{t=0}
+and @math{t=201}, respectively, which are not modeled here.
 
 @examplehead
 
@@ -2526,19 +2526,19 @@ variable @code{k}. As shown in the previous example, these values will not affec
 results. Dynare simply takes them as given and basically assumes that there were realizations
 of exogenous variables and states that make those choices
 equilibrium values (basically initial/terminal conditions
-at the unspecified time periods t<0 and t>201). 
+at the unspecified time periods @math{t<0} and @math{t>201}).
  
 The above example suggests another way of looking at the use of @code{steady}
 after @code{initval} and @code{endval}. Instead of saying that the
 implicit unspecified conditions before and after the simulation range
 have to fit the initial/terminal conditions of the endogenous variables
-in those blocks, @code{steady} specifies that those conditions at t<0 and
-t>201 are equal to being at the steady state given the exogenous
+in those blocks, @code{steady} specifies that those conditions at @math{t<0} and
+@math{t>201} are equal to being at the steady state given the exogenous
 variables in the @code{initval} and @code{endval}-blocks. The
-endogenous variables at t=0 and t=201 are then set to the corresponding steady state
+endogenous variables at @math{t=0} and @math{t=201} are then set to the corresponding steady state
 equilibrium values.
  
-The fact that @code{c} at t=0 and @code{k} at t=201 specified in
+The fact that @code{c} at @math{t=0} and @code{k} at @math{t=201} specified in
 @code{initval} and @code{endval} are taken as given has an important
 implication for plotting the simulated vector for the endogenous
 variables, i.e. the rows of @code{oo_.endo_simul}: this vector will 
@@ -2546,11 +2546,11 @@ also contain the initial and terminal
 conditions and thus is 202 periods long in the example. When you specify
 arbitrary values for the initial and terminal conditions for forward- and
 backward-looking variables, respectively, these values can be very far
-away from the endogenously determined values at t=1 and t=200. While the
-values at t=0 and t=201 are unrelated to the dynamics for 0<t<201, they
+away from the endogenously determined values at @math{t=1} and @math{t=200}. While the
+values at @math{t=0} and @math{t=201} are unrelated to the dynamics for @math{0<t<201}, they
 may result in strange-looking large jumps. In the example above,
-consumption will display a large jump from t=0 to t=1 and capital will
-jump from t=200 to t=201 when using @ref{rplot} or manually plotting @code{oo_.endo_val}.
+consumption will display a large jump from @math{t=0} to @math{t=1} and capital will
+jump from @math{t=200} to @math{t=201} when using @ref{rplot} or manually plotting @code{oo_.endo_val}.
 
 @end deffn
 
