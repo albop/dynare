@@ -10802,7 +10802,7 @@ The path to the MATLAB or Octave executable. The default value is
 
 @item SingleCompThread = @var{BOOLEAN}
 Whether or not to disable MATLAB's native multithreading. The default
-value is @code{true}. Option meaningless under Octave.
+value is @code{false}. Option meaningless under Octave.
 
 @item OperatingSystem = @var{OPERATING_SYSTEM}
 The operating system associated with a node. Only necessary when
