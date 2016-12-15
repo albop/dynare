@@ -204,8 +204,8 @@ for b=fpar:B
 
     if run_smoother
         [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
-        [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK,junk1,junk2,P,junk4,junk5,trend_addition,state_uncertainty] = ...
-            DsgeSmoother(deep,gend,Y,data_index,missing_value);
+        [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK,junk1,junk2,P,junk4,junk5,trend_addition,state_uncertainty,M_,oo_,options_,bayestopt_] = ...
+            DsgeSmoother(deep,gend,Y,data_index,missing_value,M_,oo_,options_,bayestopt_,estim_params_);
         
         stock_trend_coeff(options_.varobs_id,irun(9))=trend_coeff;
         stock_smoothed_trend(IdObs,:,irun(11))=trend_addition;

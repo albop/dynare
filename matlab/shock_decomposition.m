@@ -1,4 +1,4 @@
-function oo_ = shock_decomposition(M_,oo_,options_,varlist)
+function oo_ = shock_decomposition(M_,oo_,options_,varlist,bayestopt_,estim_params_)
 % function z = shock_decomposition(M_,oo_,options_,varlist)
 % Computes shocks contribution to a simulated trajectory. The field set is
 % oo_.shock_decomposition. It is a n_var by nshock+2 by nperiods array. The
@@ -12,6 +12,8 @@ function oo_ = shock_decomposition(M_,oo_,options_,varlist)
 %    oo_:         [structure]  Storage of results
 %    options_:    [structure]  Options
 %    varlist:     [char]       List of variables
+%    bayestopt_:  [structure]  describing the priors
+%    estim_params_: [structure] characterizing parameters to be estimated
 %
 % OUTPUTS
 %    oo_:         [structure]  Storage of results
@@ -64,7 +66,7 @@ if isempty(parameter_set)
     end
 end
 
-[oo,Smoothed_Variables_deviation_from_mean] = evaluate_smoother(parameter_set,varlist);
+[oo,Smoothed_Variables_deviation_from_mean] = evaluate_smoother(parameter_set,varlist,M_,oo_,options_,bayestopt_,estim_params_);
 
 % reduced form
 dr = oo.dr;

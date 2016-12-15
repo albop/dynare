@@ -43,7 +43,7 @@ function imcforecast(constrained_paths, constrained_vars, options_cond_fcst)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global options_ oo_ M_ bayestopt_
+global options_ oo_ M_ bayestopt_ estim_params_
 
 if ~isfield(options_cond_fcst,'parameter_set') || isempty(options_cond_fcst.parameter_set)
     if isfield(oo_,'posterior_mode')
@@ -124,7 +124,7 @@ if estimated_model
     qz_criterium_old=options_.qz_criterium;
     options_=select_qz_criterium_value(options_);
     options_smoothed_state_uncertainty_old = options_.smoothed_state_uncertainty;
-    [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff,aK,T,R,P,PK,decomp,trend_addition] = DsgeSmoother(xparam,gend,data,data_index,missing_value);
+    [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff,aK,T,R,P,PK,decomp,trend_addition,state_uncertainty,M_,oo_,options_,bayestopt_] = DsgeSmoother(xparam,gend,data,data_index,missing_value,M_,oo_,options_,bayestopt_,estim_params_);
     options_.smoothed_state_uncertainty = options_smoothed_state_uncertainty_old;
     %get constant part
     if options_.noconstant

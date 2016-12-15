@@ -1,4 +1,4 @@
-function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,decomp,trend_addition,state_uncertainty] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value)
+function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,decomp,trend_addition,state_uncertainty,M_,oo_,options_,bayestopt_] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value,M_,oo_,options_,bayestopt_,estim_params_)
 % Estimation of the smoothed variables and innovations. 
 % 
 % INPUTS 
@@ -7,6 +7,11 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,de
 %   o data          [double]   (n*T) matrix of data.
 %   o data_index    [cell]      1*smpl cell of column vectors of indices.
 %   o missing_value 1 if missing values, 0 otherwise
+%   o M_            [structure] decribing the model
+%   o oo_           [structure] storing the results
+%   o options_      [structure] describing the options
+%   o bayestopt_    [structure] describing the priors
+%   o estim_params_ [structure] characterizing parameters to be estimated
 %  
 % OUTPUTS
 %   o alphahat      [double]  (m*T) matrix, smoothed endogenous variables (a_{t|T})  (decision-rule order)
@@ -27,6 +32,10 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,de
 %   o trend_addition [double] (n*T) pure trend component; stored in options_.varobs order         
 %   o state_uncertainty [double] (K,K,T) array, storing the uncertainty
 %                                   about the smoothed state (decision-rule order)
+%   o M_            [structure] decribing the model
+%   o oo_           [structure] storing the results
+%   o options_      [structure] describing the options
+%   o bayestopt_    [structure] describing the priors
 %  
 % Notes:
 %   m:  number of endogenous variables (M_.endo_nbr)
@@ -65,8 +74,6 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,de
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global bayestopt_ M_ oo_ estim_params_ options_
 
 alphahat        = [];
 etahat  = [];

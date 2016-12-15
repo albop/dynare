@@ -163,7 +163,7 @@ end
 
 if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.mh_posterior_mode_estimation==0
     if options_.smoother == 1
-        [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp,Trend,state_uncertainty] = DsgeSmoother(xparam1,gend,transpose(data),data_index,missing_value);
+        [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp,Trend,state_uncertainty,M_,oo_,options_,bayestopt_] = DsgeSmoother(xparam1,gend,transpose(data),data_index,missing_value,M_,oo_,options_,bayestopt_,estim_params_);
         [oo_]=store_smoother_results(M_,oo_,options_,bayestopt_,dataset_,dataset_info,atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,P,PK,decomp,Trend,state_uncertainty);
     end
     %reset qz_criterium
@@ -483,7 +483,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                                                       > 0) && options_.load_mh_file)) ...
     || ~options_.smoother ) && options_.partial_information == 0  % to be fixed
     %% ML estimation, or posterior mode without Metropolis-Hastings or Metropolis without Bayesian smoothes variables
-    [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp,Trend,state_uncertainty] = DsgeSmoother(xparam1,dataset_.nobs,transpose(dataset_.data),dataset_info.missing.aindex,dataset_info.missing.state);
+    [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp,Trend,state_uncertainty,M_,oo_,options_,bayestopt_] = DsgeSmoother(xparam1,dataset_.nobs,transpose(dataset_.data),dataset_info.missing.aindex,dataset_info.missing.state,M_,oo_,options_,bayestopt_,estim_params_);
     [oo_,yf]=store_smoother_results(M_,oo_,options_,bayestopt_,dataset_,dataset_info,atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,P,PK,decomp,Trend,state_uncertainty);
 
     if ~options_.nograph,
