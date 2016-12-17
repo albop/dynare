@@ -430,12 +430,21 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         options_.qz_criterium=qz_criterium_old;
         return
     else
-        if ~options_.nodiagnostic && options_.mh_replic>0
-            oo_= McMCDiagnostics(options_, estim_params_, M_,oo_);
+        %get stored results if required
+        if options_.load_mh_file && options_.load_results_after_load_mh
+            oo_load_mh=load([M_.fname '_results'],'oo_');    
         end
-
+        if ~options_.nodiagnostic 
+            if (options_.mh_replic>0 || (options_.load_mh_file && ~options_.load_results_after_load_mh))
+                oo_= McMCDiagnostics(options_, estim_params_, M_,oo_);
+            elseif options_.load_mh_file && options_.load_results_after_load_mh
+                if isfield(oo_load_mh.oo_,'convergence')
+                    oo_.convergence=oo_load_mh.oo_.convergence;
+                end
+            end
+        end
         %% Estimation of the marginal density from the Mh draws:
-        if options_.mh_replic
+        if options_.mh_replic || (options_.load_mh_file && ~options_.load_results_after_load_mh)
             [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_, bayestopt_);
             % Store posterior statistics by parameter name
             oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_, pnames);
@@ -446,8 +455,25 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
             % a matrix
             [oo_.posterior.metropolis.mean,oo_.posterior.metropolis.Variance] ...
                 = GetPosteriorMeanVariance(M_,options_.mh_drop);
-        else
-            load([M_.fname '_results'],'oo_');
+        elseif options_.load_mh_file && options_.load_results_after_load_mh
+            %% load fields from previous MCMC run stored in results-file            
+            field_names={'posterior_mode','posterior_std_at_mode',...% fields set by marginal_density
+                'posterior_mean','posterior_hpdinf','posterior_hpdsup','posterior_median','posterior_variance','posterior_std','posterior_deciles','posterior_density',...% fields set by GetPosteriorParametersStatistics
+                'prior_density',...%fields set by PlotPosteriorDistributions
+                };
+            for field_iter=1:size(field_names,2)
+                if isfield(oo_load_mh.oo_,field_names{1,field_iter})
+                    oo_.(field_names{1,field_iter})=oo_load_mh.oo_.(field_names{1,field_iter});
+                end
+            end            
+            % field set by marginal_density
+            if isfield(oo_load_mh.oo_,'MarginalDensity') && isfield(oo_load_mh.oo_.MarginalDensity,'ModifiedHarmonicMean')
+                oo_.MarginalDensity.ModifiedHarmonicMean=oo_load_mh.oo_.MarginalDensity.ModifiedHarmonicMean;
+            end            
+            % field set by GetPosteriorMeanVariance
+            if isfield(oo_load_mh.oo_,'posterior') && isfield(oo_load_mh.oo_.posterior,'metropolis')
+                oo_.posterior.metropolis=oo_load_mh.oo_.posterior.metropolis;
+            end
         end
         [error_flag,junk,options_]= metropolis_draw(1,options_,estim_params_,M_);
         if options_.bayesian_irf

@@ -595,6 +595,14 @@ else
 end
 
 
+if options_.load_results_after_load_mh
+    if ~exist([M_.fname '_results.mat'],'file')
+        fprintf('\ndynare_estimation_init:: You specified the load_results_after_load_mh, but no _results.mat-file\n')
+        fprintf('dynare_estimation_init:: was found. Results will be recomputed.\n')
+        options_.load_results_after_load_mh=0;
+    end
+end
+
 if options_.mh_replic
     [current_options, options_] = check_posterior_sampler_options([], options_, bounds);
     options_.posterior_sampler_options.current_options = current_options;

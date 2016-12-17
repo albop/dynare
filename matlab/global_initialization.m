@@ -426,6 +426,7 @@ options_.riccati_tol = 1e-6;
 options_.lik_algo = 1;
 options_.lik_init = 1;
 options_.load_mh_file = 0;
+options_.load_results_after_load_mh = 0;
 options_.logdata = 0;
 options_.loglinear = 0;
 options_.linear_approximation = 0;

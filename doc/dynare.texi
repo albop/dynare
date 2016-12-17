@@ -5478,6 +5478,12 @@ provide the @code{mode_file} used in the previous
 run or the same user-defined @code{mcmc_jumping_covariance} when using this option.
 Shouldn't be used together with @code{mh_recover}.
 
+@item load_results_after_load_mh
+@anchor{load_results_after_load_mh} This option is available when loading a previous MCMC run without
+adding additional draws, i.e. when @code{load_mh_file} is specified with @code{mh_replic=0}. It tells Dynare 
+to load the previously computed convergence diagnostics, marginal data density, and posterior statistics from an
+existing @code{_results}-file instead of recomputing them.
+
 @item optim = (@var{NAME}, @var{VALUE}, ...)
 @anchor{optim}
 A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the optimization routines. The set of available options depends on the selected optimization routine (ie on the value of option @ref{mode_compute}):

@@ -115,3 +115,6 @@ temp2=load([M_.dname filesep 'metropolis' filesep M_.dname '_mh1_blck1.mat']);
 if max(max(abs(temp1.x2-temp2.x2)))>1e-10
     error('Draws of unaffected chain are not the same')
 end
+
+save('fs2000_result.mat','oo_')        
+estimation(mode_compute=0,mode_file=fs2000_mode,order=1, datafile=fsdat_simul, nobs=192, loglinear, mh_replic=0, mh_nblocks=1, mh_jscale=10,load_mh_file,load_results_after_load_mh,smoother) gy_obs gp_obs;
