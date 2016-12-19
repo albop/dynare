@@ -58,6 +58,7 @@ dynareParallelMkDir(RemoteTmpFolder,DataInput);
 %               see http://www.dynare.org/DynareWiki/ParallelDynare.
 %         2.1   [warning] The user asks to use more CPU's than those available.
 %         2.2   [warning] There are unused CPU's!
+%         2.3   [error] NumberOfThreadsPerJob is not a divisor of CPUnbr
 %
 %
 %   Value 3:    The remote computer is unreachable!!!
@@ -619,6 +620,15 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         disp('Warning! There are unused CPU''s!')
         skipline(2)
         ErrorCode=2.2;
+    end
+    
+    if mod(length(DataInput(Node).CPUnbr),DataInput(Node).NumberOfThreadsPerJob)
+        skipline()
+        disp(['NumberOfThreadsPerJob = ',int2str(DataInput(Node).NumberOfThreadsPerJob),' is not an exact divisor of number of CPUs = ',int2str(DataInput(Node).CPUnbr)),'!'])
+        disp(['    You must re-set properly NumberOfThreadsPerJob of node ' int2str(Node) ' ' DataInput(Node).ComputerName])
+        disp(['    in your configuration file'])
+        skipline()
+        ErrorCode=2.3;
     end
     
     disp(['Test for Cluster computation, computer ',DataInput(Node).ComputerName, ' ..... Passed!'])

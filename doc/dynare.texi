@@ -10815,6 +10815,10 @@ installation directory. The default is the empty string.
 The path to the MATLAB or Octave executable. The default value is
 @code{matlab}.
 
+@item NumberOfThreadsPerJob = @var{INTEGER}
+For Windows nodes, sets the number of threads assigned to each remote MATLAB/Octave run. The default
+value is @code{1}. 
+
 @item SingleCompThread = @var{BOOLEAN}
 Whether or not to disable MATLAB's native multithreading. The default
 value is @code{false}. Option meaningless under Octave.
