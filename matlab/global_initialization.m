@@ -134,6 +134,7 @@ options_.graphics.line_width = 1;
 options_.graph_format = 'eps';
 options_.nodisplay = 0;
 options_.nograph = 0;
+options_.no_graph.shock_decomposition = 0;
 options_.XTick = [];
 options_.XTickLabel = [];
 options_.console_mode = 0;
@@ -789,9 +790,6 @@ options_.mcppath.mu0 = [];
 
 %Figure options
 options_.figures.textwidth=0.8;
-
-% Shock decomposition options
-options_.shock_decomp.nograph = 0;
 
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);

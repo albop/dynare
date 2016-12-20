@@ -7030,6 +7030,11 @@ the decomposition. Groups of shocks are defined in @xref{shock_groups} block.
 @item colormap = @var{COLORMAP_NAME}
 @anchor{colormap}. Controls the colormap used for the shocks decomposition
 graphs. See @code{colormap} in Matlab/Octave manual.
+
+@item nograph
+@xref{nograph}. Suppresses the display and creation only within the @code{shock_decomposition}-command
+but does not affect other commands.
+
 @end table
 
 @vindex oo_.shock_decomposition
