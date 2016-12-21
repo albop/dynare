@@ -86,7 +86,8 @@ estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=3000,mh_nbl
         geweke_interval = [0.19 0.49],
         taper_steps = [4 7 15],
         raftery_lewis_diagnostics,
-        raftery_lewis_qrs=[0.025 0.01 0.95]
+        raftery_lewis_qrs=[0.025 0.01 0.95],
+        bayesian_irf,posterior_nograph
         ) y m;
 
 if ~isequal(options_.convergence.geweke.taper_steps,[4 7 15]') || ~isequal(options_.convergence.geweke.geweke_interval,[0.19 0.49])
@@ -98,6 +99,7 @@ if ~isequal(options_.convergence.rafterylewis.qrs,[0.025 0.01 0.95]) || ~isequal
 end
 
 %test load_mh_file option
+options_.bayesian_irf=0;
 options_.smoother=0;
 options_.moments_varendo=0;
 options_.forecast=0;   
