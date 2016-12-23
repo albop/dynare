@@ -111,10 +111,12 @@ estimation(mode_compute=0,mode_file=fs2000_mode,order=1, datafile=fsdat_simul, n
 temp1=load([M_.dname '_mh1_blck1.mat']);
 temp2=load([M_.dname filesep 'metropolis' filesep M_.dname '_mh1_blck1.mat']);
 
-if max(max(abs(temp1.x2-temp2.x2)))>1e-10
-    error('Draws of unaffected chain are not the same')
+if ~isoctave
+    if max(max(abs(temp1.x2-temp2.x2)))>1e-10
+        error('Adding draws did not result in the same chain')
+    end
 end
-
+        
 save('fs2000_result.mat','oo_')        
 options_.load_results_after_load_mh=1;
 estimation(mode_compute=0,mode_file=fs2000_mode,order=1, datafile=fsdat_simul, nobs=192, loglinear, mh_replic=0, mh_nblocks=1, mh_jscale=10,load_mh_file,smoother) gy_obs gp_obs;
