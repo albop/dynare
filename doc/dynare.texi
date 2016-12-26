@@ -4034,6 +4034,10 @@ will be saved to disk (to the format specified by @code{graph_format}
 option, except if @code{graph_format=none}) and displayed to screen
 (unless @code{nodisplay} option is used).
 
+@item graph
+@anchor{graph}
+Re-enables the generation of graphs previously shut off with @ref{nograph}.
+
 @item nodisplay
 @anchor{nodisplay} Do not display the graphs, but still save them to disk
 (unless @code{nograph} is used).
