@@ -5304,7 +5304,9 @@ simulation that crashed prematurely, starting with the last available saved
 the proposal density from the previous run will automatically be loaded. In older versions,
 to assure a neat continuation of the chain with the same proposal density, you should 
 provide the @code{mode_file} used in the previous 
-run or the same user-defined @code{mcmc_jumping_covariance} when using this option.
+run or the same user-defined @code{mcmc_jumping_covariance} when using this option. Note that 
+under Octave, a neat continuation of the crashed chain with the respective last random number 
+generator state is currently not supported.
 
 @item mh_mode = @var{INTEGER}
 @dots{}
@@ -5476,7 +5478,9 @@ the proposal density from the previous run will automatically be loaded. In olde
 to assure a neat continuation of the chain with the same proposal density, you should 
 provide the @code{mode_file} used in the previous 
 run or the same user-defined @code{mcmc_jumping_covariance} when using this option.
-Shouldn't be used together with @code{mh_recover}.
+Shouldn't be used together with @code{mh_recover}. Note that under Octave, a neat 
+continuation of the chain with the last random number 
+generator state of the already present draws is currently not supported.
 
 @item load_results_after_load_mh
 @anchor{load_results_after_load_mh} This option is available when loading a previous MCMC run without
