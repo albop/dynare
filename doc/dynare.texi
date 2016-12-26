@@ -5186,6 +5186,15 @@ Default value is @code{1}.
 @item nograph
 @xref{nograph}.
 
+@item posterior_nograph
+@anchor{posterior_nograph}
+Suppresses the generation of graphs associated with Bayesian IRFs (@ref{bayesian_irf}), 
+posterior smoothed objects (@ref{smoother}), and posterior forecasts (@ref{forecast}).
+
+@item posterior_graph
+@anchor{posterior_graph}
+Re-enables the generation of graphs previously shut off with @ref{posterior_nograph}.
+
 @item nodisplay
 @xref{nodisplay}.
 

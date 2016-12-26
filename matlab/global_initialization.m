@@ -134,6 +134,7 @@ options_.graphics.line_width = 1;
 options_.graph_format = 'eps';
 options_.nodisplay = 0;
 options_.nograph = 0;
+options_.no_graph.posterior = 0;
 options_.no_graph.shock_decomposition = 0;
 options_.XTick = [];
 options_.XTickLabel = [];
