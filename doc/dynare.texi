@@ -8038,6 +8038,8 @@ and only then approximates these FOCs of planner's problem to first order. There
 order terms that are required for a second-order correct welfare evaluation are 
 preserved.
 
+Note that the variables in the list after the @code{ramsey_policy}-command can also contain multiplier 
+names. In that case, Dynare will for example display the IRFs of the respective multipliers when @code{irf>0}.
 
 The planner objective must be declared with the @code{planner_objective} command.
 
