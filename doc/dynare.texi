@@ -172,6 +172,12 @@ Installation of Dynare
 * On Mac OS X::
 * For other systems::
 
+Compiler installation
+
+* Prerequisites on Windows::
+* Prerequisites on Debian GNU/Linux and Ubuntu::
+* Prerequisites on Mac OS X::
+
 Configuration
 
 * For MATLAB::
@@ -248,6 +254,7 @@ Sensitivity and identification analysis
 * Types of analysis and output files::
 
 Types of analysis and output files
+
 * Sampling::
 * Stability Mapping::
 * IRF/Moment restrictions::
