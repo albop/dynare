@@ -54,6 +54,9 @@ MODFILES = \
 	example1_irf_shocks.mod \
 	example1_abs_sign.mod \
 	example1_macroif.mod \
+	example1long.mod \
+	example2long.mod \
+	example2long_use_dll \
 	t_sgu_ex1.mod \
 	irfs/example1_unit_std.mod \
 	optimal_policy/OSR/osr_example.mod \
@@ -344,6 +347,12 @@ MFILES = initval_file/ramst_initval_file_data.m
 # Dependencies
 example1_use_dll.m.trs: example1.m.trs
 example1_use_dll.o.trs: example1.o.trs
+
+example2long_use_dll.m.trs: example1long.m.trs
+example2long_use_dll.o.trs: example1long.o.trs
+
+example2long.m.trs: example1long.m.trs
+example2long.o.trs: example1long.o.trs
 
 estimation/MH_recover/fs2000_recover_tarb.m.trs: estimation/MH_recover/fs2000_recover.m.trs
 estimation/MH_recover/fs2000_recover_tarb.o.trs: estimation/MH_recover/fs2000_recover.o.trs
