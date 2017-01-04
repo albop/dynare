@@ -56,7 +56,7 @@ MODFILES = \
 	example1_macroif.mod \
 	example1long.mod \
 	example2long.mod \
-	example2long_use_dll \
+	example2long_use_dll.mod \
 	t_sgu_ex1.mod \
 	irfs/example1_unit_std.mod \
 	optimal_policy/OSR/osr_example.mod \
