@@ -362,7 +362,7 @@ end
 % .tex generation always run in sequentially. This portion of code is execute in parallel by
 % PosteriorIRF_core2.m function.
 
-
+if ~options_.nograph && ~options_.no_graph.posterior
 % Save the local variables.
 localVars=[];
 
@@ -459,5 +459,6 @@ else
 end
 % END parallel code!
 
+end
 
 fprintf('Estimation::mcmc: Posterior IRFs, done!\n');

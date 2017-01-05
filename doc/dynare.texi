@@ -4041,6 +4041,10 @@ will be saved to disk (to the format specified by @code{graph_format}
 option, except if @code{graph_format=none}) and displayed to screen
 (unless @code{nodisplay} option is used).
 
+@item graph
+@anchor{graph}
+Re-enables the generation of graphs previously shut off with @ref{nograph}.
+
 @item nodisplay
 @anchor{nodisplay} Do not display the graphs, but still save them to disk
 (unless @code{nograph} is used).
@@ -5192,6 +5196,15 @@ Default value is @code{1}.
 
 @item nograph
 @xref{nograph}.
+
+@item posterior_nograph
+@anchor{posterior_nograph}
+Suppresses the generation of graphs associated with Bayesian IRFs (@ref{bayesian_irf}), 
+posterior smoothed objects (@ref{smoother}), and posterior forecasts (@ref{forecast}).
+
+@item posterior_graph
+@anchor{posterior_graph}
+Re-enables the generation of graphs previously shut off with @ref{posterior_nograph}.
 
 @item nodisplay
 @xref{nodisplay}.
@@ -7041,6 +7054,11 @@ the decomposition. Groups of shocks are defined in @xref{shock_groups} block.
 @item colormap = @var{COLORMAP_NAME}
 @anchor{colormap}. Controls the colormap used for the shocks decomposition
 graphs. See @code{colormap} in Matlab/Octave manual.
+
+@item nograph
+@xref{nograph}. Suppresses the display and creation only within the @code{shock_decomposition}-command
+but does not affect other commands.
+
 @end table
 
 @vindex oo_.shock_decomposition

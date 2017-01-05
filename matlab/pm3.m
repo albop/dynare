@@ -292,6 +292,7 @@ end
 %% 	Finally I build the plots.
 %%
 
+if ~options_.nograph && ~options_.no_graph.posterior
 % Block of code executed in parallel, with the exception of file
 % .tex generation always run sequentially. This portion of code is execute in parallel by
 % pm3_core1.m function.
@@ -393,6 +394,7 @@ if options_.TeX && any(strcmp('eps',cellstr(options_.graph_format)))
     end
     fprintf(fidTeX,'%% End of TeX file.\n');
     fclose(fidTeX);
+end
 end
 
 fprintf(['Estimation::mcmc: ' tit1 ', done!\n']);
