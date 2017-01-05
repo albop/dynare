@@ -5092,8 +5092,6 @@ univariate convergence diagnostic.
 The inefficiency factors are computed as in @cite{Giordano et al. (2011)} based on 
 Parzen windows as in e.g. @cite{Andrews (1991)}.
 
-based on Parzen 
-
 @optionshead
 
 @table @code
@@ -6323,6 +6321,16 @@ the procedure uses @code{mh_jscale} for all parameters. If
 all parameters. Note that if @code{mode_compute=6} is used or the @code{posterior_sampler_option} 
 called @code{scale_file} is specified, the values set in @code{estimated_params}
 will be overwritten.
+
+@customhead{``Endogenous'' prior restrictions}
+
+It is also possible to impose implicit ``endogenous'' priors about IRFs and moments on the model during 
+estimation. For example, one can specify that all valid parameter draws for the model must generate fiscal multipliers that are
+bigger than 1 by specifying how the IRF to a government spending shock must look like. The prior restrictions can be imposed
+via @code{irf_calibration} and @code{moment_calibration} blocks (@pxref{IRF/Moment calibration}). The way it works internally is that 
+any parameter draw that is inconsistent with the ``calibration'' provided in these blocks is discarded, i.e. assigned a prior density of 0. 
+When specifying these blocks, it is important to keep in mind that one won't be able to easily do @code{model_comparison} in this case, 
+because the prior density will not integrate to 1.
 
 @outputhead
 
@@ -8448,6 +8456,12 @@ Maximum number of lags for moments in identification analysis. Default: @code{1}
 
 @node IRF/Moment calibration
 @subsection IRF/Moment calibration
+
+The @code{irf_calibration} and @code{moment_calibration} blocks allow imposing implicit ``endogenous'' priors 
+about IRFs and moments on the model. The way it works internally is that 
+any parameter draw that is inconsistent with the ``calibration'' provided in these blocks is discarded, i.e. assigned a prior density of 0. 
+In the context of @code{dynare_sensitivity}, these restrictions allow tracing out which parameters are driving the model to
+satisfy or violate the given restrictions.
 
 IRF and moment calibration can be defined in @code{irf_calibration} and @code{moment_calibration} blocks:
 
