@@ -7160,7 +7160,7 @@ end;
 This command computes the first order approximation of the policy that
 maximizes the policy maker's objective function subject to the
 constraints provided by the equilibrium path of the private economy and under 
-commitment to this optimal policy. The Ramsey policy is computed is computed 
+commitment to this optimal policy. The Ramsey policy is computed
 by approximating the equilibrium system around the perturbation point where the 
 Lagrange multipliers are at their steady state, i.e. where the Ramsey planner acts 
 as if the initial multipliers had 
@@ -7221,10 +7221,13 @@ taken to be at their steady state values. The result is a 1 by 2
 vector, where the first entry stores the value of the planner objective when the initial Lagrange
 multipliers associated with the planner's problem are set to their steady state
 values (@pxref{ramsey_policy}).
+
 In contrast, the second entry stores the value of the planner objective with 
 initial Lagrange multipliers of the planner's problem set to 0, i.e. it is assumed 
-that the planner succumbs to the temptation to exploit the preset private expecatations 
-in the first period (but not in later periods due to commitment).
+that the planner exploits its ability to surprise private agents in the first
+period of implementing Ramsey policy. This is the value of implementating
+optimal policy for the first time and committing not to re-optimize in the future.
+
 Because it entails computing at least a second order approximation, this
 computation is skipped with a message when the model is too large (more than 180 state
 variables, including lagged Lagrange multipliers).
