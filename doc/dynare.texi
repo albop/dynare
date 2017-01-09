@@ -13563,6 +13563,7 @@ specific row can be overridden by using the @ref{tableRowColor} option to
 @item showHlines, @code{BOOLEAN}
 Whether or not to show horizontal lines separating the rows. Default: @code{false}
 
+@anchor{precision}
 @item precision, @code{INTEGER}
 The number of decimal places to report in the table data. Default: @code{1}
 
@@ -13609,7 +13610,7 @@ with the same base name as specified by @ref{tableName} with the ending
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphBar, graphBarColor, graphBarFillColor, graphBarWidth, graphFanShadeColor, graphFanShadeOpacity, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNaNSymb, tableNegColor, tablePosColor, tableSubSectionHeader, zeroTol
+@defmethod Report addSeries data, graphBar, graphBarColor, graphBarFillColor, graphBarWidth, graphFanShadeColor, graphFanShadeOpacity, graphHline, graphLegendName, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, graphMiscTikzAddPlotOptions, graphShowInLegend, graphVline, tableDataRhs, tableRowColor, tableRowIndent, tableShowMarkers, tableAlignRight, tableNaNSymb, tableNegColor, tablePrecision, tablePosColor, tableSubSectionHeader, zeroTol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}. NB: Options specific
 to graphs begin with `@code{graph}' while options specific to tables begin with
 `@code{table}'.
@@ -13736,6 +13737,9 @@ Replace @code{NaN} values with the text in this option. Default: @code{NaN}
 @item tableNegColor, @code{LATEX_COLOR}
 The color to use when marking Table data that is less than
 zero. Default: @code{`red'}
+
+@item tablePrecision, @code{INTEGER}
+The number of decimal places to report in the table data. Default: the value set by @ref{precision}
 
 @anchor{tablePosColor}
 @item tablePosColor, @code{LATEX_COLOR}
