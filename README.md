@@ -149,6 +149,52 @@ make check
 Note that running the testsuite with Octave requires the additional packages
 `pstoedit`, `epstool`, `xfig`, and `gnuplot`.
 
+### Check
+
+The Git source comes with unit tests (in the matlab functions) and integration tests (under the `tests` subfolder). All the tests can be run with:
+```
+make check
+```
+In the `tests` subfolder. If Dynare has been compiled against Matlab and Octave, the tests will be run with Matlab and Octave. Depending on
+your PC, this can take several hours. It is possible to run the tests only with Matlab:
+```
+make check-matlab
+```
+or only with Octave:
+```
+make check-matlab
+```
+A summary of the results is available in `tests/run_test_matlab_output.txt` or `tests/run_test_octave_output.txt`. Often, it does not make sense
+to run the complete testsuite. For instance, if you modify codes only related to the perfect foresight model solver, you can decide to run only a
+subset of the integration tests, with:
+```
+make deterministic_simulations
+```
+This will run all the integration tests in `tests/deterministic_simulations` with Matlab and Octave. Again, it is possible to do this only with Matlab:
+```
+make m/deterministic_simulations
+```
+or with Octave:
+```
+make o/deterministic_simulations
+```
+Finally if you want to run a single integration test with Matlab:
+```
+make deterministic_simulations/lbj/rbc.m.trs
+```
+or with Octave:
+```
+make deterministic_simulations/lbj/rbc.o.trs
+```
+The result of the test (`PASSED` or `FAILED`) will be printed in the terminal, the produced log can be displayed with:
+```
+make deterministic_simulations/lbj/rbc.m.drs
+```
+or
+```
+make deterministic_simulations/lbj/rbc.o.drs
+```
+
 ## Debian or Ubuntu
 
 All the prerequisites are packaged.
